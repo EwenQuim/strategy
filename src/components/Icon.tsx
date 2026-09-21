@@ -1,4 +1,13 @@
+const pawnIcons = {
+  king: 'crown',
+  swordsman: 'sword',
+  archer: 'bow',
+  magician: 'wand',
+} as const
+
 const paths = {
+  bow: 'M5 3c14 0 14 18 0 18V3Zm0 9h16m-4-4 4 4-4 4',
+  wand: 'm4 20 12-12m-9 9 3 3M17 2l1.5 4.5L23 8l-4.5 1.5L17 14l-1.5-4.5L11 8l4.5-1.5L17 2Z',
   crown: 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12',
   sword: 'm14 4 6-1-1 6L8 20l-4-4L14 4ZM3 13l8 8M5 19l-3 3M14 8l2 2',
   escape: 'M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M5 16h5a3 3 0 1 1-3 3',
@@ -14,6 +23,10 @@ const paths = {
 } as const
 
 export type IconName = keyof typeof paths
+
+export function PawnIcon({ kind }: { kind: keyof typeof pawnIcons }) {
+  return <Icon name={pawnIcons[kind]} />
+}
 
 export function Icon({ name, className = '' }: { name: IconName; className?: string }) {
   return (

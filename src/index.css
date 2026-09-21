@@ -154,12 +154,10 @@ p {
   gap: 12px;
   min-height: 41px;
 }
-.initiative-bar > .eyebrow {
-  font-size: 8px;
-  letter-spacing: 0.1em;
-}
 .turn-order {
   display: flex;
+  flex: 1;
+  min-width: 0;
   gap: 5px;
   padding: 0;
   margin: 0;
@@ -167,6 +165,9 @@ p {
 }
 .initiative-unit {
   display: flex;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
   align-items: center;
   gap: 4px;
   padding: 4px 5px;
@@ -189,12 +190,6 @@ p {
   border-color: #d7c78a66;
   background: #d7c78a14;
   color: #ead99e;
-}
-.turn-status {
-  margin-left: auto;
-  font-size: 9px;
-  color: var(--gold);
-  white-space: nowrap;
 }
 
 .battle-stage {
@@ -368,6 +363,7 @@ p {
   gap: 18px;
 }
 .unit-stat {
+  width: 60px;
   min-width: 60px;
 }
 .stat-label {
@@ -384,11 +380,13 @@ p {
 }
 .stat-pips {
   display: flex;
+  width: 100%;
   gap: 3px;
   margin-top: 7px;
 }
 .stat-pips i {
-  width: 18px;
+  flex: 1;
+  min-width: 0;
   height: 5px;
   background: #34483a;
   border-radius: 1px;
@@ -479,6 +477,13 @@ p {
 }
 .escape-action > svg {
   color: #bad7bc;
+}
+.special-action {
+  color: #d0b6e7;
+}
+.special-action.is-selected {
+  background: #9f82b933;
+  border-color: #c4a6db;
 }
 .end-action {
   color: #263b2a;
@@ -595,6 +600,9 @@ p {
   width: 21px;
   flex-shrink: 0;
   margin-top: 3px;
+}
+.class-name {
+  text-transform: capitalize;
 }
 .rules-list h3 {
   color: var(--ink);
@@ -791,9 +799,6 @@ p {
   .initiative-unit {
     padding: 4px 9px;
   }
-  .turn-status {
-    font-size: 11px;
-  }
   .command-content {
     padding-top: 17px;
     padding-bottom: 12px;
@@ -805,10 +810,8 @@ p {
     gap: 28px;
   }
   .unit-stat {
+    width: 83px;
     min-width: 83px;
-  }
-  .stat-pips i {
-    width: 25px;
   }
   .unit-identity h2 {
     font-size: 24px;
@@ -831,8 +834,9 @@ p {
     gap: 8px;
   }
   .initiative-unit {
-    gap: 3px;
-    padding: 4px;
+    flex-direction: column;
+    gap: 0;
+    padding: 3px 2px;
   }
   .initiative-unit svg {
     width: 12px;
@@ -840,9 +844,6 @@ p {
   }
   .turn-order {
     gap: 3px;
-  }
-  .turn-status {
-    font-size: 8px;
   }
   .board-container {
     padding-left: 3px;
@@ -868,6 +869,7 @@ p {
     gap: 10px;
   }
   .unit-stat {
+    width: 49px;
     min-width: 49px;
   }
   .stat-label {
@@ -878,7 +880,6 @@ p {
     font-size: 8px;
   }
   .stat-pips i {
-    width: 14px;
     height: 4px;
   }
   .escape-stat {
@@ -971,9 +972,6 @@ p {
     padding-left: 12px;
     padding-right: 12px;
   }
-  .initiative-bar > .eyebrow {
-    display: none;
-  }
   .command-content {
     padding-left: 10px;
     padding-right: 10px;
@@ -1060,10 +1058,8 @@ p {
     gap: 10px;
   }
   .unit-stat {
+    width: 45px;
     min-width: 45px;
-  }
-  .stat-pips i {
-    width: 13px;
   }
   .escape-stat {
     padding-left: 8px;

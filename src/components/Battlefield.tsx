@@ -1,5 +1,5 @@
-import { ATTACK_RANGE, hexDist, key, type Pawn, type Tile } from '../lib/engine'
-import { Icon } from './Icon'
+import { key, type Axial, type Pawn, type Tile } from '../lib/engine'
+import { Icon, PawnIcon } from './Icon'
 
 const SIZE = 34
 const hexX = (q: number, r: number) => SIZE * Math.sqrt(3) * (q + r / 2)
@@ -16,7 +16,9 @@ interface BattlefieldProps {
   pawns: Pawn[]
   active?: Pawn
   reach: Map<string, number>
-  attacking: boolean
+  targets: Set<string>
+  targetLabel: string
+  preview: Axial | null
   onTileClick: (tile: Tile) => void
 }
 
@@ -25,7 +27,9 @@ export function Battlefield({
   pawns,
   active,
   reach,
-  attacking,
+  targets,
+  targetLabel,
+  preview,
   onTileClick,
 }: BattlefieldProps) {
   const allTiles = [...tiles.values()]
@@ -71,15 +75,19 @@ export function Battlefield({
         const tileKey = key(tile.q, tile.r)
         const occupant = pawns.find((p) => p.q === tile.q && p.r === tile.r)
         const selected = active?.q === tile.q && active.r === tile.r
-        const inRange = attacking && active && hexDist(active, tile) <= ATTACK_RANGE && !selected
-        const target = inRange && occupant?.side !== active?.side && !!occupant
+        const target = targets.has(tileKey)
+        const previewed = preview?.q === tile.q && preview.r === tile.r
         const cost = reach.get(tileKey)
-        const canMove = !attacking && cost !== undefined && cost > 0
+        const canMove = cost !== undefined && cost > 0
         const interactive = !!target || canMove
-        const fill = selected
-          ? '#c9b77f'
-          : inRange
+        const fill = target
+          ? targetLabel === 'Attack'
             ? '#b98370'
+            : targetLabel === 'Rally'
+              ? '#a3c6ae'
+              : '#b79dce'
+          : selected || previewed
+            ? '#c9b77f'
             : canMove
               ? '#a3bd88'
               : terrainColors[tile.terrain]
@@ -97,7 +105,7 @@ export function Battlefield({
             ', row ' +
             (tile.r + 1)
         const actionLabel = target
-          ? 'Attack ' + label
+          ? targetLabel + ' ' + label
           : canMove
             ? 'Move to ' + label + ', ' + cost + ' energy'
             : label
@@ -140,6 +148,11 @@ export function Battlefield({
                 <text y="23.4" textAnchor="middle" fill="#f0edcc" fontSize="10" fontWeight="600">
                   {cost}
                 </text>
+              </g>
+            )}
+            {previewed && !occupant && (
+              <g transform="translate(-12 -12)" color="#fff4cb" className="tile-detail">
+                <Icon name="arrow" />
               </g>
             )}
             {target && (
@@ -241,7 +254,7 @@ function PawnChip({ pawn, active }: { pawn: Pawn; active: boolean }) {
       )}
       <circle r="17.5" fill="none" stroke="#f5e5bf" strokeOpacity=".15" />
       <g transform="translate(-12 -15)" color={pawn.kind === 'king' ? '#f0d38e' : '#f1e8d2'}>
-        <Icon name={pawn.kind === 'king' ? 'crown' : 'sword'} />
+        <PawnIcon kind={pawn.kind} />
       </g>
       <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill="#e9e5ce">
         {pawn.id.toString().padStart(2, '0')}
@@ -250,9 +263,9 @@ function PawnChip({ pawn, active }: { pawn: Pawn; active: boolean }) {
       {Array.from({ length: pawn.maxHp }, (_, i) => (
         <rect
           key={i}
-          x={-13 + i * 9}
+          x={-13 + (i * 26) / pawn.maxHp}
           y="25"
-          width="8"
+          width={26 / pawn.maxHp - 1}
           height="3"
           rx="1"
           fill={i < pawn.hp ? (enemy ? '#db9b7e' : '#d5deb0') : '#47614c'}

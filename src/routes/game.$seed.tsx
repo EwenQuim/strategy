@@ -2,19 +2,25 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useMemo, useReducer, useRef } from 'react'
 import { Battlefield } from '../components/Battlefield'
 import { BattleNotifications } from '../components/BattleNotifications'
-import { Icon } from '../components/Icon'
+import { Icon, PawnIcon } from '../components/Icon'
 import {
   activePawn,
-  ATTACK_RANGE,
+  King,
+  Swordsman,
+  Archer,
+  Magician,
+  canUseSpecial,
+  targetingTiles,
   ESCAPE_BONUS,
   MAX_ESCAPE,
-  hexDist,
   initialState,
   key,
   reducer,
   reachable,
   type Tile,
 } from '../lib/engine'
+
+const classes = [King, Swordsman, Archer, Magician].map((Unit) => new Unit(0, 0, 0, 'player'))
 
 export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {
@@ -28,6 +34,13 @@ export const Route = createFileRoute('/game/$seed')({
     const pawn = activePawn(state)
     const myTurn = !!pawn && pawn.side === 'player' && !state.winner
     const attacking = myTurn && state.phase === 'attack'
+    const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
+    const targets = useMemo(() => targetingTiles(state), [state])
+    const targetLabel = attacking
+      ? 'Attack'
+      : state.phase === 'special' && pawn?.kind === 'swordsman'
+        ? 'Charge to'
+        : (pawn?.special.name ?? 'Special')
     const turnOrder = state.order.flatMap((id, index) => {
       const unit = state.pawns.find((p) => p.id === id)
       return unit ? [{ unit, index }] : []
@@ -43,8 +56,8 @@ export const Route = createFileRoute('/game/$seed')({
     }, [state.pawns, state.tiles, state.phase, myTurn, pawn])
 
     const onTileClick = (tile: Tile) => {
-      if (attacking && pawn && hexDist(pawn, tile) <= ATTACK_RANGE)
-        return dispatch({ type: 'attackAt', q: tile.q, r: tile.r })
+      if (targets.has(key(tile.q, tile.r)))
+        return dispatch({ type: attacking ? 'attackAt' : 'specialAt', q: tile.q, r: tile.r })
       if (myTurn && reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
     }
 
@@ -72,7 +85,6 @@ export const Route = createFileRoute('/game/$seed')({
             </div>
           </div>
           <div className="initiative-bar">
-            <span className="eyebrow">Turn order</span>
             <ol className="turn-order" aria-label="Round turn order">
               {turnOrder.map(({ unit, index }) => (
                 <li
@@ -86,7 +98,7 @@ export const Route = createFileRoute('/game/$seed')({
                   aria-current={index === state.active && !state.winner ? 'step' : undefined}
                   title={(unit.side === 'player' ? 'Your ' : 'Enemy ') + unit.kind + ' #' + unit.id}
                 >
-                  <Icon name={unit.kind === 'king' ? 'crown' : 'sword'} />
+                  <PawnIcon kind={unit.kind} />
                   <span>{unit.id.toString().padStart(2, '0')}</span>
                   <span className="sr-only">
                     {unit.side} {unit.kind}
@@ -95,7 +107,6 @@ export const Route = createFileRoute('/game/$seed')({
                 </li>
               ))}
             </ol>
-            <span className="turn-status">{state.winner ? 'Battle ended' : 'Your move'}</span>
           </div>
         </header>
 
@@ -109,7 +120,9 @@ export const Route = createFileRoute('/game/$seed')({
               pawns={state.pawns}
               active={state.winner ? undefined : pawn}
               reach={reach}
-              attacking={attacking}
+              targets={targets}
+              targetLabel={targetLabel}
+              preview={state.chargeDestination}
               onTileClick={onTileClick}
             />
           </div>
@@ -141,7 +154,7 @@ export const Route = createFileRoute('/game/$seed')({
             <div className="unit-panel">
               <div className="unit-identity">
                 <div className="unit-portrait">
-                  <Icon name={pawn?.kind === 'king' ? 'crown' : 'sword'} />
+                  <PawnIcon kind={pawn?.kind ?? 'swordsman'} />
                 </div>
                 <div>
                   <h2>
@@ -212,19 +225,29 @@ export const Route = createFileRoute('/game/$seed')({
             <div className="action-grid">
               <button
                 className={'action-button attack-action' + (attacking ? ' is-selected' : '')}
-                disabled={!myTurn || !pawn?.energy}
+                disabled={!myTurn || usingSpecial || !pawn?.energy}
                 onClick={() =>
-                  dispatch(attacking ? { type: 'cancelAttack' } : { type: 'act', action: 'attack' })
+                  dispatch(
+                    attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' },
+                  )
                 }
                 aria-pressed={attacking}
               >
                 <Icon name={attacking ? 'close' : 'sword'} />
                 <span>{attacking ? 'Cancel' : 'Attack'}</span>
-                <small>{attacking ? 'Back to move' : '1 energy'}</small>
+                <small>
+                  {attacking ? (targets.size ? 'Choose enemy' : 'No targets') : '1 energy'}
+                </small>
               </button>
               <button
                 className="action-button escape-action"
-                disabled={!myTurn || attacking || !pawn?.energy || pawn.escapeChance >= MAX_ESCAPE}
+                disabled={
+                  !myTurn ||
+                  attacking ||
+                  usingSpecial ||
+                  !pawn?.energy ||
+                  pawn.escapeChance >= MAX_ESCAPE
+                }
                 onClick={() => dispatch({ type: 'act', action: 'escape' })}
                 title={
                   'Spend 1 energy for +' +
@@ -243,13 +266,33 @@ export const Route = createFileRoute('/game/$seed')({
                 </small>
               </button>
               <button
-                className="action-button special-action"
-                disabled
-                title="Special abilities are not available yet"
+                className={'action-button special-action' + (usingSpecial ? ' is-selected' : '')}
+                disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn)}
+                title={pawn?.special.description}
+                aria-pressed={usingSpecial}
+                onClick={() =>
+                  dispatch(
+                    usingSpecial ? { type: 'cancelTargeting' } : { type: 'act', action: 'special' },
+                  )
+                }
               >
-                <Icon name="spark" />
-                <span>Special</span>
-                <small>Coming soon</small>
+                <Icon name={usingSpecial ? 'close' : 'spark'} />
+                <span>{usingSpecial ? 'Cancel' : (pawn?.special.name ?? 'Special')}</span>
+                <small>
+                  {usingSpecial
+                    ? !targets.size
+                      ? 'No targets'
+                      : state.phase === 'charge'
+                        ? 'Choose enemy'
+                        : pawn?.kind === 'swordsman'
+                          ? 'Choose tile'
+                          : pawn?.kind === 'king'
+                            ? 'Choose ally'
+                            : 'Choose enemy'
+                    : pawn?.kind === 'king' && pawn.specialUsed
+                      ? 'Used this round'
+                      : (pawn?.special.cost ?? 2) + ' energy'}
+                </small>
               </button>
               <button
                 className="action-button end-action"
@@ -288,7 +331,7 @@ export const Route = createFileRoute('/game/$seed')({
             </div>
             <div className="rules-list">
               <p>
-                Lead your king and two swordsmen across the vale. Defeat the enemy king to win.
+                Lead your king, two swordsmen, archer, and magician. Defeat the enemy king to win.
                 Losing yours ends the battle.
               </p>
               <section>
@@ -296,9 +339,8 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>Three energy. Every round.</h3>
                   <p>
-                    Each unit starts with 3 health and 3 energy. The lit unit is yours to command.
-                    Moving costs 1 energy per tile; numbers show the full cost. Mountains cannot be
-                    crossed.
+                    Each unit starts with 3 energy. The lit unit is yours to command. Moving costs 1
+                    energy per tile; numbers show the full cost. Mountains cannot be crossed.
                   </p>
                 </div>
               </section>
@@ -307,11 +349,31 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>Make your move.</h3>
                   <p>
-                    Attack spends 1 energy to deal 1 damage to an enemy within {ATTACK_RANGE} tiles.
-                    Choose Attack, then a marked enemy. Cancel costs nothing.
+                    Normal attacks cost 1 energy. Each class has its own damage and range. Choose
+                    Attack or a special, then a highlighted target. Charge first asks for a
+                    destination, then an adjacent enemy. Cancelling either step costs nothing.
+                    Ranged attacks can pass over terrain.
                   </p>
                 </div>
               </section>
+              {classes.map((unit) => (
+                <section key={unit.kind}>
+                  <PawnIcon kind={unit.kind} />
+                  <div>
+                    <h3 className="class-name">
+                      {unit.kind}: {unit.maxHp} health
+                    </h3>
+                    <p>
+                      {unit.attack.damage} damage, range{' '}
+                      {unit.attack.minRange === unit.attack.maxRange
+                        ? unit.attack.maxRange
+                        : unit.attack.minRange + '-' + unit.attack.maxRange}
+                      . {unit.special.name} costs {unit.special.cost} energy.{' '}
+                      {unit.special.description}
+                    </p>
+                  </div>
+                </section>
+              ))}
               <section>
                 <Icon name="escape" />
                 <div>
