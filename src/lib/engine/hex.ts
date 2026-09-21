@@ -1,4 +1,4 @@
-import type { Axial, Tile } from './types'
+import type { Axial, Tile } from './types.ts'
 
 export const MAP_WIDTH = 10
 export const MAP_HEIGHT = 10

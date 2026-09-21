@@ -2,6 +2,8 @@ export type Side = 'player' | 'enemy'
 
 export const START_HP = 3
 export const START_ENERGY = 3
+export const ESCAPE_BONUS = 20
+export const MAX_ESCAPE = 60
 
 export abstract class Pawn {
   abstract readonly kind: 'king' | 'swordsman'
@@ -13,7 +15,7 @@ export abstract class Pawn {
   r: number
   hp: number
   energy: number
-  defending: boolean
+  escapeChance: number
   constructor(
     id: number,
     q: number,
@@ -21,7 +23,7 @@ export abstract class Pawn {
     side: Side,
     hp = START_HP,
     energy = START_ENERGY,
-    defending = false,
+    escapeChance = 0,
   ) {
     this.id = id
     this.q = q
@@ -29,11 +31,11 @@ export abstract class Pawn {
     this.side = side
     this.hp = hp
     this.energy = energy
-    this.defending = defending
+    this.escapeChance = escapeChance
   }
   clone(): Pawn {
     const Ctor = this.constructor as new (...args: ConstructorParameters<typeof Pawn>) => Pawn
-    return new Ctor(this.id, this.q, this.r, this.side, this.hp, this.energy, this.defending)
+    return new Ctor(this.id, this.q, this.r, this.side, this.hp, this.energy, this.escapeChance)
   }
 }
 

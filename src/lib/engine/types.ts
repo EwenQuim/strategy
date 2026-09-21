@@ -1,4 +1,4 @@
-import type { Pawn, Side } from './pawns'
+import type { Pawn, Side } from './pawns.ts'
 
 export type Axial = { q: number; r: number }
 export type Terrain = 'plain' | 'forest' | 'mountain'
@@ -6,10 +6,13 @@ export type Tile = { q: number; r: number; terrain: Terrain }
 export type Phase = 'move' | 'attack' | 'over'
 
 export type GameState = {
+  seed: string
+  randomState: number
   tiles: Map<string, Tile>
   pawns: Pawn[]
   order: number[]
   active: number
+  round: number
   phase: Phase
   winner: Side | null
   log: string[]
@@ -17,7 +20,7 @@ export type GameState = {
 
 export type Action =
   | { type: 'move'; q: number; r: number }
-  | { type: 'act'; action: 'attack' | 'defense' | 'special' }
+  | { type: 'act'; action: 'attack' | 'escape' | 'special' }
   | { type: 'attackAt'; q: number; r: number }
   | { type: 'cancelAttack' }
   | { type: 'endTurn' }
