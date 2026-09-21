@@ -200,7 +200,7 @@ p {
 .battle-stage {
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   min-height: 0;
   isolation: isolate;
   background:
@@ -223,24 +223,38 @@ p {
     0 0 0 100px #c5d09c02;
   pointer-events: none;
 }
-.stage-heading {
-  width: 100%;
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 15px 18px 4px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+.battle-notifications {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(390px, calc(100% - 24px));
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  pointer-events: none;
 }
-.stage-heading .eyebrow {
-  font-size: 9px;
-  color: #b5bea1;
-  letter-spacing: 0.2em;
+.battle-notifications li {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #14271fe6;
+  color: #e7e6cc;
+  font-size: 10px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px #07180f33;
+  animation: notification-fade 5s both;
 }
-.map-coordinate {
-  color: #a2b194;
-  font-size: 8px;
-  letter-spacing: 0.12em;
+@keyframes notification-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  5%,
+  90% {
+    opacity: 1;
+  }
 }
 .board-container {
   display: flex;
@@ -298,50 +312,6 @@ p {
   border-top: 1px solid #c4d1a530;
   box-shadow: 0 -12px 40px #10201840;
   padding-bottom: env(safe-area-inset-bottom);
-}
-.battle-feed {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 18px;
-  max-width: 1040px;
-  margin: auto;
-  height: 33px;
-  border-bottom: 1px solid var(--line);
-}
-.battle-feed p {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: 10px;
-  color: #b5bea9;
-}
-.feed-dot {
-  flex-shrink: 0;
-  width: 4px;
-  height: 4px;
-  background: var(--gold);
-  border-radius: 50%;
-}
-.battle-feed button {
-  flex-shrink: 0;
-  margin-left: auto;
-  border: 0;
-  background: none;
-  color: #94a48d;
-  padding: 0;
-  width: 44px;
-  height: 33px;
-  display: grid;
-  place-items: center;
-}
-.battle-feed button:hover {
-  color: var(--gold);
-}
-.battle-feed button svg {
-  width: 14px;
-  height: 14px;
 }
 .command-content {
   padding: 14px 18px 10px;
@@ -522,13 +492,6 @@ p {
   background: #ecdaa1;
   border-color: #ecdaa1;
 }
-.action-hint {
-  min-height: 13px;
-  text-align: center;
-  margin-top: 10px;
-  font-size: 10px;
-  color: #a5b197;
-}
 
 .battle-result {
   position: absolute;
@@ -638,28 +601,6 @@ p {
   font-weight: 600;
   font-size: 13px;
   margin-bottom: 4px;
-}
-.history-list {
-  list-style: none;
-  margin: 0;
-  padding: 5px 0 0;
-}
-.history-list li {
-  display: flex;
-  gap: 15px;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 12px;
-  line-height: 1.6;
-}
-.history-list li > span {
-  color: var(--gold);
-  font-size: 9px;
-  padding-top: 2px;
-}
-.history-list li:last-child {
-  color: #d8deb9;
-  border-bottom: none;
 }
 
 .primary-button {
@@ -853,9 +794,6 @@ p {
   .turn-status {
     font-size: 11px;
   }
-  .stage-heading {
-    padding-top: 20px;
-  }
   .command-content {
     padding-top: 17px;
     padding-bottom: 12px;
@@ -882,10 +820,6 @@ p {
   .action-grid {
     gap: 12px;
   }
-  .battle-feed {
-    padding-left: 0;
-    padding-right: 0;
-  }
 }
 
 @media (max-width: 600px) {
@@ -908,12 +842,6 @@ p {
     gap: 3px;
   }
   .turn-status {
-    font-size: 8px;
-  }
-  .stage-heading {
-    padding-top: 12px;
-  }
-  .stage-heading .eyebrow {
     font-size: 8px;
   }
   .board-container {
@@ -991,10 +919,6 @@ p {
     font-size: 8px;
     margin-top: 0;
   }
-  .action-hint {
-    font-size: 9px;
-    margin-top: 9px;
-  }
   .landing-header {
     padding: 20px 23px;
   }
@@ -1063,9 +987,6 @@ p {
   .unit-stats {
     gap: 8px;
   }
-  .map-coordinate {
-    font-size: 7px;
-  }
   .action-button > span {
     font-size: 10px;
   }
@@ -1081,9 +1002,6 @@ p {
   .initiative-bar {
     min-height: 34px;
   }
-  .stage-heading {
-    padding-top: 8px;
-  }
   .command-content {
     padding-top: 8px;
     padding-bottom: 6px;
@@ -1095,15 +1013,6 @@ p {
     min-height: 65px;
     padding-top: 6px;
     padding-bottom: 6px;
-  }
-  .action-hint {
-    margin-top: 6px;
-  }
-  .battle-feed {
-    height: 28px;
-  }
-  .battle-feed button {
-    height: 28px;
   }
   .result-card {
     padding: 16px 20px;
@@ -1126,10 +1035,7 @@ p {
   .header-main {
     min-height: 42px;
   }
-  .initiative-bar,
-  .stage-heading,
-  .battle-feed,
-  .action-hint {
+  .initiative-bar {
     display: none;
   }
   .command-content {

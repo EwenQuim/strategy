@@ -79,7 +79,7 @@ export const Route = createFileRoute('/')({
         <div className="landing-facts">
           <span>
             <Icon name="hex" />
-            100 hexes
+            99 hexes
           </span>
           <span>
             <Icon name="energy" />3 energy

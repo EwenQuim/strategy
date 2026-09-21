@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { useMemo, useReducer, useRef, useState } from 'react'
+import { useMemo, useReducer, useRef } from 'react'
 import { Battlefield } from '../components/Battlefield'
+import { BattleNotifications } from '../components/BattleNotifications'
 import { Icon } from '../components/Icon'
 import {
   activePawn,
@@ -23,13 +24,10 @@ export const Route = createFileRoute('/game/$seed')({
   component: function Game() {
     const { seed } = Route.useParams()
     const [state, dispatch] = useReducer(reducer, seed, initialState)
-    const [panel, setPanel] = useState<'rules' | 'history'>('rules')
     const dialog = useRef<HTMLDialogElement>(null)
     const pawn = activePawn(state)
     const myTurn = !!pawn && pawn.side === 'player' && !state.winner
     const attacking = myTurn && state.phase === 'attack'
-    const enemies = state.pawns.filter((p) => p.side === 'enemy')
-    const targetCount = pawn ? enemies.filter((p) => hexDist(pawn, p) <= ATTACK_RANGE).length : 0
     const turnOrder = state.order.flatMap((id, index) => {
       const unit = state.pawns.find((p) => p.id === id)
       return unit ? [{ unit, index }] : []
@@ -50,19 +48,6 @@ export const Route = createFileRoute('/game/$seed')({
       if (myTurn && reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
     }
 
-    const openPanel = (next: typeof panel) => {
-      setPanel(next)
-      dialog.current?.showModal()
-    }
-
-    const instruction = state.winner
-      ? 'The battle is decided. A new story awaits.'
-      : attacking
-        ? targetCount
-          ? 'Choose a marked enemy to strike.'
-          : 'No enemies in range. Cancel to reposition.'
-        : 'Select a lit tile to move, or choose your next action.'
-
     return (
       <main className="game-shell">
         <header className="game-header">
@@ -78,15 +63,7 @@ export const Route = createFileRoute('/game/$seed')({
             <div className="header-tools">
               <button
                 className="icon-button"
-                onClick={() => openPanel('history')}
-                aria-label="Battle history"
-                title="Battle history"
-              >
-                <Icon name="history" />
-              </button>
-              <button
-                className="icon-button"
-                onClick={() => openPanel('rules')}
+                onClick={() => dialog.current?.showModal()}
                 aria-label="How to play"
                 title="How to play"
               >
@@ -126,10 +103,6 @@ export const Route = createFileRoute('/game/$seed')({
           className={'battle-stage' + (attacking ? ' is-attacking' : '')}
           aria-label="The battlefield"
         >
-          <div className="stage-heading">
-            <span className="eyebrow">The Verdant Vale</span>
-            <span className="map-coordinate">FIELD 01 / 10 x 10</span>
-          </div>
           <div className="board-container">
             <Battlefield
               tiles={state.tiles}
@@ -140,6 +113,7 @@ export const Route = createFileRoute('/game/$seed')({
               onTileClick={onTileClick}
             />
           </div>
+          <BattleNotifications log={state.log} logCount={state.logCount} />
           {state.winner && (
             <div className="battle-result" role="status">
               <div className="result-card">
@@ -163,13 +137,6 @@ export const Route = createFileRoute('/game/$seed')({
         </section>
 
         <footer className="command-deck">
-          <div className="battle-feed" role="status" aria-live="polite" aria-atomic="true">
-            <span className="feed-dot" />
-            <p>{state.log.at(-1) ?? 'The vale awaits your command.'}</p>
-            <button onClick={() => openPanel('history')} aria-label="Open full battle history">
-              <Icon name="history" />
-            </button>
-          </div>
           <div className="command-content">
             <div className="unit-panel">
               <div className="unit-identity">
@@ -294,9 +261,6 @@ export const Route = createFileRoute('/game/$seed')({
                 <small>Next unit</small>
               </button>
             </div>
-            <p className="action-hint" aria-live="polite">
-              {instruction}
-            </p>
           </div>
         </footer>
 
@@ -312,9 +276,7 @@ export const Route = createFileRoute('/game/$seed')({
             <div className="dialog-heading">
               <div>
                 <span className="eyebrow">Commander's field notes</span>
-                <h2 id="dialog-title">
-                  {panel === 'rules' ? 'The art of the turn.' : 'Battle chronicle.'}
-                </h2>
+                <h2 id="dialog-title">The art of the turn.</h2>
               </div>
               <button
                 className="icon-button"
@@ -324,66 +286,55 @@ export const Route = createFileRoute('/game/$seed')({
                 <Icon name="close" />
               </button>
             </div>
-            {panel === 'rules' ? (
-              <div className="rules-list">
-                <p>
-                  Lead your king and two swordsmen across the vale. Defeat the enemy king to win.
-                  Losing yours ends the battle.
-                </p>
-                <section>
-                  <Icon name="energy" />
-                  <div>
-                    <h3>Three energy. Every round.</h3>
-                    <p>
-                      Each unit starts with 3 health and 3 energy. The lit unit is yours to command.
-                      Moving costs 1 energy per tile; numbers show the full cost. Mountains cannot
-                      be crossed.
-                    </p>
-                  </div>
-                </section>
-                <section>
-                  <Icon name="sword" />
-                  <div>
-                    <h3>Make your move.</h3>
-                    <p>
-                      Attack spends 1 energy to deal 1 damage to an enemy within {ATTACK_RANGE}{' '}
-                      tiles. Choose Attack, then a marked enemy. Cancel costs nothing.
-                    </p>
-                  </div>
-                </section>
-                <section>
-                  <Icon name="escape" />
-                  <div>
-                    <h3>Live to fight another turn.</h3>
-                    <p>
-                      Escape spends 1 energy to add {ESCAPE_BONUS} percentage points to your chance
-                      of avoiding each incoming attack: 20%, 40%, then {MAX_ESCAPE}%. It is not a
-                      movement action. The bonus lasts until the round ends.
-                    </p>
-                  </div>
-                </section>
-                <section>
-                  <Icon name="history" />
-                  <div>
-                    <h3>A fresh round. A new order.</h3>
-                    <p>
-                      End turn passes to the next unit. Running out of energy also ends your turn.
-                      Enemy units act automatically. Each new round shuffles the order, restores all
-                      energy, and resets Escape to 0%.
-                    </p>
-                  </div>
-                </section>
-              </div>
-            ) : (
-              <ol className="history-list">
-                {state.log.map((entry, index) => (
-                  <li key={index}>
-                    <span>{(index + 1).toString().padStart(2, '0')}</span>
-                    <p>{entry}</p>
-                  </li>
-                ))}
-              </ol>
-            )}
+            <div className="rules-list">
+              <p>
+                Lead your king and two swordsmen across the vale. Defeat the enemy king to win.
+                Losing yours ends the battle.
+              </p>
+              <section>
+                <Icon name="energy" />
+                <div>
+                  <h3>Three energy. Every round.</h3>
+                  <p>
+                    Each unit starts with 3 health and 3 energy. The lit unit is yours to command.
+                    Moving costs 1 energy per tile; numbers show the full cost. Mountains cannot be
+                    crossed.
+                  </p>
+                </div>
+              </section>
+              <section>
+                <Icon name="sword" />
+                <div>
+                  <h3>Make your move.</h3>
+                  <p>
+                    Attack spends 1 energy to deal 1 damage to an enemy within {ATTACK_RANGE} tiles.
+                    Choose Attack, then a marked enemy. Cancel costs nothing.
+                  </p>
+                </div>
+              </section>
+              <section>
+                <Icon name="escape" />
+                <div>
+                  <h3>Live to fight another turn.</h3>
+                  <p>
+                    Escape spends 1 energy to add {ESCAPE_BONUS} percentage points to your chance of
+                    avoiding each incoming attack: 20%, 40%, then {MAX_ESCAPE}%. It is not a
+                    movement action. The bonus lasts until the round ends.
+                  </p>
+                </div>
+              </section>
+              <section>
+                <Icon name="history" />
+                <div>
+                  <h3>A fresh round. A new order.</h3>
+                  <p>
+                    End turn passes to the next unit. Running out of energy also ends your turn.
+                    Enemy units act automatically. Each new round shuffles the order, restores all
+                    energy, and resets Escape to 0%.
+                  </p>
+                </div>
+              </section>
+            </div>
           </div>
         </dialog>
       </main>

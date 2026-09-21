@@ -2,6 +2,10 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   King,
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  hexOf,
+  key,
   Swordsman,
   activePawn,
   createGameEngine,
@@ -34,6 +38,7 @@ function battle(): GameState {
     phase: 'move',
     winner: null,
     log: [],
+    logCount: 0,
   }
 }
 
@@ -157,7 +162,7 @@ test('Defeating the enemy king ends the game; restart clears the battle', () => 
   assert.equal(restarted.round, 1)
   assert.equal(restarted.pawns.length, 6)
   assert.ok(restarted.pawns.every((p) => p.escapeChance === 0))
-  assert.equal(initialState('test').tiles.size, 100)
+  assert.equal(initialState('test').tiles.size, 99)
   assert.deepEqual(restarted, initialState(state.seed))
 })
 
@@ -217,20 +222,23 @@ test('Identical seeds and decisions replay identically, including repeated reduc
   assert.deepEqual(reducer(first, { type: 'restart' }), initialState('shared-vale'))
 })
 
-test('Different seeds vary the turn order without depending on global random state', (t) => {
+test('Different seeds vary terrain and turn order without depending on global random state', (t) => {
   t.mock.method(Math, 'random', () => {
     throw new Error('Unseeded randomness')
   })
+  const maps = new Set<string>()
   const orders = new Set(
     ['alpha', 'bravo', 'charlie', 'delta'].map((seed) => {
       const state = initialState(seed)
       assert.equal(state.seed, seed)
+      maps.add(JSON.stringify([...state.tiles.values()]))
       const next = reducer(state, { type: 'endTurn' })
       assert.deepEqual(next, reducer(state, { type: 'endTurn' }))
       return state.order.join(',')
     }),
   )
   assert.ok(orders.size > 1)
+  assert.ok(maps.size > 1)
 })
 
 test('Previewing, cancelling, and invalid actions never advance the random stream', () => {
@@ -247,4 +255,56 @@ test('Seed hashing and the PRNG stream have a stable reference sequence', () => 
   assert.equal(random.next(), 0.6270739405881613)
   const resumed = new SeededRandom(random.state)
   assert.equal(random.next(), resumed.next())
+})
+
+test('The mobile board is 9 columns by 11 rows with passable spawn tiles', () => {
+  assert.equal(MAP_WIDTH, 9)
+  assert.equal(MAP_HEIGHT, 11)
+  const state = initialState('mobile')
+  for (let row = 0; row < 11; row++) {
+    for (let col = 0; col < 9; col++) {
+      const { q, r } = hexOf(col, row)
+      assert.ok(state.tiles.has(key(q, r)))
+    }
+  }
+  for (const pawn of state.pawns) {
+    const tile = state.tiles.get(key(pawn.q, pawn.r))
+    assert.ok(tile && tile.terrain !== 'mountain')
+  }
+  assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
+})
+
+test('A confirmed attack spends exactly one energy, including the final energy before switching units', () => {
+  for (const energy of [1, 2, 3]) {
+    const state = battle()
+    state.pawns[0].energy = energy
+    const targeting = reducer(state, { type: 'act', action: 'attack' })
+    assert.equal(targeting.pawns[0].energy, energy)
+    const next = reducer(targeting, { type: 'attackAt', q: 2, r: 0 })
+    assert.equal(next.pawns[0].energy, energy - 1)
+    assert.equal(next.pawns[2].hp, 2)
+    assert.equal(activePawn(next)?.id, energy === 1 ? 2 : 1)
+    assert.equal(state.pawns[0].energy, energy)
+  }
+})
+
+test('Notification IDs advance for repeated messages even when the log is full', () => {
+  let state = battle()
+  state.pawns[0].energy = 60
+  for (let index = 1; index <= 45; index++) {
+    state = reducer(state, { type: 'act', action: 'attack' })
+    assert.equal(state.logCount, index - 1)
+    state = reducer(state, { type: 'attackAt', q: 1, r: 0 })
+    assert.equal(state.logCount, index)
+    assert.equal(state.log.length, Math.min(index, 40))
+  }
+  assert.equal(new Set(state.log).size, 1)
+  state = reducer(state, { type: 'act', action: 'escape' })
+  assert.equal(state.logCount, 46)
+  state = reducer(state, { type: 'move', q: 0, r: 1 })
+  assert.equal(state.logCount, 47)
+  state.order = [1, 3, 2]
+  state = reducer(state, { type: 'endTurn' })
+  assert.equal(state.logCount, 48)
+  assert.equal(state.log.length, 40)
 })

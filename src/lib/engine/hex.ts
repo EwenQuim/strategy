@@ -1,7 +1,8 @@
+import type { SeededRandom } from './random.ts'
 import type { Axial, Tile } from './types.ts'
 
-export const MAP_WIDTH = 10
-export const MAP_HEIGHT = 10
+export const MAP_WIDTH = 9
+export const MAP_HEIGHT = 11
 
 export const key = (q: number, r: number) => `${q},${r}`
 export const hexOf = (col: number, row: number): Axial => ({ q: col - Math.floor(row / 2), r: row })
@@ -23,21 +24,17 @@ export function hexDist(a: Axial, b: Axial) {
   return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2
 }
 
-function makeTiles(): Map<string, Tile> {
+export function makeMap(random: SeededRandom): Map<string, Tile> {
   const tiles = new Map<string, Tile>()
   for (let row = 0; row < MAP_HEIGHT; row++) {
     for (let col = 0; col < MAP_WIDTH; col++) {
       const { q, r } = hexOf(col, row)
-      const h = Math.abs((col * 73856093) ^ (row * 19349663)) % 100
+      const h = random.next() * 100
       const terrain: Tile['terrain'] = h < 12 ? 'mountain' : h < 35 ? 'forest' : 'plain'
       tiles.set(key(q, r), { q, r, terrain })
     }
   }
   return tiles
-}
-
-export function makeMap(): Map<string, Tile> {
-  return makeTiles()
 }
 
 export function reachable(

@@ -16,6 +16,7 @@ export type GameState = {
   phase: Phase
   winner: Side | null
   log: string[]
+  logCount: number
 }
 
 export type Action =

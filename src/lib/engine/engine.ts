@@ -1,4 +1,14 @@
-import { distFrom, hexDist, hexOf, key, makeMap, neighbors, reachable } from './hex.ts'
+import {
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  distFrom,
+  hexDist,
+  hexOf,
+  key,
+  makeMap,
+  neighbors,
+  reachable,
+} from './hex.ts'
 import { ESCAPE_BONUS, MAX_ESCAPE, King, Swordsman, type Pawn, type Side } from './pawns.ts'
 import type { Action, GameState, Tile } from './types.ts'
 import { nearestTarget, type EnemyStrategy } from './strategies.ts'
@@ -106,11 +116,15 @@ function advance(prev: GameState, strategy: EnemyStrategy): GameState {
         phase: 'over',
         winner,
         log: [...prev.log, ...log].slice(-40),
+        logCount: prev.logCount + log.length,
       }
     }
     if (active >= order.length) {
       round++
-      order = shuffle(pawns.map((p) => p.id), random)
+      order = shuffle(
+        pawns.map((p) => p.id),
+        random,
+      )
       for (const p of pawns) {
         p.energy = p.maxEnergy
         p.escapeChance = 0
@@ -137,6 +151,7 @@ function advance(prev: GameState, strategy: EnemyStrategy): GameState {
       randomState: random.state,
       phase: 'move',
       log: [...prev.log, ...log].slice(-40),
+      logCount: prev.logCount + log.length,
     }
   }
 }
@@ -157,18 +172,24 @@ function createInitialState(seed: string, strategy: EnemyStrategy): GameState {
     const { q, r } = hexOf(col, row)
     return new Ctor(id, q, r, side)
   }
+  const center = Math.floor(MAP_WIDTH / 2)
   const pawns = [
-    spawn(Swordsman, 1, 4, 7, 'player'),
-    spawn(King, 2, 5, 8, 'player'),
-    spawn(Swordsman, 3, 6, 7, 'player'),
-    spawn(Swordsman, 4, 3, 2, 'enemy'),
-    spawn(King, 5, 4, 1, 'enemy'),
-    spawn(Swordsman, 6, 6, 2, 'enemy'),
+    spawn(Swordsman, 1, center - 1, MAP_HEIGHT - 3, 'player'),
+    spawn(King, 2, center, MAP_HEIGHT - 2, 'player'),
+    spawn(Swordsman, 3, center + 1, MAP_HEIGHT - 3, 'player'),
+    spawn(Swordsman, 4, center - 1, 2, 'enemy'),
+    spawn(King, 5, center, 1, 'enemy'),
+    spawn(Swordsman, 6, center + 1, 2, 'enemy'),
   ]
+  const tiles = makeMap(random)
+  for (const pawn of pawns) tiles.get(key(pawn.q, pawn.r))!.terrain = 'plain'
   const base: GameState = {
-    tiles: makeMap(),
+    tiles,
     pawns,
-    order: shuffle(pawns.map((p) => p.id), random),
+    order: shuffle(
+      pawns.map((p) => p.id),
+      random,
+    ),
     seed,
     randomState: random.state,
     active: -1,
@@ -176,6 +197,7 @@ function createInitialState(seed: string, strategy: EnemyStrategy): GameState {
     phase: 'move',
     winner: null,
     log: ['The battle begins. Protect your crown.'],
+    logCount: 1,
   }
   return advance(base, strategy)
 }
@@ -215,7 +237,12 @@ function reduce(state: GameState, action: Action, strategy: EnemyStrategy): Game
     } else {
       log.push(`${me.kind} ${me.id} uses special (nothing happens yet)`)
     }
-    const next: GameState = { ...state, pawns, log: log.slice(-40) }
+    const next: GameState = {
+      ...state,
+      pawns,
+      log: log.slice(-40),
+      logCount: state.logCount + log.length - state.log.length,
+    }
     return me.energy === 0 ? advance(next, strategy) : next
   }
 
@@ -231,7 +258,15 @@ function reduce(state: GameState, action: Action, strategy: EnemyStrategy): Game
     if (target) strike(pawns, me, target, log, random)
     else log.push(`Your ${me.kind} #${me.id} strikes empty ground.`)
     const winner = winnerFrom(pawns)
-    const next: GameState = { ...state, pawns, log: log.slice(-40), randomState: random.state, phase: 'move', winner }
+    const next: GameState = {
+      ...state,
+      pawns,
+      log: log.slice(-40),
+      logCount: state.logCount + log.length - state.log.length,
+      randomState: random.state,
+      phase: 'move',
+      winner,
+    }
     if (winner) return { ...next, phase: 'over' }
     return me.energy === 0 ? advance(next, strategy) : next
   }
@@ -250,7 +285,7 @@ function reduce(state: GameState, action: Action, strategy: EnemyStrategy): Game
       ...state.log,
       `Your ${me.kind} #${me.id} moves ${steps} ${steps === 1 ? 'tile' : 'tiles'}.`,
     ].slice(-40)
-    const next: GameState = { ...state, pawns, log }
+    const next: GameState = { ...state, pawns, log, logCount: state.logCount + 1 }
     return me.energy === 0 ? advance(next, strategy) : next
   }
 
