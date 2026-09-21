@@ -1,8 +1,8 @@
 import type { SeededRandom } from './random.ts'
 import type { Axial, Tile } from './types.ts'
 
-export const MAP_WIDTH = 9
-export const MAP_HEIGHT = 11
+export const MAP_WIDTH = 8
+export const MAP_HEIGHT = 12
 
 export const key = (q: number, r: number) => `${q},${r}`
 export const hexOf = (col: number, row: number): Axial => ({ q: col - Math.floor(row / 2), r: row })
