@@ -1,0 +1,10 @@
+# Hex Strategy
+
+Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Router (file-based routing) + Tailwind v4.
+
+## Constraints
+
+- Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.
+- Game logic is plain TypeScript in `src/lib/engine/` (hex math, pawn classes, reducer), pure and framework-free. Routes only render it.
+- Pawn types are TS classes extending `Pawn` in `src/lib/engine/pawns.ts` (currently `Swordsman`, `King`).
+- Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
