@@ -9,17 +9,16 @@ import {
   neighbors,
   reachable,
 } from './hex.ts'
-import {
-  ESCAPE_BONUS,
-  MAX_ESCAPE,
-  King,
-  Swordsman,
-  Archer,
-  Magician,
-  type Pawn,
-  type Side,
-} from './pawns.ts'
-import type { Action, GameState, Tile } from './types.ts'
+import { King, Swordsman, Archer, Magician, type Pawn, type Side } from './pawns.ts'
+import type {
+  Action,
+  Axial,
+  BattleEffect,
+  BattleFrame,
+  GameState,
+  Tile,
+  Transition,
+} from './types.ts'
 import { nearestTarget, type EnemyStrategy } from './strategies.ts'
 import { SeededRandom, seedState } from './random.ts'
 
@@ -47,6 +46,27 @@ function winnerFrom(pawns: Pawn[]): Side | null {
   return null
 }
 
+function finishTurn(pawn: Pawn, log: string[]): boolean {
+  const previousEscape = pawn.escapeChance
+  pawn.endTurn()
+  const gained = pawn.escapeChance - previousEscape
+  if (gained <= 0) return false
+  log.push(
+    (pawn.side === 'player' ? 'Your ' : 'Enemy ') +
+      pawn.kind +
+      ' #' +
+      pawn.id +
+      ' ends turn: +' +
+      gained +
+      '% escape (' +
+      pawn.escapeChance +
+      '% total).',
+  )
+  return true
+}
+
+type RecordFrame = (frame: BattleFrame) => void
+
 function enemyAct(
   pawns: Pawn[],
   pawn: Pawn,
@@ -54,8 +74,12 @@ function enemyAct(
   log: string[],
   strategy: EnemyStrategy,
   random: SeededRandom,
+  recordStep?: (effect: BattleEffect) => void,
 ) {
   while (pawn.energy > 0 && !winnerFrom(pawns)) {
+    const from = { q: pawn.q, r: pawn.r }
+    const record = (kind: BattleEffect['kind'], to: Axial = pawn) =>
+      recordStep?.({ kind, from, to: { q: to.q, r: to.r } })
     const foes = pawns.filter((p) => p.side !== pawn.side)
     const specials = specialTargets(pawns, pawn)
     const special =
@@ -69,13 +93,22 @@ function enemyAct(
                 : pawn.kind === 'magician' && foes.filter((f) => hexDist(p, f) <= 1).length > 1,
             ),
           )
-    if (special && performSpecial(tiles, pawns, pawn, special, log, random)) continue
+    if (special && performSpecial(tiles, pawns, pawn, special, log, random)) {
+      record(
+        pawn.kind === 'king' ? 'rally' : pawn.kind === 'magician' ? 'fireball' : 'attack',
+        special,
+      )
+      continue
+    }
 
     const target = strategy.chooseTarget(
       pawn,
       foes.filter((p) => canAttack(pawn, p)),
     )
-    if (target && performAttack(pawns, pawn, target, log, random)) continue
+    if (target && performAttack(pawns, pawn, target, log, random)) {
+      record('attack', target)
+      continue
+    }
 
     const charges = chargeDestinations(tiles, pawns, pawn)
     const chargeTiles = [...charges.keys()].map((k) => tiles.get(k)!)
@@ -85,7 +118,10 @@ function enemyAct(
     )
     if (chargeTarget) {
       const destination = chargeTiles.find((tile) => canAttack(pawn, chargeTarget, tile))!
-      if (performSpecial(tiles, pawns, pawn, chargeTarget, log, random, destination)) continue
+      if (performSpecial(tiles, pawns, pawn, chargeTarget, log, random, destination)) {
+        record('attack', chargeTarget)
+        continue
+      }
     }
 
     const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
@@ -105,30 +141,41 @@ function enemyAct(
       pawn.r = step.r
       pawn.energy--
       log.push('Enemy ' + pawn.kind + ' #' + pawn.id + ' moves 1 tile.')
+      record('move')
       continue
     }
-    if (pawn.escapeChance >= MAX_ESCAPE) break
-    pawn.energy--
-    pawn.escapeChance = Math.min(MAX_ESCAPE, pawn.escapeChance + ESCAPE_BONUS)
-    log.push(
-      'Enemy ' +
-        pawn.kind +
-        ' #' +
-        pawn.id +
-        ' prepares to escape: ' +
-        pawn.escapeChance +
-        '% chance.',
-    )
+    break
+  }
+  if (!winnerFrom(pawns) && finishTurn(pawn, log)) {
+    const position = { q: pawn.q, r: pawn.r }
+    recordStep?.({ kind: 'escape', from: position, to: position })
   }
 }
 
-function advance(prev: GameState, strategy: EnemyStrategy): GameState {
+function advance(prev: GameState, strategy: EnemyStrategy, record?: RecordFrame): GameState {
   const random = new SeededRandom(prev.randomState)
   const pawns = prev.pawns.map((p) => p.clone())
   const log: string[] = []
   let order = prev.order
   let active = prev.active + 1
   let round = prev.round
+  const capture = (effect: BattleEffect | null) =>
+    record?.({
+      state: {
+        ...prev,
+        pawns: pawns.map((p) => p.clone()),
+        order: [...order],
+        active,
+        round,
+        randomState: random.state,
+        phase: 'move',
+        chargeDestination: null,
+        winner: null,
+        log: [...prev.log, ...log].slice(-40),
+        logCount: prev.logCount + log.length,
+      },
+      effect,
+    })
 
   while (true) {
     const winner = winnerFrom(pawns)
@@ -170,7 +217,8 @@ function advance(prev: GameState, strategy: EnemyStrategy): GameState {
       continue
     }
     if (pawn.side === 'enemy') {
-      enemyAct(pawns, pawn, prev.tiles, log, strategy, random)
+      capture(null)
+      enemyAct(pawns, pawn, prev.tiles, log, strategy, random, record ? capture : undefined)
       active++
       continue
     }
@@ -193,7 +241,11 @@ export function activePawn(state: GameState): Pawn | undefined {
   return state.pawns.find((p) => p.id === state.order[state.active])
 }
 
-function createInitialState(seed: string, strategy: EnemyStrategy): GameState {
+function createInitialState(
+  seed: string,
+  strategy: EnemyStrategy,
+  record?: RecordFrame,
+): GameState {
   const random = new SeededRandom(seedState(seed))
   const spawn = (
     Ctor: new (id: number, q: number, r: number, side: Side) => Pawn,
@@ -237,17 +289,27 @@ function createInitialState(seed: string, strategy: EnemyStrategy): GameState {
     log: ['The battle begins. Protect your crown.'],
     logCount: 1,
   }
-  return advance(base, strategy)
+  return advance(base, strategy, record)
+}
+
+function recordTransition(run: (record: RecordFrame) => GameState): Transition {
+  const frames: BattleFrame[] = []
+  const state = run((frame) => frames.push(frame))
+  return { state, frames }
 }
 
 export function createGameEngine(strategy: EnemyStrategy = nearestTarget) {
   return {
     initialState: (seed: string) => createInitialState(seed, strategy),
     reducer: (state: GameState, action: Action) => reduce(state, action, strategy),
+    initialTransition: (seed: string) =>
+      recordTransition((record) => createInitialState(seed, strategy, record)),
+    transition: (state: GameState, action: Action) =>
+      recordTransition((record) => reduce(state, action, strategy, record)),
   }
 }
 
-export const { initialState, reducer } = createGameEngine()
+export const { initialState, reducer, initialTransition, transition } = createGameEngine()
 
 export function targetingTiles(state: GameState): Set<string> {
   const pawn = activePawn(state)
@@ -264,11 +326,15 @@ export function targetingTiles(state: GameState): Set<string> {
   return new Set(targets.map((target) => key(target.q, target.r)))
 }
 
-function reduce(state: GameState, action: Action, strategy: EnemyStrategy): GameState {
-  if (action.type === 'restart') return createInitialState(state.seed, strategy)
+function reduce(
+  state: GameState,
+  action: Action,
+  strategy: EnemyStrategy,
+  record?: RecordFrame,
+): GameState {
+  if (action.type === 'restart') return createInitialState(state.seed, strategy, record)
   const pawn = activePawn(state)
   if (!pawn || pawn.side !== 'player' || state.winner) return state
-  if (action.type === 'endTurn') return advance(state, strategy)
   if (action.type === 'cancelTargeting') {
     return state.phase === 'move' ? state : { ...state, phase: 'move', chargeDestination: null }
   }
@@ -278,7 +344,6 @@ function reduce(state: GameState, action: Action, strategy: EnemyStrategy): Game
     if (action.action === 'special') {
       return canUseSpecial(pawn) ? { ...state, phase: 'special' } : state
     }
-    if (pawn.escapeChance >= MAX_ESCAPE) return state
   }
 
   if (action.type === 'specialAt' && state.phase === 'special' && pawn.kind === 'swordsman') {
@@ -322,15 +387,11 @@ function reduce(state: GameState, action: Action, strategy: EnemyStrategy): Game
     log.push(
       'Your ' + me.kind + ' #' + me.id + ' moves ' + steps + (steps === 1 ? ' tile.' : ' tiles.'),
     )
-  } else if (action.type === 'act' && action.action === 'escape') {
-    me.energy--
-    me.escapeChance = Math.min(MAX_ESCAPE, me.escapeChance + ESCAPE_BONUS)
-    log.push(
-      'Your ' + me.kind + ' #' + me.id + ' prepares to escape: ' + me.escapeChance + '% chance.',
-    )
-  } else return state
+  } else if (action.type !== 'endTurn') return state
 
   const winner = winnerFrom(pawns)
+  const turnEnded = !winner && (action.type === 'endTurn' || me.energy === 0)
+  if (turnEnded) finishTurn(me, log)
   const next: GameState = {
     ...state,
     pawns,
@@ -341,5 +402,5 @@ function reduce(state: GameState, action: Action, strategy: EnemyStrategy): Game
     log: [...state.log, ...log].slice(-40),
     logCount: state.logCount + log.length,
   }
-  return !winner && me.energy === 0 ? advance(next, strategy) : next
+  return turnEnded ? advance(next, strategy, record) : next
 }

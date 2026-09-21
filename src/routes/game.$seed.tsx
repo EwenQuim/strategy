@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { useMemo, useReducer, useRef } from 'react'
+import { useMemo, useRef } from 'react'
+import { useGame } from '../lib/useGame'
 import { Battlefield } from '../components/Battlefield'
 import { BattleNotifications } from '../components/BattleNotifications'
 import { Icon, PawnIcon } from '../components/Icon'
@@ -13,9 +14,7 @@ import {
   targetingTiles,
   ESCAPE_BONUS,
   MAX_ESCAPE,
-  initialState,
   key,
-  reducer,
   reachable,
   type Tile,
 } from '../lib/engine'
@@ -29,10 +28,10 @@ export const Route = createFileRoute('/game/$seed')({
   remountDeps: ({ params }) => params.seed,
   component: function Game() {
     const { seed } = Route.useParams()
-    const [state, dispatch] = useReducer(reducer, seed, initialState)
+    const { state, dispatch, effect, playing } = useGame(seed)
     const dialog = useRef<HTMLDialogElement>(null)
     const pawn = activePawn(state)
-    const myTurn = !!pawn && pawn.side === 'player' && !state.winner
+    const myTurn = !!pawn && pawn.side === 'player' && !state.winner && !playing
     const attacking = myTurn && state.phase === 'attack'
     const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
     const targets = useMemo(() => targetingTiles(state), [state])
@@ -56,6 +55,7 @@ export const Route = createFileRoute('/game/$seed')({
     }, [state.pawns, state.tiles, state.phase, myTurn, pawn])
 
     const onTileClick = (tile: Tile) => {
+      if (!myTurn) return
       if (targets.has(key(tile.q, tile.r)))
         return dispatch({ type: attacking ? 'attackAt' : 'specialAt', q: tile.q, r: tile.r })
       if (myTurn && reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
@@ -74,6 +74,11 @@ export const Route = createFileRoute('/game/$seed')({
               </span>
             </Link>
             <div className="header-tools">
+              {playing && (
+                <span className="enemy-turn" role="status">
+                  Enemy turn
+                </span>
+              )}
               <button
                 className="icon-button"
                 onClick={() => dialog.current?.showModal()}
@@ -123,6 +128,8 @@ export const Route = createFileRoute('/game/$seed')({
               targets={targets}
               targetLabel={targetLabel}
               preview={state.chargeDestination}
+              effect={effect}
+              effectId={state.logCount}
               onTileClick={onTileClick}
             />
           </div>
@@ -240,32 +247,6 @@ export const Route = createFileRoute('/game/$seed')({
                 </small>
               </button>
               <button
-                className="action-button escape-action"
-                disabled={
-                  !myTurn ||
-                  attacking ||
-                  usingSpecial ||
-                  !pawn?.energy ||
-                  pawn.escapeChance >= MAX_ESCAPE
-                }
-                onClick={() => dispatch({ type: 'act', action: 'escape' })}
-                title={
-                  'Spend 1 energy for +' +
-                  ESCAPE_BONUS +
-                  '% escape chance this round. Maximum ' +
-                  MAX_ESCAPE +
-                  '%.'
-                }
-              >
-                <Icon name="escape" />
-                <span>
-                  Escape <b>+{ESCAPE_BONUS}%</b>
-                </span>
-                <small>
-                  {pawn && pawn.escapeChance >= MAX_ESCAPE ? 'Maximum reached' : '1 energy'}
-                </small>
-              </button>
-              <button
                 className={'action-button special-action' + (usingSpecial ? ' is-selected' : '')}
                 disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn)}
                 title={pawn?.special.description}
@@ -298,10 +279,15 @@ export const Route = createFileRoute('/game/$seed')({
                 className="action-button end-action"
                 disabled={!myTurn}
                 onClick={() => dispatch({ type: 'endTurn' })}
+                title={
+                  'Spend all remaining energy and end this turn. Escape: ' +
+                  (pawn?.endTurnEscapeChance ?? 0) +
+                  '% until the round ends.'
+                }
               >
-                <Icon name="arrow" />
+                <Icon name="escape" />
                 <span>End turn</span>
-                <small>Next unit</small>
+                <small>+{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape</small>
               </button>
             </div>
           </div>
@@ -379,9 +365,9 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>Live to fight another turn.</h3>
                   <p>
-                    Escape spends 1 energy to add {ESCAPE_BONUS} percentage points to your chance of
-                    avoiding each incoming attack: 20%, 40%, then {MAX_ESCAPE}%. It is not a
-                    movement action. The bonus lasts until the round ends.
+                    End turn converts all remaining energy into Escape: +{ESCAPE_BONUS} percentage
+                    points per energy, up to {MAX_ESCAPE}% chance to avoid each incoming attack. The
+                    bonus lasts until the round ends. It is not a movement action.
                   </p>
                 </div>
               </section>
@@ -390,9 +376,10 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>A fresh round. A new order.</h3>
                   <p>
-                    End turn passes to the next unit. Running out of energy also ends your turn.
-                    Enemy units act automatically. Each new round shuffles the order, restores all
-                    energy, and resets Escape to 0%.
+                    End turn spends your remaining energy and passes to the next unit. Running out
+                    of energy also ends your turn, with no extra Escape bonus. Enemy units act
+                    automatically. Each new round shuffles the order, restores all energy, and
+                    resets Escape to 0%.
                   </p>
                 </div>
               </section>

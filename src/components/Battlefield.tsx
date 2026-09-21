@@ -1,4 +1,4 @@
-import { key, type Axial, type Pawn, type Tile } from '../lib/engine'
+import { key, type Axial, type BattleEffect, type Pawn, type Tile } from '../lib/engine'
 import { Icon, PawnIcon } from './Icon'
 
 const SIZE = 34
@@ -19,6 +19,8 @@ interface BattlefieldProps {
   targets: Set<string>
   targetLabel: string
   preview: Axial | null
+  effect: BattleEffect | null
+  effectId: number
   onTileClick: (tile: Tile) => void
 }
 
@@ -30,6 +32,8 @@ export function Battlefield({
   targets,
   targetLabel,
   preview,
+  effect,
+  effectId,
   onTileClick,
 }: BattlefieldProps) {
   const allTiles = [...tiles.values()]
@@ -171,6 +175,27 @@ export function Battlefield({
       {pawns.map((pawn) => (
         <PawnChip key={pawn.id} pawn={pawn} active={active?.id === pawn.id} />
       ))}
+      {effect && (
+        <g key={effectId} className={'battle-effect effect-' + effect.kind} aria-hidden="true">
+          {effect.kind !== 'escape' && (
+            <line
+              x1={hexX(effect.from.q, effect.from.r)}
+              y1={hexY(effect.from.r)}
+              x2={hexX(effect.to.q, effect.to.r)}
+              y2={hexY(effect.to.r)}
+              pathLength="1"
+              className="battle-trail"
+            />
+          )}
+          <g
+            transform={
+              'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+            }
+          >
+            <circle r={effect.kind === 'fireball' ? 66 : 29} className="battle-impact" />
+          </g>
+        </g>
+      )}
     </svg>
   )
 }

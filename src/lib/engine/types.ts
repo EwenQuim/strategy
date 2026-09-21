@@ -20,9 +20,18 @@ export type GameState = {
   logCount: number
 }
 
+export type BattleEffect = {
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'escape'
+  from: Axial
+  to: Axial
+}
+
+export type BattleFrame = { state: GameState; effect: BattleEffect | null }
+export type Transition = { state: GameState; frames: BattleFrame[] }
+
 export type Action =
   | { type: 'move'; q: number; r: number }
-  | { type: 'act'; action: 'attack' | 'escape' | 'special' }
+  | { type: 'act'; action: 'attack' | 'special' }
   | { type: 'attackAt'; q: number; r: number }
   | { type: 'specialAt'; q: number; r: number }
   | { type: 'cancelTargeting' }

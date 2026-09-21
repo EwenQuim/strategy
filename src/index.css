@@ -220,7 +220,7 @@ p {
 }
 .battle-notifications {
   position: absolute;
-  bottom: 8px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   width: min(390px, calc(100% - 24px));
@@ -292,6 +292,71 @@ p {
 .pawn-chip {
   pointer-events: none;
   transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.enemy-turn {
+  align-self: center;
+  margin-right: 10px;
+  color: #d69b81;
+  font-size: 10px;
+}
+.battle-effect {
+  pointer-events: none;
+  color: #ffd4a1;
+  animation: battle-fade 460ms ease-out both;
+}
+.effect-move {
+  color: #ead695;
+}
+.effect-rally,
+.effect-escape {
+  color: #b7e5c8;
+}
+.effect-fireball {
+  color: #ffab78;
+}
+.battle-trail {
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: battle-travel 300ms ease-out both;
+}
+.effect-move .battle-trail {
+  stroke-width: 2;
+}
+.battle-impact {
+  fill: currentColor;
+  fill-opacity: 0.18;
+  stroke: currentColor;
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: battle-impact 460ms ease-out both;
+}
+@keyframes battle-travel {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes battle-impact {
+  from {
+    transform: scale(0.45);
+  }
+  to {
+    transform: scale(1.2);
+  }
+}
+@keyframes battle-fade {
+  0%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 .active-halo {
   animation: halo-breathe 3s ease-in-out infinite;
@@ -422,7 +487,7 @@ p {
 }
 .action-grid {
   display: grid;
-  grid-template-columns: 1fr 1.16fr 1fr 1.1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 .action-button {
@@ -448,11 +513,6 @@ p {
   font-size: 13px;
   font-weight: 600;
 }
-.action-button b {
-  font-size: 10px;
-  font-weight: 500;
-  color: #bdccb4;
-}
 .action-button small {
   display: block;
   font-size: 9px;
@@ -474,9 +534,6 @@ p {
 }
 .attack-action small {
   color: #b5a997;
-}
-.escape-action > svg {
-  color: #bad7bc;
 }
 .special-action {
   color: #d0b6e7;
@@ -901,9 +958,6 @@ p {
   .action-button > span {
     font-size: 11px;
   }
-  .action-button b {
-    font-size: 8px;
-  }
   .action-button small {
     font-size: 8px;
     margin-top: 0;
@@ -975,9 +1029,6 @@ p {
   }
   .action-button > span {
     font-size: 10px;
-  }
-  .action-button b {
-    font-size: 7px;
   }
 }
 

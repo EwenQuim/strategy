@@ -53,6 +53,15 @@ export abstract class Pawn {
     this.escapeChance = escapeChance
   }
 
+  get endTurnEscapeChance(): number {
+    return Math.min(MAX_ESCAPE, this.escapeChance + this.energy * ESCAPE_BONUS)
+  }
+
+  endTurn(): void {
+    this.escapeChance = this.endTurnEscapeChance
+    this.energy = 0
+  }
+
   clone(): this {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this)
   }
