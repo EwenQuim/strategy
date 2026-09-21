@@ -100,7 +100,6 @@ p {
   box-shadow: 0 8px 30px #0a1e1a22;
 }
 .header-main,
-.battle-status,
 .initiative-bar {
   max-width: 1040px;
   margin: auto;
@@ -144,71 +143,9 @@ p {
   width: 22px;
   height: 22px;
 }
-.round-display {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.round-display strong {
-  font-family: Georgia, serif;
-  font-size: 27px;
-  font-weight: 400;
-  color: var(--gold);
-  font-variant-numeric: tabular-nums;
-}
 .header-tools {
   display: flex;
   gap: 0;
-}
-.battle-status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px 0 12px;
-}
-.army-count {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  white-space: nowrap;
-  font-size: 10px;
-  color: #c5ceb9;
-}
-.army-count strong {
-  font-size: 14px;
-  color: var(--ink);
-  font-weight: 500;
-}
-.army-count strong span {
-  color: #718571;
-  font-size: 10px;
-}
-.side-dot {
-  width: 7px;
-  height: 7px;
-  display: inline-block;
-  background: #acd0ad;
-  border-radius: 50%;
-  box-shadow: 0 0 12px #acd0ad33;
-}
-.enemy .side-dot {
-  border-radius: 1px;
-  transform: rotate(45deg);
-  background: #d5997c;
-  box-shadow: 0 0 12px #d5997c22;
-}
-.objective {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.objective svg {
-  height: 15px;
-  width: 15px;
-  color: var(--gold);
 }
 .initiative-bar {
   border-top: 1px solid var(--line);
@@ -263,7 +200,7 @@ p {
 .battle-stage {
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 0;
   isolation: isolate;
   background:
@@ -353,33 +290,6 @@ p {
 .target-ring {
   pointer-events: none;
 }
-.field-legend {
-  display: flex;
-  justify-content: center;
-  gap: 19px;
-  padding: 6px 12px 12px;
-  color: #adba9f;
-  font-size: 9px;
-}
-.field-legend > span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.field-legend svg {
-  width: 13px;
-  height: 13px;
-}
-.legend-move {
-  width: 9px;
-  height: 10px;
-  display: inline-block;
-  background: #a3bd88;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-}
-.is-attacking .legend-move {
-  background: #b98370;
-}
 
 .command-deck {
   position: relative;
@@ -465,12 +375,6 @@ p {
 .unit-portrait svg {
   width: 26px;
   height: 26px;
-}
-.unit-identity .eyebrow {
-  display: block;
-  font-size: 8px;
-  letter-spacing: 0.13em;
-  margin-bottom: 4px;
 }
 .unit-identity h2 {
   font:
@@ -940,17 +844,6 @@ p {
   .wordmark {
     font-size: 26px;
   }
-  .battle-status {
-    padding-top: 9px;
-    padding-bottom: 14px;
-  }
-  .army-count {
-    font-size: 12px;
-    gap: 10px;
-  }
-  .objective {
-    font-size: 12px;
-  }
   .initiative-bar {
     min-height: 43px;
   }
@@ -996,29 +889,9 @@ p {
 }
 
 @media (max-width: 600px) {
-  .objective {
-    display: none;
-  }
-  .battle-status::after {
-    content: 'VS';
-    order: 1;
-    color: #86987d;
-    font:
-      italic 11px Georgia,
-      serif;
-  }
-  .battle-status .enemy {
-    order: 2;
-  }
   .game-header {
     padding-left: 16px;
     padding-right: 16px;
-  }
-  .round-display {
-    gap: 7px;
-  }
-  .round-display .eyebrow {
-    font-size: 8px;
   }
   .initiative-bar {
     gap: 8px;
@@ -1062,10 +935,6 @@ p {
   }
   .unit-number {
     font-size: 9px;
-  }
-  .unit-identity .eyebrow {
-    font-size: 7px;
-    letter-spacing: 0.1em;
   }
   .unit-stats {
     gap: 10px;
@@ -1209,18 +1078,11 @@ p {
   .header-main {
     min-height: 43px;
   }
-  .battle-status {
-    padding-top: 6px;
-    padding-bottom: 7px;
-  }
   .initiative-bar {
     min-height: 34px;
   }
   .stage-heading {
     padding-top: 8px;
-  }
-  .field-legend {
-    padding-bottom: 7px;
   }
   .command-content {
     padding-top: 8px;
@@ -1264,10 +1126,8 @@ p {
   .header-main {
     min-height: 42px;
   }
-  .battle-status,
   .initiative-bar,
   .stage-heading,
-  .field-legend,
   .battle-feed,
   .action-hint {
     display: none;
@@ -1284,8 +1144,7 @@ p {
     align-items: flex-start;
     gap: 6px;
   }
-  .unit-portrait,
-  .unit-identity .eyebrow {
+  .unit-portrait {
     display: none;
   }
   .unit-identity h2 {

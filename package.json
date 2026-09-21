@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build && tsc -b && node -e \"require('node:fs').copyFileSync('dist/index.html', 'dist/404.html')\"",
     "lint": "oxlint",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "preview": "vite preview"

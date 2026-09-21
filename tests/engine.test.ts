@@ -12,6 +12,7 @@ import {
   type GameState,
   type Tile,
 } from '../src/lib/engine/index.ts'
+import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 
 function battle(): GameState {
   const tiles = new Map<string, Tile>()
@@ -19,6 +20,8 @@ function battle(): GameState {
     for (let r = -5; r <= 5; r++) tiles.set(q + ',' + r, { q, r, terrain: 'plain' })
   }
   return {
+    seed: 'test',
+    randomState: 0,
     tiles,
     pawns: [
       new Swordsman(1, 0, 0, 'player'),
@@ -72,24 +75,27 @@ test('Escape is blocked during targeting, without energy, and after game over', 
 })
 
 for (const chance of [0, 20, 40, 60]) {
-  test('Incoming attacks respect the ' + chance + '% Escape threshold', (t) => {
-    for (const roll of [0, chance / 100 - 0.001, chance / 100, 0.99].filter((n) => n >= 0)) {
-      const random = t.mock.method(Math, 'random', () => roll)
+  test('Incoming attacks respect the ' + chance + '% Escape threshold', () => {
+    for (let randomState = 0; randomState < 50; randomState++) {
+      const random = new SeededRandom(randomState)
+      const roll = random.next()
       const state = battle()
+      state.randomState = randomState
       state.phase = 'attack'
       state.pawns[2].escapeChance = chance
       const next = reducer(state, { type: 'attackAt', q: 2, r: 0 })
       assert.equal(next.pawns[2].hp, roll * 100 < chance ? 3 : 2)
       assert.equal(next.pawns[0].energy, 2)
+      assert.equal(next.randomState, chance > 0 ? random.state : randomState)
       assert.equal(state.pawns[2].hp, 3)
-      random.mock.restore()
+      assert.equal(state.randomState, randomState)
     }
   })
 }
 
-test('Enemy attacks use Escape too', (t) => {
-  t.mock.method(Math, 'random', () => 0.19)
+test('Enemy attacks use Escape too', () => {
   const state = battle()
+  state.randomState = 7
   state.pawns[0].escapeChance = 20
   state.order = [1, 3, 2]
   const next = reducer(state, { type: 'endTurn' })
@@ -97,8 +103,7 @@ test('Enemy attacks use Escape too', (t) => {
   assert.ok(next.log.some((line) => line.includes('escapes the attack')))
 })
 
-test('A new round restores energy and resets Escape for every unit', (t) => {
-  t.mock.method(Math, 'random', () => 0.999)
+test('A new round restores energy and resets Escape for every unit', () => {
   const state = battle()
   state.order = [3, 2, 1]
   state.active = 2
@@ -139,8 +144,7 @@ test('Movement rejects mountains, occupied tiles, and out-of-range destinations'
   }
 })
 
-test('Defeating the enemy king ends the game; restart clears the battle', (t) => {
-  t.mock.method(Math, 'random', () => 0.999)
+test('Defeating the enemy king ends the game; restart clears the battle', () => {
   const state = battle()
   state.phase = 'attack'
   state.pawns[2].hp = 1
@@ -153,7 +157,8 @@ test('Defeating the enemy king ends the game; restart clears the battle', (t) =>
   assert.equal(restarted.round, 1)
   assert.equal(restarted.pawns.length, 6)
   assert.ok(restarted.pawns.every((p) => p.escapeChance === 0))
-  assert.equal(initialState().tiles.size, 100)
+  assert.equal(initialState('test').tiles.size, 100)
+  assert.deepEqual(restarted, initialState(state.seed))
 })
 
 test('A lethal final enemy turn ends the current round without starting another', () => {
@@ -192,4 +197,54 @@ test('The reducer uses the supplied enemy strategy', () => {
   assert.equal(nearest.pawns[1].hp, 3)
   assert.equal(hunting.pawns[0].hp, 3)
   assert.equal(hunting.pawns[1].hp, 2)
+})
+
+test('Identical seeds and decisions replay identically, including repeated reducer calls', () => {
+  let first = initialState('shared-vale')
+  let replay = initialState('shared-vale')
+  assert.deepEqual(first, replay)
+  for (let turn = 0; turn < 60; turn++) {
+    const action =
+      turn % 3 === 2
+        ? { type: 'endTurn' as const }
+        : { type: 'act' as const, action: 'escape' as const }
+    const next = reducer(first, action)
+    assert.deepEqual(next, reducer(first, action))
+    replay = reducer(replay, action)
+    assert.deepEqual(next, replay)
+    first = next
+  }
+  assert.deepEqual(reducer(first, { type: 'restart' }), initialState('shared-vale'))
+})
+
+test('Different seeds vary the turn order without depending on global random state', (t) => {
+  t.mock.method(Math, 'random', () => {
+    throw new Error('Unseeded randomness')
+  })
+  const orders = new Set(
+    ['alpha', 'bravo', 'charlie', 'delta'].map((seed) => {
+      const state = initialState(seed)
+      assert.equal(state.seed, seed)
+      const next = reducer(state, { type: 'endTurn' })
+      assert.deepEqual(next, reducer(state, { type: 'endTurn' }))
+      return state.order.join(',')
+    }),
+  )
+  assert.ok(orders.size > 1)
+})
+
+test('Previewing, cancelling, and invalid actions never advance the random stream', () => {
+  const state = battle()
+  const attack = reducer(state, { type: 'act', action: 'attack' })
+  assert.equal(attack.randomState, state.randomState)
+  assert.equal(reducer(attack, { type: 'cancelAttack' }).randomState, state.randomState)
+  assert.equal(reducer(state, { type: 'move', q: 500, r: 500 }), state)
+})
+
+test('Seed hashing and the PRNG stream have a stable reference sequence', () => {
+  assert.equal(seedState('hello'), 0x4f9f2cab)
+  const random = new SeededRandom(1)
+  assert.equal(random.next(), 0.6270739405881613)
+  const resumed = new SeededRandom(random.state)
+  assert.equal(random.next(), resumed.next())
 })
