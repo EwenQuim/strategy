@@ -485,18 +485,6 @@ p {
   background: #9f82b933;
   border-color: #c4a6db;
 }
-.end-action {
-  color: #263b2a;
-  background: #d5c38d;
-  border-color: #d5c38d;
-}
-.end-action small {
-  color: #47543a;
-}
-.end-action:not(:disabled):hover {
-  background: #ecdaa1;
-  border-color: #ecdaa1;
-}
 
 .battle-result {
   position: absolute;
