@@ -84,7 +84,7 @@ function advance(prev: GameState): GameState {
     const winner = winnerFrom(pawns)
     if (winner) {
       log.push(`Game over: ${winner} wins`)
-      return { ...prev, pawns, order, active, phase: 'over', winner, log: [...prev.log, ...log].slice(-8) }
+      return { ...prev, pawns, order, active, phase: 'over', winner, log: [...prev.log, ...log].slice(-40) }
     }
     const pawn = pawns.find((p) => p.id === order[active])
     if (!pawn) {
@@ -96,7 +96,7 @@ function advance(prev: GameState): GameState {
       active++
       continue
     }
-    return { ...prev, pawns, order, active, phase: 'move', log: [...prev.log, ...log].slice(-8) }
+    return { ...prev, pawns, order, active, phase: 'move', log: [...prev.log, ...log].slice(-40) }
   }
 }
 

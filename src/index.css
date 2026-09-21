@@ -6,3 +6,24 @@
     font-family: system-ui, sans-serif;
   }
 }
+
+@keyframes toast-life {
+  0% {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  5% {
+    opacity: 1;
+    transform: none;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.toast {
+  animation: toast-life 5s ease-out forwards;
+}

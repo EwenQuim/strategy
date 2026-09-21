@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMemo, useReducer } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import {
   activePawn,
   ATTACK_RANGE,
@@ -36,6 +36,21 @@ function Game() {
   const pawn = activePawn(state)
   const myTurn = !!pawn && pawn.side === 'player' && !state.winner
 
+  const [events, setEvents] = useState<{ id: number; text: string }[]>([])
+  const prevLog = useRef<string[]>([])
+  const nextEventId = useRef(0)
+  useEffect(() => {
+    const prev = prevLog.current
+    prevLog.current = state.log
+    let kept = 0
+    while (kept < prev.length && kept < state.log.length && prev[kept] === state.log[kept]) kept++
+    const added = state.log.slice(kept).map((text) => ({ id: nextEventId.current++, text }))
+    if (!added.length) return
+    const ids = added.map((e) => e.id)
+    setEvents((list) => [...list, ...added].slice(-3))
+    setTimeout(() => setEvents((list) => list.filter((e) => !ids.includes(e.id))), 5000)
+  }, [state.log])
+
   const reach = useMemo(() => {
     if (!myTurn || pawn!.energy <= 0 || state.phase !== 'move') return new Map<string, number>()
     const occupied = new Set(state.pawns.filter((p) => p.id !== pawn!.id).map((p) => `${p.q},${p.r}`))
@@ -61,13 +76,10 @@ function Game() {
 
   const xs = [...state.tiles.values()].map((t) => hexX(t.q, t.r))
   const ys = [...state.tiles.values()].map((t) => hexY(t.q, t.r))
-  const pad = SIZE * 1.1
-  const viewBox = [
-    Math.min(...xs) - pad,
-    Math.min(...ys) - pad,
-    Math.max(...xs) + pad,
-    Math.max(...ys) + pad,
-  ].join(' ')
+  const pad = SIZE * 1.4
+  const minX = Math.min(...xs) - pad
+  const minY = Math.min(...ys) - pad
+  const viewBox = `${minX} ${minY} ${Math.max(...xs) - minX + pad} ${Math.max(...ys) - minY + pad}`
 
   return (
     <div className="flex h-[calc(100dvh-2.25rem)] flex-col overflow-hidden">
@@ -86,11 +98,18 @@ function Game() {
         <p className="ml-auto max-w-45 truncate text-xs text-neutral-400">{state.log.at(-1)}</p>
       </header>
 
-      <div className="flex min-h-0 flex-1 justify-center">
+      <div className="relative flex min-h-0 flex-1 justify-center">
+        <div className="pointer-events-none absolute right-2 top-2 z-10 flex flex-col items-end gap-1">
+          {events.map((e) => (
+            <div key={e.id} className="toast rounded bg-neutral-800/90 px-3 py-1 text-xs shadow-lg">
+              {e.text}
+            </div>
+          ))}
+        </div>
         <svg
           viewBox={viewBox}
           preserveAspectRatio="xMidYMid meet"
-          className="h-full max-w-2xl touch-manipulation select-none"
+          className="h-full w-full max-w-2xl touch-manipulation select-none"
         >
           {[...state.tiles.values()].map((tile) => (
             <polygon
@@ -159,24 +178,29 @@ function Game() {
 }
 
 function PawnChip({ pawn, active }: { pawn: Pawn; active: boolean }) {
-  const x = hexX(pawn.q, pawn.r)
-  const y = hexY(pawn.q, pawn.r)
   const r = SIZE * (pawn.kind === 'king' ? 0.5 : 0.42)
   return (
-    <g>
+    <g
+      className="pointer-events-none"
+      style={{
+        transform: `translate(${hexX(pawn.q, pawn.r)}px, ${hexY(pawn.q, pawn.r)}px)`,
+        transition: 'transform 350ms ease-in-out',
+      }}
+    >
+      {active && (
+        <circle r={r + 7} fill="none" stroke="#ffe066" strokeWidth={2} className="animate-pulse" />
+      )}
       <circle
-        cx={x}
-        cy={y}
         r={r}
         fill={pawn.side === 'player' ? '#2b6cb0' : '#b03a3a'}
         stroke={active ? '#ffe066' : '#fff'}
         strokeWidth={active ? 4 : 2}
         strokeDasharray={pawn.defending ? '5 3' : undefined}
       />
-      <text x={x} y={y + 5} textAnchor="middle" fontSize={14} fontWeight="bold" fill="#fff">
+      <text y={5} textAnchor="middle" fontSize={14} fontWeight="bold" fill="#fff">
         {LETTER[pawn.kind]}
       </text>
-      <text x={x} y={y + r + 10} textAnchor="middle" fontSize={9} fill="#fff">
+      <text y={r + 10} textAnchor="middle" fontSize={9} fill="#fff">
         {pawn.hp} hp
       </text>
     </g>
