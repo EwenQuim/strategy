@@ -42,7 +42,9 @@ export function Battlefield({
   const pad = SIZE * 1.35
   const minX = Math.min(...xs) - pad
   const minY = Math.min(...ys) - pad
-  const viewBox = [minX, minY, Math.max(...xs) - minX + pad, Math.max(...ys) - minY + pad].join(' ')
+  const viewBox = [minX, minY, Math.max(...xs) - minX + pad, Math.max(...ys) - minY + pad].join(
+    ' ',
+  )
 
   return (
     <svg
@@ -147,7 +149,13 @@ export function Battlefield({
             {canMove && !occupant && (
               <g className="move-cost">
                 <circle cy="20" r="7" fill="#213f30" fillOpacity=".8" />
-                <text y="23.4" textAnchor="middle" fill="#f0edcc" fontSize="10" fontWeight="600">
+                <text
+                  y="23.4"
+                  textAnchor="middle"
+                  fill="#f0edcc"
+                  fontSize="10"
+                  fontWeight="600"
+                >
                   {cost}
                 </text>
               </g>

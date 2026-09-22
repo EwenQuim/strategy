@@ -17,17 +17,18 @@ import {
   key,
   Swordsman,
   activePawn,
-  createGameEngine,
-  huntTheKing,
-  initialState,
-  initialTransition,
-  transition,
-  nearestTarget,
-  reducer,
   type GameState,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { playbackReducer } from '../src/lib/useGame.ts'
+import {
+  createBotGame,
+  initialState,
+  initialTransition,
+  transition,
+  reducer,
+} from '../src/lib/bot.ts'
+import { huntTheKing, nearestTarget } from '../src/lib/strategies.ts'
+import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 
 function battle(): GameState {
@@ -275,8 +276,8 @@ test('The reducer uses the supplied enemy strategy', () => {
   state.pawns[1].q = 0
   state.pawns[1].r = 1
   state.order = [1, 3, 2]
-  const nearest = createGameEngine(nearestTarget).reducer(state, { type: 'endTurn' })
-  const hunting = createGameEngine(huntTheKing).reducer(state, { type: 'endTurn' })
+  const nearest = createBotGame(nearestTarget).reducer(state, { type: 'endTurn' })
+  const hunting = createBotGame(huntTheKing).reducer(state, { type: 'endTurn' })
   assert.equal(nearest.pawns[0].hp, 3)
   assert.equal(nearest.pawns[1].hp, 7)
   assert.equal(hunting.pawns[0].hp, 5)
@@ -642,13 +643,15 @@ test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
     const next = reducer(state, { type: 'endTurn' })
     assert.equal(next.pawns[0].hp, Ctor === Swordsman ? 3 : 4)
     assert.equal(next.pawns[2].energy, 0)
-    assert.ok(next.log.some((line) => line.includes(Ctor === Swordsman ? 'Charge' : 'Fireball')))
+    assert.ok(
+      next.log.some((line) => line.includes(Ctor === Swordsman ? 'Charge' : 'Fireball')),
+    )
   }
 })
 
 test('Enemy playback records each action in order without changing seeded results', () => {
   for (const strategy of [nearestTarget, huntTheKing]) {
-    const engine = createGameEngine(strategy)
+    const engine = createBotGame(strategy)
     for (const seed of ['alpha', 'bravo', 'animation-review']) {
       const opening = engine.initialTransition(seed)
       assert.deepEqual(opening.state, engine.initialState(seed))
@@ -667,7 +670,8 @@ test('Enemy playback records each action in order without changing seeded result
             const before = result.frames[i - 1].state
             assert.equal(activePawn(before)?.id, activePawn(frame.state)?.id)
             assert.ok(activePawn(before)!.energy > activePawn(frame.state)!.energy)
-            if (frame.effect.kind === 'move') assert.equal(frame.state.logCount, before.logCount)
+            if (frame.effect.kind === 'move')
+              assert.equal(frame.state.logCount, before.logCount)
             else assert.ok(frame.state.logCount > before.logCount)
           }
         }
@@ -745,7 +749,9 @@ test('Enemy moves, Escape, and all specials have board effects', () => {
       result.frames[1].effect?.kind,
       Ctor === King ? 'rally' : Ctor === Magician ? 'fireball' : 'attack',
     )
-    assert.ok(result.frames[1].state.log.some((line) => line.includes(state.pawns[2].special.name)))
+    assert.ok(
+      result.frames[1].state.log.some((line) => line.includes(state.pawns[2].special.name)),
+    )
   }
 })
 
@@ -768,7 +774,10 @@ test('Playback locks actions, reveals the killing blow before defeat, and can sk
   assert.equal(playback.frames.length, 0)
   assert.equal(playback.state.winner, 'enemy')
   assert.deepEqual(playbackReducer(result, { type: 'playbackFinish' }), playback)
-  assert.deepEqual(playbackReducer(playback, { type: 'restart' }), initialTransition(state.seed))
+  assert.deepEqual(
+    playbackReducer(playback, { type: 'restart' }),
+    initialTransition(state.seed),
+  )
 })
 
 test('Enemies convert remaining energy in one end-turn action, including at the Escape cap', () => {

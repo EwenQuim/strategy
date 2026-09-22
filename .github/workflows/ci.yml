@@ -1,9 +1,15 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_call:
+    inputs:
+      pages:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 jobs:
   check:
@@ -14,7 +20,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npx tsc -b
-      - run: npm test
+      - run: npm run check:ci
+      - uses: actions/upload-pages-artifact@v3
+        if: inputs.pages
+        with:
+          path: dist

@@ -1,16 +1,16 @@
-import { hexDist } from './hex.ts'
-import type { Pawn } from './pawns.ts'
+import { hexDist } from './engine/hex.ts'
+import type { Pawn } from './engine/pawns.ts'
 
-export interface EnemyStrategy {
+export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
 }
 
-export const nearestTarget: EnemyStrategy = {
+export const nearestTarget: BotStrategy = {
   chooseTarget: (attacker, targets) =>
-    [...targets].sort((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
+    targets.toSorted((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
 }
 
-export const huntTheKing: EnemyStrategy = {
+export const huntTheKing: BotStrategy = {
   chooseTarget: (attacker, targets) =>
     nearestTarget.chooseTarget(
       attacker,

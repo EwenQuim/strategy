@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
+import { MAP_WIDTH, MAP_HEIGHT } from '../lib/engine'
 
 export const Route = createFileRoute('/')({
   component: () => (
@@ -79,7 +80,7 @@ export const Route = createFileRoute('/')({
         <div className="landing-facts">
           <span>
             <Icon name="hex" />
-            99 hexes
+            {MAP_WIDTH * MAP_HEIGHT} hexes
           </span>
           <span>
             <Icon name="energy" />3 energy

@@ -5,7 +5,10 @@ export const MAP_WIDTH = 8
 export const MAP_HEIGHT = 12
 
 export const key = (q: number, r: number) => `${q},${r}`
-export const hexOf = (col: number, row: number): Axial => ({ q: col - Math.floor(row / 2), r: row })
+export const hexOf = (col: number, row: number): Axial => ({
+  q: col - Math.floor(row / 2),
+  r: row,
+})
 
 const NEIGHBORS: Axial[] = [
   { q: 1, r: 0 },
@@ -44,7 +47,7 @@ export function reachable(
   maxSteps: number,
 ): Map<string, number> {
   const dist = new Map([[key(start.q, start.r), 0]])
-  const frontier: Axial[] = [start]
+  let frontier: Axial[] = [start]
   for (let step = 1; step <= maxSteps; step++) {
     const next: Axial[] = []
     for (const cur of frontier) {
@@ -56,7 +59,7 @@ export function reachable(
         next.push(n)
       }
     }
-    frontier.push(...next)
+    frontier = next
   }
   return dist
 }

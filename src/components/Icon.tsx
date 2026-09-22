@@ -20,8 +20,6 @@ const paths = {
   help: 'M9 9a3 3 0 1 1 5 2c-2 1-2 2-2 3m0 3h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z',
   history: 'M3 11a9 9 0 1 1 2 7M3 4v7h7m2-5v6l4 2',
   hex: 'm12 2 9 5v10l-9 5-9-5V7l9-5Z',
-  tree: 'm12 2-7 9h4l-6 7h18l-6-7h4l-7-9Zm0 16v4',
-  mountain: 'm2 20 8-15 4 7 3-5 5 13H2Zm5-9 3 2 3-2',
 } as const
 
 export type IconName = keyof typeof paths

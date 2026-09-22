@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useMemo, useRef } from 'react'
-import { useGame } from '../lib/useGame'
+import { useGame } from '../useGame'
 import { Battlefield } from '../components/Battlefield'
 import { BattleNotifications } from '../components/BattleNotifications'
 import { Icon, PawnIcon } from '../components/Icon'
@@ -60,7 +60,7 @@ export const Route = createFileRoute('/game/$seed')({
       if (!myTurn) return
       if (targets.has(key(tile.q, tile.r)))
         return dispatch({ type: attacking ? 'attackAt' : 'specialAt', q: tile.q, r: tile.r })
-      if (myTurn && reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
+      if (reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
     }
 
     return (
@@ -103,7 +103,9 @@ export const Route = createFileRoute('/game/$seed')({
                     (index === state.active && !state.winner ? ' is-current' : '')
                   }
                   aria-current={index === state.active && !state.winner ? 'step' : undefined}
-                  title={(unit.side === 'player' ? 'Your ' : 'Enemy ') + unit.kind + ' #' + unit.id}
+                  title={
+                    (unit.side === 'player' ? 'Your ' : 'Enemy ') + unit.kind + ' #' + unit.id
+                  }
                 >
                   <PawnIcon kind={unit.kind} />
                   <span>{unit.id.toString().padStart(2, '0')}</span>
@@ -143,7 +145,9 @@ export const Route = createFileRoute('/game/$seed')({
                   <Icon name="crown" />
                 </div>
                 <span className="eyebrow">The battle is over</span>
-                <h1>{state.winner === 'player' ? 'The vale is yours.' : 'A crown has fallen.'}</h1>
+                <h1>
+                  {state.winner === 'player' ? 'The vale is yours.' : 'A crown has fallen.'}
+                </h1>
                 <p>
                   {state.winner === 'player'
                     ? 'Their king has fallen. Your guard stands victorious.'
@@ -173,7 +177,10 @@ export const Route = createFileRoute('/game/$seed')({
                         : 'Defeat'
                       : (pawn?.kind ?? 'Your guard')}
                     {!state.winner && pawn && (
-                      <span className="unit-number"> / {pawn.id.toString().padStart(2, '0')}</span>
+                      <span className="unit-number">
+                        {' '}
+                        / {pawn.id.toString().padStart(2, '0')}
+                      </span>
                     )}
                   </h2>
                 </div>
@@ -249,7 +256,9 @@ export const Route = createFileRoute('/game/$seed')({
                 </small>
               </button>
               <button
-                className={'action-button special-action' + (usingSpecial ? ' is-selected' : '')}
+                className={
+                  'action-button special-action' + (usingSpecial ? ' is-selected' : '')
+                }
                 disabled={
                   !myTurn ||
                   attacking ||
@@ -261,7 +270,9 @@ export const Route = createFileRoute('/game/$seed')({
                 aria-pressed={usingSpecial}
                 onClick={() =>
                   dispatch(
-                    usingSpecial ? { type: 'cancelTargeting' } : { type: 'act', action: 'special' },
+                    usingSpecial
+                      ? { type: 'cancelTargeting' }
+                      : { type: 'act', action: 'special' },
                   )
                 }
               >
@@ -295,7 +306,9 @@ export const Route = createFileRoute('/game/$seed')({
               >
                 <Icon name="escape" />
                 <span>End turn</span>
-                <small>+{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape</small>
+                <small>
+                  +{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape
+                </small>
               </button>
             </div>
           </div>
@@ -325,17 +338,18 @@ export const Route = createFileRoute('/game/$seed')({
             </div>
             <div className="rules-list">
               <p>
-                Each army has one king, at least one swordsman, and three random recruits. Repeated
-                classes are possible. Both sides get the same lineup, chosen by the game seed.
-                Defeat the enemy king to win; losing yours ends the battle.
+                Each army has one king, at least one swordsman, and three random recruits.
+                Repeated classes are possible. Both sides get the same lineup, chosen by the
+                game seed. Defeat the enemy king to win; losing yours ends the battle.
               </p>
               <section>
                 <Icon name="energy" />
                 <div>
                   <h3>Three energy. Every round.</h3>
                   <p>
-                    Each unit starts with 3 energy. The lit unit is yours to command. Moving costs 1
-                    energy per tile; numbers show the full cost. Mountains cannot be crossed.
+                    Each unit starts with 3 energy. The lit unit is yours to command. Moving
+                    costs 1 energy per tile; numbers show the full cost. Mountains cannot be
+                    crossed.
                   </p>
                 </div>
               </section>
@@ -344,11 +358,11 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>Make your move.</h3>
                   <p>
-                    Normal attacks cost 1 energy. Each class has its own damage and range. Choose
-                    Attack or a targeted special, then a highlighted target. Jump selects an empty
-                    landing tile, not an enemy. Rally heals every adjacent ally immediately. Charge
-                    first asks for a destination, then an adjacent enemy. Cancelling either step
-                    costs nothing. Ranged attacks can pass over terrain.
+                    Normal attacks cost 1 energy. Each class has its own damage and range.
+                    Choose Attack or a targeted special, then a highlighted target. Jump selects
+                    an empty landing tile, not an enemy. Rally heals every adjacent ally
+                    immediately. Charge first asks for a destination, then an adjacent enemy.
+                    Cancelling either step costs nothing. Ranged attacks can pass over terrain.
                   </p>
                 </div>
               </section>
@@ -375,9 +389,10 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>Live to fight another turn.</h3>
                   <p>
-                    End turn converts all remaining energy into Escape: +{ESCAPE_BONUS} percentage
-                    points per energy, up to {MAX_ESCAPE}% chance to avoid each incoming attack. The
-                    bonus lasts until the round ends. It is not a movement action.
+                    End turn converts all remaining energy into Escape: +{ESCAPE_BONUS}{' '}
+                    percentage points per energy, up to {MAX_ESCAPE}% chance to avoid each
+                    incoming attack. The bonus lasts until the round ends. It is not a movement
+                    action.
                   </p>
                 </div>
               </section>
@@ -386,10 +401,10 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h3>A fresh round. A new order.</h3>
                   <p>
-                    End turn spends your remaining energy and passes to the next unit. Running out
-                    of energy also ends your turn, with no extra Escape bonus. Enemy units act
-                    automatically. Each new round shuffles the order, restores all energy, and
-                    resets Escape to 0%.
+                    End turn spends your remaining energy and passes to the next unit. Running
+                    out of energy also ends your turn, with no extra Escape bonus. Enemy units
+                    act automatically. Each new round shuffles the order, restores all energy,
+                    and resets Escape to 0%.
                   </p>
                 </div>
               </section>

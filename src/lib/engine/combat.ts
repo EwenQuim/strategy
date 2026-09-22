@@ -20,7 +20,8 @@ export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): P
   if (!canUseSpecial(pawn) || pawn.kind === 'ninja') return []
   if (pawn.kind === 'king') {
     return pawns.filter(
-      (p) => p.side === pawn.side && p.id !== pawn.id && p.hp < p.maxHp && hexDist(pawn, p) === 1,
+      (p) =>
+        p.side === pawn.side && p.id !== pawn.id && p.hp < p.maxHp && hexDist(pawn, p) === 1,
     )
   }
   return pawns.filter((p) => canAttack(pawn, p, from))
@@ -44,7 +45,9 @@ export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: 
   const occupied = new Set(pawns.map((p) => key(p.q, p.r)))
   return [...tiles.values()].filter(
     (tile) =>
-      tile.terrain !== 'mountain' && !occupied.has(key(tile.q, tile.r)) && hexDist(pawn, tile) <= 3,
+      tile.terrain !== 'mountain' &&
+      !occupied.has(key(tile.q, tile.r)) &&
+      hexDist(pawn, tile) <= 3,
   )
 }
 
@@ -141,7 +144,8 @@ export function performSpecial(
   if (pawn.kind === 'king' || pawn.kind === 'ninja') return false
   if (
     pawn.kind === 'swordsman' &&
-    (!destination || !chargeDestinations(tiles, pawns, pawn).has(key(destination.q, destination.r)))
+    (!destination ||
+      !chargeDestinations(tiles, pawns, pawn).has(key(destination.q, destination.r)))
   )
     return false
   if (!specialTargets(pawns, pawn, destination ?? pawn).includes(target)) return false
@@ -154,10 +158,19 @@ export function performSpecial(
       strike(pawns, pawn, target, pawn.attack, log, random)
       break
     case 'archer':
-      strike(pawns, pawn, target, { ...pawn.attack, damage: 2, ignoresEscape: true }, log, random)
+      strike(
+        pawns,
+        pawn,
+        target,
+        { ...pawn.attack, damage: 2, ignoresEscape: true },
+        log,
+        random,
+      )
       break
     case 'magician':
-      for (const enemy of pawns.filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)) {
+      for (const enemy of pawns.filter(
+        (p) => p.side !== pawn.side && hexDist(target, p) <= 1,
+      )) {
         strike(pawns, pawn, enemy, pawn.attack, log, random)
       }
       break
