@@ -9,3 +9,11 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 - Game logic is plain TypeScript in `src/lib/engine/` (hex math, pawn classes, reducer), pure and framework-free. Routes only render it.
 - Pawn types are TS classes extending `Pawn` in `src/lib/engine/pawns.ts` (`Swordsman`, `King`, `Archer`, `Magician`, `Ninja`). Non-king classes available for random recruitment are listed in `RECRUIT_CLASSES`.
 - Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
+
+## Styling
+
+- Default to Tailwind utilities in JSX for layout, spacing, typography, colors, responsive behavior, and simple interaction states. Put utilities on the element they style where practical.
+- Keep native CSS in `src/index.css` for keyframes, coordinated combat/SVG animations, layered artwork, biome theme variables, and global base/accessibility rules. Use descriptive, feature-scoped class names such as `battlefield-backdrop`, `combat-feedback--hit`, and `pawn-active-halo`.
+- Do not wrap simple components in semantic CSS classes or `@apply` rules. Reuse small Tailwind class strings when the same control styling is repeated. Keep full utility names literal so Tailwind can detect them.
+- Reuse the theme colors (`text-ink`, `text-muted`, `text-gold`, `border-line`) and viewport variants (`wide`, `compact`, `narrow`, `short`, `flat`) defined in `src/index.css`. Preserve safe-area insets, reduced-motion behavior, and the fixed game viewport.
+- Keep inline styles for runtime-computed values such as pawn coordinates. Browser tests should use roles/accessible names or stable data attributes, not Tailwind utility strings or obsolete CSS classes.

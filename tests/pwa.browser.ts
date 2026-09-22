@@ -190,13 +190,13 @@ async function fixture(t: TestContext) {
 }
 
 async function playTurn(page: Page) {
-  await page.locator('.end-action:not([disabled])').waitFor()
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   const current = await page.locator('[aria-current="step"]').getAttribute('title')
   await page.getByRole('button', { name: /End turn/ }).click()
   await page.waitForFunction(
     (previous) =>
       document.querySelector('[aria-current="step"]')?.getAttribute('title') !== previous &&
-      !!document.querySelector('.end-action:not([disabled])'),
+      !!document.querySelector('[data-action="endTurn"]:not([disabled])'),
     current,
     polling,
   )
@@ -206,17 +206,19 @@ async function playTurn(page: Page) {
       return (
         root.scrollWidth <= innerWidth &&
         root.scrollHeight <= innerHeight &&
-        ['.game-shell', '.battlefield', '.command-deck'].every((selector) => {
-          const rect = document.querySelector(selector)!.getBoundingClientRect()
-          return (
-            rect.width > 0 &&
-            rect.height > 0 &&
-            rect.left >= -1 &&
-            rect.top >= -1 &&
-            rect.right <= innerWidth + 1 &&
-            rect.bottom <= innerHeight + 1
-          )
-        })
+        ['[data-biome]', '[data-testid="battlefield"]', '[data-testid="command-deck"]'].every(
+          (selector) => {
+            const rect = document.querySelector(selector)!.getBoundingClientRect()
+            return (
+              rect.width > 0 &&
+              rect.height > 0 &&
+              rect.left >= -1 &&
+              rect.top >= -1 &&
+              rect.right <= innerWidth + 1 &&
+              rect.bottom <= innerHeight + 1
+            )
+          },
+        )
       )
     }),
     true,
@@ -269,9 +271,7 @@ test(
       await page.setViewportSize(viewport)
       assert.equal(
         await page.evaluate(() => {
-          const button = document
-            .querySelector('.custom-form > button')!
-            .getBoundingClientRect()
+          const button = document.querySelector('form > button')!.getBoundingClientRect()
           return (
             document.documentElement.scrollWidth <= innerWidth &&
             document.documentElement.scrollHeight <= innerHeight &&
@@ -283,7 +283,7 @@ test(
         'Custom settings must keep Start battle visible without page overflow',
       )
       assert.equal(
-        await page.locator('.roster-table input').evaluateAll((inputs) => {
+        await page.locator('table input').evaluateAll((inputs) => {
           const first = inputs[0].getBoundingClientRect()
           const beside = inputs[1].getBoundingClientRect()
           const below = inputs[2].getBoundingClientRect()
@@ -295,40 +295,60 @@ test(
     }
     await page.setViewportSize({ width: 320, height: 568 })
     await page.getByRole('button', { name: 'Start battle' }).click()
-    await page.locator('.end-action:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     const search = new URL(page.url()).searchParams
     assert.equal(search.get('mode'), 'local')
-    assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), 'mountains')
-    assert.equal(await page.locator('.initiative-unit.player').count(), 24)
-    assert.equal(await page.locator('.initiative-unit.enemy').count(), 24)
-    assert.equal(await page.locator('.initiative-unit.player[title*="archer"]').count(), 4)
-    assert.equal(await page.locator('.initiative-unit.enemy[title*="archer"]').count(), 1)
-    const opening = await page.locator('.battlefield').innerHTML()
+    assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'mountains')
+    assert.equal(
+      await page.locator('[data-testid="initiative-unit"][data-side="player"]').count(),
+      24,
+    )
+    assert.equal(
+      await page.locator('[data-testid="initiative-unit"][data-side="enemy"]').count(),
+      24,
+    )
+    assert.equal(
+      await page
+        .locator('[data-testid="initiative-unit"][data-side="player"][title*="archer"]')
+        .count(),
+      4,
+    )
+    assert.equal(
+      await page
+        .locator('[data-testid="initiative-unit"][data-side="enemy"][title*="archer"]')
+        .count(),
+      1,
+    )
+    const opening = await page.locator('[data-testid="battlefield"]').innerHTML()
     await page.reload()
-    await page.locator('.end-action:not([disabled])').waitFor()
-    assert.equal(await page.locator('.battlefield').innerHTML(), opening)
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await page.locator('[data-testid="battlefield"]').innerHTML(), opening)
     await playTurn(page)
-    assert.equal(await page.locator('.enemy-turn').count(), 0)
+    assert.equal(await page.locator('[data-testid="enemy-turn"]').count(), 0)
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('.rules-list').innerText(), /This custom battle/)
-    assert.doesNotMatch(await page.locator('.rules-list').innerText(), /unlock the next level/)
+    assert.match(await page.locator('dialog').innerText(), /This custom battle/)
+    assert.doesNotMatch(await page.locator('dialog').innerText(), /unlock the next level/)
     await page.getByRole('button', { name: 'Close dialog' }).click()
     for (const difficulty of ['easy', 'normal', 'hard']) {
       await page.goto(origin + base + 'custom')
       await page.getByLabel('Difficulty', { exact: true }).selectOption(difficulty)
       await page.getByLabel('Biome', { exact: true }).selectOption('desert')
       await page.getByRole('button', { name: 'Start battle' }).click()
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).searchParams.get('difficulty'), difficulty)
-      assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), 'desert')
-      assert.equal(await page.locator('.initiative-unit.player').count(), 5)
-      assert.equal(await page.locator('.initiative-unit.enemy').count(), 5)
-      assert.equal(await page.locator('.player-turn').count(), 0)
+      assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'desert')
+      assert.equal(
+        await page.locator('[data-testid="initiative-unit"][data-side="player"]').count(),
+        5,
+      )
+      assert.equal(
+        await page.locator('[data-testid="initiative-unit"][data-side="enemy"]').count(),
+        5,
+      )
+      assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
       await page.getByRole('button', { name: 'How to play' }).click()
       assert.ok(
-        (await page.locator('.rules-list').innerText()).includes(
-          'AI difficulty: ' + difficulty,
-        ),
+        (await page.locator('dialog').innerText()).includes('AI difficulty: ' + difficulty),
       )
       await page.getByRole('button', { name: 'Close dialog' }).click()
       await playTurn(page)
@@ -364,12 +384,12 @@ test(
     )
     await context.setOffline(true)
     await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
-    await page.locator('.end-action:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.equal(
       await page.getByRole('meter', { name: 'Health' }).getAttribute('aria-valuemax'),
       '10',
     )
-    assert.equal(await page.locator('.health-pips .is-filled').count(), 10)
+    assert.equal(await page.locator('[aria-label="Health"] [data-filled="true"]').count(), 10)
     const moves = page.getByRole('button', { name: /^Move to / })
     assert.ok(await moves.count())
     for (const label of await moves.evaluateAll((tiles) =>
@@ -377,16 +397,16 @@ test(
     )) {
       assert.match(label!, /2 energy$/)
     }
-    await page.locator('.special-action').click()
-    assert.match(await page.locator('.special-action').innerText(), /Choose ally/)
+    await page.locator('[data-action="special"]').click()
+    assert.match(await page.locator('[data-action="special"]').innerText(), /Choose ally/)
     const allies = page.getByRole('button', { name: /^Protect / })
     assert.equal(await allies.count(), specialTargets(state.pawns, pawn).length)
-    await page.locator('.special-action').click()
+    await page.locator('[data-action="special"]').click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '3',
     )
-    await page.locator('.special-action').click()
+    await page.locator('[data-action="special"]').click()
     await page.locator('.hex-tile').nth(tileIndex).click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
@@ -399,21 +419,26 @@ test(
     assert.equal(await page.locator('.protection-badge').count(), 1)
     assert.equal(await moves.count(), 0)
     await page.reload()
-    await page.locator('.end-action:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     await moves.first().click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '1',
     )
     assert.equal(await moves.count(), 0)
-    assert.equal(await page.locator('.special-action').isDisabled(), true)
+    assert.equal(await page.locator('[data-action="special"]').isDisabled(), true)
     assert.equal(
       await page.evaluate(() => {
         const root = document.documentElement
         return (
           root.scrollWidth <= innerWidth &&
           root.scrollHeight <= innerHeight &&
-          ['.game-shell', '.battlefield', '.command-deck', '.unit-stats'].every((selector) => {
+          [
+            '[data-biome]',
+            '[data-testid="battlefield"]',
+            '[data-testid="command-deck"]',
+            '[data-testid="unit-stats"]',
+          ].every((selector) => {
             const rect = document.querySelector(selector)!.getBoundingClientRect()
             return (
               rect.left >= 0 &&
@@ -453,7 +478,7 @@ test(
       timeout: 5_000,
     }).trim()
     assert.equal(
-      await page.locator('.landing-footer > span').first().textContent(),
+      await page.locator('main > footer > span').first().textContent(),
       'Build ' + commit,
     )
     const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href')
@@ -497,7 +522,7 @@ test(
     assert.equal((await page.goto(origin + route))?.fromServiceWorker(), true)
     await playTurn(page)
     assert.equal(requests.has(route), false)
-    const match = await page.locator('.turn-order').innerHTML()
+    const match = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
     const started = await page.evaluate(() => performance.timeOrigin)
     const unrelated = ['unrelated-cache', 'hexmate:' + origin + '/other/:keep']
     await probe.evaluate(
@@ -518,7 +543,7 @@ test(
     )
     assert.ok(requests.has(next.newScript), 'Coming online must download the new release')
     assert.equal(await page.evaluate(() => performance.timeOrigin), started)
-    assert.equal(await page.locator('.turn-order').innerHTML(), match)
+    assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), match)
     assert.equal(await releaseMarker(page), undefined)
     const waitingCaches = await probe.evaluate(() => caches.keys())
     assert.ok(waitingCaches.includes(cacheName))
@@ -541,7 +566,7 @@ test(
     await page.getByRole('button', { name: 'Dismiss update notice' }).click()
     await notice.waitFor({ state: 'hidden' })
     assert.equal(await page.evaluate(() => performance.timeOrigin), started)
-    assert.equal(await page.locator('.turn-order').innerHTML(), match)
+    assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), match)
 
     await page.reload()
     await notice.waitFor()
@@ -644,7 +669,7 @@ test(
   { timeout: 60_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
-    const buildLabel = await page.locator('.landing-footer > span').first().textContent()
+    const buildLabel = await page.locator('main > footer > span').first().textContent()
     const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
     assert.deepEqual(await modes.allTextContents(), [
       'Campaign0 / 20',
@@ -689,34 +714,34 @@ test(
     await context.setOffline(true)
     for (const [biome, seed] of seeds) {
       await page.goto(origin + base)
-      assert.equal(
-        await page.locator('.landing-footer > span').first().textContent(),
-        buildLabel,
-      )
+      assert.equal(await page.locator('main > footer > span').first().textContent(), buildLabel)
       await page.evaluate((seed) => {
         Object.defineProperty(crypto, 'randomUUID', { value: () => seed })
       }, seed)
       await page.getByRole('link', { name: 'Quick play' }).click()
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
-      assert.equal(await page.locator('.attack-action').isVisible(), true)
-      assert.equal(await page.locator('.attack-action').isDisabled(), true)
-      assert.equal(await page.locator('.action-grid > button').count(), 3)
-      assert.equal(await page.locator('.wordmark-sub').textContent(), BIOMES[biome].name)
+      assert.equal(await page.locator('[data-action="attack"]').isVisible(), true)
+      assert.equal(await page.locator('[data-action="attack"]').isDisabled(), true)
+      assert.equal(await page.locator('[data-action]').count(), 3)
+      assert.equal(
+        await page.locator('[data-testid="battle-subtitle"]').textContent(),
+        BIOMES[biome].name,
+      )
       assert.equal(await page.locator('.hex-tile').count(), 96)
-      assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), biome)
+      assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), biome)
       backgrounds.add(
         await page
-          .locator('.battle-stage')
+          .locator('.battlefield-backdrop')
           .evaluate((element) => getComputedStyle(element).background),
       )
       const panel = await page
-        .locator('.game-header')
+        .locator('[data-testid="game-header"]')
         .evaluate((element) => getComputedStyle(element).backgroundColor)
       panels.add(panel)
       assert.equal(
         await page
-          .locator('.command-deck')
+          .locator('[data-testid="command-deck"]')
           .evaluate((element) => getComputedStyle(element).backgroundColor),
         panel,
       )
@@ -788,9 +813,9 @@ test(
       const level = CAMPAIGN_LEVELS[id - 1]
       await page.goto(origin + base + 'campaign/' + id)
       await page.getByRole('button', { name: 'Go !', exact: true }).click()
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
-        await page.locator('.game-shell').getAttribute('data-biome'),
+        await page.locator('[data-biome]').getAttribute('data-biome'),
         level.setup.biome,
       )
       const state = initialState(level.seed, level.setup)
@@ -896,7 +921,7 @@ test(
       const tile = state.tiles.get(position)!
       const index = [...state.tiles.keys()].indexOf(position)
       await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       const destination = page.locator('.hex-tile').nth(index)
       if (kind === 'lava') {
         assert.match((await destination.getAttribute('aria-label'))!, /lethal/)
@@ -913,7 +938,7 @@ test(
             .evaluate((face) => getComputedStyle(face).fill),
           'rgb(148, 113, 109)',
         )
-        await page.locator('.special-action').click()
+        await page.locator('[data-action="special"]').click()
         assert.match((await destination.getAttribute('aria-label'))!, /Jump to .*lethal/)
         assert.equal(
           await destination
@@ -921,7 +946,7 @@ test(
             .evaluate((face) => getComputedStyle(face).fill),
           'rgb(148, 113, 109)',
         )
-        await page.locator('.special-action').click()
+        await page.locator('[data-action="special"]').click()
       } else {
         assert.match(
           (await destination.getAttribute('aria-label'))!,
@@ -937,7 +962,7 @@ test(
       }
       await destination.click()
       state = transition(state, { type: 'move', q: tile.q, r: tile.r }).state
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       if (kind === 'lava') {
         assert.ok(!state.pawns.some((unit) => unit.id === pawn.id))
         assert.equal(await page.locator('.pawn-chip').count(), state.pawns.length)
@@ -959,7 +984,7 @@ test(
         }
         const round = state.round
         while (activePawn(state)?.id !== pawn.id || state.round === round) {
-          await page.locator('.end-action:not([disabled])').click()
+          await page.locator('[data-action="endTurn"]:not([disabled])').click()
           state = transition(state, { type: 'endTurn' }).state
         }
         assert.equal(
@@ -970,12 +995,12 @@ test(
           const archer = activePawn(state)!
           const targets = state.pawns.filter((target) => canAttack(archer, target, tile))
           if (targets.length) {
-            await page.locator('.attack-action').click()
+            await page.locator('[data-action="attack"]').click()
             assert.equal(
               await page.getByRole('button', { name: /^Attack / }).count(),
               targets.length,
             )
-            await page.locator('.attack-action').click()
+            await page.locator('[data-action="attack"]').click()
           }
         }
       }
@@ -996,12 +1021,12 @@ test(
         1,
       )
       await page.reload()
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
     }
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('.rules-list').innerText(), /two middle rows/)
-    assert.match(await page.locator('.rules-list').innerText(), /no permanent bonus/)
+    assert.match(await page.locator('dialog').innerText(), /two middle rows/)
+    assert.match(await page.locator('dialog').innerText(), /no permanent bonus/)
     assert.deepEqual(errors, [])
   },
 )
@@ -1018,24 +1043,25 @@ test(
       const seed = 'juice-4'
       let state = botState(seed)
       await page.goto(origin + base + 'game/' + seed)
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       await page.evaluate(() => {
         const seen = new Set<Element>()
         const checks: unknown[] = []
         document.body.dataset.combatChecks = '[]'
         new MutationObserver(() => {
-          const impacts = document.querySelector('.combat-impacts')
+          const impacts = document.querySelector('[data-testid="combat-impacts"]')
           if (!impacts || seen.has(impacts)) return
           seen.add(impacts)
           const feedback = document.querySelector('.combat-feedback')!
           const title = document.querySelector('[aria-current="step"]')!.getAttribute('title')!
-          const labels = [...impacts.querySelectorAll('.impact-label')]
+          const labels = [...impacts.querySelectorAll('.combat-impact-label')]
           checks.push({
             labels: labels.map((label) => label.textContent!.trim()),
             animations: labels.map((label) => getComputedStyle(label).animationName),
             side: title.startsWith('Enemy') ? 'enemy' : 'player',
-            enemyBanner: !!document.querySelector('.enemy-turn'),
-            locked: (document.querySelector('.end-action') as HTMLButtonElement).disabled,
+            enemyBanner: !!document.querySelector('[data-testid="enemy-turn"]'),
+            locked: (document.querySelector('[data-action="endTurn"]') as HTMLButtonElement)
+              .disabled,
             screenDisplay: getComputedStyle(feedback).display,
             screenAnimation: getComputedStyle(feedback, '::before').animationName,
             pointerEvents: getComputedStyle(feedback).pointerEvents,
@@ -1070,8 +1096,8 @@ test(
             })
             expected.push({ labels, side })
           }
-          if (action.type === 'endTurn') await page.locator('.end-action').click()
-          else if (action.type === 'act') await page.locator('.attack-action').click()
+          if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
+          else if (action.type === 'act') await page.locator('[data-action="attack"]').click()
           else if (action.type === 'attackAt') {
             const tile = [...state.tiles.values()].findIndex(
               (tile) => tile.q === action.q && tile.r === action.r,
@@ -1079,8 +1105,8 @@ test(
             await page.locator('.hex-tile').nth(tile).click()
           }
           state = result.state
-          if (state.winner) await page.locator('.battle-result').waitFor()
-          else await page.locator('.end-action:not([disabled])').waitFor()
+          if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
+          else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
         }
         if (['hit-player', 'hit-enemy', 'miss-enemy'].every((outcome) => outcomes.has(outcome)))
           break
@@ -1145,16 +1171,16 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
     await page.getByRole('link', { name: '2 players' }).click()
-    await page.locator('.end-action:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.equal(new URL(page.url()).searchParams.get('mode'), 'local')
     await playTurn(page)
-    assert.equal(await page.locator('.enemy-turn').count(), 0)
+    assert.equal(await page.locator('[data-testid="enemy-turn"]').count(), 0)
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('.rules-list').innerText(), /Player 1 commands green units/)
-    assert.match(await page.locator('.rules-list').innerText(), /Turn order is decided once/)
-    assert.doesNotMatch(await page.locator('.rules-list').innerText(), /shuffles the order/)
+    assert.match(await page.locator('dialog').innerText(), /Player 1 commands green units/)
+    assert.match(await page.locator('dialog').innerText(), /Turn order is decided once/)
+    assert.doesNotMatch(await page.locator('dialog').innerText(), /shuffles the order/)
     assert.doesNotMatch(
-      await page.locator('.rules-list').innerText(),
+      await page.locator('dialog').innerText(),
       /Enemy units act automatically/,
     )
     await page.getByRole('button', { name: 'Close dialog' }).click()
@@ -1164,20 +1190,20 @@ test(
     for (const seed of ['local-26', 'local-6']) {
       let state = initialState(seed)
       await page.goto(origin + base + 'game/' + seed + '?mode=local')
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       const first = activePawn(state)!
       assert.equal(
-        await page.locator('.player-turn').textContent(),
+        await page.locator('[data-testid="player-turn"]').textContent(),
         playerNames[first.side] + ' turn',
       )
       assert.equal(
         await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
         '3',
       )
-      const opening = await page.locator('.turn-order').innerHTML()
+      const opening = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
       await page.reload()
-      await page.locator('.end-action:not([disabled])').waitFor()
-      assert.equal(await page.locator('.turn-order').innerHTML(), opening)
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), opening)
 
       for (let step = 0; step < 100 && !state.winner; step++) {
         for (const action of chooseBotActions(state, huntTheKing)) {
@@ -1187,15 +1213,19 @@ test(
             armyLabels.local[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
           )
           assert.equal(
-            await page.locator('.player-turn').textContent(),
+            await page.locator('[data-testid="player-turn"]').textContent(),
             playerNames[pawn.side] + ' turn',
           )
           actionsBySide.add(pawn.side + '-' + action.type)
           const result = transition(state, action)
-          if (action.type === 'endTurn') await page.locator('.end-action').click()
+          if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
           else if (action.type === 'act')
             await page
-              .locator(action.action === 'attack' ? '.attack-action' : '.special-action')
+              .locator(
+                action.action === 'attack'
+                  ? '[data-action="attack"]'
+                  : '[data-action="special"]',
+              )
               .click()
           else if ('q' in action) {
             const tile = [...state.tiles.values()].findIndex(
@@ -1204,23 +1234,23 @@ test(
             await page.locator('.hex-tile').nth(tile).click()
           } else assert.fail('Unexpected action: ' + action.type)
           state = result.state
-          if (state.winner) await page.locator('.battle-result').waitFor()
-          else await page.locator('.end-action:not([disabled])').waitFor()
+          if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
+          else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
         }
       }
       assert.ok(state.winner, 'The local battle must reach a winner')
       winners.add(state.winner)
       assert.equal(
-        await page.locator('.result-card h1').textContent(),
+        await page.locator('[data-testid="result-card"] h1').textContent(),
         playerNames[state.winner] + ' wins!',
       )
       assert.doesNotMatch(
-        await page.locator('.battle-notifications').innerText(),
+        await page.locator('ol[aria-label="Recent battle events"]').innerText(),
         /Your |Enemy /,
       )
-      assert.equal(await page.locator('.end-action').isDisabled(), true)
+      assert.equal(await page.locator('[data-action="endTurn"]').isDisabled(), true)
       await page.getByRole('link', { name: 'New game' }).click()
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).searchParams.get('mode'), 'local')
       assert.notEqual(new URL(page.url()).pathname, base + 'game/' + seed)
       await playTurn(page)
@@ -1232,13 +1262,13 @@ test(
     }
     await page.getByRole('link', { name: 'Hexmate home' }).click()
     await page.getByRole('link', { name: 'Quick play' }).click()
-    await page.locator('.end-action:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.equal(new URL(page.url()).searchParams.get('mode'), 'ai')
-    assert.equal(await page.locator('.player-turn').count(), 0)
+    assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
     await playTurn(page)
     await page.goto(origin + base + 'game/local-26?mode=invalid')
-    await page.locator('.end-action:not([disabled])').waitFor()
-    assert.equal(await page.locator('.player-turn').count(), 0)
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
     assert.match((await page.locator('[aria-current="step"]').getAttribute('title'))!, /^Your /)
     assert.deepEqual(errors, [])
   },
@@ -1247,16 +1277,22 @@ test(
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   const level = CAMPAIGN_LEVELS[id - 1]
   let state = botState(level.seed, level.setup)
-  await page.locator('.end-action:not([disabled])').waitFor()
-  assert.equal(await page.locator('.wordmark-sub').textContent(), 'Level ' + id + ' / 20')
+  await page.getByRole('button', { name: 'Go !', exact: true }).click()
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  assert.equal(
+    await page.locator('[data-testid="battle-subtitle"]').textContent(),
+    'Level ' + id + ' / 20',
+  )
   for (let step = 0; step < 200 && !state.winner; step++) {
     const actions: Action[] = surrender ? [{ type: 'endTurn' }] : campaignActions(state)
     for (const action of actions) {
       const result = botTransition(state, action)
-      if (action.type === 'endTurn') await page.locator('.end-action').click()
+      if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
       else if (action.type === 'act')
         await page
-          .locator(action.action === 'attack' ? '.attack-action' : '.special-action')
+          .locator(
+            action.action === 'attack' ? '[data-action="attack"]' : '[data-action="special"]',
+          )
           .click()
       else if ('q' in action) {
         const tile = [...state.tiles.values()].findIndex(
@@ -1265,8 +1301,8 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
         await page.locator('.hex-tile').nth(tile).click()
       } else assert.fail('Unexpected campaign action: ' + action.type)
       state = result.state
-      if (state.winner) await page.locator('.battle-result').waitFor()
-      else await page.locator('.end-action:not([disabled])').waitFor()
+      if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
+      else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     }
   }
   assert.ok(state.winner)
@@ -1281,18 +1317,21 @@ test(
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
-    await page.getByRole('link', { name: 'Campaign', exact: true }).click()
-    await page.locator('.campaign-grid').waitFor()
-    assert.equal(await page.locator('.campaign-grid li').count(), 20)
-    assert.equal(await page.locator('.campaign-grid button:disabled').count(), 19)
-    assert.equal(await page.locator('.campaign-grid a').count(), 1)
+    await page.getByRole('link', { name: /^Campaign/ }).click()
+    await page.locator('ol[aria-label="Campaign levels"]').waitFor()
+    assert.equal(await page.locator('ol[aria-label="Campaign levels"] li').count(), 20)
+    assert.equal(
+      await page.locator('ol[aria-label="Campaign levels"] button:disabled').count(),
+      19,
+    )
+    assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 1)
     assert.equal(
       await page.evaluate(() => {
         const root = document.documentElement
         return (
           root.scrollWidth <= innerWidth &&
           root.scrollHeight <= innerHeight &&
-          [...document.querySelectorAll('.campaign-level')].every((element) => {
+          [...document.querySelectorAll('[data-testid="campaign-level"]')].every((element) => {
             const rect = element.getBoundingClientRect()
             return (
               rect.left >= 0 &&
@@ -1309,19 +1348,21 @@ test(
     )
     for (const level of ['2', '20', '0', '21', 'bad', '1.5', '01']) {
       await page.goto(origin + base + 'campaign/' + level)
-      await page.locator('.campaign-grid').waitFor()
+      await page.locator('ol[aria-label="Campaign levels"]').waitFor()
       assert.equal(
         new URL(page.url()).pathname.replace(new RegExp('/$'), ''),
         base + 'campaign',
       )
-      assert.equal(await page.locator('.game-shell').count(), 0)
+      assert.equal(await page.locator('[data-biome]').count(), 0)
     }
     await page.getByRole('link', { name: /^Level 1:/ }).click()
-    await page.locator('.end-action:not([disabled])').waitFor()
-    const opening = await page.locator('.battlefield').innerHTML()
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    const opening = await page.locator('[data-testid="battlefield"]').innerHTML()
     await page.reload()
-    await page.locator('.end-action:not([disabled])').waitFor()
-    assert.equal(await page.locator('.battlefield').innerHTML(), opening)
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await page.locator('[data-testid="battlefield"]').innerHTML(), opening)
     await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
     assert.equal(
       await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
@@ -1340,7 +1381,7 @@ test(
       '1',
     )
     await page.getByRole('button', { name: 'Retry level' }).click()
-    await page.locator('.end-action:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     const restarted = botState(CAMPAIGN_LEVELS[1].seed, CAMPAIGN_LEVELS[1].setup)
     const pawn = activePawn(restarted)!
     assert.equal(
@@ -1355,29 +1396,43 @@ test(
       '1',
     )
     await page.getByRole('link', { name: 'Level selection' }).click()
-    await page.locator('.campaign-grid').waitFor()
-    assert.equal(await page.locator('.campaign-grid .is-completed').count(), 1)
-    assert.equal(await page.locator('.campaign-grid a').count(), 2)
+    await page.locator('ol[aria-label="Campaign levels"]').waitFor()
+    assert.equal(
+      await page.locator('ol[aria-label="Campaign levels"] [data-status="completed"]').count(),
+      1,
+    )
+    assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 2)
     const reopened = await context.newPage()
     await reopened.goto(origin + base + 'campaign')
-    await reopened.locator('.campaign-grid').waitFor()
-    assert.equal(await reopened.locator('.campaign-grid a').count(), 2)
+    await reopened.locator('ol[aria-label="Campaign levels"]').waitFor()
+    assert.equal(await reopened.locator('ol[aria-label="Campaign levels"] a').count(), 2)
     await reopened.close()
     await page.evaluate((key) => localStorage.setItem(key, '19'), CAMPAIGN_STORAGE_KEY)
     await page.goto(origin + base + 'campaign/20')
     assert.equal(await finishCampaignLevel(page, 20), 'player')
-    assert.equal(await page.locator('.result-card h1').textContent(), 'Campaign complete!')
+    assert.equal(
+      await page.locator('[data-testid="result-card"] h1').textContent(),
+      'Campaign complete!',
+    )
     assert.equal(await page.getByRole('link', { name: 'Next level' }).count(), 0)
     assert.equal(
       await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
       '20',
     )
     await page.getByRole('link', { name: 'Back to campaign' }).click()
-    await page.locator('.campaign-grid').waitFor()
-    assert.equal(await page.locator('.campaign-grid .is-completed').count(), 20)
-    assert.equal(await page.locator('.campaign-grid button:disabled').count(), 0)
+    await page.locator('ol[aria-label="Campaign levels"]').waitFor()
+    assert.equal(
+      await page.locator('ol[aria-label="Campaign levels"] [data-status="completed"]').count(),
+      20,
+    )
+    assert.equal(
+      await page.locator('ol[aria-label="Campaign levels"] button:disabled').count(),
+      0,
+    )
     assert.ok(
-      (await page.locator('.campaign-progress').innerText()).includes('20 / 20 completed'),
+      (await page.locator('[data-testid="campaign-progress"]').innerText()).includes(
+        '20 / 20 completed',
+      ),
     )
     assert.deepEqual(errors, [])
   },
@@ -1396,8 +1451,8 @@ test(
         value,
       })
       await page.goto(origin + base + 'campaign')
-      await page.locator('.campaign-grid').waitFor()
-      assert.equal(await page.locator('.campaign-grid a').count(), 1)
+      await page.locator('ol[aria-label="Campaign levels"]').waitFor()
+      assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 1)
     }
     for (const method of ['getItem', 'setItem'] as const) {
       const level = method === 'getItem' ? 2 : 1
@@ -1406,7 +1461,7 @@ test(
         { key: CAMPAIGN_STORAGE_KEY, completed: level - 1 },
       )
       await page.goto(origin + base + 'campaign')
-      await page.locator('.campaign-grid').waitFor()
+      await page.locator('ol[aria-label="Campaign levels"]').waitFor()
       await page.evaluate((method) => {
         Storage.prototype[method] = () => {
           throw new DOMException('Storage blocked', 'SecurityError')
@@ -1416,17 +1471,169 @@ test(
       assert.equal(await finishCampaignLevel(page, level), 'player')
       if (method === 'setItem')
         assert.match(
-          await page.locator('.campaign-result-actions').innerText(),
+          await page.locator('[data-testid="campaign-result-actions"]').innerText(),
           /Progress could not be saved/,
         )
       await page.getByRole('link', { name: 'Next level' }).click()
-      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
-        await page.locator('.wordmark-sub').textContent(),
+        await page.locator('[data-testid="battle-subtitle"]').textContent(),
         'Level ' + (level + 1) + ' / 20',
       )
       await page.goto(origin + base + 'campaign')
     }
     assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Hybrid styling keeps responsive layouts, state colors, keyboard focus and native animations',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+      { width: 768, height: 900 },
+      { width: 1280, height: 900 },
+      { width: 900, height: 600 },
+      { width: 800, height: 450 },
+    ]) {
+      await page.setViewportSize(viewport)
+      await page.goto(origin + base + 'campaign')
+      const levels = page.getByRole('list', { name: 'Campaign levels', exact: true })
+      await levels.waitFor()
+      assert.deepEqual(
+        await levels.evaluate((element) => {
+          const style = getComputedStyle(element)
+          return [
+            style.display,
+            style.gridTemplateColumns.split(' ').length,
+            style.gridTemplateRows.split(' ').length,
+          ]
+        }),
+        ['grid', 4, 5],
+      )
+      const ready = page.getByRole('link', { name: /^Level 1:/ })
+      const locked = page.getByRole('button', { name: /^Level 2:/ })
+      assert.equal(
+        await ready.evaluate((element) => getComputedStyle(element).borderColor),
+        'rgb(220, 196, 138)',
+      )
+      assert.equal(
+        await locked.evaluate((element) => getComputedStyle(element).opacity),
+        '0.38',
+      )
+      await ready.click()
+      const start = page.getByRole('button', { name: 'Go !', exact: true })
+      await start.waitFor()
+      assert.ok(
+        await start.evaluate(
+          (element) => element.getBoundingClientRect().bottom <= innerHeight,
+        ),
+      )
+      await page.getByRole('checkbox', { name: 'Hide future hints' }).check()
+      await page.goto(origin + base + 'game/style-check?mode=local')
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      assert.equal(
+        await page.evaluate(() => {
+          const root = document.documentElement
+          return (
+            root.scrollWidth <= innerWidth &&
+            root.scrollHeight <= innerHeight &&
+            ['[data-testid="battlefield"]', '[data-testid="command-deck"]'].every(
+              (selector) => {
+                const rect = document.querySelector(selector)!.getBoundingClientRect()
+                return (
+                  rect.width > 0 &&
+                  rect.height > 0 &&
+                  rect.left >= 0 &&
+                  rect.top >= 0 &&
+                  rect.right <= innerWidth &&
+                  rect.bottom <= innerHeight
+                )
+              },
+            )
+          )
+        }),
+        true,
+        'The board and controls must fit portrait, desktop and short landscape viewports',
+      )
+      assert.equal(
+        await page
+          .locator('[aria-current="step"]')
+          .evaluate((element) => getComputedStyle(element).color),
+        'rgb(234, 217, 158)',
+      )
+      const special = page.locator('[data-action="special"]')
+      await special.click()
+      await page.mouse.move(0, 0)
+      assert.equal(await special.getAttribute('aria-pressed'), 'true')
+      assert.equal(
+        await special.evaluate((element) => getComputedStyle(element).backgroundColor),
+        'rgba(159, 130, 185, 0.2)',
+      )
+      assert.equal(
+        await special.evaluate((element) => getComputedStyle(element).borderColor),
+        'rgb(196, 166, 219)',
+      )
+      assert.equal(await page.locator('[data-action="attack"]').isDisabled(), true)
+      await special.click()
+      await page.getByRole('button', { name: 'How to play' }).click()
+      const dialog = page.getByRole('dialog')
+      assert.ok(
+        await dialog.evaluate((element) => {
+          const rect = element.getBoundingClientRect()
+          return (
+            rect.left >= 0 &&
+            rect.right <= innerWidth &&
+            rect.top >= 0 &&
+            rect.bottom <= innerHeight
+          )
+        }),
+      )
+      await page.getByRole('button', { name: 'Close dialog' }).click()
+    }
+    await page.setViewportSize({ width: 320, height: 568 })
+    const help = page.getByRole('button', { name: 'How to play' })
+    await page.keyboard.press('Tab')
+    await help.focus()
+    assert.deepEqual(
+      await help.evaluate((element) => {
+        const style = getComputedStyle(element)
+        return [style.outlineStyle, style.outlineWidth, style.outlineColor]
+      }),
+      ['solid', '2px', 'rgb(220, 196, 138)'],
+    )
+    const move = page.getByRole('button', { name: /^Move to / }).first()
+    const face = move.locator('.tile-face')
+    const stroke = await face.evaluate((element) => getComputedStyle(element).stroke)
+    await move.focus()
+    assert.equal(
+      await face.evaluate((element) => getComputedStyle(element).fill),
+      'rgb(241, 219, 156)',
+    )
+    assert.equal(await face.evaluate((element) => getComputedStyle(element).stroke), stroke)
+    const halo = page.locator('.pawn-active-halo')
+    assert.equal(
+      await halo.evaluate((element) => getComputedStyle(element).animationName),
+      'none',
+    )
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    assert.equal(
+      await halo.evaluate((element) => getComputedStyle(element).animationName),
+      'halo-breathe',
+    )
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    for (let turn = 0; turn < 4; turn++) {
+      await playTurn(page)
+      assert.equal(
+        await page
+          .locator('[aria-current="step"]')
+          .evaluate((element) => getComputedStyle(element).color),
+        'rgb(234, 217, 158)',
+      )
+    }
   },
 )

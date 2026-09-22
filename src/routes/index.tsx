@@ -1,3 +1,4 @@
+import { buttonClassName } from '../components/styles'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
@@ -9,22 +10,34 @@ export const Route = createFileRoute('/')({
     const completed = useSyncExternalStore(subscribeCampaignProgress, readCampaignProgress)
     const done = completed === CAMPAIGN_LEVELS.length
     return (
-      <main className="landing">
-        <header className="landing-header">
-          <span className="wordmark">
-            <span className="brand-crest">
+      <main className="landing-backdrop flex min-h-dvh flex-col">
+        <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 compact:px-[23px] compact:py-5 short:py-3">
+          <span className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] wide:text-[26px]">
+            <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
               <Icon name="crown" />
             </span>
             <span>
-              HEX<span className="wordmark-sub">MATE</span>
+              HEX
+              <span
+                className="mt-[5px] block font-label text-[7px] leading-[normal] tracking-[0.29em] text-muted"
+                data-testid="battle-subtitle"
+              >
+                MATE
+              </span>
             </span>
           </span>
         </header>
-        <div className="landing-content">
-          <div className="landing-art" aria-hidden="true">
-            <div className="art-orbit orbit-one" />
-            <div className="art-orbit orbit-two" />
-            <svg viewBox="0 0 360 260" className="hero-tiles">
+        <div className="flex flex-1 flex-col items-center px-5 pt-[5px] pb-9 text-center short:pb-4">
+          <div
+            className="relative h-[260px] w-[340px] max-w-[90vw] compact:h-[235px] compact:w-[285px] [@media(height<=800px)]:hidden"
+            aria-hidden="true"
+          >
+            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[290px] compact:size-[250px]" />
+            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[370px] compact:size-[310px]" />
+            <svg
+              viewBox="0 0 360 260"
+              className="absolute inset-0 size-full drop-shadow-[0_20px_15px_#08190f55]"
+            >
               <defs>
                 <linearGradient id="hero-tile" x2="0" y2="1">
                   <stop stopColor="#8f9f73" />
@@ -65,37 +78,61 @@ export const Route = createFileRoute('/')({
               <Icon name="crown" />
             </div>
           </div>
-          <h1>
+          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] short:text-[32px]">
             Hexmate.
             <br />
-            <em>Corner the king.</em>
+            <em className="font-normal text-[#c7d1b0]">Corner the king.</em>
           </h1>
-          <div className="mode-options" role="group" aria-label="Choose game mode">
-            <Link to="/campaign" className="primary-button campaign-entry" preload={false}>
+          <div
+            className="mt-[27px] flex w-[min(100%,300px)] flex-col gap-3 short:mt-[18px]"
+            role="group"
+            aria-label="Choose game mode"
+          >
+            <Link
+              to="/campaign"
+              className={
+                buttonClassName +
+                ' min-h-13 justify-between gap-3 border-[#e5d19a] bg-[#d8c38a] px-[18px] text-[#24392a] hover:bg-[#ecdaa3]'
+              }
+              preload={false}
+            >
               Campaign
-              <span className="campaign-badge">
+              <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
                 {completed} / {CAMPAIGN_LEVELS.length}
-                <Icon name="crown" className={done ? 'crown-full' : undefined} />
+                <Icon name="crown" className={done ? 'fill-current' : undefined} />
               </span>
             </Link>
             <Link
               to="/game"
               search={{ mode: 'ai' }}
-              className="primary-button local-button"
+              className={
+                buttonClassName +
+                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
+              }
               preload={false}
               title="Play a new seeded battle against AI"
             >
               Quick play
               <Icon name="arrow" />
             </Link>
-            <Link to="/custom" className="primary-button local-button" preload={false}>
+            <Link
+              to="/custom"
+              className={
+                buttonClassName +
+                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
+              }
+              preload={false}
+            >
               Custom play
               <Icon name="hex" />
             </Link>
             <Link
               to="/game"
               search={{ mode: 'local' }}
-              className="primary-button local-button"
+              className={
+                buttonClassName +
+                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
+              }
               preload={false}
               title="Play together on this device"
             >
@@ -104,7 +141,7 @@ export const Route = createFileRoute('/')({
             </Link>
           </div>
         </div>
-        <footer className="landing-footer">
+        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] compact:px-[23px] compact:py-[18px] compact:text-[8px] compact:[&>span:last-child]:hidden short:py-3">
           <span title="Git commit used for this build">
             Build {import.meta.env.VITE_GIT_COMMIT}
           </span>

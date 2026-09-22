@@ -99,7 +99,8 @@ export function Battlefield({
       ref={board}
       viewBox={viewBox}
       preserveAspectRatio="xMidYMid meet"
-      className="battlefield"
+      className="block size-full max-w-[860px] touch-manipulation select-none drop-shadow-[0_18px_20px_#0a211b60]"
+      data-testid="battlefield"
       role="group"
       aria-label="Battlefield. Select a highlighted tile to move or an enemy to attack."
     >
@@ -230,14 +231,14 @@ export function Battlefield({
             <polygon
               points={hexPoints}
               fill="url(#tile-light)"
-              className="tile-detail tile-light"
+              className="pointer-events-none tile-light"
             />
             {(tile.terrain === 'lava' || (!occupant && !tile.feature)) && (
               <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
             )}
             {!occupant && tile.feature && <FeatureArt feature={tile.feature} />}
             {canMove && !occupant && (
-              <g className="move-cost">
+              <g className="pointer-events-none">
                 <circle cy="20" r="7" fill="#213f30" fillOpacity=".8" />
                 <text
                   y="23.4"
@@ -251,7 +252,7 @@ export function Battlefield({
               </g>
             )}
             {previewed && !occupant && (
-              <g transform="translate(-12 -12)" color="#fff4cb" className="tile-detail">
+              <g transform="translate(-12 -12)" color="#fff4cb" className="pointer-events-none">
                 <Icon name="arrow" />
               </g>
             )}
@@ -262,7 +263,7 @@ export function Battlefield({
                 stroke="#f8d4b0"
                 strokeWidth="1.3"
                 strokeDasharray="3 4"
-                className="target-ring"
+                className="pointer-events-none"
               />
             )}
           </g>
@@ -278,7 +279,11 @@ export function Battlefield({
         />
       ))}
       {effect && (
-        <g key={effectId} className={'battle-effect effect-' + effect.kind} aria-hidden="true">
+        <g
+          key={effectId}
+          className={'battle-effect battle-effect--' + effect.kind}
+          aria-hidden="true"
+        >
           {effect.kind !== 'escape' && effect.kind !== 'rally' && (
             <line
               x1={hexX(effect.from.q, effect.from.r)}
@@ -304,21 +309,31 @@ export function Battlefield({
         </g>
       )}
       {!!effect?.impacts?.length && (
-        <g key={'impacts-' + effectId} className="combat-impacts" aria-hidden="true">
+        <g
+          key={'impacts-' + effectId}
+          className="pointer-events-none"
+          data-testid="combat-impacts"
+          aria-hidden="true"
+        >
           {effect.impacts.map((hit) => (
             <g
               key={key(hit.q, hit.r)}
               transform={'translate(' + hexX(hit.q, hit.r) + ' ' + hexY(hit.r) + ')'}
             >
-              <g className={'combat-impact ' + (hit.damage > 0 ? 'impact-hit' : 'impact-miss')}>
-                <circle r="28" className="impact-ring" />
+              <g
+                className={
+                  'combat-impact ' +
+                  (hit.damage > 0 ? 'combat-impact--hit' : 'combat-impact--miss')
+                }
+              >
+                <circle r="28" className="combat-impact-ring" />
                 {hit.damage > 0 && (
                   <path
-                    className="impact-rays"
+                    className="combat-impact-rays"
                     d="M0-34v-8M24-24l6-6M34 0h8M24 24l6 6M0 34v8M-24 24l-6 6M-34 0h-8M-24-24l-6-6"
                   />
                 )}
-                <text y="8" textAnchor="middle" className="impact-label">
+                <text y="8" textAnchor="middle" className="combat-impact-label">
                   {hit.damage > 0 ? '-' + hit.damage : 'MISS'}
                 </text>
               </g>
@@ -332,7 +347,7 @@ export function Battlefield({
 
 function FeatureArt({ feature }: { feature: NonNullable<Tile['feature']> }) {
   return (
-    <g className={'tile-detail feature-art feature-' + feature}>
+    <g className={'pointer-events-none feature-art feature-' + feature}>
       {feature === 'watchtower' ? (
         <>
           <ellipse cy="17" rx="19" ry="5" fill="#26312c" opacity=".4" />
@@ -366,7 +381,7 @@ function FeatureArt({ feature }: { feature: NonNullable<Tile['feature']> }) {
 function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: number }) {
   if (terrain === 'lava')
     return (
-      <g className="tile-detail lava-pool">
+      <g className="pointer-events-none lava-pool">
         <g clipPath="url(#lava-hex)">
           <polygon points={hexPoints} fill="url(#lava-glow)" />
           <g transform={'rotate(' + variant * 120 + ') scale(1.4)'}>
@@ -401,7 +416,10 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   if (terrain === 'basalt')
     return (
-      <g className="tile-detail basalt-stone" transform={'rotate(' + variant * 120 + ')'}>
+      <g
+        className="pointer-events-none basalt-stone"
+        transform={'rotate(' + variant * 120 + ')'}
+      >
         <path d="m-23-7 14-11 15 5 12 12-15 5-15-3Z" fill="#75666b" opacity=".18" />
         <path d="m-20 9 10-6 16 4 13 9-15 6-16-5Z" fill="#433b42" opacity=".18" />
         <path
@@ -424,7 +442,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   if (terrain === 'palm')
     return (
-      <g className="tile-detail palm-tree">
+      <g className="pointer-events-none palm-tree">
         <ellipse cy="17" rx="19" ry="5" fill="#886039" opacity=".25" />
         <path d="M2 18Q-6 5 0-10" fill="none" stroke="#86603c" strokeWidth="5" />
         <path
@@ -438,7 +456,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   if (terrain === 'sand')
     return (
       <g
-        className="tile-detail sand-dunes"
+        className="pointer-events-none sand-dunes"
         transform={'translate(0 ' + (variant * 3 - 3) + ')'}
       >
         <path
@@ -461,7 +479,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   if (terrain === 'lake')
     return (
-      <g className="tile-detail">
+      <g className="pointer-events-none">
         <path
           d="m-16-4q6-5 12 0t12 0 12 0"
           fill="none"
@@ -482,7 +500,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   if (terrain === 'mountain')
     return (
-      <g className="tile-detail">
+      <g className="pointer-events-none">
         <ellipse cy="15" rx="20" ry="5" fill="#263c2e" opacity=".25" />
         <path d="m-23 15 13-23 13 23Z" fill="#8f9980" />
         <path d="m-10-8 13 23h-13Z" fill="#576651" />
@@ -493,7 +511,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   if (terrain === 'forest')
     return (
-      <g className="tile-detail">
+      <g className="pointer-events-none">
         <ellipse cy="16" rx="21" ry="6" fill="#1b3429" opacity=".3" />
         {[-12, 11, 0].map((x, i) => (
           <g key={x} transform={'translate(' + x + ' ' + (i === 2 ? 2 : -4) + ')'}>
@@ -507,7 +525,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   return (
     <g
-      className="tile-detail"
+      className="pointer-events-none"
       opacity=".48"
       transform={'translate(' + (variant * 4 - 4) + ' ' + (variant * 3 - 5) + ')'}
     >
@@ -550,7 +568,7 @@ function PawnChip({
           fillOpacity=".18"
           stroke="#f2df9e"
           strokeWidth="1.5"
-          className="active-halo"
+          className="pawn-active-halo"
         />
       )}
       {pawn.escapeChance > 0 && (

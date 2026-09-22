@@ -1,3 +1,4 @@
+import { buttonClassName, iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
@@ -25,15 +26,15 @@ export const Route = createFileRoute('/custom')({
     const labels = mode === 'local' ? ['Player 1', 'Player 2'] : ['Player', 'Enemy']
 
     return (
-      <main className="custom-screen">
-        <header className="campaign-heading">
-          <h1>Custom play</h1>
-          <Link to="/" className="icon-button" aria-label="Back to home">
+      <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&_select:focus-visible]:outline-2 [&_select:focus-visible]:outline-offset-1 [&_select:focus-visible]:outline-gold [&_:disabled]:opacity-50">
+        <header className="flex items-center justify-between gap-3">
+          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">Custom play</h1>
+          <Link to="/" className={iconButtonClassName} aria-label="Back to home">
             <Icon name="close" />
           </Link>
         </header>
         <form
-          className="custom-form"
+          className="flex min-h-0 flex-1 flex-col gap-3"
           onSubmit={(event) => {
             event.preventDefault()
             void navigate({
@@ -42,11 +43,12 @@ export const Route = createFileRoute('/custom')({
             })
           }}
         >
-          <div className="custom-options">
-            <div className="custom-settings">
-              <div>
+          <div className="min-h-0 overflow-y-auto p-1">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-1.5 text-[12px] text-muted">
                 <label htmlFor="custom-mode">Mode</label>
                 <select
+                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
                   id="custom-mode"
                   value={mode}
                   onChange={(event) => setMode(event.target.value as GameMode)}
@@ -55,11 +57,12 @@ export const Route = createFileRoute('/custom')({
                   <option value="local">2 players</option>
                 </select>
               </div>
-              <div>
+              <div className="grid gap-1.5 text-[12px] text-muted">
                 <label htmlFor="custom-difficulty">
                   Difficulty{mode === 'local' ? ' (AI only)' : ''}
                 </label>
                 <select
+                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
                   id="custom-difficulty"
                   value={difficulty}
                   disabled={mode === 'local'}
@@ -72,9 +75,10 @@ export const Route = createFileRoute('/custom')({
                   ))}
                 </select>
               </div>
-              <div className="custom-biome">
+              <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
                 <label htmlFor="custom-biome">Biome</label>
                 <select
+                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
                   id="custom-biome"
                   value={biome}
                   onChange={(event) => setBiome(event.target.value as Biome)}
@@ -87,38 +91,45 @@ export const Route = createFileRoute('/custom')({
                 </select>
               </div>
             </div>
-            <label className="roster-mirror">
+            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
               <input
+                className="size-[18px] accent-gold"
                 type="checkbox"
                 checked={enemy === null}
                 onChange={(event) => setEnemy(event.target.checked ? null : [...player])}
               />
               Mirror player roster
             </label>
-            <table className="roster-table">
-              <caption>Rosters</caption>
-              <thead>
+            <table className="w-full border-separate border-spacing-2 text-[13px] [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
+              <caption className="text-left font-semibold text-gold">Rosters</caption>
+              <thead className="text-[11px] text-muted">
                 <tr>
-                  <th scope="col">Unit</th>
-                  <th scope="col">{labels[0]}</th>
-                  <th scope="col">{labels[1]}</th>
+                  <th className="text-left font-medium" scope="col">
+                    Unit
+                  </th>
+                  <th className="font-medium w-1/4 text-center" scope="col">
+                    {labels[0]}
+                  </th>
+                  <th className="font-medium w-1/4 text-center" scope="col">
+                    {labels[1]}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <th scope="row">
-                    <span>
+                  <th className="text-left font-medium" scope="row">
+                    <span className="flex items-center gap-2 capitalize">
                       <PawnIcon kind="king" />
                       King
                     </span>
                   </th>
-                  <td>1</td>
-                  <td>1</td>
+                  <td className="w-1/4 text-center">1</td>
+                  <td className="w-1/4 text-center">1</td>
                 </tr>
                 {recruits.map(({ kind }) => (
                   <tr key={kind}>
-                    <th scope="row">
-                      <span>
+                    <th className="text-left font-medium" scope="row">
+                      <span className="flex items-center gap-2 capitalize">
                         <PawnIcon kind={kind} />
                         {kind}
                       </span>
@@ -130,8 +141,9 @@ export const Route = createFileRoute('/custom')({
                         side === 0 && kind === 'bulwark' ? MAP_WIDTH : MAP_WIDTH * 3 - 1,
                       )
                       return (
-                        <td key={side}>
+                        <td className="w-1/4 text-center" key={side}>
                           <input
+                            className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark] text-center"
                             type="number"
                             inputMode="numeric"
                             min={0}
@@ -157,20 +169,28 @@ export const Route = createFileRoute('/custom')({
                   </tr>
                 ))}
               </tbody>
-              <tfoot>
+              <tfoot className="text-[11px] text-muted">
                 <tr>
-                  <th scope="row">Total</th>
-                  <td>{player.length}</td>
-                  <td>{enemyRoster.length}</td>
+                  <th className="text-left font-medium" scope="row">
+                    Total
+                  </th>
+                  <td className="w-1/4 text-center">{player.length}</td>
+                  <td className="w-1/4 text-center">{enemyRoster.length}</td>
                 </tr>
               </tfoot>
             </table>
-            <p className="custom-note">
+            <p className="text-[11px] leading-[1.5] text-muted">
               One king per side. Up to {MAP_WIDTH * 3} units; player Bulwarks are limited to{' '}
               {MAP_WIDTH}.
             </p>
           </div>
-          <button type="submit" className="primary-button">
+          <button
+            type="submit"
+            className={
+              buttonClassName +
+              ' min-h-13 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3] mt-auto shrink-0'
+            }
+          >
             Start battle
             <Icon name="arrow" />
           </button>
