@@ -231,6 +231,113 @@ function releaseMarker(page: Page) {
 }
 
 test(
+  'Custom play mirrors rosters live, allows independent enemies, and launches configured battles offline',
+  { timeout: 60_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await context.setOffline(true)
+    await page.getByRole('link', { name: 'Custom play' }).click()
+    const playerArcher = page.getByRole('spinbutton', { name: 'Player archer', exact: true })
+    const enemyArcher = page.getByRole('spinbutton', { name: 'Enemy archer', exact: true })
+    const mirror = page.getByRole('checkbox', { name: 'Mirror player roster' })
+    assert.equal(await mirror.isChecked(), true)
+    assert.equal(await enemyArcher.isDisabled(), true)
+    await playerArcher.fill('3')
+    assert.equal(await enemyArcher.inputValue(), '3')
+    await mirror.uncheck()
+    await enemyArcher.fill('2')
+    assert.equal(await playerArcher.inputValue(), '3')
+    await playerArcher.fill('4')
+    assert.equal(await enemyArcher.inputValue(), '2')
+    await mirror.check()
+    assert.equal(await enemyArcher.inputValue(), '4')
+    assert.equal(await enemyArcher.isDisabled(), true)
+    await mirror.uncheck()
+    await enemyArcher.fill('1')
+    await page.getByLabel('Mode', { exact: true }).selectOption('local')
+    assert.equal(await page.getByLabel('Difficulty', { exact: false }).isDisabled(), true)
+    await page.getByLabel('Biome', { exact: true }).selectOption('mountains')
+    await page.getByRole('spinbutton', { name: 'Player 1 swordsman', exact: true }).fill('17')
+    await page.getByRole('spinbutton', { name: 'Player 2 swordsman', exact: true }).fill('20')
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+      { width: 1280, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport)
+      assert.equal(
+        await page.evaluate(() => {
+          const button = document
+            .querySelector('.custom-form > button')!
+            .getBoundingClientRect()
+          return (
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight &&
+            button.top >= 0 &&
+            button.bottom <= innerHeight
+          )
+        }),
+        true,
+        'Custom settings must keep Start battle visible without page overflow',
+      )
+      assert.equal(
+        await page.locator('.roster-table input').evaluateAll((inputs) => {
+          const first = inputs[0].getBoundingClientRect()
+          const beside = inputs[1].getBoundingClientRect()
+          const below = inputs[2].getBoundingClientRect()
+          return beside.left - first.right >= 8 && below.top - first.bottom >= 8
+        }),
+        true,
+        'Roster inputs must have at least 8px of space outside their boxes in both directions',
+      )
+    }
+    await page.setViewportSize({ width: 320, height: 568 })
+    await page.getByRole('button', { name: 'Start battle' }).click()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    const search = new URL(page.url()).searchParams
+    assert.equal(search.get('mode'), 'local')
+    assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), 'mountains')
+    assert.equal(await page.locator('.initiative-unit.player').count(), 24)
+    assert.equal(await page.locator('.initiative-unit.enemy').count(), 24)
+    assert.equal(await page.locator('.initiative-unit.player[title*="archer"]').count(), 4)
+    assert.equal(await page.locator('.initiative-unit.enemy[title*="archer"]').count(), 1)
+    const opening = await page.locator('.battlefield').innerHTML()
+    await page.reload()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    assert.equal(await page.locator('.battlefield').innerHTML(), opening)
+    await playTurn(page)
+    assert.equal(await page.locator('.enemy-turn').count(), 0)
+    await page.getByRole('button', { name: 'How to play' }).click()
+    assert.match(await page.locator('.rules-list').innerText(), /This custom battle/)
+    assert.doesNotMatch(await page.locator('.rules-list').innerText(), /unlock the next level/)
+    await page.getByRole('button', { name: 'Close dialog' }).click()
+    for (const difficulty of ['easy', 'normal', 'hard']) {
+      await page.goto(origin + base + 'custom')
+      await page.getByLabel('Difficulty', { exact: true }).selectOption(difficulty)
+      await page.getByLabel('Biome', { exact: true }).selectOption('desert')
+      await page.getByRole('button', { name: 'Start battle' }).click()
+      await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(new URL(page.url()).searchParams.get('difficulty'), difficulty)
+      assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), 'desert')
+      assert.equal(await page.locator('.initiative-unit.player').count(), 5)
+      assert.equal(await page.locator('.initiative-unit.enemy').count(), 5)
+      assert.equal(await page.locator('.player-turn').count(), 0)
+      await page.getByRole('button', { name: 'How to play' }).click()
+      assert.ok(
+        (await page.locator('.rules-list').innerText()).includes(
+          'AI difficulty: ' + difficulty,
+        ),
+      )
+      await page.getByRole('button', { name: 'Close dialog' }).click()
+      await playTurn(page)
+    }
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
   'Bulwarks show slow movement costs and protect allies offline on a small portrait screen',
   { timeout: 30_000 },
   async (t) => {
@@ -539,7 +646,12 @@ test(
     const { context, page, origin } = await fixture(t)
     const buildLabel = await page.locator('.landing-footer > span').first().textContent()
     const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
-    assert.deepEqual(await modes.allTextContents(), ['Solo vs AI', '2 players', 'Campaign'])
+    assert.deepEqual(await modes.allTextContents(), [
+      'Campaign',
+      'Solo vs AI',
+      'Custom play',
+      '2 players',
+    ])
     for (const viewport of [
       { width: 320, height: 568 },
       { width: 375, height: 667 },

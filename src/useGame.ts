@@ -2,11 +2,17 @@ import { useEffect, useReducer } from 'react'
 import { initialPlayback, playbackReducer } from './lib/playback.ts'
 import type { GameMode } from './lib/game-mode.ts'
 import type { BattleSetup, Transition } from './lib/engine/types.ts'
+import type { BotDifficulty } from './lib/bot.ts'
 
-export function useGame(seed: string, mode: GameMode, setup?: BattleSetup) {
+export function useGame(
+  seed: string,
+  mode: GameMode,
+  setup?: BattleSetup,
+  difficulty: BotDifficulty = 'normal',
+) {
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: Parameters<typeof playbackReducer>[1]) =>
-      playbackReducer(playback, action, mode),
+      playbackReducer(playback, action, mode, difficulty),
     seed,
     (seed) => initialPlayback(seed, mode, setup),
   )

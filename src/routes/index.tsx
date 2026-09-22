@@ -65,6 +65,10 @@ export const Route = createFileRoute('/')({
           <em>Corner the king.</em>
         </h1>
         <div className="mode-options" role="group" aria-label="Choose game mode">
+          <Link to="/campaign" className="primary-button local-button" preload={false}>
+            Campaign
+            <Icon name="crown" />
+          </Link>
           <Link
             to="/game"
             search={{ mode: 'ai' }}
@@ -75,6 +79,10 @@ export const Route = createFileRoute('/')({
             Solo vs AI
             <Icon name="arrow" />
           </Link>
+          <Link to="/custom" className="primary-button local-button" preload={false}>
+            Custom play
+            <Icon name="hex" />
+          </Link>
           <Link
             to="/game"
             search={{ mode: 'local' }}
@@ -84,10 +92,6 @@ export const Route = createFileRoute('/')({
           >
             2 players
             <Icon name="arrow" />
-          </Link>
-          <Link to="/campaign" className="primary-button local-button" preload={false}>
-            Campaign
-            <Icon name="crown" />
           </Link>
         </div>
       </div>

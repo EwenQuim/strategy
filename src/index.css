@@ -94,6 +94,7 @@ p {
   --move-tint: #a3bd88;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   height: 100dvh;
   overflow: hidden;
   background: var(--biome-background);
@@ -183,11 +184,13 @@ p {
   padding: 0;
   margin: 0;
   list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 .initiative-unit {
   display: flex;
   flex: 1;
-  min-width: 0;
+  min-width: 24px;
   justify-content: center;
   align-items: center;
   gap: 4px;
@@ -943,6 +946,129 @@ p {
 }
 .local-button:hover {
   background: #ffffff0c;
+}
+.custom-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100dvh;
+  max-width: 520px;
+  margin: auto;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+.custom-options {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px;
+}
+.custom-form > .primary-button {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+.custom-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.custom-settings > div {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.custom-biome {
+  grid-column: 1 / -1;
+}
+.custom-screen select,
+.roster-table input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #20362b;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  color-scheme: dark;
+}
+.custom-screen input:focus-visible,
+.custom-screen select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.custom-screen :disabled {
+  opacity: 0.5;
+}
+.roster-mirror {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.roster-mirror input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+}
+.roster-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 8px;
+  font-size: 13px;
+}
+.roster-table caption {
+  text-align: left;
+  color: var(--gold);
+  font-weight: 600;
+}
+.roster-table th {
+  text-align: left;
+  font-weight: 500;
+}
+.roster-table th span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: capitalize;
+}
+.roster-table svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+}
+.roster-table td,
+.roster-table thead th:not(:first-child) {
+  width: 25%;
+  text-align: center;
+}
+.roster-table input {
+  text-align: center;
+}
+.roster-table thead,
+.roster-table tfoot,
+.custom-note {
+  color: var(--muted);
+  font-size: 11px;
+}
+.roster-table tfoot th,
+.roster-table tfoot td {
+  padding-block: 8px;
+}
+.custom-note {
+  line-height: 1.5;
 }
 .campaign-screen {
   display: flex;

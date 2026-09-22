@@ -31,7 +31,7 @@ const pawnClasses = {
   bulwark: Bulwark,
 }
 
-function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
+export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))
     throw new Error('Battle setup must specify a valid biome')
   const occupied = new Set<string>()

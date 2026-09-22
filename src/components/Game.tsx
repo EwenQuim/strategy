@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { useGame } from '../useGame'
 import { armyLabels, playerNames, type GameMode } from '../lib/game-mode'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
+import type { BotDifficulty } from '../lib/bot'
 import {
   recordCampaignVictory,
   subscribeCampaignProgress,
@@ -34,15 +35,17 @@ export function Game({
   mode,
   setup,
   campaignLevel,
+  difficulty = 'normal',
 }: {
   seed: string
   mode: GameMode
   setup?: BattleSetup
   campaignLevel?: number
+  difficulty?: BotDifficulty
 }) {
   const local = mode === 'local'
   const labels = armyLabels[mode]
-  const { state, dispatch, effect, effectId, playing } = useGame(seed, mode, setup)
+  const { state, dispatch, effect, effectId, playing } = useGame(seed, mode, setup, difficulty)
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, campaignProgressSaved)
   useEffect(() => {
     if (campaignLevel && state.winner === 'player') recordCampaignVictory(campaignLevel)
@@ -245,7 +248,16 @@ export function Game({
                   )}
                 </div>
               ) : (
-                <Link to="/game" search={{ mode }} className="primary-button" preload={false}>
+                <Link
+                  to="/game"
+                  search={{
+                    mode,
+                    difficulty,
+                    setup: setup?.map === undefined ? setup : undefined,
+                  }}
+                  className="primary-button"
+                  preload={false}
+                >
                   New game
                   <Icon name="arrow" />
                 </Link>
@@ -429,9 +441,12 @@ export function Game({
           </div>
           <div className="rules-list">
             <p>
-              {setup
+              {campaignLevel
                 ? 'This campaign battle has fixed armies and terrain. Defeat the enemy king to unlock the next level. Losing or leaving does not erase completed levels.'
-                : 'Each army has one king, at least one swordsman, and three random recruits. Repeated classes are possible. Both sides get the same lineup, chosen by the game seed. Defeat the enemy king to win; losing yours ends the battle.'}{' '}
+                : setup
+                  ? 'This custom battle uses your chosen armies and biome. Defeat the opposing king to win; losing yours ends the battle.'
+                  : 'Each army has one king, at least one swordsman, and three random recruits. Repeated classes are possible. Both sides get the same lineup, chosen by the game seed. Defeat the enemy king to win; losing yours ends the battle.'}{' '}
+              {setup && !campaignLevel && !local && 'AI difficulty: ' + difficulty + '. '}
               {setup?.map
                 ? 'Terrain and starting positions are designed for this level; the biome sets its visual theme.'
                 : 'Verdant Vale has lakes and forests, Mountain Ranges has mountain chains, and Open Desert is all sand with no obstacles.'}

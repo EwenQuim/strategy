@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampaignRouteImport } from './routes/campaign'
+import { Route as CustomRouteImport } from './routes/custom'
 import { Route as GameRouteImport } from './routes/game'
 import { Route as CampaignIndexRouteImport } from './routes/campaign.index'
 import { Route as CampaignLevelRouteImport } from './routes/campaign.$level'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const CampaignRoute = CampaignRouteImport.update({
   id: '/campaign',
   path: '/campaign',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomRoute = CustomRouteImport.update({
+  id: '/custom',
+  path: '/custom',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameRoute = GameRouteImport.update({
@@ -56,6 +62,7 @@ const GameSeedRoute = GameSeedRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campaign': typeof CampaignRouteWithChildren
+  '/custom': typeof CustomRoute
   '/game': typeof GameRouteWithChildren
   '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/custom': typeof CustomRoute
   '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
   '/campaign': typeof CampaignIndexRoute
@@ -73,6 +81,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/campaign': typeof CampaignRouteWithChildren
+  '/custom': typeof CustomRoute
   '/game': typeof GameRouteWithChildren
   '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
@@ -84,17 +93,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/campaign'
+    | '/custom'
     | '/game'
     | '/campaign/$level'
     | '/game/$seed'
     | '/campaign/'
     | '/game/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/campaign/$level' | '/game/$seed' | '/campaign' | '/game'
+  to:
+    '/' | '/custom' | '/campaign/$level' | '/game/$seed' | '/campaign' | '/game'
   id:
     | '__root__'
     | '/'
     | '/campaign'
+    | '/custom'
     | '/game'
     | '/campaign/$level'
     | '/game/$seed'
@@ -105,6 +117,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CampaignRoute: typeof CampaignRouteWithChildren
+  CustomRoute: typeof CustomRoute
   GameRoute: typeof GameRouteWithChildren
 }
 
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/campaign'
       fullPath: '/campaign'
       preLoaderRoute: typeof CampaignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/custom': {
+      id: '/custom'
+      path: '/custom'
+      fullPath: '/custom'
+      preLoaderRoute: typeof CustomRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game': {
@@ -191,6 +211,7 @@ const GameRouteWithChildren = GameRoute._addFileChildren(GameRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CampaignRoute: CampaignRouteWithChildren,
+  CustomRoute: CustomRoute,
   GameRoute: GameRouteWithChildren,
 }
 export const routeTree = rootRouteImport
