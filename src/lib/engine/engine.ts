@@ -79,7 +79,6 @@ function finishTurn(pawn: Pawn, log: string[]): boolean {
 }
 
 function advance(state: GameState): GameState {
-  const random = new SeededRandom(state.randomState)
   const { pawns } = state
   const log = [...state.log]
   let { order, round, logCount } = state
@@ -87,10 +86,7 @@ function advance(state: GameState): GameState {
   while (true) {
     if (active >= order.length) {
       round++
-      order = shuffle(
-        pawns.map((p) => p.id),
-        random,
-      )
+      order = order.filter((id) => pawns.some((p) => p.id === id))
       for (const pawn of pawns) {
         pawn.energy = pawn.maxEnergy
         pawn.escapeChance = 0
@@ -112,7 +108,6 @@ function advance(state: GameState): GameState {
     order,
     active,
     round,
-    randomState: random.state,
     log: log.slice(-40),
     logCount,
   }

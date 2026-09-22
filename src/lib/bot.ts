@@ -12,12 +12,41 @@ import {
 } from './engine/combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './engine/hex.ts'
 import type { Action, BattleFrame, BattleSetup, GameState, Transition } from './engine/types.ts'
-import { nearestTarget, type BotStrategy } from './strategies.ts'
+import { type BotStrategy } from './strategies.ts'
+import {
+  BOT_LEVELS,
+  chooseTacticalActions,
+  type BotDifficulty,
+  type BotOptions,
+} from './engine/ai.ts'
+
+export { BOT_LEVELS, type BotDifficulty, type BotOptions } from './engine/ai.ts'
+
+type BotController = BotStrategy | BotDifficulty | BotOptions
 
 export function chooseBotActions(
   state: GameState,
-  strategy: BotStrategy = nearestTarget,
+  strategy: BotController = 'normal',
 ): Action[] {
+  if (typeof strategy === 'string' || !('chooseTarget' in strategy)) {
+    const options = typeof strategy === 'string' ? BOT_LEVELS[strategy] : strategy
+    if (
+      !options ||
+      ![1, 2, 3].includes(options.depth) ||
+      !Number.isInteger(options.beamWidth) ||
+      options.beamWidth < 1 ||
+      options.beamWidth > 32 ||
+      !Number.isInteger(options.samples) ||
+      options.samples < 1 ||
+      options.samples > 16 ||
+      !Number.isFinite(options.caution) ||
+      options.caution < 0 ||
+      options.caution > 2
+    ) {
+      throw new RangeError('Invalid bot options')
+    }
+    return chooseTacticalActions(state, options)
+  }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
   if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
@@ -83,7 +112,10 @@ export function chooseBotActions(
       !occupied.has(key(tile.q, tile.r)) &&
       foes.some((foe) => canAttack(pawn, foe, tile)),
   )
-  const dist = distFrom(tiles, firingTiles)
+  const dist = distFrom(
+    new Map([...tiles].filter(([position]) => !occupied.has(position))),
+    firingTiles,
+  )
   const here = dist.get(key(pawn.q, pawn.r)) ?? Infinity
   const step = neighbors(pawn.q, pawn.r)
     .filter((n) => !occupied.has(key(n.q, n.r)) && (dist.get(key(n.q, n.r)) ?? Infinity) < here)
@@ -103,7 +135,7 @@ export function chooseBotActions(
     : [{ type: 'endTurn' }]
 }
 
-export function createBotGame(strategy: BotStrategy = nearestTarget) {
+export function createBotGame(strategy: BotController = 'normal') {
   function playBots(state: GameState): Transition {
     const frames: BattleFrame[] = []
     while (!state.winner && activePawn(state)?.side === 'enemy') {
@@ -122,8 +154,14 @@ export function createBotGame(strategy: BotStrategy = nearestTarget) {
     return { state, frames }
   }
 
-  const initialTransition = (seed: string, setup?: BattleSetup) =>
-    playBots(createState(seed, setup))
+  const initialTransition = (seed: string, setup?: BattleSetup): Transition => {
+    const state = createState(seed, setup)
+    const first = state.order.findIndex(
+      (id) => state.pawns.find((p) => p.id === id)?.side === 'player',
+    )
+    state.order = [...state.order.slice(first), ...state.order.slice(0, first)]
+    return { state, frames: [] }
+  }
   const transition = (state: GameState, action: Action): Transition => {
     if (action.type === 'restart') return initialTransition(state.seed, state.setup)
     if (activePawn(state)?.side === 'enemy') return { state, frames: [] }

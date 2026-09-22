@@ -493,15 +493,15 @@ export function Game({
             <section>
               <Icon name="history" />
               <div>
-                <h3>A fresh round. A new order.</h3>
+                <h3>A fresh round. The same order.</h3>
                 <p>
                   End turn spends your remaining energy and passes to the next unit. Running out
                   of energy also ends your turn, with no extra Escape bonus.{' '}
                   {local
                     ? 'Share this device: Player 1 commands green units and Player 2 commands red units. Follow the turn indicator for each unit; the same player may act several times in a row.'
-                    : 'Enemy units act automatically.'}{' '}
-                  Each new round shuffles the order, restores all energy, and resets Escape to
-                  0%.
+                    : 'You move first; enemy units act automatically.'}{' '}
+                  Turn order is decided once at the start and stays the same, skipping fallen
+                  units. Each new round restores all energy and resets Escape to 0%.
                 </p>
               </div>
             </section>

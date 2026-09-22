@@ -13,6 +13,7 @@ import {
   type Pawn,
 } from '../src/lib/engine/index.ts'
 import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
+import { nearestTarget } from '../src/lib/strategies.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'
 
@@ -124,7 +125,7 @@ test('Authored encounters replay and restart identically through AI and local pl
     const opening = initialPlayback('campaign-1', mode, encounter)
     let playback = playbackReducer(opening, { type: 'playbackFinish' }, mode)
     for (let step = 0; step < 300 && !playback.state.winner; step++) {
-      for (const action of chooseBotActions(playback.state)) {
+      for (const action of chooseBotActions(playback.state, nearestTarget)) {
         const before = structuredClone(playback)
         const result = playbackReducer(playback, action, mode)
         assert.deepEqual(result, playbackReducer(playback, action, mode))

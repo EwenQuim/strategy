@@ -20,17 +20,14 @@ import {
   activePawn,
   type GameState,
   type Tile,
+  reducer as coreReducer,
 } from '../src/lib/engine/index.ts'
-import {
-  createBotGame,
-  initialState,
-  initialTransition,
-  transition,
-  reducer,
-} from '../src/lib/bot.ts'
+import { createBotGame } from '../src/lib/bot.ts'
 import { huntTheKing, nearestTarget } from '../src/lib/strategies.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
+
+const { initialState, initialTransition, transition, reducer } = createBotGame(nearestTarget)
 
 function battle(): GameState {
   const tiles = new Map<string, Tile>()
@@ -197,7 +194,7 @@ test('A new round restores energy and resets Escape for every unit', () => {
     pawn.escapeChance = 60
     pawn.energy = 1
   }
-  const next = reducer(state, { type: 'endTurn' })
+  const next = coreReducer(state, { type: 'endTurn' })
   assert.equal(next.round, 2)
   assert.ok(next.pawns.every((p) => p.escapeChance === 0 && p.energy === p.maxEnergy))
   assert.ok(state.pawns.every((p) => p.escapeChance === 60 && p.energy === 1))

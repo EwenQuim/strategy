@@ -21,6 +21,7 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { chooseBotActions } from '../src/lib/bot.ts'
+import { nearestTarget } from '../src/lib/strategies.ts'
 
 function battle(side: Side = 'player'): GameState {
   const other = side === 'player' ? 'enemy' : 'player'
@@ -256,7 +257,7 @@ test('Bots protect threatened allies and never try to walk with only one energy'
     state.pawns = state.pawns.filter((p) => p.kind !== 'ninja' && p.kind !== 'swordsman')
     state.pawns[1].q = -3
     state.pawns[1].r = -3
-    const [move] = chooseBotActions(state)
+    const [move] = chooseBotActions(state, nearestTarget)
     assert.equal(move.type, 'move')
     const moved = reducer(state, move)
     assert.equal(moved.pawns[0].energy, 1)

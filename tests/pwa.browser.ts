@@ -664,7 +664,7 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     for (const reducedMotion of ['no-preference', 'reduce'] as const) {
       await page.emulateMedia({ reducedMotion })
-      const seed = 'juice-1'
+      const seed = 'juice-4'
       let state = botState(seed)
       await page.goto(origin + base + 'game/' + seed)
       await page.locator('.end-action:not([disabled])').waitFor()
@@ -798,6 +798,8 @@ test(
     assert.equal(await page.locator('.enemy-turn').count(), 0)
     await page.getByRole('button', { name: 'How to play' }).click()
     assert.match(await page.locator('.rules-list').innerText(), /Player 1 commands green units/)
+    assert.match(await page.locator('.rules-list').innerText(), /Turn order is decided once/)
+    assert.doesNotMatch(await page.locator('.rules-list').innerText(), /shuffles the order/)
     assert.doesNotMatch(
       await page.locator('.rules-list').innerText(),
       /Enemy units act automatically/,
@@ -806,7 +808,7 @@ test(
 
     const winners = new Set<string>()
     const actionsBySide = new Set<string>()
-    for (const seed of ['local-26', 'local-18']) {
+    for (const seed of ['local-26', 'local-6']) {
       let state = initialState(seed)
       await page.goto(origin + base + 'game/' + seed + '?mode=local')
       await page.locator('.end-action:not([disabled])').waitFor()

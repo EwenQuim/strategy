@@ -1,16 +1,11 @@
-import { activePawn, hexDist, type Action, type GameState } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/bot.ts'
-import type { BotStrategy } from '../src/lib/strategies.ts'
-
-const weakestTarget: BotStrategy = {
-  chooseTarget: (attacker, targets) =>
-    targets.toSorted((a, b) => a.hp - b.hp || hexDist(attacker, a) - hexDist(attacker, b))[0],
-}
+import type { Action, GameState } from '../src/lib/engine/index.ts'
+import { BOT_LEVELS, chooseBotActions } from '../src/lib/bot.ts'
+import { huntTheKing } from '../src/lib/strategies.ts'
 
 export function campaignActions(state: GameState): Action[] {
-  const actions = chooseBotActions(state, weakestTarget)
-  const pawn = activePawn(state)
-  return (pawn?.kind === 'king' || pawn?.kind === 'magician') && actions[0]?.type === 'move'
-    ? [{ type: 'endTurn' }]
-    : actions
+  // Press the attack in long endgames instead of testing two kings retreating forever.
+  return chooseBotActions(
+    state,
+    state.round > 20 ? huntTheKing : { ...BOT_LEVELS.hard, caution: 0.25 },
+  )
 }
