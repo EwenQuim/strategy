@@ -6,11 +6,27 @@ export type Terrain = 'plain' | 'forest' | 'mountain' | 'lake' | 'sand'
 export type Tile = { q: number; r: number; terrain: Terrain }
 export type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
 
-export type BattleSetup = {
-  readonly biome: Biome
-  readonly player: readonly Pawn['kind'][]
-  readonly enemy: readonly Pawn['kind'][]
+export type PawnPlacement = {
+  readonly kind: Pawn['kind']
+  readonly col: number
+  readonly row: number
 }
+
+export type FixedBattleSetup = {
+  readonly biome: Biome
+  readonly map: readonly string[]
+  readonly player: readonly PawnPlacement[]
+  readonly enemy: readonly PawnPlacement[]
+}
+
+export type BattleSetup =
+  | FixedBattleSetup
+  | {
+      readonly biome: Biome
+      readonly map?: undefined
+      readonly player: readonly Pawn['kind'][]
+      readonly enemy: readonly Pawn['kind'][]
+    }
 
 export type GameState = {
   seed: string

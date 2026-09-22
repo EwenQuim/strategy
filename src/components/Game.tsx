@@ -432,8 +432,9 @@ export function Game({
               {setup
                 ? 'This campaign battle has fixed armies and terrain. Defeat the enemy king to unlock the next level. Losing or leaving does not erase completed levels.'
                 : 'Each army has one king, at least one swordsman, and three random recruits. Repeated classes are possible. Both sides get the same lineup, chosen by the game seed. Defeat the enemy king to win; losing yours ends the battle.'}{' '}
-              Verdant Vale has lakes and forests, Mountain Ranges has mountain chains, and Open
-              Desert is all sand with no obstacles.
+              {setup?.map
+                ? 'Terrain and starting positions are designed for this level; the biome sets its visual theme.'
+                : 'Verdant Vale has lakes and forests, Mountain Ranges has mountain chains, and Open Desert is all sand with no obstacles.'}
             </p>
             <section>
               <Icon name="energy" />

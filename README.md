@@ -23,7 +23,7 @@ The app runs under `/strategy/`. Game URLs contain a seed: the same seed and act
 - `make check`: run all checks, engine tests, the production build, and PWA browser tests.
 - `npm run test:pwa`: test the existing build in Chrome at a small portrait viewport, including offline play, safe upgrades, and failed downloads.
 
-CI and `.githooks/pre-push` both run `npm run check:ci`: a fresh locked install with lifecycle scripts disabled, all checks, and a clean tracked diff. `npm run prepare` installs the hook locally, including when automatic npm lifecycle scripts are disabled. The hook rejects uncommitted or untracked changes so checks run against the code being pushed.
+CI and `.githooks/pre-push` both run `npm run check:ci`: a fresh locked install with lifecycle scripts disabled, formatting, lint, typechecks, all unit tests, the production build, four browser smoke tests, and a clean tracked diff. CI has a four-minute job timeout. `npm run test:pwa:smoke` skips the slow full-battle animation, local multiplayer, and campaign browser scenarios; these remain available through `make check` or `npm run test:pwa`. `npm run prepare` installs the hook locally, including when automatic npm lifecycle scripts are disabled. The hook rejects uncommitted or untracked changes so checks run against the code being pushed.
 
 The same checks gate pull requests and GitHub Pages deployment. The build includes a `404.html` fallback for seeded game URLs.
 
@@ -40,20 +40,42 @@ Battles still live in memory: reloading restarts the seeded battle. Offline supp
 Campaign encounters can supply a plain, JSON-compatible setup instead of random mirrored armies:
 
 ```ts
-import { initialState, type BattleSetup } from './src/lib/engine/index.ts'
+import { initialState, type FixedBattleSetup } from './src/lib/engine/index.ts'
 
 const setup = {
-  biome: 'desert',
-  player: ['king', 'swordsman', 'archer'],
-  enemy: ['king', 'swordsman', 'swordsman', 'magician', 'ninja'],
-} as const satisfies BattleSetup
+  biome: 'mountains',
+  map: [
+    '........',
+    '........',
+    '........',
+    '........',
+    '........',
+    '^^^.^^^^',
+    '^^^.^^^^',
+    '........',
+    '........',
+    '........',
+    '........',
+    '........',
+  ],
+  player: [
+    { kind: 'king', col: 3, row: 10 },
+    { kind: 'archer', col: 2, row: 7 },
+  ],
+  enemy: [
+    { kind: 'king', col: 3, row: 1 },
+    { kind: 'archer', col: 2, row: 4 },
+  ],
+} as const satisfies FixedBattleSetup
 
 const battle = initialState('campaign-01', setup)
 ```
 
-The array lengths determine the number of units, including each king. Repeating a class recruits multiple units of that class. Each side must have exactly one king and 1 to 24 units, matching its three-row deployment area. Invalid setups throw before creating a battle.
+Each map has 12 rows of 8 terrain symbols: `.` plain, `f` forest, `^` mountain, `~` lake, and `s` sand. Pawn `col` and `row` are zero-based: column 0 is the left edge, row 0 is the top; odd rows are offset half a hex to the right. Each side must have exactly one king and 1 to 24 units. Pawns can start anywhere on the board, but every starting tile must be distinct and passable. Invalid maps and placements are rejected, never silently moved or regenerated.
 
-The same seed and setup reproduce terrain, deployment positions, initiative, and combat rolls for the same actions. Spawn positions are still seed-generated, not hand-placed. The engine copies the setup into the battle so restart restores the authored encounter even after units die or the caller edits its original setup. Omitting the setup keeps existing random games and their seeded results unchanged.
+Authored maps and positions are loaded literally from the setup, independently of the seed. The biome controls the visual theme, not which terrain can appear. The seed controls initiative and combat rolls; the same actions still replay deterministically. Restart restores an independent copy of the full map and formation, even after units die or the caller edits the original data. Seed-only games and roster-only setups retain their existing generated maps and deployments.
+
+Level 6, High Pass, demonstrates a two-row mountain wall with a narrow opening: walking units must use the pass, while archers can shoot across the mountains.
 
 The same optional setup is accepted by bot `initialState(seed, setup)` / `initialTransition(seed, setup)`, `initialPlayback(seed, mode, setup)`, and `useGame(seed, mode, setup)`. Campaign routes pass their encounter directly and remount the game between levels. Custom setups are not encoded in the existing random-game URLs.
 
@@ -63,7 +85,9 @@ Choose Campaign on the home screen to play 20 fixed AI encounters across all thr
 
 Completed levels are stored in localStorage under `hex-strategy:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 
-Level definitions live in `src/lib/campaign.ts`; the selector is at `/strategy/campaign` and battles at `/strategy/campaign/1` through `/strategy/campaign/20`. Locked and invalid battle URLs return to the selector.
+All 20 level definitions live in `src/lib/campaign-levels.json`. Each level explicitly includes its ID, name, seed, biome, full terrain map, and both armies as `{ kind, col, row }` entries, including both kings. Edit that single JSON file to design terrain lines and starting formations; campaign terrain and positions are never randomly generated at runtime. `src/lib/campaign.ts` imports those levels and contains the progression helpers.
+
+The selector is at `/strategy/campaign` and battles at `/strategy/campaign/1` through `/strategy/campaign/20`. Locked and invalid battle URLs return to the selector.
 
 ## Boundaries
 

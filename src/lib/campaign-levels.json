@@ -1,0 +1,1452 @@
+[
+  {
+    "id": 1,
+    "name": "First Watch",
+    "seed": "campaign-v1-1",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "...f....",
+        "..f..~..",
+        "f.f..~~.",
+        "....f...",
+        "~~f..~~.",
+        "~.~~.~~.",
+        "..~~f.~.",
+        "....f.f.",
+        "...~.~~~",
+        "..~~.~~~",
+        "ff~~.f..",
+        "..~....."
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 0,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 10
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 7,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Bowmen",
+    "seed": "campaign-v1-2",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "..f~..ff",
+        "~.~~..f.",
+        "~~.~.f..",
+        "~~fff...",
+        ".~f.f...",
+        "........",
+        "f.f....f",
+        "..f.....",
+        "f.f~ff~.",
+        "..~~f~~.",
+        "~~.~.~~.",
+        "~~...ff."
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 7,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 7,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "River Guard",
+    "seed": "campaign-v1-3",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "....fff.",
+        "~f......",
+        "~~ff~~f.",
+        "..f.~f..",
+        "f.f..ff.",
+        ".f.f....",
+        "f.f.....",
+        "f.f.f.f.",
+        "...ff...",
+        ".f..~~f.",
+        ".f..~~..",
+        "....~..."
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 11
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Forest Magic",
+    "seed": "campaign-v1-4",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "..~.ff..",
+        ".~~.....",
+        ".f~..f..",
+        ".....f..",
+        "f.......",
+        "f~.f....",
+        ".~~.f~~.",
+        "....~~.f",
+        "~~...~ff",
+        "~...ff..",
+        "f.......",
+        "....f..f"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 11
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Vale Keep",
+    "seed": "campaign-v1-5",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "..~..~..",
+        "f~~.~~.f",
+        ".f...~~.",
+        "..f~.~..",
+        "fff~~...",
+        "~~......",
+        "~~~.....",
+        "f....~..",
+        "f...f~~.",
+        "..~~.ff.",
+        ".f.~~...",
+        ".f.~f.f."
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 10
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 7,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "name": "High Pass",
+    "seed": "campaign-v1-6",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "^^^.^^^^",
+        "^^^.^^^^",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 7
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 4
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "name": "Stone Wall",
+    "seed": "campaign-v1-7",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "^.......",
+        "^......^",
+        ".^.....^",
+        ".^....^.",
+        "..^...^.",
+        "...^.^..",
+        "...^.^..",
+        "..^.....",
+        "..^.....",
+        ".^......",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 6,
+          "row": 11
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "name": "Ambush",
+    "seed": "campaign-v1-8",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "......^.",
+        ".....^..",
+        "^....^..",
+        "^...^...",
+        ".^..^...",
+        ".^.^....",
+        "..^.....",
+        "..^....^",
+        ".......^",
+        "...^^^^.",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 0,
+          "row": 11
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "name": "Twin Mages",
+    "seed": "campaign-v1-9",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "^.^.....",
+        "^.^.....",
+        ".^.^....",
+        ".^.^..^.",
+        "..^...^.",
+        "..^..^..",
+        "...^.^.^",
+        "......^.",
+        ".....^^.",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 1,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "name": "Peak Fortress",
+    "seed": "campaign-v1-10",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "..^....^",
+        "..^...^.",
+        "...^..^.",
+        "...^.^..",
+        ".....^..",
+        "........",
+        "........",
+        "........",
+        "^^^.....",
+        "..^.....",
+        "...^....",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 0,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 7,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 7,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "name": "Dune Patrol",
+    "seed": "campaign-v1-11",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 11
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "name": "Sandstorm",
+    "seed": "campaign-v1-12",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 7,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 7,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 5,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 13,
+    "name": "Iron Caravan",
+    "seed": "campaign-v1-13",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 0,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 14,
+    "name": "Oasis Siege",
+    "seed": "campaign-v1-14",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 6,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 7,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 15,
+    "name": "Sun Citadel",
+    "seed": "campaign-v1-15",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 7,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 0,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 7,
+          "row": 2
+        },
+        {
+          "kind": "magician",
+          "col": 1,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 16,
+    "name": "Homeward",
+    "seed": "campaign-v1-16",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "....~~..",
+        "...~~.~.",
+        "~~f.~.~~",
+        "~~fff.~.",
+        ".ff.fff.",
+        "........",
+        "ff.....~",
+        "f.ff..~~",
+        ".f.~~...",
+        "...~....",
+        ".f......",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 6,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 7,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 17,
+    "name": "Frozen Gate",
+    "seed": "campaign-v1-17",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "...^....",
+        "...^..^.",
+        "....^.^.",
+        "..^.^.^.",
+        "..^..^.^",
+        ".^.....^",
+        ".^..^^^.",
+        "^..^....",
+        "^..^....",
+        "..^.....",
+        "........",
+        "^^^^^^^."
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 6,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 10
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 7,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 7,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 18,
+    "name": "Burning Sands",
+    "seed": "campaign-v1-18",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 6,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 10
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 7,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "magician",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 19,
+    "name": "Royal Guard",
+    "seed": "campaign-v1-19",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        ".......f",
+        "fff~~f..",
+        "....~~.f",
+        "~~f.f.~~",
+        "~~f~f.~~",
+        "~f~~..f.",
+        "...f.~~.",
+        "f....~~.",
+        "..f.ff~f",
+        "f.f.f...",
+        "..f~.f..",
+        "..~~...f"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 0,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 20,
+    "name": "Last Crown",
+    "seed": "campaign-v1-20",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "......^.",
+        "..^^^^.^",
+        "^......^",
+        "^.....^.",
+        ".^....^.",
+        ".^...^..",
+        "^.^..^..",
+        "^.^.^...",
+        ".^.^....",
+        ".^......",
+        "..^.....",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 6,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 11
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 0
+        }
+      ]
+    }
+  }
+]

@@ -165,6 +165,33 @@ function placeFeature(
   }
 }
 
+const terrainSymbols: Record<string, Terrain> = {
+  '.': 'plain',
+  f: 'forest',
+  '^': 'mountain',
+  '~': 'lake',
+  s: 'sand',
+}
+
+export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
+  if (!Array.isArray(rows) || rows.length !== MAP_HEIGHT)
+    throw new Error('Map must contain ' + MAP_HEIGHT + ' rows')
+  const tiles = new Map<string, Tile>()
+  for (let row = 0; row < MAP_HEIGHT; row++) {
+    const line = rows[row]
+    if (typeof line !== 'string' || line.length !== MAP_WIDTH)
+      throw new Error('Map row ' + row + ' must contain ' + MAP_WIDTH + ' tiles')
+    for (let col = 0; col < MAP_WIDTH; col++) {
+      const symbol = line[col]
+      if (!Object.hasOwn(terrainSymbols, symbol))
+        throw new Error('Unknown map terrain: ' + symbol)
+      const { q, r } = hexOf(col, row)
+      tiles.set(key(q, r), { q, r, terrain: terrainSymbols[symbol] })
+    }
+  }
+  return tiles
+}
+
 export function makeMap(
   random: SeededRandom,
   biome: Biome,

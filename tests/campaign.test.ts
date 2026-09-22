@@ -6,11 +6,45 @@ import {
   isLevelUnlocked,
   completeCampaignLevel,
 } from '../src/lib/campaign.ts'
-import { initialState as coreState } from '../src/lib/engine/index.ts'
-import { initialState, transition, chooseBotActions } from '../src/lib/bot.ts'
-import { huntTheKing } from '../src/lib/strategies.ts'
+import { initialState as coreState, MAP_HEIGHT } from '../src/lib/engine/index.ts'
+import { initialState, transition } from '../src/lib/bot.ts'
+import { campaignActions } from './campaign-actions.ts'
+import levels from '../src/lib/campaign-levels.json' with { type: 'json' }
 
-test('The campaign has twenty distinct deterministic AI encounters that can finish', () => {
+test('Every campaign level comes directly from one JSON with both complete armies', () => {
+  assert.equal(CAMPAIGN_LEVELS, levels)
+  for (const level of levels) {
+    assert.deepEqual(Object.keys(level).sort(), ['id', 'name', 'seed', 'setup'])
+    assert.deepEqual(Object.keys(level.setup).sort(), ['biome', 'enemy', 'map', 'player'])
+    const state = coreState(level.seed, CAMPAIGN_LEVELS[level.id - 1].setup)
+    for (const side of ['player', 'enemy'] as const)
+      assert.deepEqual(
+        state.pawns
+          .filter((pawn) => pawn.side === side)
+          .map((pawn) => ({
+            kind: pawn.kind,
+            col: pawn.q + Math.floor(pawn.r / 2),
+            row: pawn.r,
+          })),
+        level.setup[side],
+      )
+  }
+})
+
+test('Campaign Bulwarks start on their assigned rows for both sides', () => {
+  for (const [side, row] of [
+    ['player', MAP_HEIGHT - 3],
+    ['enemy', 3],
+  ] as const) {
+    const bulwarks = CAMPAIGN_LEVELS.flatMap((level) =>
+      level.setup[side].filter((pawn) => pawn.kind === 'bulwark'),
+    )
+    assert.ok(bulwarks.length > 0)
+    for (const pawn of bulwarks) assert.equal(pawn.row, row)
+  }
+})
+
+test('The campaign has twenty distinct deterministic AI levels that can finish', () => {
   assert.equal(CAMPAIGN_LEVELS.length, 20)
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.seed)).size, 20)
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.name)).size, 20)
@@ -26,7 +60,7 @@ test('The campaign has twenty distinct deterministic AI encounters that can fini
     biomes.add(core.biome)
     let state = initialState(level.seed, level.setup)
     for (let step = 0; step < 300 && !state.winner; step++) {
-      for (const action of chooseBotActions(state, huntTheKing)) {
+      for (const action of campaignActions(state)) {
         const result = transition(state, action)
         assert.notEqual(result.state, state)
         state = result.state

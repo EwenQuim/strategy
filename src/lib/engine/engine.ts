@@ -1,4 +1,14 @@
-import { BIOMES, MAP_WIDTH, MAP_HEIGHT, hexDist, hexOf, key, makeMap } from './hex.ts'
+import {
+  BIOMES,
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  hexDist,
+  hexOf,
+  key,
+  makeMap,
+  mapFromRows,
+  passable,
+} from './hex.ts'
 import {
   King,
   Swordsman,
@@ -17,6 +27,7 @@ import type {
   BattleSetup,
   Biome,
   GameState,
+  Tile,
   Transition,
 } from './types.ts'
 import { SeededRandom, seedState } from './random.ts'
@@ -120,55 +131,103 @@ const pawnClasses = {
   bulwark: Bulwark,
 }
 
-function validateSetup(setup: BattleSetup): void {
+function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))
     throw new Error('Battle setup must specify a valid biome')
+  const occupied = new Set<string>()
   for (const side of ['player', 'enemy'] as const) {
     const army = setup[side]
     if (!Array.isArray(army) || army.length < 1 || army.length > MAP_WIDTH * 3)
       throw new RangeError(side + ' army must contain 1 to ' + MAP_WIDTH * 3 + ' units')
-    for (const kind of army) {
+    let kings = 0
+    for (const unit of army) {
+      const kind = typeof unit === 'string' ? unit : unit?.kind
       if (typeof kind !== 'string' || !Object.hasOwn(pawnClasses, kind))
         throw new Error(side + ' army contains an unknown pawn kind')
+      if (kind === 'king') kings++
+      if (tiles) {
+        if (
+          typeof unit !== 'object' ||
+          !unit ||
+          !Number.isInteger(unit.col) ||
+          !Number.isInteger(unit.row) ||
+          unit.col < 0 ||
+          unit.col >= MAP_WIDTH ||
+          unit.row < 0 ||
+          unit.row >= MAP_HEIGHT
+        )
+          throw new Error(side + ' army must specify valid col and row positions')
+        const { q, r } = hexOf(unit.col, unit.row)
+        const position = key(q, r)
+        if (!passable(tiles.get(position)))
+          throw new Error(side + ' army cannot start on blocked terrain')
+        if (occupied.has(position)) throw new Error('Armies cannot share a starting tile')
+        occupied.add(position)
+      } else if (typeof unit !== 'string') {
+        throw new Error('Positioned armies require an explicit map')
+      }
     }
-    if (army.filter((kind) => kind === 'king').length !== 1)
-      throw new Error(side + ' army must contain exactly one king')
+    if (kings !== 1) throw new Error(side + ' army must contain exactly one king')
   }
 }
 
 export function initialState(seed: string, setup?: BattleSetup): GameState {
-  if (setup !== undefined) validateSetup(setup)
+  const authoredTiles = setup?.map === undefined ? undefined : mapFromRows(setup.map)
+  if (setup !== undefined) validateSetup(setup, authoredTiles)
   const random = new SeededRandom(seedState(seed))
-  const biomes = Object.keys(BIOMES) as Biome[]
-  const biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
-  const playerArmy = setup
-    ? setup.player.map((kind) => pawnClasses[kind])
-    : [
-        Swordsman,
-        King,
-        ...Array.from(
-          { length: 3 },
-          () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
+  let biome: Biome
+  let pawns: Pawn[]
+  let tiles: Map<string, Tile>
+  if (setup?.map !== undefined) {
+    biome = setup.biome
+    tiles = authoredTiles!
+    const spawn = (side: Side, firstId: number) =>
+      setup[side].map((unit, index) => {
+        const { q, r } = hexOf(unit.col, unit.row)
+        const Unit = pawnClasses[unit.kind]
+        return new Unit(firstId + index, q, r, side)
+      })
+    pawns = [...spawn('player', 1), ...spawn('enemy', setup.player.length + 1)]
+  } else {
+    const biomes = Object.keys(BIOMES) as Biome[]
+    biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
+    const playerArmy = setup
+      ? setup.player.map((kind) => pawnClasses[kind])
+      : [
+          Swordsman,
+          King,
+          ...Array.from(
+            { length: 3 },
+            () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
+          ),
+        ]
+    const enemyArmy = setup ? setup.enemy.map((kind) => pawnClasses[kind]) : playerArmy
+    const spawn = (side: Side, firstRow: number, firstId: number) => {
+      const positions = shuffle(
+        Array.from({ length: MAP_WIDTH * 3 }, (_, index) =>
+          hexOf(index % MAP_WIDTH, firstRow + Math.floor(index / MAP_WIDTH)),
         ),
-      ]
-  const enemyArmy = setup ? setup.enemy.map((kind) => pawnClasses[kind]) : playerArmy
-  const spawn = (side: Side, firstRow: number, firstId: number) => {
-    const positions = shuffle(
-      Array.from({ length: MAP_WIDTH * 3 }, (_, index) =>
-        hexOf(index % MAP_WIDTH, firstRow + Math.floor(index / MAP_WIDTH)),
-      ),
-      random,
-    )
-    return (side === 'player' ? playerArmy : enemyArmy).map((Unit, index) => {
-      const tile = positions[index]
-      return new Unit(firstId + index, tile.q, tile.r, side)
-    })
+        random,
+      )
+      return (side === 'player' ? playerArmy : enemyArmy).map((Unit, index) => {
+        const tile = positions[index]
+        return new Unit(firstId + index, tile.q, tile.r, side)
+      })
+    }
+    pawns = [...spawn('player', MAP_HEIGHT - 3, 1), ...spawn('enemy', 0, playerArmy.length + 1)]
+    tiles = makeMap(random, biome, pawns)
   }
-  const pawns = [
-    ...spawn('player', MAP_HEIGHT - 3, 1),
-    ...spawn('enemy', 0, playerArmy.length + 1),
-  ]
-  const tiles = makeMap(random, biome, pawns)
+  const savedSetup: BattleSetup | undefined =
+    setup?.map !== undefined
+      ? {
+          biome: setup.biome,
+          map: [...setup.map],
+          player: setup.player.map((unit) => ({ ...unit })),
+          enemy: setup.enemy.map((unit) => ({ ...unit })),
+        }
+      : setup
+        ? { biome: setup.biome, player: [...setup.player], enemy: [...setup.enemy] }
+        : undefined
   return advance({
     tiles,
     biome,
@@ -178,9 +237,7 @@ export function initialState(seed: string, setup?: BattleSetup): GameState {
       random,
     ),
     seed,
-    ...(setup
-      ? { setup: { biome: setup.biome, player: [...setup.player], enemy: [...setup.enemy] } }
-      : {}),
+    ...(savedSetup ? { setup: savedSetup } : {}),
     randomState: random.state,
     active: -1,
     round: 1,

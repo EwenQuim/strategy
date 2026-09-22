@@ -25,6 +25,7 @@ import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/strategies.ts'
 import { armyLabels, playerNames } from '../src/lib/game-mode.ts'
 import { CAMPAIGN_LEVELS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
+import { campaignActions } from './campaign-actions.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -869,9 +870,7 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   await page.locator('.end-action:not([disabled])').waitFor()
   assert.equal(await page.locator('.wordmark-sub').textContent(), 'Level ' + id + ' / 20')
   for (let step = 0; step < 200 && !state.winner; step++) {
-    const actions: Action[] = surrender
-      ? [{ type: 'endTurn' }]
-      : chooseBotActions(state, huntTheKing)
+    const actions: Action[] = surrender ? [{ type: 'endTurn' }] : campaignActions(state)
     for (const action of actions) {
       const result = botTransition(state, action)
       if (action.type === 'endTurn') await page.locator('.end-action').click()
