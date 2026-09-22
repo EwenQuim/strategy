@@ -18,7 +18,7 @@ export interface SpecialAbility {
 }
 
 export abstract class Pawn {
-  abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician' | 'ninja'
+  abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician' | 'ninja' | 'bulwark'
   abstract readonly attack: AttackProfile
   abstract readonly special: SpecialAbility
   readonly maxEnergy = START_ENERGY
@@ -30,6 +30,11 @@ export abstract class Pawn {
   energy: number
   escapeChance: number
   specialUsed = false
+  protectingId: number | null = null
+
+  get moveCost(): number {
+    return 1
+  }
 
   get maxHp(): number {
     return 3
@@ -131,4 +136,21 @@ export class Ninja extends Pawn {
   }
 }
 
-export const RECRUIT_CLASSES = [Swordsman, Archer, Magician, Ninja] as const
+export class Bulwark extends Pawn {
+  readonly kind = 'bulwark' as const
+  get maxHp(): number {
+    return 10
+  }
+  override get moveCost(): number {
+    return 2
+  }
+  readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 1 }
+  readonly special: SpecialAbility = {
+    name: 'Protect',
+    cost: 2,
+    description:
+      'Protect an adjacent ally until your next turn. Take its next hit instead, without a second Escape roll. Ends if you separate. Moving costs 2 energy per tile.',
+  }
+}
+
+export const RECRUIT_CLASSES = [Swordsman, Archer, Magician, Ninja, Bulwark] as const

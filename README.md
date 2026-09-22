@@ -35,6 +35,36 @@ Updates are checked when the app opens, comes online, or returns to the foregrou
 
 Battles still live in memory: reloading restarts the seeded battle. Offline support does not add saved matches.
 
+## Authored battle setups
+
+Campaign encounters can supply a plain, JSON-compatible setup instead of random mirrored armies:
+
+```ts
+import { initialState, type BattleSetup } from './src/lib/engine/index.ts'
+
+const setup = {
+  biome: 'desert',
+  player: ['king', 'swordsman', 'archer'],
+  enemy: ['king', 'swordsman', 'swordsman', 'magician', 'ninja'],
+} as const satisfies BattleSetup
+
+const battle = initialState('campaign-01', setup)
+```
+
+The array lengths determine the number of units, including each king. Repeating a class recruits multiple units of that class. Each side must have exactly one king and 1 to 24 units, matching its three-row deployment area. Invalid setups throw before creating a battle.
+
+The same seed and setup reproduce terrain, deployment positions, initiative, and combat rolls for the same actions. Spawn positions are still seed-generated, not hand-placed. The engine copies the setup into the battle so restart restores the authored encounter even after units die or the caller edits its original setup. Omitting the setup keeps existing random games and their seeded results unchanged.
+
+The same optional setup is accepted by bot `initialState(seed, setup)` / `initialTransition(seed, setup)`, `initialPlayback(seed, mode, setup)`, and `useGame(seed, mode, setup)`. Campaign routes pass their encounter directly and remount the game between levels. Custom setups are not encoded in the existing random-game URLs.
+
+## Campaign
+
+Choose Campaign on the home screen to play 20 fixed AI encounters across all three biomes. Level 1 starts unlocked; winning unlocks the next level. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
+
+Completed levels are stored in localStorage under `hex-strategy:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
+
+Level definitions live in `src/lib/campaign.ts`; the selector is at `/strategy/campaign` and battles at `/strategy/campaign/1` through `/strategy/campaign/20`. Locked and invalid battle URLs return to the selector.
+
 ## Boundaries
 
 - `src/lib/engine/`: deterministic game rules. `initialState(seed)` creates an untouched battle; `reducer(state, action)` applies an action for whichever side owns the active pawn. It never runs a bot or mutates its input. `transition` additionally returns effect snapshots before turn advancement or the victory screen.

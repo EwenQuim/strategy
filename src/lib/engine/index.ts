@@ -8,4 +8,6 @@ export {
   chargeDestinations,
   jumpDestinations,
   specialTargets,
+  movementDestinations,
+  protectorFor,
 } from './combat.ts'

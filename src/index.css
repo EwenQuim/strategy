@@ -944,6 +944,101 @@ p {
 .local-button:hover {
   background: #ffffff0c;
 }
+.campaign-entry {
+  margin-top: 12px;
+}
+.campaign-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100dvh;
+  max-width: 800px;
+  margin: auto;
+  padding: max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.campaign-heading,
+.campaign-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.campaign-heading h1 {
+  font:
+    32px Georgia,
+    serif;
+  margin-top: 4px;
+}
+.campaign-progress {
+  font-size: 10px;
+  color: var(--muted);
+}
+.campaign-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.campaign-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 100%;
+  width: 100%;
+  padding: 5px;
+  text-align: center;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff04;
+  font-size: clamp(9px, 2.5vw, 12px);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.campaign-level strong {
+  font:
+    20px Georgia,
+    serif;
+  color: var(--gold);
+}
+.campaign-level small {
+  color: var(--muted);
+  font-size: 8px;
+}
+.campaign-level.is-next {
+  border-color: var(--gold);
+  background: #dcc48a16;
+}
+.campaign-level.is-completed {
+  border-color: #89bba477;
+  background: #89bba412;
+}
+.campaign-level:not(:disabled):hover {
+  background: #ffffff12;
+}
+.campaign-note {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+.campaign-result-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.campaign-back {
+  font-size: 11px;
+  padding: 12px;
+  text-decoration: underline;
+}
 .landing-facts {
   display: flex;
   gap: 23px;

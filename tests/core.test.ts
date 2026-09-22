@@ -12,6 +12,7 @@ import {
   Magician,
   Archer,
   Ninja,
+  Bulwark,
   type GameState,
   type Side,
   type Tile,
@@ -179,7 +180,7 @@ test('Path searches use shortest passable routes within the movement budget', ()
 
 test('Combat frames report actual hits and misses for either side without changing seeded results', () => {
   for (const side of ['player', 'enemy'] as const) {
-    for (const Unit of [Swordsman, King, Archer, Magician, Ninja]) {
+    for (const Unit of [Swordsman, King, Archer, Magician, Ninja, Bulwark]) {
       for (const escapeChance of [0, 60]) {
         const state = duel(side)
         state.pawns[0] = new Unit(1, 0, 0, side)

@@ -8,9 +8,10 @@ import {
   chargeDestinations,
   jumpDestinations,
   specialTargets,
+  protectorFor,
 } from './engine/combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './engine/hex.ts'
-import type { Action, BattleFrame, GameState, Transition } from './engine/types.ts'
+import type { Action, BattleFrame, BattleSetup, GameState, Transition } from './engine/types.ts'
 import { nearestTarget, type BotStrategy } from './strategies.ts'
 
 export function chooseBotActions(
@@ -25,6 +26,16 @@ export function chooseBotActions(
   const foes = pawns.filter((p) => p.side !== pawn.side)
   const specials = specialTargets(pawns, pawn)
   if (pawn.kind === 'king' && specials.length) return [{ type: 'act', action: 'special' }]
+  if (pawn.kind === 'bulwark') {
+    const ally = specials
+      .filter((p) => !protectorFor(pawns, p) && foes.some((foe) => canAttack(foe, p)))
+      .sort((a, b) => Number(b.kind === 'king') - Number(a.kind === 'king') || a.hp - b.hp)[0]
+    if (ally)
+      return [
+        { type: 'act', action: 'special' },
+        { type: 'specialAt', q: ally.q, r: ally.r },
+      ]
+  }
   const special = strategy.chooseTarget(
     pawn,
     specials.filter((p) =>
@@ -87,7 +98,9 @@ export function chooseBotActions(
       { type: 'specialAt', q: jump.q, r: jump.r },
     ]
   }
-  return step ? [{ type: 'move', q: step.q, r: step.r }] : [{ type: 'endTurn' }]
+  return step && pawn.energy >= pawn.moveCost
+    ? [{ type: 'move', q: step.q, r: step.r }]
+    : [{ type: 'endTurn' }]
 }
 
 export function createBotGame(strategy: BotStrategy = nearestTarget) {
@@ -109,9 +122,10 @@ export function createBotGame(strategy: BotStrategy = nearestTarget) {
     return { state, frames }
   }
 
-  const initialTransition = (seed: string) => playBots(createState(seed))
+  const initialTransition = (seed: string, setup?: BattleSetup) =>
+    playBots(createState(seed, setup))
   const transition = (state: GameState, action: Action): Transition => {
-    if (action.type === 'restart') return initialTransition(state.seed)
+    if (action.type === 'restart') return initialTransition(state.seed, state.setup)
     if (activePawn(state)?.side === 'enemy') return { state, frames: [] }
     const player = applyAction(state, action)
     const bots = playBots(player.state)
@@ -124,7 +138,7 @@ export function createBotGame(strategy: BotStrategy = nearestTarget) {
     }
   }
   return {
-    initialState: (seed: string) => initialTransition(seed).state,
+    initialState: (seed: string, setup?: BattleSetup) => initialTransition(seed, setup).state,
     reducer: (state: GameState, action: Action) => transition(state, action).state,
     initialTransition,
     transition,

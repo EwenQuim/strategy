@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CampaignRouteImport } from './routes/campaign'
 import { Route as GameRouteImport } from './routes/game'
+import { Route as CampaignIndexRouteImport } from './routes/campaign.index'
+import { Route as CampaignLevelRouteImport } from './routes/campaign.$level'
 import { Route as GameIndexRouteImport } from './routes/game.index'
 import { Route as GameSeedRouteImport } from './routes/game.$seed'
 
@@ -19,10 +22,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignRoute = CampaignRouteImport.update({
+  id: '/campaign',
+  path: '/campaign',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameRoute = GameRouteImport.update({
   id: '/game',
   path: '/game',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignIndexRoute = CampaignIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CampaignRoute,
+} as any)
+const CampaignLevelRoute = CampaignLevelRouteImport.update({
+  id: '/$level',
+  path: '/$level',
+  getParentRoute: () => CampaignRoute,
 } as any)
 const GameIndexRoute = GameIndexRouteImport.update({
   id: '/',
@@ -37,32 +55,56 @@ const GameSeedRoute = GameSeedRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRouteWithChildren
   '/game': typeof GameRouteWithChildren
+  '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
+  '/campaign/': typeof CampaignIndexRoute
   '/game/': typeof GameIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
+  '/campaign': typeof CampaignIndexRoute
   '/game': typeof GameIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRouteWithChildren
   '/game': typeof GameRouteWithChildren
+  '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
+  '/campaign/': typeof CampaignIndexRoute
   '/game/': typeof GameIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/game' | '/game/$seed' | '/game/'
+  fullPaths:
+    | '/'
+    | '/campaign'
+    | '/game'
+    | '/campaign/$level'
+    | '/game/$seed'
+    | '/campaign/'
+    | '/game/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/game/$seed' | '/game'
-  id: '__root__' | '/' | '/game' | '/game/$seed' | '/game/'
+  to: '/' | '/campaign/$level' | '/game/$seed' | '/campaign' | '/game'
+  id:
+    | '__root__'
+    | '/'
+    | '/campaign'
+    | '/game'
+    | '/campaign/$level'
+    | '/game/$seed'
+    | '/campaign/'
+    | '/game/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CampaignRoute: typeof CampaignRouteWithChildren
   GameRoute: typeof GameRouteWithChildren
 }
 
@@ -75,12 +117,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaign': {
+      id: '/campaign'
+      path: '/campaign'
+      fullPath: '/campaign'
+      preLoaderRoute: typeof CampaignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game': {
       id: '/game'
       path: '/game'
       fullPath: '/game'
       preLoaderRoute: typeof GameRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/campaign/': {
+      id: '/campaign/'
+      path: '/'
+      fullPath: '/campaign/'
+      preLoaderRoute: typeof CampaignIndexRouteImport
+      parentRoute: typeof CampaignRoute
+    }
+    '/campaign/$level': {
+      id: '/campaign/$level'
+      path: '/$level'
+      fullPath: '/campaign/$level'
+      preLoaderRoute: typeof CampaignLevelRouteImport
+      parentRoute: typeof CampaignRoute
     }
     '/game/': {
       id: '/game/'
@@ -99,6 +162,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CampaignRouteChildren {
+  CampaignLevelRoute: typeof CampaignLevelRoute
+  CampaignIndexRoute: typeof CampaignIndexRoute
+}
+
+const CampaignRouteChildren: CampaignRouteChildren = {
+  CampaignLevelRoute: CampaignLevelRoute,
+  CampaignIndexRoute: CampaignIndexRoute,
+}
+
+const CampaignRouteWithChildren = CampaignRoute._addFileChildren(
+  CampaignRouteChildren,
+)
+
 interface GameRouteChildren {
   GameSeedRoute: typeof GameSeedRoute
   GameIndexRoute: typeof GameIndexRoute
@@ -113,6 +190,7 @@ const GameRouteWithChildren = GameRoute._addFileChildren(GameRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CampaignRoute: CampaignRouteWithChildren,
   GameRoute: GameRouteWithChildren,
 }
 export const routeTree = rootRouteImport

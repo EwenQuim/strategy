@@ -89,6 +89,10 @@ export const Route = createFileRoute('/')({
             <Icon name="arrow" />
           </Link>
         </div>
+        <Link to="/campaign" className="primary-button campaign-entry" preload={false}>
+          Campaign
+          <Icon name="crown" />
+        </Link>
         <div className="landing-facts">
           <span>
             <Icon name="hex" />

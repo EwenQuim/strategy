@@ -11,6 +11,8 @@ import {
   initialState,
   activePawn,
   canAttack,
+  movementDestinations,
+  specialTargets,
   type Action,
   type Biome,
 } from '../src/lib/engine/index.ts'
@@ -22,6 +24,7 @@ import {
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/strategies.ts'
 import { armyLabels, playerNames } from '../src/lib/game-mode.ts'
+import { CAMPAIGN_LEVELS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -225,6 +228,100 @@ function releaseMarker(page: Page) {
     () => (globalThis as typeof globalThis & { __pwaRelease?: string }).__pwaRelease,
   )
 }
+
+test(
+  'Bulwarks show slow movement costs and protect allies offline on a small portrait screen',
+  { timeout: 30_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    let state = initialState('bulwark-ui')
+    for (let index = 0; index < 1000; index++) {
+      state = initialState('bulwark-ui-' + index)
+      const pawn = activePawn(state)!
+      if (
+        pawn.kind === 'bulwark' &&
+        specialTargets(state.pawns, pawn).length &&
+        movementDestinations(state.tiles, state.pawns, pawn).size > 1
+      )
+        break
+    }
+    const pawn = activePawn(state)!
+    assert.equal(pawn.kind, 'bulwark')
+    const ally = specialTargets(state.pawns, pawn)[0]
+    assert.ok(ally)
+    const tileIndex = [...state.tiles.values()].findIndex(
+      (tile) => tile.q === ally.q && tile.r === ally.r,
+    )
+    await context.setOffline(true)
+    await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+    await page.locator('.end-action:not([disabled])').waitFor()
+    assert.equal(
+      await page.getByRole('meter', { name: 'Health' }).getAttribute('aria-valuemax'),
+      '10',
+    )
+    assert.equal(await page.locator('.health-pips .is-filled').count(), 10)
+    const moves = page.getByRole('button', { name: /^Move to / })
+    assert.ok(await moves.count())
+    for (const label of await moves.evaluateAll((tiles) =>
+      tiles.map((tile) => tile.getAttribute('aria-label')),
+    )) {
+      assert.match(label!, /2 energy$/)
+    }
+    await page.locator('.special-action').click()
+    assert.match(await page.locator('.special-action').innerText(), /Choose ally/)
+    const allies = page.getByRole('button', { name: /^Protect / })
+    assert.equal(await allies.count(), specialTargets(state.pawns, pawn).length)
+    await page.locator('.special-action').click()
+    assert.equal(
+      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+      '3',
+    )
+    await page.locator('.special-action').click()
+    await page.locator('.hex-tile').nth(tileIndex).click()
+    assert.equal(
+      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+      '1',
+    )
+    assert.match(
+      (await page.locator('.hex-tile').nth(tileIndex).getAttribute('aria-label'))!,
+      /protected by bulwark/,
+    )
+    assert.equal(await page.locator('.protection-badge').count(), 1)
+    assert.equal(await moves.count(), 0)
+    await page.reload()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    await moves.first().click()
+    assert.equal(
+      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+      '1',
+    )
+    assert.equal(await moves.count(), 0)
+    assert.equal(await page.locator('.special-action').isDisabled(), true)
+    assert.equal(
+      await page.evaluate(() => {
+        const root = document.documentElement
+        return (
+          root.scrollWidth <= innerWidth &&
+          root.scrollHeight <= innerHeight &&
+          ['.game-shell', '.battlefield', '.command-deck', '.unit-stats'].every((selector) => {
+            const rect = document.querySelector(selector)!.getBoundingClientRect()
+            return (
+              rect.left >= 0 &&
+              rect.top >= 0 &&
+              rect.right <= innerWidth &&
+              rect.bottom <= innerHeight
+            )
+          })
+        )
+      }),
+      true,
+    )
+    await playTurn(page)
+    assert.deepEqual(errors, [])
+  },
+)
 
 test(
   'PWA installs every asset, plays a new route offline, and defers an online update until tabs close',
@@ -762,6 +859,195 @@ test(
     await page.locator('.end-action:not([disabled])').waitFor()
     assert.equal(await page.locator('.player-turn').count(), 0)
     assert.match((await page.locator('[aria-current="step"]').getAttribute('title'))!, /^Your /)
+    assert.deepEqual(errors, [])
+  },
+)
+
+async function finishCampaignLevel(page: Page, id: number, surrender = false) {
+  const level = CAMPAIGN_LEVELS[id - 1]
+  let state = botState(level.seed, level.setup)
+  await page.locator('.end-action:not([disabled])').waitFor()
+  assert.equal(await page.locator('.wordmark-sub').textContent(), 'Level ' + id + ' / 20')
+  for (let step = 0; step < 200 && !state.winner; step++) {
+    const actions: Action[] = surrender
+      ? [{ type: 'endTurn' }]
+      : chooseBotActions(state, huntTheKing)
+    for (const action of actions) {
+      const result = botTransition(state, action)
+      if (action.type === 'endTurn') await page.locator('.end-action').click()
+      else if (action.type === 'act')
+        await page
+          .locator(action.action === 'attack' ? '.attack-action' : '.special-action')
+          .click()
+      else if ('q' in action) {
+        const tile = [...state.tiles.values()].findIndex(
+          (tile) => tile.q === action.q && tile.r === action.r,
+        )
+        await page.locator('.hex-tile').nth(tile).click()
+      } else assert.fail('Unexpected campaign action: ' + action.type)
+      state = result.state
+      if (state.winner) await page.locator('.battle-result').waitFor()
+      else await page.locator('.end-action:not([disabled])').waitFor()
+    }
+  }
+  assert.ok(state.winner)
+  return state.winner
+}
+
+test(
+  'Campaign saves wins offline, guards locked routes, retries losses and finishes at level twenty',
+  { timeout: 150_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await context.setOffline(true)
+    await page.getByRole('link', { name: 'Campaign', exact: true }).click()
+    await page.locator('.campaign-grid').waitFor()
+    assert.equal(await page.locator('.campaign-grid li').count(), 20)
+    assert.equal(await page.locator('.campaign-grid button:disabled').count(), 19)
+    assert.equal(await page.locator('.campaign-grid a').count(), 1)
+    assert.equal(
+      await page.evaluate(() => {
+        const root = document.documentElement
+        return (
+          root.scrollWidth <= innerWidth &&
+          root.scrollHeight <= innerHeight &&
+          [...document.querySelectorAll('.campaign-level')].every((element) => {
+            const rect = element.getBoundingClientRect()
+            return (
+              rect.left >= 0 &&
+              rect.top >= 0 &&
+              rect.right <= innerWidth &&
+              rect.bottom <= innerHeight &&
+              element.scrollHeight <= element.clientHeight
+            )
+          })
+        )
+      }),
+      true,
+      'All twenty campaign tiles must fit a small portrait viewport',
+    )
+    for (const level of ['2', '20', '0', '21', 'bad', '1.5', '01']) {
+      await page.goto(origin + base + 'campaign/' + level)
+      await page.locator('.campaign-grid').waitFor()
+      assert.equal(
+        new URL(page.url()).pathname.replace(new RegExp('/$'), ''),
+        base + 'campaign',
+      )
+      assert.equal(await page.locator('.game-shell').count(), 0)
+    }
+    await page.getByRole('link', { name: /^Level 1:/ }).click()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    const opening = await page.locator('.battlefield').innerHTML()
+    await page.reload()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    assert.equal(await page.locator('.battlefield').innerHTML(), opening)
+    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
+    assert.equal(
+      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
+      null,
+    )
+    await page.getByRole('link', { name: /^Level 1:/ }).click()
+    assert.equal(await finishCampaignLevel(page, 1), 'player')
+    assert.equal(
+      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
+      '1',
+    )
+    await page.getByRole('link', { name: 'Next level' }).click()
+    assert.equal(await finishCampaignLevel(page, 2, true), 'enemy')
+    assert.equal(
+      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
+      '1',
+    )
+    await page.getByRole('button', { name: 'Retry level' }).click()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    const restarted = botState(CAMPAIGN_LEVELS[1].seed, CAMPAIGN_LEVELS[1].setup)
+    const pawn = activePawn(restarted)!
+    assert.equal(
+      await page.locator('[aria-current="step"]').getAttribute('title'),
+      'Your ' + pawn.kind + ' #' + pawn.id,
+    )
+    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
+    await page.getByRole('link', { name: /^Level 1:/ }).click()
+    assert.equal(await finishCampaignLevel(page, 1), 'player')
+    assert.equal(
+      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
+      '1',
+    )
+    await page.getByRole('link', { name: 'Level selection' }).click()
+    await page.locator('.campaign-grid').waitFor()
+    assert.equal(await page.locator('.campaign-grid .is-completed').count(), 1)
+    assert.equal(await page.locator('.campaign-grid a').count(), 2)
+    const reopened = await context.newPage()
+    await reopened.goto(origin + base + 'campaign')
+    await reopened.locator('.campaign-grid').waitFor()
+    assert.equal(await reopened.locator('.campaign-grid a').count(), 2)
+    await reopened.close()
+    await page.evaluate((key) => localStorage.setItem(key, '19'), CAMPAIGN_STORAGE_KEY)
+    await page.goto(origin + base + 'campaign/20')
+    assert.equal(await finishCampaignLevel(page, 20), 'player')
+    assert.equal(await page.locator('.result-card h1').textContent(), 'Campaign complete!')
+    assert.equal(await page.getByRole('link', { name: 'Next level' }).count(), 0)
+    assert.equal(
+      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
+      '20',
+    )
+    await page.getByRole('link', { name: 'Back to campaign' }).click()
+    await page.locator('.campaign-grid').waitFor()
+    assert.equal(await page.locator('.campaign-grid .is-completed').count(), 20)
+    assert.equal(await page.locator('.campaign-grid button:disabled').count(), 0)
+    assert.ok(
+      (await page.locator('.campaign-progress').innerText()).includes('20 / 20 completed'),
+    )
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Campaign handles corrupt or unavailable local storage without losing the current session',
+  { timeout: 90_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    for (const value of ['garbage', '-1', '21', '1.5', '{}']) {
+      await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+        key: CAMPAIGN_STORAGE_KEY,
+        value,
+      })
+      await page.goto(origin + base + 'campaign')
+      await page.locator('.campaign-grid').waitFor()
+      assert.equal(await page.locator('.campaign-grid a').count(), 1)
+    }
+    for (const method of ['getItem', 'setItem'] as const) {
+      const level = method === 'getItem' ? 2 : 1
+      await page.evaluate(
+        ({ key, completed }) => localStorage.setItem(key, String(completed)),
+        { key: CAMPAIGN_STORAGE_KEY, completed: level - 1 },
+      )
+      await page.goto(origin + base + 'campaign')
+      await page.locator('.campaign-grid').waitFor()
+      await page.evaluate((method) => {
+        Storage.prototype[method] = () => {
+          throw new DOMException('Storage blocked', 'SecurityError')
+        }
+      }, method)
+      await page.getByRole('link', { name: new RegExp('^Level ' + level + ':') }).click()
+      assert.equal(await finishCampaignLevel(page, level), 'player')
+      if (method === 'setItem')
+        assert.match(
+          await page.locator('.campaign-result-actions').innerText(),
+          /Progress could not be saved/,
+        )
+      await page.getByRole('link', { name: 'Next level' }).click()
+      await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(
+        await page.locator('.wordmark-sub').textContent(),
+        'Level ' + (level + 1) + ' / 20',
+      )
+      await page.goto(origin + base + 'campaign')
+    }
     assert.deepEqual(errors, [])
   },
 )

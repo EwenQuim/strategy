@@ -1,9 +1,20 @@
-import { BIOMES, MAP_WIDTH, MAP_HEIGHT, hexOf, key, makeMap, reachable } from './hex.ts'
-import { King, Swordsman, RECRUIT_CLASSES, type Pawn, type Side } from './pawns.ts'
+import { BIOMES, MAP_WIDTH, MAP_HEIGHT, hexDist, hexOf, key, makeMap } from './hex.ts'
+import {
+  King,
+  Swordsman,
+  Archer,
+  Magician,
+  Ninja,
+  Bulwark,
+  RECRUIT_CLASSES,
+  type Pawn,
+  type Side,
+} from './pawns.ts'
 import type {
   Action,
   BattleEffect,
   BattleFrame,
+  BattleSetup,
   Biome,
   GameState,
   Transition,
@@ -11,6 +22,7 @@ import type {
 import { SeededRandom, seedState } from './random.ts'
 import {
   canAttack,
+  movementDestinations,
   canUseSpecial,
   chargeDestinations,
   jumpDestinations,
@@ -77,7 +89,11 @@ function advance(state: GameState): GameState {
       log.push('Round ' + round + '. Energy restored; escape chances reset.')
       logCount++
     }
-    if (pawns.some((p) => p.id === order[active])) break
+    const next = pawns.find((p) => p.id === order[active])
+    if (next) {
+      next.protectingId = null
+      break
+    }
     active++
   }
   return {
@@ -95,18 +111,47 @@ export function activePawn(state: GameState): Pawn | undefined {
   return state.pawns.find((p) => p.id === state.order[state.active])
 }
 
-export function initialState(seed: string): GameState {
+const pawnClasses = {
+  king: King,
+  swordsman: Swordsman,
+  archer: Archer,
+  magician: Magician,
+  ninja: Ninja,
+  bulwark: Bulwark,
+}
+
+function validateSetup(setup: BattleSetup): void {
+  if (!setup || !Object.hasOwn(BIOMES, setup.biome))
+    throw new Error('Battle setup must specify a valid biome')
+  for (const side of ['player', 'enemy'] as const) {
+    const army = setup[side]
+    if (!Array.isArray(army) || army.length < 1 || army.length > MAP_WIDTH * 3)
+      throw new RangeError(side + ' army must contain 1 to ' + MAP_WIDTH * 3 + ' units')
+    for (const kind of army) {
+      if (typeof kind !== 'string' || !Object.hasOwn(pawnClasses, kind))
+        throw new Error(side + ' army contains an unknown pawn kind')
+    }
+    if (army.filter((kind) => kind === 'king').length !== 1)
+      throw new Error(side + ' army must contain exactly one king')
+  }
+}
+
+export function initialState(seed: string, setup?: BattleSetup): GameState {
+  if (setup !== undefined) validateSetup(setup)
   const random = new SeededRandom(seedState(seed))
   const biomes = Object.keys(BIOMES) as Biome[]
-  const biome = biomes[Math.floor(random.next() * biomes.length)]
-  const army = [
-    Swordsman,
-    King,
-    ...Array.from(
-      { length: 3 },
-      () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
-    ),
-  ]
+  const biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
+  const playerArmy = setup
+    ? setup.player.map((kind) => pawnClasses[kind])
+    : [
+        Swordsman,
+        King,
+        ...Array.from(
+          { length: 3 },
+          () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
+        ),
+      ]
+  const enemyArmy = setup ? setup.enemy.map((kind) => pawnClasses[kind]) : playerArmy
   const spawn = (side: Side, firstRow: number, firstId: number) => {
     const positions = shuffle(
       Array.from({ length: MAP_WIDTH * 3 }, (_, index) =>
@@ -114,12 +159,15 @@ export function initialState(seed: string): GameState {
       ),
       random,
     )
-    return army.map((Unit, index) => {
+    return (side === 'player' ? playerArmy : enemyArmy).map((Unit, index) => {
       const tile = positions[index]
       return new Unit(firstId + index, tile.q, tile.r, side)
     })
   }
-  const pawns = [...spawn('player', MAP_HEIGHT - 3, 1), ...spawn('enemy', 0, 6)]
+  const pawns = [
+    ...spawn('player', MAP_HEIGHT - 3, 1),
+    ...spawn('enemy', 0, playerArmy.length + 1),
+  ]
   const tiles = makeMap(random, biome, pawns)
   return advance({
     tiles,
@@ -130,6 +178,9 @@ export function initialState(seed: string): GameState {
       random,
     ),
     seed,
+    ...(setup
+      ? { setup: { biome: setup.biome, player: [...setup.player], enemy: [...setup.enemy] } }
+      : {}),
     randomState: random.state,
     active: -1,
     round: 1,
@@ -175,7 +226,7 @@ function reduce(
   action: Action,
   record?: (frame: BattleFrame) => void,
 ): GameState {
-  if (action.type === 'restart') return initialState(state.seed)
+  if (action.type === 'restart') return initialState(state.seed, state.setup)
   const pawn = activePawn(state)
   if (!pawn || state.winner) return state
   if (action.type === 'cancelTargeting') {
@@ -228,15 +279,21 @@ function reduce(
           )
     if (!impacts) return state
     effect = {
-      kind: action.type === 'specialAt' && me.kind === 'magician' ? 'fireball' : 'attack',
+      kind:
+        action.type === 'specialAt'
+          ? me.kind === 'magician'
+            ? 'fireball'
+            : me.kind === 'bulwark'
+              ? 'protect'
+              : 'attack'
+          : 'attack',
       from,
       to: { q: target.q, r: target.r },
       impacts,
     }
   } else if (action.type === 'move') {
     if (state.phase !== 'move' || me.energy <= 0) return state
-    const occupied = new Set(pawns.filter((p) => p.id !== me.id).map((p) => key(p.q, p.r)))
-    const steps = reachable(state.tiles, occupied, me, me.energy).get(key(action.q, action.r))
+    const steps = movementDestinations(state.tiles, pawns, me).get(key(action.q, action.r))
     if (!steps) return state
     me.q = action.q
     me.r = action.r
@@ -244,6 +301,11 @@ function reduce(
     effect = { kind: 'move', from, to: { q: me.q, r: me.r } }
   } else if (action.type !== 'endTurn') return state
 
+  for (const protector of pawns) {
+    if (protector.protectingId === null) continue
+    const ally = pawns.find((p) => p.id === protector.protectingId)
+    if (!ally || hexDist(protector, ally) !== 1) protector.protectingId = null
+  }
   const winner = winnerFrom(pawns)
   const turnEnded = !winner && (action.type === 'endTurn' || me.energy === 0)
   if (turnEnded && finishTurn(me, log) && action.type === 'endTurn') {

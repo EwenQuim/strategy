@@ -5,6 +5,7 @@ import {
   Archer,
   Magician,
   Ninja,
+  Bulwark,
   RECRUIT_CLASSES,
   jumpDestinations,
   hexDist,
@@ -396,6 +397,7 @@ test('Every class has its proposed health, damage, range, and independently clon
     [Archer, 3, 1, 2, 3],
     [Magician, 3, 1, 1, 2],
     [Ninja, 1, 5, 1, 1],
+    [Bulwark, 10, 1, 1, 1],
   ] as const) {
     const pawn = new Ctor(1, 0, 0, 'player')
     assert.equal(pawn.hp, hp)
@@ -885,7 +887,13 @@ test('Seeded armies mirror one King, a guaranteed swordsman, and three random re
   }
   assert.ok(rosters.size > 1)
   assert.ok(duplicateRecruits)
-  assert.deepEqual([...recruits].sort(), ['archer', 'magician', 'ninja', 'swordsman'])
+  assert.deepEqual([...recruits].sort(), [
+    'archer',
+    'bulwark',
+    'magician',
+    'ninja',
+    'swordsman',
+  ])
 })
 
 test('Jump crosses blocked paths, targets only empty passable tiles within three hexes, and costs two energy', () => {

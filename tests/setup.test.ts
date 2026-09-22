@@ -1,0 +1,182 @@
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import {
+  initialState,
+  reducer,
+  activePawn,
+  key,
+  passable,
+  distFrom,
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  type BattleSetup,
+  type Pawn,
+} from '../src/lib/engine/index.ts'
+import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
+import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+import { seedState } from '../src/lib/engine/random.ts'
+
+const encounter = {
+  biome: 'desert',
+  player: ['king', 'swordsman', 'archer'],
+  enemy: ['king', 'swordsman', 'swordsman', 'magician', 'ninja'],
+} as const satisfies BattleSetup
+
+test('Authored setups control both army sizes and classes with legal deterministic spawns', () => {
+  const recruits = ['swordsman', 'archer', 'magician', 'ninja', 'bulwark'] as const
+  const army = (size: number): Pawn['kind'][] => [
+    'king',
+    ...Array.from({ length: size - 1 }, (_, index) => recruits[index % recruits.length]),
+  ]
+  for (const biome of ['verdant', 'mountains', 'desert'] as const) {
+    for (const [player, enemy] of [
+      [1, 1],
+      [3, 7],
+      [8, 2],
+      [24, 24],
+    ]) {
+      const setup: BattleSetup = { biome, player: army(player), enemy: army(enemy) }
+      const before = structuredClone(setup)
+      const state = initialState('authored-battle', setup)
+      assert.deepEqual(setup, before)
+      assert.deepEqual(state, initialState(state.seed, JSON.parse(JSON.stringify(setup))))
+      assert.equal(state.biome, biome)
+      assert.equal(state.tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      assert.equal(state.pawns.length, player + enemy)
+      assert.deepEqual(
+        state.pawns.map((pawn) => pawn.id),
+        Array.from({ length: player + enemy }, (_, i) => i + 1),
+      )
+      assert.equal(new Set(state.pawns.map((pawn) => key(pawn.q, pawn.r))).size, player + enemy)
+      assert.deepEqual(
+        state.order.toSorted((a, b) => a - b),
+        state.pawns.map((pawn) => pawn.id),
+      )
+      assert.equal(state.active, 0)
+      assert.equal(state.round, 1)
+      assert.equal(state.winner, null)
+      for (const side of ['player', 'enemy'] as const) {
+        const pawns = state.pawns.filter((pawn) => pawn.side === side)
+        assert.deepEqual(
+          pawns.map((pawn) => pawn.kind),
+          setup[side],
+        )
+        const firstRow = side === 'player' ? MAP_HEIGHT - 3 : 0
+        for (const pawn of pawns) {
+          assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
+          assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
+          assert.equal(pawn.hp, pawn.maxHp)
+          assert.equal(pawn.energy, pawn.maxEnergy)
+          assert.equal(pawn.escapeChance, 0)
+          assert.equal(pawn.specialUsed, false)
+          assert.equal(pawn.clone().kind, pawn.kind)
+        }
+      }
+      assert.equal(
+        distFrom(state.tiles, [state.pawns[0]]).size,
+        [...state.tiles.values()].filter(passable).length,
+      )
+    }
+  }
+})
+
+test('Setup snapshots survive caller edits, combat changes and restarts without sharing mutable input', () => {
+  const setup = {
+    biome: encounter.biome,
+    player: [...encounter.player],
+    enemy: [...encounter.enemy],
+  }
+  const state = initialState('snapshot', setup)
+  const original = initialState('snapshot', encounter)
+  assert.notEqual(state.setup, setup)
+  assert.notEqual(state.setup?.player, setup.player)
+  assert.notEqual(state.setup?.enemy, setup.enemy)
+  setup.player.length = 0
+  setup.enemy.reverse()
+  state.pawns[0].hp = 1
+  state.pawns.pop()
+  state.tiles.clear()
+  assert.deepEqual(reducer(state, { type: 'restart' }), original)
+  assert.deepEqual(initialState('snapshot', encounter), original)
+})
+
+test('Authored encounters replay and restart identically through AI and local playback', () => {
+  const bot = createBotGame()
+  const openingSides = new Set<string>()
+  for (let index = 0; index < 10; index++) {
+    const seed = 'campaign-' + index
+    const core = initialState(seed, encounter)
+    openingSides.add(activePawn(core)!.side)
+    assert.deepEqual(initialPlayback(seed, 'local', encounter), { state: core, frames: [] })
+    assert.deepEqual(
+      initialPlayback(seed, 'ai', encounter),
+      bot.initialTransition(seed, encounter),
+    )
+    assert.deepEqual(
+      bot.initialState(seed, encounter),
+      bot.initialTransition(seed, encounter).state,
+    )
+    const opening = bot.initialTransition(seed, encounter)
+    assert.deepEqual(bot.transition(opening.state, { type: 'restart' }), opening)
+  }
+  assert.deepEqual(openingSides, new Set(['player', 'enemy']))
+  for (const mode of ['ai', 'local'] as const) {
+    const opening = initialPlayback('campaign-1', mode, encounter)
+    let playback = playbackReducer(opening, { type: 'playbackFinish' }, mode)
+    for (let step = 0; step < 300 && !playback.state.winner; step++) {
+      for (const action of chooseBotActions(playback.state)) {
+        const before = structuredClone(playback)
+        const result = playbackReducer(playback, action, mode)
+        assert.deepEqual(result, playbackReducer(playback, action, mode))
+        assert.deepEqual(structuredClone(playback), before)
+        assert.deepEqual(result.state.setup, encounter)
+        if (result.frames.length)
+          assert.equal(playbackReducer(result, { type: 'endTurn' }, mode), result)
+        playback = playbackReducer(result, { type: 'playbackFinish' }, mode)
+      }
+    }
+    assert.ok(playback.state.winner, mode + ' must finish the authored battle')
+    assert.deepEqual(playbackReducer(playback, { type: 'restart' }, mode), opening)
+  }
+})
+
+test('Invalid setups reject unknown classes, invalid biomes, oversized armies and missing kings', () => {
+  const invalid: unknown[] = [
+    null,
+    {},
+    { ...encounter, biome: 'ocean' },
+    { ...encounter, biome: 'toString' },
+  ]
+  for (const side of ['player', 'enemy']) {
+    for (const army of [
+      [],
+      ['swordsman'],
+      ['king', 'king'],
+      ['king', 'dragon'],
+      ['king', 'toString'],
+      ['king', 1],
+      ['king', undefined],
+      ['king', ...Array(24).fill('swordsman')],
+      new Array(3),
+      'king',
+      null,
+    ])
+      invalid.push({ ...encounter, [side]: army })
+  }
+  for (const setup of invalid)
+    assert.throws(() => initialState('invalid', setup as BattleSetup), /setup|army/)
+})
+
+test('Seed-only battles have stable terrain, armies, initiative and random stream', () => {
+  const states = Array.from({ length: 30 }, (_, index) =>
+    initialState('setup-compatibility-' + index),
+  )
+  assert.equal(
+    seedState(JSON.stringify(states.map((state) => ({ ...state, tiles: [...state.tiles] })))),
+    2719936183,
+  )
+  for (const state of states) {
+    assert.deepEqual(initialState(state.seed, undefined), state)
+    assert.deepEqual(reducer(state, { type: 'restart' }), state)
+  }
+})

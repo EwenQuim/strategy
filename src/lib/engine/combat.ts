@@ -3,6 +3,27 @@ import type { AttackProfile, Pawn } from './pawns.ts'
 import type { SeededRandom } from './random.ts'
 import type { Axial, BattleImpact, Tile } from './types.ts'
 
+export function movementDestinations(
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+  pawn: Pawn,
+): Map<string, number> {
+  const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
+  const steps = reachable(tiles, occupied, pawn, Math.floor(pawn.energy / pawn.moveCost))
+  return new Map([...steps].map(([tile, distance]) => [tile, distance * pawn.moveCost]))
+}
+
+export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
+  return pawns.find(
+    (p) =>
+      p.kind === 'bulwark' &&
+      p.protectingId === target.id &&
+      p.side === target.side &&
+      p.id !== target.id &&
+      hexDist(p, target) === 1,
+  )
+}
+
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
   const distance = hexDist(from, target)
   return (
@@ -18,10 +39,13 @@ export function canUseSpecial(pawn: Pawn): boolean {
 
 export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): Pawn[] {
   if (!canUseSpecial(pawn) || pawn.kind === 'ninja') return []
-  if (pawn.kind === 'king') {
+  if (pawn.kind === 'king' || pawn.kind === 'bulwark') {
     return pawns.filter(
       (p) =>
-        p.side === pawn.side && p.id !== pawn.id && p.hp < p.maxHp && hexDist(pawn, p) === 1,
+        p.side === pawn.side &&
+        p.id !== pawn.id &&
+        hexDist(pawn, p) === 1 &&
+        (pawn.kind === 'bulwark' || p.hp < p.maxHp),
     )
   }
   return pawns.filter((p) => canAttack(pawn, p, from))
@@ -84,6 +108,12 @@ function strike(
   ) {
     log.push(label(target) + ' escapes the attack.')
     return { q: target.q, r: target.r, damage: 0 }
+  }
+  const protector = protectorFor(pawns, target)
+  if (protector) {
+    protector.protectingId = null
+    log.push(label(protector) + ' takes the hit for ' + target.kind + ' #' + target.id + '.')
+    target = protector
   }
   target.hp -= profile.damage
   log.push(
@@ -164,9 +194,21 @@ export function performSpecial(
           random,
         ),
       ]
-    case 'magician':
-      return pawns
-        .filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)
-        .map((enemy) => strike(pawns, pawn, enemy, pawn.attack, log, random))
+    case 'magician': {
+      const enemies = pawns.filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)
+      const impacts: BattleImpact[] = []
+      for (const enemy of enemies) {
+        if (!pawns.includes(enemy)) continue
+        const hit = strike(pawns, pawn, enemy, pawn.attack, log, random)
+        const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
+        if (previous) previous.damage += hit.damage
+        else impacts.push(hit)
+      }
+      return impacts
+    }
+    case 'bulwark':
+      pawn.protectingId = target.id
+      log.push(label(pawn) + ' protects ' + target.kind + ' #' + target.id + '.')
+      return []
   }
 }

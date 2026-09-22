@@ -1,10 +1,16 @@
 import { initialTransition, transition } from './bot.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
-import type { Action, Transition } from './engine/types.ts'
+import type { Action, BattleSetup, Transition } from './engine/types.ts'
 import type { GameMode } from './game-mode.ts'
 
-export function initialPlayback(seed: string, mode: GameMode = 'ai'): Transition {
-  return mode === 'local' ? { state: initialState(seed), frames: [] } : initialTransition(seed)
+export function initialPlayback(
+  seed: string,
+  mode: GameMode = 'ai',
+  setup?: BattleSetup,
+): Transition {
+  return mode === 'local'
+    ? { state: initialState(seed, setup), frames: [] }
+    : initialTransition(seed, setup)
 }
 
 export function playbackReducer(

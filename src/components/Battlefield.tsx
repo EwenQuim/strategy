@@ -1,5 +1,12 @@
 import { useEffect, useRef } from 'react'
-import { key, type Axial, type BattleEffect, type Pawn, type Tile } from '../lib/engine'
+import {
+  key,
+  protectorFor,
+  type Axial,
+  type BattleEffect,
+  type Pawn,
+  type Tile,
+} from '../lib/engine'
 import { Icon, PawnIcon } from './Icon'
 import { armyLabels, type GameMode } from '../lib/game-mode'
 
@@ -110,6 +117,7 @@ export function Battlefield({
       {allTiles.map((tile) => {
         const tileKey = key(tile.q, tile.r)
         const occupant = pawns.find((p) => p.q === tile.q && p.r === tile.r)
+        const protector = occupant && protectorFor(pawns, occupant)
         const selected = active?.q === tile.q && active.r === tile.r
         const target = targets.has(tileKey)
         const previewed = preview?.q === tile.q && preview.r === tile.r
@@ -133,7 +141,8 @@ export function Battlefield({
             occupant.id +
             ', ' +
             occupant.hp +
-            ' health'
+            ' health' +
+            (protector ? ', protected by bulwark #' + protector.id : '')
           : tile.terrain +
             ', column ' +
             (tile.q + Math.floor(tile.r / 2) + 1) +
@@ -210,7 +219,12 @@ export function Battlefield({
         )
       })}
       {pawns.map((pawn) => (
-        <PawnChip key={pawn.id} pawn={pawn} active={active?.id === pawn.id} />
+        <PawnChip
+          key={pawn.id}
+          pawn={pawn}
+          active={active?.id === pawn.id}
+          protectedAlly={!!protectorFor(pawns, pawn)}
+        />
       ))}
       {effect && (
         <g key={effectId} className={'battle-effect effect-' + effect.kind} aria-hidden="true">
@@ -355,7 +369,15 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   )
 }
 
-function PawnChip({ pawn, active }: { pawn: Pawn; active: boolean }) {
+function PawnChip({
+  pawn,
+  active,
+  protectedAlly,
+}: {
+  pawn: Pawn
+  active: boolean
+  protectedAlly: boolean
+}) {
   const enemy = pawn.side === 'enemy'
   return (
     <g
@@ -394,6 +416,16 @@ function PawnChip({ pawn, active }: { pawn: Pawn; active: boolean }) {
       <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill="#e9e5ce">
         {pawn.id.toString().padStart(2, '0')}
       </text>
+      {protectedAlly && (
+        <g
+          className="protection-badge"
+          transform="translate(10 -26) scale(.65)"
+          color="#f6e5a6"
+        >
+          <circle cx="12" cy="12" r="14" fill="#17362b" />
+          <Icon name="shield" />
+        </g>
+      )}
       <rect x="-15" y="24" width="30" height="5" rx="2.5" fill="#17362b" />
       {Array.from({ length: pawn.maxHp }, (_, i) => (
         <rect

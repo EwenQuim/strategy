@@ -6,8 +6,15 @@ export type Terrain = 'plain' | 'forest' | 'mountain' | 'lake' | 'sand'
 export type Tile = { q: number; r: number; terrain: Terrain }
 export type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
 
+export type BattleSetup = {
+  readonly biome: Biome
+  readonly player: readonly Pawn['kind'][]
+  readonly enemy: readonly Pawn['kind'][]
+}
+
 export type GameState = {
   seed: string
+  readonly setup?: BattleSetup
   biome: Biome
   randomState: number
   tiles: Map<string, Tile>
@@ -25,7 +32,7 @@ export type GameState = {
 export type BattleImpact = Axial & { damage: number }
 
 export type BattleEffect = {
-  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'escape'
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'escape' | 'protect'
   from: Axial
   to: Axial
   impacts?: BattleImpact[]

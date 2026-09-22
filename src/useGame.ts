@@ -1,14 +1,14 @@
 import { useEffect, useReducer } from 'react'
 import { initialPlayback, playbackReducer } from './lib/playback.ts'
 import type { GameMode } from './lib/game-mode.ts'
-import type { Transition } from './lib/engine/types.ts'
+import type { BattleSetup, Transition } from './lib/engine/types.ts'
 
-export function useGame(seed: string, mode: GameMode) {
+export function useGame(seed: string, mode: GameMode, setup?: BattleSetup) {
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: Parameters<typeof playbackReducer>[1]) =>
       playbackReducer(playback, action, mode),
     seed,
-    (seed) => initialPlayback(seed, mode),
+    (seed) => initialPlayback(seed, mode, setup),
   )
   const frame = playback.frames[0]
 
