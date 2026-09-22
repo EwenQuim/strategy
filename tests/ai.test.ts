@@ -45,6 +45,25 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
   return state
 }
 
+test('Equally valued attacks keep candidate order at every difficulty', () => {
+  for (const reversed of [false, true]) {
+    const targets = [new Archer(4, 1, 0, 'player', 1, 0), new Archer(5, 0, 1, 'player', 1, 0)]
+    if (reversed) targets.reverse()
+    const state = battle([
+      new Swordsman(1, 0, 0, 'enemy', 5, 1),
+      new King(2, -6, 0, 'enemy'),
+      new King(3, 6, 0, 'player'),
+      ...targets,
+    ])
+    for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
+      assert.deepEqual(chooseBotActions(state, level), [
+        { type: 'act', action: 'attack' },
+        { type: 'attackAt', q: targets[0].q, r: targets[0].r },
+      ])
+    }
+  }
+})
+
 test('AI battles start with an untouched human turn and restart with the same order', () => {
   for (let seed = 0; seed < 30; seed++) {
     const game = createBotGame()

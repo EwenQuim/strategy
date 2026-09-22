@@ -159,6 +159,25 @@ export function performRally(pawns: Pawn[], pawn: Pawn, log: string[]): boolean 
   return true
 }
 
+function performFireball(
+  pawns: Pawn[],
+  pawn: Pawn,
+  target: Pawn,
+  log: string[],
+  random: SeededRandom,
+): BattleImpact[] {
+  const enemies = pawns.filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)
+  const impacts: BattleImpact[] = []
+  for (const enemy of enemies) {
+    if (!pawns.includes(enemy)) continue
+    const hit = strike(pawns, pawn, enemy, pawn.attack, log, random)
+    const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
+    if (previous) previous.damage += hit.damage
+    else impacts.push(hit)
+  }
+  return impacts
+}
+
 export function performSpecial(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
@@ -194,18 +213,8 @@ export function performSpecial(
           random,
         ),
       ]
-    case 'magician': {
-      const enemies = pawns.filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)
-      const impacts: BattleImpact[] = []
-      for (const enemy of enemies) {
-        if (!pawns.includes(enemy)) continue
-        const hit = strike(pawns, pawn, enemy, pawn.attack, log, random)
-        const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
-        if (previous) previous.damage += hit.damage
-        else impacts.push(hit)
-      }
-      return impacts
-    }
+    case 'magician':
+      return performFireball(pawns, pawn, target, log, random)
     case 'bulwark':
       pawn.protectingId = target.id
       log.push(label(pawn) + ' protects ' + target.kind + ' #' + target.id + '.')

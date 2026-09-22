@@ -9,7 +9,7 @@ import {
 } from './combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import type { Pawn, Side } from './pawns.ts'
-import type { Action, GameState } from './types.ts'
+import type { Action, Axial, GameState } from './types.ts'
 
 export type BotOptions = {
   depth: 1 | 2 | 3
@@ -26,7 +26,7 @@ export const BOT_LEVELS = {
 
 export type BotDifficulty = keyof typeof BOT_LEVELS
 
-function candidates(state: GameState): Action[][] {
+function generateCandidates(state: GameState): Action[][] {
   const pawn = activePawn(state)!
   const actions: Action[][] = [[{ type: 'endTurn' }]]
   if (pawn.energy <= 0) return actions
@@ -74,56 +74,78 @@ function candidates(state: GameState): Action[][] {
   return actions
 }
 
-function apply(state: GameState, actions: Action[]): GameState {
-  return actions.reduce(reducer, state)
+function damageFromPosition(
+  attacker: Pawn,
+  target: Pawn,
+  targets: Pawn[],
+  from: Axial,
+  movementCost: number,
+): number {
+  const remainingEnergy = attacker.energy - movementCost
+  let damage = 0
+  if (canAttack(attacker, target, from)) {
+    damage = remainingEnergy * attacker.attack.damage
+    if (attacker.kind === 'swordsman') {
+      const walkingCostBeforeCharge = Math.max(0, movementCost - 2)
+      const chargeCost = walkingCostBeforeCharge + attacker.special.cost
+      if (attacker.energy >= chargeCost) {
+        const hitsIncludingCharge = 1 + attacker.energy - chargeCost
+        damage = Math.max(damage, hitsIncludingCharge * attacker.attack.damage)
+      }
+    }
+  }
+  if (
+    attacker.kind === 'magician' &&
+    remainingEnergy >= attacker.special.cost &&
+    targets.some(
+      (neighbor) => hexDist(neighbor, target) <= 1 && canAttack(attacker, neighbor, from),
+    )
+  ) {
+    const fireballHits = Math.floor(remainingEnergy / attacker.special.cost)
+    damage = Math.max(damage, fireballHits)
+  }
+  return damage
 }
 
-function threats(state: GameState, side: Side): Map<number, number> {
+function estimateIncomingDamage(state: GameState, side: Side): Map<number, number> {
   const targets = state.pawns.filter((p) => p.side === side)
-  const damage = new Map(targets.map((p) => [p.id, 0]))
-  const smallestHit = new Map<number, number>()
-  const lastThreat = new Map<number, number>()
+  const damageByTarget = new Map(targets.map((p) => [p.id, 0]))
+  const smallestHitByTarget = new Map<number, number>()
+  const lastAttackerTurn = new Map<number, number>()
   const turnOffset = (id: number) =>
     (state.order.indexOf(id) - state.active + state.order.length) % state.order.length
   for (const foe of state.pawns.filter((p) => p.side !== side)) {
     const attacker = foe.clone()
-    const nextRound = state.order.indexOf(foe.id) < state.active
-    attacker.energy = nextRound ? attacker.maxEnergy : attacker.energy
+    const actsNextRound = state.order.indexOf(foe.id) < state.active
+    attacker.energy = actsNextRound ? attacker.maxEnergy : attacker.energy
     if (attacker.energy <= 0) continue
     const moves = movementDestinations(state.tiles, state.pawns, attacker)
     const jumps = jumpDestinations(state.tiles, state.pawns, attacker)
     for (const target of targets) {
-      let worst = 0
+      let maxDamage = 0
       for (const [position, cost] of moves) {
         const from = state.tiles.get(position) ?? attacker
-        const energy = attacker.energy - cost
-        if (canAttack(attacker, target, from)) {
-          worst = Math.max(worst, energy * attacker.attack.damage)
-          const chargeCost = Math.max(0, cost - 2) + attacker.special.cost
-          if (attacker.kind === 'swordsman' && attacker.energy >= chargeCost)
-            worst = Math.max(worst, (1 + attacker.energy - chargeCost) * attacker.attack.damage)
-        }
-        if (
-          attacker.kind === 'magician' &&
-          energy >= attacker.special.cost &&
-          targets.some((p) => hexDist(p, target) <= 1 && canAttack(attacker, p, from))
-        ) {
-          worst = Math.max(worst, Math.floor(energy / attacker.special.cost))
-        }
+        maxDamage = Math.max(
+          maxDamage,
+          damageFromPosition(attacker, target, targets, from, cost),
+        )
       }
       if (jumps.some((from) => canAttack(attacker, target, from))) {
-        worst = Math.max(
-          worst,
+        maxDamage = Math.max(
+          maxDamage,
           (attacker.energy - attacker.special.cost) * attacker.attack.damage,
         )
       }
-      damage.set(target.id, damage.get(target.id)! + worst)
-      if (worst > 0) {
-        smallestHit.set(
+      damageByTarget.set(target.id, damageByTarget.get(target.id)! + maxDamage)
+      if (maxDamage > 0) {
+        smallestHitByTarget.set(
           target.id,
-          Math.min(smallestHit.get(target.id) ?? Infinity, attacker.attack.damage),
+          Math.min(smallestHitByTarget.get(target.id) ?? Infinity, attacker.attack.damage),
         )
-        lastThreat.set(target.id, Math.max(lastThreat.get(target.id) ?? 0, turnOffset(foe.id)))
+        lastAttackerTurn.set(
+          target.id,
+          Math.max(lastAttackerTurn.get(target.id) ?? 0, turnOffset(foe.id)),
+        )
       }
     }
   }
@@ -131,51 +153,122 @@ function threats(state: GameState, side: Side): Map<number, number> {
     const guard = protectorFor(state.pawns, target)
     if (
       guard &&
-      damage.get(guard.id)! < guard.hp &&
-      turnOffset(guard.id) > (lastThreat.get(target.id) ?? -1)
+      damageByTarget.get(guard.id)! < guard.hp &&
+      turnOffset(guard.id) > (lastAttackerTurn.get(target.id) ?? -1)
     ) {
-      const hit = smallestHit.get(target.id) ?? 0
-      damage.set(target.id, Math.max(0, damage.get(target.id)! - hit))
-      damage.set(guard.id, damage.get(guard.id)! + hit)
+      const hit = smallestHitByTarget.get(target.id) ?? 0
+      damageByTarget.set(target.id, Math.max(0, damageByTarget.get(target.id)! - hit))
+      damageByTarget.set(guard.id, damageByTarget.get(guard.id)! + hit)
     }
   }
-  return damage
+  return damageByTarget
 }
 
-function evaluate(
+const SCORE = {
+  victory: 1_000_000,
+  king: 1000,
+  kingHealth: 30,
+  unit: 12,
+  attackDamage: 3,
+  unitHealth: 4,
+  kingIncomingDamage: 120,
+  kingLethalThreat: 100_000,
+  kingAllyDistance: 0.5,
+  attackDistance: 8,
+}
+const UNREACHABLE_DISTANCE = 100
+
+function evaluatePosition(
   state: GameState,
   actor: Pawn,
   caution: number,
   distance: Map<string, number>,
 ): number {
-  if (state.winner) return state.winner === actor.side ? 1_000_000 : -1_000_000
+  if (state.winner) return state.winner === actor.side ? SCORE.victory : -SCORE.victory
   const sameTurn = activePawn(state)?.id === actor.id
   const settled = sameTurn ? reducer(state, { type: 'endTurn' }) : state
-  const danger = threats(settled, actor.side)
+  const danger = estimateIncomingDamage(settled, actor.side)
   let score = 0
   for (const pawn of settled.pawns) {
     const allied = pawn.side === actor.side
     const value =
-      pawn.kind === 'king' ? 1000 + pawn.hp * 30 : 12 + pawn.attack.damage * 3 + pawn.hp * 4
+      pawn.kind === 'king'
+        ? SCORE.king + pawn.hp * SCORE.kingHealth
+        : SCORE.unit + pawn.attack.damage * SCORE.attackDamage + pawn.hp * SCORE.unitHealth
     score += allied ? value : -value
     if (!allied) continue
     const incoming = danger.get(pawn.id) ?? 0
     if (pawn.kind === 'king') {
-      score -= incoming * 120
-      if (incoming >= pawn.hp) score -= 100_000
+      score -= incoming * SCORE.kingIncomingDamage
+      if (incoming >= pawn.hp) score -= SCORE.kingLethalThreat
     } else {
       const expected = incoming * (1 - pawn.escapeChance / 100)
-      score -= caution * (Math.min(pawn.hp, expected) * 4 + (expected >= pawn.hp ? value : 0))
+      score -=
+        caution *
+        (Math.min(pawn.hp, expected) * SCORE.unitHealth + (expected >= pawn.hp ? value : 0))
     }
   }
   const pawn = settled.pawns.find((p) => p.id === actor.id)!
   const allies = settled.pawns.filter((p) => p.side === pawn.side && p.id !== pawn.id)
   if (pawn.kind === 'king' && allies.length) {
-    score -= Math.min(...allies.map((p) => hexDist(pawn, p))) * 0.5
+    score -= Math.min(...allies.map((p) => hexDist(pawn, p))) * SCORE.kingAllyDistance
   } else {
-    score -= (distance.get(key(pawn.q, pawn.r)) ?? 100) * 8
+    score -= (distance.get(key(pawn.q, pawn.r)) ?? UNREACHABLE_DISTANCE) * SCORE.attackDistance
   }
   return score
+}
+
+function distancesToAttack(state: GameState, pawn: Pawn): Map<string, number> {
+  const occupied = new Set(
+    state.pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)),
+  )
+  const foes = state.pawns.filter((p) => p.side !== pawn.side)
+  const paths = new Map([...state.tiles].filter(([position]) => !occupied.has(position)))
+  return distFrom(
+    paths,
+    [...paths.values()].filter(
+      (tile) => passable(tile) && foes.some((foe) => canAttack(pawn, foe, tile)),
+    ),
+  )
+}
+
+function rankCandidates(states: GameState[], score: (state: GameState) => number) {
+  return generateCandidates(states[0])
+    .map((actions) => {
+      const outcomes = states.map((state) => actions.reduce(reducer, state))
+      return {
+        actions,
+        states: outcomes,
+        score: outcomes.reduce((sum, state) => sum + score(state), 0) / outcomes.length,
+      }
+    })
+    .sort((a, b) => b.score - a.score)
+}
+
+function searchTurn(
+  state: GameState,
+  depth: number,
+  beamWidth: number,
+  startingState: GameState,
+  score: (state: GameState) => number,
+): number {
+  if (
+    depth === 0 ||
+    state.winner ||
+    state.round !== startingState.round ||
+    activePawn(state)?.id !== activePawn(startingState)?.id
+  )
+    return score(state)
+
+  const ranked = rankCandidates([state], score)
+  if (depth === 1) return ranked[0].score
+  return Math.max(
+    ...ranked
+      .slice(0, beamWidth)
+      .map((candidate) =>
+        searchTurn(candidate.states[0], depth - 1, beamWidth, startingState, score),
+      ),
+  )
 }
 
 export function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
@@ -183,58 +276,24 @@ export function chooseTacticalActions(state: GameState, options: BotOptions): Ac
   if (!pawn || state.winner) return []
   if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-  const occupied = new Set(
-    state.pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)),
-  )
-  const foes = state.pawns.filter((p) => p.side !== pawn.side)
-  const paths = new Map([...state.tiles].filter(([position]) => !occupied.has(position)))
-  const distance = distFrom(
-    paths,
-    [...paths.values()].filter(
-      (tile) => passable(tile) && foes.some((foe) => canAttack(pawn, foe, tile)),
-    ),
-  )
-  const score = (next: GameState) => evaluate(next, pawn, options.caution, distance)
-  const rank = (states: GameState[]) =>
-    candidates(states[0])
-      .map((actions) => {
-        const next = states.map((s) => apply(s, actions))
-        return {
-          actions,
-          states: next,
-          score: next.reduce((sum, s) => sum + score(s), 0) / next.length,
-        }
-      })
-      .sort((a, b) => b.score - a.score)
-  const search = (current: GameState, depth: number): number => {
-    if (
-      depth === 0 ||
-      current.winner ||
-      current.round !== state.round ||
-      activePawn(current)?.id !== pawn.id
-    )
-      return score(current)
-    const ranked = rank([current])
-    if (depth === 1) return ranked[0].score
-    return Math.max(
-      ...ranked
-        .slice(0, options.beamWidth)
-        .map((candidate) => search(candidate.states[0], depth - 1)),
-    )
-  }
+  const distance = distancesToAttack(state, pawn)
+  const score = (next: GameState) => evaluatePosition(next, pawn, options.caution, distance)
   // Separate analysis streams keep the bot from seeing the battle's future Escape rolls.
   const samples = Array.from({ length: options.samples }, (_, randomState) => ({
     ...state,
     randomState,
   }))
-  const ranked = rank(samples)
+  const ranked = rankCandidates(samples, score)
   if (options.depth === 1) return ranked[0].actions
   let best = ranked[0]
   let bestScore = -Infinity
   for (const candidate of ranked.slice(0, options.beamWidth)) {
     const value =
-      candidate.states.reduce((sum, next) => sum + search(next, options.depth - 1), 0) /
-      candidate.states.length
+      candidate.states.reduce(
+        (sum, next) =>
+          sum + searchTurn(next, options.depth - 1, options.beamWidth, state, score),
+        0,
+      ) / candidate.states.length
     if (value > bestScore) {
       best = candidate
       bestScore = value

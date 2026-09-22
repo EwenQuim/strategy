@@ -131,6 +131,22 @@ function shapeFits(
   })
 }
 
+function tryPlaceConnectedTerrain(
+  tiles: Map<string, Tile>,
+  allTiles: Tile[],
+  featureTiles: Tile[],
+  terrain: Terrain,
+): boolean {
+  const previousTerrain = featureTiles.map((tile) => tile.terrain)
+  for (const tile of featureTiles) tile.terrain = terrain
+  const land = allTiles.filter(passable)
+  if (distFrom(tiles, land.slice(0, 1)).size === land.length) return true
+  featureTiles.forEach((tile, index) => {
+    tile.terrain = previousTerrain[index]
+  })
+  return false
+}
+
 function placeFeature(
   tiles: Map<string, Tile>,
   anchors: Tile[],
@@ -149,15 +165,7 @@ function placeFeature(
         const anchor = anchors[(offset + a) % anchors.length]
         if (!shapeFits(tiles, reserved, anchor, shape, feature.terrain)) continue
         const placedTiles = shape.map(([q, r]) => tiles.get(key(anchor.q + q, anchor.r + r))!)
-        const previous = placedTiles.map((tile) => tile.terrain)
-        for (const tile of placedTiles) tile.terrain = feature.terrain
-        const land = anchors.filter(passable)
-        if (distFrom(tiles, land.slice(0, 1)).size !== land.length) {
-          placedTiles.forEach((tile, index) => {
-            tile.terrain = previous[index]
-          })
-          continue
-        }
+        if (!tryPlaceConnectedTerrain(tiles, anchors, placedTiles, feature.terrain)) continue
         placed = true
         break
       }

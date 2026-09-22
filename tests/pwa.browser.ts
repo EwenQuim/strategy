@@ -418,7 +418,7 @@ test(
     assert.ok(waitingCaches.includes(next.cacheName))
     const notice = page.getByRole('status').filter({ hasText: 'Update ready.' })
     await notice.waitFor()
-    assert.match(await notice.innerText(), /Close all Hex Strategy tabs and app windows/)
+    assert.match(await notice.innerText(), /Finish your match, then tap Update now/)
     assert.equal(
       await notice.evaluate((element) => {
         const rect = element.getBoundingClientRect()

@@ -35,6 +35,55 @@ function duel(side: Side): GameState {
   }
 }
 
+test('Actions rejected by the targeting phase leave state and playback untouched', () => {
+  for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark]) {
+    for (const [phase, actions] of [
+      [
+        'move',
+        [
+          { type: 'attackAt', q: 2, r: 0 },
+          { type: 'specialAt', q: 2, r: 0 },
+        ],
+      ],
+      [
+        'attack',
+        [
+          { type: 'move', q: 1, r: 0 },
+          { type: 'specialAt', q: 2, r: 0 },
+        ],
+      ],
+      [
+        'special',
+        [
+          { type: 'move', q: 1, r: 0 },
+          { type: 'attackAt', q: 2, r: 0 },
+        ],
+      ],
+      [
+        'charge',
+        [
+          { type: 'move', q: 1, r: 0 },
+          { type: 'attackAt', q: 2, r: 0 },
+        ],
+      ],
+    ] as const) {
+      const state = { ...duel('player'), phase }
+      state.pawns[0] = new Unit(1, 0, 0, 'player')
+      const original = structuredClone(state)
+      for (const action of actions) {
+        const result = transition(state, action)
+        assert.equal(result.state, state)
+        assert.deepEqual(result.frames, [])
+      }
+      if (phase !== 'move') {
+        for (const action of ['attack', 'special'] as const)
+          assert.equal(reducer(state, { type: 'act', action }), state)
+      }
+      assert.deepEqual(structuredClone(state), original)
+    }
+  }
+})
+
 test('Core initialization leaves both armies untouched and permits either side to start', () => {
   const sides = new Set<Side>()
   for (let index = 0; index < 30; index++) {
