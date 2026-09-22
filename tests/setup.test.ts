@@ -81,6 +81,53 @@ test('Authored setups control both army sizes and classes with legal determinist
   }
 })
 
+test('Player Bulwarks start on row 10 in seeded games and keep their positions on restart', () => {
+  const columns = new Set<number>()
+  for (const mode of ['ai', 'local'] as const) {
+    for (let index = 0; index < 100; index++) {
+      const opening = initialPlayback('bulwark-row-' + index, mode)
+      const { state } = opening
+      for (const pawn of state.pawns.filter(
+        (p) => p.side === 'player' && p.kind === 'bulwark',
+      )) {
+        assert.equal(pawn.r, 9)
+        assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
+        columns.add(pawn.q)
+      }
+      assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
+      assert.deepEqual(playbackReducer(opening, { type: 'restart' }, mode), opening)
+    }
+  }
+  assert.ok(columns.size > 1)
+})
+
+test('Row 10 is reserved for all player Bulwarks before placing the rest of a full army', () => {
+  const setup: BattleSetup = {
+    biome: 'desert',
+    player: [
+      'king',
+      ...Array<Pawn['kind']>(15).fill('swordsman'),
+      ...Array<Pawn['kind']>(8).fill('bulwark'),
+    ],
+    enemy: ['king'],
+  }
+  const state = initialState('full-bulwark-row', setup)
+  const bulwarks = state.pawns.filter((p) => p.kind === 'bulwark')
+  assert.equal(bulwarks.length, 8)
+  assert.ok(bulwarks.every((p) => p.r === 9))
+  assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
+  assert.deepEqual(reducer(state, { type: 'restart' }), state)
+  assert.throws(
+    () =>
+      initialState('too-many-bulwarks', {
+        biome: 'desert',
+        player: ['king', ...Array<Pawn['kind']>(9).fill('bulwark')],
+        enemy: ['king'],
+      }),
+    /Bulwarks/,
+  )
+})
+
 test('Setup snapshots survive caller edits, combat changes and restarts without sharing mutable input', () => {
   const setup = {
     biome: encounter.biome,
@@ -174,7 +221,7 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
   )
   assert.equal(
     seedState(JSON.stringify(states.map((state) => ({ ...state, tiles: [...state.tiles] })))),
-    2719936183,
+    249675184,
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

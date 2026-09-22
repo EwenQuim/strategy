@@ -163,6 +163,12 @@ function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
       }
     }
     if (kings !== 1) throw new Error(side + ' army must contain exactly one king')
+    if (
+      !tiles &&
+      side === 'player' &&
+      army.filter((unit) => unit === 'bulwark').length > MAP_WIDTH
+    )
+      throw new RangeError('Player Bulwarks must fit on one starting row')
   }
 }
 
@@ -204,8 +210,18 @@ export function initialState(seed: string, setup?: BattleSetup): GameState {
         ),
         random,
       )
-      return (side === 'player' ? playerArmy : enemyArmy).map((Unit, index) => {
-        const tile = positions[index]
+      const army = side === 'player' ? playerArmy : enemyArmy
+      const bulwarkPositions =
+        side === 'player'
+          ? positions
+              .filter((tile) => tile.r === firstRow)
+              .slice(0, army.filter((Unit) => Unit === Bulwark).length)
+          : []
+      const otherPositions = positions.filter((tile) => !bulwarkPositions.includes(tile))
+      return army.map((Unit, index) => {
+        const tile = (
+          side === 'player' && Unit === Bulwark ? bulwarkPositions : otherPositions
+        ).shift()!
         return new Unit(firstId + index, tile.q, tile.r, side)
       })
     }
