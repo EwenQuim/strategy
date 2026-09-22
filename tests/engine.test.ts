@@ -669,10 +669,12 @@ test('Enemy playback records each action in order without changing seeded result
           if (frame.effect) {
             const before = result.frames[i - 1].state
             assert.equal(activePawn(before)?.id, activePawn(frame.state)?.id)
-            assert.ok(activePawn(before)!.energy > activePawn(frame.state)!.energy)
-            if (frame.effect.kind === 'move')
+            const gained =
+              activePawn(frame.state)!.bonusEnergy - activePawn(before)!.bonusEnergy
+            assert.ok(activePawn(before)!.energy + gained > activePawn(frame.state)!.energy)
+            if (frame.effect.kind !== 'move') assert.ok(frame.state.logCount > before.logCount)
+            else if (!gained && !frame.effect.impacts?.length)
               assert.equal(frame.state.logCount, before.logCount)
-            else assert.ok(frame.state.logCount > before.logCount)
           }
         }
         state = result.state
@@ -818,7 +820,7 @@ test('Every seed places distinct pawns in their own three-row starting area', ()
       const tileKey = key(pawn.q, pawn.r)
       assert.equal(
         state.tiles.get(tileKey)?.terrain,
-        state.biome === 'desert' ? 'sand' : 'plain',
+        state.biome === 'desert' ? 'sand' : state.biome === 'volcano' ? 'basalt' : 'plain',
       )
       assert.equal(pawn.hp, pawn.maxHp)
       assert.equal(pawn.energy, pawn.maxEnergy)

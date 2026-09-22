@@ -15,6 +15,7 @@ import { Icon, PawnIcon } from './Icon'
 import {
   activePawn,
   BIOMES,
+  TILE_FEATURES,
   King,
   RECRUIT_CLASSES,
   canAttack,
@@ -60,7 +61,9 @@ export function Game({
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
   const hasAllies = !!pawn && specialTargets(state.pawns, pawn).length > 0
-  const hasFoes = !!pawn && state.pawns.some((target) => canAttack(pawn, target))
+  const hasFoes =
+    !!pawn &&
+    state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
   const myTurn = !!pawn && (local || pawn.side === 'player') && !state.winner && !playing
   const attacking = myTurn && state.phase === 'attack'
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
@@ -314,7 +317,7 @@ export function Game({
                 </div>
                 <div className="unit-stat">
                   <span className="stat-label">
-                    Energy{' '}
+                    Energy{pawn.bonusEnergy ? ' +' + pawn.bonusEnergy : ''}{' '}
                     <b>
                       {pawn.energy}/{pawn.maxEnergy}
                     </b>
@@ -344,22 +347,20 @@ export function Game({
             )}
           </div>
           <div className="action-grid">
-            {(attacking || hasFoes) && (
-              <button
-                className={'action-button attack-action' + (attacking ? ' is-selected' : '')}
-                disabled={!myTurn || usingSpecial || !pawn?.energy}
-                onClick={() =>
-                  dispatch(
-                    attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' },
-                  )
-                }
-                aria-pressed={attacking}
-              >
-                <Icon name={attacking ? 'close' : 'sword'} />
-                <span>{attacking ? 'Cancel' : 'Attack'}</span>
-                <small>{attacking ? 'Choose enemy' : '1 energy'}</small>
-              </button>
-            )}
+            <button
+              className={'action-button attack-action' + (attacking ? ' is-selected' : '')}
+              disabled={!myTurn || usingSpecial || !pawn?.energy || (!attacking && !hasFoes)}
+              onClick={() =>
+                dispatch(
+                  attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' },
+                )
+              }
+              aria-pressed={attacking}
+            >
+              <Icon name={attacking ? 'close' : 'sword'} />
+              <span>{attacking ? 'Cancel' : 'Attack'}</span>
+              <small>{attacking ? 'Choose enemy' : '1 energy'}</small>
+            </button>
             <button
               className={'action-button special-action' + (usingSpecial ? ' is-selected' : '')}
               disabled={
@@ -451,7 +452,7 @@ export function Game({
               {setup && !campaignLevel && !local && 'AI difficulty: ' + difficulty + '. '}
               {setup?.map
                 ? 'Terrain and starting positions are designed for this level; the biome sets its visual theme.'
-                : 'Verdant Vale has lakes and forests, Mountain Ranges has mountain chains, and Open Desert is all sand with no obstacles.'}
+                : 'Verdant Vale has lakes and forests, Mountain Ranges has mountain chains, Open Desert has oases and rare decorative palms, and Ember Caldera has lava pools over dark basalt.'}
             </p>
             <section>
               <Icon name="energy" />
@@ -475,6 +476,26 @@ export function Game({
                   Protect selects an adjacent ally; a shield marks the protected unit. Charge
                   first asks for a destination, then an adjacent enemy. Cancelling either step
                   costs nothing. Ranged attacks can pass over terrain.
+                </p>
+              </div>
+            </section>
+            <section>
+              <Icon name="hex" />
+              <div>
+                <h3>Control the center.</h3>
+                <p>
+                  Random maps have zero (50%), one (40%), or two (10%) special tiles, only in
+                  the two middle rows.
+                </p>
+                {Object.values(TILE_FEATURES).map((feature) => (
+                  <p key={feature.name}>
+                    <b>{feature.name}.</b> {feature.description}
+                  </p>
+                ))}
+                <p>
+                  Lava costs 1 health for every tile entered, including during Charge. Damage
+                  cannot be escaped or redirected by Protect and can be lethal. Jump crosses
+                  lava safely but landing on it deals damage. Forests and palms are decorative.
                 </p>
               </div>
             </section>

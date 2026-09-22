@@ -77,11 +77,21 @@ Authored maps and positions are loaded literally from the setup, independently o
 
 Level 6, High Pass, demonstrates a two-row mountain wall with a narrow opening: walking units must use the pass, while archers can shoot across the mountains.
 
+Random maps can also use the volcano biome, Ember Caldera: basalt ground with passable lava pools. Lava deals 1 unavoidable damage per tile entered, including walking and Charge; Jump only triggers the landing tile. A lethal crossing ends the unit's turn, or the battle if it kills a king. Movement chooses a shortest survivable route, preferring less lava on equally short paths. Deserts contain small lakes and rare, purely decorative palms.
+
+Generated maps have no special tiles 50% of the time, one 40%, and two 10%. These tiles are restricted to rows 6 and 7 (zero-based rows 5 and 6), never overlap hazards or starting units, and use distinct types:
+
+- Watchtower: +1 maximum basic-attack range for Archers and Magicians, without changing minimum range or specials.
+- Healing spring: +1 health, capped at maximum, at a unit's next activation after staying on it. Leaving cancels the pending healing.
+- Power rune: consumed on entry for +2 energy usable in the current round only. Normal energy capacity returns next round.
+
+Authored maps additionally accept `p` (decorative palm), `b` (basalt), `l` (lava), `W` (watchtower), `H` (healing spring), and `R` (power rune). Special symbols sit on plain ground and obey the same two-tile, center-row limit. Their ground color follows the biome.
+
 The same optional setup is accepted by bot `initialState(seed, setup)` / `initialTransition(seed, setup)`, `initialPlayback(seed, mode, setup)`, and `useGame(seed, mode, setup)`. Campaign routes pass their encounter directly and remount the game between levels. Custom setups are not encoded in the existing random-game URLs.
 
 ## Campaign
 
-Choose Campaign on the home screen to play 20 fixed AI encounters across all three biomes. Level 1 starts unlocked; winning unlocks the next level. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
+Choose Campaign on the home screen to play 20 fixed AI encounters across all four biomes. Volcanic encounters are level 9 (Ember Crossing), level 15 (Cinder Keep), and level 18 (Caldera Run). Each special tile appears exactly once: the watchtower in level 5, the healing spring in level 14, and the power rune in level 15. Level 1 starts unlocked; winning unlocks the next level. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
 
 Completed levels are stored in localStorage under `hexmate:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 

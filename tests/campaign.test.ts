@@ -6,7 +6,13 @@ import {
   isLevelUnlocked,
   completeCampaignLevel,
 } from '../src/lib/campaign.ts'
-import { initialState as coreState, MAP_HEIGHT } from '../src/lib/engine/index.ts'
+import {
+  initialState as coreState,
+  MAP_HEIGHT,
+  distFrom,
+  key,
+  type TileFeature,
+} from '../src/lib/engine/index.ts'
 import { initialState, transition } from '../src/lib/bot.ts'
 import { campaignActions } from './campaign-actions.ts'
 import levels from '../src/lib/campaign-levels.json' with { type: 'json' }
@@ -73,7 +79,47 @@ test('The campaign has twenty distinct deterministic AI levels that can finish',
       initialState(level.seed, level.setup),
     )
   }
-  assert.deepEqual(biomes, new Set(['verdant', 'mountains', 'desert']))
+  assert.deepEqual(biomes, new Set(['verdant', 'mountains', 'desert', 'volcano']))
+})
+
+test('Three volcanic encounters and one of each special tile have safe, contested approaches', () => {
+  const volcanic = CAMPAIGN_LEVELS.filter((level) => level.setup.biome === 'volcano')
+  assert.deepEqual(
+    volcanic.map((level) => level.id),
+    [9, 15, 18],
+  )
+  const features: Record<TileFeature, number[]> = { watchtower: [], spring: [], rune: [] }
+  for (const level of CAMPAIGN_LEVELS) {
+    const state = coreState(level.seed, level.setup)
+    const safe = new Map([...state.tiles].filter(([, tile]) => tile.terrain !== 'lava'))
+    const specials = [...state.tiles.values()].filter((tile) => tile.feature)
+    assert.ok(specials.length <= 2)
+    for (const tile of specials) {
+      features[tile.feature!].push(level.id)
+      assert.ok(tile.r === 5 || tile.r === 6)
+      assert.ok(!state.pawns.some((pawn) => pawn.q === tile.q && pawn.r === tile.r))
+      for (const side of ['player', 'enemy'] as const) {
+        const king = state.pawns.find((pawn) => pawn.kind === 'king' && pawn.side === side)!
+        assert.ok(distFrom(safe, [king]).has(key(tile.q, tile.r)))
+      }
+    }
+    if (state.biome !== 'volcano') continue
+    assert.ok([...state.tiles.values()].some((tile) => tile.terrain === 'lava'))
+    assert.ok(
+      [...state.tiles.values()].every(
+        (tile) => tile.terrain === 'basalt' || tile.terrain === 'lava' || tile.feature,
+      ),
+    )
+    assert.ok(
+      state.pawns.every((pawn) => state.tiles.get(key(pawn.q, pawn.r))!.terrain === 'basalt'),
+    )
+    assert.equal(
+      distFrom(safe, [state.pawns[0]]).size,
+      safe.size,
+      'Safe routes across level ' + level.id,
+    )
+  }
+  assert.deepEqual(features, { watchtower: [5], spring: [14], rune: [15] })
 })
 
 test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {

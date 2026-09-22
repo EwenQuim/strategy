@@ -1,5 +1,5 @@
 import type { SeededRandom } from './random.ts'
-import type { Axial, Biome, Terrain, Tile } from './types.ts'
+import type { Axial, Biome, Terrain, Tile, TileFeature } from './types.ts'
 
 export const MAP_WIDTH = 8
 export const MAP_HEIGHT = 12
@@ -51,6 +51,53 @@ const bendShape = (first: number, second: number): Shape => [
   ...lineShape(second - 1).map(([q]) => [first - 1, q + 1] as [number, number]),
 ]
 
+const poolShapes: Shape[] = [
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+  ],
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, -1],
+  ],
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, -1],
+    [-1, 1],
+  ],
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, 2],
+  ],
+]
+
+export const TILE_FEATURES = {
+  watchtower: {
+    name: 'Watchtower',
+    description:
+      '+1 basic-attack range for Archers and Magicians. Specials and minimum range are unchanged.',
+  },
+  spring: {
+    name: 'Healing spring',
+    description:
+      'Heal 1 health at your next activation after staying here, up to maximum health.',
+  },
+  rune: {
+    name: 'Power rune',
+    description:
+      'Collect once for +2 energy this round. Disappears on entry; no permanent bonus.',
+  },
+} as const
+
 export const BIOMES: Record<Biome, { name: string; feature: MapFeature | null }> = {
   verdant: {
     name: 'Verdant Vale',
@@ -58,34 +105,7 @@ export const BIOMES: Record<Biome, { name: string; feature: MapFeature | null }>
       terrain: 'lake',
       min: 3,
       max: 6,
-      shapes: [
-        [
-          [0, 0],
-          [1, 0],
-          [0, 1],
-        ],
-        [
-          [0, 0],
-          [1, 0],
-          [0, 1],
-          [1, -1],
-        ],
-        [
-          [0, 0],
-          [1, 0],
-          [0, 1],
-          [1, -1],
-          [-1, 1],
-        ],
-        [
-          [0, 0],
-          [1, 0],
-          [0, 1],
-          [1, -1],
-          [-1, 1],
-          [-1, 2],
-        ],
-      ],
+      shapes: poolShapes,
     },
   },
   mountains: {
@@ -100,7 +120,14 @@ export const BIOMES: Record<Biome, { name: string; feature: MapFeature | null }>
       ],
     },
   },
-  desert: { name: 'Open Desert', feature: null },
+  desert: {
+    name: 'Open Desert',
+    feature: { terrain: 'lake', min: 1, max: 3, shapes: poolShapes },
+  },
+  volcano: {
+    name: 'Ember Caldera',
+    feature: { terrain: 'lava', min: 3, max: 6, shapes: poolShapes },
+  },
 }
 
 function orient(shape: Shape, random: SeededRandom): Shape {
@@ -179,7 +206,12 @@ const terrainSymbols: Record<string, Terrain> = {
   '^': 'mountain',
   '~': 'lake',
   s: 'sand',
+  p: 'palm',
+  b: 'basalt',
+  l: 'lava',
 }
+
+const featureSymbols: Record<string, TileFeature> = { W: 'watchtower', H: 'spring', R: 'rune' }
 
 export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
   if (!Array.isArray(rows) || rows.length !== MAP_HEIGHT)
@@ -191,12 +223,24 @@ export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
       throw new Error('Map row ' + row + ' must contain ' + MAP_WIDTH + ' tiles')
     for (let col = 0; col < MAP_WIDTH; col++) {
       const symbol = line[col]
-      if (!Object.hasOwn(terrainSymbols, symbol))
+      const feature = Object.hasOwn(featureSymbols, symbol) ? featureSymbols[symbol] : undefined
+      if (!feature && !Object.hasOwn(terrainSymbols, symbol))
         throw new Error('Unknown map terrain: ' + symbol)
       const { q, r } = hexOf(col, row)
-      tiles.set(key(q, r), { q, r, terrain: terrainSymbols[symbol] })
+      tiles.set(key(q, r), {
+        q,
+        r,
+        terrain: feature ? 'plain' : terrainSymbols[symbol],
+        ...(feature ? { feature } : {}),
+      })
     }
   }
+  const features = [...tiles.values()].filter((tile) => tile.feature)
+  if (
+    features.length > 2 ||
+    features.some((tile) => tile.r !== MAP_HEIGHT / 2 - 1 && tile.r !== MAP_HEIGHT / 2)
+  )
+    throw new Error('Map features must be limited to two tiles in the center two rows')
   return tiles
 }
 
@@ -211,16 +255,35 @@ export function makeMap(
     for (let col = 0; col < MAP_WIDTH; col++) {
       const { q, r } = hexOf(col, row)
       const terrain: Terrain =
-        biome === 'desert'
-          ? 'sand'
-          : biome === 'verdant' && !reserved.has(key(q, r)) && random.next() < 0.25
-            ? 'forest'
-            : 'plain'
+        biome === 'volcano'
+          ? 'basalt'
+          : biome === 'desert'
+            ? !reserved.has(key(q, r)) && random.next() < 0.04
+              ? 'palm'
+              : 'sand'
+            : biome === 'verdant' && !reserved.has(key(q, r)) && random.next() < 0.25
+              ? 'forest'
+              : 'plain'
       tiles.set(key(q, r), { q, r, terrain })
     }
   }
   const feature = BIOMES[biome].feature
   if (feature) placeFeature(tiles, [...tiles.values()], reserved, feature, random)
+  const roll = random.next()
+  const count = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+  const candidates = [...tiles.values()].filter(
+    (tile) =>
+      (tile.r === MAP_HEIGHT / 2 - 1 || tile.r === MAP_HEIGHT / 2) &&
+      passable(tile) &&
+      tile.terrain !== 'lava' &&
+      !reserved.has(key(tile.q, tile.r)),
+  )
+  const features = Object.keys(TILE_FEATURES) as TileFeature[]
+  for (let i = 0; i < count && candidates.length; i++) {
+    const [tile] = candidates.splice(Math.floor(random.next() * candidates.length), 1)
+    const [feature] = features.splice(Math.floor(random.next() * features.length), 1)
+    tile.feature = feature
+  }
   return tiles
 }
 

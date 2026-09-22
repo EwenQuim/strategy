@@ -113,6 +113,31 @@ p {
   --tile-base: #996437;
   --tile-shade: #8b4e28;
   --move-tint: #c7c79b;
+  --plain-tile: #e5bc70;
+}
+.game-shell[data-biome='volcano'] {
+  --biome-background: #2b202b;
+  --biome-glow: #d56b3b55;
+  --biome-panel: #241c27;
+  --tile-base: #44373f;
+  --tile-shade: #392d33;
+  --plain-tile: #594e53;
+  --move-tint: #8c7b7c;
+  --selected-tint: #b39b86;
+  --tile-stroke-opacity: 0.075;
+  --muted: #b7a5aa;
+}
+.game-shell[data-biome='volcano'] .tile-light {
+  opacity: 0.45;
+}
+.game-shell[data-biome='volcano'] .battle-stage {
+  background:
+    radial-gradient(ellipse at 45% 65%, var(--biome-glow), transparent 65%),
+    radial-gradient(#e9995b33 1px, transparent 1px), var(--biome-background);
+  background-size:
+    auto,
+    37px 43px,
+    auto;
 }
 .game-header {
   position: relative;

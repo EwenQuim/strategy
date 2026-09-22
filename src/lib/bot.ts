@@ -57,7 +57,11 @@ export function chooseBotActions(
   if (pawn.kind === 'king' && specials.length) return [{ type: 'act', action: 'special' }]
   if (pawn.kind === 'bulwark') {
     const ally = specials
-      .filter((p) => !protectorFor(pawns, p) && foes.some((foe) => canAttack(foe, p)))
+      .filter(
+        (p) =>
+          !protectorFor(pawns, p) &&
+          foes.some((foe) => canAttack(foe, p, tiles.get(key(foe.q, foe.r)))),
+      )
       .sort((a, b) => Number(b.kind === 'king') - Number(a.kind === 'king') || a.hp - b.hp)[0]
     if (ally)
       return [
@@ -81,7 +85,7 @@ export function chooseBotActions(
 
   const target = strategy.chooseTarget(
     pawn,
-    foes.filter((p) => canAttack(pawn, p)),
+    foes.filter((p) => canAttack(pawn, p, tiles.get(key(pawn.q, pawn.r)))),
   )
   if (target)
     return [
@@ -118,11 +122,18 @@ export function chooseBotActions(
   )
   const here = dist.get(key(pawn.q, pawn.r)) ?? Infinity
   const step = neighbors(pawn.q, pawn.r)
-    .filter((n) => !occupied.has(key(n.q, n.r)) && (dist.get(key(n.q, n.r)) ?? Infinity) < here)
+    .filter(
+      (n) =>
+        !occupied.has(key(n.q, n.r)) &&
+        (dist.get(key(n.q, n.r)) ?? Infinity) < here &&
+        (pawn.hp > 1 || tiles.get(key(n.q, n.r))?.terrain !== 'lava'),
+    )
     .sort((a, b) => dist.get(key(a.q, a.r))! - dist.get(key(b.q, b.r))!)[0]
-  const jump = jumpDestinations(tiles, pawns, pawn).sort(
-    (a, b) => (dist.get(key(a.q, a.r)) ?? Infinity) - (dist.get(key(b.q, b.r)) ?? Infinity),
-  )[0]
+  const jump = jumpDestinations(tiles, pawns, pawn)
+    .filter((tile) => tile.terrain !== 'lava')
+    .sort(
+      (a, b) => (dist.get(key(a.q, a.r)) ?? Infinity) - (dist.get(key(b.q, b.r)) ?? Infinity),
+    )[0]
   const jumpDistance = jump ? (dist.get(key(jump.q, jump.r)) ?? Infinity) : Infinity
   if (jump && jumpDistance < here && (!step || jumpDistance + pawn.special.cost < here)) {
     return [

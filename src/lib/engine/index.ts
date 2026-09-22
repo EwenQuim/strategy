@@ -9,5 +9,6 @@ export {
   jumpDestinations,
   specialTargets,
   movementDestinations,
+  walkingPaths,
   protectorFor,
 } from './combat.ts'

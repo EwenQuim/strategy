@@ -4,11 +4,12 @@ import {
   chargeDestinations,
   jumpDestinations,
   movementDestinations,
+  walkingPaths,
   protectorFor,
   specialTargets,
 } from './combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import type { Pawn, Side } from './pawns.ts'
+import { START_ENERGY, type Pawn, type Side } from './pawns.ts'
 import type { Action, Axial, GameState } from './types.ts'
 
 export type BotOptions = {
@@ -39,7 +40,9 @@ function generateCandidates(state: GameState): Action[][] {
   for (const tile of destinations) {
     if (moves.get(key(tile.q, tile.r))) actions.push([{ type: 'move', q: tile.q, r: tile.r }])
   }
-  for (const target of foes.filter((p) => canAttack(pawn, p))) {
+  for (const target of foes.filter((p) =>
+    canAttack(pawn, p, state.tiles.get(key(pawn.q, pawn.r))),
+  )) {
     actions.push([
       { type: 'act', action: 'attack' },
       { type: 'attackAt', q: target.q, r: target.r },
@@ -98,7 +101,9 @@ function damageFromPosition(
     attacker.kind === 'magician' &&
     remainingEnergy >= attacker.special.cost &&
     targets.some(
-      (neighbor) => hexDist(neighbor, target) <= 1 && canAttack(attacker, neighbor, from),
+      (neighbor) =>
+        hexDist(neighbor, target) <= 1 &&
+        canAttack(attacker, neighbor, { q: from.q, r: from.r }),
     )
   ) {
     const fireballHits = Math.floor(remainingEnergy / attacker.special.cost)
@@ -117,20 +122,24 @@ function estimateIncomingDamage(state: GameState, side: Side): Map<number, numbe
   for (const foe of state.pawns.filter((p) => p.side !== side)) {
     const attacker = foe.clone()
     const actsNextRound = state.order.indexOf(foe.id) < state.active
-    attacker.energy = actsNextRound ? attacker.maxEnergy : attacker.energy
+    attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
     if (attacker.energy <= 0) continue
-    const moves = movementDestinations(state.tiles, state.pawns, attacker)
+    const moves = walkingPaths(state.tiles, state.pawns, attacker)
     const jumps = jumpDestinations(state.tiles, state.pawns, attacker)
     for (const target of targets) {
       let maxDamage = 0
-      for (const [position, cost] of moves) {
+      for (const [position, route] of moves) {
+        if (route.damage >= attacker.hp) continue
+        const cost =
+          route.path.length * attacker.moveCost -
+          route.path.filter((tile) => tile.feature === 'rune').length * 2
         const from = state.tiles.get(position) ?? attacker
         maxDamage = Math.max(
           maxDamage,
           damageFromPosition(attacker, target, targets, from, cost),
         )
       }
-      if (jumps.some((from) => canAttack(attacker, target, from))) {
+      if (jumps.some((from) => from.terrain !== 'lava' && canAttack(attacker, target, from))) {
         maxDamage = Math.max(
           maxDamage,
           (attacker.energy - attacker.special.cost) * attacker.attack.damage,
@@ -208,7 +217,7 @@ function evaluatePosition(
         (Math.min(pawn.hp, expected) * SCORE.unitHealth + (expected >= pawn.hp ? value : 0))
     }
   }
-  const pawn = settled.pawns.find((p) => p.id === actor.id)!
+  const pawn = settled.pawns.find((p) => p.id === actor.id) ?? actor
   const allies = settled.pawns.filter((p) => p.side === pawn.side && p.id !== pawn.id)
   if (pawn.kind === 'king' && allies.length) {
     score -= Math.min(...allies.map((p) => hexDist(pawn, p))) * SCORE.kingAllyDistance

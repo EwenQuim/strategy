@@ -1,16 +1,87 @@
-import { hexDist, key, passable, reachable } from './hex.ts'
+import { hexDist, key, neighbors, passable } from './hex.ts'
 import type { AttackProfile, Pawn } from './pawns.ts'
 import type { SeededRandom } from './random.ts'
 import type { Axial, BattleImpact, Tile } from './types.ts'
+
+type WalkingPath = { path: Tile[]; damage: number }
+
+export function walkingPaths(
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+  pawn: Pawn,
+  maxSteps = Math.floor(pawn.energy / pawn.moveCost),
+): Map<string, WalkingPath> {
+  const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
+  const start = key(pawn.q, pawn.r)
+  const paths = new Map<string, WalkingPath>([[start, { path: [], damage: 0 }]])
+  const leastDamage = new Map([[start, 0]])
+  let frontier = [{ position: pawn as Axial, path: [] as Tile[], damage: 0 }]
+  for (let step = 1; step <= maxSteps && frontier.length; step++) {
+    const next: typeof frontier = []
+    for (const current of frontier) {
+      for (const position of neighbors(current.position.q, current.position.r)) {
+        const k = key(position.q, position.r)
+        const tile = tiles.get(k)
+        if (!tile || !passable(tile) || occupied.has(k)) continue
+        const damage = current.damage + Number(tile.terrain === 'lava')
+        if (damage >= (leastDamage.get(k) ?? Infinity)) continue
+        leastDamage.set(k, damage)
+        const path = [...current.path, tile]
+        const previous = paths.get(k)
+        if (!previous || path.length === previous.path.length || previous.damage >= pawn.hp)
+          paths.set(k, { path, damage })
+        if (damage < pawn.hp) next.push({ position: tile, path, damage })
+      }
+    }
+    frontier = next
+  }
+  return paths
+}
+
+export function enterTiles(
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+  pawn: Pawn,
+  path: Tile[],
+  round: number,
+  log: string[],
+): BattleImpact[] {
+  const impacts: BattleImpact[] = []
+  for (const tile of path) {
+    pawn.q = tile.q
+    pawn.r = tile.r
+    pawn.springSince = tile.feature === 'spring' ? round : null
+    if (tile.terrain === 'lava') {
+      pawn.hp--
+      impacts.push({ q: tile.q, r: tile.r, damage: 1 })
+      log.push(label(pawn) + ' takes 1 lava damage.')
+      if (pawn.hp <= 0) {
+        pawns.splice(pawns.indexOf(pawn), 1)
+        log.push(label(pawn) + ' has fallen.')
+        break
+      }
+    }
+    if (tile.feature === 'rune') {
+      pawn.energy += 2
+      pawn.bonusEnergy += 2
+      tiles.set(key(tile.q, tile.r), { q: tile.q, r: tile.r, terrain: tile.terrain })
+      log.push(label(pawn) + ' collects a power rune: +2 energy this round.')
+    }
+  }
+  return impacts
+}
 
 export function movementDestinations(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
 ): Map<string, number> {
-  const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
-  const steps = reachable(tiles, occupied, pawn, Math.floor(pawn.energy / pawn.moveCost))
-  return new Map([...steps].map(([tile, distance]) => [tile, distance * pawn.moveCost]))
+  return new Map(
+    [...walkingPaths(tiles, pawns, pawn)].map(([tile, route]) => [
+      tile,
+      route.path.length * pawn.moveCost,
+    ]),
+  )
 }
 
 export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
@@ -26,10 +97,16 @@ export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
 
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
   const distance = hexDist(from, target)
+  const bonus =
+    (pawn.kind === 'archer' || pawn.kind === 'magician') &&
+    'feature' in from &&
+    from.feature === 'watchtower'
+      ? 1
+      : 0
   return (
     pawn.side !== target.side &&
     distance >= pawn.attack.minRange &&
-    distance <= pawn.attack.maxRange
+    distance <= pawn.attack.maxRange + bonus
   )
 }
 
@@ -48,7 +125,7 @@ export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): P
         (pawn.kind === 'bulwark' || p.hp < p.maxHp),
     )
   }
-  return pawns.filter((p) => canAttack(pawn, p, from))
+  return pawns.filter((p) => canAttack(pawn, p, { q: from.q, r: from.r }))
 }
 
 export function chargeDestinations(
@@ -57,10 +134,10 @@ export function chargeDestinations(
   pawn: Pawn,
 ): Map<string, number> {
   if (pawn.kind !== 'swordsman' || !canUseSpecial(pawn)) return new Map()
-  const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
-  const destinations = reachable(tiles, occupied, pawn, 2)
   return new Map(
-    [...destinations].filter(([k]) => specialTargets(pawns, pawn, tiles.get(k)!).length > 0),
+    [...walkingPaths(tiles, pawns, pawn, 2)]
+      .filter(([k]) => specialTargets(pawns, pawn, tiles.get(k)!).length > 0)
+      .map(([k, route]) => [k, route.path.length]),
   )
 }
 
@@ -134,13 +211,14 @@ function strike(
 }
 
 export function performAttack(
+  tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
   target: Pawn,
   log: string[],
   random: SeededRandom,
 ): BattleImpact[] | null {
-  if (pawn.energy < 1 || !canAttack(pawn, target)) return null
+  if (pawn.energy < 1 || !canAttack(pawn, target, tiles.get(key(pawn.q, pawn.r)))) return null
   pawn.energy--
   return [strike(pawns, pawn, target, pawn.attack, log, random)]
 }
@@ -185,6 +263,7 @@ export function performSpecial(
   target: Pawn,
   log: string[],
   random: SeededRandom,
+  round: number,
   destination?: Axial,
 ): BattleImpact[] | null {
   if (pawn.kind === 'king' || pawn.kind === 'ninja') return null
@@ -198,10 +277,14 @@ export function performSpecial(
   pawn.energy -= pawn.special.cost
   log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
   switch (pawn.kind) {
-    case 'swordsman':
-      pawn.q = destination!.q
-      pawn.r = destination!.r
-      return [strike(pawns, pawn, target, pawn.attack, log, random)]
+    case 'swordsman': {
+      const route = walkingPaths(tiles, pawns, pawn, 2).get(
+        key(destination!.q, destination!.r),
+      )!
+      const impacts = enterTiles(tiles, pawns, pawn, route.path, round, log)
+      if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
+      return impacts
+    }
     case 'archer':
       return [
         strike(

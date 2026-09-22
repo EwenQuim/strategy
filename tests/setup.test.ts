@@ -29,7 +29,7 @@ test('Authored setups control both army sizes and classes with legal determinist
     'king',
     ...Array.from({ length: size - 1 }, (_, index) => recruits[index % recruits.length]),
   ]
-  for (const biome of ['verdant', 'mountains', 'desert'] as const) {
+  for (const biome of ['verdant', 'mountains', 'desert', 'volcano'] as const) {
     for (const [player, enemy] of [
       [1, 1],
       [3, 7],
@@ -221,7 +221,7 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
   )
   assert.equal(
     seedState(JSON.stringify(states.map((state) => ({ ...state, tiles: [...state.tiles] })))),
-    249675184,
+    691306820,
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

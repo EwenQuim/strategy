@@ -640,7 +640,7 @@ test(
 )
 
 test(
-  'New games reach all three biomes offline and retain the build label on a small portrait screen',
+  'New games reach all four biomes offline and retain the build label on a small portrait screen',
   { timeout: 60_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
@@ -679,11 +679,11 @@ test(
     const panels = new Set<string>()
     const tileBases = new Set<string>()
     const seeds = new Map<Biome, string>()
-    for (let index = 0; index < 100 && seeds.size < 3; index++) {
+    for (let index = 0; index < 100 && seeds.size < 4; index++) {
       const seed = '00000000-0000-4000-8000-' + index.toString(16).padStart(12, '0')
       seeds.set(initialState(seed).biome, seed)
     }
-    assert.equal(seeds.size, 3)
+    assert.equal(seeds.size, 4)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
@@ -699,6 +699,9 @@ test(
       await page.getByRole('link', { name: 'Quick play' }).click()
       await page.locator('.end-action:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
+      assert.equal(await page.locator('.attack-action').isVisible(), true)
+      assert.equal(await page.locator('.attack-action').isDisabled(), true)
+      assert.equal(await page.locator('.action-grid > button').count(), 3)
       assert.equal(await page.locator('.wordmark-sub').textContent(), BIOMES[biome].name)
       assert.equal(await page.locator('.hex-tile').count(), 96)
       assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), biome)
@@ -725,7 +728,7 @@ test(
         .evaluateAll((tiles) => tiles.map((tile) => tile.getAttribute('aria-label')!))
       assert.equal(
         terrain.some((label) => label.includes('lake')),
-        biome === 'verdant',
+        biome === 'verdant' || biome === 'desert',
       )
       assert.equal(
         terrain.some((label) => label.includes('mountain')),
@@ -736,7 +739,7 @@ test(
         biome === 'desert',
       )
       if (biome === 'desert') {
-        assert.ok(terrain.every((label) => /sand|health/.test(label)))
+        assert.ok(terrain.every((label) => /sand|palm|lake|health/.test(label)))
         assert.ok((await page.locator('.sand-dunes').count()) > 0)
         const faces = await page.locator('.tile-face').evaluateAll((tiles) =>
           tiles.map((tile) => ({
@@ -758,11 +761,235 @@ test(
           'Highlights must not change tile borders',
         )
       }
+      if (biome === 'volcano') {
+        assert.ok(terrain.some((label) => label.includes('lava')))
+        assert.ok(await page.locator('.lava-pool').count())
+        assert.ok(await page.locator('[data-terrain=basalt]').count())
+      }
       await playTurn(page)
     }
-    assert.equal(backgrounds.size, 3, 'Each biome needs a distinct background')
-    assert.equal(panels.size, 3, 'Headers and actions must match the biome')
-    assert.equal(tileBases.size, 3, 'Tile edges must match the biome')
+    assert.equal(backgrounds.size, 4, 'Each biome needs a distinct background')
+    assert.equal(panels.size, 4, 'Headers and actions must match the biome')
+    assert.equal(tileBases.size, 4, 'Tile edges must match the biome')
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Campaign showcases volcanic terrain and each special tile with subdued, readable tile art',
+  { timeout: 30_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
+    await context.setOffline(true)
+    for (const id of [5, 9, 14, 15, 18]) {
+      const level = CAMPAIGN_LEVELS[id - 1]
+      await page.goto(origin + base + 'campaign/' + id)
+      await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(
+        await page.locator('.game-shell').getAttribute('data-biome'),
+        level.setup.biome,
+      )
+      const state = initialState(level.seed, level.setup)
+      for (const tile of state.tiles.values()) {
+        if (!tile.feature) continue
+        const feature = page.locator('[data-feature=' + tile.feature + ']')
+        assert.equal(await feature.count(), 1)
+        assert.equal(await feature.locator('.feature-art').count(), 1)
+        if (id === 15) {
+          assert.equal(
+            await feature.locator('.tile-face').evaluate((face) => getComputedStyle(face).fill),
+            'rgb(89, 78, 83)',
+          )
+        }
+      }
+      if (level.setup.biome === 'volcano') {
+        const basalt = page
+          .locator('.hex-tile[data-terrain=basalt][role=img][aria-label^="basalt,"] .tile-face')
+          .first()
+        const lava = page
+          .locator('.hex-tile[data-terrain=lava][role=img][aria-label^="lava,"] .tile-face')
+          .first()
+        const colors = await Promise.all(
+          [basalt, lava].map((tile) => tile.evaluate((face) => getComputedStyle(face).fill)),
+        )
+        const [rock, melt] = colors.map((color) => color.match(/\d+/g)!.map(Number))
+        assert.ok(rock.every((channel, index) => Math.abs(channel - melt[index]) < 40))
+        assert.equal(
+          await page.locator('.lava-pool > g[clip-path]').count(),
+          await page.locator('.lava-pool').count(),
+        )
+        assert.ok(await page.locator('.basalt-stone').count())
+        assert.ok(
+          await page
+            .locator('.lava-pool path')
+            .evaluateAll((paths) =>
+              paths.every((path) => (path as SVGPathElement).getTotalLength() > 0),
+            ),
+        )
+        assert.equal(
+          await page
+            .locator('.tile-face')
+            .evaluateAll(
+              (faces) =>
+                new Set(faces.map((face) => getComputedStyle(face).strokeOpacity)).size,
+            ),
+          1,
+        )
+      }
+      assert.equal(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight,
+        ),
+        true,
+      )
+    }
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Interactive tiles stay readable on mobile, grant temporary rune energy, and warn about lethal lava',
+  { timeout: 60_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await context.setOffline(true)
+    for (const kind of ['watchtower', 'spring', 'rune', 'lava'] as const) {
+      let state = initialState('interactive-ui')
+      let position: string | undefined
+      for (let index = 0; index < 10_000; index++) {
+        state = initialState('interactive-ui-' + kind + '-' + index)
+        const pawn = activePawn(state)!
+        if (kind === 'lava' && pawn.kind !== 'ninja') continue
+        if (kind === 'watchtower' && pawn.kind !== 'archer' && pawn.kind !== 'magician')
+          continue
+        position = [...movementDestinations(state.tiles, state.pawns, pawn)].find(
+          ([k, cost]) => {
+            if (!cost) return false
+            const tile = state.tiles.get(k)!
+            if (kind === 'lava') return tile.terrain === 'lava'
+            return tile.feature === kind
+          },
+        )?.[0]
+        if (position) break
+      }
+      assert.ok(position, 'Find a reachable ' + kind)
+      const pawn = activePawn(state)!
+      const tile = state.tiles.get(position)!
+      const index = [...state.tiles.keys()].indexOf(position)
+      await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+      await page.locator('.end-action:not([disabled])').waitFor()
+      const destination = page.locator('.hex-tile').nth(index)
+      if (kind === 'lava') {
+        assert.match((await destination.getAttribute('aria-label'))!, /lethal/)
+        assert.doesNotMatch(
+          await destination
+            .locator('text')
+            .allTextContents()
+            .then((labels) => labels.join(' ')),
+          /HP|LETHAL/,
+        )
+        assert.equal(
+          await destination
+            .locator('.tile-face')
+            .evaluate((face) => getComputedStyle(face).fill),
+          'rgb(148, 113, 109)',
+        )
+        await page.locator('.special-action').click()
+        assert.match((await destination.getAttribute('aria-label'))!, /Jump to .*lethal/)
+        assert.equal(
+          await destination
+            .locator('.tile-face')
+            .evaluate((face) => getComputedStyle(face).fill),
+          'rgb(148, 113, 109)',
+        )
+        await page.locator('.special-action').click()
+      } else {
+        assert.match(
+          (await destination.getAttribute('aria-label'))!,
+          new RegExp(
+            kind === 'rune'
+              ? 'Power rune'
+              : kind === 'spring'
+                ? 'Healing spring'
+                : 'Watchtower',
+          ),
+        )
+        assert.equal(await destination.locator('.feature-' + kind).count(), 1)
+      }
+      await destination.click()
+      state = transition(state, { type: 'move', q: tile.q, r: tile.r }).state
+      await page.locator('.end-action:not([disabled])').waitFor()
+      if (kind === 'lava') {
+        assert.ok(!state.pawns.some((unit) => unit.id === pawn.id))
+        assert.equal(await page.locator('.pawn-chip').count(), state.pawns.length)
+      } else {
+        assert.equal(
+          await destination.getAttribute('data-feature'),
+          kind === 'rune' ? null : kind,
+        )
+        if (kind === 'rune') {
+          assert.equal(activePawn(state)?.id, pawn.id)
+          assert.equal(
+            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
+            '5',
+          )
+          assert.equal(
+            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+            String(activePawn(state)!.energy),
+          )
+        }
+        const round = state.round
+        while (activePawn(state)?.id !== pawn.id || state.round === round) {
+          await page.locator('.end-action:not([disabled])').click()
+          state = transition(state, { type: 'endTurn' }).state
+        }
+        assert.equal(
+          await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
+          '3',
+        )
+        if (kind === 'watchtower') {
+          const archer = activePawn(state)!
+          const targets = state.pawns.filter((target) => canAttack(archer, target, tile))
+          if (targets.length) {
+            await page.locator('.attack-action').click()
+            assert.equal(
+              await page.getByRole('button', { name: /^Attack / }).count(),
+              targets.length,
+            )
+            await page.locator('.attack-action').click()
+          }
+        }
+      }
+      assert.equal(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight,
+        ),
+        true,
+      )
+      assert.equal(
+        await page
+          .locator('.tile-face')
+          .evaluateAll(
+            (faces) => new Set(faces.map((face) => getComputedStyle(face).stroke)).size,
+          ),
+        1,
+      )
+      await page.reload()
+      await page.locator('.end-action:not([disabled])').waitFor()
+      if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
+    }
+    await page.getByRole('button', { name: 'How to play' }).click()
+    assert.match(await page.locator('.rules-list').innerText(), /two middle rows/)
+    assert.match(await page.locator('.rules-list').innerText(), /no permanent bonus/)
     assert.deepEqual(errors, [])
   },
 )
@@ -811,7 +1038,9 @@ test(
       const outcomes = new Set<string>()
       for (let turn = 0; turn < 30 && !state.winner; turn++) {
         const pawn = activePawn(state)!
-        const target = state.pawns.find((p) => canAttack(pawn, p))
+        const target = state.pawns.find((p) =>
+          canAttack(pawn, p, state.tiles.get(pawn.q + ',' + pawn.r)),
+        )
         const actions: Action[] = target
           ? [
               { type: 'act', action: 'attack' },

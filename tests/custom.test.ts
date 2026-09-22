@@ -52,7 +52,7 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
     const bot = createBotGame(difficulty)
-    const opening = initialPlayback('custom-difficulty', 'ai', setup)
+    const opening = initialPlayback('custom-difficulty-8', 'ai', setup)
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
       const expected = bot.transition(playback.state, { type: 'endTurn' })
@@ -62,7 +62,7 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
     }
     outcomes.add(JSON.stringify(playback.state))
     assert.deepEqual(playbackReducer(playback, { type: 'restart' }, 'ai', difficulty), opening)
-    const local = initialPlayback('custom-difficulty', 'local', setup)
+    const local = initialPlayback('custom-difficulty-8', 'local', setup)
     const expected = transition(local.state, { type: 'endTurn' })
     assert.deepEqual(playbackReducer(local, { type: 'endTurn' }, 'local', difficulty), {
       state: expected.state,

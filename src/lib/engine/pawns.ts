@@ -21,7 +21,12 @@ export abstract class Pawn {
   abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician' | 'ninja' | 'bulwark'
   abstract readonly attack: AttackProfile
   abstract readonly special: SpecialAbility
-  readonly maxEnergy = START_ENERGY
+  bonusEnergy = 0
+  springSince: number | null = null
+
+  get maxEnergy(): number {
+    return START_ENERGY + this.bonusEnergy
+  }
   readonly id: number
   readonly side: Side
   q: number

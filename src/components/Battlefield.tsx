@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
   key,
+  walkingPaths,
+  TILE_FEATURES,
   protectorFor,
   type Axial,
   type BattleEffect,
@@ -19,12 +21,21 @@ const hexPoints = Array.from({ length: 6 }, (_, i) => {
 }).join(' ')
 
 const terrainColors = {
-  plain: '#7d8963',
+  plain: 'var(--plain-tile, #7d8963)',
   forest: '#536e51',
   mountain: '#737c69',
   lake: '#4c7186',
   sand: '#e5bc70',
+  palm: '#d5b774',
+  basalt: '#594e53',
+  lava: '#6a504b',
 }
+
+const lavaOutlines = [
+  'M-23-3C-23-12-13-18-5-15S6-21 15-13 25-7 23 3 14 18 3 16-8 22-18 12-22 4-23-3Z',
+  'M-22-7C-15-18-7-13 1-17S19-15 21-5 27 8 17 12 5 22-5 16-21 18-23 8-27-1-22-7Z',
+  'M-24 1C-25-9-16-12-9-16S1-13 11-15 25-4 21 6 15 17 5 16-8 22-14 13-22 11-24 1Z',
+]
 
 interface BattlefieldProps {
   mode: GameMode
@@ -54,6 +65,13 @@ export function Battlefield({
   onTileClick,
 }: BattlefieldProps) {
   const board = useRef<SVGSVGElement>(null)
+  const paths = useMemo(
+    () =>
+      active && (reach.size || targetLabel === 'Charge to')
+        ? walkingPaths(tiles, pawns, active, targetLabel === 'Charge to' ? 2 : undefined)
+        : new Map(),
+    [tiles, pawns, active, reach, targetLabel],
+  )
   useEffect(() => {
     if (
       !effect?.impacts?.some((hit) => hit.damage > 0) ||
@@ -92,6 +110,21 @@ export function Battlefield({
       aria-label="Battlefield. Select a highlighted tile to move or an enemy to attack."
     >
       <defs>
+        <linearGradient id="lava-melt" x1="0" y1="0" x2=".8" y2="1">
+          <stop stopColor="#815c51" />
+          <stop offset=".45" stopColor="#b9825d" />
+          <stop offset="1" stopColor="#8e5d4b" />
+        </linearGradient>
+        <radialGradient id="lava-glow" cx=".4" cy=".45" r=".6">
+          <stop stopColor="#deb17c" stopOpacity=".5" />
+          <stop offset=".5" stopColor="#c59164" stopOpacity=".22" />
+          <stop offset="1" stopColor="#a86650" stopOpacity="0" />
+        </radialGradient>
+        {lavaOutlines.map((outline, index) => (
+          <clipPath key={index} id={'lava-pool-' + index}>
+            <path d={outline} />
+          </clipPath>
+        ))}
         <linearGradient id="player-chip" x2="0" y2="1">
           <stop stopColor="#407265" />
           <stop offset="1" stopColor="#193e35" />
@@ -124,39 +157,59 @@ export function Battlefield({
         const cost = reach.get(tileKey)
         const canMove = cost !== undefined && cost > 0
         const interactive = !!target || canMove
-        const fill = target
-          ? targetLabel === 'Attack'
-            ? '#b98370'
-            : '#b79dce'
-          : selected || previewed
-            ? '#c9b77f'
-            : canMove
-              ? 'var(--move-tint)'
-              : terrainColors[tile.terrain]
-        const label = occupant
-          ? armyLabels[mode][occupant.side] +
-            ' ' +
-            occupant.kind +
-            ' #' +
-            occupant.id +
-            ', ' +
-            occupant.hp +
-            ' health' +
-            (protector ? ', protected by bulwark #' + protector.id : '')
-          : tile.terrain +
-            ', column ' +
-            (tile.q + Math.floor(tile.r / 2) + 1) +
-            ', row ' +
-            (tile.r + 1)
+        const feature = tile.feature && TILE_FEATURES[tile.feature]
+        const damage =
+          target && targetLabel === 'Jump to'
+            ? Number(tile.terrain === 'lava')
+            : (paths.get(tileKey)?.damage ?? 0)
+        const lethal = !!active && damage >= active.hp
+        const fill =
+          interactive && damage > 0 && !occupant
+            ? '#94716d'
+            : target
+              ? targetLabel === 'Attack'
+                ? '#b98370'
+                : '#b79dce'
+              : selected || previewed
+                ? 'var(--selected-tint, #c9b77f)'
+                : canMove
+                  ? 'var(--move-tint)'
+                  : terrainColors[tile.terrain]
+        const label =
+          (occupant
+            ? armyLabels[mode][occupant.side] +
+              ' ' +
+              occupant.kind +
+              ' #' +
+              occupant.id +
+              ', ' +
+              occupant.hp +
+              ' health' +
+              (protector ? ', protected by bulwark #' + protector.id : '')
+            : tile.terrain +
+              ', column ' +
+              (tile.q + Math.floor(tile.r / 2) + 1) +
+              ', row ' +
+              (tile.r + 1)) + (feature ? ', ' + feature.name + '. ' + feature.description : '')
         const actionLabel = target
-          ? targetLabel + ' ' + label
+          ? targetLabel +
+            ' ' +
+            label +
+            (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '')
           : canMove
-            ? 'Move to ' + label + ', ' + cost + ' energy'
+            ? 'Move to ' +
+              label +
+              (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '') +
+              ', ' +
+              cost +
+              ' energy'
             : label
         return (
           <g
             key={tileKey}
             transform={'translate(' + hexX(tile.q, tile.r) + ' ' + hexY(tile.r) + ')'}
+            data-terrain={tile.terrain}
+            data-feature={tile.feature}
             className={'hex-tile' + (interactive ? ' is-interactive' : '')}
             role={interactive ? 'button' : 'img'}
             tabIndex={interactive ? 0 : undefined}
@@ -179,13 +232,18 @@ export function Battlefield({
               points={hexPoints}
               fill={fill}
               stroke="#ecedcc"
-              strokeOpacity=".13"
+              strokeOpacity="var(--tile-stroke-opacity, .13)"
               strokeWidth="1"
             />
-            <polygon points={hexPoints} fill="url(#tile-light)" className="tile-detail" />
-            {!occupant && (
+            <polygon
+              points={hexPoints}
+              fill="url(#tile-light)"
+              className="tile-detail tile-light"
+            />
+            {!occupant && !tile.feature && (
               <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
             )}
+            {!occupant && tile.feature && <FeatureArt feature={tile.feature} />}
             {canMove && !occupant && (
               <g className="move-cost">
                 <circle cy="20" r="7" fill="#213f30" fillOpacity=".8" />
@@ -222,6 +280,7 @@ export function Battlefield({
         <PawnChip
           key={pawn.id}
           pawn={pawn}
+          feature={tiles.get(key(pawn.q, pawn.r))?.feature}
           active={active?.id === pawn.id}
           protectedAlly={!!protectorFor(pawns, pawn)}
         />
@@ -279,7 +338,133 @@ export function Battlefield({
   )
 }
 
+function FeatureArt({ feature }: { feature: NonNullable<Tile['feature']> }) {
+  return (
+    <g className={'tile-detail feature-art feature-' + feature}>
+      {feature === 'watchtower' ? (
+        <>
+          <ellipse cy="17" rx="19" ry="5" fill="#26312c" opacity=".4" />
+          <path d="M-13 16-10-9h20l3 25Z" fill="#d2b984" />
+          <path d="M2-9h8l3 25H2Z" fill="#94765d" />
+          <path d="M-15-9v-13h7v6h5v-6h6v6h5v-6h7v13Z" fill="#f0d4a0" />
+          <path d="M-4 16V6a4 4 0 0 1 8 0v10M-3-7h6v6h-6Z" fill="#463d39" />
+        </>
+      ) : feature === 'spring' ? (
+        <>
+          <ellipse cy="7" rx="22" ry="13" fill="#a9bbb0" />
+          <ellipse cy="5" rx="18" ry="10" fill="#287c87" />
+          <ellipse cy="4" rx="11" ry="5" fill="none" stroke="#91efda" strokeWidth="2" />
+          <path d="M0-21C-13-7-9 0 0 0s13-7 0-21Z" fill="#a6f5e4" />
+          <path d="M-17 14q17 10 34 0" fill="none" stroke="#647e76" strokeWidth="3" />
+        </>
+      ) : (
+        <>
+          <ellipse cy="17" rx="17" ry="5" fill="#392851" opacity=".4" />
+          <path d="m0-23 15 17L0 12-15-6Z" fill="#c8a2ed" stroke="#f1d4ff" strokeWidth="1.5" />
+          <path d="m0-23 4 17L0 12-4-6Z" fill="#f8e4ff" />
+          <text y="24" textAnchor="middle" fill="#f8e4ff" fontSize="11" fontWeight="700">
+            +2
+          </text>
+        </>
+      )}
+    </g>
+  )
+}
+
 function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: number }) {
+  if (terrain === 'lava')
+    return (
+      <g className="tile-detail lava-pool">
+        <path d={lavaOutlines[variant]} fill="#493a3d" stroke="#493a3d" strokeWidth="4" />
+        <g clipPath={'url(#lava-pool-' + variant + ')'}>
+          <path d={lavaOutlines[variant]} fill="url(#lava-melt)" />
+          <ellipse cx="-3" cy="-2" rx="26" ry="21" fill="url(#lava-glow)" />
+          <g transform={'rotate(' + variant * 120 + ')'}>
+            <path
+              d="M-29 4C-14-10-7 12 7 2S21-8 30-2M-15 21C-7 13-2 14 3 8"
+              fill="none"
+              stroke="#d7a674"
+              strokeWidth="2.5"
+              opacity=".42"
+            />
+            <path
+              d="M-24-8Q-14-14-5-7L-8-1-19 0ZM8 6l12-6 8 8-10 12-13-5Z"
+              fill="#66504b"
+              stroke="#815c4d"
+              strokeWidth="1.2"
+            />
+            <path
+              d="m-20-7 9-2M10 8l9-4"
+              fill="none"
+              stroke="#a17b61"
+              strokeWidth="1"
+              opacity=".55"
+            />
+            <path
+              d="M-18 6Q-10 3-4 6T7 3"
+              fill="none"
+              stroke="#e0b47f"
+              strokeWidth="1"
+              opacity=".6"
+            />
+            <ellipse
+              cx="4"
+              cy="-8"
+              rx="2.7"
+              ry="1.5"
+              fill="none"
+              stroke="#d2a376"
+              strokeWidth=".8"
+              opacity=".6"
+            />
+            <ellipse cx="-8" cy="11" rx="1.6" ry=".9" fill="#d6ab7d" opacity=".5" />
+          </g>
+        </g>
+        <path
+          d={lavaOutlines[variant]}
+          fill="none"
+          stroke="#896454"
+          strokeWidth="1"
+          strokeOpacity=".6"
+        />
+      </g>
+    )
+  if (terrain === 'basalt')
+    return (
+      <g className="tile-detail basalt-stone" transform={'rotate(' + variant * 120 + ')'}>
+        <path d="m-23-7 14-11 15 5 12 12-15 5-15-3Z" fill="#75666b" opacity=".18" />
+        <path d="m-20 9 10-6 16 4 13 9-15 6-16-5Z" fill="#433b42" opacity=".18" />
+        <path
+          d="m-21-7 12 3 9-4 14 7M0-8l4-9"
+          fill="none"
+          stroke="#40373e"
+          strokeWidth=".8"
+          opacity=".4"
+        />
+        <path
+          d="m-19-8 10 3M-7 14l8 2"
+          fill="none"
+          stroke="#9a8388"
+          strokeWidth=".7"
+          opacity=".22"
+        />
+        <ellipse cx="12" cy="10" rx="3.5" ry="1.8" fill="#6c5c62" opacity=".65" />
+        <ellipse cx="-12" cy="12" rx="1.5" ry=".8" fill="#a28b88" opacity=".25" />
+      </g>
+    )
+  if (terrain === 'palm')
+    return (
+      <g className="tile-detail palm-tree">
+        <ellipse cy="17" rx="19" ry="5" fill="#886039" opacity=".25" />
+        <path d="M2 18Q-6 5 0-10" fill="none" stroke="#86603c" strokeWidth="5" />
+        <path
+          d="M0-10Q-18-23-23-6q12-7 23-4M0-10Q-4-30 11-24L0-10M0-10Q18-22 24-6q-12-7-24-4M0-10Q-15-5-13 7L0-10M0-10Q14-8 15 6Z"
+          fill="#4f7751"
+        />
+        <path d="M0-10-17-12M0-10 18-12M0-10 7-23" stroke="#96a467" strokeWidth="1.4" />
+        <circle cy="-8" r="2.5" fill="#bc864c" />
+      </g>
+    )
   if (terrain === 'sand')
     return (
       <g
@@ -373,10 +558,12 @@ function PawnChip({
   pawn,
   active,
   protectedAlly,
+  feature,
 }: {
   pawn: Pawn
   active: boolean
   protectedAlly: boolean
+  feature?: Tile['feature']
 }) {
   const enemy = pawn.side === 'enemy'
   return (
@@ -416,6 +603,12 @@ function PawnChip({
       <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill="#e9e5ce">
         {pawn.id.toString().padStart(2, '0')}
       </text>
+      {feature && (
+        <g className="feature-badge" transform="translate(-20 -19) scale(.43)">
+          <circle r="28" fill="#24342e" stroke="#dec89a" strokeWidth="2" />
+          <FeatureArt feature={feature} />
+        </g>
+      )}
       {protectedAlly && (
         <g
           className="protection-badge"
