@@ -131,7 +131,7 @@ export function Battlefield({
           : selected || previewed
             ? '#c9b77f'
             : canMove
-              ? '#a3bd88'
+              ? 'var(--move-tint)'
               : terrainColors[tile.terrain]
         const label = occupant
           ? armyLabels[mode][occupant.side] +
@@ -286,21 +286,21 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
         className="tile-detail sand-dunes"
         transform={'translate(0 ' + (variant * 3 - 3) + ')'}
       >
-        <path d="M-24 10Q-6-15 8-3T24 8Q3 3-24 10Z" fill="#bb803f" opacity=".5" />
         <path
-          d="M-24 10Q-6-15 8-3T24 8"
+          d="M-22 8Q-4-10 8-2T22 6"
           fill="none"
-          stroke="#ffe0a0"
-          strokeWidth="2"
+          stroke="#e6c081"
+          strokeOpacity=".28"
+          strokeWidth="1.4"
           strokeLinecap="round"
         />
         <path
-          d="m-18 18q14-8 34-1"
+          d="m-16 16q13-6 30-1"
           fill="none"
-          stroke="#b47b3b"
-          strokeWidth="1.5"
+          stroke="#8b5c30"
+          strokeOpacity=".22"
+          strokeWidth="1.2"
           strokeLinecap="round"
-          opacity=".55"
         />
       </g>
     )

@@ -91,6 +91,7 @@ p {
   --biome-panel: #172a21;
   --tile-base: #263f30;
   --tile-shade: #10291b;
+  --move-tint: #a3bd88;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100dvh;
@@ -110,6 +111,7 @@ p {
   --biome-panel: #3f2b20;
   --tile-base: #996437;
   --tile-shade: #8b4e28;
+  --move-tint: #c7c79b;
 }
 .game-header {
   position: relative;
