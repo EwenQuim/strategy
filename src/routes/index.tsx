@@ -68,7 +68,7 @@ export const Route = createFileRoute('/')({
           <em>A little more legend.</em>
         </h1>
         <p className="landing-description">
-          One king. Four classes. A field of possibilities.
+          One king. A new army every game.
           <br />
           Outthink your rival and claim the crown.
         </p>

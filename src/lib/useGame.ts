@@ -29,6 +29,7 @@ export function useGame(seed: string) {
   return {
     state: frame?.state ?? playback.state,
     effect: frame?.effect ?? null,
+    effectId: playback.frames.length,
     playing: !!frame,
     dispatch,
   }

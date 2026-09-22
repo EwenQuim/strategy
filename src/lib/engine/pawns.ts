@@ -18,7 +18,7 @@ export interface SpecialAbility {
 }
 
 export abstract class Pawn {
-  abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician'
+  abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician' | 'ninja'
   abstract readonly attack: AttackProfile
   abstract readonly special: SpecialAbility
   readonly maxEnergy = START_ENERGY
@@ -91,7 +91,7 @@ export class King extends Pawn {
     name: 'Rally',
     cost: 1,
     description:
-      'Restore 1 health to an adjacent ally, once per round. Cannot heal yourself or exceed maximum health.',
+      'Restore 1 health to every adjacent ally, once per round. Activates immediately. Cannot heal yourself or exceed maximum health.',
   }
 }
 
@@ -116,3 +116,19 @@ export class Magician extends Pawn {
       'Target an enemy within 2 tiles. Deal 1 damage to it and every adjacent enemy. Each may Escape; allies are unharmed.',
   }
 }
+
+export class Ninja extends Pawn {
+  readonly kind = 'ninja' as const
+  get maxHp(): number {
+    return 1
+  }
+  readonly attack: AttackProfile = { damage: 5, minRange: 1, maxRange: 1 }
+  readonly special: SpecialAbility = {
+    name: 'Jump',
+    cost: 2,
+    description:
+      'Jump up to 3 tiles, passing over terrain and units. Land on an empty, non-mountain tile. Jump does not attack.',
+  }
+}
+
+export const RECRUIT_CLASSES = [Swordsman, Archer, Magician, Ninja] as const

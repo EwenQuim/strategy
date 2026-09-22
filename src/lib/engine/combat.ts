@@ -17,7 +17,7 @@ export function canUseSpecial(pawn: Pawn): boolean {
 }
 
 export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): Pawn[] {
-  if (!canUseSpecial(pawn)) return []
+  if (!canUseSpecial(pawn) || pawn.kind === 'ninja') return []
   if (pawn.kind === 'king') {
     return pawns.filter(
       (p) => p.side === pawn.side && p.id !== pawn.id && p.hp < p.maxHp && hexDist(pawn, p) === 1,
@@ -37,6 +37,33 @@ export function chargeDestinations(
   return new Map(
     [...destinations].filter(([k]) => specialTargets(pawns, pawn, tiles.get(k)!).length > 0),
   )
+}
+
+export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
+  if (pawn.kind !== 'ninja' || !canUseSpecial(pawn)) return []
+  const occupied = new Set(pawns.map((p) => key(p.q, p.r)))
+  return [...tiles.values()].filter(
+    (tile) =>
+      tile.terrain !== 'mountain' && !occupied.has(key(tile.q, tile.r)) && hexDist(pawn, tile) <= 3,
+  )
+}
+
+export function performJump(
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+  pawn: Pawn,
+  destination: Axial,
+): boolean {
+  if (
+    !jumpDestinations(tiles, pawns, pawn).some(
+      (tile) => tile.q === destination.q && tile.r === destination.r,
+    )
+  )
+    return false
+  pawn.q = destination.q
+  pawn.r = destination.r
+  pawn.energy -= pawn.special.cost
+  return true
 }
 
 const label = (pawn: Pawn) =>
@@ -88,6 +115,20 @@ export function performAttack(
   return true
 }
 
+export function performRally(pawns: Pawn[], pawn: Pawn, log: string[]): boolean {
+  if (pawn.kind !== 'king') return false
+  const allies = specialTargets(pawns, pawn)
+  if (!allies.length) return false
+  pawn.energy -= pawn.special.cost
+  pawn.specialUsed = true
+  log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
+  for (const ally of allies) {
+    ally.hp = Math.min(ally.maxHp, ally.hp + 1)
+    log.push(label(ally) + ' recovers 1 health.')
+  }
+  return true
+}
+
 export function performSpecial(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
@@ -97,6 +138,7 @@ export function performSpecial(
   random: SeededRandom,
   destination?: Axial,
 ): boolean {
+  if (pawn.kind === 'king' || pawn.kind === 'ninja') return false
   if (
     pawn.kind === 'swordsman' &&
     (!destination || !chargeDestinations(tiles, pawns, pawn).has(key(destination.q, destination.r)))
@@ -106,11 +148,6 @@ export function performSpecial(
   pawn.energy -= pawn.special.cost
   log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
   switch (pawn.kind) {
-    case 'king':
-      target.hp = Math.min(target.maxHp, target.hp + 1)
-      pawn.specialUsed = true
-      log.push(label(target) + ' recovers 1 health.')
-      break
     case 'swordsman':
       pawn.q = destination!.q
       pawn.r = destination!.r

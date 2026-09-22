@@ -7,10 +7,9 @@ import { Icon, PawnIcon } from '../components/Icon'
 import {
   activePawn,
   King,
-  Swordsman,
-  Archer,
-  Magician,
+  RECRUIT_CLASSES,
   canUseSpecial,
+  specialTargets,
   targetingTiles,
   ESCAPE_BONUS,
   MAX_ESCAPE,
@@ -19,7 +18,7 @@ import {
   type Tile,
 } from '../lib/engine'
 
-const classes = [King, Swordsman, Archer, Magician].map((Unit) => new Unit(0, 0, 0, 'player'))
+const classes = [King, ...RECRUIT_CLASSES].map((Unit) => new Unit(0, 0, 0, 'player'))
 
 export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {
@@ -28,9 +27,10 @@ export const Route = createFileRoute('/game/$seed')({
   remountDeps: ({ params }) => params.seed,
   component: function Game() {
     const { seed } = Route.useParams()
-    const { state, dispatch, effect, playing } = useGame(seed)
+    const { state, dispatch, effect, effectId, playing } = useGame(seed)
     const dialog = useRef<HTMLDialogElement>(null)
     const pawn = activePawn(state)
+    const canRally = pawn?.kind === 'king' && specialTargets(state.pawns, pawn).length > 0
     const myTurn = !!pawn && pawn.side === 'player' && !state.winner && !playing
     const attacking = myTurn && state.phase === 'attack'
     const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
@@ -39,7 +39,9 @@ export const Route = createFileRoute('/game/$seed')({
       ? 'Attack'
       : state.phase === 'special' && pawn?.kind === 'swordsman'
         ? 'Charge to'
-        : (pawn?.special.name ?? 'Special')
+        : pawn?.kind === 'ninja'
+          ? 'Jump to'
+          : (pawn?.special.name ?? 'Special')
     const turnOrder = state.order.flatMap((id, index) => {
       const unit = state.pawns.find((p) => p.id === id)
       return unit ? [{ unit, index }] : []
@@ -129,7 +131,7 @@ export const Route = createFileRoute('/game/$seed')({
               targetLabel={targetLabel}
               preview={state.chargeDestination}
               effect={effect}
-              effectId={state.logCount}
+              effectId={effectId}
               onTileClick={onTileClick}
             />
           </div>
@@ -248,7 +250,13 @@ export const Route = createFileRoute('/game/$seed')({
               </button>
               <button
                 className={'action-button special-action' + (usingSpecial ? ' is-selected' : '')}
-                disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn)}
+                disabled={
+                  !myTurn ||
+                  attacking ||
+                  !pawn ||
+                  !canUseSpecial(pawn) ||
+                  (pawn.kind === 'king' && !canRally)
+                }
                 title={pawn?.special.description}
                 aria-pressed={usingSpecial}
                 onClick={() =>
@@ -265,14 +273,14 @@ export const Route = createFileRoute('/game/$seed')({
                       ? 'No targets'
                       : state.phase === 'charge'
                         ? 'Choose enemy'
-                        : pawn?.kind === 'swordsman'
+                        : pawn?.kind === 'swordsman' || pawn?.kind === 'ninja'
                           ? 'Choose tile'
-                          : pawn?.kind === 'king'
-                            ? 'Choose ally'
-                            : 'Choose enemy'
+                          : 'Choose enemy'
                     : pawn?.kind === 'king' && pawn.specialUsed
                       ? 'Used this round'
-                      : (pawn?.special.cost ?? 2) + ' energy'}
+                      : pawn?.kind === 'king' && !canRally
+                        ? 'No allies to heal'
+                        : (pawn?.special.cost ?? 2) + ' energy'}
                 </small>
               </button>
               <button
@@ -317,8 +325,9 @@ export const Route = createFileRoute('/game/$seed')({
             </div>
             <div className="rules-list">
               <p>
-                Lead your king, two swordsmen, archer, and magician. Defeat the enemy king to win.
-                Losing yours ends the battle.
+                Each army has one king, at least one swordsman, and three random recruits. Repeated
+                classes are possible. Both sides get the same lineup, chosen by the game seed.
+                Defeat the enemy king to win; losing yours ends the battle.
               </p>
               <section>
                 <Icon name="energy" />
@@ -336,9 +345,10 @@ export const Route = createFileRoute('/game/$seed')({
                   <h3>Make your move.</h3>
                   <p>
                     Normal attacks cost 1 energy. Each class has its own damage and range. Choose
-                    Attack or a special, then a highlighted target. Charge first asks for a
-                    destination, then an adjacent enemy. Cancelling either step costs nothing.
-                    Ranged attacks can pass over terrain.
+                    Attack or a targeted special, then a highlighted target. Jump selects an empty
+                    landing tile, not an enemy. Rally heals every adjacent ally immediately. Charge
+                    first asks for a destination, then an adjacent enemy. Cancelling either step
+                    costs nothing. Ranged attacks can pass over terrain.
                   </p>
                 </div>
               </section>

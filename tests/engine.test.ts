@@ -4,6 +4,10 @@ import {
   King,
   Archer,
   Magician,
+  Ninja,
+  RECRUIT_CLASSES,
+  jumpDestinations,
+  hexDist,
   canAttack,
   chargeDestinations,
   targetingTiles,
@@ -52,7 +56,7 @@ function battle(): GameState {
 }
 
 test('End turn converts all remaining energy to Escape for every class and advances once', () => {
-  for (const Ctor of [King, Swordsman, Archer, Magician]) {
+  for (const Ctor of [King, ...RECRUIT_CLASSES]) {
     for (const energy of [0, 1, 2, 3]) {
       const state = battle()
       state.pawns[0] = new Ctor(1, 0, 0, 'player', undefined, energy)
@@ -365,25 +369,21 @@ test('A confirmed attack spends exactly one energy, including the final energy b
   }
 })
 
-test('Notification IDs advance for repeated messages even when the log is full', () => {
+test('Notification IDs advance for repeated attacks even when the log is full', () => {
   let state = battle()
   state.pawns[0].energy = 60
+  state.pawns[2].hp = 200
   for (let index = 1; index <= 45; index++) {
     state = reducer(state, { type: 'act', action: 'attack' })
     assert.equal(state.logCount, index - 1)
-    state = reducer(state, { type: 'cancelTargeting' })
-    state = reducer(state, { type: 'move', q: 0, r: index % 2 })
+    state = reducer(state, { type: 'attackAt', q: 1, r: 0 })
     assert.equal(state.logCount, index)
     assert.equal(state.log.length, Math.min(index, 40))
   }
   assert.equal(new Set(state.log).size, 1)
-  state = reducer(state, { type: 'move', q: 0, r: 2 })
-  assert.equal(state.logCount, 46)
-  state = reducer(state, { type: 'move', q: 0, r: 1 })
-  assert.equal(state.logCount, 47)
   state.order = [1, 3, 2]
   state = reducer(state, { type: 'endTurn' })
-  assert.equal(state.logCount, 49)
+  assert.equal(state.logCount, 47)
   assert.equal(state.log.length, 40)
 })
 
@@ -393,6 +393,7 @@ test('Every class has its proposed health, damage, range, and independently clon
     [Swordsman, 5, 2, 1, 1],
     [Archer, 3, 1, 2, 3],
     [Magician, 3, 1, 1, 2],
+    [Ninja, 1, 5, 1, 1],
   ] as const) {
     const pawn = new Ctor(1, 0, 0, 'player')
     assert.equal(pawn.hp, hp)
@@ -415,36 +416,35 @@ test('Every class has its proposed health, damage, range, and independently clon
     assert.equal(pawn.hp, hp)
     assert.equal(pawn.specialUsed, true)
   }
-  const state = initialState('full-armies')
-  for (const side of ['player', 'enemy']) {
-    assert.deepEqual(
-      state.pawns
-        .filter((p) => p.side === side)
-        .map((p) => p.kind)
-        .sort(),
-      ['archer', 'king', 'magician', 'swordsman', 'swordsman'],
-    )
-  }
 })
 
-test('Rally heals only a wounded adjacent ally, costs one energy, and resets next round', () => {
+test('Rally immediately heals every wounded adjacent ally for one energy, once per round', () => {
   const state = battle()
-  state.pawns[0] = new King(1, 0, 0, 'player')
+  state.pawns[0] = new King(1, 0, 0, 'player', 4)
   state.pawns[1] = new Swordsman(2, 0, 1, 'player', 4)
-  const preview = reducer(state, { type: 'act', action: 'special' })
-  assert.deepEqual([...targetingTiles(preview)], ['0,1'])
-  for (const [q, r] of [
-    [0, 0],
-    [1, 0],
-    [0, 3],
-  ])
-    assert.equal(reducer(preview, { type: 'specialAt', q, r }), preview)
-  const healed = reducer(preview, { type: 'specialAt', q: 0, r: 1 })
-  assert.equal(healed.pawns[1].hp, 5)
+  state.pawns.push(
+    new Archer(4, -1, 0, 'player', 1),
+    new Magician(5, 1, -1, 'player', 2),
+    new Swordsman(6, 0, -1, 'player'),
+    new Archer(7, -3, 0, 'player', 1),
+  )
+  const healed = reducer(state, { type: 'act', action: 'special' })
+  assert.deepEqual(
+    healed.pawns.map((p) => p.hp),
+    [4, 5, 7, 2, 3, 5, 1],
+  )
+  assert.deepEqual(
+    state.pawns.map((p) => p.hp),
+    [4, 4, 7, 1, 2, 5, 1],
+  )
   assert.equal(healed.pawns[0].energy, 2)
   assert.equal(healed.pawns[0].specialUsed, true)
-  assert.equal(state.pawns[1].hp, 4)
+  assert.equal(healed.phase, 'move')
+  assert.equal(targetingTiles(healed).size, 0)
+  assert.equal(healed.randomState, state.randomState)
+  assert.equal(healed.logCount, 4)
   assert.equal(reducer(healed, { type: 'act', action: 'special' }), healed)
+  assert.equal(reducer(healed, { type: 'specialAt', q: 0, r: 1 }), healed)
   healed.order = [3, 2, 1]
   healed.active = 2
   healed.pawns[2].q = 5
@@ -452,9 +452,34 @@ test('Rally heals only a wounded adjacent ally, costs one energy, and resets nex
   const nextRound = reducer(healed, { type: 'endTurn' })
   assert.equal(nextRound.round, 2)
   assert.equal(nextRound.pawns.find((p) => p.id === 1)!.specialUsed, false)
-  const full = reducer(state, { type: 'act', action: 'special' })
-  full.pawns[1].hp = 5
-  assert.equal(targetingTiles(full).size, 0)
+
+  state.pawns[0].energy = 1
+  const exhausted = reducer(state, { type: 'act', action: 'special' })
+  assert.deepEqual(
+    exhausted.pawns.map((p) => p.hp),
+    [4, 5, 7, 2, 3, 5, 1],
+  )
+  assert.equal(exhausted.pawns[0].energy, 0)
+  assert.equal(exhausted.pawns[0].escapeChance, 0)
+  assert.equal(activePawn(exhausted)?.id, 2)
+})
+
+test('Rally does not spend energy without wounded adjacent allies or when unavailable', () => {
+  const state = battle()
+  state.pawns[0] = new King(1, 0, 0, 'player', 4)
+  state.pawns[1] = new Swordsman(2, 0, 1, 'player')
+  assert.equal(reducer(state, { type: 'act', action: 'special' }), state)
+  state.pawns[1].hp = 3
+  for (const unavailable of [
+    { ...state, phase: 'attack' as const },
+    { ...state, winner: 'enemy' as const, phase: 'over' as const },
+  ])
+    assert.equal(reducer(unavailable, { type: 'act', action: 'special' }), unavailable)
+  state.pawns[0].energy = 0
+  assert.equal(reducer(state, { type: 'act', action: 'special' }), state)
+  state.pawns[0].energy = 3
+  state.pawns[0].specialUsed = true
+  assert.equal(reducer(state, { type: 'act', action: 'special' }), state)
 })
 
 test('Charge previews freely, then moves and strikes atomically for two energy', () => {
@@ -599,9 +624,10 @@ test('Enemy archers retreat out of melee before shooting and can use Aimed shot'
 test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
   const king = battle()
   king.order = [1, 3, 2]
-  king.pawns.push(new Swordsman(4, 1, 1, 'enemy', 3))
+  king.pawns.push(new Swordsman(4, 1, 1, 'enemy', 3), new Archer(5, 2, 0, 'enemy', 1))
   const rallied = reducer(king, { type: 'endTurn' })
   assert.equal(rallied.pawns[3].hp, 4)
+  assert.equal(rallied.pawns[4].hp, 2)
   assert.equal(rallied.pawns[2].specialUsed, true)
   for (const Ctor of [Swordsman, Magician]) {
     const state = battle()
@@ -641,7 +667,8 @@ test('Enemy playback records each action in order without changing seeded result
             const before = result.frames[i - 1].state
             assert.equal(activePawn(before)?.id, activePawn(frame.state)?.id)
             assert.ok(activePawn(before)!.energy > activePawn(frame.state)!.energy)
-            assert.ok(frame.state.logCount > before.logCount)
+            if (frame.effect.kind === 'move') assert.equal(frame.state.logCount, before.logCount)
+            else assert.ok(frame.state.logCount > before.logCount)
           }
         }
         state = result.state
@@ -763,4 +790,216 @@ test('Enemies convert remaining energy in one end-turn action, including at the 
       if (effects.length) assert.equal(activePawn(effects[0].state)?.energy, 0)
     }
   }
+})
+
+test('Every seed places distinct pawns in their own three-row starting area', () => {
+  const positionsById = new Map<number, Set<string>>()
+  const rowsBySide = { player: new Set<number>(), enemy: new Set<number>() }
+  for (let index = 0; index < 100; index++) {
+    const seed = 'spawn-' + index
+    const opening = initialTransition(seed)
+    assert.deepEqual(opening, initialTransition(seed))
+    const state = opening.frames[0]?.state ?? opening.state
+    assert.equal(state.pawns.length, 10)
+    assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, 10)
+    for (const pawn of state.pawns) {
+      const firstRow = pawn.side === 'enemy' ? 0 : MAP_HEIGHT - 3
+      assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
+      const tileKey = key(pawn.q, pawn.r)
+      assert.equal(state.tiles.get(tileKey)?.terrain, 'plain')
+      assert.equal(pawn.hp, pawn.maxHp)
+      assert.equal(pawn.energy, pawn.maxEnergy)
+      assert.equal(pawn.escapeChance, 0)
+      const positions = positionsById.get(pawn.id) ?? new Set<string>()
+      positions.add(tileKey)
+      positionsById.set(pawn.id, positions)
+      rowsBySide[pawn.side].add(pawn.r)
+    }
+  }
+  assert.ok([...positionsById.values()].every((positions) => positions.size > 1))
+  assert.equal(rowsBySide.player.size, 3)
+  assert.equal(rowsBySide.enemy.size, 3)
+})
+
+test('Player and enemy movement stays silent while each enemy step still has a playback frame', () => {
+  const state = battle()
+  const moved = reducer(state, { type: 'move', q: 0, r: 1 })
+  assert.deepEqual(moved.log, state.log)
+  assert.equal(moved.logCount, state.logCount)
+  state.pawns[0].energy = 0
+  state.pawns[2].q = 5
+  state.pawns[2].energy = 3
+  state.order = [1, 3, 2]
+  const result = transition(state, { type: 'endTurn' })
+  assert.deepEqual(result.state.log, [])
+  assert.equal(result.frames.length, 4)
+  assert.deepEqual(
+    result.frames.map((f) => activePawn(f.state)?.energy),
+    [3, 2, 1, 0],
+  )
+  assert.deepEqual(
+    result.frames.map((f) => f.state.logCount),
+    [0, 0, 0, 0],
+  )
+  assert.equal(result.frames.filter((f) => f.effect?.kind === 'move').length, 3)
+})
+
+test('Seeded armies mirror one King, a guaranteed swordsman, and three random recruits', () => {
+  const rosters = new Set<string>()
+  const recruits = new Set<string>()
+  let duplicateRecruits = false
+  for (let index = 0; index < 100; index++) {
+    const opening = initialTransition('roster-' + index)
+    const state = opening.frames[0]?.state ?? opening.state
+    const player = state.pawns.filter((p) => p.side === 'player')
+    const enemy = state.pawns.filter((p) => p.side === 'enemy')
+    assert.equal(player.length, 5)
+    assert.equal(enemy.length, 5)
+    assert.equal(player.filter((p) => p.kind === 'king').length, 1)
+    assert.ok(player.some((p) => p.kind === 'swordsman'))
+    assert.deepEqual(
+      player.map((p) => p.kind),
+      enemy.map((p) => p.kind),
+    )
+    assert.ok(player[0] instanceof Swordsman)
+    assert.ok(player[1] instanceof King)
+    const randomRecruits = player.slice(2)
+    assert.ok(randomRecruits.every((p) => RECRUIT_CLASSES.some((Unit) => p instanceof Unit)))
+    randomRecruits.forEach((p) => recruits.add(p.kind))
+    duplicateRecruits ||= new Set(randomRecruits.map((p) => p.kind)).size < 3
+    rosters.add(player.map((p) => p.kind).join(','))
+  }
+  assert.ok(rosters.size > 1)
+  assert.ok(duplicateRecruits)
+  assert.deepEqual([...recruits].sort(), ['archer', 'magician', 'ninja', 'swordsman'])
+})
+
+test('Jump crosses blocked paths, targets only empty passable tiles within three hexes, and costs two energy', () => {
+  const state = battle()
+  state.pawns[0] = new Ninja(1, 0, 0, 'player')
+  state.pawns[2].q = 4
+  for (const tile of state.tiles.values()) tile.terrain = 'mountain'
+  for (const k of ['0,0', '1,0', '2,0', '3,0', '0,3', '0,4', '-3,0', '4,0'])
+    state.tiles.get(k)!.terrain = 'plain'
+  state.tiles.get('0,3')!.terrain = 'forest'
+  state.pawns.push(new Archer(4, 1, 0, 'enemy'), new Swordsman(5, 2, 0, 'player'))
+  const original = structuredClone(state)
+  const preview = reducer(state, { type: 'act', action: 'special' })
+  assert.equal(preview.phase, 'special')
+  assert.equal(preview.pawns[0].energy, 3)
+  assert.deepEqual(targetingTiles(preview), new Set(['0,3', '3,0']))
+  assert.deepEqual(reducer(preview, { type: 'cancelTargeting' }), state)
+  for (const [q, r] of [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+    [-3, 0],
+    [0, 1],
+    [0, 4],
+    [99, 99],
+  ]) {
+    assert.equal(reducer(preview, { type: 'specialAt', q, r }), preview)
+  }
+  assert.equal(reducer(state, { type: 'specialAt', q: 3, r: 0 }), state)
+  const jumped = reducer(preview, { type: 'specialAt', q: 3, r: 0 })
+  assert.equal(jumped.pawns[0].q, 3)
+  assert.equal(jumped.pawns[0].energy, 1)
+  assert.equal(jumped.phase, 'move')
+  assert.equal(jumped.randomState, state.randomState)
+  assert.deepEqual(jumped.log, state.log)
+  assert.equal(jumped.logCount, 0)
+  assert.deepEqual(structuredClone(state), original)
+  const attacked = reducer(reducer(jumped, { type: 'act', action: 'attack' }), {
+    type: 'attackAt',
+    q: 4,
+    r: 0,
+  })
+  assert.equal(attacked.pawns[2].hp, 2)
+  assert.equal(attacked.pawns[0].energy, 0)
+  assert.equal(activePawn(attacked)?.id, 2)
+  assert.equal(attacked.winner, null)
+})
+
+test('Jump includes one to three hexes, requires two energy, and ends the turn when exhausted', () => {
+  const state = battle()
+  state.pawns[0] = new Ninja(1, 0, 0, 'player')
+  for (const energy of [0, 1, 2, 3]) {
+    state.pawns[0].energy = energy
+    const destinations = jumpDestinations(state.tiles, state.pawns, state.pawns[0])
+    if (energy < 2) {
+      assert.deepEqual(destinations, [])
+      assert.equal(reducer(state, { type: 'act', action: 'special' }), state)
+      continue
+    }
+    assert.deepEqual(
+      new Set(destinations.map((t) => hexDist(state.pawns[0], t))),
+      new Set([1, 2, 3]),
+    )
+    const preview = reducer(state, { type: 'act', action: 'special' })
+    const next = reducer(preview, { type: 'specialAt', q: 0, r: 1 })
+    assert.equal(next.pawns[0].energy, energy - 2)
+    assert.equal(next.pawns[0].r, 1)
+    assert.equal(next.pawns[0].escapeChance, 0)
+    assert.equal(activePawn(next)?.id, energy === 2 ? 2 : 1)
+    assert.equal(next.randomState, state.randomState)
+  }
+  assert.deepEqual(jumpDestinations(state.tiles, state.pawns, state.pawns[1]), [])
+})
+
+test('Ninja attacks cost one energy and respect Escape; one incoming hit kills a Ninja', () => {
+  for (let randomState = 0; randomState < 20; randomState++) {
+    const state = battle()
+    state.pawns[0] = new Ninja(1, 0, 0, 'player')
+    state.pawns[2].escapeChance = 60
+    state.randomState = randomState
+    const random = new SeededRandom(randomState)
+    const escaped = random.next() < 0.6
+    const attacked = reducer(reducer(state, { type: 'act', action: 'attack' }), {
+      type: 'attackAt',
+      q: 1,
+      r: 0,
+    })
+    assert.equal(attacked.pawns[2].hp, escaped ? 7 : 2)
+    assert.equal(attacked.pawns[0].energy, 2)
+    assert.equal(attacked.randomState, random.state)
+  }
+  const state = battle()
+  state.pawns[0] = new Ninja(1, 0, 0, 'player', undefined, 0)
+  state.order = [1, 3, 2]
+  const struck = reducer(state, { type: 'endTurn' })
+  assert.ok(!struck.pawns.some((p) => p.id === 1))
+  assert.equal(state.pawns[0].hp, 1)
+})
+
+test('Enemy Ninja jumps over a blocked path then attacks, with deterministic ordered playback', () => {
+  const state = battle()
+  state.pawns[0].q = -5
+  state.pawns[0].r = -5
+  state.pawns[1].q = 0
+  state.pawns[2] = new Ninja(3, 4, 0, 'enemy')
+  state.pawns.push(new King(4, 5, 5, 'enemy'))
+  state.order = [1, 3, 2, 4]
+  for (const tile of state.tiles.values()) tile.terrain = 'mountain'
+  for (const k of ['-5,-5', '0,0', '1,0', '4,0', '5,5']) state.tiles.get(k)!.terrain = 'plain'
+  const result = transition(state, { type: 'endTurn' })
+  assert.deepEqual(result, transition(state, { type: 'endTurn' }))
+  assert.deepEqual(result.state, reducer(state, { type: 'endTurn' }))
+  assert.deepEqual(
+    result.frames.map((frame) => frame.effect?.kind),
+    [undefined, 'move', 'attack'],
+  )
+  assert.deepEqual(
+    result.frames.map((frame) => activePawn(frame.state)?.energy),
+    [3, 1, 0],
+  )
+  assert.deepEqual(result.frames[1].effect, {
+    kind: 'move',
+    from: { q: 4, r: 0 },
+    to: { q: 1, r: 0 },
+  })
+  assert.equal(result.frames[1].state.logCount, result.frames[0].state.logCount)
+  assert.equal(result.state.pawns[1].hp, 2)
+  assert.equal(result.state.pawns[2].energy, 0)
+  assert.equal(state.pawns[2].q, 4)
+  assert.equal(state.pawns[1].hp, 7)
 })

@@ -1,15 +1,5 @@
-import {
-  MAP_WIDTH,
-  MAP_HEIGHT,
-  distFrom,
-  hexDist,
-  hexOf,
-  key,
-  makeMap,
-  neighbors,
-  reachable,
-} from './hex.ts'
-import { King, Swordsman, Archer, Magician, type Pawn, type Side } from './pawns.ts'
+import { MAP_HEIGHT, distFrom, hexDist, key, makeMap, neighbors, reachable } from './hex.ts'
+import { King, Swordsman, RECRUIT_CLASSES, type Pawn, type Side } from './pawns.ts'
 import type {
   Action,
   Axial,
@@ -26,13 +16,16 @@ import {
   canAttack,
   canUseSpecial,
   chargeDestinations,
+  jumpDestinations,
+  performJump,
   specialTargets,
   performAttack,
+  performRally,
   performSpecial,
 } from './combat.ts'
 
-function shuffle(ids: number[], random: SeededRandom): number[] {
-  const out = [...ids]
+function shuffle<T>(items: T[], random: SeededRandom): T[] {
+  const out = [...items]
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(random.next() * (i + 1))
     ;[out[i], out[j]] = [out[j], out[i]]
@@ -81,23 +74,20 @@ function enemyAct(
     const record = (kind: BattleEffect['kind'], to: Axial = pawn) =>
       recordStep?.({ kind, from, to: { q: to.q, r: to.r } })
     const foes = pawns.filter((p) => p.side !== pawn.side)
-    const specials = specialTargets(pawns, pawn)
-    const special =
-      pawn.kind === 'king'
-        ? specials.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0]
-        : strategy.chooseTarget(
-            pawn,
-            specials.filter((p) =>
-              pawn.kind === 'archer'
-                ? p.escapeChance > 0
-                : pawn.kind === 'magician' && foes.filter((f) => hexDist(p, f) <= 1).length > 1,
-            ),
-          )
+    if (performRally(pawns, pawn, log)) {
+      record('rally')
+      continue
+    }
+    const special = strategy.chooseTarget(
+      pawn,
+      specialTargets(pawns, pawn).filter((p) =>
+        pawn.kind === 'archer'
+          ? p.escapeChance > 0
+          : pawn.kind === 'magician' && foes.filter((f) => hexDist(p, f) <= 1).length > 1,
+      ),
+    )
     if (special && performSpecial(tiles, pawns, pawn, special, log, random)) {
-      record(
-        pawn.kind === 'king' ? 'rally' : pawn.kind === 'magician' ? 'fireball' : 'attack',
-        special,
-      )
+      record(pawn.kind === 'magician' ? 'fireball' : 'attack', special)
       continue
     }
 
@@ -136,11 +126,19 @@ function enemyAct(
     const step = neighbors(pawn.q, pawn.r)
       .filter((n) => !occupied.has(key(n.q, n.r)) && (dist.get(key(n.q, n.r)) ?? Infinity) < here)
       .sort((a, b) => dist.get(key(a.q, a.r))! - dist.get(key(b.q, b.r))!)[0]
+    const jump = jumpDestinations(tiles, pawns, pawn).sort(
+      (a, b) => (dist.get(key(a.q, a.r)) ?? Infinity) - (dist.get(key(b.q, b.r)) ?? Infinity),
+    )[0]
+    const jumpDistance = jump ? (dist.get(key(jump.q, jump.r)) ?? Infinity) : Infinity
+    if (jump && jumpDistance < here && (!step || jumpDistance + pawn.special.cost < here)) {
+      performJump(tiles, pawns, pawn, jump)
+      record('move')
+      continue
+    }
     if (step) {
       pawn.q = step.q
       pawn.r = step.r
       pawn.energy--
-      log.push('Enemy ' + pawn.kind + ' #' + pawn.id + ' moves 1 tile.')
       record('move')
       continue
     }
@@ -247,31 +245,27 @@ function createInitialState(
   record?: RecordFrame,
 ): GameState {
   const random = new SeededRandom(seedState(seed))
-  const spawn = (
-    Ctor: new (id: number, q: number, r: number, side: Side) => Pawn,
-    id: number,
-    col: number,
-    row: number,
-    side: Side,
-  ) => {
-    const { q, r } = hexOf(col, row)
-    return new Ctor(id, q, r, side)
-  }
-  const center = Math.floor(MAP_WIDTH / 2)
-  const pawns = [
-    spawn(Swordsman, 1, center - 1, MAP_HEIGHT - 3, 'player'),
-    spawn(King, 2, center, MAP_HEIGHT - 2, 'player'),
-    spawn(Swordsman, 3, center + 1, MAP_HEIGHT - 3, 'player'),
-    spawn(Archer, 4, center - 2, MAP_HEIGHT - 2, 'player'),
-    spawn(Magician, 5, center + 2, MAP_HEIGHT - 2, 'player'),
-    spawn(Swordsman, 6, center - 1, 2, 'enemy'),
-    spawn(King, 7, center, 1, 'enemy'),
-    spawn(Swordsman, 8, center + 1, 2, 'enemy'),
-    spawn(Archer, 9, center + 2, 1, 'enemy'),
-    spawn(Magician, 10, center - 2, 1, 'enemy'),
-  ]
   const tiles = makeMap(random)
-  for (const pawn of pawns) tiles.get(key(pawn.q, pawn.r))!.terrain = 'plain'
+  const army = [
+    Swordsman,
+    King,
+    ...Array.from(
+      { length: 3 },
+      () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
+    ),
+  ]
+  const spawn = (side: Side, firstRow: number, firstId: number) => {
+    const positions = shuffle(
+      [...tiles.values()].filter((tile) => tile.r >= firstRow && tile.r < firstRow + 3),
+      random,
+    )
+    return army.map((Unit, index) => {
+      const tile = positions[index]
+      tile.terrain = 'plain'
+      return new Unit(firstId + index, tile.q, tile.r, side)
+    })
+  }
+  const pawns = [...spawn('player', MAP_HEIGHT - 3, 1), ...spawn('enemy', 0, 6)]
   const base: GameState = {
     tiles,
     pawns,
@@ -314,6 +308,11 @@ export const { initialState, reducer, initialTransition, transition } = createGa
 export function targetingTiles(state: GameState): Set<string> {
   const pawn = activePawn(state)
   if (!pawn || state.winner) return new Set()
+  if (state.phase === 'special' && pawn.kind === 'ninja') {
+    return new Set(
+      jumpDestinations(state.tiles, state.pawns, pawn).map((tile) => key(tile.q, tile.r)),
+    )
+  }
   if (state.phase === 'special' && pawn.kind === 'swordsman') {
     return new Set(chargeDestinations(state.tiles, state.pawns, pawn).keys())
   }
@@ -341,7 +340,7 @@ function reduce(
   if (action.type === 'act') {
     if (state.phase !== 'move' || pawn.energy <= 0) return state
     if (action.action === 'attack') return { ...state, phase: 'attack' }
-    if (action.action === 'special') {
+    if (action.action === 'special' && pawn.kind !== 'king') {
       return canUseSpecial(pawn) ? { ...state, phase: 'special' } : state
     }
   }
@@ -357,7 +356,11 @@ function reduce(
   const log: string[] = []
   const random = new SeededRandom(state.randomState)
 
-  if (action.type === 'attackAt' || action.type === 'specialAt') {
+  if (action.type === 'act' && action.action === 'special') {
+    if (!performRally(pawns, me, log)) return state
+  } else if (action.type === 'specialAt' && me.kind === 'ninja') {
+    if (state.phase !== 'special' || !performJump(state.tiles, pawns, me, action)) return state
+  } else if (action.type === 'attackAt' || action.type === 'specialAt') {
     const expectedPhase =
       action.type === 'attackAt' ? 'attack' : me.kind === 'swordsman' ? 'charge' : 'special'
     if (state.phase !== expectedPhase) return state
@@ -384,9 +387,6 @@ function reduce(
     me.q = action.q
     me.r = action.r
     me.energy -= steps
-    log.push(
-      'Your ' + me.kind + ' #' + me.id + ' moves ' + steps + (steps === 1 ? ' tile.' : ' tiles.'),
-    )
   } else if (action.type !== 'endTurn') return state
 
   const winner = winnerFrom(pawns)

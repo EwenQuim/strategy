@@ -87,9 +87,7 @@ export function Battlefield({
         const fill = target
           ? targetLabel === 'Attack'
             ? '#b98370'
-            : targetLabel === 'Rally'
-              ? '#a3c6ae'
-              : '#b79dce'
+            : '#b79dce'
           : selected || previewed
             ? '#c9b77f'
             : canMove
@@ -177,7 +175,7 @@ export function Battlefield({
       ))}
       {effect && (
         <g key={effectId} className={'battle-effect effect-' + effect.kind} aria-hidden="true">
-          {effect.kind !== 'escape' && (
+          {effect.kind !== 'escape' && effect.kind !== 'rally' && (
             <line
               x1={hexX(effect.from.q, effect.from.r)}
               y1={hexY(effect.from.r)}
@@ -192,7 +190,10 @@ export function Battlefield({
               'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
             }
           >
-            <circle r={effect.kind === 'fireball' ? 66 : 29} className="battle-impact" />
+            <circle
+              r={effect.kind === 'fireball' || effect.kind === 'rally' ? 66 : 29}
+              className="battle-impact"
+            />
           </g>
         </g>
       )}

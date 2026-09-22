@@ -3,9 +3,11 @@ const pawnIcons = {
   swordsman: 'sword',
   archer: 'bow',
   magician: 'wand',
+  ninja: 'mask',
 } as const
 
 const paths = {
+  mask: 'M4 9a8 8 0 0 1 16 0v6a8 8 0 0 1-16 0V9Zm0 0h16M4 15h16M7 12h2m6 0h2M4 9 1 5m3 4L1 12',
   bow: 'M5 3c14 0 14 18 0 18V3Zm0 9h16m-4-4 4 4-4 4',
   wand: 'm4 20 12-12m-9 9 3 3M17 2l1.5 4.5L23 8l-4.5 1.5L17 14l-1.5-4.5L11 8l4.5-1.5L17 2Z',
   crown: 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12',
