@@ -31,24 +31,6 @@ export function readCampaignProgress(): number {
   return sessionCompleted
 }
 
-export const HINTS_STORAGE_KEY = 'hexmate:campaign:hints:v1'
-
-export function readHideFutureHints(): boolean {
-  try {
-    return localStorage.getItem(HINTS_STORAGE_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-export function writeHideFutureHints(hidden: boolean): void {
-  try {
-    localStorage.setItem(HINTS_STORAGE_KEY, hidden ? '1' : '0')
-  } catch {
-    /* ignored */
-  }
-}
-
 export function recordCampaignVictory(level: number): void {
   sessionCompleted = completeCampaignLevel(readCampaignProgress(), level)
   try {

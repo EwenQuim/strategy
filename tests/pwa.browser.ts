@@ -1580,7 +1580,6 @@ test(
           (element) => element.getBoundingClientRect().bottom <= innerHeight,
         ),
       )
-      await page.getByRole('checkbox', { name: 'Hide future hints' }).check()
       await page.goto(origin + base + 'game/style-check?mode=local')
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
