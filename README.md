@@ -4,7 +4,7 @@ Mobile-first, turn-based hex strategy game built with React, Vite, TanStack Rout
 
 ## Development
 
-Use Node.js 22 (22.12 or newer) and npm.
+Use Node.js 22 (22.12 or newer), npm, and Google Chrome. The PWA browser checks use the same Chrome channel locally and on the GitHub-hosted Ubuntu runner.
 
 ```sh
 npm ci --ignore-scripts
@@ -20,11 +20,20 @@ The app runs under `/strategy/`. Game URLs contain a seed: the same seed and act
 - `make typecheck`: strict TypeScript checks for the app, library, tooling, and tests.
 - `make lint`: typecheck, formatting validation, and Oxlint with no warnings allowed.
 - `make test`: run the Node.js built-in test runner; no browser or test framework required.
-- `make check`: run all checks, tests, and the production build.
+- `make check`: run all checks, engine tests, the production build, and PWA browser tests.
+- `npm run test:pwa`: test the existing build in Chrome at a small portrait viewport, including offline play, safe upgrades, and failed downloads.
 
 CI and `.githooks/pre-push` both run `npm run check:ci`: a fresh locked install with lifecycle scripts disabled, all checks, and a clean tracked diff. `npm run prepare` installs the hook locally, including when automatic npm lifecycle scripts are disabled. The hook rejects uncommitted or untracked changes so checks run against the code being pushed.
 
 The same checks gate pull requests and GitHub Pages deployment. The build includes a `404.html` fallback for seeded game URLs.
+
+## Offline play and installation
+
+Open the production site once online, then use your browser's Install app or Add to Home Screen command. The app caches its HTML, styles, icons, and every JavaScript chunk, so new seeded games also work offline. Development mode does not register a service worker.
+
+Updates are checked when the app opens, comes online, or returns to the foreground. A new build downloads in the background, but never reloads a running match. Close all Hex Strategy tabs/windows and reopen the app to activate the update. Old assets are removed only then; a failed download leaves the previous version usable offline.
+
+Battles still live in memory: reloading restarts the seeded battle. Offline support does not add saved matches.
 
 ## Boundaries
 
