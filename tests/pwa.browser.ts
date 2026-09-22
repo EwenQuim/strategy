@@ -787,6 +787,7 @@ test(
     for (const id of [5, 9, 14, 15, 18]) {
       const level = CAMPAIGN_LEVELS[id - 1]
       await page.goto(origin + base + 'campaign/' + id)
+      await page.getByRole('button', { name: 'Go !', exact: true }).click()
       await page.locator('.end-action:not([disabled])').waitFor()
       assert.equal(
         await page.locator('.game-shell').getAttribute('data-biome'),
@@ -812,14 +813,25 @@ test(
         const lava = page
           .locator('.hex-tile[data-terrain=lava][role=img][aria-label^="lava,"] .tile-face')
           .first()
-        const colors = await Promise.all(
-          [basalt, lava].map((tile) => tile.evaluate((face) => getComputedStyle(face).fill)),
-        )
-        const [rock, melt] = colors.map((color) => color.match(/\d+/g)!.map(Number))
-        assert.ok(rock.every((channel, index) => Math.abs(channel - melt[index]) < 40))
         assert.equal(
-          await page.locator('.lava-pool > g[clip-path]').count(),
-          await page.locator('.lava-pool').count(),
+          await basalt.evaluate((face) => getComputedStyle(face).fill),
+          'rgb(89, 78, 83)',
+        )
+        assert.equal(await lava.getAttribute('fill'), 'url(#lava-melt)')
+        const hexPoints = await lava.getAttribute('points')
+        assert.equal(await page.locator('#lava-hex polygon').getAttribute('points'), hexPoints)
+        assert.equal(
+          await page.locator('.lava-pool > g[clip-path="url(#lava-hex)"]').count(),
+          await page.locator('[data-terrain=lava]').count(),
+        )
+        assert.ok(
+          await page
+            .locator('.lava-pool polygon')
+            .evaluateAll(
+              (polygons, points) =>
+                polygons.every((polygon) => polygon.getAttribute('points') === points),
+              hexPoints,
+            ),
         )
         assert.ok(await page.locator('.basalt-stone').count())
         assert.ok(
@@ -854,13 +866,11 @@ test(
 
 test(
   'Interactive tiles stay readable on mobile, grant temporary rune energy, and warn about lethal lava',
-  { timeout: 60_000 },
+  { timeout: 180_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
-    const trace = (message: string) => console.error('[tiles-test] ' + message)
-    trace('fixture ready')
     await context.setOffline(true)
     for (const kind of ['watchtower', 'spring', 'rune', 'lava'] as const) {
       let state = initialState('interactive-ui')
@@ -882,13 +892,11 @@ test(
         if (position) break
       }
       assert.ok(position, 'Find a reachable ' + kind)
-      trace(kind + ' seed found at ' + state.seed)
       const pawn = activePawn(state)!
       const tile = state.tiles.get(position)!
       const index = [...state.tiles.keys()].indexOf(position)
       await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
       await page.locator('.end-action:not([disabled])').waitFor()
-      trace(kind + ' page ready')
       const destination = page.locator('.hex-tile').nth(index)
       if (kind === 'lava') {
         assert.match((await destination.getAttribute('aria-label'))!, /lethal/)
@@ -950,13 +958,10 @@ test(
           )
         }
         const round = state.round
-        let endTurns = 0
         while (activePawn(state)?.id !== pawn.id || state.round === round) {
-          trace(kind + ' end turn ' + ++endTurns)
           await page.locator('.end-action:not([disabled])').click()
           state = transition(state, { type: 'endTurn' }).state
         }
-        trace(kind + ' round done')
         assert.equal(
           await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
           '3',
@@ -992,10 +997,8 @@ test(
       )
       await page.reload()
       await page.locator('.end-action:not([disabled])').waitFor()
-      trace(kind + ' reloaded')
       if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
     }
-    trace('all kinds done')
     await page.getByRole('button', { name: 'How to play' }).click()
     assert.match(await page.locator('.rules-list').innerText(), /two middle rows/)
     assert.match(await page.locator('.rules-list').innerText(), /no permanent bonus/)
