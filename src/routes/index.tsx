@@ -145,7 +145,7 @@ export const Route = createFileRoute('/')({
           <span title="Git commit used for this build">
             Build {import.meta.env.VITE_GIT_COMMIT}
           </span>
-          <span>Made for a moment of strategy.</span>
+          <span>Made with ❤️ by EwenQuim</span>
         </footer>
       </main>
     )
