@@ -5,6 +5,7 @@ import { extname, join, relative } from 'node:path'
 import { test, type TestContext } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright-core'
+import { BIOMES, initialState, type Biome } from '../src/lib/engine/index.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -368,5 +369,46 @@ test(
     )
     await playTurn(offline)
     assert.equal(await releaseMarker(offline), undefined)
+  },
+)
+
+test(
+  'All three seeded biomes render and play offline on a small portrait screen',
+  { timeout: 60_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const seeds = new Map<Biome, string>()
+    for (let index = 0; index < 100 && seeds.size < 3; index++) {
+      const seed = 'biome-' + index
+      seeds.set(initialState(seed).biome, seed)
+    }
+    assert.equal(seeds.size, 3)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await context.setOffline(true)
+    for (const [biome, seed] of seeds) {
+      await page.goto(origin + base + 'game/' + seed)
+      await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(await page.locator('.wordmark-sub').textContent(), BIOMES[biome].name)
+      assert.equal(await page.locator('.hex-tile').count(), 96)
+      const terrain = await page
+        .locator('.hex-tile')
+        .evaluateAll((tiles) => tiles.map((tile) => tile.getAttribute('aria-label')!))
+      assert.equal(
+        terrain.some((label) => label.includes('lake')),
+        biome === 'verdant',
+      )
+      assert.equal(
+        terrain.some((label) => label.includes('mountain')),
+        biome === 'mountains',
+      )
+      assert.equal(
+        terrain.some((label) => label.includes('sand')),
+        biome === 'desert',
+      )
+      if (biome === 'desert') assert.ok(terrain.every((label) => /sand|health/.test(label)))
+      await playTurn(page)
+    }
+    assert.deepEqual(errors, [])
   },
 )

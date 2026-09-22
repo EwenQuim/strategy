@@ -1,6 +1,13 @@
-import { MAP_HEIGHT, key, makeMap, reachable } from './hex.ts'
+import { BIOMES, MAP_WIDTH, MAP_HEIGHT, hexOf, key, makeMap, reachable } from './hex.ts'
 import { King, Swordsman, RECRUIT_CLASSES, type Pawn, type Side } from './pawns.ts'
-import type { Action, BattleEffect, BattleFrame, GameState, Transition } from './types.ts'
+import type {
+  Action,
+  BattleEffect,
+  BattleFrame,
+  Biome,
+  GameState,
+  Transition,
+} from './types.ts'
 import { SeededRandom, seedState } from './random.ts'
 import {
   canAttack,
@@ -90,7 +97,8 @@ export function activePawn(state: GameState): Pawn | undefined {
 
 export function initialState(seed: string): GameState {
   const random = new SeededRandom(seedState(seed))
-  const tiles = makeMap(random)
+  const biomes = Object.keys(BIOMES) as Biome[]
+  const biome = biomes[Math.floor(random.next() * biomes.length)]
   const army = [
     Swordsman,
     King,
@@ -101,18 +109,21 @@ export function initialState(seed: string): GameState {
   ]
   const spawn = (side: Side, firstRow: number, firstId: number) => {
     const positions = shuffle(
-      [...tiles.values()].filter((tile) => tile.r >= firstRow && tile.r < firstRow + 3),
+      Array.from({ length: MAP_WIDTH * 3 }, (_, index) =>
+        hexOf(index % MAP_WIDTH, firstRow + Math.floor(index / MAP_WIDTH)),
+      ),
       random,
     )
     return army.map((Unit, index) => {
       const tile = positions[index]
-      tile.terrain = 'plain'
       return new Unit(firstId + index, tile.q, tile.r, side)
     })
   }
   const pawns = [...spawn('player', MAP_HEIGHT - 3, 1), ...spawn('enemy', 0, 6)]
+  const tiles = makeMap(random, biome, pawns)
   return advance({
     tiles,
+    biome,
     pawns,
     order: shuffle(
       pawns.map((p) => p.id),

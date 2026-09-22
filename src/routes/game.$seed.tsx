@@ -6,6 +6,7 @@ import { BattleNotifications } from '../components/BattleNotifications'
 import { Icon, PawnIcon } from '../components/Icon'
 import {
   activePawn,
+  BIOMES,
   King,
   RECRUIT_CLASSES,
   canUseSpecial,
@@ -72,7 +73,7 @@ export const Route = createFileRoute('/game/$seed')({
                 <Icon name="crown" />
               </span>
               <span>
-                HEX<span className="wordmark-sub">STRATEGY</span>
+                HEX<span className="wordmark-sub">{BIOMES[state.biome].name}</span>
               </span>
             </Link>
             <div className="header-tools">
@@ -146,7 +147,9 @@ export const Route = createFileRoute('/game/$seed')({
                 </div>
                 <span className="eyebrow">The battle is over</span>
                 <h1>
-                  {state.winner === 'player' ? 'The vale is yours.' : 'A crown has fallen.'}
+                  {state.winner === 'player'
+                    ? 'The battlefield is yours.'
+                    : 'A crown has fallen.'}
                 </h1>
                 <p>
                   {state.winner === 'player'
@@ -340,7 +343,9 @@ export const Route = createFileRoute('/game/$seed')({
               <p>
                 Each army has one king, at least one swordsman, and three random recruits.
                 Repeated classes are possible. Both sides get the same lineup, chosen by the
-                game seed. Defeat the enemy king to win; losing yours ends the battle.
+                game seed. Defeat the enemy king to win; losing yours ends the battle. The seed
+                also chooses the biome: Verdant Vale has lakes and forests, Mountain Ranges has
+                mountain chains, and Open Desert is all sand with no obstacles.
               </p>
               <section>
                 <Icon name="energy" />
@@ -348,8 +353,8 @@ export const Route = createFileRoute('/game/$seed')({
                   <h3>Three energy. Every round.</h3>
                   <p>
                     Each unit starts with 3 energy. The lit unit is yours to command. Moving
-                    costs 1 energy per tile; numbers show the full cost. Mountains cannot be
-                    crossed.
+                    costs 1 energy per tile; numbers show the full cost. Mountains and lakes
+                    block walking and Charge. Arrows and magic pass over them.
                   </p>
                 </div>
               </section>

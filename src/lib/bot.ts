@@ -10,7 +10,7 @@ import {
   jumpDestinations,
   specialTargets,
 } from './engine/combat.ts'
-import { distFrom, hexDist, key, neighbors } from './engine/hex.ts'
+import { distFrom, hexDist, key, neighbors, passable } from './engine/hex.ts'
 import type { Action, BattleFrame, GameState, Transition } from './engine/types.ts'
 import { nearestTarget, type BotStrategy } from './strategies.ts'
 
@@ -69,7 +69,7 @@ export function chooseBotActions(
   const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
   const firingTiles = [...tiles.values()].filter(
     (tile) =>
-      tile.terrain !== 'mountain' &&
+      passable(tile) &&
       !occupied.has(key(tile.q, tile.r)) &&
       foes.some((foe) => canAttack(pawn, foe, tile)),
   )
