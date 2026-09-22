@@ -28,14 +28,8 @@ const terrainColors = {
   sand: '#e5bc70',
   palm: '#d5b774',
   basalt: '#594e53',
-  lava: '#6a504b',
+  lava: 'url(#lava-melt)',
 }
-
-const lavaOutlines = [
-  'M-23-3C-23-12-13-18-5-15S6-21 15-13 25-7 23 3 14 18 3 16-8 22-18 12-22 4-23-3Z',
-  'M-22-7C-15-18-7-13 1-17S19-15 21-5 27 8 17 12 5 22-5 16-21 18-23 8-27-1-22-7Z',
-  'M-24 1C-25-9-16-12-9-16S1-13 11-15 25-4 21 6 15 17 5 16-8 22-14 13-22 11-24 1Z',
-]
 
 interface BattlefieldProps {
   mode: GameMode
@@ -120,11 +114,9 @@ export function Battlefield({
           <stop offset=".5" stopColor="#c59164" stopOpacity=".22" />
           <stop offset="1" stopColor="#a86650" stopOpacity="0" />
         </radialGradient>
-        {lavaOutlines.map((outline, index) => (
-          <clipPath key={index} id={'lava-pool-' + index}>
-            <path d={outline} />
-          </clipPath>
-        ))}
+        <clipPath id="lava-hex">
+          <polygon points={hexPoints} />
+        </clipPath>
         <linearGradient id="player-chip" x2="0" y2="1">
           <stop stopColor="#407265" />
           <stop offset="1" stopColor="#193e35" />
@@ -240,7 +232,7 @@ export function Battlefield({
               fill="url(#tile-light)"
               className="tile-detail tile-light"
             />
-            {!occupant && !tile.feature && (
+            {(tile.terrain === 'lava' || (!occupant && !tile.feature)) && (
               <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
             )}
             {!occupant && tile.feature && <FeatureArt feature={tile.feature} />}
@@ -375,30 +367,15 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   if (terrain === 'lava')
     return (
       <g className="tile-detail lava-pool">
-        <path d={lavaOutlines[variant]} fill="#493a3d" stroke="#493a3d" strokeWidth="4" />
-        <g clipPath={'url(#lava-pool-' + variant + ')'}>
-          <path d={lavaOutlines[variant]} fill="url(#lava-melt)" />
-          <ellipse cx="-3" cy="-2" rx="26" ry="21" fill="url(#lava-glow)" />
-          <g transform={'rotate(' + variant * 120 + ')'}>
+        <g clipPath="url(#lava-hex)">
+          <polygon points={hexPoints} fill="url(#lava-glow)" />
+          <g transform={'rotate(' + variant * 120 + ') scale(1.4)'}>
             <path
               d="M-29 4C-14-10-7 12 7 2S21-8 30-2M-15 21C-7 13-2 14 3 8"
               fill="none"
               stroke="#d7a674"
               strokeWidth="2.5"
               opacity=".42"
-            />
-            <path
-              d="M-24-8Q-14-14-5-7L-8-1-19 0ZM8 6l12-6 8 8-10 12-13-5Z"
-              fill="#66504b"
-              stroke="#815c4d"
-              strokeWidth="1.2"
-            />
-            <path
-              d="m-20-7 9-2M10 8l9-4"
-              fill="none"
-              stroke="#a17b61"
-              strokeWidth="1"
-              opacity=".55"
             />
             <path
               d="M-18 6Q-10 3-4 6T7 3"
@@ -420,13 +397,6 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
             <ellipse cx="-8" cy="11" rx="1.6" ry=".9" fill="#d6ab7d" opacity=".5" />
           </g>
         </g>
-        <path
-          d={lavaOutlines[variant]}
-          fill="none"
-          stroke="#896454"
-          strokeWidth="1"
-          strokeOpacity=".6"
-        />
       </g>
     )
   if (terrain === 'basalt')
