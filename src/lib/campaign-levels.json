@@ -48,6 +48,27 @@
           "row": 1
         }
       ]
+    },
+    "intro": {
+      "roleplay": "The beacons are lit and the valley wakes to war. Your first command: hold the watch road and break the raiding party.",
+      "newElements": [
+        {
+          "name": "Swordsman",
+          "description": "Frontline fighter. 5 health, strikes adjacent enemies for 2. Special Charge (2 energy): move up to 2 tiles, then strike an adjacent enemy for 2."
+        },
+        {
+          "name": "Archer",
+          "description": "Ranged attacker. Hits enemies 2 to 3 tiles away for 1, never adjacent. Special Aimed shot (2 energy): 2 damage that cannot be Escaped."
+        },
+        {
+          "name": "King",
+          "description": "Your commander, 7 health. Special Rally (1 energy, once per round): restore 1 health to every adjacent ally."
+        },
+        {
+          "name": "Lakes",
+          "description": "Water tiles block all movement. Route around them or funnel foes into your blades."
+        }
+      ]
     }
   },
   {
@@ -97,6 +118,15 @@
           "kind": "archer",
           "col": 7,
           "row": 2
+        }
+      ]
+    },
+    "intro": {
+      "roleplay": "Enemy archers hold the far ridge. Their arrows will answer yours, and they know how to slip a blade.",
+      "newElements": [
+        {
+          "name": "Escape",
+          "description": "End a unit's turn with energy left and it gains Escape: +20% per remaining energy, up to 60% chance to dodge each incoming attack."
         }
       ]
     }
@@ -155,6 +185,10 @@
           "row": 0
         }
       ]
+    },
+    "intro": {
+      "roleplay": "For the first time the enemy fields a full army. Guard the crossing; there is nowhere left to hide.",
+      "newElements": []
     }
   },
   {
@@ -209,6 +243,15 @@
           "kind": "magician",
           "col": 4,
           "row": 1
+        }
+      ]
+    },
+    "intro": {
+      "roleplay": "Word of a hooded figure reached your camp, fire dancing between its fingers. Today you see the craft for yourself.",
+      "newElements": [
+        {
+          "name": "Magician",
+          "description": "Rival caster. Attacks 1 to 2 tiles away for 1. Special Fireball (2 energy): 1 damage to the target and every enemy adjacent to it, though each may Escape."
         }
       ]
     }
@@ -272,6 +315,15 @@
           "row": 2
         }
       ]
+    },
+    "intro": {
+      "roleplay": "A keep straddles the road home, its tall tower watching every approach. The garrison will not yield it.",
+      "newElements": [
+        {
+          "name": "Watchtower",
+          "description": "A unit standing on a watchtower gains +1 basic-attack range. Archers and Magicians only."
+        }
+      ]
     }
   },
   {
@@ -331,6 +383,15 @@
           "kind": "archer",
           "col": 2,
           "row": 4
+        }
+      ]
+    },
+    "intro": {
+      "roleplay": "Beyond the vale the land rises into bare rock. The pass is narrow, and so is mercy.",
+      "newElements": [
+        {
+          "name": "Mountains",
+          "description": "Mountain tiles cannot be entered or crossed by anyone. Fight for the gaps."
         }
       ]
     }
@@ -399,6 +460,15 @@
           "row": 1
         }
       ]
+    },
+    "intro": {
+      "roleplay": "A shield wall stands planted in the road like a stone. Behind it waits the enemy vanguard.",
+      "newElements": [
+        {
+          "name": "Bulwark",
+          "description": "Enemy wall-bearer. 10 health, strikes adjacent enemies for 1, and every tile of movement costs 2 energy. Special Protect (2 energy): take the next hit for an adjacent ally."
+        }
+      ]
     }
   },
   {
@@ -465,6 +535,15 @@
           "row": 2
         }
       ]
+    },
+    "intro": {
+      "roleplay": "No campfires tonight. Shadows move between the rocks where nothing should move.",
+      "newElements": [
+        {
+          "name": "Ninja",
+          "description": "Enemy assassin. Only 1 health, but its blade deals 5 to adjacent foes. Special Jump (2 energy): leap up to 3 tiles over anything, landing on empty ground."
+        }
+      ]
     }
   },
   {
@@ -529,6 +608,15 @@
           "kind": "bulwark",
           "col": 4,
           "row": 3
+        }
+      ]
+    },
+    "intro": {
+      "roleplay": "The ground itself burns. Cross the caldera before the enemy does, and mind your boots.",
+      "newElements": [
+        {
+          "name": "Lava",
+          "description": "Every lava tile a unit crosses deals 1 damage. Cross at the shortest point, or not at all."
         }
       ]
     }
@@ -602,6 +690,10 @@
           "row": 2
         }
       ]
+    },
+    "intro": {
+      "roleplay": "Their last mountain fortress rises above you, defended by everything they have left. Take it.",
+      "newElements": []
     }
   },
   {
@@ -673,6 +765,10 @@
           "row": 0
         }
       ]
+    },
+    "intro": {
+      "roleplay": "Sand to the horizon and no cover for miles. Your first Bulwark marches at your side, heavy and unhurried.",
+      "newElements": []
     }
   },
   {
@@ -749,6 +845,10 @@
           "row": 2
         }
       ]
+    },
+    "intro": {
+      "roleplay": "The storm swallows the dunes, and blades slip out of it without a sound.",
+      "newElements": []
     }
   },
   {
@@ -825,6 +925,10 @@
           "row": 2
         }
       ]
+    },
+    "intro": {
+      "roleplay": "A caravan of iron and shields rumbles toward your lines. Break the wagons, scatter the guard.",
+      "newElements": []
     }
   },
   {
@@ -906,6 +1010,15 @@
           "row": 2
         }
       ]
+    },
+    "intro": {
+      "roleplay": "The last water for a hundred miles lies behind their lines, a pale spring at the heart of the camp.",
+      "newElements": [
+        {
+          "name": "Healing spring",
+          "description": "Stay on a spring; at its next activation the unit recovers 1 health, up to its maximum."
+        }
+      ]
     }
   },
   {
@@ -985,6 +1098,15 @@
           "kind": "magician",
           "col": 1,
           "row": 2
+        }
+      ]
+    },
+    "intro": {
+      "roleplay": "The keep burns from within. Strange runes glow along its corridors, humming with borrowed strength.",
+      "newElements": [
+        {
+          "name": "Power rune",
+          "description": "The first unit to step on a rune gains +2 energy for this round, then the rune vanishes."
         }
       ]
     }
@@ -1073,6 +1195,10 @@
           "row": 1
         }
       ]
+    },
+    "intro": {
+      "roleplay": "The road home at last, verdant and familiar. One enemy host is all that stands between you and the gate.",
+      "newElements": []
     }
   },
   {
@@ -1164,6 +1290,10 @@
           "row": 1
         }
       ]
+    },
+    "intro": {
+      "roleplay": "Winter has sealed the high gate shut. Their whole host waits in the snow, and so do you.",
+      "newElements": []
     }
   },
   {
@@ -1255,6 +1385,10 @@
           "row": 0
         }
       ]
+    },
+    "intro": {
+      "roleplay": "Cut through the caldera before the hunt catches you. Fast feet, faster blade.",
+      "newElements": []
     }
   },
   {
@@ -1351,6 +1485,10 @@
           "row": 1
         }
       ]
+    },
+    "intro": {
+      "roleplay": "The pretender's personal guard, shield to shield, bars the meadow. Past them, the crown is a formality.",
+      "newElements": []
     }
   },
   {
@@ -1447,6 +1585,10 @@
           "row": 0
         }
       ]
+    },
+    "intro": {
+      "roleplay": "One throne, one battle, one crown. Everything you have learned ends here.",
+      "newElements": []
     }
   }
 ]

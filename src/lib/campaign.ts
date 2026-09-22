@@ -1,12 +1,25 @@
 import levels from './campaign-levels.json' with { type: 'json' }
 import type { FixedBattleSetup } from './engine/index.ts'
 
-export const CAMPAIGN_LEVELS = levels as {
+export interface IntroElement {
+  readonly name: string
+  readonly description: string
+}
+
+export interface LevelIntro {
+  readonly roleplay: string
+  readonly newElements: readonly IntroElement[]
+}
+
+export interface CampaignLevel {
   id: number
   name: string
   seed: string
   setup: FixedBattleSetup
-}[]
+  intro: LevelIntro
+}
+
+export const CAMPAIGN_LEVELS = levels as CampaignLevel[]
 
 export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'
 

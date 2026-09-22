@@ -647,7 +647,7 @@ test(
     const buildLabel = await page.locator('.landing-footer > span').first().textContent()
     const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
     assert.deepEqual(await modes.allTextContents(), [
-      'Campaign',
+      'Campaign0 / 20',
       'Quick play',
       'Custom play',
       '2 players',

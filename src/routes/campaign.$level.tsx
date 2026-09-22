@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { Briefing } from '../components/Briefing'
 import { Game } from '../components/Game'
 import { CAMPAIGN_LEVELS, isLevelUnlocked } from '../lib/campaign'
 import { readCampaignProgress } from '../campaignProgress'
@@ -16,6 +18,11 @@ export const Route = createFileRoute('/campaign/$level')({
   remountDeps: ({ params }) => params.level,
   component: function CampaignBattle() {
     const { level } = Route.useRouteContext()
-    return <Game seed={level.seed} mode="ai" setup={level.setup} campaignLevel={level.id} />
+    const [started, setStarted] = useState(false)
+    return started ? (
+      <Game seed={level.seed} mode="ai" setup={level.setup} campaignLevel={level.id} />
+    ) : (
+      <Briefing level={level} onStart={() => setStarted(true)} />
+    )
   },
 })

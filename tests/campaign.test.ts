@@ -20,7 +20,13 @@ import levels from '../src/lib/campaign-levels.json' with { type: 'json' }
 test('Every campaign level comes directly from one JSON with both complete armies', () => {
   assert.equal(CAMPAIGN_LEVELS, levels)
   for (const level of levels) {
-    assert.deepEqual(Object.keys(level).sort(), ['id', 'name', 'seed', 'setup'])
+    assert.deepEqual(Object.keys(level).sort(), ['id', 'intro', 'name', 'seed', 'setup'])
+    assert.equal(typeof level.intro.roleplay, 'string')
+    assert.ok(level.intro.roleplay.length > 0)
+    for (const element of level.intro.newElements) {
+      assert.deepEqual(Object.keys(element).sort(), ['description', 'name'])
+      assert.ok(element.name.length > 0 && element.description.length > 0)
+    }
     assert.deepEqual(Object.keys(level.setup).sort(), ['biome', 'enemy', 'map', 'player'])
     const state = coreState(level.seed, CAMPAIGN_LEVELS[level.id - 1].setup)
     for (const side of ['player', 'enemy'] as const)

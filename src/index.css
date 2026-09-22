@@ -972,6 +972,20 @@ p {
 .local-button:hover {
   background: #ffffff0c;
 }
+.campaign-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.campaign-badge svg {
+  width: 16px;
+  height: 16px;
+}
+.crown-full {
+  fill: currentColor;
+}
 .custom-screen {
   display: flex;
   flex-direction: column;
@@ -1176,6 +1190,89 @@ p {
   font-size: 10px;
   color: var(--muted);
   text-align: center;
+}
+.briefing-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100dvh;
+  max-width: 800px;
+  margin: auto;
+  padding: max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.briefing-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.briefing-heading h1 {
+  font:
+    32px Georgia,
+    serif;
+  margin-top: 4px;
+}
+.briefing-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.briefing-roleplay {
+  margin: 0;
+  font:
+    italic 16px Georgia,
+    serif;
+  line-height: 1.5;
+}
+.briefing-elements {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.briefing-elements li {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff04;
+}
+.briefing-elements strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--gold);
+  font-size: 13px;
+}
+.briefing-elements p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.briefing-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.briefing-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.briefing-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
 }
 .campaign-result-actions {
   display: flex;
