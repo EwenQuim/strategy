@@ -13,12 +13,6 @@
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
-@custom-variant wide (@media (width >= 900px));
-@custom-variant compact (@media (width <= 600px));
-@custom-variant narrow (@media (width <= 359px));
-@custom-variant short (@media (height <= 650px));
-@custom-variant flat (@media (height <= 480px) and (width >= 600px));
-
 @layer base {
   :root {
     font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
@@ -33,11 +27,7 @@
     --line: #c4d1a51c;
   }
 
-  * {
-    box-sizing: border-box;
-  }
   body {
-    margin: 0;
     min-width: 280px;
   }
   button,
@@ -46,15 +36,10 @@
     touch-action: manipulation;
   }
   button {
-    font: inherit;
     cursor: pointer;
   }
   button:disabled {
     cursor: not-allowed;
-  }
-  a {
-    color: inherit;
-    text-decoration: none;
   }
   button,
   a {
@@ -72,265 +57,39 @@
   button:disabled {
     opacity: 0.38;
   }
-  h1,
-  h2,
-  h3,
-  p {
-    margin: 0;
+}
+
+@layer components {
+  .battle-effect {
+    animation: battle-fade 460ms ease-out both;
   }
-}
-
-.battlefield-theme {
-  --biome-background: #1c3025;
-  --biome-glow: #51634069;
-  --biome-panel: #172a21;
-  --tile-base: #263f30;
-  --tile-shade: #10291b;
-  --move-tint: #a3bd88;
-}
-
-.battlefield-theme[data-biome='mountains'] {
-  --biome-background: #263b4c;
-  --biome-glow: #9db9d078;
-  --biome-panel: #1b2935;
-  --tile-base: #435562;
-  --tile-shade: #263544;
-}
-
-.battlefield-theme[data-biome='desert'] {
-  --biome-background: #805537;
-  --biome-glow: #f4c46e85;
-  --biome-panel: #3f2b20;
-  --tile-base: #996437;
-  --tile-shade: #8b4e28;
-  --move-tint: #c7c79b;
-  --plain-tile: #e5bc70;
-}
-
-.battlefield-theme[data-biome='volcano'] {
-  --biome-background: #2b202b;
-  --biome-glow: #d56b3b55;
-  --biome-panel: #241c27;
-  --tile-base: #44373f;
-  --tile-shade: #392d33;
-  --plain-tile: #594e53;
-  --move-tint: #8c7b7c;
-  --selected-tint: #b39b86;
-  --tile-stroke-opacity: 0.075;
-  --muted: #b7a5aa;
-}
-
-.battlefield-theme[data-biome='volcano'] .tile-light {
-  opacity: 0.45;
-}
-
-.battlefield-theme[data-biome='volcano'] .battlefield-backdrop {
-  background:
-    radial-gradient(ellipse at 45% 65%, var(--biome-glow), transparent 65%),
-    radial-gradient(#e9995b33 1px, transparent 1px), var(--biome-background);
-  background-size:
-    auto,
-    37px 43px,
-    auto;
-}
-
-.battlefield-backdrop {
-  background:
-    radial-gradient(ellipse at 50% 45%, var(--biome-glow), transparent 66%),
-    radial-gradient(#d7d8b308 1px, transparent 1px), var(--biome-background);
-  background-size:
-    auto,
-    8px 8px,
-    auto;
-}
-
-.battlefield-backdrop::before {
-  content: '';
-  position: absolute;
-  inset: 10% 20%;
-  z-index: -1;
-  border: 1px solid #c5d09c08;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 50px #c5d09c03,
-    0 0 0 100px #c5d09c02;
-  pointer-events: none;
-}
-
-.hex-tile {
-  outline: none;
-}
-
-.hex-tile.is-interactive {
-  cursor: pointer;
-}
-
-.tile-face {
-  transition:
-    fill 0.2s,
-    filter 0.2s;
-}
-
-.hex-tile.is-interactive:hover .tile-face,
-.hex-tile:focus-visible .tile-face {
-  filter: brightness(1.2);
-}
-
-.hex-tile:focus-visible .tile-face {
-  fill: #f1db9c;
-}
-
-.pawn-chip {
-  pointer-events: none;
-  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.battle-effect {
-  pointer-events: none;
-  color: #ffd4a1;
-  animation: battle-fade 460ms ease-out both;
-}
-
-.battle-effect--move {
-  color: #ead695;
-}
-
-.battle-effect--rally,
-.battle-effect--escape {
-  color: #b7e5c8;
-}
-
-.battle-effect--fireball {
-  color: #ffab78;
-}
-
-.battle-trail {
-  stroke: currentColor;
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  animation: battle-travel 300ms ease-out both;
-}
-
-.battle-effect--move .battle-trail {
-  stroke-width: 2;
-}
-
-.battle-impact {
-  fill: currentColor;
-  fill-opacity: 0.18;
-  stroke: currentColor;
-  stroke-width: 2;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: battle-impact 460ms ease-out both;
-}
-
-.combat-feedback {
-  position: fixed;
-  inset: 0;
-  z-index: 4;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.combat-feedback::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-}
-
-.combat-feedback--hit::before {
-  background: radial-gradient(ellipse, transparent 45%, #ffc07966);
-  animation: hit-flash 700ms ease-out both;
-}
-
-.combat-feedback--miss::before {
-  background: linear-gradient(110deg, transparent 35%, #bce6f433 50%, transparent 65%);
-  animation: miss-sweep 700ms ease-out both;
-}
-
-.combat-impact {
-  color: #ffe1a3;
-}
-
-.combat-impact--miss {
-  color: #c9eaf4;
-}
-
-.combat-impact-ring,
-.combat-impact-rays {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: impact-burst 450ms ease-out both;
-}
-
-.combat-impact--miss .combat-impact-ring {
-  stroke-dasharray: 4 7;
-}
-
-.combat-impact-label {
-  fill: currentColor;
-  stroke: #14271f;
-  stroke-width: 5;
-  paint-order: stroke;
-  font-size: 32px;
-  font-weight: 900;
-  animation: damage-pop 700ms ease-out both;
-}
-
-.combat-impact--miss .combat-impact-label {
-  font-size: 24px;
-  font-style: italic;
-  animation-name: miss-drift;
-}
-
-.pawn-active-halo {
-  animation: halo-breathe 3s ease-in-out infinite;
-}
-
-.landing-backdrop {
-  background: radial-gradient(ellipse at 50% 38%, #465c3880, transparent 60%), #182c22;
-}
-
-.hero-crown {
-  position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 74px;
-  height: 78px;
-  display: grid;
-  place-items: center;
-  color: #ecd290;
-  background: linear-gradient(145deg, #4e7460, #204732);
-  border: 2px solid #d7c182;
-  border-radius: 12px 12px 30px 30px;
-  box-shadow:
-    0 8px 0 #153621,
-    0 13px 20px #102d2066;
-}
-
-.hero-crown svg {
-  width: 45px;
-  height: 45px;
-}
-@media (width <= 600px) {
-  .hero-crown {
-    top: 78px;
-    width: 64px;
-    height: 68px;
+  .battle-trail {
+    animation: battle-travel 300ms ease-out both;
   }
-  .hero-crown svg {
-    width: 38px;
-    height: 38px;
+  .battle-impact {
+    animation: battle-impact 460ms ease-out both;
   }
-}
-.battle-notification {
-  animation: notification-fade 5s both;
+  .combat-feedback--hit::before {
+    animation: hit-flash 700ms ease-out both;
+  }
+  .combat-feedback--miss::before {
+    animation: miss-sweep 700ms ease-out both;
+  }
+  .combat-impact-burst {
+    animation: impact-burst 450ms ease-out both;
+  }
+  .combat-impact-label {
+    animation: damage-pop 700ms ease-out both;
+  }
+  .combat-impact-label--miss {
+    animation-name: miss-drift;
+  }
+  .pawn-active-halo {
+    animation: halo-breathe 3s ease-in-out infinite;
+  }
+  .battle-notification {
+    animation: notification-fade 5s both;
+  }
 }
 
 @keyframes notification-fade {
@@ -444,19 +203,5 @@
   50% {
     stroke-opacity: 0.45;
     fill-opacity: 0.07;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .combat-feedback,
-  .combat-impact-ring,
-  .combat-impact-rays {
-    display: none;
-  }
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
   }
 }

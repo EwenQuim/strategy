@@ -9,7 +9,7 @@ export function walkingPaths(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
-  maxSteps = Math.floor(pawn.energy / pawn.moveCost),
+  maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1),
 ): Map<string, WalkingPath> {
   const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
   const start = key(pawn.q, pawn.r)
@@ -79,7 +79,7 @@ export function movementDestinations(
   return new Map(
     [...walkingPaths(tiles, pawns, pawn)].map(([tile, route]) => [
       tile,
-      route.path.length * pawn.moveCost,
+      pawn.moveEnergyCost(route.path.length),
     ]),
   )
 }

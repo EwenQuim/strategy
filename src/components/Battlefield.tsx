@@ -131,7 +131,7 @@ export function Battlefield({
           <stop offset="1" stopColor="var(--tile-shade)" stopOpacity=".12" />
         </linearGradient>
       </defs>
-      <g className="tile-bases" transform="translate(0 5)" fill="var(--tile-base)">
+      <g data-art="tile-bases" transform="translate(0 5)" fill="var(--tile-base)">
         {allTiles.map((tile) => (
           <polygon
             key={key(tile.q, tile.r)}
@@ -203,7 +203,8 @@ export function Battlefield({
             transform={'translate(' + hexX(tile.q, tile.r) + ' ' + hexY(tile.r) + ')'}
             data-terrain={tile.terrain}
             data-feature={tile.feature}
-            className={'hex-tile' + (interactive ? ' is-interactive' : '')}
+            className="group/tile outline-none [&[role=button]]:cursor-pointer"
+            data-testid="hex-tile"
             role={interactive ? 'button' : 'img'}
             tabIndex={interactive ? 0 : undefined}
             aria-label={actionLabel}
@@ -221,7 +222,11 @@ export function Battlefield({
           >
             <title>{actionLabel}</title>
             <polygon
-              className="tile-face"
+              data-testid="tile-face"
+              className={
+                'transition-[fill,filter] duration-200 ease-[ease] group-focus-visible/tile:fill-[#f1db9c] group-focus-visible/tile:brightness-120' +
+                (interactive ? ' group-hover/tile:brightness-120' : '')
+              }
               points={hexPoints}
               fill={fill}
               stroke="#ecedcc"
@@ -231,7 +236,7 @@ export function Battlefield({
             <polygon
               points={hexPoints}
               fill="url(#tile-light)"
-              className="pointer-events-none tile-light"
+              className="pointer-events-none group-data-[biome=volcano]/biome:opacity-45"
             />
             {(tile.terrain === 'lava' || (!occupant && !tile.feature)) && (
               <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
@@ -281,7 +286,8 @@ export function Battlefield({
       {effect && (
         <g
           key={effectId}
-          className={'battle-effect battle-effect--' + effect.kind}
+          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78]"
+          data-kind={effect.kind}
           aria-hidden="true"
         >
           {effect.kind !== 'escape' && effect.kind !== 'rally' && (
@@ -291,7 +297,10 @@ export function Battlefield({
               x2={hexX(effect.to.q, effect.to.r)}
               y2={hexY(effect.to.r)}
               pathLength="1"
-              className="battle-trail"
+              className={
+                'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
+                (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
+              }
             />
           )}
           {!effect.impacts?.length && (
@@ -302,7 +311,7 @@ export function Battlefield({
             >
               <circle
                 r={effect.kind === 'fireball' || effect.kind === 'rally' ? 66 : 29}
-                className="battle-impact"
+                className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box]"
               />
             </g>
           )}
@@ -320,20 +329,30 @@ export function Battlefield({
               key={key(hit.q, hit.r)}
               transform={'translate(' + hexX(hit.q, hit.r) + ' ' + hexY(hit.r) + ')'}
             >
-              <g
-                className={
-                  'combat-impact ' +
-                  (hit.damage > 0 ? 'combat-impact--hit' : 'combat-impact--miss')
-                }
-              >
-                <circle r="28" className="combat-impact-ring" />
+              <g className={hit.damage > 0 ? 'text-[#ffe1a3]' : 'text-[#c9eaf4]'}>
+                <circle
+                  r="28"
+                  className={
+                    'combat-impact-burst origin-center fill-none stroke-current stroke-[3] [transform-box:fill-box] motion-reduce:hidden' +
+                    (hit.damage > 0 ? '' : ' [stroke-dasharray:4_7]')
+                  }
+                />
                 {hit.damage > 0 && (
                   <path
-                    className="combat-impact-rays"
+                    className="combat-impact-burst origin-center fill-none stroke-current stroke-[3] [transform-box:fill-box] motion-reduce:hidden"
                     d="M0-34v-8M24-24l6-6M34 0h8M24 24l6 6M0 34v8M-24 24l-6 6M-34 0h-8M-24-24l-6-6"
                   />
                 )}
-                <text y="8" textAnchor="middle" className="combat-impact-label">
+                <text
+                  y="8"
+                  textAnchor="middle"
+                  className={
+                    'combat-impact-label fill-current stroke-[#14271f] stroke-[5] font-black [paint-order:stroke] ' +
+                    (hit.damage > 0
+                      ? 'text-[32px]'
+                      : 'combat-impact-label--miss text-[24px] italic')
+                  }
+                >
                   {hit.damage > 0 ? '-' + hit.damage : 'MISS'}
                 </text>
               </g>
@@ -347,7 +366,7 @@ export function Battlefield({
 
 function FeatureArt({ feature }: { feature: NonNullable<Tile['feature']> }) {
   return (
-    <g className={'pointer-events-none feature-art feature-' + feature}>
+    <g className="pointer-events-none" data-art="feature" data-feature-art={feature}>
       {feature === 'watchtower' ? (
         <>
           <ellipse cy="17" rx="19" ry="5" fill="#26312c" opacity=".4" />
@@ -381,7 +400,7 @@ function FeatureArt({ feature }: { feature: NonNullable<Tile['feature']> }) {
 function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: number }) {
   if (terrain === 'lava')
     return (
-      <g className="pointer-events-none lava-pool">
+      <g className="pointer-events-none" data-art="lava">
         <g clipPath="url(#lava-hex)">
           <polygon points={hexPoints} fill="url(#lava-glow)" />
           <g transform={'rotate(' + variant * 120 + ') scale(1.4)'}>
@@ -417,7 +436,8 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   if (terrain === 'basalt')
     return (
       <g
-        className="pointer-events-none basalt-stone"
+        className="pointer-events-none"
+        data-art="basalt"
         transform={'rotate(' + variant * 120 + ')'}
       >
         <path d="m-23-7 14-11 15 5 12 12-15 5-15-3Z" fill="#75666b" opacity=".18" />
@@ -442,7 +462,7 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
     )
   if (terrain === 'palm')
     return (
-      <g className="pointer-events-none palm-tree">
+      <g className="pointer-events-none" data-art="palm">
         <ellipse cy="17" rx="19" ry="5" fill="#886039" opacity=".25" />
         <path d="M2 18Q-6 5 0-10" fill="none" stroke="#86603c" strokeWidth="5" />
         <path
@@ -456,7 +476,8 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   if (terrain === 'sand')
     return (
       <g
-        className="pointer-events-none sand-dunes"
+        className="pointer-events-none"
+        data-art="sand"
         transform={'translate(0 ' + (variant * 3 - 3) + ')'}
       >
         <path
@@ -556,7 +577,8 @@ function PawnChip({
   const enemy = pawn.side === 'enemy'
   return (
     <g
-      className="pawn-chip"
+      data-testid="pawn-chip"
+      className="pointer-events-none transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{ transform: 'translate(' + hexX(pawn.q, pawn.r) + 'px, ' + hexY(pawn.r) + 'px)' }}
       aria-hidden="true"
     >
@@ -592,17 +614,13 @@ function PawnChip({
         {pawn.id.toString().padStart(2, '0')}
       </text>
       {feature && (
-        <g className="feature-badge" transform="translate(-20 -19) scale(.43)">
+        <g data-art="feature-badge" transform="translate(-20 -19) scale(.43)">
           <circle r="28" fill="#24342e" stroke="#dec89a" strokeWidth="2" />
           <FeatureArt feature={feature} />
         </g>
       )}
       {protectedAlly && (
-        <g
-          className="protection-badge"
-          transform="translate(10 -26) scale(.65)"
-          color="#f6e5a6"
-        >
+        <g data-art="protection-badge" transform="translate(10 -26) scale(.65)" color="#f6e5a6">
           <circle cx="12" cy="12" r="14" fill="#17362b" />
           <Icon name="shield" />
         </g>

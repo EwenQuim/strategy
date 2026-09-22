@@ -13,7 +13,8 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 ## Styling
 
 - Default to Tailwind utilities in JSX for layout, spacing, typography, colors, responsive behavior, and simple interaction states. Put utilities on the element they style where practical.
-- Keep native CSS in `src/index.css` for keyframes, coordinated combat/SVG animations, layered artwork, biome theme variables, and global base/accessibility rules. Use descriptive, feature-scoped class names such as `battlefield-backdrop`, `combat-feedback--hit`, and `pawn-active-halo`.
+- Reserve native CSS in `src/index.css` for keyframes and their animation bindings, plus global base rules and theme tokens. Even animated components should use Tailwind for positioning, colors, gradients, SVG styling, and simple transitions. Keep animation class names feature-scoped, such as `combat-feedback--hit` and `pawn-active-halo`.
 - Do not wrap simple components in semantic CSS classes or `@apply` rules. Reuse small Tailwind class strings when the same control styling is repeated. Keep full utility names literal so Tailwind can detect them.
-- Reuse the theme colors (`text-ink`, `text-muted`, `text-gold`, `border-line`) and viewport variants (`wide`, `compact`, `narrow`, `short`, `flat`) defined in `src/index.css`. Preserve safe-area insets, reduced-motion behavior, and the fixed game viewport.
+- Use Tailwind responsive and `motion-reduce:` variants, not hand-written CSS media queries or custom viewport aliases. Preserve existing width thresholds with `min-[900px]:`, `max-[601px]:`, and `max-[360px]:`; use arbitrary media variants for height and compound conditions. Test overlapping width/height conditions when changing responsive styles.
+- Reuse the theme colors (`text-ink`, `text-muted`, `text-gold`, `border-line`). Preserve safe-area insets, reduced-motion behavior, and the fixed game viewport.
 - Keep inline styles for runtime-computed values such as pawn coordinates. Browser tests should use roles/accessible names or stable data attributes, not Tailwind utility strings or obsolete CSS classes.

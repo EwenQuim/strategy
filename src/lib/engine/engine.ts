@@ -181,7 +181,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       if (state.phase !== 'move' || actor.energy <= 0) return null
       const route = walkingPaths(tiles, pawns, actor).get(key(action.q, action.r))
       if (!route?.path.length) return null
-      actor.energy -= route.path.length * actor.moveCost
+      actor.energy -= actor.moveEnergyCost(route.path.length)
       const impacts = enterTiles(tiles, pawns, actor, route.path, state.round, log)
       effect = {
         kind: 'move',

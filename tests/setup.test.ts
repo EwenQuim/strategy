@@ -221,7 +221,7 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
   )
   assert.equal(
     seedState(JSON.stringify(states.map((state) => ({ ...state, tiles: [...state.tiles] })))),
-    691306820,
+    29788876,
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

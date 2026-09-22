@@ -32,7 +32,7 @@ import {
 } from '../lib/engine'
 
 const actionButtonClassName =
-  'grid min-h-16 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:hover]:border-[#bcc8a670] [&:enabled:hover]:bg-[#ffffff0c] compact:min-h-[76px] compact:grid-cols-1 compact:justify-items-center compact:gap-y-[3px] compact:rounded-lg compact:px-0.5 compact:pt-[9px] compact:pb-2 compact:text-center short:min-h-[65px] short:py-1.5 flat:min-h-12 flat:px-3 flat:py-1.5'
+  'grid min-h-16 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:hover]:border-[#bcc8a670] [&:enabled:hover]:bg-[#ffffff0c] max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
 
 const classes = [King, ...RECRUIT_CLASSES].map((Unit) => new Unit(0, 0, 0, 'player'))
 
@@ -99,29 +99,30 @@ export function Game({
 
   return (
     <main
-      className="battlefield-theme grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background)"
+      className="group/biome [--biome-background:#1c3025] [--biome-glow:#51634069] [--biome-panel:#172a21] [--tile-base:#263f30] [--tile-shade:#10291b] [--move-tint:#a3bd88] data-[biome=mountains]:[--biome-background:#263b4c] data-[biome=mountains]:[--biome-glow:#9db9d078] data-[biome=mountains]:[--biome-panel:#1b2935] data-[biome=mountains]:[--tile-base:#435562] data-[biome=mountains]:[--tile-shade:#263544] data-[biome=desert]:[--biome-background:#805537] data-[biome=desert]:[--biome-glow:#f4c46e85] data-[biome=desert]:[--biome-panel:#3f2b20] data-[biome=desert]:[--tile-base:#996437] data-[biome=desert]:[--tile-shade:#8b4e28] data-[biome=desert]:[--move-tint:#c7c79b] data-[biome=desert]:[--plain-tile:#e5bc70] data-[biome=volcano]:[--biome-background:#2b202b] data-[biome=volcano]:[--biome-glow:#d56b3b55] data-[biome=volcano]:[--biome-panel:#241c27] data-[biome=volcano]:[--tile-base:#44373f] data-[biome=volcano]:[--tile-shade:#392d33] data-[biome=volcano]:[--plain-tile:#594e53] data-[biome=volcano]:[--move-tint:#8c7b7c] data-[biome=volcano]:[--selected-tint:#b39b86] data-[biome=volcano]:[--tile-stroke-opacity:0.075] data-[biome=volcano]:[--muted:#b7a5aa] grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background)"
       data-biome={state.biome}
     >
       {!!effect?.impacts?.length && (
         <div
           key={effectId}
+          data-testid="combat-feedback"
           className={
-            'combat-feedback ' +
+            'pointer-events-none fixed inset-0 z-4 overflow-hidden before:absolute before:inset-0 motion-reduce:hidden ' +
             (effect.impacts.some((hit) => hit.damage > 0)
-              ? 'combat-feedback--hit'
-              : 'combat-feedback--miss')
+              ? 'combat-feedback--hit before:bg-[radial-gradient(ellipse,transparent_45%,#ffc07966)]'
+              : 'combat-feedback--miss before:bg-[linear-gradient(110deg,transparent_35%,#bce6f433_50%,transparent_65%)]')
           }
           aria-hidden="true"
         />
       )}
       <header
-        className="relative z-2 bg-(--biome-panel) px-[max(16px,env(safe-area-inset-left))] pt-[max(8px,env(safe-area-inset-top))] shadow-[0_8px_30px_#0a1e1a22] wide:pt-[max(13px,env(safe-area-inset-top))] compact:px-4 narrow:px-3 flat:pt-[3px]"
+        className="relative z-2 bg-(--biome-panel) px-[max(16px,env(safe-area-inset-left))] pt-[max(8px,env(safe-area-inset-top))] shadow-[0_8px_30px_#0a1e1a22] min-[900px]:pt-[max(13px,env(safe-area-inset-top))] max-[601px]:px-4 max-[360px]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:pt-[3px]"
         data-testid="game-header"
       >
-        <div className="m-auto flex min-h-[50px] max-w-[1040px] items-center justify-between wide:min-h-[53px] short:min-h-[43px] flat:min-h-[42px]">
+        <div className="m-auto flex min-h-[50px] max-w-[1040px] items-center justify-between min-[900px]:min-h-[53px] [@media(max-height:650px)]:min-h-[43px] [@media(min-width:600px)_and_(max-height:480px)]:min-h-[42px]">
           <Link
             to={campaignLevel ? '/campaign' : '/'}
-            className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] wide:text-[26px]"
+            className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]"
             aria-label={campaignLevel ? 'Campaign levels' : 'Hexmate home'}
           >
             <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
@@ -169,15 +170,15 @@ export function Game({
             </button>
           </div>
         </div>
-        <div className="m-auto flex min-h-[41px] max-w-[1040px] items-center gap-3 border-t border-line wide:min-h-[43px] compact:gap-2 short:min-h-[34px] flat:hidden">
+        <div className="m-auto flex min-h-[41px] max-w-[1040px] items-center gap-3 border-t border-line min-[900px]:min-h-[43px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[34px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
           <ol
-            className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] compact:gap-[3px]"
+            className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
             aria-label="Round turn order"
           >
             {turnOrder.map(({ unit, index }) => (
               <li
                 key={unit.id}
-                className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[5px] py-1 text-[8px] text-[#b6d2b5] data-[side=enemy]:not-aria-[current=step]:text-[#d69b81] data-[acted=true]:opacity-35 aria-[current=step]:border-[#d7c78a66] aria-[current=step]:bg-[#d7c78a14] aria-[current=step]:text-[#ead99e] [&>svg]:size-3.5 wide:px-[9px] compact:flex-col compact:gap-0 compact:px-0.5 compact:py-[3px] compact:[&>svg]:size-3"
+                className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[5px] py-1 text-[8px] text-[#b6d2b5] data-[side=enemy]:not-aria-[current=step]:text-[#d69b81] data-[acted=true]:opacity-35 aria-[current=step]:border-[#d7c78a66] aria-[current=step]:bg-[#d7c78a14] aria-[current=step]:text-[#ead99e] [&>svg]:size-3.5 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[3px] max-[601px]:[&>svg]:size-3"
                 data-testid="initiative-unit"
                 data-side={unit.side}
                 data-acted={index < state.active}
@@ -197,10 +198,10 @@ export function Game({
       </header>
 
       <section
-        className="battlefield-backdrop relative isolate grid min-h-0 grid-rows-[minmax(0,1fr)]"
+        className="bg-(--biome-background) bg-[image:radial-gradient(ellipse_at_50%_45%,var(--biome-glow),transparent_66%),radial-gradient(#d7d8b308_1px,transparent_1px),none] bg-[size:auto,8px_8px,auto] group-data-[biome=volcano]/biome:bg-[image:radial-gradient(ellipse_at_45%_65%,var(--biome-glow),transparent_65%),radial-gradient(#e9995b33_1px,transparent_1px),none] group-data-[biome=volcano]/biome:bg-[size:auto,37px_43px,auto] before:pointer-events-none before:absolute before:inset-x-1/5 before:inset-y-[10%] before:-z-1 before:rounded-[50%] before:border before:border-[#c5d09c08] before:shadow-[0_0_0_50px_#c5d09c03,0_0_0_100px_#c5d09c02] relative isolate grid min-h-0 grid-rows-[minmax(0,1fr)]"
         aria-label="The battlefield"
       >
-        <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] compact:px-[3px]">
+        <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] max-[601px]:px-[3px]">
           <Battlefield
             mode={mode}
             tiles={state.tiles}
@@ -223,10 +224,10 @@ export function Game({
             role="status"
           >
             <div
-              className="max-w-[390px] rounded-2xl border border-[#dcc48a59] bg-[#20362bee] p-7 text-center shadow-[0_20px_60px_#07180f80] [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-[normal] [&_p]:text-[12px] [&_p]:leading-[1.7] [&_p]:text-[#bfccb4] short:px-5 short:py-4 short:[&_h1]:text-[25px]"
+              className="max-w-[390px] rounded-2xl border border-[#dcc48a59] bg-[#20362bee] p-7 text-center shadow-[0_20px_60px_#07180f80] [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-[normal] [&_p]:text-[12px] [&_p]:leading-[1.7] [&_p]:text-[#bfccb4] [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]"
               data-testid="result-card"
             >
-              <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-[#dcc48a40] text-gold [&>svg]:size-[29px] short:hidden">
+              <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-[#dcc48a40] text-gold [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
                 <Icon name="crown" />
               </div>
               <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
@@ -259,7 +260,7 @@ export function Game({
                         params={{ level: String(campaignLevel + 1) }}
                         className={
                           buttonClassName +
-                          ' mt-5 min-h-[46px] short:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
+                          ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
                         }
                         preload={false}
                       >
@@ -271,7 +272,7 @@ export function Game({
                         to="/campaign"
                         className={
                           buttonClassName +
-                          ' mt-5 min-h-[46px] short:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
+                          ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
                         }
                       >
                         Back to campaign
@@ -281,7 +282,7 @@ export function Game({
                     <button
                       className={
                         buttonClassName +
-                        ' mt-5 min-h-[46px] short:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
+                        ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
                       }
                       onClick={() => dispatch({ type: 'restart' })}
                     >
@@ -309,7 +310,7 @@ export function Game({
                   }}
                   className={
                     buttonClassName +
-                    ' mt-5 min-h-[46px] short:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
+                    ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
                   }
                   preload={false}
                 >
@@ -326,19 +327,19 @@ export function Game({
         className="relative z-2 border-t border-[#c4d1a530] bg-(--biome-panel) pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_#10201840]"
         data-testid="command-deck"
       >
-        <div className="m-auto max-w-[920px] px-[18px] pt-3.5 pb-2.5 wide:pt-[17px] wide:pb-3 compact:px-3.5 compact:pt-3 compact:pb-[9px] narrow:px-2.5 short:pt-2 short:pb-1.5 flat:flex flat:items-center flat:gap-5 flat:px-[18px] flat:py-2">
-          <div className="mb-3.5 flex items-center justify-between gap-[15px] wide:mb-[17px] compact:mb-3 compact:gap-2.5 short:mb-2 flat:m-0 flat:flex-col flat:items-start flat:gap-1.5">
+        <div className="m-auto max-w-[920px] px-[18px] pt-3.5 pb-2.5 min-[900px]:pt-[17px] min-[900px]:pb-3 max-[601px]:px-3.5 max-[601px]:pt-3 max-[601px]:pb-[9px] max-[360px]:px-2.5 [@media(max-height:650px)]:pt-2 [@media(max-height:650px)]:pb-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex [@media(min-width:600px)_and_(max-height:480px)]:items-center [@media(min-width:600px)_and_(max-height:480px)]:gap-5 [@media(min-width:600px)_and_(max-height:480px)]:px-[18px] [@media(min-width:600px)_and_(max-height:480px)]:py-2">
+          <div className="mb-3.5 flex items-center justify-between gap-[15px] min-[900px]:mb-[17px] max-[601px]:mb-3 max-[601px]:gap-2.5 [@media(max-height:650px)]:mb-2 [@media(min-width:600px)_and_(max-height:480px)]:m-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-col [@media(min-width:600px)_and_(max-height:480px)]:items-start [@media(min-width:600px)_and_(max-height:480px)]:gap-1.5">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="grid h-[46px] w-[42px] shrink-0 place-items-center rounded-[10px_10px_16px_16px] border border-[#c4d1a53b] bg-[linear-gradient(135deg,#4c604038,#203d3077)] text-gold [&>svg]:size-[26px] wide:h-[49px] wide:w-[47px] compact:hidden flat:hidden">
+              <div className="grid h-[46px] w-[42px] shrink-0 place-items-center rounded-[10px_10px_16px_16px] border border-[#c4d1a53b] bg-[linear-gradient(135deg,#4c604038,#203d3077)] text-gold [&>svg]:size-[26px] min-[900px]:h-[49px] min-[900px]:w-[47px] max-[601px]:hidden [@media(min-width:600px)_and_(max-height:480px)]:hidden">
                 <PawnIcon kind={pawn?.kind ?? 'swordsman'} />
               </div>
               <div>
-                <h2 className="font-display text-[20px] leading-[normal] capitalize whitespace-nowrap wide:text-[24px] compact:text-[19px] narrow:text-[16px] flat:text-[16px]">
+                <h2 className="font-display text-[20px] leading-[normal] capitalize whitespace-nowrap min-[900px]:text-[24px] max-[601px]:text-[19px] max-[360px]:text-[16px] [@media(min-width:600px)_and_(max-height:480px)]:text-[16px]">
                   {state.winner
                     ? (winnerLabel ?? (state.winner === 'player' ? 'Victory' : 'Defeat'))
                     : (pawn?.kind ?? 'Your guard')}
                   {!state.winner && pawn && (
-                    <span className="font-label text-[10px] leading-[normal] tracking-[0.05em] text-[#7f957e] compact:text-[9px] narrow:hidden">
+                    <span className="font-label text-[10px] leading-[normal] tracking-[0.05em] text-[#7f957e] max-[601px]:text-[9px] max-[360px]:hidden">
                       {' '}
                       / {pawn.id.toString().padStart(2, '0')}
                     </span>
@@ -348,13 +349,13 @@ export function Game({
             </div>
             {pawn && !state.winner && (
               <div
-                className="flex items-center gap-[18px] wide:gap-7 compact:gap-2.5 narrow:gap-2 flat:gap-2.5"
+                className="flex items-center gap-[18px] min-[900px]:gap-7 max-[601px]:gap-2.5 max-[360px]:gap-2 [@media(min-width:600px)_and_(max-height:480px)]:gap-2.5"
                 data-testid="unit-stats"
               >
-                <div className="w-[60px] min-w-[60px] wide:w-[83px] wide:min-w-[83px] compact:w-[49px] compact:min-w-[49px] flat:w-[45px] flat:min-w-[45px]">
-                  <span className="flex justify-between gap-2.5 text-[9px] text-muted compact:gap-[5px] compact:text-[8px]">
+                <div className="w-[60px] min-w-[60px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[49px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px]">
+                  <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
                     Health{' '}
-                    <b className="text-[9px] font-medium text-[#d9dfc9] compact:text-[8px]">
+                    <b className="text-[9px] font-medium text-[#d9dfc9] max-[601px]:text-[8px]">
                       {pawn.hp}/{pawn.maxHp}
                     </b>
                   </span>
@@ -370,15 +371,15 @@ export function Game({
                       <i
                         key={i}
                         data-filled={i < pawn.hp}
-                        className="h-[5px] min-w-0 flex-1 rounded-[1px] bg-[#34483a] data-[filled=true]:bg-[#b7c9a0] compact:h-1"
+                        className="h-[5px] min-w-0 flex-1 rounded-[1px] bg-[#34483a] data-[filled=true]:bg-[#b7c9a0] max-[601px]:h-1"
                       />
                     ))}
                   </div>
                 </div>
-                <div className="w-[60px] min-w-[60px] wide:w-[83px] wide:min-w-[83px] compact:w-[49px] compact:min-w-[49px] flat:w-[45px] flat:min-w-[45px]">
-                  <span className="flex justify-between gap-2.5 text-[9px] text-muted compact:gap-[5px] compact:text-[8px]">
+                <div className="w-[60px] min-w-[60px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[49px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px]">
+                  <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
                     Energy{pawn.bonusEnergy ? ' +' + pawn.bonusEnergy : ''}{' '}
-                    <b className="text-[9px] font-medium text-[#d9dfc9] compact:text-[8px]">
+                    <b className="text-[9px] font-medium text-[#d9dfc9] max-[601px]:text-[8px]">
                       {pawn.energy}/{pawn.maxEnergy}
                     </b>
                   </span>
@@ -394,16 +395,16 @@ export function Game({
                       <i
                         key={i}
                         data-filled={i < pawn.energy}
-                        className="h-[5px] min-w-0 flex-1 rounded-[1px] bg-[#34483a] data-[filled=true]:bg-[#d4bb7b] compact:h-1"
+                        className="h-[5px] min-w-0 flex-1 rounded-[1px] bg-[#34483a] data-[filled=true]:bg-[#d4bb7b] max-[601px]:h-1"
                       />
                     ))}
                   </div>
                 </div>
-                <div className="w-[60px] min-w-[43px] wide:w-[83px] wide:min-w-[83px] compact:w-[49px] compact:min-w-[41px] flat:w-[45px] flat:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] compact:pl-2 compact:[&_svg]:hidden flat:pl-2">
-                  <span className="flex justify-between gap-2.5 text-[9px] text-muted compact:gap-[5px] compact:text-[8px]">
+                <div className="w-[60px] min-w-[43px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[41px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] max-[601px]:pl-2 max-[601px]:[&_svg]:hidden [@media(min-width:600px)_and_(max-height:480px)]:pl-2">
+                  <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
                     Escape
                   </span>
-                  <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] compact:text-[17px]">
+                  <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] max-[601px]:text-[17px]">
                     <Icon name="escape" />
                     {pawn.escapeChance}
                     <small>%</small>
@@ -412,7 +413,7 @@ export function Game({
               </div>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2 wide:gap-3 compact:gap-1.5 flat:flex-1">
+          <div className="grid grid-cols-3 gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
             <button
               className={
                 actionButtonClassName +
@@ -428,13 +429,13 @@ export function Game({
               aria-pressed={attacking}
             >
               <Icon
-                className="row-span-2 size-[22px] compact:row-auto compact:mb-0.5 compact:size-5"
+                className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
                 name={attacking ? 'close' : 'sword'}
               />
-              <span className="text-[13px] font-semibold whitespace-nowrap compact:text-[11px] narrow:text-[10px] flat:text-[11px]">
+              <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
                 {attacking ? 'Cancel' : 'Attack'}
               </span>
-              <small className="mt-0.5 block text-[9px] compact:mt-0 compact:text-[8px] text-[#b5a997]">
+              <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
                 {attacking ? 'Choose enemy' : '1 energy'}
               </small>
             </button>
@@ -462,13 +463,13 @@ export function Game({
               }
             >
               <Icon
-                className="row-span-2 size-[22px] compact:row-auto compact:mb-0.5 compact:size-5"
+                className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
                 name={usingSpecial ? 'close' : 'spark'}
               />
-              <span className="text-[13px] font-semibold whitespace-nowrap compact:text-[11px] narrow:text-[10px] flat:text-[11px]">
+              <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
                 {usingSpecial ? 'Cancel' : (pawn?.special.name ?? 'Special')}
               </span>
-              <small className="mt-0.5 block text-[9px] text-[#a1b29b] compact:mt-0 compact:text-[8px]">
+              <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
                 {usingSpecial
                   ? !targets.size
                     ? 'No targets'
@@ -502,13 +503,13 @@ export function Game({
               }
             >
               <Icon
-                className="row-span-2 size-[22px] compact:row-auto compact:mb-0.5 compact:size-5"
+                className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
                 name="escape"
               />
-              <span className="text-[13px] font-semibold whitespace-nowrap compact:text-[11px] narrow:text-[10px] flat:text-[11px]">
+              <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
                 End turn
               </span>
-              <small className="mt-0.5 block text-[9px] text-[#a1b29b] compact:mt-0 compact:text-[8px]">
+              <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
                 +{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape
               </small>
             </button>
@@ -562,8 +563,9 @@ export function Game({
                 </h3>
                 <p>
                   Each unit starts with 3 energy. The lit unit is yours to command. Moving costs
-                  1 energy per tile, or 2 for a Bulwark; numbers show the full cost. Mountains
-                  and lakes block walking and Charge. Arrows and magic pass over them.
+                  1 energy per tile; a Bulwark pays 2 for its first tile and 1 after. Numbers
+                  show the full cost. Mountains and lakes block walking and Charge. Arrows and
+                  magic pass over them.
                 </p>
               </div>
             </section>

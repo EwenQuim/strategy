@@ -392,11 +392,15 @@ test(
     assert.equal(await page.locator('[aria-label="Health"] [data-filled="true"]').count(), 10)
     const moves = page.getByRole('button', { name: /^Move to / })
     assert.ok(await moves.count())
-    for (const label of await moves.evaluateAll((tiles) =>
-      tiles.map((tile) => tile.getAttribute('aria-label')),
-    )) {
-      assert.match(label!, /2 energy$/)
-    }
+    const moveCosts = await moves.evaluateAll((tiles) =>
+      tiles.map((tile) => Number(tile.getAttribute('aria-label')!.match(/(\d+) energy$/)![1])),
+    )
+    assert.deepEqual(
+      moveCosts.sort(),
+      [...movementDestinations(state.tiles, state.pawns, pawn).values()]
+        .filter((cost) => cost > 0)
+        .sort(),
+    )
     await page.locator('[data-action="special"]').click()
     assert.match(await page.locator('[data-action="special"]').innerText(), /Choose ally/)
     const allies = page.getByRole('button', { name: /^Protect / })
@@ -407,20 +411,26 @@ test(
       '3',
     )
     await page.locator('[data-action="special"]').click()
-    await page.locator('.hex-tile').nth(tileIndex).click()
+    await page.locator('[data-testid="hex-tile"]').nth(tileIndex).click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '1',
     )
     assert.match(
-      (await page.locator('.hex-tile').nth(tileIndex).getAttribute('aria-label'))!,
+      (await page
+        .locator('[data-testid="hex-tile"]')
+        .nth(tileIndex)
+        .getAttribute('aria-label'))!,
       /protected by bulwark/,
     )
-    assert.equal(await page.locator('.protection-badge').count(), 1)
+    assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
     assert.equal(await moves.count(), 0)
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    await moves.first().click()
+    await page
+      .getByRole('button', { name: /^Move to .*2 energy$/ })
+      .first()
+      .click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '1',
@@ -728,11 +738,11 @@ test(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
         BIOMES[biome].name,
       )
-      assert.equal(await page.locator('.hex-tile').count(), 96)
+      assert.equal(await page.locator('[data-testid="hex-tile"]').count(), 96)
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), biome)
       backgrounds.add(
         await page
-          .locator('.battlefield-backdrop')
+          .locator('[aria-label="The battlefield"]')
           .evaluate((element) => getComputedStyle(element).background),
       )
       const panel = await page
@@ -746,10 +756,12 @@ test(
         panel,
       )
       tileBases.add(
-        await page.locator('.tile-bases').evaluate((element) => getComputedStyle(element).fill),
+        await page
+          .locator('[data-art="tile-bases"]')
+          .evaluate((element) => getComputedStyle(element).fill),
       )
       const terrain = await page
-        .locator('.hex-tile')
+        .locator('[data-testid="hex-tile"]')
         .evaluateAll((tiles) => tiles.map((tile) => tile.getAttribute('aria-label')!))
       assert.equal(
         terrain.some((label) => label.includes('lake')),
@@ -765,8 +777,8 @@ test(
       )
       if (biome === 'desert') {
         assert.ok(terrain.every((label) => /sand|palm|lake|health/.test(label)))
-        assert.ok((await page.locator('.sand-dunes').count()) > 0)
-        const faces = await page.locator('.tile-face').evaluateAll((tiles) =>
+        assert.ok((await page.locator('[data-art="sand"]').count()) > 0)
+        const faces = await page.locator('[data-testid="tile-face"]').evaluateAll((tiles) =>
           tiles.map((tile) => ({
             fill: getComputedStyle(tile).fill,
             stroke: getComputedStyle(tile).stroke,
@@ -788,7 +800,7 @@ test(
       }
       if (biome === 'volcano') {
         assert.ok(terrain.some((label) => label.includes('lava')))
-        assert.ok(await page.locator('.lava-pool').count())
+        assert.ok(await page.locator('[data-art="lava"]').count())
         assert.ok(await page.locator('[data-terrain=basalt]').count())
       }
       await playTurn(page)
@@ -823,20 +835,26 @@ test(
         if (!tile.feature) continue
         const feature = page.locator('[data-feature=' + tile.feature + ']')
         assert.equal(await feature.count(), 1)
-        assert.equal(await feature.locator('.feature-art').count(), 1)
+        assert.equal(await feature.locator('[data-art="feature"]').count(), 1)
         if (id === 15) {
           assert.equal(
-            await feature.locator('.tile-face').evaluate((face) => getComputedStyle(face).fill),
+            await feature
+              .locator('[data-testid="tile-face"]')
+              .evaluate((face) => getComputedStyle(face).fill),
             'rgb(89, 78, 83)',
           )
         }
       }
       if (level.setup.biome === 'volcano') {
         const basalt = page
-          .locator('.hex-tile[data-terrain=basalt][role=img][aria-label^="basalt,"] .tile-face')
+          .locator(
+            '[data-testid="hex-tile"][data-terrain=basalt][role=img][aria-label^="basalt,"] [data-testid="tile-face"]',
+          )
           .first()
         const lava = page
-          .locator('.hex-tile[data-terrain=lava][role=img][aria-label^="lava,"] .tile-face')
+          .locator(
+            '[data-testid="hex-tile"][data-terrain=lava][role=img][aria-label^="lava,"] [data-testid="tile-face"]',
+          )
           .first()
         assert.equal(
           await basalt.evaluate((face) => getComputedStyle(face).fill),
@@ -846,29 +864,29 @@ test(
         const hexPoints = await lava.getAttribute('points')
         assert.equal(await page.locator('#lava-hex polygon').getAttribute('points'), hexPoints)
         assert.equal(
-          await page.locator('.lava-pool > g[clip-path="url(#lava-hex)"]').count(),
+          await page.locator('[data-art="lava"] > g[clip-path="url(#lava-hex)"]').count(),
           await page.locator('[data-terrain=lava]').count(),
         )
         assert.ok(
           await page
-            .locator('.lava-pool polygon')
+            .locator('[data-art="lava"] polygon')
             .evaluateAll(
               (polygons, points) =>
                 polygons.every((polygon) => polygon.getAttribute('points') === points),
               hexPoints,
             ),
         )
-        assert.ok(await page.locator('.basalt-stone').count())
+        assert.ok(await page.locator('[data-art="basalt"]').count())
         assert.ok(
           await page
-            .locator('.lava-pool path')
+            .locator('[data-art="lava"] path')
             .evaluateAll((paths) =>
               paths.every((path) => (path as SVGPathElement).getTotalLength() > 0),
             ),
         )
         assert.equal(
           await page
-            .locator('.tile-face')
+            .locator('[data-testid="tile-face"]')
             .evaluateAll(
               (faces) =>
                 new Set(faces.map((face) => getComputedStyle(face).strokeOpacity)).size,
@@ -922,7 +940,7 @@ test(
       const index = [...state.tiles.keys()].indexOf(position)
       await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      const destination = page.locator('.hex-tile').nth(index)
+      const destination = page.locator('[data-testid="hex-tile"]').nth(index)
       if (kind === 'lava') {
         assert.match((await destination.getAttribute('aria-label'))!, /lethal/)
         assert.doesNotMatch(
@@ -934,7 +952,7 @@ test(
         )
         assert.equal(
           await destination
-            .locator('.tile-face')
+            .locator('[data-testid="tile-face"]')
             .evaluate((face) => getComputedStyle(face).fill),
           'rgb(148, 113, 109)',
         )
@@ -942,7 +960,7 @@ test(
         assert.match((await destination.getAttribute('aria-label'))!, /Jump to .*lethal/)
         assert.equal(
           await destination
-            .locator('.tile-face')
+            .locator('[data-testid="tile-face"]')
             .evaluate((face) => getComputedStyle(face).fill),
           'rgb(148, 113, 109)',
         )
@@ -958,14 +976,17 @@ test(
                 : 'Watchtower',
           ),
         )
-        assert.equal(await destination.locator('.feature-' + kind).count(), 1)
+        assert.equal(await destination.locator('[data-feature-art=' + kind + ']').count(), 1)
       }
       await destination.click()
       state = transition(state, { type: 'move', q: tile.q, r: tile.r }).state
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       if (kind === 'lava') {
         assert.ok(!state.pawns.some((unit) => unit.id === pawn.id))
-        assert.equal(await page.locator('.pawn-chip').count(), state.pawns.length)
+        assert.equal(
+          await page.locator('[data-testid="pawn-chip"]').count(),
+          state.pawns.length,
+        )
       } else {
         assert.equal(
           await destination.getAttribute('data-feature'),
@@ -1014,7 +1035,7 @@ test(
       )
       assert.equal(
         await page
-          .locator('.tile-face')
+          .locator('[data-testid="tile-face"]')
           .evaluateAll(
             (faces) => new Set(faces.map((face) => getComputedStyle(face).stroke)).size,
           ),
@@ -1052,12 +1073,19 @@ test(
           const impacts = document.querySelector('[data-testid="combat-impacts"]')
           if (!impacts || seen.has(impacts)) return
           seen.add(impacts)
-          const feedback = document.querySelector('.combat-feedback')!
+          const feedback = document.querySelector('[data-testid="combat-feedback"]')!
           const title = document.querySelector('[aria-current="step"]')!.getAttribute('title')!
           const labels = [...impacts.querySelectorAll('.combat-impact-label')]
           checks.push({
             labels: labels.map((label) => label.textContent!.trim()),
             animations: labels.map((label) => getComputedStyle(label).animationName),
+            labelStyles: labels.map((label) => {
+              const style = getComputedStyle(label)
+              return [style.fontSize, style.fill, style.strokeWidth]
+            }),
+            burstsHidden: [...impacts.querySelectorAll('.combat-impact-burst')].every(
+              (element) => getComputedStyle(element).display === 'none',
+            ),
             side: title.startsWith('Enemy') ? 'enemy' : 'player',
             enemyBanner: !!document.querySelector('[data-testid="enemy-turn"]'),
             locked: (document.querySelector('[data-action="endTurn"]') as HTMLButtonElement)
@@ -1102,7 +1130,7 @@ test(
             const tile = [...state.tiles.values()].findIndex(
               (tile) => tile.q === action.q && tile.r === action.r,
             )
-            await page.locator('.hex-tile').nth(tile).click()
+            await page.locator('[data-testid="hex-tile"]').nth(tile).click()
           }
           state = result.state
           if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
@@ -1120,6 +1148,8 @@ test(
         labels: string[]
         side: string
         animations: string[]
+        labelStyles: string[][]
+        burstsHidden: boolean
         enemyBanner: boolean
         locked: boolean
         screenDisplay: string
@@ -1132,6 +1162,15 @@ test(
         expected,
       )
       for (const check of checks) {
+        assert.equal(check.burstsHidden, reducedMotion === 'reduce')
+        assert.deepEqual(
+          check.labelStyles,
+          check.labels.map((label) =>
+            label === 'MISS'
+              ? ['24px', 'rgb(201, 234, 244)', '5px']
+              : ['32px', 'rgb(255, 225, 163)', '5px'],
+          ),
+        )
         assert.equal(check.locked, true)
         assert.equal(check.enemyBanner, check.side === 'enemy')
         assert.equal(check.fits, true)
@@ -1156,7 +1195,7 @@ test(
           ),
         )
       }
-      assert.equal(await page.locator('.combat-feedback').count(), 0)
+      assert.equal(await page.locator('[data-testid="combat-feedback"]').count(), 0)
     }
     assert.deepEqual(errors, [])
   },
@@ -1231,7 +1270,7 @@ test(
             const tile = [...state.tiles.values()].findIndex(
               (tile) => tile.q === action.q && tile.r === action.r,
             )
-            await page.locator('.hex-tile').nth(tile).click()
+            await page.locator('[data-testid="hex-tile"]').nth(tile).click()
           } else assert.fail('Unexpected action: ' + action.type)
           state = result.state
           if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
@@ -1298,7 +1337,7 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
         const tile = [...state.tiles.values()].findIndex(
           (tile) => tile.q === action.q && tile.r === action.r,
         )
-        await page.locator('.hex-tile').nth(tile).click()
+        await page.locator('[data-testid="hex-tile"]').nth(tile).click()
       } else assert.fail('Unexpected campaign action: ' + action.type)
       state = result.state
       if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
@@ -1499,6 +1538,14 @@ test(
       { width: 1280, height: 900 },
       { width: 900, height: 600 },
       { width: 800, height: 450 },
+      { width: 359, height: 568 },
+      { width: 360, height: 568 },
+      { width: 600, height: 844 },
+      { width: 601, height: 844 },
+      { width: 900, height: 650 },
+      { width: 900, height: 651 },
+      { width: 600, height: 480 },
+      { width: 600, height: 481 },
     ]) {
       await page.setViewportSize(viewport)
       await page.goto(origin + base + 'campaign')
@@ -1566,6 +1613,29 @@ test(
           .evaluate((element) => getComputedStyle(element).color),
         'rgb(234, 217, 158)',
       )
+      const shortLandscape = viewport.width >= 600 && viewport.height <= 480
+      assert.equal(
+        await page.getByRole('list', { name: 'Round turn order' }).isVisible(),
+        !shortLandscape,
+      )
+      assert.equal(
+        await page
+          .locator('[data-action="endTurn"]')
+          .evaluate((element) => getComputedStyle(element).minHeight),
+        shortLandscape
+          ? '48px'
+          : viewport.height <= 650
+            ? '65px'
+            : viewport.width <= 600
+              ? '76px'
+              : '64px',
+      )
+      assert.equal(
+        await page
+          .getByRole('region', { name: 'The battlefield', exact: true })
+          .evaluate((element) => getComputedStyle(element).backgroundSize),
+        'auto, 37px 43px, auto',
+      )
       const special = page.locator('[data-action="special"]')
       await special.click()
       await page.mouse.move(0, 0)
@@ -1607,20 +1677,34 @@ test(
       ['solid', '2px', 'rgb(220, 196, 138)'],
     )
     const move = page.getByRole('button', { name: /^Move to / }).first()
-    const face = move.locator('.tile-face')
+    const face = move.locator('[data-testid="tile-face"]')
     const stroke = await face.evaluate((element) => getComputedStyle(element).stroke)
+    await move.hover()
+    assert.equal(
+      await face.evaluate((element) => getComputedStyle(element).filter),
+      'brightness(1.2)',
+    )
     await move.focus()
     assert.equal(
       await face.evaluate((element) => getComputedStyle(element).fill),
       'rgb(241, 219, 156)',
     )
     assert.equal(await face.evaluate((element) => getComputedStyle(element).stroke), stroke)
+    const chip = page.locator('[data-testid="pawn-chip"]').first()
+    assert.equal(
+      await chip.evaluate((element) => getComputedStyle(element).transitionProperty),
+      'none',
+    )
     const halo = page.locator('.pawn-active-halo')
     assert.equal(
       await halo.evaluate((element) => getComputedStyle(element).animationName),
       'none',
     )
     await page.emulateMedia({ reducedMotion: 'no-preference' })
+    assert.equal(
+      await chip.evaluate((element) => getComputedStyle(element).transitionDuration),
+      '0.35s',
+    )
     assert.equal(
       await halo.evaluate((element) => getComputedStyle(element).animationName),
       'halo-breathe',

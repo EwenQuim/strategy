@@ -10,9 +10,9 @@ export const Route = createFileRoute('/')({
     const completed = useSyncExternalStore(subscribeCampaignProgress, readCampaignProgress)
     const done = completed === CAMPAIGN_LEVELS.length
     return (
-      <main className="landing-backdrop flex min-h-dvh flex-col">
-        <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 compact:px-[23px] compact:py-5 short:py-3">
-          <span className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] wide:text-[26px]">
+      <main className="[background:radial-gradient(ellipse_at_50%_38%,#465c3880,transparent_60%),#182c22] flex min-h-dvh flex-col">
+        <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 max-[601px]:px-[23px] max-[601px]:py-5 [@media(max-height:650px)]:py-3">
+          <span className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]">
             <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
               <Icon name="crown" />
             </span>
@@ -27,13 +27,13 @@ export const Route = createFileRoute('/')({
             </span>
           </span>
         </header>
-        <div className="flex flex-1 flex-col items-center px-5 pt-[5px] pb-9 text-center short:pb-4">
+        <div className="flex flex-1 flex-col items-center px-5 pt-[5px] pb-9 text-center [@media(max-height:650px)]:pb-4">
           <div
-            className="relative h-[260px] w-[340px] max-w-[90vw] compact:h-[235px] compact:w-[285px] [@media(height<=800px)]:hidden"
+            className="relative h-[260px] w-[340px] max-w-[90vw] max-[601px]:h-[235px] max-[601px]:w-[285px] [@media(height<=800px)]:hidden"
             aria-hidden="true"
           >
-            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[290px] compact:size-[250px]" />
-            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[370px] compact:size-[310px]" />
+            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[290px] max-[601px]:size-[250px]" />
+            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[370px] max-[601px]:size-[310px]" />
             <svg
               viewBox="0 0 360 260"
               className="absolute inset-0 size-full drop-shadow-[0_20px_15px_#08190f55]"
@@ -74,17 +74,17 @@ export const Route = createFileRoute('/')({
                 </g>
               ))}
             </svg>
-            <div className="hero-crown">
+            <div className="absolute top-20 left-1/2 grid h-[78px] w-[74px] -translate-x-1/2 place-items-center rounded-[12px_12px_30px_30px] border-2 border-[#d7c182] bg-[linear-gradient(145deg,#4e7460,#204732)] text-[#ecd290] shadow-[0_8px_0_#153621,0_13px_20px_#102d2066] [&>svg]:size-[45px] max-[601px]:top-[78px] max-[601px]:h-[68px] max-[601px]:w-16 max-[601px]:[&>svg]:size-[38px]">
               <Icon name="crown" />
             </div>
           </div>
-          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] short:text-[32px]">
+          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-[32px]">
             Hexmate.
             <br />
             <em className="font-normal text-[#c7d1b0]">Corner the king.</em>
           </h1>
           <div
-            className="mt-[27px] flex w-[min(100%,300px)] flex-col gap-3 short:mt-[18px]"
+            className="mt-[27px] flex w-[min(100%,300px)] flex-col gap-3 [@media(max-height:650px)]:mt-[18px]"
             role="group"
             aria-label="Choose game mode"
           >
@@ -141,7 +141,7 @@ export const Route = createFileRoute('/')({
             </Link>
           </div>
         </div>
-        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] compact:px-[23px] compact:py-[18px] compact:text-[8px] compact:[&>span:last-child]:hidden short:py-3">
+        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:text-[8px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
           <span title="Git commit used for this build">
             Build {import.meta.env.VITE_GIT_COMMIT}
           </span>
