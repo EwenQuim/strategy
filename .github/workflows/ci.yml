@@ -2,11 +2,6 @@ name: CI
 
 on:
   pull_request:
-  workflow_call:
-    inputs:
-      pages:
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -20,8 +15,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm run check:ci
-      - uses: actions/upload-pages-artifact@v3
-        if: inputs.pages
-        with:
-          path: dist
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: DEBUG=pw:api node --experimental-strip-types --test tests/pwa.browser.ts
