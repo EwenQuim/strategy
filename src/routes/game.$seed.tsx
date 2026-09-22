@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useMemo, useRef } from 'react'
 import { useGame } from '../useGame'
+import { armyLabels, playerNames } from '../lib/game-mode'
 import { Battlefield } from '../components/Battlefield'
 import { BattleNotifications } from '../components/BattleNotifications'
 import { Icon, PawnIcon } from '../components/Icon'
@@ -25,14 +26,18 @@ export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {
     if (!/^[a-zA-Z0-9_-]{1,64}$/.test(params.seed)) throw redirect({ to: '/' })
   },
-  remountDeps: ({ params }) => params.seed,
+  remountDeps: ({ params, search }) => [params.seed, search.mode],
   component: function Game() {
     const { seed } = Route.useParams()
-    const { state, dispatch, effect, effectId, playing } = useGame(seed)
+    const { mode } = Route.useSearch()
+    const local = mode === 'local'
+    const labels = armyLabels[mode]
+    const { state, dispatch, effect, effectId, playing } = useGame(seed, mode)
+    const winnerLabel = state.winner && local ? playerNames[state.winner] + ' wins!' : null
     const dialog = useRef<HTMLDialogElement>(null)
     const pawn = activePawn(state)
     const canRally = pawn?.kind === 'king' && specialTargets(state.pawns, pawn).length > 0
-    const myTurn = !!pawn && pawn.side === 'player' && !state.winner && !playing
+    const myTurn = !!pawn && (local || pawn.side === 'player') && !state.winner && !playing
     const attacking = myTurn && state.phase === 'attack'
     const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
     const targets = useMemo(() => targetingTiles(state), [state])
@@ -65,7 +70,7 @@ export const Route = createFileRoute('/game/$seed')({
     }
 
     return (
-      <main className="game-shell">
+      <main className="game-shell" data-biome={state.biome}>
         {!!effect?.impacts?.length && (
           <div
             key={effectId}
@@ -87,7 +92,12 @@ export const Route = createFileRoute('/game/$seed')({
               </span>
             </Link>
             <div className="header-tools">
-              {playing && pawn?.side === 'enemy' && (
+              {local && pawn && !state.winner && (
+                <span className={'player-turn ' + pawn.side} role="status">
+                  {playerNames[pawn.side]} turn
+                </span>
+              )}
+              {!local && playing && pawn?.side === 'enemy' && (
                 <span className="enemy-turn" role="status">
                   Enemy turn
                 </span>
@@ -114,14 +124,12 @@ export const Route = createFileRoute('/game/$seed')({
                     (index === state.active && !state.winner ? ' is-current' : '')
                   }
                   aria-current={index === state.active && !state.winner ? 'step' : undefined}
-                  title={
-                    (unit.side === 'player' ? 'Your ' : 'Enemy ') + unit.kind + ' #' + unit.id
-                  }
+                  title={labels[unit.side] + ' ' + unit.kind + ' #' + unit.id}
                 >
                   <PawnIcon kind={unit.kind} />
                   <span>{unit.id.toString().padStart(2, '0')}</span>
                   <span className="sr-only">
-                    {unit.side} {unit.kind}
+                    {labels[unit.side]} {unit.kind}
                     {index < state.active ? ', already acted' : ''}
                   </span>
                 </li>
@@ -136,6 +144,7 @@ export const Route = createFileRoute('/game/$seed')({
         >
           <div className="board-container">
             <Battlefield
+              mode={mode}
               tiles={state.tiles}
               pawns={state.pawns}
               active={state.winner ? undefined : pawn}
@@ -148,7 +157,7 @@ export const Route = createFileRoute('/game/$seed')({
               onTileClick={onTileClick}
             />
           </div>
-          <BattleNotifications log={state.log} logCount={state.logCount} />
+          <BattleNotifications log={state.log} logCount={state.logCount} mode={mode} />
           {state.winner && (
             <div className="battle-result" role="status">
               <div className="result-card">
@@ -157,16 +166,20 @@ export const Route = createFileRoute('/game/$seed')({
                 </div>
                 <span className="eyebrow">The battle is over</span>
                 <h1>
-                  {state.winner === 'player'
-                    ? 'The battlefield is yours.'
-                    : 'A crown has fallen.'}
+                  {winnerLabel ??
+                    (state.winner === 'player'
+                      ? 'The battlefield is yours.'
+                      : 'A crown has fallen.')}
                 </h1>
                 <p>
-                  {state.winner === 'player'
-                    ? 'Their king has fallen. Your guard stands victorious.'
-                    : 'Your king has fallen. Regroup, rethink, and return.'}
+                  {local
+                    ? labels[state.winner === 'player' ? 'enemy' : 'player'] +
+                      ' king has fallen.'
+                    : state.winner === 'player'
+                      ? 'Their king has fallen. Your guard stands victorious.'
+                      : 'Your king has fallen. Regroup, rethink, and return.'}
                 </p>
-                <Link to="/game/" className="primary-button" preload={false}>
+                <Link to="/game" search={{ mode }} className="primary-button" preload={false}>
                   New game
                   <Icon name="arrow" />
                 </Link>
@@ -185,9 +198,7 @@ export const Route = createFileRoute('/game/$seed')({
                 <div>
                   <h2>
                     {state.winner
-                      ? state.winner === 'player'
-                        ? 'Victory'
-                        : 'Defeat'
+                      ? (winnerLabel ?? (state.winner === 'player' ? 'Victory' : 'Defeat'))
                       : (pawn?.kind ?? 'Your guard')}
                     {!state.winner && pawn && (
                       <span className="unit-number">
@@ -417,9 +428,12 @@ export const Route = createFileRoute('/game/$seed')({
                   <h3>A fresh round. A new order.</h3>
                   <p>
                     End turn spends your remaining energy and passes to the next unit. Running
-                    out of energy also ends your turn, with no extra Escape bonus. Enemy units
-                    act automatically. Each new round shuffles the order, restores all energy,
-                    and resets Escape to 0%.
+                    out of energy also ends your turn, with no extra Escape bonus.{' '}
+                    {local
+                      ? 'Share this device: Player 1 commands green units and Player 2 commands red units. Follow the turn indicator for each unit; the same player may act several times in a row.'
+                      : 'Enemy units act automatically.'}{' '}
+                    Each new round shuffles the order, restores all energy, and resets Escape to
+                    0%.
                   </p>
                 </div>
               </section>

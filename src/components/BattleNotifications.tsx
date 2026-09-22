@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react'
+import { battleMessage, type GameMode } from '../lib/game-mode'
 
-export function BattleNotifications({ log, logCount }: { log: string[]; logCount: number }) {
+export function BattleNotifications({
+  log,
+  logCount,
+  mode,
+}: {
+  log: string[]
+  logCount: number
+  mode: GameMode
+}) {
   const latest = log.slice(-5)
   return (
     <ol
@@ -10,7 +19,10 @@ export function BattleNotifications({ log, logCount }: { log: string[]; logCount
       aria-relevant="additions"
     >
       {latest.map((message, index) => (
-        <Notification key={logCount - latest.length + index} message={message} />
+        <Notification
+          key={logCount - latest.length + index}
+          message={battleMessage(message, mode)}
+        />
       ))}
     </ol>
   )

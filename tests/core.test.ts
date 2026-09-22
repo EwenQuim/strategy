@@ -17,6 +17,8 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
+import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+import { battleMessage } from '../src/lib/game-mode.ts'
 
 function duel(side: Side): GameState {
   return {
@@ -236,5 +238,95 @@ test('Player attack playback precedes enemy responses and shows lethal damage be
       assert.equal(activePawn(result.frames[1].state)?.side, 'enemy')
       assert.ok(result.frames.slice(1).some((frame) => frame.effect?.impacts?.length))
     }
+  }
+})
+
+test('Local games leave either starting army untouched and never automate a turn', () => {
+  const starters = new Set<Side>()
+  const bot = createBotGame()
+  for (let index = 0; index < 30; index++) {
+    const seed = 'local-' + index
+    let playback = initialPlayback(seed, 'local')
+    assert.deepEqual(playback, { state: initialState(seed), frames: [] })
+    assert.deepEqual(initialPlayback(seed), bot.initialTransition(seed))
+    assert.deepEqual(initialPlayback(seed, 'ai'), bot.initialTransition(seed))
+    starters.add(activePawn(playback.state)!.side)
+    for (let turn = 0; turn < 12; turn++) {
+      const expected = reducer(playback.state, { type: 'endTurn' })
+      playback = playbackReducer(playback, { type: 'endTurn' }, 'local')
+      assert.deepEqual(playback, { state: expected, frames: [] })
+      assert.equal(activePawn(playback.state)?.energy, 3)
+      assert.ok(playback.state.pawns.every((pawn) => pawn.hp === pawn.maxHp))
+    }
+    assert.deepEqual(
+      playbackReducer(playback, { type: 'restart' }, 'local'),
+      initialPlayback(seed, 'local'),
+    )
+  }
+  assert.deepEqual(starters, new Set(['player', 'enemy']))
+})
+
+test('Both local players can move, attack and win with locked combat playback', () => {
+  for (const side of ['player', 'enemy'] as const) {
+    let playback = { state: duel(side), frames: [] } as ReturnType<typeof initialPlayback>
+    for (const action of [
+      { type: 'move', q: 1, r: 0 },
+      { type: 'act', action: 'attack' },
+      { type: 'attackAt', q: 2, r: 0 },
+      { type: 'endTurn' },
+    ] as const) {
+      const expected = transition(playback.state, action)
+      playback = playbackReducer(playback, action, 'local')
+      assert.deepEqual(playback.state, expected.state)
+      assert.deepEqual(
+        playback.frames,
+        expected.frames.filter((f) => f.effect?.impacts?.length),
+      )
+      if (playback.frames.length) {
+        assert.equal(playbackReducer(playback, { type: 'endTurn' }, 'local'), playback)
+        playback = playbackReducer(playback, { type: 'playbackNext' }, 'local')
+      }
+    }
+    assert.equal(activePawn(playback.state)?.id, 3)
+    const state = duel(side)
+    state.pawns[0].q = 1
+    state.pawns[0].energy = 1
+    state.pawns[2].hp = 1
+    state.phase = 'attack'
+    const result = playbackReducer(
+      { state, frames: [] },
+      { type: 'attackAt', q: 2, r: 0 },
+      'local',
+    )
+    assert.equal(result.state.winner, side)
+    assert.equal(result.frames.length, 1)
+    assert.equal(result.frames[0].state.winner, null)
+    assert.equal(playbackReducer(result, { type: 'endTurn' }, 'local'), result)
+    const finished = playbackReducer(result, { type: 'playbackFinish' }, 'local')
+    assert.equal(finished.state.winner, side)
+    assert.deepEqual(
+      playbackReducer(finished, { type: 'restart' }, 'local'),
+      initialPlayback(state.seed, 'local'),
+    )
+  }
+})
+
+test('Local battle messages name both players without changing AI messages', () => {
+  for (const [message, local] of [
+    [
+      'The battle begins. Protect your crown.',
+      'The battle begins. Player 1 is green; Player 2 is red.',
+    ],
+    ['Your swordsman #1 has fallen.', "Player 1's swordsman #1 has fallen."],
+    ['Enemy king #7 uses Rally.', "Player 2's king #7 uses Rally."],
+    ['The enemy crown has fallen. Victory!', "Player 2's king has fallen. Player 1 wins!"],
+    ['Your crown has fallen.', "Player 1's king has fallen. Player 2 wins!"],
+    [
+      'Round 2. Energy restored; escape chances reset.',
+      'Round 2. Energy restored; escape chances reset.',
+    ],
+  ]) {
+    assert.equal(battleMessage(message, 'local'), local)
+    assert.equal(battleMessage(message, 'ai'), message)
   }
 })

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import { readdir, readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, relative } from 'node:path'
@@ -13,7 +14,14 @@ import {
   type Action,
   type Biome,
 } from '../src/lib/engine/index.ts'
-import { initialState as botState, transition as botTransition } from '../src/lib/bot.ts'
+import {
+  initialState as botState,
+  transition as botTransition,
+  chooseBotActions,
+} from '../src/lib/bot.ts'
+import { transition } from '../src/lib/engine/engine.ts'
+import { huntTheKing } from '../src/lib/strategies.ts'
+import { armyLabels, playerNames } from '../src/lib/game-mode.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -234,6 +242,15 @@ test(
       requests,
       releaseB,
     } = await fixture(t)
+    const commit = execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], {
+      cwd: new URL('../', import.meta.url),
+      encoding: 'utf8',
+      timeout: 5_000,
+    }).trim()
+    assert.equal(
+      await page.locator('.landing-footer > span').first().textContent(),
+      'Build ' + commit,
+    )
     const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href')
     assert.ok(manifestHref)
     const manifestUrl = new URL(manifestHref, page.url())
@@ -301,8 +318,44 @@ test(
     const waitingCaches = await probe.evaluate(() => caches.keys())
     assert.ok(waitingCaches.includes(cacheName))
     assert.ok(waitingCaches.includes(next.cacheName))
+    const notice = page.getByRole('status').filter({ hasText: 'Update ready.' })
+    await notice.waitFor()
+    assert.match(await notice.innerText(), /Close all Hex Strategy tabs and app windows/)
+    assert.equal(
+      await notice.evaluate((element) => {
+        const rect = element.getBoundingClientRect()
+        return (
+          rect.left >= 0 &&
+          rect.top >= 0 &&
+          rect.right <= innerWidth &&
+          rect.bottom <= innerHeight
+        )
+      }),
+      true,
+    )
+    await page.getByRole('button', { name: 'Dismiss update notice' }).click()
+    await notice.waitFor({ state: 'hidden' })
+    assert.equal(await page.evaluate(() => performance.timeOrigin), started)
+    assert.equal(await page.locator('.turn-order').innerHTML(), match)
 
+    await page.reload()
+    await notice.waitFor()
+    assert.equal(await releaseMarker(page), undefined, 'Refresh must not mix releases')
+    await page.getByRole('button', { name: 'Dismiss update notice' }).click()
+    await playTurn(page)
+
+    const other = await context.newPage()
+    await other.goto(origin + base)
+    await other.getByRole('status').filter({ hasText: 'Update ready.' }).waitFor()
+    assert.equal(await releaseMarker(other), undefined)
     await page.close()
+    assert.equal(
+      await probe.evaluate((registration) => registration.waiting?.state, registration),
+      'installed',
+      'Another open tab must keep the previous release active',
+    )
+    assert.ok((await probe.evaluate(() => caches.keys())).includes(cacheName))
+    await other.close()
     await probe.waitForFunction(
       (registration) =>
         registration.waiting === null && registration.active?.state === 'activated',
@@ -368,6 +421,7 @@ test(
       true,
     )
     assert.ok((await probe.evaluate(() => caches.keys())).includes(cacheName))
+    assert.equal(await page.locator('#pwa-update').count(), 0)
     await page.close()
     await context.setOffline(true)
     const offline = await context.newPage()
@@ -381,13 +435,17 @@ test(
 )
 
 test(
-  'All three seeded biomes render and play offline on a small portrait screen',
+  'New games reach all three biomes offline and retain the build label on a small portrait screen',
   { timeout: 60_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
+    const buildLabel = await page.locator('.landing-footer > span').first().textContent()
+    const backgrounds = new Set<string>()
+    const panels = new Set<string>()
+    const tileBases = new Set<string>()
     const seeds = new Map<Biome, string>()
     for (let index = 0; index < 100 && seeds.size < 3; index++) {
-      const seed = 'biome-' + index
+      const seed = '00000000-0000-4000-8000-' + index.toString(16).padStart(12, '0')
       seeds.set(initialState(seed).biome, seed)
     }
     assert.equal(seeds.size, 3)
@@ -395,10 +453,38 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
     for (const [biome, seed] of seeds) {
-      await page.goto(origin + base + 'game/' + seed)
+      await page.goto(origin + base)
+      assert.equal(
+        await page.locator('.landing-footer > span').first().textContent(),
+        buildLabel,
+      )
+      await page.evaluate((seed) => {
+        Object.defineProperty(crypto, 'randomUUID', { value: () => seed })
+      }, seed)
+      await page.getByRole('link', { name: 'VS AI' }).click()
       await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
       assert.equal(await page.locator('.wordmark-sub').textContent(), BIOMES[biome].name)
       assert.equal(await page.locator('.hex-tile').count(), 96)
+      assert.equal(await page.locator('.game-shell').getAttribute('data-biome'), biome)
+      backgrounds.add(
+        await page
+          .locator('.battle-stage')
+          .evaluate((element) => getComputedStyle(element).background),
+      )
+      const panel = await page
+        .locator('.game-header')
+        .evaluate((element) => getComputedStyle(element).backgroundColor)
+      panels.add(panel)
+      assert.equal(
+        await page
+          .locator('.command-deck')
+          .evaluate((element) => getComputedStyle(element).backgroundColor),
+        panel,
+      )
+      tileBases.add(
+        await page.locator('.tile-bases').evaluate((element) => getComputedStyle(element).fill),
+      )
       const terrain = await page
         .locator('.hex-tile')
         .evaluateAll((tiles) => tiles.map((tile) => tile.getAttribute('aria-label')!))
@@ -414,9 +500,34 @@ test(
         terrain.some((label) => label.includes('sand')),
         biome === 'desert',
       )
-      if (biome === 'desert') assert.ok(terrain.every((label) => /sand|health/.test(label)))
+      if (biome === 'desert') {
+        assert.ok(terrain.every((label) => /sand|health/.test(label)))
+        assert.ok((await page.locator('.sand-dunes').count()) > 0)
+        const faces = await page.locator('.tile-face').evaluateAll((tiles) =>
+          tiles.map((tile) => ({
+            fill: getComputedStyle(tile).fill,
+            stroke: getComputedStyle(tile).stroke,
+          })),
+        )
+        assert.ok(
+          faces.some((tile) => tile.fill === 'rgb(229, 188, 112)'),
+          'Sand tiles must be golden',
+        )
+        assert.ok(
+          faces.some((tile) => tile.fill === 'rgb(163, 189, 136)'),
+          'Reachable tiles must still use their highlight fill',
+        )
+        assert.equal(
+          new Set(faces.map((tile) => tile.stroke)).size,
+          1,
+          'Highlights must not change tile borders',
+        )
+      }
       await playTurn(page)
     }
+    assert.equal(backgrounds.size, 3, 'Each biome needs a distinct background')
+    assert.equal(panels.size, 3, 'Headers and actions must match the biome')
+    assert.equal(tileBases.size, 3, 'Tile edges must match the biome')
     assert.deepEqual(errors, [])
   },
 )
@@ -545,6 +656,112 @@ test(
       }
       assert.equal(await page.locator('.combat-feedback').count(), 0)
     }
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Local mode plays both armies offline on mobile, names either winner, and preserves mode for new games',
+  { timeout: 90_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await context.setOffline(true)
+    await page.getByRole('link', { name: '2 players' }).click()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    assert.equal(new URL(page.url()).searchParams.get('mode'), 'local')
+    await playTurn(page)
+    assert.equal(await page.locator('.enemy-turn').count(), 0)
+    await page.getByRole('button', { name: 'How to play' }).click()
+    assert.match(await page.locator('.rules-list').innerText(), /Player 1 commands green units/)
+    assert.doesNotMatch(
+      await page.locator('.rules-list').innerText(),
+      /Enemy units act automatically/,
+    )
+    await page.getByRole('button', { name: 'Close dialog' }).click()
+
+    const winners = new Set<string>()
+    const actionsBySide = new Set<string>()
+    for (const seed of ['local-26', 'local-18']) {
+      let state = initialState(seed)
+      await page.goto(origin + base + 'game/' + seed + '?mode=local')
+      await page.locator('.end-action:not([disabled])').waitFor()
+      const first = activePawn(state)!
+      assert.equal(
+        await page.locator('.player-turn').textContent(),
+        playerNames[first.side] + ' turn',
+      )
+      assert.equal(
+        await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+        '3',
+      )
+      const opening = await page.locator('.turn-order').innerHTML()
+      await page.reload()
+      await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(await page.locator('.turn-order').innerHTML(), opening)
+
+      for (let step = 0; step < 100 && !state.winner; step++) {
+        for (const action of chooseBotActions(state, huntTheKing)) {
+          const pawn = activePawn(state)!
+          assert.equal(
+            await page.locator('[aria-current="step"]').getAttribute('title'),
+            armyLabels.local[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
+          )
+          assert.equal(
+            await page.locator('.player-turn').textContent(),
+            playerNames[pawn.side] + ' turn',
+          )
+          actionsBySide.add(pawn.side + '-' + action.type)
+          const result = transition(state, action)
+          if (action.type === 'endTurn') await page.locator('.end-action').click()
+          else if (action.type === 'act')
+            await page
+              .locator(action.action === 'attack' ? '.attack-action' : '.special-action')
+              .click()
+          else if ('q' in action) {
+            const tile = [...state.tiles.values()].findIndex(
+              (tile) => tile.q === action.q && tile.r === action.r,
+            )
+            await page.locator('.hex-tile').nth(tile).click()
+          } else assert.fail('Unexpected action: ' + action.type)
+          state = result.state
+          if (state.winner) await page.locator('.battle-result').waitFor()
+          else await page.locator('.end-action:not([disabled])').waitFor()
+        }
+      }
+      assert.ok(state.winner, 'The local battle must reach a winner')
+      winners.add(state.winner)
+      assert.equal(
+        await page.locator('.result-card h1').textContent(),
+        playerNames[state.winner] + ' wins!',
+      )
+      assert.doesNotMatch(
+        await page.locator('.battle-notifications').innerText(),
+        /Your |Enemy /,
+      )
+      assert.equal(await page.locator('.end-action').isDisabled(), true)
+      await page.getByRole('link', { name: 'New game' }).click()
+      await page.locator('.end-action:not([disabled])').waitFor()
+      assert.equal(new URL(page.url()).searchParams.get('mode'), 'local')
+      assert.notEqual(new URL(page.url()).pathname, base + 'game/' + seed)
+      await playTurn(page)
+    }
+    assert.deepEqual(winners, new Set(['player', 'enemy']))
+    for (const side of ['player', 'enemy']) {
+      assert.ok(actionsBySide.has(side + '-move'))
+      assert.ok(actionsBySide.has(side + '-attackAt'))
+    }
+    await page.getByRole('link', { name: 'Hex Strategy home' }).click()
+    await page.getByRole('link', { name: 'VS AI' }).click()
+    await page.locator('.end-action:not([disabled])').waitFor()
+    assert.equal(new URL(page.url()).searchParams.get('mode'), 'ai')
+    assert.equal(await page.locator('.player-turn').count(), 0)
+    await playTurn(page)
+    await page.goto(origin + base + 'game/local-26?mode=invalid')
+    await page.locator('.end-action:not([disabled])').waitFor()
+    assert.equal(await page.locator('.player-turn').count(), 0)
+    assert.match((await page.locator('[aria-current="step"]').getAttribute('title'))!, /^Your /)
     assert.deepEqual(errors, [])
   },
 )

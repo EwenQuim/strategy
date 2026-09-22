@@ -31,7 +31,7 @@ The same checks gate pull requests and GitHub Pages deployment. The build includ
 
 Open the production site once online, then use your browser's Install app or Add to Home Screen command. The app caches its HTML, styles, icons, and every JavaScript chunk, so new seeded games also work offline. Development mode does not register a service worker.
 
-Updates are checked when the app opens, comes online, or returns to the foreground. A new build downloads in the background, but never reloads a running match. Close all Hex Strategy tabs/windows and reopen the app to activate the update. Old assets are removed only then; a failed download leaves the previous version usable offline.
+Updates are checked when the app opens, comes online, or returns to the foreground. A new build downloads in the background, but never reloads a running match. An "Update ready" notice appears once the full release is cached, including when reopening a page with an update already waiting. Finish your match, close all Hex Strategy browser tabs and app windows, then reopen to activate the update. Refreshing or just backgrounding the installed app is not enough while a client remains open. Old assets are removed only after activation; a failed download leaves the previous version usable offline.
 
 Battles still live in memory: reloading restarts the seeded battle. Offline support does not add saved matches.
 

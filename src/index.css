@@ -86,17 +86,36 @@ p {
 }
 
 .game-shell {
+  --biome-background: #1c3025;
+  --biome-glow: #51634069;
+  --biome-panel: #172a21;
+  --tile-base: #263f30;
+  --tile-shade: #10291b;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100dvh;
   overflow: hidden;
-  background: #1c3025;
+  background: var(--biome-background);
+}
+.game-shell[data-biome='mountains'] {
+  --biome-background: #263b4c;
+  --biome-glow: #9db9d078;
+  --biome-panel: #1b2935;
+  --tile-base: #435562;
+  --tile-shade: #263544;
+}
+.game-shell[data-biome='desert'] {
+  --biome-background: #805537;
+  --biome-glow: #f4c46e85;
+  --biome-panel: #3f2b20;
+  --tile-base: #996437;
+  --tile-shade: #8b4e28;
 }
 .game-header {
   position: relative;
   z-index: 2;
   padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-left)) 0;
-  background: #172a21;
+  background: var(--biome-panel);
   box-shadow: 0 8px 30px #0a1e1a22;
 }
 .header-main,
@@ -199,8 +218,8 @@ p {
   min-height: 0;
   isolation: isolate;
   background:
-    radial-gradient(ellipse at 50% 45%, #51634069, transparent 66%),
-    radial-gradient(#d7d8b308 1px, transparent 1px), #1c3025;
+    radial-gradient(ellipse at 50% 45%, var(--biome-glow), transparent 66%),
+    radial-gradient(#d7d8b308 1px, transparent 1px), var(--biome-background);
   background-size:
     auto,
     8px 8px,
@@ -293,11 +312,15 @@ p {
   pointer-events: none;
   transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.enemy-turn {
+.enemy-turn,
+.player-turn {
   align-self: center;
   margin-right: 10px;
   color: #d69b81;
   font-size: 10px;
+}
+.player-turn.player {
+  color: #b6d2b5;
 }
 .battle-effect {
   pointer-events: none;
@@ -486,7 +509,7 @@ p {
 .command-deck {
   position: relative;
   z-index: 2;
-  background: #172a22;
+  background: var(--biome-panel);
   border-top: 1px solid #c4d1a530;
   box-shadow: 0 -12px 40px #10201840;
   padding-bottom: env(safe-area-inset-bottom);
@@ -904,6 +927,22 @@ p {
   font-size: 13px;
   line-height: 1.9;
   color: #adbda2;
+}
+.mode-options {
+  display: flex;
+  gap: 12px;
+}
+.mode-options .primary-button {
+  gap: 12px;
+  padding-inline: 18px;
+}
+.local-button {
+  color: var(--ink);
+  background: #ffffff04;
+  border-color: var(--line);
+}
+.local-button:hover {
+  background: #ffffff0c;
 }
 .landing-facts {
   display: flex;

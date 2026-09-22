@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { key, type Axial, type BattleEffect, type Pawn, type Tile } from '../lib/engine'
 import { Icon, PawnIcon } from './Icon'
+import { armyLabels, type GameMode } from '../lib/game-mode'
 
 const SIZE = 34
 const hexX = (q: number, r: number) => SIZE * Math.sqrt(3) * (q + r / 2)
@@ -15,10 +16,11 @@ const terrainColors = {
   forest: '#536e51',
   mountain: '#737c69',
   lake: '#4c7186',
-  sand: '#ceb27a',
+  sand: '#e5bc70',
 }
 
 interface BattlefieldProps {
+  mode: GameMode
   tiles: Map<string, Tile>
   pawns: Pawn[]
   active?: Pawn
@@ -32,6 +34,7 @@ interface BattlefieldProps {
 }
 
 export function Battlefield({
+  mode,
   tiles,
   pawns,
   active,
@@ -92,10 +95,10 @@ export function Battlefield({
         </linearGradient>
         <linearGradient id="tile-light" x2="0.7" y2="1">
           <stop stopColor="#fff6cc" stopOpacity=".13" />
-          <stop offset="1" stopColor="#10291b" stopOpacity=".12" />
+          <stop offset="1" stopColor="var(--tile-shade)" stopOpacity=".12" />
         </linearGradient>
       </defs>
-      <g transform="translate(0 5)" fill="#263f30">
+      <g className="tile-bases" transform="translate(0 5)" fill="var(--tile-base)">
         {allTiles.map((tile) => (
           <polygon
             key={key(tile.q, tile.r)}
@@ -123,7 +126,8 @@ export function Battlefield({
               ? '#a3bd88'
               : terrainColors[tile.terrain]
         const label = occupant
-          ? (occupant.side === 'player' ? 'Your ' : 'Enemy ') +
+          ? armyLabels[mode][occupant.side] +
+            ' ' +
             occupant.kind +
             ' #' +
             occupant.id +
@@ -265,14 +269,25 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   if (terrain === 'sand')
     return (
       <g
-        className="tile-detail"
-        fill="none"
-        stroke="#f3d9a2"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        opacity=".65"
+        className="tile-detail sand-dunes"
+        transform={'translate(0 ' + (variant * 3 - 3) + ')'}
       >
-        <path d="m-19 5q10-12 22-4t17 0m-28 11q8-6 16-3" />
+        <path d="M-24 10Q-6-15 8-3T24 8Q3 3-24 10Z" fill="#bb803f" opacity=".5" />
+        <path
+          d="M-24 10Q-6-15 8-3T24 8"
+          fill="none"
+          stroke="#ffe0a0"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="m-18 18q14-8 34-1"
+          fill="none"
+          stroke="#b47b3b"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity=".55"
+        />
       </g>
     )
   if (terrain === 'lake')

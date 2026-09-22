@@ -60,7 +60,7 @@ export const Route = createFileRoute('/')({
           <div className="hero-crown">
             <Icon name="crown" />
           </div>
-          <span className="art-caption">THE VERDANT VALE</span>
+          <span className="art-caption">LAKES. MOUNTAINS. DESERT.</span>
         </div>
         <span className="eyebrow landing-kicker">Turn-based tactics, distilled.</span>
         <h1>
@@ -73,10 +73,22 @@ export const Route = createFileRoute('/')({
           <br />
           Outthink your rival and claim the crown.
         </p>
-        <Link to="/game/" className="primary-button" preload={false}>
-          Enter the battlefield
-          <Icon name="arrow" />
-        </Link>
+        <div className="mode-options" role="group" aria-label="Choose game mode">
+          <Link to="/game" search={{ mode: 'ai' }} className="primary-button" preload={false}>
+            VS AI
+            <Icon name="arrow" />
+          </Link>
+          <Link
+            to="/game"
+            search={{ mode: 'local' }}
+            className="primary-button local-button"
+            preload={false}
+            title="Play together on this device"
+          >
+            2 players
+            <Icon name="arrow" />
+          </Link>
+        </div>
         <div className="landing-facts">
           <span>
             <Icon name="hex" />
@@ -91,7 +103,9 @@ export const Route = createFileRoute('/')({
         </div>
       </div>
       <footer className="landing-footer">
-        <span>NO TIMER. JUST TACTICS.</span>
+        <span title="Git commit used for this build">
+          Build {import.meta.env.VITE_GIT_COMMIT}
+        </span>
         <span>Made for a moment of strategy.</span>
       </footer>
     </main>
