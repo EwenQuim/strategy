@@ -859,6 +859,8 @@ test(
     const { context, page, origin } = await fixture(t)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
+    const trace = (message: string) => console.error('[tiles-test] ' + message)
+    trace('fixture ready')
     await context.setOffline(true)
     for (const kind of ['watchtower', 'spring', 'rune', 'lava'] as const) {
       let state = initialState('interactive-ui')
@@ -880,11 +882,13 @@ test(
         if (position) break
       }
       assert.ok(position, 'Find a reachable ' + kind)
+      trace(kind + ' seed found at ' + state.seed)
       const pawn = activePawn(state)!
       const tile = state.tiles.get(position)!
       const index = [...state.tiles.keys()].indexOf(position)
       await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
       await page.locator('.end-action:not([disabled])').waitFor()
+      trace(kind + ' page ready')
       const destination = page.locator('.hex-tile').nth(index)
       if (kind === 'lava') {
         assert.match((await destination.getAttribute('aria-label'))!, /lethal/)
@@ -946,10 +950,13 @@ test(
           )
         }
         const round = state.round
+        let endTurns = 0
         while (activePawn(state)?.id !== pawn.id || state.round === round) {
+          trace(kind + ' end turn ' + ++endTurns)
           await page.locator('.end-action:not([disabled])').click()
           state = transition(state, { type: 'endTurn' }).state
         }
+        trace(kind + ' round done')
         assert.equal(
           await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
           '3',
@@ -985,8 +992,10 @@ test(
       )
       await page.reload()
       await page.locator('.end-action:not([disabled])').waitFor()
+      trace(kind + ' reloaded')
       if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
     }
+    trace('all kinds done')
     await page.getByRole('button', { name: 'How to play' }).click()
     assert.match(await page.locator('.rules-list').innerText(), /two middle rows/)
     assert.match(await page.locator('.rules-list').innerText(), /no permanent bonus/)
