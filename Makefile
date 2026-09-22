@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := lint
 
-.PHONY: onboarding installdeps dev format lint typecheck test build check
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check
 
 onboarding: installdeps
 
@@ -23,6 +23,9 @@ typecheck:
 
 test:
 	npm test
+
+test-integration:
+	npm run test:integration
 
 build:
 	npm run build
