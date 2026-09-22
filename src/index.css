@@ -358,6 +358,124 @@ p {
     opacity: 0;
   }
 }
+.combat-feedback {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+}
+.combat-feedback::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.feedback-hit::before {
+  background: radial-gradient(ellipse, transparent 45%, #ffc07966);
+  animation: hit-flash 700ms ease-out both;
+}
+.feedback-miss::before {
+  background: linear-gradient(110deg, transparent 35%, #bce6f433 50%, transparent 65%);
+  animation: miss-sweep 700ms ease-out both;
+}
+.combat-impacts {
+  pointer-events: none;
+}
+.combat-impact {
+  color: #ffe1a3;
+}
+.impact-miss {
+  color: #c9eaf4;
+}
+.impact-ring,
+.impact-rays {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: impact-burst 450ms ease-out both;
+}
+.impact-miss .impact-ring {
+  stroke-dasharray: 4 7;
+}
+.impact-label {
+  fill: currentColor;
+  stroke: #14271f;
+  stroke-width: 5;
+  paint-order: stroke;
+  font-size: 32px;
+  font-weight: 900;
+  animation: damage-pop 700ms ease-out both;
+}
+.impact-miss .impact-label {
+  font-size: 24px;
+  font-style: italic;
+  animation-name: miss-drift;
+}
+@keyframes hit-flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+}
+@keyframes miss-sweep {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+@keyframes impact-burst {
+  from {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes damage-pop {
+  0% {
+    transform: translateY(5px) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-4px) scale(1.2);
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-18px) scale(1);
+    opacity: 0;
+  }
+}
+@keyframes miss-drift {
+  0% {
+    transform: translate(-8px, 4px);
+    opacity: 0;
+  }
+  20%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(8px, -16px);
+    opacity: 0;
+  }
+}
 .active-halo {
   animation: halo-breathe 3s ease-in-out infinite;
 }
@@ -1119,6 +1237,11 @@ p {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .combat-feedback,
+  .impact-ring,
+  .impact-rays {
+    display: none;
+  }
   *,
   *::before,
   *::after {

@@ -9,6 +9,9 @@ import {
   distFrom,
   King,
   Swordsman,
+  Magician,
+  Archer,
+  Ninja,
   type GameState,
   type Side,
   type Tile,
@@ -170,4 +173,68 @@ test('Path searches use shortest passable routes within the movement budget', ()
   assert.equal(reachable(tiles, new Set(), start, 3).get('2,0'), 3)
   assert.equal(reachable(tiles, new Set(['1,1']), start, 5).has('2,0'), false)
   assert.equal(distFrom(tiles, [{ q: 2, r: 0 }]).get('0,0'), 3)
+})
+
+test('Combat frames report actual hits and misses for either side without changing seeded results', () => {
+  for (const side of ['player', 'enemy'] as const) {
+    for (const Unit of [Swordsman, King, Archer, Magician, Ninja]) {
+      for (const escapeChance of [0, 60]) {
+        const state = duel(side)
+        state.pawns[0] = new Unit(1, 0, 0, side)
+        state.pawns[2].q = Unit === Archer ? 2 : 1
+        state.pawns[2].escapeChance = escapeChance
+        state.randomState = 0
+        state.phase = 'attack'
+        const action = { type: 'attackAt', q: state.pawns[2].q, r: 0 } as const
+        const result = transition(state, action)
+        const damage = escapeChance ? 0 : state.pawns[0].attack.damage
+        assert.deepEqual(result.frames[0].effect?.impacts, [{ q: action.q, r: 0, damage }])
+        assert.equal(result.state.pawns[2].hp, 7 - damage)
+        assert.deepEqual(result.state, reducer(state, action))
+        assert.deepEqual(result, transition(state, action))
+        assert.equal(state.pawns[2].hp, 7)
+        assert.deepEqual(transition(state, { type: 'attackAt', q: 99, r: 99 }).frames, [])
+      }
+    }
+  }
+})
+
+test('Fireball reports each hit and dodge, including a killed target, without hitting allies', () => {
+  const state = duel('player')
+  state.pawns[0] = new Magician(1, 0, 0, 'player')
+  state.pawns[2].q = 1
+  state.pawns[2].escapeChance = 60
+  state.pawns.push(new Archer(4, 2, 0, 'enemy', 1), new Archer(5, 1, 1, 'player'))
+  state.randomState = 0
+  state.phase = 'special'
+  const result = transition(state, { type: 'specialAt', q: 1, r: 0 })
+  assert.equal(result.frames[0].effect?.kind, 'fireball')
+  assert.deepEqual(result.frames[0].effect?.impacts, [
+    { q: 1, r: 0, damage: 0 },
+    { q: 2, r: 0, damage: 1 },
+  ])
+  assert.ok(!result.state.pawns.some((p) => p.id === 4))
+  assert.equal(result.state.pawns.find((p) => p.id === 5)?.hp, 3)
+})
+
+test('Player attack playback precedes enemy responses and shows lethal damage before victory', () => {
+  const game = createBotGame()
+  for (const lethal of [false, true]) {
+    const state = duel('player')
+    state.pawns[0].energy = 1
+    state.pawns[2].q = 1
+    state.pawns[2].hp = lethal ? 1 : 7
+    state.phase = 'attack'
+    const result = game.transition(state, { type: 'attackAt', q: 1, r: 0 })
+    assert.equal(activePawn(result.frames[0].state)?.side, 'player')
+    assert.equal(result.frames[0].state.winner, null)
+    assert.deepEqual(result.frames[0].effect?.impacts, [{ q: 1, r: 0, damage: 2 }])
+    if (lethal) {
+      assert.equal(result.state.winner, 'player')
+      assert.equal(result.frames.length, 1)
+    } else {
+      assert.equal(activePawn(result.frames[1].state)?.side, 'enemy')
+      assert.ok(result.frames.slice(1).some((frame) => frame.effect?.impacts?.length))
+    }
+  }
 })

@@ -1,7 +1,7 @@
 import { hexDist, key, passable, reachable } from './hex.ts'
 import type { AttackProfile, Pawn } from './pawns.ts'
 import type { SeededRandom } from './random.ts'
-import type { Axial, Tile } from './types.ts'
+import type { Axial, BattleImpact, Tile } from './types.ts'
 
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
   const distance = hexDist(from, target)
@@ -76,14 +76,14 @@ function strike(
   profile: AttackProfile,
   log: string[],
   random: SeededRandom,
-) {
+): BattleImpact {
   if (
     !profile.ignoresEscape &&
     target.escapeChance > 0 &&
     random.next() * 100 < target.escapeChance
   ) {
     log.push(label(target) + ' escapes the attack.')
-    return
+    return { q: target.q, r: target.r, damage: 0 }
   }
   target.hp -= profile.damage
   log.push(
@@ -100,6 +100,7 @@ function strike(
     pawns.splice(pawns.indexOf(target), 1)
     log.push(label(target) + ' has fallen.')
   }
+  return { q: target.q, r: target.r, damage: profile.damage }
 }
 
 export function performAttack(
@@ -108,11 +109,10 @@ export function performAttack(
   target: Pawn,
   log: string[],
   random: SeededRandom,
-): boolean {
-  if (pawn.energy < 1 || !canAttack(pawn, target)) return false
+): BattleImpact[] | null {
+  if (pawn.energy < 1 || !canAttack(pawn, target)) return null
   pawn.energy--
-  strike(pawns, pawn, target, pawn.attack, log, random)
-  return true
+  return [strike(pawns, pawn, target, pawn.attack, log, random)]
 }
 
 export function performRally(pawns: Pawn[], pawn: Pawn, log: string[]): boolean {
@@ -137,40 +137,36 @@ export function performSpecial(
   log: string[],
   random: SeededRandom,
   destination?: Axial,
-): boolean {
-  if (pawn.kind === 'king' || pawn.kind === 'ninja') return false
+): BattleImpact[] | null {
+  if (pawn.kind === 'king' || pawn.kind === 'ninja') return null
   if (
     pawn.kind === 'swordsman' &&
     (!destination ||
       !chargeDestinations(tiles, pawns, pawn).has(key(destination.q, destination.r)))
   )
-    return false
-  if (!specialTargets(pawns, pawn, destination ?? pawn).includes(target)) return false
+    return null
+  if (!specialTargets(pawns, pawn, destination ?? pawn).includes(target)) return null
   pawn.energy -= pawn.special.cost
   log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
   switch (pawn.kind) {
     case 'swordsman':
       pawn.q = destination!.q
       pawn.r = destination!.r
-      strike(pawns, pawn, target, pawn.attack, log, random)
-      break
+      return [strike(pawns, pawn, target, pawn.attack, log, random)]
     case 'archer':
-      strike(
-        pawns,
-        pawn,
-        target,
-        { ...pawn.attack, damage: 2, ignoresEscape: true },
-        log,
-        random,
-      )
-      break
+      return [
+        strike(
+          pawns,
+          pawn,
+          target,
+          { ...pawn.attack, damage: 2, ignoresEscape: true },
+          log,
+          random,
+        ),
+      ]
     case 'magician':
-      for (const enemy of pawns.filter(
-        (p) => p.side !== pawn.side && hexDist(target, p) <= 1,
-      )) {
-        strike(pawns, pawn, enemy, pawn.attack, log, random)
-      }
-      break
+      return pawns
+        .filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)
+        .map((enemy) => strike(pawns, pawn, enemy, pawn.attack, log, random))
   }
-  return true
 }

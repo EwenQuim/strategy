@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { key, type Axial, type BattleEffect, type Pawn, type Tile } from '../lib/engine'
 import { Icon, PawnIcon } from './Icon'
 
@@ -42,6 +43,25 @@ export function Battlefield({
   effectId,
   onTileClick,
 }: BattlefieldProps) {
+  const board = useRef<SVGSVGElement>(null)
+  useEffect(() => {
+    if (
+      !effect?.impacts?.some((hit) => hit.damage > 0) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+      return
+    const animation = board.current?.animate(
+      [
+        { transform: 'translate(0, 0)' },
+        { transform: 'translate(-4px, 2px)' },
+        { transform: 'translate(3px, -2px)' },
+        { transform: 'translate(-2px, 1px)' },
+        { transform: 'translate(0, 0)' },
+      ],
+      { duration: 260, easing: 'ease-out' },
+    )
+    return () => animation?.cancel()
+  }, [effect, effectId])
   const allTiles = [...tiles.values()]
   const xs = allTiles.map((t) => hexX(t.q, t.r))
   const ys = allTiles.map((t) => hexY(t.r))
@@ -54,6 +74,7 @@ export function Battlefield({
 
   return (
     <svg
+      ref={board}
       viewBox={viewBox}
       preserveAspectRatio="xMidYMid meet"
       className="battlefield"
@@ -199,16 +220,41 @@ export function Battlefield({
               className="battle-trail"
             />
           )}
-          <g
-            transform={
-              'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
-            }
-          >
-            <circle
-              r={effect.kind === 'fireball' || effect.kind === 'rally' ? 66 : 29}
-              className="battle-impact"
-            />
-          </g>
+          {!effect.impacts?.length && (
+            <g
+              transform={
+                'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+              }
+            >
+              <circle
+                r={effect.kind === 'fireball' || effect.kind === 'rally' ? 66 : 29}
+                className="battle-impact"
+              />
+            </g>
+          )}
+        </g>
+      )}
+      {!!effect?.impacts?.length && (
+        <g key={'impacts-' + effectId} className="combat-impacts" aria-hidden="true">
+          {effect.impacts.map((hit) => (
+            <g
+              key={key(hit.q, hit.r)}
+              transform={'translate(' + hexX(hit.q, hit.r) + ' ' + hexY(hit.r) + ')'}
+            >
+              <g className={'combat-impact ' + (hit.damage > 0 ? 'impact-hit' : 'impact-miss')}>
+                <circle r="28" className="impact-ring" />
+                {hit.damage > 0 && (
+                  <path
+                    className="impact-rays"
+                    d="M0-34v-8M24-24l6-6M34 0h8M24 24l6 6M0 34v8M-24 24l-6 6M-34 0h-8M-24-24l-6-6"
+                  />
+                )}
+                <text y="8" textAnchor="middle" className="impact-label">
+                  {hit.damage > 0 ? '-' + hit.damage : 'MISS'}
+                </text>
+              </g>
+            </g>
+          ))}
         </g>
       )}
     </svg>

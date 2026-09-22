@@ -10,8 +10,8 @@ export function useGame(seed: string) {
     if (!frame) return
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timer = window.setTimeout(
-      () => dispatch({ type: reducedMotion ? 'playbackFinish' : 'playbackNext' }),
-      reducedMotion ? 0 : frame.effect ? 460 : 180,
+      () => dispatch({ type: 'playbackNext' }),
+      frame.effect?.impacts?.length ? 700 : reducedMotion ? 0 : frame.effect ? 460 : 180,
     )
     return () => window.clearTimeout(timer)
   }, [frame])

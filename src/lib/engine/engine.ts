@@ -214,7 +214,7 @@ function reduce(
     if (state.phase !== expectedPhase) return state
     const target = pawns.find((p) => p.q === action.q && p.r === action.r)
     if (!target) return state
-    const performed =
+    const impacts =
       action.type === 'attackAt'
         ? performAttack(pawns, me, target, log, random)
         : performSpecial(
@@ -226,11 +226,12 @@ function reduce(
             random,
             state.chargeDestination ?? undefined,
           )
-    if (!performed) return state
+    if (!impacts) return state
     effect = {
       kind: action.type === 'specialAt' && me.kind === 'magician' ? 'fireball' : 'attack',
       from,
       to: { q: target.q, r: target.r },
+      impacts,
     }
   } else if (action.type === 'move') {
     if (state.phase !== 'move' || me.energy <= 0) return state

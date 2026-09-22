@@ -22,10 +22,13 @@ export type GameState = {
   logCount: number
 }
 
+export type BattleImpact = Axial & { damage: number }
+
 export type BattleEffect = {
   kind: 'move' | 'attack' | 'rally' | 'fireball' | 'escape'
   from: Axial
   to: Axial
+  impacts?: BattleImpact[]
 }
 
 export type BattleFrame = { state: GameState; effect: BattleEffect | null }

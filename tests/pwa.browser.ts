@@ -5,7 +5,15 @@ import { extname, join, relative } from 'node:path'
 import { test, type TestContext } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type Page } from 'playwright-core'
-import { BIOMES, initialState, type Biome } from '../src/lib/engine/index.ts'
+import {
+  BIOMES,
+  initialState,
+  activePawn,
+  canAttack,
+  type Action,
+  type Biome,
+} from '../src/lib/engine/index.ts'
+import { initialState as botState, transition as botTransition } from '../src/lib/bot.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -408,6 +416,134 @@ test(
       )
       if (biome === 'desert') assert.ok(terrain.every((label) => /sand|health/.test(label)))
       await playTurn(page)
+    }
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Hits and misses animate for both armies, remain readable with reduced motion, and lock input',
+  { timeout: 120_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+      await page.emulateMedia({ reducedMotion })
+      const seed = 'juice-1'
+      let state = botState(seed)
+      await page.goto(origin + base + 'game/' + seed)
+      await page.locator('.end-action:not([disabled])').waitFor()
+      await page.evaluate(() => {
+        const seen = new Set<Element>()
+        const checks: unknown[] = []
+        document.body.dataset.combatChecks = '[]'
+        new MutationObserver(() => {
+          const impacts = document.querySelector('.combat-impacts')
+          if (!impacts || seen.has(impacts)) return
+          seen.add(impacts)
+          const feedback = document.querySelector('.combat-feedback')!
+          const title = document.querySelector('[aria-current="step"]')!.getAttribute('title')!
+          const labels = [...impacts.querySelectorAll('.impact-label')]
+          checks.push({
+            labels: labels.map((label) => label.textContent!.trim()),
+            animations: labels.map((label) => getComputedStyle(label).animationName),
+            side: title.startsWith('Enemy') ? 'enemy' : 'player',
+            enemyBanner: !!document.querySelector('.enemy-turn'),
+            locked: (document.querySelector('.end-action') as HTMLButtonElement).disabled,
+            screenDisplay: getComputedStyle(feedback).display,
+            screenAnimation: getComputedStyle(feedback, '::before').animationName,
+            pointerEvents: getComputedStyle(feedback).pointerEvents,
+            fits:
+              document.documentElement.scrollWidth <= innerWidth &&
+              document.documentElement.scrollHeight <= innerHeight,
+          })
+          document.body.dataset.combatChecks = JSON.stringify(checks)
+        }).observe(document.body, { childList: true, subtree: true })
+      })
+      const expected: { labels: string[]; side: string }[] = []
+      const outcomes = new Set<string>()
+      for (let turn = 0; turn < 30 && !state.winner; turn++) {
+        const pawn = activePawn(state)!
+        const target = state.pawns.find((p) => canAttack(pawn, p))
+        const actions: Action[] = target
+          ? [
+              { type: 'act', action: 'attack' },
+              { type: 'attackAt', q: target.q, r: target.r },
+            ]
+          : [{ type: 'endTurn' }]
+        for (const action of actions) {
+          const result = botTransition(state, action)
+          for (const frame of result.frames) {
+            if (!frame.effect?.impacts?.length) continue
+            const side = activePawn(frame.state)!.side
+            const labels = frame.effect.impacts.map((hit) => {
+              outcomes.add((hit.damage ? 'hit-' : 'miss-') + side)
+              return hit.damage ? '-' + hit.damage : 'MISS'
+            })
+            expected.push({ labels, side })
+          }
+          if (action.type === 'endTurn') await page.locator('.end-action').click()
+          else if (action.type === 'act') await page.locator('.attack-action').click()
+          else if (action.type === 'attackAt') {
+            const tile = [...state.tiles.values()].findIndex(
+              (tile) => tile.q === action.q && tile.r === action.r,
+            )
+            await page.locator('.hex-tile').nth(tile).click()
+          }
+          state = result.state
+          if (state.winner) await page.locator('.battle-result').waitFor()
+          else await page.locator('.end-action:not([disabled])').waitFor()
+        }
+        if (['hit-player', 'hit-enemy', 'miss-enemy'].every((outcome) => outcomes.has(outcome)))
+          break
+      }
+      assert.ok(
+        ['hit-player', 'hit-enemy', 'miss-enemy'].every((outcome) => outcomes.has(outcome)),
+      )
+      const checks = (await page.evaluate(() =>
+        JSON.parse(document.body.dataset.combatChecks!),
+      )) as {
+        labels: string[]
+        side: string
+        animations: string[]
+        enemyBanner: boolean
+        locked: boolean
+        screenDisplay: string
+        screenAnimation: string
+        pointerEvents: string
+        fits: boolean
+      }[]
+      assert.deepEqual(
+        checks.map(({ labels, side }) => ({ labels, side })),
+        expected,
+      )
+      for (const check of checks) {
+        assert.equal(check.locked, true)
+        assert.equal(check.enemyBanner, check.side === 'enemy')
+        assert.equal(check.fits, true)
+        assert.equal(check.pointerEvents, 'none')
+        assert.equal(check.screenDisplay, reducedMotion === 'reduce' ? 'none' : 'block')
+        assert.equal(
+          check.screenAnimation,
+          reducedMotion === 'reduce'
+            ? 'none'
+            : check.labels.every((label) => label === 'MISS')
+              ? 'miss-sweep'
+              : 'hit-flash',
+        )
+        assert.deepEqual(
+          check.animations,
+          check.labels.map((label) =>
+            reducedMotion === 'reduce'
+              ? 'none'
+              : label === 'MISS'
+                ? 'miss-drift'
+                : 'damage-pop',
+          ),
+        )
+      }
+      assert.equal(await page.locator('.combat-feedback').count(), 0)
     }
     assert.deepEqual(errors, [])
   },

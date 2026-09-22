@@ -701,6 +701,7 @@ test('Playback snapshots keep intermediate health, logs, and dead target coordin
     kind: 'attack',
     from: { q: 1, r: 0 },
     to: { q: 0, r: 0 },
+    impacts: [{ q: 0, r: 0, damage: 2 }],
   })
   const saved = JSON.stringify(result.frames)
   result.state.pawns[0].hp = 99

@@ -1,7 +1,6 @@
 import {
   activePawn,
   initialState as createState,
-  reducer as reduce,
   transition as applyAction,
 } from './engine/engine.ts'
 import {
@@ -114,7 +113,15 @@ export function createBotGame(strategy: BotStrategy = nearestTarget) {
   const transition = (state: GameState, action: Action): Transition => {
     if (action.type === 'restart') return initialTransition(state.seed)
     if (activePawn(state)?.side === 'enemy') return { state, frames: [] }
-    return playBots(reduce(state, action))
+    const player = applyAction(state, action)
+    const bots = playBots(player.state)
+    return {
+      state: bots.state,
+      frames: [
+        ...player.frames.filter((frame) => frame.effect?.impacts?.length),
+        ...bots.frames,
+      ],
+    }
   }
   return {
     initialState: (seed: string) => initialTransition(seed).state,

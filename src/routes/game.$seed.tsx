@@ -66,6 +66,16 @@ export const Route = createFileRoute('/game/$seed')({
 
     return (
       <main className="game-shell">
+        {!!effect?.impacts?.length && (
+          <div
+            key={effectId}
+            className={
+              'combat-feedback ' +
+              (effect.impacts.some((hit) => hit.damage > 0) ? 'feedback-hit' : 'feedback-miss')
+            }
+            aria-hidden="true"
+          />
+        )}
         <header className="game-header">
           <div className="header-main">
             <Link to="/" className="wordmark" aria-label="Hex Strategy home">
@@ -77,7 +87,7 @@ export const Route = createFileRoute('/game/$seed')({
               </span>
             </Link>
             <div className="header-tools">
-              {playing && (
+              {playing && pawn?.side === 'enemy' && (
                 <span className="enemy-turn" role="status">
                   Enemy turn
                 </span>
