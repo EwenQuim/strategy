@@ -538,6 +538,31 @@ test(
   async (t) => {
     const { context, page, origin } = await fixture(t)
     const buildLabel = await page.locator('.landing-footer > span').first().textContent()
+    const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
+    assert.deepEqual(await modes.allTextContents(), ['Solo vs AI', '2 players', 'Campaign'])
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 375, height: 667 },
+      { width: 390, height: 844 },
+      { width: 1280, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport)
+      const boxes = await modes.evaluateAll((links) =>
+        links.map((link) => {
+          const { left, right, top, bottom, width, height } = link.getBoundingClientRect()
+          return { left, right, top, bottom, width, height }
+        }),
+      )
+      for (const [index, box] of boxes.entries()) {
+        assert.equal(box.left, boxes[0].left)
+        assert.equal(box.width, boxes[0].width)
+        assert.ok(box.height >= 44)
+        assert.ok(box.left >= 0 && box.right <= viewport.width)
+        assert.ok(box.top >= 0 && box.bottom <= viewport.height)
+        if (index > 0) assert.ok(box.top > boxes[index - 1].bottom)
+      }
+    }
+    await page.setViewportSize({ width: 320, height: 568 })
     const backgrounds = new Set<string>()
     const panels = new Set<string>()
     const tileBases = new Set<string>()
@@ -559,7 +584,7 @@ test(
       await page.evaluate((seed) => {
         Object.defineProperty(crypto, 'randomUUID', { value: () => seed })
       }, seed)
-      await page.getByRole('link', { name: 'VS AI' }).click()
+      await page.getByRole('link', { name: 'Solo vs AI' }).click()
       await page.locator('.end-action:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
       assert.equal(await page.locator('.wordmark-sub').textContent(), BIOMES[biome].name)
@@ -851,7 +876,7 @@ test(
       assert.ok(actionsBySide.has(side + '-attackAt'))
     }
     await page.getByRole('link', { name: 'Hex Strategy home' }).click()
-    await page.getByRole('link', { name: 'VS AI' }).click()
+    await page.getByRole('link', { name: 'Solo vs AI' }).click()
     await page.locator('.end-action:not([disabled])').waitFor()
     assert.equal(new URL(page.url()).searchParams.get('mode'), 'ai')
     assert.equal(await page.locator('.player-turn').count(), 0)

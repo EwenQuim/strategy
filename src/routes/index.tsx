@@ -68,14 +68,15 @@ export const Route = createFileRoute('/')({
           <br />
           <em>A little more legend.</em>
         </h1>
-        <p className="landing-description">
-          Three biomes. A new army every game.
-          <br />
-          Outthink your rival and claim the crown.
-        </p>
         <div className="mode-options" role="group" aria-label="Choose game mode">
-          <Link to="/game" search={{ mode: 'ai' }} className="primary-button" preload={false}>
-            VS AI
+          <Link
+            to="/game"
+            search={{ mode: 'ai' }}
+            className="primary-button local-button"
+            preload={false}
+            title="Play a new seeded battle against AI"
+          >
+            Solo vs AI
             <Icon name="arrow" />
           </Link>
           <Link
@@ -88,21 +89,22 @@ export const Route = createFileRoute('/')({
             2 players
             <Icon name="arrow" />
           </Link>
+          <Link to="/campaign" className="primary-button local-button" preload={false}>
+            Campaign
+            <Icon name="crown" />
+          </Link>
         </div>
-        <Link to="/campaign" className="primary-button campaign-entry" preload={false}>
-          Campaign
-          <Icon name="crown" />
-        </Link>
         <div className="landing-facts">
           <span>
             <Icon name="hex" />
             {MAP_WIDTH * MAP_HEIGHT} hexes
           </span>
           <span>
-            <Icon name="energy" />3 energy
+            <Icon name="crown" />3 biomes
           </span>
           <span>
-            <Icon name="crown" />1 crown to claim
+            <Icon name="energy" />
+            Play offline
           </span>
         </div>
       </div>

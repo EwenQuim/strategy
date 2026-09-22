@@ -922,17 +922,15 @@ p {
   font-weight: 400;
   color: #c7d1b0;
 }
-.landing-description {
-  margin: 22px 0 27px;
-  font-size: 13px;
-  line-height: 1.9;
-  color: #adbda2;
-}
 .mode-options {
+  margin-top: 27px;
   display: flex;
+  flex-direction: column;
+  width: min(100%, 300px);
   gap: 12px;
 }
 .mode-options .primary-button {
+  justify-content: space-between;
   gap: 12px;
   padding-inline: 18px;
 }
@@ -943,9 +941,6 @@ p {
 }
 .local-button:hover {
   background: #ffffff0c;
-}
-.campaign-entry {
-  margin-top: 12px;
 }
 .campaign-screen {
   display: flex;
@@ -1245,9 +1240,6 @@ p {
     margin-top: 26px;
     font-size: 8px;
   }
-  .landing-description {
-    font-size: 12px;
-  }
   .landing-facts {
     gap: 15px;
     font-size: 9px;
@@ -1284,7 +1276,32 @@ p {
   }
 }
 
+@media (max-height: 800px) {
+  .landing-art {
+    display: none;
+  }
+}
+
 @media (max-height: 650px) {
+  .landing-header,
+  .landing-footer {
+    padding-block: 12px;
+  }
+  .landing-content {
+    padding-bottom: 16px;
+  }
+  .landing-kicker {
+    margin: 12px 0;
+  }
+  .landing h1 {
+    font-size: 32px;
+  }
+  .mode-options {
+    margin-top: 18px;
+  }
+  .landing-facts {
+    margin-top: 18px;
+  }
   .header-main {
     min-height: 43px;
   }
