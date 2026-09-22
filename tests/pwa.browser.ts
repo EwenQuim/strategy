@@ -637,7 +637,7 @@ test(
           'Sand tiles must be golden',
         )
         assert.ok(
-          faces.some((tile) => tile.fill === 'rgb(163, 189, 136)'),
+          faces.some((tile) => tile.fill === 'rgb(199, 199, 155)'),
           'Reachable tiles must still use their highlight fill',
         )
         assert.equal(
