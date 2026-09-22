@@ -12,10 +12,7 @@ export const Route = createFileRoute('/campaign/')({
       <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
         <header className="flex items-center justify-between gap-3">
           <div>
-            <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
-              Twenty battles. One crown.
-            </span>
-            <h1 className="mt-1 font-serif text-[32px] leading-[normal]">Campaign</h1>
+            <h1 className="font-serif text-[32px] leading-[normal]">Campaign</h1>
           </div>
           <Link to="/" className={iconButtonClassName} aria-label="Back to home">
             <Icon name="close" />
@@ -29,11 +26,7 @@ export const Route = createFileRoute('/campaign/')({
           <span>
             {completed} / {CAMPAIGN_LEVELS.length} completed
           </span>
-          <span>
-            {completed === CAMPAIGN_LEVELS.length
-              ? 'Campaign complete!'
-              : 'Win to unlock the next level.'}
-          </span>
+          {completed === CAMPAIGN_LEVELS.length && <span>Campaign complete!</span>}
         </div>
         <ol
           className="m-0 grid min-h-0 flex-1 list-none grid-cols-4 grid-rows-5 gap-2 p-0"
@@ -80,9 +73,7 @@ export const Route = createFileRoute('/campaign/')({
             )
           })}
         </ol>
-        <p className="text-center text-[10px] text-muted">
-          Wins are saved on this device. Finished levels can be replayed.
-        </p>
+        <p className="text-center text-[10px] text-muted">Wins are saved on this device.</p>
       </main>
     )
   },
