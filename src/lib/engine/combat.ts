@@ -97,12 +97,7 @@ export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
 
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
   const distance = hexDist(from, target)
-  const bonus =
-    (pawn.kind === 'archer' || pawn.kind === 'magician') &&
-    'feature' in from &&
-    from.feature === 'watchtower'
-      ? 1
-      : 0
+  const bonus = 'feature' in from && from.feature === 'watchtower' ? pawn.watchtowerBonus : 0
   return (
     pawn.side !== target.side &&
     distance >= pawn.attack.minRange &&
@@ -111,21 +106,13 @@ export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean
 }
 
 export function canUseSpecial(pawn: Pawn): boolean {
-  return pawn.energy >= pawn.special.cost && (pawn.kind !== 'king' || !pawn.specialUsed)
+  return pawn.canUseSpecial
 }
 
 export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): Pawn[] {
-  if (!canUseSpecial(pawn) || pawn.kind === 'ninja') return []
-  if (pawn.kind === 'king' || pawn.kind === 'bulwark') {
-    return pawns.filter(
-      (p) =>
-        p.side === pawn.side &&
-        p.id !== pawn.id &&
-        hexDist(pawn, p) === 1 &&
-        (pawn.kind === 'bulwark' || p.hp < p.maxHp),
-    )
-  }
-  return pawns.filter((p) => canAttack(pawn, p, { q: from.q, r: from.r }))
+  return canUseSpecial(pawn)
+    ? pawns.filter((target) => pawn.canTargetSpecial(target, from))
+    : []
 }
 
 export function chargeDestinations(
@@ -133,44 +120,29 @@ export function chargeDestinations(
   pawns: Pawn[],
   pawn: Pawn,
 ): Map<string, number> {
-  if (pawn.kind !== 'swordsman' || !canUseSpecial(pawn)) return new Map()
+  if (!pawn.chargeRange || !canUseSpecial(pawn)) return new Map()
   return new Map(
-    [...walkingPaths(tiles, pawns, pawn, 2)]
+    [...walkingPaths(tiles, pawns, pawn, pawn.chargeRange)]
       .filter(([k]) => specialTargets(pawns, pawn, tiles.get(k)!).length > 0)
       .map(([k, route]) => [k, route.path.length]),
   )
 }
 
 export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
-  if (pawn.kind !== 'ninja' || !canUseSpecial(pawn)) return []
+  if (!pawn.jumpRange || !canUseSpecial(pawn)) return []
   const occupied = new Set(pawns.map((p) => key(p.q, p.r)))
   return [...tiles.values()].filter(
-    (tile) => passable(tile) && !occupied.has(key(tile.q, tile.r)) && hexDist(pawn, tile) <= 3,
+    (tile) =>
+      passable(tile) &&
+      !occupied.has(key(tile.q, tile.r)) &&
+      hexDist(pawn, tile) <= pawn.jumpRange,
   )
 }
 
-export function performJump(
-  tiles: Map<string, Tile>,
-  pawns: Pawn[],
-  pawn: Pawn,
-  destination: Axial,
-): boolean {
-  if (
-    !jumpDestinations(tiles, pawns, pawn).some(
-      (tile) => tile.q === destination.q && tile.r === destination.r,
-    )
-  )
-    return false
-  pawn.q = destination.q
-  pawn.r = destination.r
-  pawn.energy -= pawn.special.cost
-  return true
-}
-
-const label = (pawn: Pawn) =>
+export const label = (pawn: Pawn) =>
   (pawn.side === 'player' ? 'Your ' : 'Enemy ') + pawn.kind + ' #' + pawn.id
 
-function strike(
+export function strike(
   pawns: Pawn[],
   attacker: Pawn,
   target: Pawn,
@@ -194,14 +166,7 @@ function strike(
   }
   target.hp -= profile.damage
   log.push(
-    label(attacker) +
-      ' strikes ' +
-      target.kind +
-      ' #' +
-      target.id +
-      ' for ' +
-      profile.damage +
-      ' damage.',
+    `${label(attacker)} strikes ${target.kind} #${target.id} for ${profile.damage} damage.`,
   )
   if (target.hp <= 0) {
     pawns.splice(pawns.indexOf(target), 1)
@@ -221,86 +186,4 @@ export function performAttack(
   if (pawn.energy < 1 || !canAttack(pawn, target, tiles.get(key(pawn.q, pawn.r)))) return null
   pawn.energy--
   return [strike(pawns, pawn, target, pawn.attack, log, random)]
-}
-
-export function performRally(pawns: Pawn[], pawn: Pawn, log: string[]): boolean {
-  if (pawn.kind !== 'king') return false
-  const allies = specialTargets(pawns, pawn)
-  if (!allies.length) return false
-  pawn.energy -= pawn.special.cost
-  pawn.specialUsed = true
-  log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-  for (const ally of allies) {
-    ally.hp = Math.min(ally.maxHp, ally.hp + 1)
-    log.push(label(ally) + ' recovers 1 health.')
-  }
-  return true
-}
-
-function performFireball(
-  pawns: Pawn[],
-  pawn: Pawn,
-  target: Pawn,
-  log: string[],
-  random: SeededRandom,
-): BattleImpact[] {
-  const enemies = pawns.filter((p) => p.side !== pawn.side && hexDist(target, p) <= 1)
-  const impacts: BattleImpact[] = []
-  for (const enemy of enemies) {
-    if (!pawns.includes(enemy)) continue
-    const hit = strike(pawns, pawn, enemy, pawn.attack, log, random)
-    const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
-    if (previous) previous.damage += hit.damage
-    else impacts.push(hit)
-  }
-  return impacts
-}
-
-export function performSpecial(
-  tiles: Map<string, Tile>,
-  pawns: Pawn[],
-  pawn: Pawn,
-  target: Pawn,
-  log: string[],
-  random: SeededRandom,
-  round: number,
-  destination?: Axial,
-): BattleImpact[] | null {
-  if (pawn.kind === 'king' || pawn.kind === 'ninja') return null
-  if (
-    pawn.kind === 'swordsman' &&
-    (!destination ||
-      !chargeDestinations(tiles, pawns, pawn).has(key(destination.q, destination.r)))
-  )
-    return null
-  if (!specialTargets(pawns, pawn, destination ?? pawn).includes(target)) return null
-  pawn.energy -= pawn.special.cost
-  log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-  switch (pawn.kind) {
-    case 'swordsman': {
-      const route = walkingPaths(tiles, pawns, pawn, 2).get(
-        key(destination!.q, destination!.r),
-      )!
-      const impacts = enterTiles(tiles, pawns, pawn, route.path, round, log)
-      if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
-      return impacts
-    }
-    case 'archer':
-      return [
-        strike(
-          pawns,
-          pawn,
-          target,
-          { ...pawn.attack, damage: 2, ignoresEscape: true },
-          log,
-          random,
-        ),
-      ]
-    case 'magician':
-      return performFireball(pawns, pawn, target, log, random)
-    case 'bulwark':
-      pawn.protectingId = target.id
-      log.push(label(pawn) + ' protects ' + target.kind + ' #' + target.id + '.')
-      return []
-  }
 }

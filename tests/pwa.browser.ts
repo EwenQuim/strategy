@@ -1053,6 +1053,54 @@ test(
 )
 
 test(
+  'Notifications expire in both motion modes and briefings stay dismissed until route remount',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+      await page.emulateMedia({ reducedMotion })
+      await page.goto(origin + base + 'game/notification-lifecycle?mode=local')
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      const notifications = page.getByRole('list', { name: 'Recent battle events' })
+      assert.equal(await notifications.getAttribute('aria-live'), 'polite')
+      assert.equal(await notifications.getAttribute('aria-relevant'), 'additions')
+      for (let turn = 0; turn < 2; turn++) {
+        if (turn) await playTurn(page)
+        const message = notifications.locator('li').first()
+        await message.waitFor()
+        assert.ok(await message.textContent())
+        await message.waitFor({ state: 'detached' })
+        assert.equal(await notifications.locator('li').count(), 0)
+        assert.equal(await notifications.textContent(), '')
+      }
+    }
+
+    await page.goto(origin + base + 'campaign/1')
+    const briefing = page.getByRole('dialog', {
+      name: CAMPAIGN_LEVELS[0].name,
+      exact: true,
+      includeHidden: true,
+    })
+    await briefing.waitFor()
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await briefing.waitFor({ state: 'hidden' })
+    await playTurn(page)
+    assert.equal(await briefing.getAttribute('open'), null)
+    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
+    await briefing.waitFor({ state: 'detached' })
+    await page.getByRole('link', { name: /^Level 1:/ }).click()
+    await briefing.waitFor()
+    await page.getByRole('button', { name: 'Close dialog', exact: true }).click()
+    await briefing.waitFor({ state: 'hidden' })
+    await playTurn(page)
+    assert.equal(await briefing.getAttribute('open'), null)
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
   'Hits and misses animate for both armies, remain readable with reduced motion, and lock input',
   { timeout: 120_000 },
   async (t) => {

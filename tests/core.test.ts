@@ -5,6 +5,7 @@ import {
   initialState,
   reducer,
   transition,
+  targetingTiles,
   reachable,
   distFrom,
   King,
@@ -15,11 +16,14 @@ import {
   Bulwark,
   type GameState,
   type Side,
+  type Pawn,
+  type SpecialContext,
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
+import { seedState } from '../src/lib/engine/random.ts'
 
 function duel(side: Side): GameState {
   return {
@@ -82,6 +86,102 @@ test('Actions rejected by the targeting phase leave state and playback untouched
       assert.deepEqual(structuredClone(state), original)
     }
   }
+})
+
+test('Special previews and outcomes retain their pre-refactor reference across all classes', () => {
+  const results: unknown[] = []
+  for (const side of ['player', 'enemy'] as const) {
+    const other = side === 'player' ? 'enemy' : 'player'
+    for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark]) {
+      for (const energy of [1, 2, 3]) {
+        for (const terrain of ['plain', 'lava', 'mountain', 'lake'] as const) {
+          const state: GameState = {
+            ...initialState('special-reference'),
+            pawns: [
+              new Unit(1, 0, 0, side, undefined, energy),
+              new King(2, 0, 1, side, 4),
+              new King(3, 3, 0, other, 7, 3, 60),
+              new Bulwark(4, 2, 0, other, 2, 3, 40),
+            ],
+            order: [1, 2, 3, 4],
+            active: 0,
+          }
+          state.tiles = new Map()
+          for (let q = -1; q <= 4; q++)
+            for (let r = -1; r <= 2; r++)
+              state.tiles.set(q + ',' + r, { q, r, terrain: q === 1 ? terrain : 'plain' })
+          state.tiles.get('0,0')!.feature = 'watchtower'
+          state.tiles.get('1,0')!.feature = 'rune'
+          state.tiles.get('1,1')!.feature = 'spring'
+          state.pawns[3].protectingId = 3
+          for (const action of ['attack', 'special'] as const) {
+            const preview = transition(state, { type: 'act', action })
+            results.push(preview, [...targetingTiles(preview.state)])
+            for (const q of [-1, 0, 1, 2, 3, 4]) {
+              for (const r of [0, 1]) {
+                const selected = transition(preview.state, {
+                  type: action === 'attack' ? 'attackAt' : 'specialAt',
+                  q,
+                  r,
+                })
+                results.push(selected, [...targetingTiles(selected.state)])
+                if (selected.state.phase === 'charge') {
+                  for (const target of state.pawns)
+                    results.push(
+                      transition(selected.state, {
+                        type: 'specialAt',
+                        q: target.q,
+                        r: target.r,
+                      }),
+                    )
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  assert.equal(results.length, 7552)
+  assert.equal(
+    seedState(
+      JSON.stringify(results, (_, value) => (value instanceof Map ? [...value] : value)),
+    ),
+    2007234619,
+  )
+})
+
+test('Special targeting and execution dispatch through cloned pawn subclasses', () => {
+  class FieldMedic extends King {
+    override canTargetSpecial(target: Pawn): boolean {
+      return super.canTargetSpecial(target) && target.kind === 'swordsman'
+    }
+    override performSpecial(context: SpecialContext) {
+      const result = super.performSpecial(context)
+      if (result) this.hp++
+      return result
+    }
+  }
+  const state = duel('player')
+  state.pawns[0] = new FieldMedic(1, 0, 0, 'player', 4)
+  state.pawns[1] = new Swordsman(2, 0, 1, 'player', 1)
+  state.pawns.push(new Archer(4, -1, 0, 'player', 1))
+  const original = structuredClone(state)
+  const result = transition(state, { type: 'act', action: 'special' })
+  assert.equal(result.state.pawns[0].hp, 5)
+  assert.equal(result.state.pawns[1].hp, 2)
+  assert.equal(result.state.pawns[3].hp, 1)
+  assert.ok(result.state.pawns[0] instanceof FieldMedic)
+  assert.ok(result.frames[0].state.pawns[0] instanceof FieldMedic)
+  assert.deepEqual(structuredClone(state), original)
+})
+
+test('Rally cannot be invoked by a targeted action even with wounded allies', () => {
+  const state = duel('player')
+  state.pawns[0] = new King(1, 0, 0, 'player')
+  state.pawns[1] = new Swordsman(2, 0, 1, 'player', 1)
+  assert.equal(reducer(state, { type: 'specialAt', q: 0, r: 1 }), state)
+  assert.equal(reducer(state, { type: 'act', action: 'special' }).pawns[1].hp, 2)
 })
 
 test('Core initialization leaves both armies untouched and permits either side to start', () => {

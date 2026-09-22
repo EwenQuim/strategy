@@ -1,23 +1,26 @@
-import { useEffect, useRef } from 'react'
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Icon } from './Icon'
 import type { CampaignLevel } from '../lib/campaign'
 
+function showBriefing(dialog: HTMLDialogElement) {
+  dialog.showModal()
+  return () => dialog.close()
+}
+
 export function Briefing({ level }: { level: CampaignLevel }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  useEffect(() => {
-    if (dialog.current && !dialog.current.open) dialog.current.showModal()
-  }, [])
   return (
     <dialog
-      ref={dialog}
+      ref={showBriefing}
       className="fixed inset-0 m-auto open:flex max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] flex-col rounded-2xl border border-[#d1cf9b40] bg-[#20362b] p-0 text-ink shadow-[0_25px_90px_#07180f99] backdrop:bg-[#091910b8] backdrop:backdrop-blur-[7px]"
       aria-labelledby="briefing-title"
       onClick={(event) => {
-        if (event.target === event.currentTarget) dialog.current?.close()
+        if (event.target === event.currentTarget) event.currentTarget.close()
       }}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-[25px] pt-[25px] pb-5 [&>button]:shrink-0">
+      <form
+        method="dialog"
+        className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-[25px] pt-[25px] pb-5 [&>button]:shrink-0"
+      >
         <div>
           <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
             Level {String(level.id).padStart(2, '0')}
@@ -26,14 +29,10 @@ export function Briefing({ level }: { level: CampaignLevel }) {
             {level.name}
           </h2>
         </div>
-        <button
-          className={iconButtonClassName}
-          onClick={() => dialog.current?.close()}
-          aria-label="Close dialog"
-        >
+        <button className={iconButtonClassName} type="submit" aria-label="Close dialog">
           <Icon name="close" />
         </button>
-      </div>
+      </form>
       <div className="min-h-0 flex-1 overflow-y-auto px-[25px]">
         <p className="m-0 pt-5 font-serif text-[16px] leading-[1.5] italic">
           {level.intro.roleplay}
@@ -54,18 +53,17 @@ export function Briefing({ level }: { level: CampaignLevel }) {
           </ul>
         )}
       </div>
-      <div className="shrink-0 px-[25px] pb-[25px]">
+      <form method="dialog" className="shrink-0 px-[25px] pb-[25px]">
         <button
-          type="button"
+          type="submit"
           className={
             buttonClassName +
             ' min-h-13 w-full justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
           }
-          onClick={() => dialog.current?.close()}
         >
           Go !
         </button>
-      </div>
+      </form>
     </dialog>
   )
 }

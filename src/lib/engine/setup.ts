@@ -107,15 +107,16 @@ function spawnRandomArmy(
     ),
     random,
   )
-  const bulwarkPositions =
+  const frontPositions =
     side === 'player'
       ? positions
           .filter((tile) => tile.r === firstRow)
-          .slice(0, army.filter((Unit) => Unit === Bulwark).length)
+          .slice(0, army.filter((Unit) => Unit.startsOnFrontRow).length)
       : []
-  const otherPositions = positions.filter((tile) => !bulwarkPositions.includes(tile))
+  const otherPositions = positions.filter((tile) => !frontPositions.includes(tile))
   return army.map((Unit, index) => {
-    const available = side === 'player' && Unit === Bulwark ? bulwarkPositions : otherPositions
+    const available =
+      side === 'player' && Unit.startsOnFrontRow ? frontPositions : otherPositions
     const tile = available.shift()!
     return new Unit(firstId + index, tile.q, tile.r, side)
   })

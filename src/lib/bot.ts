@@ -20,7 +20,7 @@ import {
   type BotOptions,
 } from './engine/ai.ts'
 
-export { BOT_LEVELS, type BotDifficulty, type BotOptions } from './engine/ai.ts'
+export { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 
 type BotController = BotStrategy | BotDifficulty | BotOptions
 
@@ -194,4 +194,4 @@ export function createBotGame(strategy: BotController = 'normal') {
   }
 }
 
-export const { initialState, reducer, initialTransition, transition } = createBotGame()
+export const { initialState, initialTransition, transition } = createBotGame()

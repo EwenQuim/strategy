@@ -1,16 +1,14 @@
 import { activePawn, reducer } from './engine.ts'
 import {
   canAttack,
-  chargeDestinations,
   jumpDestinations,
   movementDestinations,
   walkingPaths,
   protectorFor,
-  specialTargets,
 } from './combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import { START_ENERGY, type Pawn, type Side } from './pawns.ts'
-import type { Action, Axial, GameState } from './types.ts'
+import type { Action, GameState } from './types.ts'
 
 export type BotOptions = {
   depth: 1 | 2 | 3
@@ -48,68 +46,7 @@ function generateCandidates(state: GameState): Action[][] {
       { type: 'attackAt', q: target.q, r: target.r },
     ])
   }
-  const specials = specialTargets(state.pawns, pawn)
-  if (pawn.kind === 'king') {
-    if (specials.length) actions.push([{ type: 'act', action: 'special' }])
-  } else if (pawn.kind === 'swordsman') {
-    for (const position of chargeDestinations(state.tiles, state.pawns, pawn).keys()) {
-      const tile = state.tiles.get(position)!
-      for (const target of foes.filter((p) => canAttack(pawn, p, tile))) {
-        actions.push([
-          { type: 'act', action: 'special' },
-          { type: 'specialAt', q: tile.q, r: tile.r },
-          { type: 'specialAt', q: target.q, r: target.r },
-        ])
-      }
-    }
-  } else {
-    const targets =
-      pawn.kind === 'ninja'
-        ? jumpDestinations(state.tiles, state.pawns, pawn)
-        : specials.filter((p) => pawn.kind !== 'bulwark' || !protectorFor(state.pawns, p))
-    for (const target of targets) {
-      actions.push([
-        { type: 'act', action: 'special' },
-        { type: 'specialAt', q: target.q, r: target.r },
-      ])
-    }
-  }
-  return actions
-}
-
-function damageFromPosition(
-  attacker: Pawn,
-  target: Pawn,
-  targets: Pawn[],
-  from: Axial,
-  movementCost: number,
-): number {
-  const remainingEnergy = attacker.energy - movementCost
-  let damage = 0
-  if (canAttack(attacker, target, from)) {
-    damage = remainingEnergy * attacker.attack.damage
-    if (attacker.kind === 'swordsman') {
-      const walkingCostBeforeCharge = Math.max(0, movementCost - 2)
-      const chargeCost = walkingCostBeforeCharge + attacker.special.cost
-      if (attacker.energy >= chargeCost) {
-        const hitsIncludingCharge = 1 + attacker.energy - chargeCost
-        damage = Math.max(damage, hitsIncludingCharge * attacker.attack.damage)
-      }
-    }
-  }
-  if (
-    attacker.kind === 'magician' &&
-    remainingEnergy >= attacker.special.cost &&
-    targets.some(
-      (neighbor) =>
-        hexDist(neighbor, target) <= 1 &&
-        canAttack(attacker, neighbor, { q: from.q, r: from.r }),
-    )
-  ) {
-    const fireballHits = Math.floor(remainingEnergy / attacker.special.cost)
-    damage = Math.max(damage, fireballHits)
-  }
-  return damage
+  return [...actions, ...pawn.specialActions(state)]
 }
 
 function estimateIncomingDamage(state: GameState, side: Side): Map<number, number> {
@@ -136,7 +73,7 @@ function estimateIncomingDamage(state: GameState, side: Side): Map<number, numbe
         const from = state.tiles.get(position) ?? attacker
         maxDamage = Math.max(
           maxDamage,
-          damageFromPosition(attacker, target, targets, from, cost),
+          attacker.damageFromPosition({ target, targets, from, movementCost: cost }),
         )
       }
       if (jumps.some((from) => from.terrain !== 'lava' && canAttack(attacker, target, from))) {
