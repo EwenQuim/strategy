@@ -395,7 +395,7 @@ test(
     for (const label of await moves.evaluateAll((tiles) =>
       tiles.map((tile) => tile.getAttribute('aria-label')),
     )) {
-      assert.match(label!, /2 energy$/)
+      assert.match(label!, /(2|3) energy$/)
     }
     await page.locator('[data-action="special"]').click()
     assert.match(await page.locator('[data-action="special"]').innerText(), /Choose ally/)
@@ -407,7 +407,9 @@ test(
       '3',
     )
     await page.locator('[data-action="special"]').click()
-    await page.locator('.hex-tile').nth(tileIndex).click()
+    await page
+      .getByRole('button', { name: new RegExp('Protect .*#' + ally.id + '\\b') })
+      .click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '1',
@@ -420,7 +422,10 @@ test(
     assert.equal(await moves.count(), 0)
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    await moves.first().click()
+    await page
+      .getByRole('button', { name: /, 2 energy$/ })
+      .first()
+      .click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '1',

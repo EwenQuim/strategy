@@ -41,6 +41,10 @@ export abstract class Pawn {
     return 1
   }
 
+  moveEnergyCost(steps: number): number {
+    return steps === 0 ? 0 : steps + this.moveCost - 1
+  }
+
   get maxHp(): number {
     return 3
   }
@@ -154,7 +158,7 @@ export class Bulwark extends Pawn {
     name: 'Protect',
     cost: 2,
     description:
-      'Protect an adjacent ally until your next turn. Take its next hit instead, without a second Escape roll. Ends if you separate. Moving costs 2 energy per tile.',
+      'Protect an adjacent ally until your next turn. Take its next hit instead, without a second Escape roll. Ends if you separate. Moving costs 2 energy for the first tile, then 1 per extra tile.',
   }
 }
 

@@ -61,7 +61,7 @@ function attack(state: GameState, q = 1, r = 0) {
   })
 }
 
-test('Bulwarks move one hex for two energy, with identical previews and rules for both sides', () => {
+test('Bulwarks pay 2 energy for the first tile and 1 for each extra tile, with identical previews and rules for both sides', () => {
   for (const side of ['player', 'enemy'] as const) {
     for (const energy of [0, 1, 2, 3]) {
       const state = battle(side)
@@ -70,7 +70,7 @@ test('Bulwarks move one hex for two energy, with identical previews and rules fo
       const reach = movementDestinations(state.tiles, state.pawns, state.pawns[0])
       assert.equal(reach.get('0,0'), 0)
       assert.equal(reach.get('-1,0'), energy >= 2 ? 2 : undefined)
-      assert.equal(reach.has('-2,0'), false)
+      assert.equal(reach.get('-2,0'), energy >= 3 ? 3 : undefined)
       assert.equal(reach.has('1,0'), false)
       const next = reducer(state, { type: 'move', q: -1, r: 0 })
       if (energy < 2) assert.equal(next, state)
@@ -79,6 +79,12 @@ test('Bulwarks move one hex for two energy, with identical previews and rules fo
         assert.equal(next.pawns[0].q, -1)
         assert.equal(activePawn(next)?.id, energy === 2 ? 5 : 1)
         assert.equal(reducer(next, { type: 'move', q: -2, r: 0 }), next)
+      }
+      if (energy === 3) {
+        const two = reducer(state, { type: 'move', q: -2, r: 0 })
+        assert.equal(two.pawns[0].energy, 0)
+        assert.equal(two.pawns[0].q, -2)
+        assert.equal(activePawn(two)?.id, 5)
       }
       for (const terrain of ['lake', 'mountain'] as const) {
         const blocked = { ...state, tiles: new Map(state.tiles) }

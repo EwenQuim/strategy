@@ -131,7 +131,7 @@ function estimateIncomingDamage(state: GameState, side: Side): Map<number, numbe
       for (const [position, route] of moves) {
         if (route.damage >= attacker.hp) continue
         const cost =
-          route.path.length * attacker.moveCost -
+          attacker.moveEnergyCost(route.path.length) -
           route.path.filter((tile) => tile.feature === 'rune').length * 2
         const from = state.tiles.get(position) ?? attacker
         maxDamage = Math.max(

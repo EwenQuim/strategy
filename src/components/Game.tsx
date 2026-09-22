@@ -562,8 +562,9 @@ export function Game({
                 </h3>
                 <p>
                   Each unit starts with 3 energy. The lit unit is yours to command. Moving costs
-                  1 energy per tile, or 2 for a Bulwark; numbers show the full cost. Mountains
-                  and lakes block walking and Charge. Arrows and magic pass over them.
+                  1 energy per tile; a Bulwark pays 2 for its first tile and 1 after. Numbers
+                  show the full cost. Mountains and lakes block walking and Charge. Arrows and
+                  magic pass over them.
                 </p>
               </div>
             </section>
