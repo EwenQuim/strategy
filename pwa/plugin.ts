@@ -6,7 +6,7 @@ import { transformWithOxc, type Plugin, type ResolvedConfig } from 'vite'
 export function pwa(): Plugin {
   let config: ResolvedConfig
   return {
-    name: 'hex-strategy-pwa',
+    name: 'hexmate-pwa',
     apply: 'build',
     configResolved(resolved) {
       config = resolved

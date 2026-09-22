@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
-import { MAP_WIDTH, MAP_HEIGHT } from '../lib/engine'
 
 export const Route = createFileRoute('/')({
   component: () => (
@@ -11,10 +10,9 @@ export const Route = createFileRoute('/')({
             <Icon name="crown" />
           </span>
           <span>
-            HEX<span className="wordmark-sub">STRATEGY</span>
+            HEX<span className="wordmark-sub">MATE</span>
           </span>
         </span>
-        <span className="eyebrow">A small battlefield. A thousand possibilities.</span>
       </header>
       <div className="landing-content">
         <div className="landing-art" aria-hidden="true">
@@ -60,13 +58,11 @@ export const Route = createFileRoute('/')({
           <div className="hero-crown">
             <Icon name="crown" />
           </div>
-          <span className="art-caption">LAKES. MOUNTAINS. DESERT.</span>
         </div>
-        <span className="eyebrow landing-kicker">Turn-based tactics, distilled.</span>
         <h1>
-          Every move.
+          Hexmate.
           <br />
-          <em>A little more legend.</em>
+          <em>Corner the king.</em>
         </h1>
         <div className="mode-options" role="group" aria-label="Choose game mode">
           <Link
@@ -93,19 +89,6 @@ export const Route = createFileRoute('/')({
             Campaign
             <Icon name="crown" />
           </Link>
-        </div>
-        <div className="landing-facts">
-          <span>
-            <Icon name="hex" />
-            {MAP_WIDTH * MAP_HEIGHT} hexes
-          </span>
-          <span>
-            <Icon name="crown" />3 biomes
-          </span>
-          <span>
-            <Icon name="energy" />
-            Play offline
-          </span>
         </div>
       </div>
       <footer className="landing-footer">

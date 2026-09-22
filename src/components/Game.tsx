@@ -102,7 +102,7 @@ export function Game({
           <Link
             to={campaignLevel ? '/campaign' : '/'}
             className="wordmark"
-            aria-label={campaignLevel ? 'Campaign levels' : 'Hex Strategy home'}
+            aria-label={campaignLevel ? 'Campaign levels' : 'Hexmate home'}
           >
             <span className="brand-crest">
               <Icon name="crown" />

@@ -8,7 +8,7 @@ export const CAMPAIGN_LEVELS = levels as {
   setup: FixedBattleSetup
 }[]
 
-export const CAMPAIGN_STORAGE_KEY = 'hex-strategy:campaign:v1'
+export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'
 
 export function parseCampaignProgress(value: string | null): number {
   const completed = Number(value)

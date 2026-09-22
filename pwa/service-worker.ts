@@ -2,7 +2,7 @@ declare const VERSION: string
 declare const ASSETS: string[]
 declare const self: ServiceWorkerGlobalScope
 
-const cachePrefix = 'hex-strategy:' + self.registration.scope + ':'
+const cachePrefix = 'hexmate:' + self.registration.scope + ':'
 const cacheName = cachePrefix + VERSION
 const shell = new URL('index.html', self.registration.scope).href
 

@@ -107,7 +107,7 @@ async function fixture(t: TestContext) {
   const address = server.address()
   assert.ok(address && typeof address !== 'string')
   const origin = 'http://127.0.0.1:' + address.port
-  const prefix = 'hex-strategy:' + origin + base + ':'
+  const prefix = 'hexmate:' + origin + base + ':'
   browser = await chromium.launch({ channel: 'chrome', headless: true, timeout })
   const context = await browser.newContext({
     viewport: { width: 320, height: 568 },
@@ -392,7 +392,7 @@ test(
     assert.equal(requests.has(route), false)
     const match = await page.locator('.turn-order').innerHTML()
     const started = await page.evaluate(() => performance.timeOrigin)
-    const unrelated = ['unrelated-cache', 'hex-strategy:' + origin + '/other/:keep']
+    const unrelated = ['unrelated-cache', 'hexmate:' + origin + '/other/:keep']
     await probe.evaluate(
       async (names) => {
         for (const name of names) await caches.open(name)
@@ -877,7 +877,7 @@ test(
       assert.ok(actionsBySide.has(side + '-move'))
       assert.ok(actionsBySide.has(side + '-attackAt'))
     }
-    await page.getByRole('link', { name: 'Hex Strategy home' }).click()
+    await page.getByRole('link', { name: 'Hexmate home' }).click()
     await page.getByRole('link', { name: 'Solo vs AI' }).click()
     await page.locator('.end-action:not([disabled])').waitFor()
     assert.equal(new URL(page.url()).searchParams.get('mode'), 'ai')

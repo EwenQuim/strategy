@@ -1,4 +1,4 @@
-# Hex Strategy
+# Hexmate
 
 Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Router (file-based routing) + Tailwind v4.
 
