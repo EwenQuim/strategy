@@ -69,12 +69,12 @@ export const Route = createFileRoute('/')({
           <em>A little more legend.</em>
         </h1>
         <p className="landing-description">
-          One king. A new army every game.
+          Three biomes. A new army every game.
           <br />
           Outthink your rival and claim the crown.
         </p>
         <Link to="/game/" className="primary-button" preload={false}>
-          Enter the vale
+          Enter the battlefield
           <Icon name="arrow" />
         </Link>
         <div className="landing-facts">

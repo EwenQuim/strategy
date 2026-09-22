@@ -1,12 +1,14 @@
 import type { Pawn, Side } from './pawns.ts'
 
 export type Axial = { q: number; r: number }
-export type Terrain = 'plain' | 'forest' | 'mountain'
+export type Biome = 'verdant' | 'mountains' | 'desert'
+export type Terrain = 'plain' | 'forest' | 'mountain' | 'lake' | 'sand'
 export type Tile = { q: number; r: number; terrain: Terrain }
 export type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
 
 export type GameState = {
   seed: string
+  biome: Biome
   randomState: number
   tiles: Map<string, Tile>
   pawns: Pawn[]

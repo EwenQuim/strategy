@@ -77,7 +77,7 @@ export class Swordsman extends Pawn {
     name: 'Charge',
     cost: 2,
     description:
-      'Choose a tile up to 2 steps away, then an adjacent enemy. Move and strike for 2 damage. Mountains and occupied tiles block the path.',
+      'Choose a tile up to 2 steps away, then an adjacent enemy. Move and strike for 2 damage. Mountains, lakes, and occupied tiles block the path.',
   }
 }
 
@@ -127,7 +127,7 @@ export class Ninja extends Pawn {
     name: 'Jump',
     cost: 2,
     description:
-      'Jump up to 3 tiles, passing over terrain and units. Land on an empty, non-mountain tile. Jump does not attack.',
+      'Jump up to 3 tiles, passing over terrain and units. Land on empty ground, never a mountain or lake. Jump does not attack.',
   }
 }
 

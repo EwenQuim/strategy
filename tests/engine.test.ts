@@ -38,6 +38,7 @@ function battle(): GameState {
   }
   return {
     seed: 'test',
+    biome: 'verdant',
     randomState: 0,
     tiles,
     pawns: [
@@ -815,7 +816,10 @@ test('Every seed places distinct pawns in their own three-row starting area', ()
       const firstRow = pawn.side === 'enemy' ? 0 : MAP_HEIGHT - 3
       assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
       const tileKey = key(pawn.q, pawn.r)
-      assert.equal(state.tiles.get(tileKey)?.terrain, 'plain')
+      assert.equal(
+        state.tiles.get(tileKey)?.terrain,
+        state.biome === 'desert' ? 'sand' : 'plain',
+      )
       assert.equal(pawn.hp, pawn.maxHp)
       assert.equal(pawn.energy, pawn.maxEnergy)
       assert.equal(pawn.escapeChance, 0)

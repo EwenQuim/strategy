@@ -1,4 +1,4 @@
-import { hexDist, key, reachable } from './hex.ts'
+import { hexDist, key, passable, reachable } from './hex.ts'
 import type { AttackProfile, Pawn } from './pawns.ts'
 import type { SeededRandom } from './random.ts'
 import type { Axial, Tile } from './types.ts'
@@ -44,10 +44,7 @@ export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: 
   if (pawn.kind !== 'ninja' || !canUseSpecial(pawn)) return []
   const occupied = new Set(pawns.map((p) => key(p.q, p.r)))
   return [...tiles.values()].filter(
-    (tile) =>
-      tile.terrain !== 'mountain' &&
-      !occupied.has(key(tile.q, tile.r)) &&
-      hexDist(pawn, tile) <= 3,
+    (tile) => passable(tile) && !occupied.has(key(tile.q, tile.r)) && hexDist(pawn, tile) <= 3,
   )
 }
 

@@ -9,7 +9,13 @@ const hexPoints = Array.from({ length: 6 }, (_, i) => {
   return [SIZE * 0.95 * Math.cos(angle), SIZE * 0.95 * Math.sin(angle)].join(',')
 }).join(' ')
 
-const terrainColors = { plain: '#7d8963', forest: '#536e51', mountain: '#737c69' }
+const terrainColors = {
+  plain: '#7d8963',
+  forest: '#536e51',
+  mountain: '#737c69',
+  lake: '#4c7186',
+  sand: '#ceb27a',
+}
 
 interface BattlefieldProps {
   tiles: Map<string, Tile>
@@ -210,6 +216,40 @@ export function Battlefield({
 }
 
 function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: number }) {
+  if (terrain === 'sand')
+    return (
+      <g
+        className="tile-detail"
+        fill="none"
+        stroke="#f3d9a2"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        opacity=".65"
+      >
+        <path d="m-19 5q10-12 22-4t17 0m-28 11q8-6 16-3" />
+      </g>
+    )
+  if (terrain === 'lake')
+    return (
+      <g className="tile-detail">
+        <path
+          d="m-16-4q6-5 12 0t12 0 12 0"
+          fill="none"
+          stroke="#bfe0ea"
+          strokeOpacity=".5"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="m-12 6q6-5 12 0t12 0"
+          fill="none"
+          stroke="#bfe0ea"
+          strokeOpacity=".3"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </g>
+    )
   if (terrain === 'mountain')
     return (
       <g className="tile-detail">
