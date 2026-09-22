@@ -17,6 +17,7 @@ import {
   BIOMES,
   King,
   RECRUIT_CLASSES,
+  canAttack,
   canUseSpecial,
   specialTargets,
   targetingTiles,
@@ -59,6 +60,7 @@ export function Game({
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
   const hasAllies = !!pawn && specialTargets(state.pawns, pawn).length > 0
+  const hasFoes = !!pawn && state.pawns.some((target) => canAttack(pawn, target))
   const myTurn = !!pawn && (local || pawn.side === 'player') && !state.winner && !playing
   const attacking = myTurn && state.phase === 'attack'
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
@@ -342,22 +344,22 @@ export function Game({
             )}
           </div>
           <div className="action-grid">
-            <button
-              className={'action-button attack-action' + (attacking ? ' is-selected' : '')}
-              disabled={!myTurn || usingSpecial || !pawn?.energy}
-              onClick={() =>
-                dispatch(
-                  attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' },
-                )
-              }
-              aria-pressed={attacking}
-            >
-              <Icon name={attacking ? 'close' : 'sword'} />
-              <span>{attacking ? 'Cancel' : 'Attack'}</span>
-              <small>
-                {attacking ? (targets.size ? 'Choose enemy' : 'No targets') : '1 energy'}
-              </small>
-            </button>
+            {(attacking || hasFoes) && (
+              <button
+                className={'action-button attack-action' + (attacking ? ' is-selected' : '')}
+                disabled={!myTurn || usingSpecial || !pawn?.energy}
+                onClick={() =>
+                  dispatch(
+                    attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' },
+                  )
+                }
+                aria-pressed={attacking}
+              >
+                <Icon name={attacking ? 'close' : 'sword'} />
+                <span>{attacking ? 'Cancel' : 'Attack'}</span>
+                <small>{attacking ? 'Choose enemy' : '1 energy'}</small>
+              </button>
+            )}
             <button
               className={'action-button special-action' + (usingSpecial ? ' is-selected' : '')}
               disabled={

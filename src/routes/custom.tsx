@@ -51,7 +51,7 @@ export const Route = createFileRoute('/custom')({
                   value={mode}
                   onChange={(event) => setMode(event.target.value as GameMode)}
                 >
-                  <option value="ai">Solo vs AI</option>
+                  <option value="ai">Quick play</option>
                   <option value="local">2 players</option>
                 </select>
               </div>

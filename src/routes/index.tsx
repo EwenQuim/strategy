@@ -76,7 +76,7 @@ export const Route = createFileRoute('/')({
             preload={false}
             title="Play a new seeded battle against AI"
           >
-            Solo vs AI
+            Quick play
             <Icon name="arrow" />
           </Link>
           <Link to="/custom" className="primary-button local-button" preload={false}>

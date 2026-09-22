@@ -648,7 +648,7 @@ test(
     const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
     assert.deepEqual(await modes.allTextContents(), [
       'Campaign',
-      'Solo vs AI',
+      'Quick play',
       'Custom play',
       '2 players',
     ])
@@ -696,7 +696,7 @@ test(
       await page.evaluate((seed) => {
         Object.defineProperty(crypto, 'randomUUID', { value: () => seed })
       }, seed)
-      await page.getByRole('link', { name: 'Solo vs AI' }).click()
+      await page.getByRole('link', { name: 'Quick play' }).click()
       await page.locator('.end-action:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
       assert.equal(await page.locator('.wordmark-sub').textContent(), BIOMES[biome].name)
@@ -990,7 +990,7 @@ test(
       assert.ok(actionsBySide.has(side + '-attackAt'))
     }
     await page.getByRole('link', { name: 'Hexmate home' }).click()
-    await page.getByRole('link', { name: 'Solo vs AI' }).click()
+    await page.getByRole('link', { name: 'Quick play' }).click()
     await page.locator('.end-action:not([disabled])').waitFor()
     assert.equal(new URL(page.url()).searchParams.get('mode'), 'ai')
     assert.equal(await page.locator('.player-turn').count(), 0)
