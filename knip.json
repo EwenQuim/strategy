@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+  "entry": [
+    "pwa/plugin.ts",
+    "pwa/service-worker.ts",
+    "tests/*.test.ts",
+    "tests/integration/*.test.ts",
+    "tests/*.browser.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "pwa/**/*.ts", "tests/**/*.ts", "*.ts"],
+  "ignoreDependencies": ["tailwindcss"]
+}

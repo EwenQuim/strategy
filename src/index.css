@@ -90,6 +90,18 @@
   .battle-notification {
     animation: notification-fade 5s both;
   }
+  [data-shake='0'] {
+    animation: board-shake-a 260ms ease-out;
+  }
+  [data-shake='1'] {
+    animation: board-shake-b 260ms ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-shake='0'],
+    [data-shake='1'] {
+      animation: none;
+    }
+  }
 }
 
 @keyframes notification-fade {
@@ -100,6 +112,38 @@
   5%,
   90% {
     opacity: 1;
+  }
+}
+
+@keyframes board-shake-a {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-4px, 2px);
+  }
+  50% {
+    transform: translate(3px, -2px);
+  }
+  75% {
+    transform: translate(-2px, 1px);
+  }
+}
+
+@keyframes board-shake-b {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-4px, 2px);
+  }
+  50% {
+    transform: translate(3px, -2px);
+  }
+  75% {
+    transform: translate(-2px, 1px);
   }
 }
 

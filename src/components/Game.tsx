@@ -1,6 +1,6 @@
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Link } from '@tanstack/react-router'
-import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
+import { useRef, useSyncExternalStore } from 'react'
 import { useGame } from '../useGame'
 import { armyLabels, playerNames, type GameMode } from '../lib/game-mode'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
@@ -51,11 +51,14 @@ export function Game({
 }) {
   const local = mode === 'local'
   const labels = armyLabels[mode]
-  const { state, dispatch, effect, effectId, playing } = useGame(seed, mode, setup, difficulty)
+  const { state, dispatch, effect, effectId, playing } = useGame(
+    seed,
+    mode,
+    setup,
+    difficulty,
+    campaignLevel ? () => recordCampaignVictory(campaignLevel) : undefined,
+  )
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, campaignProgressSaved)
-  useEffect(() => {
-    if (campaignLevel && state.winner === 'player') recordCampaignVictory(campaignLevel)
-  }, [campaignLevel, state.winner])
   const winnerLabel =
     campaignLevel === CAMPAIGN_LEVELS.length && state.winner === 'player'
       ? 'Campaign complete!'
@@ -71,7 +74,7 @@ export function Game({
   const myTurn = !!pawn && (local || pawn.side === 'player') && !state.winner && !playing
   const attacking = myTurn && state.phase === 'attack'
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
-  const targets = useMemo(() => targetingTiles(state), [state])
+  const targets = targetingTiles(state)
   const targetLabel = attacking
     ? 'Attack'
     : state.phase === 'special' && pawn?.kind === 'swordsman'
@@ -84,11 +87,10 @@ export function Game({
     return unit ? [{ unit, index }] : []
   })
 
-  const reach = useMemo(() => {
-    if (!myTurn || !pawn || pawn.energy <= 0 || state.phase !== 'move')
-      return new Map<string, number>()
-    return movementDestinations(state.tiles, state.pawns, pawn)
-  }, [state.pawns, state.tiles, state.phase, myTurn, pawn])
+  const reach =
+    myTurn && pawn && pawn.energy > 0 && state.phase === 'move'
+      ? movementDestinations(state.tiles, state.pawns, pawn)
+      : new Map<string, number>()
 
   const onTileClick = (tile: Tile) => {
     if (!myTurn) return

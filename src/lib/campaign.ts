@@ -1,12 +1,12 @@
 import levels from './campaign-levels.json' with { type: 'json' }
 import type { FixedBattleSetup } from './engine/index.ts'
 
-export interface IntroElement {
+interface IntroElement {
   readonly name: string
   readonly description: string
 }
 
-export interface LevelIntro {
+interface LevelIntro {
   readonly roleplay: string
   readonly newElements: readonly IntroElement[]
 }

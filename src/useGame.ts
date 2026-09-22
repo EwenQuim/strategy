@@ -9,10 +9,14 @@ export function useGame(
   mode: GameMode,
   setup?: BattleSetup,
   difficulty: BotDifficulty = 'normal',
+  onVictory?: () => void,
 ) {
   const [playback, dispatch] = useReducer(
-    (playback: Transition, action: Parameters<typeof playbackReducer>[1]) =>
-      playbackReducer(playback, action, mode, difficulty),
+    (playback: Transition, action: Parameters<typeof playbackReducer>[1]) => {
+      const next = playbackReducer(playback, action, mode, difficulty)
+      if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
+      return next
+    },
     seed,
     (seed) => initialPlayback(seed, mode, setup),
   )

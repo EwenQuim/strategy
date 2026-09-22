@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { battleMessage, type GameMode } from '../lib/game-mode'
 
 export function BattleNotifications({
@@ -30,12 +30,11 @@ export function BattleNotifications({
 
 function Notification({ message }: { message: string }) {
   const [visible, setVisible] = useState(true)
-  useEffect(() => {
-    const timer = window.setTimeout(() => setVisible(false), 5000)
-    return () => window.clearTimeout(timer)
-  }, [])
   return visible ? (
-    <li className="battle-notification rounded-md bg-[#14271fe6] px-2.5 py-1.5 text-[10px] leading-[1.4] text-[#e7e6cc] shadow-[0_2px_8px_#07180f33]">
+    <li
+      className="battle-notification rounded-md bg-[#14271fe6] px-2.5 py-1.5 text-[10px] leading-[1.4] text-[#e7e6cc] shadow-[0_2px_8px_#07180f33]"
+      onAnimationEnd={() => setVisible(false)}
+    >
       {message}
     </li>
   ) : null

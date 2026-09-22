@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useRef } from 'react'
 import {
   key,
   walkingPaths,
@@ -58,32 +57,11 @@ export function Battlefield({
   effectId,
   onTileClick,
 }: BattlefieldProps) {
-  const board = useRef<SVGSVGElement>(null)
-  const paths = useMemo(
-    () =>
-      active && (reach.size || targetLabel === 'Charge to')
-        ? walkingPaths(tiles, pawns, active, targetLabel === 'Charge to' ? 2 : undefined)
-        : new Map(),
-    [tiles, pawns, active, reach, targetLabel],
-  )
-  useEffect(() => {
-    if (
-      !effect?.impacts?.some((hit) => hit.damage > 0) ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )
-      return
-    const animation = board.current?.animate(
-      [
-        { transform: 'translate(0, 0)' },
-        { transform: 'translate(-4px, 2px)' },
-        { transform: 'translate(3px, -2px)' },
-        { transform: 'translate(-2px, 1px)' },
-        { transform: 'translate(0, 0)' },
-      ],
-      { duration: 260, easing: 'ease-out' },
-    )
-    return () => animation?.cancel()
-  }, [effect, effectId])
+  const paths =
+    active && (reach.size || targetLabel === 'Charge to')
+      ? walkingPaths(tiles, pawns, active, targetLabel === 'Charge to' ? 2 : undefined)
+      : new Map()
+  const shake = effect?.impacts?.some((hit) => hit.damage > 0)
   const allTiles = [...tiles.values()]
   const xs = allTiles.map((t) => hexX(t.q, t.r))
   const ys = allTiles.map((t) => hexY(t.r))
@@ -96,10 +74,10 @@ export function Battlefield({
 
   return (
     <svg
-      ref={board}
       viewBox={viewBox}
       preserveAspectRatio="xMidYMid meet"
       className="block size-full max-w-[860px] touch-manipulation select-none drop-shadow-[0_18px_20px_#0a211b60]"
+      data-shake={shake ? String(effectId % 2) : undefined}
       data-testid="battlefield"
       role="group"
       aria-label="Battlefield. Select a highlighted tile to move or an enemy to attack."

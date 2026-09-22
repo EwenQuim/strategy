@@ -1,3 +1,7 @@
+import { aimedShot, charge, fireball, jump, protect, rally } from './combat.ts'
+import type { Axial, BattleEffect, BattleImpact, Tile } from './types.ts'
+import type { SeededRandom } from './random.ts'
+
 export type Side = 'player' | 'enemy'
 
 export const START_ENERGY = 3
@@ -8,19 +12,43 @@ export interface AttackProfile {
   readonly damage: number
   readonly minRange: number
   readonly maxRange: number
+  readonly rangeBonus?: number
   readonly ignoresEscape?: boolean
+}
+
+type SpecialContext = {
+  pawn: Pawn
+  tiles: Map<string, Tile>
+  pawns: Pawn[]
+  tile?: Axial
+  destination?: Axial
+  round: number
+  log: string[]
+  random: SeededRandom
+}
+
+export type SpecialResult = {
+  kind: BattleEffect['kind']
+  to: Axial
+  impacts: BattleImpact[]
 }
 
 export interface SpecialAbility {
   readonly name: string
   readonly cost: number
   readonly description: string
+  readonly targeted: boolean
+  readonly oncePerRound?: boolean
+  readonly choosesDestination?: boolean
+  targets(pawn: Pawn, pawns: readonly Pawn[], from?: Axial): Pawn[]
+  tileTargets?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
+  perform(context: SpecialContext): SpecialResult | null
 }
 
 export abstract class Pawn {
   abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician' | 'ninja' | 'bulwark'
   abstract readonly attack: AttackProfile
-  abstract readonly special: SpecialAbility
+  abstract get special(): SpecialAbility
   bonusEnergy = 0
   springSince: number | null = null
 
@@ -87,11 +115,8 @@ export class Swordsman extends Pawn {
     return 5
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
-  readonly special: SpecialAbility = {
-    name: 'Charge',
-    cost: 2,
-    description:
-      'Choose a tile up to 2 steps away, then an adjacent enemy. Move and strike for 2 damage. Mountains, lakes, and occupied tiles block the path.',
+  get special(): SpecialAbility {
+    return charge
   }
 }
 
@@ -101,33 +126,24 @@ export class King extends Pawn {
     return 7
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
-  readonly special: SpecialAbility = {
-    name: 'Rally',
-    cost: 1,
-    description:
-      'Restore 1 health to every adjacent ally, once per round. Activates immediately. Cannot heal yourself or exceed maximum health.',
+  get special(): SpecialAbility {
+    return rally
   }
 }
 
 export class Archer extends Pawn {
   readonly kind = 'archer' as const
-  readonly attack: AttackProfile = { damage: 1, minRange: 2, maxRange: 3 }
-  readonly special: SpecialAbility = {
-    name: 'Aimed shot',
-    cost: 2,
-    description:
-      'Deal 2 damage to an enemy 2 to 3 tiles away, ignoring Escape. Cannot shoot adjacent enemies.',
+  readonly attack: AttackProfile = { damage: 1, minRange: 2, maxRange: 3, rangeBonus: 1 }
+  get special(): SpecialAbility {
+    return aimedShot
   }
 }
 
 export class Magician extends Pawn {
   readonly kind = 'magician' as const
-  readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2 }
-  readonly special: SpecialAbility = {
-    name: 'Fireball',
-    cost: 2,
-    description:
-      'Target an enemy within 2 tiles. Deal 1 damage to it and every adjacent enemy. Each may Escape; allies are unharmed.',
+  readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
+  get special(): SpecialAbility {
+    return fireball
   }
 }
 
@@ -137,11 +153,8 @@ export class Ninja extends Pawn {
     return 1
   }
   readonly attack: AttackProfile = { damage: 5, minRange: 1, maxRange: 1 }
-  readonly special: SpecialAbility = {
-    name: 'Jump',
-    cost: 2,
-    description:
-      'Jump up to 3 tiles, passing over terrain and units. Land on empty ground, never a mountain or lake. Jump does not attack.',
+  get special(): SpecialAbility {
+    return jump
   }
 }
 
@@ -154,11 +167,8 @@ export class Bulwark extends Pawn {
     return 2
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 1 }
-  readonly special: SpecialAbility = {
-    name: 'Protect',
-    cost: 2,
-    description:
-      'Protect an adjacent ally until your next turn. Take its next hit instead, without a second Escape roll. Ends if you separate. Moving costs 2 energy for the first tile, then 1 per extra tile.',
+  get special(): SpecialAbility {
+    return protect
   }
 }
 
