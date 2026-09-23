@@ -263,7 +263,7 @@
   "paths": {
     "/api/games": {
       "post": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.createGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).createGame`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "createGame",
         "parameters": [
           {
@@ -341,7 +341,7 @@
     },
     "/api/games/{code}": {
       "get": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.getGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).getGame`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "getGame",
         "parameters": [
           {
@@ -431,7 +431,7 @@
     },
     "/api/games/{code}/actions": {
       "post": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.playAction.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).playAction`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "playAction",
         "parameters": [
           {
@@ -577,7 +577,7 @@
     },
     "/api/games/{code}/join": {
       "post": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.joinGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).joinGame`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "joinGame",
         "parameters": [
           {
@@ -693,7 +693,7 @@
     },
     "/api/health": {
       "get": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.Register.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).health`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "health",
         "parameters": [
           {

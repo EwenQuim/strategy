@@ -260,7 +260,7 @@ export interface UnknownInterface {}
 /**
  * #### Controller: 
 
-`hexmate/server/internal/handlers.createGame.func1`
+`hexmate/server/internal/handlers.(*Handlers).createGame`
 
 #### Middlewares:
 
@@ -336,7 +336,7 @@ export const useCreateGame = <TError = ErrorType<HTTPError>,
 /**
  * #### Controller: 
 
-`hexmate/server/internal/handlers.getGame.func1`
+`hexmate/server/internal/handlers.(*Handlers).getGame`
 
 #### Middlewares:
 
@@ -435,7 +435,7 @@ export function useGetGame<TData = Awaited<ReturnType<typeof getGame>>, TError =
 /**
  * #### Controller: 
 
-`hexmate/server/internal/handlers.playAction.func1`
+`hexmate/server/internal/handlers.(*Handlers).playAction`
 
 #### Middlewares:
 
@@ -512,7 +512,7 @@ export const usePlayAction = <TError = ErrorType<HTTPError>,
 /**
  * #### Controller: 
 
-`hexmate/server/internal/handlers.joinGame.func1`
+`hexmate/server/internal/handlers.(*Handlers).joinGame`
 
 #### Middlewares:
 
@@ -589,7 +589,7 @@ export const useJoinGame = <TError = ErrorType<HTTPError>,
 /**
  * #### Controller: 
 
-`hexmate/server/internal/handlers.Register.func1`
+`hexmate/server/internal/handlers.(*Handlers).health`
 
 #### Middlewares:
 

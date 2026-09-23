@@ -44,6 +44,18 @@ type playActionRequest struct {
 	Winner  *game.Side        `json:"winner" description:"Side of the winner, only on the final action"`
 }
 
+func (r *playActionRequest) InTransform(_ context.Context) error {
+	if err := r.Action.Validate(); err != nil {
+		return err
+	}
+	if r.Winner != nil {
+		if _, ok := game.ParseSide(string(*r.Winner)); !ok {
+			return errors.New("winner must be player or enemy")
+		}
+	}
+	return nil
+}
+
 type healthResponse struct {
 	Status string `json:"status"`
 }
@@ -69,26 +81,31 @@ type playActionResponse struct {
 	Version int `json:"version"`
 }
 
+// Handlers binds the game service to HTTP. Register wires its methods as
+// fuego controllers.
+type Handlers struct {
+	svc *service.Service
+}
+
 func Register(s *fuego.Server, svc *service.Service) {
+	h := &Handlers{svc: svc}
 	api := fuego.Group(s, "/api")
-	fuego.Get(api, "/health", func(fuego.ContextNoBody) (healthResponse, error) {
-		return healthResponse{Status: "ok"}, nil
-	},
-		fuego.OptionOperationID("health"), fuego.OptionSummary("Health check"), fuego.OptionTags("health"))
 	errorResponse := func(status int, description string) fuego.RouteOption {
 		return fuego.OptionAddResponse(status, description, fuego.Response{Type: fuego.HTTPError{}})
 	}
-	fuego.Post(api, "/games", createGame(svc),
+	fuego.Get(api, "/health", h.health,
+		fuego.OptionOperationID("health"), fuego.OptionSummary("Health check"), fuego.OptionTags("health"))
+	fuego.Post(api, "/games", h.createGame,
 		fuego.OptionOperationID("createGame"), fuego.OptionSummary("Create a game"),
 		fuego.OptionTags("games"), fuego.OptionDefaultStatusCode(http.StatusCreated))
-	fuego.Post(api, "/games/{code}/join", joinGame(svc),
+	fuego.Post(api, "/games/{code}/join", h.joinGame,
 		fuego.OptionOperationID("joinGame"), fuego.OptionSummary("Join a game"), fuego.OptionTags("games"),
 		errorResponse(http.StatusNotFound, "No game with this code"),
 		errorResponse(http.StatusConflict, "Game already has two players"))
-	fuego.Get(api, "/games/{code}", getGame(svc),
+	fuego.Get(api, "/games/{code}", h.getGame,
 		fuego.OptionOperationID("getGame"), fuego.OptionSummary("Get a game"), fuego.OptionTags("games"),
 		errorResponse(http.StatusNotFound, "No game with this code"))
-	fuego.Post(api, "/games/{code}/actions", playAction(svc),
+	fuego.Post(api, "/games/{code}/actions", h.playAction,
 		fuego.OptionOperationID("playAction"), fuego.OptionSummary("Submit a game action"), fuego.OptionTags("games"),
 		errorResponse(http.StatusUnauthorized, "Token is not a participant"),
 		errorResponse(http.StatusNotFound, "No game with this code"),
@@ -96,73 +113,57 @@ func Register(s *fuego.Server, svc *service.Service) {
 		errorResponse(http.StatusUnprocessableEntity, "Game is waiting or finished"))
 }
 
-func createGame(svc *service.Service) func(c fuego.ContextWithBody[createGameRequest]) (playerCredentials, error) {
-	return func(c fuego.ContextWithBody[createGameRequest]) (playerCredentials, error) {
-		req, err := c.Body()
-		if err != nil {
-			return playerCredentials{}, err
-		}
-		creds, err := svc.Create(c.Context(), req.Name)
-		if err != nil {
-			return playerCredentials{}, httpError(err)
-		}
-		return playerCredentials{Token: creds.Token, Side: creds.Side, Game: publicView(creds.Game)}, nil
-	}
+func (h *Handlers) health(fuego.ContextNoBody) (healthResponse, error) {
+	return healthResponse{Status: "ok"}, nil
 }
 
-func joinGame(svc *service.Service) func(c fuego.ContextWithBody[joinGameRequest]) (playerCredentials, error) {
-	return func(c fuego.ContextWithBody[joinGameRequest]) (playerCredentials, error) {
-		req, err := c.Body()
-		if err != nil {
-			return playerCredentials{}, err
-		}
-		creds, err := svc.Join(c.Context(), c.PathParam("code"), req.Name)
-		if err != nil {
-			return playerCredentials{}, httpError(err)
-		}
-		return playerCredentials{Token: creds.Token, Side: creds.Side, Game: publicView(creds.Game)}, nil
+func (h *Handlers) createGame(c fuego.ContextWithBody[createGameRequest]) (playerCredentials, error) {
+	req, err := c.Body()
+	if err != nil {
+		return playerCredentials{}, err
 	}
+	creds, err := h.svc.Create(c.Context(), req.Name)
+	if err != nil {
+		return playerCredentials{}, httpError(err)
+	}
+	return playerCredentials{Token: creds.Token, Side: creds.Side, Game: publicView(creds.Game)}, nil
 }
 
-func getGame(svc *service.Service) func(c fuego.ContextNoBody) (publicGame, error) {
-	return func(c fuego.ContextNoBody) (publicGame, error) {
-		g, err := svc.Game(c.Context(), c.PathParam("code"))
-		if err != nil {
-			return publicGame{}, httpError(err)
-		}
-		return publicView(g), nil
+func (h *Handlers) joinGame(c fuego.ContextWithBody[joinGameRequest]) (playerCredentials, error) {
+	req, err := c.Body()
+	if err != nil {
+		return playerCredentials{}, err
 	}
+	creds, err := h.svc.Join(c.Context(), c.PathParam("code"), req.Name)
+	if err != nil {
+		return playerCredentials{}, httpError(err)
+	}
+	return playerCredentials{Token: creds.Token, Side: creds.Side, Game: publicView(creds.Game)}, nil
 }
 
-func (r *playActionRequest) InTransform(_ context.Context) error {
-	if err := r.Action.Validate(); err != nil {
-		return err
+func (h *Handlers) getGame(c fuego.ContextNoBody) (publicGame, error) {
+	g, err := h.svc.Game(c.Context(), c.PathParam("code"))
+	if err != nil {
+		return publicGame{}, httpError(err)
 	}
-	if r.Winner != nil {
-		if _, ok := game.ParseSide(string(*r.Winner)); !ok {
-			return errors.New("winner must be player or enemy")
-		}
-	}
-	return nil
+	return publicView(g), nil
 }
 
-func playAction(svc *service.Service) func(c fuego.ContextWithBody[playActionRequest]) (playActionResponse, error) {
-	return func(c fuego.ContextWithBody[playActionRequest]) (playActionResponse, error) {
-		req, err := c.Body()
-		if err != nil {
-			return playActionResponse{}, err
-		}
-		var winner *game.Side
-		if req.Winner != nil {
-			side := *req.Winner
-			winner = &side
-		}
-		g, err := svc.Play(c.Context(), c.PathParam("code"), req.Token, req.Version, req.Action, winner)
-		if err != nil {
-			return playActionResponse{}, httpError(err)
-		}
-		return playActionResponse{Version: g.Version}, nil
+func (h *Handlers) playAction(c fuego.ContextWithBody[playActionRequest]) (playActionResponse, error) {
+	req, err := c.Body()
+	if err != nil {
+		return playActionResponse{}, err
 	}
+	var winner *game.Side
+	if req.Winner != nil {
+		side := *req.Winner
+		winner = &side
+	}
+	g, err := h.svc.Play(c.Context(), c.PathParam("code"), req.Token, req.Version, req.Action, winner)
+	if err != nil {
+		return playActionResponse{}, httpError(err)
+	}
+	return playActionResponse{Version: g.Version}, nil
 }
 
 func publicView(g game.Game) publicGame {
