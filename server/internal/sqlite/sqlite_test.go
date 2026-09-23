@@ -136,3 +136,42 @@ func TestConcurrentAppendOnlyOneVersionWins(t *testing.T) {
 		t.Fatalf("version=%d actions=%d, want 1 and 1", g.Version, len(g.Actions))
 	}
 }
+
+func TestAppendAcrossTwoConnectionsYieldsVersionConflict(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "hexmate.db")
+	ctx := context.Background()
+	player1, err := sqlite.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = player1.Close() }()
+	player2, err := sqlite.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = player2.Close() }()
+
+	if err := player1.Create(ctx, game.Game{
+		Code: "SHARE1", Seed: "seed", NamePlayer: "Ewen", TokenPlayer: "hash1",
+		CreatedAt: time.Now(), UpdatedAt: time.Now(),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := player2.Join(ctx, "SHARE1", "Bob", "hash2"); err != nil {
+		t.Fatal(err)
+	}
+	move := game.Action{Side: game.Player, Action: map[string]any{"type": "endTurn"}}
+	if _, err := player1.Append(ctx, "SHARE1", 0, move); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := player2.Append(ctx, "SHARE1", 0, move); !errors.Is(err, game.ErrVersionConflict) {
+		t.Fatalf("stale append on second connection: want ErrVersionConflict, got %v", err)
+	}
+	g, err := player1.Game(ctx, "SHARE1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.Version != 1 || len(g.Actions) != 1 {
+		t.Fatalf("version=%d actions=%d, want 1 and 1", g.Version, len(g.Actions))
+	}
+}

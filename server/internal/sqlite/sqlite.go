@@ -9,10 +9,14 @@ import (
 	"sync"
 	"time"
 
-	_ "modernc.org/sqlite"
+	"modernc.org/sqlite"
 
 	"hexmate/server/internal/game"
 )
+
+// SQLITE_CONSTRAINT_PRIMARYKEY and SQLITE_CONSTRAINT_UNIQUE: another process
+// appended this version between our read and the insert.
+const primarykeyConstraint, uniqueConstraint = 1555, 2067
 
 const gamesSchema = `
 CREATE TABLE IF NOT EXISTS games (
@@ -169,6 +173,11 @@ func (s *Store) Append(ctx context.Context, code string, version int, action gam
 	_, err = tx.ExecContext(ctx,
 		`INSERT INTO actions (game_code, idx, side, payload, winner) VALUES (?, ?, ?, ?, ?)`,
 		code, version, action.Side, string(payload), winner)
+	var sqliteErr *sqlite.Error
+	if errors.As(err, &sqliteErr) &&
+		(sqliteErr.Code() == primarykeyConstraint || sqliteErr.Code() == uniqueConstraint) {
+		return game.Game{}, game.ErrVersionConflict
+	}
 	if err != nil {
 		return game.Game{}, err
 	}

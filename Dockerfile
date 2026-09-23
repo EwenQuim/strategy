@@ -13,9 +13,11 @@ WORKDIR /src
 COPY server/ ./
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg/mod \
     CGO_ENABLED=0 go build -ldflags="-s -w" -o /server .
+RUN mkdir -p /data && chown 65532:65532 /data
 
 FROM gcr.io/distroless/static-debian12
 COPY --from=build /server /server
+COPY --from=build --chown=65532:65532 /data /data
 COPY --from=web /client/dist /dist
 ENV ADDR=:8080 DIST=/dist
 EXPOSE 8080
