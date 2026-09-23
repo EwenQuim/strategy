@@ -2,5 +2,5 @@
 set -eu
 
 # Fast guard only. The full suite (tests, lint, build) runs in required CI
-# via `npm run check` (.github/workflows/ci.yml).
+# via `npm run test:ci` (.github/workflows/ci.yml).
 exec npm run typecheck
