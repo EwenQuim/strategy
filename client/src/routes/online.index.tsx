@@ -4,18 +4,13 @@ import { useQueries } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import {
   ApiError,
+  health,
   onlineGameQueryOptions,
   useCreateOnlineGame,
   useJoinOnlineGame,
 } from '../api/online.ts'
 import { Icon } from '../components/Icon'
-import {
-  onlineEnabled,
-  readPlayerName,
-  readStoredGames,
-  savePlayerName,
-  saveStoredGame,
-} from '../online.ts'
+import { readPlayerName, readStoredGames, savePlayerName, saveStoredGame } from '../online.ts'
 import type { StoredGame } from '../lib/online.ts'
 
 const inputClassName =
@@ -23,8 +18,12 @@ const inputClassName =
 const onlineButtonClassName = buttonClassName + ' min-h-13 justify-center border-line'
 
 export const Route = createFileRoute('/online/')({
-  beforeLoad: () => {
-    if (!onlineEnabled()) throw redirect({ to: '/' })
+  beforeLoad: async () => {
+    try {
+      await health()
+    } catch {
+      throw redirect({ to: '/' })
+    }
   },
   component: function OnlineLobby() {
     const navigate = useNavigate()
