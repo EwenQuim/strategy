@@ -12,6 +12,8 @@ import {
   passable,
   specialTargets,
   hexDist,
+  hexOf,
+  reducer,
   distFrom,
   key,
   type TileFeature,
@@ -171,6 +173,32 @@ test('Powder Lesson and Iron Caravan offer useful blasts without requiring frien
       )
     }
   }
+})
+
+test('Powder Lesson groups two bowmen above the swordsmen within one advanced bomb blast', () => {
+  const level = CAMPAIGN_LEVELS[7]
+  assert.deepEqual(
+    level.setup.enemy.filter((pawn) => pawn.kind === 'archer'),
+    [
+      { kind: 'archer', col: 3, row: 4 },
+      { kind: 'archer', col: 4, row: 4 },
+    ],
+  )
+  const state = coreState(level.seed, level.setup)
+  const bomber = state.pawns.find((pawn) => pawn.side === 'player' && pawn.kind === 'bomber')!
+  const moved = reducer(
+    { ...state, active: state.order.indexOf(bomber.id) },
+    { type: 'move', ...hexOf(3, 7) },
+  )
+  const fired = reducer(reducer(moved, { type: 'act', action: 'special' }), {
+    type: 'specialAt',
+    ...hexOf(3, 5),
+  })
+  for (const pawn of fired.pawns) {
+    const damaged = pawn.side === 'enemy' && pawn.kind !== 'king'
+    assert.equal(pawn.hp, pawn.maxHp - Number(damaged))
+  }
+  assert.equal(fired.pawns.find((pawn) => pawn.id === bomber.id)?.energy, 0)
 })
 
 test('Wizard Curtain has four aligned casters and Forked Gate has two distinct crossings', () => {

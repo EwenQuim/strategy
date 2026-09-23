@@ -524,11 +524,21 @@
           "kind": "swordsman",
           "col": 4,
           "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 4
         }
       ]
     },
     "intro": {
-      "roleplay": "Two soldiers stand shoulder to shoulder in the quarry. Your bomber can reach the empty ground between their feet. Keep your escort outside the blast.",
+      "roleplay": "Two soldiers stand shoulder to shoulder in the quarry, with two grouped bowmen directly behind them. Advance your bomber to catch the formation in one blast, but keep your escort clear of your own powder.",
       "newElements": [
         {
           "name": "Bomber",

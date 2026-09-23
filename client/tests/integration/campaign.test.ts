@@ -20,7 +20,7 @@ test('All twenty distinct campaign encounters are winnable against normal AI', (
     assert.equal(core.pawns.length, level.setup.player.length + level.setup.enemy.length)
     biomes.add(core.biome)
     let state = initialState(level.seed, level.setup)
-    for (const caution of [0.25, 0.7]) {
+    for (const caution of [0.25, 0.7, 1]) {
       state = initialState(level.seed, level.setup)
       for (let step = 0; step < 300 && !state.winner; step++) {
         for (const action of campaignActions(state, caution)) {
