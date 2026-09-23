@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   key,
   walkingPaths,
@@ -59,13 +59,10 @@ export function Battlefield({
   onTileClick,
 }: BattlefieldProps) {
   const board = useRef<SVGSVGElement>(null)
-  const paths = useMemo(
-    () =>
-      active && (reach.size || targetLabel === 'Charge to')
-        ? walkingPaths(tiles, pawns, active, targetLabel === 'Charge to' ? 2 : undefined)
-        : new Map(),
-    [tiles, pawns, active, reach, targetLabel],
-  )
+  const paths =
+    active && (reach.size || targetLabel === 'Charge to')
+      ? walkingPaths(tiles, pawns, active, targetLabel === 'Charge to' ? 2 : undefined)
+      : new Map()
   useEffect(() => {
     if (
       !effect?.impacts?.some((hit) => hit.damage > 0) ||

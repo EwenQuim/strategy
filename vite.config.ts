@@ -19,7 +19,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
-    react(),
+    react({ compiler: { panicThreshold: 'all_errors' } }),
     pwa(),
   ],
 })

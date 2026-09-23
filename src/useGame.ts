@@ -4,15 +4,22 @@ import type { GameMode } from './lib/game-mode.ts'
 import type { BattleSetup, Transition } from './lib/engine/types.ts'
 import type { BotDifficulty } from './lib/bot.ts'
 
-export function useGame(
-  seed: string,
-  mode: GameMode,
-  setup?: BattleSetup,
-  difficulty: BotDifficulty = 'normal',
-) {
+export interface GameOptions {
+  seed: string
+  mode: GameMode
+  setup?: BattleSetup
+  difficulty?: BotDifficulty
+  onVictory?: () => void
+}
+
+export function useGame({ seed, mode, setup, difficulty = 'normal', onVictory }: GameOptions) {
   const [playback, dispatch] = useReducer(
-    (playback: Transition, action: Parameters<typeof playbackReducer>[1]) =>
-      playbackReducer(playback, action, mode, difficulty),
+    (playback: Transition, action: Parameters<typeof playbackReducer>[1]) => {
+      const next = playbackReducer(playback, action, mode, difficulty)
+      // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
+      if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
+      return next
+    },
     seed,
     (seed) => initialPlayback(seed, mode, setup),
   )

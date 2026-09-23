@@ -1,22 +1,15 @@
 import levels from './campaign-levels.json' with { type: 'json' }
 import type { FixedBattleSetup } from './engine/index.ts'
 
-export interface IntroElement {
-  readonly name: string
-  readonly description: string
-}
-
-export interface LevelIntro {
-  readonly roleplay: string
-  readonly newElements: readonly IntroElement[]
-}
-
 export interface CampaignLevel {
   id: number
   name: string
   seed: string
   setup: FixedBattleSetup
-  intro: LevelIntro
+  intro: {
+    readonly roleplay: string
+    readonly newElements: readonly { name: string; description: string }[]
+  }
 }
 
 export const CAMPAIGN_LEVELS = levels as CampaignLevel[]

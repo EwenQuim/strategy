@@ -103,6 +103,13 @@
   }
 }
 
+@keyframes notification-still {
+  from,
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes battle-travel {
   from {
     stroke-dashoffset: 1;
