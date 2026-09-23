@@ -108,6 +108,27 @@ func getAllPets(ctx fuego.ContextNoBody) (*MyResponse, error) {
 
  * OpenAPI spec version: 1.0.0
  */
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
+import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
+
+import { client } from '../src/api/client';
+import type { ErrorType } from '../src/api/client';
 export interface Action {
   action: EngineAction;
   side: string;
@@ -250,50 +271,68 @@ export interface UnknownInterface {}
 
  * @summary Create a game
  */
-export type createGameResponse201 = {
-  data: PlayerCredentials
-  status: 201
-}
-
-export type createGameResponse400 = {
-  data: HTTPError
-  status: 400
-}
-    
-export type createGameResponseComposite = createGameResponse201 | createGameResponse400;
-    
-export type createGameResponse = createGameResponseComposite & {
-  headers: Headers;
-}
-
-export const getCreateGameUrl = () => {
-
-
+export const createGame = (
+    createGameRequest: CreateGameRequest,
+ signal?: AbortSignal
+) => {
+      
+      
+      return client<PlayerCredentials>(
+      {url: `/api/games`, method: 'POST',
+      headers: {'Content-Type': '*/*', },
+      data: createGameRequest, signal
+    },
+      );
+    }
   
 
-  return `/api/games`
-}
 
-export const createGame = async (createGameRequest: CreateGameRequest, options?: RequestInit): Promise<createGameResponse> => {
-  
-  const res = await fetch(getCreateGameUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': '*/*', ...options?.headers },
-    body: JSON.stringify(
-      createGameRequest,)
-  }
-)
+export const getCreateGameMutationOptions = <TError = ErrorType<HTTPError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGame>>, TError,{data: CreateGameRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createGame>>, TError,{data: CreateGameRequest}, TContext> => {
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: createGameResponse['data'] = body ? JSON.parse(body) : {}
+const mutationKey = ['createGame'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { data, status: res.status, headers: res.headers } as createGameResponse
-}
+      
 
 
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createGame>>, {data: CreateGameRequest}> = (props) => {
+          const {data} = props ?? {};
 
+          return  createGame(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateGameMutationResult = NonNullable<Awaited<ReturnType<typeof createGame>>>
+    export type CreateGameMutationBody = CreateGameRequest
+    export type CreateGameMutationError = ErrorType<HTTPError>
+
+    /**
+ * @summary Create a game
+ */
+export const useCreateGame = <TError = ErrorType<HTTPError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGame>>, TError,{data: CreateGameRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createGame>>,
+        TError,
+        {data: CreateGameRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getCreateGameMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * #### Controller: 
 
@@ -308,46 +347,88 @@ export const createGame = async (createGameRequest: CreateGameRequest, options?:
 
  * @summary Get a game
  */
-export type getGameResponse200 = {
-  data: PublicGame
-  status: 200
-}
+export const getGame = (
+    code: string,
+ signal?: AbortSignal
+) => {
+      
+      
+      return client<PublicGame>(
+      {url: `/api/games/${code}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-export type getGameResponse400 = {
-  data: HTTPError
-  status: 400
-}
+export const getGetGameQueryKey = (code: string,) => {
+    return [`/api/games/${code}`] as const;
+    }
+
     
-export type getGameResponseComposite = getGameResponse200 | getGameResponse400;
-    
-export type getGameResponse = getGameResponseComposite & {
-  headers: Headers;
-}
+export const getGetGameQueryOptions = <TData = Awaited<ReturnType<typeof getGame>>, TError = ErrorType<HTTPError>>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>>, }
+) => {
 
-export const getGetGameUrl = (code: string,) => {
+const {query: queryOptions} = options ?? {};
 
+  const queryKey =  queryOptions?.queryKey ?? getGetGameQueryKey(code);
 
   
 
-  return `/api/games/${code}`
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGame>>> = ({ signal }) => getGame(code, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(code), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export const getGame = async (code: string, options?: RequestInit): Promise<getGameResponse> => {
-  
-  const res = await fetch(getGetGameUrl(code),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
+export type GetGameQueryResult = NonNullable<Awaited<ReturnType<typeof getGame>>>
+export type GetGameQueryError = ErrorType<HTTPError>
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: getGameResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as getGameResponse
+export function useGetGame<TData = Awaited<ReturnType<typeof getGame>>, TError = ErrorType<HTTPError>>(
+ code: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGame>>,
+          TError,
+          Awaited<ReturnType<typeof getGame>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetGame<TData = Awaited<ReturnType<typeof getGame>>, TError = ErrorType<HTTPError>>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGame>>,
+          TError,
+          Awaited<ReturnType<typeof getGame>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetGame<TData = Awaited<ReturnType<typeof getGame>>, TError = ErrorType<HTTPError>>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get a game
+ */
+
+export function useGetGame<TData = Awaited<ReturnType<typeof getGame>>, TError = ErrorType<HTTPError>>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetGameQueryOptions(code,options)
+
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
 
 
 
@@ -365,51 +446,69 @@ export const getGame = async (code: string, options?: RequestInit): Promise<getG
 
  * @summary Submit a game action
  */
-export type playActionResponse200 = {
-  data: PlayActionResponse
-  status: 200
-}
-
-export type playActionResponse400 = {
-  data: HTTPError
-  status: 400
-}
-    
-export type playActionResponseComposite = playActionResponse200 | playActionResponse400;
-    
-export type playActionResponse = playActionResponseComposite & {
-  headers: Headers;
-}
-
-export const getPlayActionUrl = (code: string,) => {
-
-
+export const playAction = (
+    code: string,
+    playActionRequest: PlayActionRequest,
+ signal?: AbortSignal
+) => {
+      
+      
+      return client<PlayActionResponse>(
+      {url: `/api/games/${code}/actions`, method: 'POST',
+      headers: {'Content-Type': '*/*', },
+      data: playActionRequest, signal
+    },
+      );
+    }
   
 
-  return `/api/games/${code}/actions`
-}
 
-export const playAction = async (code: string,
-    playActionRequest: PlayActionRequest, options?: RequestInit): Promise<playActionResponse> => {
-  
-  const res = await fetch(getPlayActionUrl(code),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': '*/*', ...options?.headers },
-    body: JSON.stringify(
-      playActionRequest,)
-  }
-)
+export const getPlayActionMutationOptions = <TError = ErrorType<HTTPError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof playAction>>, TError,{code: string;data: PlayActionRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof playAction>>, TError,{code: string;data: PlayActionRequest}, TContext> => {
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: playActionResponse['data'] = body ? JSON.parse(body) : {}
+const mutationKey = ['playAction'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { data, status: res.status, headers: res.headers } as playActionResponse
-}
+      
 
 
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof playAction>>, {code: string;data: PlayActionRequest}> = (props) => {
+          const {code,data} = props ?? {};
 
+          return  playAction(code,data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlayActionMutationResult = NonNullable<Awaited<ReturnType<typeof playAction>>>
+    export type PlayActionMutationBody = PlayActionRequest
+    export type PlayActionMutationError = ErrorType<HTTPError>
+
+    /**
+ * @summary Submit a game action
+ */
+export const usePlayAction = <TError = ErrorType<HTTPError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof playAction>>, TError,{code: string;data: PlayActionRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof playAction>>,
+        TError,
+        {code: string;data: PlayActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPlayActionMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * #### Controller: 
 
@@ -424,51 +523,69 @@ export const playAction = async (code: string,
 
  * @summary Join a game
  */
-export type joinGameResponse200 = {
-  data: PlayerCredentials
-  status: 200
-}
-
-export type joinGameResponse400 = {
-  data: HTTPError
-  status: 400
-}
-    
-export type joinGameResponseComposite = joinGameResponse200 | joinGameResponse400;
-    
-export type joinGameResponse = joinGameResponseComposite & {
-  headers: Headers;
-}
-
-export const getJoinGameUrl = (code: string,) => {
-
-
+export const joinGame = (
+    code: string,
+    joinGameRequest: JoinGameRequest,
+ signal?: AbortSignal
+) => {
+      
+      
+      return client<PlayerCredentials>(
+      {url: `/api/games/${code}/join`, method: 'POST',
+      headers: {'Content-Type': '*/*', },
+      data: joinGameRequest, signal
+    },
+      );
+    }
   
 
-  return `/api/games/${code}/join`
-}
 
-export const joinGame = async (code: string,
-    joinGameRequest: JoinGameRequest, options?: RequestInit): Promise<joinGameResponse> => {
-  
-  const res = await fetch(getJoinGameUrl(code),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': '*/*', ...options?.headers },
-    body: JSON.stringify(
-      joinGameRequest,)
-  }
-)
+export const getJoinGameMutationOptions = <TError = ErrorType<HTTPError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinGame>>, TError,{code: string;data: JoinGameRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof joinGame>>, TError,{code: string;data: JoinGameRequest}, TContext> => {
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: joinGameResponse['data'] = body ? JSON.parse(body) : {}
+const mutationKey = ['joinGame'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { data, status: res.status, headers: res.headers } as joinGameResponse
-}
+      
 
 
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinGame>>, {code: string;data: JoinGameRequest}> = (props) => {
+          const {code,data} = props ?? {};
 
+          return  joinGame(code,data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type JoinGameMutationResult = NonNullable<Awaited<ReturnType<typeof joinGame>>>
+    export type JoinGameMutationBody = JoinGameRequest
+    export type JoinGameMutationError = ErrorType<HTTPError>
+
+    /**
+ * @summary Join a game
+ */
+export const useJoinGame = <TError = ErrorType<HTTPError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinGame>>, TError,{code: string;data: JoinGameRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof joinGame>>,
+        TError,
+        {code: string;data: JoinGameRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getJoinGameMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * #### Controller: 
 
@@ -483,43 +600,84 @@ export const joinGame = async (code: string,
 
  * @summary Health check
  */
-export type healthResponse200 = {
-  data: HealthResponse
-  status: 200
-}
-
-export type healthResponse400 = {
-  data: HTTPError
-  status: 400
-}
+export const health = (
     
-export type healthResponseComposite = healthResponse200 | healthResponse400;
+ signal?: AbortSignal
+) => {
+      
+      
+      return client<HealthResponse>(
+      {url: `/api/health`, method: 'GET', signal
+    },
+      );
+    }
+  
+
+export const getHealthQueryKey = () => {
+    return [`/api/health`] as const;
+    }
+
     
-export type healthResponse = healthResponseComposite & {
-  headers: Headers;
-}
+export const getHealthQueryOptions = <TData = Awaited<ReturnType<typeof health>>, TError = ErrorType<HTTPError>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof health>>, TError, TData>>, }
+) => {
 
-export const getHealthUrl = () => {
+const {query: queryOptions} = options ?? {};
 
+  const queryKey =  queryOptions?.queryKey ?? getHealthQueryKey();
 
   
 
-  return `/api/health`
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof health>>> = ({ signal }) => health(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof health>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export const health = async ( options?: RequestInit): Promise<healthResponse> => {
-  
-  const res = await fetch(getHealthUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
+export type HealthQueryResult = NonNullable<Awaited<ReturnType<typeof health>>>
+export type HealthQueryError = ErrorType<HTTPError>
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: healthResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as healthResponse
+export function useHealth<TData = Awaited<ReturnType<typeof health>>, TError = ErrorType<HTTPError>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof health>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof health>>,
+          TError,
+          Awaited<ReturnType<typeof health>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHealth<TData = Awaited<ReturnType<typeof health>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof health>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof health>>,
+          TError,
+          Awaited<ReturnType<typeof health>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHealth<TData = Awaited<ReturnType<typeof health>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof health>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Health check
+ */
+
+export function useHealth<TData = Awaited<ReturnType<typeof health>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof health>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }

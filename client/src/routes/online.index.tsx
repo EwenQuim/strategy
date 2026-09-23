@@ -1,7 +1,14 @@
 import { buttonClassName, iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import { useQueries } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { createGame, getGame, joinGame, type PublicGame } from '../../generated/sdk.gen.ts'
+import {
+  getGetGameQueryOptions,
+  useCreateGame,
+  useJoinGame,
+  type PublicGame,
+} from '../../generated/sdk.gen.ts'
+import { ApiError } from '../api/client.ts'
 import { Icon } from '../components/Icon'
 import {
   onlineEnabled,
@@ -25,49 +32,37 @@ export const Route = createFileRoute('/online/')({
     const [name, setName] = useState(readPlayerName())
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
-    const [busy, setBusy] = useState(false)
     const [games, setGames] = useState<StoredGame[]>([])
-    const [docs, setDocs] = useState<Record<string, PublicGame | 404>>({})
+    const createGame = useCreateGame()
+    const joinGame = useJoinGame()
+    const busy = createGame.isPending || joinGame.isPending
 
     useEffect(() => {
-      const stored = readStoredGames()
-      setGames(stored)
-      void Promise.allSettled(
-        stored.map(async (game) => {
-          try {
-            const res = await getGame(game.code)
-            setDocs((prev) => ({
-              ...prev,
-              [game.code]: res.status === 200 ? res.data : 404,
-            }))
-          } catch {
-            setDocs((prev) => ({ ...prev, [game.code]: 404 }))
-          }
-        }),
-      )
+      setGames(readStoredGames())
     }, [])
+
+    const docs = useQueries({
+      queries: games.map((game) => getGetGameQueryOptions(game.code)),
+    })
 
     const trimmedName = name.trim()
     const joinCode = code.trim().toUpperCase()
 
     const start = async (run: () => Promise<string>) => {
-      setBusy(true)
       setError('')
+      savePlayerName(trimmedName)
       try {
-        savePlayerName(trimmedName)
-        const side = await run()
-        navigate({ to: '/online/$code', params: { code: side } })
+        navigate({ to: '/online/$code', params: { code: await run() } })
       } catch (cause) {
-        const status = String((cause as Error).message)
+        const status = cause instanceof ApiError ? cause.status : 0
         setError(
-          status === '404'
+          status === 404
             ? 'No game with this code.'
-            : status === '409'
+            : status === 409
               ? 'This game already has two players.'
               : 'Could not reach the game server.',
         )
       }
-      setBusy(false)
     }
 
     return (
@@ -84,14 +79,9 @@ export const Route = createFileRoute('/online/')({
             event.preventDefault()
             if (!trimmedName || busy) return
             void start(async () => {
-              const res = await createGame({ name: trimmedName })
-              if (res.status !== 201) throw new Error(String(res.status))
-              saveStoredGame({
-                code: res.data.game.code,
-                token: res.data.token,
-                side: 'player',
-              })
-              return res.data.game.code
+              const creds = await createGame.mutateAsync({ data: { name: trimmedName } })
+              saveStoredGame({ code: creds.game.code, token: creds.token, side: 'player' })
+              return creds.game.code
             })
           }}
         >
@@ -125,10 +115,12 @@ export const Route = createFileRoute('/online/')({
             event.preventDefault()
             if (!trimmedName || joinCode.length !== 6 || busy) return
             void start(async () => {
-              const res = await joinGame(joinCode, { name: trimmedName })
-              if (res.status !== 200) throw new Error(String(res.status))
-              saveStoredGame({ code: res.data.game.code, token: res.data.token, side: 'enemy' })
-              return res.data.game.code
+              const creds = await joinGame.mutateAsync({
+                data: { name: trimmedName },
+                code: joinCode,
+              })
+              saveStoredGame({ code: creds.game.code, token: creds.token, side: 'enemy' })
+              return creds.game.code
             })
           }}
         >
@@ -170,8 +162,9 @@ export const Route = createFileRoute('/online/')({
             <h2 className="text-[12px] font-semibold tracking-[0.17em] text-muted uppercase">
               Your games
             </h2>
-            {games.map((game) => {
-              const doc = docs[game.code]
+            {games.map((game, index) => {
+              const doc: PublicGame | undefined = docs[index]?.data
+              const missing = docs[index]?.isError
               return (
                 <Link
                   key={game.code}
@@ -186,14 +179,14 @@ export const Route = createFileRoute('/online/')({
                   <span className="font-mono tracking-[0.2em]">{game.code}</span>
                   <span className="text-[11px] text-muted">
                     {!doc
-                      ? 'Loading...'
-                      : doc === 404
+                      ? missing
                         ? 'Not found'
-                        : doc.status === 'waiting'
-                          ? 'Waiting for opponent'
-                          : doc.status === 'finished'
-                            ? 'Finished'
-                            : (doc.namePlayer ?? '?') + ' vs ' + (doc.nameEnemy ?? '?')}
+                        : 'Loading...'
+                      : doc.status === 'waiting'
+                        ? 'Waiting for opponent'
+                        : doc.status === 'finished'
+                          ? 'Finished'
+                          : (doc.namePlayer ?? '?') + ' vs ' + (doc.nameEnemy ?? '?')}
                   </span>
                 </Link>
               )

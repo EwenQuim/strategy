@@ -1,7 +1,7 @@
 import { buttonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
-import { getGame, type PublicGame } from '../../generated/sdk.gen.ts'
+import { useGetGame } from '../../generated/sdk.gen.ts'
+import { ApiError } from '../api/client.ts'
 import { Game } from '../components/Game'
 import { onlineEnabled, readStoredGames } from '../online.ts'
 
@@ -15,35 +15,12 @@ export const Route = createFileRoute('/online/$code')({
   component: function OnlineBattle() {
     const { code } = Route.useParams()
     const stored = readStoredGames().find((game) => game.code === code)
-    const [doc, setDoc] = useState<PublicGame | null>(null)
-    const [error, setError] = useState('')
-    const waiting = useRef(true)
-
-    useEffect(() => {
-      let cancelled = false
-      const poll = async () => {
-        if (!waiting.current || cancelled) return
-        try {
-          const res = await getGame(code)
-          if (cancelled) return
-          if (res.status === 200) {
-            setDoc(res.data)
-            setError('')
-            if (res.data.status !== 'waiting') waiting.current = false
-          } else {
-            setError('This game does not exist anymore.')
-          }
-        } catch {
-          setError('Could not reach the game server.')
-        }
-      }
-      void poll()
-      const timer = window.setInterval(poll, POLL_INTERVAL_MS)
-      return () => {
-        cancelled = true
-        window.clearInterval(timer)
-      }
-    }, [code])
+    const game = useGetGame(code, {
+      query: {
+        refetchInterval: (query) =>
+          query.state.data?.status === 'waiting' ? POLL_INTERVAL_MS : false,
+      },
+    })
 
     if (!stored) {
       return (
@@ -68,11 +45,16 @@ export const Route = createFileRoute('/online/$code')({
       )
     }
 
-    if (error && !doc) {
+    if (game.isError) {
+      const status = game.error instanceof ApiError ? game.error.status : 0
       return (
         <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
           <div className="grid gap-4">
-            <h1 className="font-serif text-[28px]">{error}</h1>
+            <h1 className="font-serif text-[28px]">
+              {status === 404
+                ? 'This game does not exist anymore.'
+                : 'Could not reach the game server.'}
+            </h1>
             <Link
               to="/online"
               className={
@@ -88,6 +70,7 @@ export const Route = createFileRoute('/online/$code')({
       )
     }
 
+    const doc = game.data
     if (!doc || doc.status === 'waiting') {
       return (
         <main className="grid min-h-dvh place-items-center bg-[#182c22] px-5 py-8 text-center">

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import { initialPlayback, playbackReducer, type PlaybackAction } from './lib/playback.ts'
-import { getGame, playAction } from '../generated/sdk.gen.ts'
+import { getGame, useGetGame, usePlayAction } from '../generated/sdk.gen.ts'
 import type { Side } from './lib/engine/pawns/pawn.ts'
 import type { GameMode } from './lib/game-mode.ts'
 import type { OnlineAction } from './lib/online.ts'
@@ -41,12 +41,30 @@ export function useGame({
   const frame = playback.frames[0]
   const appliedActions = useRef(0)
 
+  const live = !!online && !playback.state.winner
+  const game = useGetGame(online?.code ?? '', {
+    query: {
+      enabled: live,
+      refetchInterval: live ? POLL_INTERVAL_MS : false,
+    },
+  })
+  const playAction = usePlayAction()
+
+  useEffect(() => {
+    if (!online) return
+    const actions = game.data?.actions as unknown as OnlineAction[] | null | undefined
+    if (!actions) return
+    if (actions.length !== appliedActions.current) {
+      appliedActions.current = actions.length
+      dispatch({ type: 'resync', actions })
+    }
+  }, [game.data, online])
+
   const resync = useCallback(async () => {
     if (!online) return
     try {
-      const res = await getGame(online.code)
-      if (res.status !== 200) return
-      const actions = (res.data.actions ?? []) as unknown as OnlineAction[]
+      const doc = await getGame(online.code)
+      const actions = (doc.actions ?? []) as unknown as OnlineAction[]
       appliedActions.current = actions.length
       dispatch({ type: 'resync', actions })
     } catch {
@@ -69,23 +87,22 @@ export function useGame({
       dispatch(action)
       void (async () => {
         try {
-          const res = await playAction(online.code, {
-            token: online.token,
-            version: appliedActions.current,
-            action,
-            winner: winner ?? null,
+          const res = await playAction.mutateAsync({
+            code: online.code,
+            data: {
+              token: online.token,
+              version: appliedActions.current,
+              action,
+              winner: winner ?? null,
+            },
           })
-          if (res.status === 200) {
-            appliedActions.current = res.data.version
-          } else {
-            await resync()
-          }
+          appliedActions.current = res.version
         } catch {
           await resync()
         }
       })()
     },
-    [difficulty, mode, online, playback, resync],
+    [difficulty, mode, online, playback, playAction, resync],
   )
 
   useEffect(() => {
@@ -97,29 +114,6 @@ export function useGame({
     )
     return () => window.clearTimeout(timer)
   }, [frame])
-
-  useEffect(() => {
-    if (!online || playback.state.winner) return
-    let cancelled = false
-    const poll = async () => {
-      try {
-        const res = await getGame(online.code)
-        if (cancelled || res.status !== 200) return
-        const actions = res.data.actions as unknown as OnlineAction[] | null
-        if ((actions?.length ?? 0) !== appliedActions.current) {
-          appliedActions.current = actions?.length ?? 0
-          dispatch({ type: 'resync', actions: actions ?? [] })
-        }
-      } catch {
-        // server unreachable: next poll retries
-      }
-    }
-    const timer = window.setInterval(poll, POLL_INTERVAL_MS)
-    return () => {
-      cancelled = true
-      window.clearInterval(timer)
-    }
-  }, [online, playback.state.winner])
 
   return {
     state: frame?.state ?? playback.state,
