@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    # BACKEND_URL: http://backend:9000  # proxy /api to the real backend once it exists
+    develop:
+      watch:
+        - path: ./server
+          action: rebuild
+        - path: ./client/src
+          action: rebuild
+        - path: ./client/public
+          action: rebuild
+        - path: ./client/index.html
+          action: rebuild

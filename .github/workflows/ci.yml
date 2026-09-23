@@ -33,6 +33,23 @@ jobs:
         if: inputs.pages
         with:
           path: client/dist
+  go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          cache: false
+      - run: go test ./...
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.13
+          working-directory: server
   browser:
     continue-on-error: true
     runs-on: ubuntu-latest
