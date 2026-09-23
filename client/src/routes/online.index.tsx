@@ -1,7 +1,7 @@
 import { buttonClassName, iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { createGame, getGame, joinGame, type PublicGame } from '../api/sdk.gen.ts'
+import { createGame, getGame, joinGame, type PublicGame } from '../../generated/sdk.gen.ts'
 import { Icon } from '../components/Icon'
 import {
   onlineEnabled,

@@ -3,7 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
-import { health } from '../api/sdk.gen.ts'
+import { health } from '../../generated/sdk.gen.ts'
 import { onlineEnabled } from '../online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 

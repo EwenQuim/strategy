@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 import { initialPlayback, playbackReducer, type PlaybackAction } from './lib/playback.ts'
-import { getGame, playAction } from './api/sdk.gen.ts'
+import { getGame, playAction } from '../generated/sdk.gen.ts'
 import type { Side } from './lib/engine/pawns/pawn.ts'
 import type { GameMode } from './lib/game-mode.ts'
 import type { OnlineAction } from './lib/online.ts'

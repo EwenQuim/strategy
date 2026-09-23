@@ -8,17 +8,17 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as CampaignRouteImport } from './routes/campaign'
-import { Route as CustomRouteImport } from './routes/custom'
-import { Route as GameRouteImport } from './routes/game'
-import { Route as CampaignIndexRouteImport } from './routes/campaign.index'
-import { Route as CampaignLevelRouteImport } from './routes/campaign.$level'
-import { Route as GameIndexRouteImport } from './routes/game.index'
-import { Route as GameSeedRouteImport } from './routes/game.$seed'
-import { Route as OnlineIndexRouteImport } from './routes/online.index'
-import { Route as OnlineCodeRouteImport } from './routes/online.$code'
+import { Route as rootRouteImport } from './../src/routes/__root'
+import { Route as IndexRouteImport } from './../src/routes/index'
+import { Route as CampaignRouteImport } from './../src/routes/campaign'
+import { Route as CustomRouteImport } from './../src/routes/custom'
+import { Route as GameRouteImport } from './../src/routes/game'
+import { Route as CampaignIndexRouteImport } from './../src/routes/campaign.index'
+import { Route as CampaignLevelRouteImport } from './../src/routes/campaign.$level'
+import { Route as GameIndexRouteImport } from './../src/routes/game.index'
+import { Route as GameSeedRouteImport } from './../src/routes/game.$seed'
+import { Route as OnlineIndexRouteImport } from './../src/routes/online.index'
+import { Route as OnlineCodeRouteImport } from './../src/routes/online.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',

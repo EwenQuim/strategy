@@ -26,7 +26,11 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+      generatedRouteTree: './generated/routeTree.gen.ts',
+    }),
     react({ compiler: { panicThreshold: 'all_errors' } }),
     pwa(),
   ],
