@@ -90,7 +90,13 @@ The same optional setup is accepted by bot `initialState(seed, setup)` / `initia
 
 ## Campaign
 
-Choose Campaign on the home screen to play 20 fixed AI encounters across all four biomes. Volcanic encounters are level 9 (Ember Crossing), level 15 (Cinder Keep), and level 18 (Caldera Run). Each special tile appears exactly once: the watchtower in level 5, the healing spring in level 14, and the power rune in level 15. Level 1 starts unlocked; winning unlocks the next level. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
+Choose Campaign on the home screen to play 20 authored AI encounters. The opening is a swordsman-and-king patrol on open ground, not a full-roster battle. Archers arrive in level 2, lakes in 3, directional Fireball in 4, the watchtower in 5, mountains in 6, range-2 Protect in 7, and friendly-fire bombs in 8. Lava arrives in level 9; the open desert and your first ninja arrive in 11.
+
+Later encounters test combinations rather than just adding enemies: Twin Daggers threatens two flanks, Iron Caravan is a two-bomber ambush, Wizard Curtain places four aligned casters between your flanking squads, and Forked Gate offers a watchtower route or a healing-spring route. Caldera Run combines safe landings, enemy assassins, and contested energy. The final two battles bring all seven player classes together. Terrain never blocks ranged attacks or spells.
+
+Volcanic encounters remain levels 9, 15, and 18. Features are introduced separately, then reused: watchtowers first appear in 5, healing springs in 14, and power runes in 15. Later maps combine at most two features, all reachable without crossing lava. Difficulty comes from formations, terrain, and unit combinations; campaign AI stays on normal. Integration tests require a reproducible player victory for every encounter, trying aggressive and cautious hard-bot playstyles.
+
+Level 1 starts unlocked; winning unlocks the next level. Existing saved progress is preserved. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
 
 Completed levels are stored in localStorage under `hexmate:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 
