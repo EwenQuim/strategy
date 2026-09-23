@@ -2,7 +2,7 @@
 
 NPM := npm --prefix client
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker
 
 onboarding: installdeps
 
@@ -34,3 +34,6 @@ build:
 
 check:
 	$(NPM) run test:ci
+
+docker:
+	docker build -t hexmate --build-arg VITE_GIT_COMMIT=$$(git rev-parse HEAD) .
