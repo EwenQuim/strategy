@@ -99,6 +99,11 @@ func TestOnlineGameFlow(t *testing.T) {
 		t.Fatalf("join unknown: status=%d", status)
 	}
 
+	status, waiting := do[gameResponse](t, ts, http.MethodGet, "/api/games/"+code, nil)
+	if status != http.StatusOK || waiting.Status != "waiting" || waiting.NameEnemy != "" || waiting.Actions != nil {
+		t.Fatalf("waiting game: status=%d body=%+v", status, waiting)
+	}
+
 	status, joiner := do[credentialsResponse](t, ts, http.MethodPost, fmt.Sprintf("/api/games/%s/join", code), map[string]string{"name": "Bob"})
 	if status != http.StatusOK || joiner.Side != "enemy" || joiner.Token == "" {
 		t.Fatalf("join: status=%d body=%+v", status, joiner)

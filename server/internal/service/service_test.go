@@ -89,6 +89,39 @@ func TestGameLifecycle(t *testing.T) {
 	}
 }
 
+func TestCredentialsAreHashedAndWellFormed(t *testing.T) {
+	store, cleanup := stores()["memory"](t)
+	defer cleanup()
+	ctx := context.Background()
+	svc := service.New(store)
+
+	creds, err := svc.Create(ctx, "Ewen")
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := svc.Game(ctx, creds.Game.Code)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.TokenPlayer == creds.Token {
+		t.Fatal("plaintext token stored")
+	}
+	if len(g.TokenPlayer) != 64 {
+		t.Fatalf("token hash length = %d, want sha256 hex", len(g.TokenPlayer))
+	}
+	if len(creds.Game.Code) != 6 {
+		t.Fatalf("code = %q, want 6 characters", creds.Game.Code)
+	}
+	for _, c := range creds.Game.Code {
+		if !strings.ContainsRune("23456789ABCDEFGHJKMNPQRSTUVWXYZ", c) {
+			t.Fatalf("code %q contains ambiguous character %q", creds.Game.Code, c)
+		}
+	}
+	if creds.Game.Seed == "" {
+		t.Fatal("seed is empty")
+	}
+}
+
 func TestNameValidation(t *testing.T) {
 	store, cleanup := stores()["memory"](t)
 	defer cleanup()

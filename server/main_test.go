@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -40,5 +41,31 @@ func TestRootRedirectsToApp(t *testing.T) {
 	mux.ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
 	if w.Code != http.StatusFound || w.Header().Get("Location") != appBase {
 		t.Fatalf("code=%d location=%q", w.Code, w.Header().Get("Location"))
+	}
+}
+
+func TestNewServiceStoreSelection(t *testing.T) {
+	svc, err := newService("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.Create(context.Background(), "Ewen"); err != nil {
+		t.Fatalf("memory store: %v", err)
+	}
+
+	dbPath := filepath.Join(t.TempDir(), "hexmate.db")
+	svc, err = newService(dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	creds, err := svc.Create(context.Background(), "Ewen")
+	if err != nil {
+		t.Fatalf("sqlite store: %v", err)
+	}
+	if _, err := os.Stat(dbPath); err != nil {
+		t.Fatalf("sqlite file not created: %v", err)
+	}
+	if _, err := svc.Game(context.Background(), creds.Game.Code); err != nil {
+		t.Fatalf("sqlite read: %v", err)
 	}
 }
