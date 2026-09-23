@@ -5,7 +5,7 @@ import {
 } from './engine/engine.ts'
 import { canAttack, specialTargets, protectorFor } from './engine/combat.ts'
 import { chargeDestinations, jumpDestinations } from './engine/pawns/index.ts'
-import { distFrom, hexDist, key, neighbors, passable } from './engine/hex.ts'
+import { distFrom, key, neighbors, passable } from './engine/hex.ts'
 import type { Action, BattleFrame, BattleSetup, GameState, Transition } from './engine/types.ts'
 import { type BotStrategy } from './strategies.ts'
 import {
@@ -64,13 +64,36 @@ export function chooseBotActions(
         { type: 'specialAt', q: ally.q, r: ally.r },
       ]
   }
+  if (pawn.special.areaTargets) {
+    const area = pawn.special
+      .candidates(pawn, state)
+      .map((actions) => {
+        const aim = actions.find((action) => action.type === 'specialAt')!
+        const targets = pawn.special.areaTargets!(pawns, aim, pawn)
+        const score = targets.reduce(
+          (total, target) => total + (target.side === pawn.side ? -1 : 1),
+          0,
+        )
+        return { actions, targets, score }
+      })
+      .filter(
+        ({ targets, score }) =>
+          score > 0 &&
+          !targets.some(
+            (target) => target.side === pawn.side && target.kind === 'king' && target.hp <= 1,
+          ),
+      )
+      .sort((a, b) => b.score - a.score)[0]
+    if (
+      area &&
+      (area.score > 1 ||
+        !foes.some((foe) => canAttack(pawn, foe, tiles.get(key(pawn.q, pawn.r)))))
+    )
+      return area.actions
+  }
   const special = strategy.chooseTarget(
     pawn,
-    specials.filter((p) =>
-      pawn.kind === 'archer'
-        ? p.escapeChance > 0
-        : pawn.kind === 'magician' && foes.filter((f) => hexDist(p, f) <= 1).length > 1,
-    ),
+    specials.filter((p) => pawn.kind === 'archer' && p.escapeChance > 0),
   )
   if (special)
     return [
@@ -176,7 +199,9 @@ export function createBotGame(strategy: BotController = 'normal') {
     return {
       state: bots.state,
       frames: [
-        ...player.frames.filter((frame) => frame.effect?.impacts?.length),
+        ...player.frames.filter(
+          (frame) => frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length,
+        ),
         ...bots.frames,
       ],
     }

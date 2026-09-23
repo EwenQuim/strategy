@@ -32,7 +32,12 @@ export function playbackReducer(
   if (playback.frames.length) return playback
   if (mode === 'local' || mode === 'online') {
     const result = applyAction(playback.state, action)
-    return { ...result, frames: result.frames.filter((frame) => frame.effect?.impacts?.length) }
+    return {
+      ...result,
+      frames: result.frames.filter(
+        (frame) => frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length,
+      ),
+    }
   }
   return createBotGame(difficulty).transition(playback.state, action)
 }

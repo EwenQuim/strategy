@@ -1,5 +1,6 @@
-import { aimAt, allyTargets, label, pawnAt, protectorFor, specialTargets } from '../combat.ts'
+import { aimAt, label, pawnAt, protectorFor, specialTargets } from '../combat.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
+import { hexDist } from '../hex.ts'
 
 const protect: SpecialAbility = {
   name: 'Protect',
@@ -8,8 +9,12 @@ const protect: SpecialAbility = {
   prompt: 'Choose ally',
   noTargets: 'No nearby allies',
   description:
-    'Protect an adjacent ally until your next turn. Take its next hit instead, without a second Escape roll. Ends if you separate. Moving costs 2 energy for the first tile, then 1 per extra tile.',
-  targets: (pawn, pawns) => allyTargets(pawn, pawns),
+    'Protect an ally within 2 tiles until your next turn. Take its next hit instead, without a second Escape roll. Ends if you move more than 2 tiles apart. Moving costs 2 energy for the first tile, then 1 per extra tile.',
+  targets: (pawn, pawns) =>
+    pawns.filter(
+      (target) =>
+        target.side === pawn.side && target.id !== pawn.id && hexDist(pawn, target) <= 2,
+    ),
   candidates: (pawn, { pawns }) =>
     specialTargets(pawns, pawn)
       .filter((target) => !protectorFor(pawns, target))

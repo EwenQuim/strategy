@@ -8,7 +8,12 @@ import {
 } from '../src/lib/campaign.ts'
 import {
   initialState as coreState,
-  MAP_HEIGHT,
+  PAWN_CLASSES,
+  passable,
+  specialTargets,
+  hexDist,
+  hexOf,
+  reducer,
   distFrom,
   key,
   type TileFeature,
@@ -41,20 +46,23 @@ test('Every campaign level comes directly from one JSON with both complete armie
   }
 })
 
-test('Campaign Bulwarks start on their assigned rows for both sides', () => {
-  for (const [side, row] of [
-    ['player', MAP_HEIGHT - 3],
-    ['enemy', 3],
+test('Authored guardians cover their partners, including the wizard-flank deployment', () => {
+  for (const [id, side, kind] of [
+    [7, 'player', 'king'],
+    [16, 'player', 'magician'],
+    [19, 'enemy', 'king'],
   ] as const) {
-    const bulwarks = CAMPAIGN_LEVELS.flatMap((level) =>
-      level.setup[side].filter((pawn) => pawn.kind === 'bulwark'),
-    )
-    assert.ok(bulwarks.length > 0)
-    for (const pawn of bulwarks) assert.equal(pawn.row, row)
+    const level = CAMPAIGN_LEVELS[id - 1]
+    const state = coreState(level.seed, level.setup)
+    const ally = state.pawns.find((pawn) => pawn.side === side && pawn.kind === kind)!
+    const guards = state.pawns.filter((pawn) => pawn.side === side && pawn.kind === 'bulwark')
+    assert.ok(guards.length > 0)
+    for (const guard of guards) assert.ok(specialTargets(state.pawns, guard).includes(ally))
+    if (id === 16) assert.equal(hexDist(guards[0], ally), 2)
   }
 })
 
-test('Three volcanic encounters and one of each special tile have safe, contested approaches', () => {
+test('All encounters have safe routes and later levels combine previously introduced features', () => {
   const volcanic = CAMPAIGN_LEVELS.filter((level) => level.setup.biome === 'volcano')
   assert.deepEqual(
     volcanic.map((level) => level.id),
@@ -63,7 +71,14 @@ test('Three volcanic encounters and one of each special tile have safe, conteste
   const features: Record<TileFeature, number[]> = { watchtower: [], spring: [], rune: [] }
   for (const level of CAMPAIGN_LEVELS) {
     const state = coreState(level.seed, level.setup)
-    const safe = new Map([...state.tiles].filter(([, tile]) => tile.terrain !== 'lava'))
+    const safe = new Map(
+      [...state.tiles].filter(([, tile]) => passable(tile) && tile.terrain !== 'lava'),
+    )
+    assert.equal(
+      distFrom(safe, [state.pawns[0]]).size,
+      safe.size,
+      'Connected safe terrain in level ' + level.id,
+    )
     const specials = [...state.tiles.values()].filter((tile) => tile.feature)
     assert.ok(specials.length <= 2)
     for (const tile of specials) {
@@ -91,7 +106,115 @@ test('Three volcanic encounters and one of each special tile have safe, conteste
       'Safe routes across level ' + level.id,
     )
   }
-  assert.deepEqual(features, { watchtower: [5], spring: [14], rune: [15] })
+  assert.deepEqual(features, {
+    watchtower: [5, 17, 18],
+    spring: [14, 17, 19, 20],
+    rune: [15, 18, 20],
+  })
+})
+
+test('The campaign introduces units gradually and keeps the opening free of obstacles', () => {
+  const firstAppearance: Record<string, number> = {}
+  for (const level of CAMPAIGN_LEVELS) {
+    for (const pawn of [...level.setup.player, ...level.setup.enemy]) {
+      if (firstAppearance[pawn.kind]) continue
+      firstAppearance[pawn.kind] = level.id
+      assert.ok(
+        level.intro.newElements.some((element) => element.name.toLowerCase() === pawn.kind),
+        'Missing introduction for ' + pawn.kind,
+      )
+    }
+  }
+  assert.deepEqual(firstAppearance, {
+    king: 1,
+    swordsman: 1,
+    archer: 2,
+    magician: 4,
+    bulwark: 7,
+    bomber: 8,
+    ninja: 11,
+  })
+  assert.equal(CAMPAIGN_LEVELS[0].setup.player.length, 2)
+  assert.equal(CAMPAIGN_LEVELS[0].setup.enemy.length, 1)
+  for (const level of CAMPAIGN_LEVELS.slice(0, 2)) {
+    assert.ok(level.setup.map.every((row) => /^[.f]{8}$/.test(row)))
+    assert.ok(level.intro.newElements.length <= 2)
+  }
+  assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.setup.map.join(''))).size, 20)
+  assert.ok(CAMPAIGN_LEVELS[10].setup.map.every((row) => row === 'ssssssss'))
+  for (const side of ['player', 'enemy'] as const)
+    assert.deepEqual(
+      new Set(CAMPAIGN_LEVELS[19].setup[side].map((pawn) => pawn.kind)),
+      new Set(Object.keys(PAWN_CLASSES)),
+    )
+})
+
+test('Powder Lesson and Iron Caravan offer useful blasts without requiring friendly fire', () => {
+  for (const [id, minimumHits] of [
+    [8, 2],
+    [13, 3],
+  ] as const) {
+    const level = CAMPAIGN_LEVELS[id - 1]
+    const state = coreState(level.seed, level.setup)
+    const bombers = state.pawns.filter(
+      (pawn) => pawn.side === 'player' && pawn.kind === 'bomber',
+    )
+    assert.equal(bombers.length, id === 8 ? 1 : 2)
+    for (const bomber of bombers) {
+      assert.ok(
+        [...state.tiles.values()].some((tile) => {
+          if (hexDist(bomber, tile) > 2) return false
+          if (id === 8 && state.pawns.some((pawn) => pawn.q === tile.q && pawn.r === tile.r))
+            return false
+          const targets = bomber.special.areaTargets!(state.pawns, tile, bomber)
+          return targets.length >= minimumHits && targets.every((pawn) => pawn.side === 'enemy')
+        }),
+        'Safe multi-target bomb in level ' + id,
+      )
+    }
+  }
+})
+
+test('Powder Lesson groups two bowmen above the swordsmen within one advanced bomb blast', () => {
+  const level = CAMPAIGN_LEVELS[7]
+  assert.deepEqual(
+    level.setup.enemy.filter((pawn) => pawn.kind === 'archer'),
+    [
+      { kind: 'archer', col: 3, row: 4 },
+      { kind: 'archer', col: 4, row: 4 },
+    ],
+  )
+  const state = coreState(level.seed, level.setup)
+  const bomber = state.pawns.find((pawn) => pawn.side === 'player' && pawn.kind === 'bomber')!
+  const moved = reducer(
+    { ...state, active: state.order.indexOf(bomber.id) },
+    { type: 'move', ...hexOf(3, 7) },
+  )
+  const fired = reducer(reducer(moved, { type: 'act', action: 'special' }), {
+    type: 'specialAt',
+    ...hexOf(3, 5),
+  })
+  for (const pawn of fired.pawns) {
+    const damaged = pawn.side === 'enemy' && pawn.kind !== 'king'
+    assert.equal(pawn.hp, pawn.maxHp - Number(damaged))
+  }
+  assert.equal(fired.pawns.find((pawn) => pawn.id === bomber.id)?.energy, 0)
+})
+
+test('Wizard Curtain has four aligned casters and Forked Gate has two distinct crossings', () => {
+  const level = CAMPAIGN_LEVELS[15]
+  const state = coreState(level.seed, level.setup)
+  const wizards = state.pawns.filter(
+    (pawn) => pawn.kind === 'magician' && pawn.side === 'enemy',
+  )
+  const mage = state.pawns.find((pawn) => pawn.kind === 'magician' && pawn.side === 'player')!
+  assert.equal(wizards.length, 4)
+  assert.deepEqual(mage.special.areaTargets!(state.pawns, wizards[0], mage), wizards)
+  const gates = CAMPAIGN_LEVELS[16]
+  for (const row of gates.setup.map.slice(5, 7))
+    assert.equal([...row].filter((tile) => tile !== '^').length, 2)
+  assert.ok(gates.setup.map[5].includes('W'))
+  assert.ok(gates.setup.map[6].includes('H'))
 })
 
 test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {

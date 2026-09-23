@@ -283,7 +283,7 @@ export function Battlefield({
       {effect && (
         <g
           key={effectId}
-          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78]"
+          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] motion-reduce:animate-none"
           data-kind={effect.kind}
           aria-hidden="true"
         >
@@ -300,7 +300,24 @@ export function Battlefield({
               }
             />
           )}
-          {!effect.impacts?.length && (
+          {effect.kind === 'bomb' && (
+            <g
+              data-testid="bomb-effect"
+              transform={
+                'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+              }
+            >
+              <circle
+                r="66"
+                className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box] motion-reduce:animate-none"
+              />
+              <g transform="translate(-22 -30) scale(2)" className="text-[#ffe1a3]">
+                <circle cx="11" cy="15" r="7" className="fill-[#25252d]" />
+                <PawnIcon kind="bomber" />
+              </g>
+            </g>
+          )}
+          {effect.kind !== 'bomb' && !effect.impacts?.length && (
             <g
               transform={
                 'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'

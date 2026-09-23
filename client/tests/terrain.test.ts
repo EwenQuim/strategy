@@ -154,8 +154,16 @@ for (const side of ['player', 'enemy'] as const) {
       assert.equal(result.pawns[2].hp, target.hp - (ranged ? pawn.attack.damage : 0))
       if (ranged) {
         const special = reducer(state, { type: 'act', action: 'special' })
-        assert.ok(!targetingTiles(special).has(key(target.q, target.r)))
-        assert.equal(reducer(special, { type: 'specialAt', q: target.q, r: target.r }), special)
+        assert.equal(targetingTiles(special).has(key(target.q, target.r)), Unit === Magician)
+        const plain = { ...state, tiles: new Map(state.tiles) }
+        plain.tiles.set('0,5', { q: 0, r: 5, terrain: 'plain' })
+        assert.deepEqual(
+          targetingTiles(special),
+          targetingTiles(reducer(plain, { type: 'act', action: 'special' })),
+        )
+        const cast = reducer(special, { type: 'specialAt', q: target.q, r: target.r })
+        if (Unit === Magician) assert.equal(cast.pawns[2].hp, target.hp - 1)
+        else assert.equal(cast, special)
         const moved = reducer(state, { type: 'move', q: -1, r: 5 })
         assert.ok(!canAttack(moved.pawns[0], target, moved.tiles.get('-1,5')))
       }

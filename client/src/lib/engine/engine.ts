@@ -1,4 +1,4 @@
-import { hexDist, key } from './hex.ts'
+import { key } from './hex.ts'
 import type { Pawn, Side, SpecialResult } from './pawns/index.ts'
 import type {
   Action,
@@ -22,7 +22,9 @@ import {
   label,
 } from './combat.ts'
 
-function winnerFrom(pawns: Pawn[]): Side | null {
+function winnerFrom(pawns: Pawn[], actingSide: Side): Side | null {
+  if (!pawns.some((p) => p.kind === 'king' && p.side === actingSide))
+    return actingSide === 'player' ? 'enemy' : 'player'
   if (!pawns.some((p) => p.kind === 'king' && p.side === 'enemy')) return 'player'
   if (!pawns.some((p) => p.kind === 'king' && p.side === 'player')) return 'enemy'
   return null
@@ -222,7 +224,8 @@ function clearBrokenProtection(pawns: Pawn[]): void {
   for (const protector of pawns) {
     if (protector.protectingId === null) continue
     const ally = pawns.find((pawn) => pawn.id === protector.protectingId)
-    if (!ally || hexDist(protector, ally) !== 1) protector.protectingId = null
+    if (!ally || !protector.special.targets(protector, [ally]).length)
+      protector.protectingId = null
   }
 }
 
@@ -281,7 +284,7 @@ function reduce(
   const { tiles, pawns, actor, log, randomState } = result
   let { effect } = result
   clearBrokenProtection(pawns)
-  const winner = winnerFrom(pawns)
+  const winner = winnerFrom(pawns, actor.side)
   const turnEnded =
     !winner && (action.type === 'endTurn' || actor.energy === 0 || actor.hp <= 0)
   if (turnEnded && actor.hp > 0 && finishTurn(actor, log) && action.type === 'endTurn') {

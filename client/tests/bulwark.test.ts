@@ -5,6 +5,7 @@ import {
   Bulwark,
   King,
   Magician,
+  Bomber,
   Ninja,
   Swordsman,
   activePawn,
@@ -96,7 +97,7 @@ test('Bulwarks pay 2 energy for the first tile and 1 for each extra tile, with i
   }
 })
 
-test('Protect targets only adjacent allies, costs two energy, and can be cancelled freely', () => {
+test('Protect targets allies within two tiles, costs two energy, and can be cancelled freely', () => {
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(side)
     const original = structuredClone(state)
@@ -199,38 +200,48 @@ test('Separating from an ally ends Protect permanently, even if the ally returns
   let state = protect(battle())
   state.active = state.order.indexOf(3)
   state = reducer(state, { type: 'move', q: 2, r: 0 })
+  assert.equal(state.pawns[0].protectingId, 3)
+  assert.equal(protectorFor(state.pawns, state.pawns[2])?.id, 1)
+  state = reducer(state, { type: 'move', q: 3, r: 0 })
   assert.equal(state.pawns[0].protectingId, null)
-  state = reducer(state, { type: 'move', q: 1, r: 0 })
+  state = reducer(state, { type: 'move', q: 2, r: 0 })
   assert.equal(state.pawns[0].protectingId, null)
   assert.equal(protectorFor(state.pawns, state.pawns[2]), undefined)
 })
 
-test('Fireball can hit a Bulwark directly and through Protect, combining its damage marker', () => {
-  for (const hp of [1, 2, 10]) {
-    let state = reducer(protect(battle()), { type: 'endTurn' })
-    state.pawns[0].hp = hp
-    state.pawns[0].escapeChance = 0
-    state.pawns[4] = new Magician(5, 2, 0, 'enemy')
-    state.pawns = [
-      state.pawns[2],
-      state.pawns[0],
-      state.pawns[1],
-      state.pawns[3],
-      state.pawns[4],
-    ]
-    const result = transition(reducer(state, { type: 'act', action: 'special' }), {
-      type: 'specialAt',
-      q: 1,
-      r: 0,
-    })
-    const tank = result.state.pawns.find((p) => p.id === 1)
-    assert.equal(tank?.hp, hp > 2 ? hp - 2 : undefined)
-    assert.equal(result.state.pawns.find((p) => p.id === 3)?.hp, 1)
-    assert.ok(result.state.pawns.some((p) => p.id === 5))
-    assert.deepEqual(result.frames[0].effect?.impacts, [
-      { q: 0, r: 0, damage: Math.min(hp, 2) },
-      { q: 0, r: 1, damage: 1 },
-    ])
+test('Area attacks combine direct and redirected hits at the Bulwark', () => {
+  for (const Unit of [Magician, Bomber]) {
+    for (const hp of [1, 2, 10]) {
+      let state = reducer(protect(battle()), { type: 'endTurn' })
+      state.pawns[0].hp = hp
+      state.pawns[0].escapeChance = 0
+      state.pawns[4] = new Unit(5, 2, 0, 'enemy')
+      state.pawns = [
+        state.pawns[2],
+        state.pawns[0],
+        state.pawns[1],
+        state.pawns[3],
+        state.pawns[4],
+      ]
+      const result = transition(reducer(state, { type: 'act', action: 'special' }), {
+        type: 'specialAt',
+        q: 1,
+        r: 0,
+      })
+      const tank = result.state.pawns.find((p) => p.id === 1)
+      assert.equal(tank?.hp, hp > 2 ? hp - 2 : undefined)
+      assert.equal(result.state.pawns.find((p) => p.id === 3)?.hp, 1)
+      assert.ok(result.state.pawns.some((p) => p.id === 5))
+      assert.deepEqual(result.frames[0].effect?.impacts, [
+        { q: 0, r: 0, damage: Math.min(hp, 2) },
+        ...(Unit === Bomber
+          ? [
+              { q: 0, r: 1, damage: 1 },
+              { q: 2, r: 0, damage: 1 },
+            ]
+          : []),
+      ])
+    }
   }
 })
 

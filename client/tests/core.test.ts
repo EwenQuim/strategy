@@ -86,7 +86,7 @@ test('Actions rejected by the targeting phase leave state and playback untouched
   }
 })
 
-test('Special previews and outcomes retain their pre-refactor reference across all classes', () => {
+test('Special previews and outcomes have a stable reference across all classes', () => {
   const results: unknown[] = []
   for (const side of ['player', 'enemy'] as const) {
     const other = side === 'player' ? 'enemy' : 'player'
@@ -145,7 +145,7 @@ test('Special previews and outcomes retain their pre-refactor reference across a
     seedState(
       JSON.stringify(results, (_, value) => (value instanceof Map ? [...value] : value)),
     ),
-    3967109051,
+    1092823723,
   )
 })
 

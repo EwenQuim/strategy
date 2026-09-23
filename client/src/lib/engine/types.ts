@@ -50,7 +50,7 @@ export type GameState = {
 export type BattleImpact = Axial & { damage: number }
 
 export type BattleEffect = {
-  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'escape' | 'protect'
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'escape' | 'protect'
   from: Axial
   to: Axial
   impacts?: BattleImpact[]

@@ -4,6 +4,7 @@ import {
   King,
   Archer,
   Magician,
+  Bomber,
   Ninja,
   Bulwark,
   RECRUIT_CLASSES,
@@ -393,6 +394,7 @@ test('Every class has its proposed health, damage, range, and independently clon
     [Swordsman, 5, 2, 1, 1],
     [Archer, 3, 1, 2, 3],
     [Magician, 3, 1, 1, 2],
+    [Bomber, 3, 1, 1, 2],
     [Ninja, 1, 5, 1, 1],
     [Bulwark, 10, 1, 1, 1],
   ] as const) {
@@ -535,9 +537,9 @@ test('Aimed shot respects the archer dead zone and bypasses Escape without consu
   assert.equal(state.pawns[2].hp, 7)
 })
 
-test('Fireball hits each nearby enemy once, spares allies, and handles multiple kills and victory', () => {
+test('Bomb hits nearby units including allies and handles multiple kills and victory', () => {
   const state = battle()
-  state.pawns[0] = new Magician(1, 0, 0, 'player')
+  state.pawns[0] = new Bomber(1, 0, 0, 'player')
   state.pawns[2].hp = 1
   state.pawns.push(
     new Archer(4, 2, 0, 'enemy', 1),
@@ -553,7 +555,8 @@ test('Fireball hits each nearby enemy once, spares allies, and handles multiple 
     [1, 2, 5, 6, 7],
   )
   assert.equal(fired.pawns.find((p) => p.id === 5)!.hp, 4)
-  assert.equal(fired.pawns.find((p) => p.id === 6)!.hp, 5)
+  assert.equal(fired.pawns[0].hp, 2)
+  assert.equal(fired.pawns.find((p) => p.id === 6)!.hp, 4)
   assert.equal(fired.pawns.find((p) => p.id === 7)!.hp, 3)
   assert.equal(fired.winner, 'player')
   assert.equal(fired.phase, 'over')
@@ -637,8 +640,8 @@ test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
     state.pawns.push(new King(4, 5, 5, 'enemy'))
     state.order = [1, 3, 2, 4]
     if (Ctor === Magician) {
-      state.pawns[1].q = 0
-      state.pawns[1].r = 1
+      state.pawns[1].q = -1
+      state.pawns[1].r = 0
     }
     const next = reducer(state, { type: 'endTurn' })
     assert.equal(next.pawns[0].hp, Ctor === Swordsman ? 3 : 4)
@@ -744,8 +747,8 @@ test('Enemy moves, Escape, and all specials have board effects', () => {
     if (Ctor === King) state.pawns.push(new Swordsman(5, 1, 1, 'enemy', 3))
     if (Ctor === Archer) state.pawns[0].escapeChance = 60
     if (Ctor === Magician) {
-      state.pawns[1].q = 0
-      state.pawns[1].r = 1
+      state.pawns[1].q = -1
+      state.pawns[1].r = 0
     }
     const result = transition(state, { type: 'endTurn' })
     assert.equal(
@@ -888,6 +891,7 @@ test('Seeded armies mirror one King, a guaranteed swordsman, and three random re
   assert.ok(duplicateRecruits)
   assert.deepEqual([...recruits].sort(), [
     'archer',
+    'bomber',
     'bulwark',
     'magician',
     'ninja',

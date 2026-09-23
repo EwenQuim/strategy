@@ -5,7 +5,7 @@ import { initialState as coreState } from '../../src/lib/engine/index.ts'
 import { initialState, transition } from '../../src/lib/bot.ts'
 import { campaignActions } from '../campaign-actions.ts'
 
-test('The campaign has twenty distinct deterministic AI levels that can finish', () => {
+test('All twenty distinct campaign encounters are winnable against normal AI', () => {
   assert.equal(CAMPAIGN_LEVELS.length, 20)
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.seed)).size, 20)
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.name)).size, 20)
@@ -20,19 +20,30 @@ test('The campaign has twenty distinct deterministic AI levels that can finish',
     assert.equal(core.pawns.length, level.setup.player.length + level.setup.enemy.length)
     biomes.add(core.biome)
     let state = initialState(level.seed, level.setup)
-    for (let step = 0; step < 300 && !state.winner; step++) {
-      for (const action of campaignActions(state)) {
-        const result = transition(state, action)
-        assert.notEqual(result.state, state)
-        state = result.state
+    for (const caution of [0.25, 0.7, 1]) {
+      state = initialState(level.seed, level.setup)
+      for (let step = 0; step < 300 && !state.winner; step++) {
+        for (const action of campaignActions(state, caution)) {
+          const result = transition(state, action)
+          assert.notEqual(result.state, state, 'Invalid action in level ' + level.id)
+          state = result.state
+        }
       }
+      if (state.winner === 'player') break
     }
-    assert.ok(state.winner, 'Level ' + level.id + ' must finish')
-    if (level.id === 1 || level.id === 20) assert.equal(state.winner, 'player')
+    assert.equal(state.winner, 'player', 'Level ' + level.id + ': ' + level.name)
     assert.deepEqual(
       transition(state, { type: 'restart' }).state,
       initialState(level.seed, level.setup),
     )
   }
   assert.deepEqual(biomes, new Set(['verdant', 'mountains', 'desert', 'volcano']))
+})
+
+test('The introductory bowman can finish the battle if the player stays idle', () => {
+  const level = CAMPAIGN_LEVELS[1]
+  let state = initialState(level.seed, level.setup)
+  for (let step = 0; step < 40 && !state.winner; step++)
+    state = transition(state, { type: 'endTurn' }).state
+  assert.equal(state.winner, 'enemy')
 })

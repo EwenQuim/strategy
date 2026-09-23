@@ -9,6 +9,7 @@ import {
   Swordsman,
   Archer,
   Magician,
+  Bomber,
   Ninja,
   Bulwark,
   type GameState,
@@ -37,7 +38,7 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
 
 test('Class-specific candidates and threat estimates retain their reference decisions', () => {
   const decisions = []
-  for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark]) {
+  for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark, Bomber]) {
     for (const side of ['player', 'enemy'] as const) {
       for (const energy of [1, 2, 3]) {
         const other = side === 'player' ? 'enemy' : 'player'
@@ -65,24 +66,18 @@ test('Class-specific candidates and threat estimates retain their reference deci
       }
     }
   }
-  assert.equal(decisions.length, 108)
-  assert.equal(seedState(JSON.stringify(decisions)), 963989587)
+  assert.equal(decisions.length, 126)
+  assert.equal(seedState(JSON.stringify(decisions)), 412397909)
 })
 
 test('All difficulty levels emit legal actions for every class and both sides', () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
-    let state = initialState('all-classes', {
+    const state = initialState('all-classes', {
       biome: 'desert',
-      player: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark'],
-      enemy: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark'],
+      player: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark', 'bomber'],
+      enemy: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark', 'bomber'],
     })
-    const classes = new Set<string>()
-    for (let step = 0; step < 36 && !state.winner; step++) {
-      const pawn = activePawn(state)!
-      classes.add(pawn.side + ':' + pawn.kind)
-      state = playTurn(state, level)
-    }
-    assert.equal(classes.size, 12)
+    for (const [active] of state.order.entries()) playTurn({ ...state, active }, level)
   }
 })
 

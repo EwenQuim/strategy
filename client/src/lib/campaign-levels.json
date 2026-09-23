@@ -6,67 +6,49 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "...f....",
-        "..f..~..",
-        "f.f..~~.",
-        "....f...",
-        "~~f..~~.",
-        "~.~~.~~.",
-        "..~~f.~.",
-        "....f.f.",
-        "...~.~~~",
-        "..~~.~~~",
-        "ff~~.f..",
-        "..~....."
+        "........",
+        "f......f",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "f......f",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 0,
-          "row": 11
+          "col": 3,
+          "row": 9
         },
         {
           "kind": "swordsman",
           "col": 4,
-          "row": 11
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 10
+          "row": 8
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 1,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 7,
-          "row": 1
+          "col": 3,
+          "row": 4
         }
       ]
     },
     "intro": {
-      "roleplay": "The beacons are lit and the valley wakes to war. Your first command: hold the watch road and break the raiding party.",
+      "roleplay": "One raider holds the watch road. Bring your swordsman forward and keep your crown behind him. No obstacles, no tricks: learn to move, strike, and finish a turn.",
       "newElements": [
         {
           "name": "Swordsman",
-          "description": "Frontline fighter. 5 health, strikes adjacent enemies for 2. Special Charge (2 energy): move up to 2 tiles, then strike an adjacent enemy for 2."
-        },
-        {
-          "name": "Archer",
-          "description": "Ranged attacker. Hits enemies 2 to 3 tiles away for 1, never adjacent. Special Aimed shot (2 energy): 2 damage that cannot be Escaped."
+          "description": "5 health, 2 damage at range 1. Charge costs 2 energy: choose a destination up to 2 steps away, then an adjacent enemy."
         },
         {
           "name": "King",
-          "description": "Your commander, 7 health. Special Rally (1 energy, once per round): restore 1 health to every adjacent ally."
-        },
-        {
-          "name": "Lakes",
-          "description": "Water tiles block all movement. Route around them or funnel foes into your blades."
+          "description": "Your king has 7 health. Losing it ends the battle. Rally costs 1 energy and heals adjacent allies by 1, once per round."
         }
       ]
     }
@@ -78,55 +60,59 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "..f~..ff",
-        "~.~~..f.",
-        "~~.~.f..",
-        "~~fff...",
-        ".~f.f...",
         "........",
-        "f.f....f",
-        "..f.....",
-        "f.f~ff~.",
-        "..~~f~~.",
-        "~~.~.~~.",
-        "~~...ff."
+        "........",
+        "f......f",
+        "........",
+        "........",
+        "f......f",
+        "ff....ff",
+        "........",
+        "........",
+        "f......f",
+        "........",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 7,
-          "row": 10
+          "col": 2,
+          "row": 9
         },
         {
           "kind": "swordsman",
-          "col": 2,
-          "row": 11
+          "col": 3,
+          "row": 8
         },
         {
           "kind": "archer",
-          "col": 1,
+          "col": 4,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 2
+          "col": 5,
+          "row": 6
         },
         {
           "kind": "archer",
-          "col": 7,
-          "row": 2
+          "col": 1,
+          "row": 6
         }
       ]
     },
     "intro": {
-      "roleplay": "Enemy archers hold the far ridge. Their arrows will answer yours, and they know how to slip a blade.",
+      "roleplay": "A bowman has slipped around your patrol. He cannot shoot an adjacent swordsman: close that flank while your own archer fires from behind. Keep your king out of the shooting lane.",
       "newElements": [
         {
+          "name": "Archer",
+          "description": "1 damage at range 2 to 3, but cannot shoot adjacent enemies. Aimed shot costs 2 energy for 2 damage that ignores Escape."
+        },
+        {
           "name": "Escape",
-          "description": "End a unit's turn with energy left and it gains Escape: +20% per remaining energy, up to 60% chance to dodge each incoming attack."
+          "description": "Ending a turn converts unused energy into +20% Escape per energy, up to 60%. Saving energy can keep a wounded unit alive."
         }
       ]
     }
@@ -138,57 +124,62 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "....fff.",
-        "~f......",
-        "~~ff~~f.",
-        "..f.~f..",
-        "f.f..ff.",
-        ".f.f....",
-        "f.f.....",
-        "f.f.f.f.",
-        "...ff...",
-        ".f..~~f.",
-        ".f..~~..",
-        "....~..."
+        "........",
+        "........",
+        "........",
+        "..~~....",
+        "..~~....",
+        "...~....",
+        "....~~..",
+        "....~~..",
+        "........",
+        "........",
+        "........",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 2,
+          "col": 3,
           "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 3,
+          "col": 2,
           "row": 9
         },
         {
           "kind": "archer",
-          "col": 2,
-          "row": 11
+          "col": 5,
+          "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 6,
-          "row": 1
+          "col": 4,
+          "row": 2
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 1
+          "col": 1,
+          "row": 3
         },
         {
           "kind": "archer",
-          "col": 3,
-          "row": 0
+          "col": 5,
+          "row": 3
         }
       ]
     },
     "intro": {
-      "roleplay": "For the first time the enemy fields a full army. Guard the crossing; there is nowhere left to hide.",
-      "newElements": []
+      "roleplay": "Two bends of the river divide the road. Take the short middle crossing or the wide bank, but do not leave your archer alone on the other side.",
+      "newElements": [
+        {
+          "name": "Lakes",
+          "description": "Water blocks walking and Charge, not arrows or spells. Forest is decorative: it does not provide cover."
+        }
+      ]
     }
   },
   {
@@ -198,60 +189,65 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "..~.ff..",
+        "........",
+        ".f....f.",
+        "........",
+        "........",
         ".~~.....",
-        ".f~..f..",
-        ".....f..",
-        "f.......",
-        "f~.f....",
-        ".~~.f~~.",
-        "....~~.f",
-        "~~...~ff",
-        "~...ff..",
-        "f.......",
-        "....f..f"
+        ".~~..~..",
+        ".....~~.",
+        ".....~~.",
+        "........",
+        "........",
+        ".f....f.",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
+          "col": 5,
           "row": 10
         },
         {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 9
+        },
+        {
           "kind": "archer",
-          "col": 3,
-          "row": 11
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 8
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 3,
+          "col": 2,
           "row": 1
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 2
+          "col": 3,
+          "row": 3
         },
         {
           "kind": "magician",
-          "col": 4,
-          "row": 1
+          "col": 3,
+          "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "Word of a hooded figure reached your camp, fire dancing between its fingers. Today you see the craft for yourself.",
+      "roleplay": "A rival caster draws a line of fire through the trees. Your own magician can answer. Step sideways out of a firing line, then line up the raider and its escort.",
       "newElements": [
         {
           "name": "Magician",
-          "description": "Rival caster. Attacks 1 to 2 tiles away for 1. Special Fireball (2 energy): 1 damage to the target and every enemy adjacent to it, though each may Escape."
+          "description": "3 health; basic attack deals 1 damage at range 1 to 2. Fireball costs 2 energy: select a tile in one of six directions to hit every enemy along that ray for 1, to the board edge. Terrain and units do not stop it; allies are safe."
         }
       ]
     }
@@ -263,65 +259,65 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "..~..~..",
-        "f~~.~~.f",
-        ".f...~~.",
-        "..f~.~..",
-        "fff~~...",
-        "~~..W...",
-        "~~~.....",
-        "f....~..",
-        "f...f~~.",
-        "..~~.ff.",
-        ".f.~~...",
-        ".f.~f.f."
+        "........",
+        "........",
+        "........",
+        ".~....~.",
+        "~~....~~",
+        "...W....",
+        ".~....~.",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 11
+          "col": 3,
+          "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 1,
-          "row": 9
+          "col": 3,
+          "row": 8
         },
         {
           "kind": "archer",
           "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 5,
           "row": 10
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 1,
-          "row": 0
-        },
-        {
-          "kind": "swordsman",
           "col": 4,
-          "row": 2
+          "row": 1
         },
         {
           "kind": "archer",
-          "col": 7,
-          "row": 2
+          "col": 3,
+          "row": 3
         },
         {
-          "kind": "swordsman",
-          "col": 2,
+          "kind": "archer",
+          "col": 6,
           "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "A keep straddles the road home, its tall tower watching every approach. The garrison will not yield it.",
+      "roleplay": "Two bowmen guard the keep. The central watchtower can outrange them, but its open approach invites crossfire. Send a fighter ahead of your archer.",
       "newElements": [
         {
           "name": "Watchtower",
-          "description": "A unit standing on a watchtower gains +1 basic-attack range. Archers and Magicians only."
+          "description": "A unit on the tower gains +1 maximum basic-attack range if it is an Archer or Magician. Minimum range and specials do not change."
         }
       ]
     }
@@ -387,11 +383,11 @@
       ]
     },
     "intro": {
-      "roleplay": "Beyond the vale the land rises into bare rock. The pass is narrow, and so is mercy.",
+      "roleplay": "The mountain wall has only one walking pass. Your archer can already reach the bowman on the other side. Win that duel before feeding soldiers into the gap.",
       "newElements": [
         {
           "name": "Mountains",
-          "description": "Mountain tiles cannot be entered or crossed by anyone. Fight for the gaps."
+          "description": "Mountains block walking and Charge, but not ranged attacks or Fireball. The pass is a route, not shelter from magic."
         }
       ]
     }
@@ -403,16 +399,16 @@
     "setup": {
       "biome": "mountains",
       "map": [
-        "^.......",
-        "^......^",
-        ".^.....^",
-        ".^....^.",
-        "..^...^.",
-        "...^.^..",
-        "...^.^..",
-        "..^.....",
-        "..^.....",
-        ".^......",
+        "........",
+        "........",
+        "........",
+        "........",
+        "..^..^..",
+        "..^..^..",
+        "........",
+        "..^..^..",
+        "..^..^..",
+        "........",
         "........",
         "........"
       ],
@@ -423,26 +419,26 @@
           "row": 10
         },
         {
-          "kind": "swordsman",
-          "col": 0,
+          "kind": "bulwark",
+          "col": 3,
           "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
         },
         {
           "kind": "archer",
           "col": 2,
           "row": 10
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 11
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 4,
-          "row": 2
+          "col": 3,
+          "row": 1
         },
         {
           "kind": "bulwark",
@@ -451,97 +447,106 @@
         },
         {
           "kind": "swordsman",
-          "col": 2,
-          "row": 0
+          "col": 4,
+          "row": 3
         },
         {
           "kind": "archer",
-          "col": 4,
-          "row": 1
+          "col": 3,
+          "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "A shield wall stands planted in the road like a stone. Behind it waits the enemy vanguard.",
+      "roleplay": "A wall-bearer joins you. Protect a fragile ally across the gap while the swordsman works around the enemy shield. A guardian cannot stop every blow.",
       "newElements": [
         {
           "name": "Bulwark",
-          "description": "Enemy wall-bearer. 10 health, strikes adjacent enemies for 1, and every tile of movement costs 2 energy. Special Protect (2 energy): take the next hit for an adjacent ally."
+          "description": "10 health and 1 adjacent damage. Protect costs 2 energy and redirects one successful hit from an ally within 2 tiles. It expires beyond range 2 or at the guardian's next turn. Moving costs 2 energy for the first tile, then 1 per extra tile."
         }
       ]
     }
   },
   {
     "id": 8,
-    "name": "Ambush",
+    "name": "Powder Lesson",
     "seed": "campaign-v1-8",
     "setup": {
       "biome": "mountains",
       "map": [
-        "......^.",
-        ".....^..",
-        "^....^..",
-        "^...^...",
-        ".^..^...",
-        ".^.^....",
-        "..^.....",
-        "..^....^",
-        ".......^",
-        "...^^^^.",
+        "........",
+        "........",
+        "........",
+        ".^....^.",
+        ".^....^.",
+        ".^....^.",
+        ".^....^.",
+        ".^....^.",
+        "........",
+        "........",
         "........",
         "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 9
+          "col": 3,
+          "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 1,
-          "row": 11
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "bomber",
+          "col": 3,
+          "row": 8
         },
         {
           "kind": "archer",
-          "col": 3,
-          "row": 11
-        },
-        {
-          "kind": "magician",
-          "col": 0,
-          "row": 11
+          "col": 2,
+          "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 4,
+          "col": 3,
           "row": 2
         },
         {
-          "kind": "ninja",
-          "col": 1,
-          "row": 1
+          "kind": "swordsman",
+          "col": 3,
+          "row": 5
         },
         {
           "kind": "swordsman",
           "col": 4,
-          "row": 0
+          "row": 5
         },
         {
           "kind": "archer",
-          "col": 6,
-          "row": 2
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 4
         }
       ]
     },
     "intro": {
-      "roleplay": "No campfires tonight. Shadows move between the rocks where nothing should move.",
+      "roleplay": "Two soldiers stand shoulder to shoulder in the quarry, with two grouped bowmen directly behind them. Advance your bomber to catch the formation in one blast, but keep your escort clear of your own powder.",
       "newElements": [
         {
-          "name": "Ninja",
-          "description": "Enemy assassin. Only 1 health, but its blade deals 5 to adjacent foes. Special Jump (2 energy): leap up to 3 tiles over anything, landing on empty ground."
+          "name": "Bomber",
+          "description": "3 health; basic attack deals 1 damage at range 1 to 2. Bomb costs 2 energy: choose any tile within 2 tiles, including empty or blocked ground. The center and its six neighbors take 1 damage."
+        },
+        {
+          "name": "Friendly fire",
+          "description": "Bombs hit allies, enemies, and the bomber. Everyone may Escape. Destroying your own king loses, even if the enemy king falls in the same blast."
         }
       ]
     }
@@ -569,131 +574,146 @@
       "player": [
         {
           "kind": "king",
-          "col": 1,
+          "col": 2,
           "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 11
+          "col": 3,
+          "row": 9
         },
         {
           "kind": "archer",
           "col": 5,
+          "row": 10
+        },
+        {
+          "kind": "bomber",
+          "col": 4,
           "row": 9
         },
         {
-          "kind": "magician",
-          "col": 4,
+          "kind": "swordsman",
+          "col": 2,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 1,
+          "col": 4,
           "row": 1
         },
         {
-          "kind": "magician",
-          "col": 4,
-          "row": 0
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
         },
         {
-          "kind": "magician",
+          "kind": "archer",
           "col": 5,
           "row": 2
         },
         {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 3
+          "kind": "bomber",
+          "col": 2,
+          "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "The ground itself burns. Cross the caldera before the enemy does, and mind your boots.",
+      "roleplay": "The quarry opens onto a burning caldera. Both sides carry powder now. Use the safe channels instead of crowding the shortest crossing: enemy bombs punish a packed bridgehead.",
       "newElements": [
         {
           "name": "Lava",
-          "description": "Every lava tile a unit crosses deals 1 damage. Cross at the shortest point, or not at all."
+          "description": "Each lava tile entered costs 1 health, ignoring Escape and Protect. It also hurts during Charge. Basalt is safe; there is always a route around the pools."
         }
       ]
     }
   },
   {
     "id": 10,
-    "name": "Peak Fortress",
+    "name": "Split Battery",
     "seed": "campaign-v1-10",
     "setup": {
       "biome": "mountains",
       "map": [
-        "..^....^",
-        "..^...^.",
-        "...^..^.",
-        "...^.^..",
-        ".....^..",
         "........",
         "........",
+        "...^^...",
+        "...^^...",
+        "...^^...",
         "........",
-        "^^^.....",
-        "..^.....",
-        "...^....",
+        "........",
+        "..^^....",
+        "..^^....",
+        "........",
+        "........",
         "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 3,
+          "col": 4,
           "row": 11
         },
         {
           "kind": "swordsman",
-          "col": 1,
+          "col": 3,
           "row": 9
         },
         {
           "kind": "archer",
-          "col": 0,
-          "row": 9
+          "col": 1,
+          "row": 10
         },
         {
           "kind": "magician",
-          "col": 7,
+          "col": 6,
+          "row": 10
+        },
+        {
+          "kind": "bomber",
+          "col": 5,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 7,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 0,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 3,
+          "col": 5,
           "row": 1
         },
         {
           "kind": "bulwark",
+          "col": 5,
+          "row": 3
+        },
+        {
+          "kind": "archer",
           "col": 1,
           "row": 3
         },
         {
-          "kind": "ninja",
-          "col": 1,
+          "kind": "swordsman",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "magician",
+          "col": 6,
           "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "Their last mountain fortress rises above you, defended by everything they have left. Take it.",
-      "newElements": []
+      "roleplay": "Archers hold one bank of the ridge, a magician the other. Commit to one side or divide your force. The crossing in the middle lets a bomber punish defenders who rotate together.",
+      "newElements": [
+        {
+          "name": "Split the battery",
+          "description": "Mountains divide movement, not fire. Break one firing position before advancing your king; piling every ally behind the same guardian invites trouble."
+        }
+      ]
     }
   },
   {
@@ -719,61 +739,70 @@
       "player": [
         {
           "kind": "king",
-          "col": 6,
-          "row": 9
+          "col": 5,
+          "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 1,
+          "col": 2,
           "row": 9
         },
         {
           "kind": "archer",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
           "col": 4,
           "row": 9
         },
         {
-          "kind": "magician",
-          "col": 2,
-          "row": 11
-        },
-        {
-          "kind": "bulwark",
-          "col": 5,
+          "kind": "ninja",
+          "col": 6,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 6,
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 4,
           "row": 2
         },
         {
           "kind": "swordsman",
-          "col": 1,
-          "row": 1
-        },
-        {
-          "kind": "archer",
-          "col": 0,
-          "row": 1
-        },
-        {
-          "kind": "magician",
           "col": 5,
-          "row": 0
+          "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "Sand to the horizon and no cover for miles. Your first Bulwark marches at your side, heavy and unhurried.",
-      "newElements": []
+      "roleplay": "Nothing but sand: no choke to hide behind, no detour to blame. Your new ninja can threaten a whole flank, but a single arrow or fireball will end that threat.",
+      "newElements": [
+        {
+          "name": "Desert",
+          "description": "Open sand has no movement penalty and no cover. Spacing, attack ranges, and the six firing directions decide the battle."
+        },
+        {
+          "name": "Ninja",
+          "description": "Only 1 health, but 5 adjacent damage. Jump costs 2 energy and lands up to 3 tiles away on empty passable ground, crossing obstacles and units. It does not attack; save the last energy for your blade."
+        }
+      ]
     }
   },
   {
     "id": 12,
-    "name": "Sandstorm",
+    "name": "Twin Daggers",
     "seed": "campaign-v1-12",
     "setup": {
       "biome": "desert",
@@ -781,12 +810,12 @@
         "ssssssss",
         "ssssssss",
         "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
+        "ss~~ssss",
+        "ss~~ssss",
+        "sssp~sss",
+        "sss~~pss",
+        "ssss~~ss",
+        "ssss~~ss",
         "ssssssss",
         "ssssssss",
         "ssssssss"
@@ -794,61 +823,66 @@
       "player": [
         {
           "kind": "king",
-          "col": 7,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
           "col": 3,
           "row": 10
         },
         {
-          "kind": "archer",
-          "col": 2,
-          "row": 10
-        },
-        {
-          "kind": "magician",
-          "col": 7,
+          "kind": "swordsman",
+          "col": 3,
           "row": 9
         },
         {
+          "kind": "archer",
+          "col": 1,
+          "row": 10
+        },
+        {
           "kind": "bulwark",
-          "col": 2,
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 2
-        },
-        {
-          "kind": "ninja",
-          "col": 2,
+          "col": 4,
           "row": 1
         },
         {
           "kind": "ninja",
-          "col": 5,
-          "row": 0
+          "col": 1,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 3
         },
         {
           "kind": "swordsman",
-          "col": 1,
-          "row": 0
+          "col": 4,
+          "row": 3
         },
         {
           "kind": "archer",
-          "col": 1,
+          "col": 4,
           "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "The storm swallows the dunes, and blades slip out of it without a sound.",
-      "newElements": []
+      "roleplay": "Two assassins circle the oasis from opposite sides. Their jumps ignore the lakes. Keep your crown within protection range while your ranged units cut off the landing tiles.",
+      "newElements": [
+        {
+          "name": "Twin threats",
+          "description": "A shield covers one hit, not two assassins. Do not chase one flank so far that the other can jump beside your king."
+        }
+      ]
     }
   },
   {
@@ -861,12 +895,12 @@
         "ssssssss",
         "ssssssss",
         "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
+        "s~ssss~s",
+        "s~ssss~s",
+        "s~~ss~~s",
+        "s~~ss~~s",
+        "s~ssss~s",
+        "s~ssss~s",
         "ssssssss",
         "ssssssss",
         "ssssssss"
@@ -874,61 +908,71 @@
       "player": [
         {
           "kind": "king",
-          "col": 5,
-          "row": 11
+          "col": 3,
+          "row": 10
         },
         {
-          "kind": "swordsman",
+          "kind": "bomber",
           "col": 2,
-          "row": 11
+          "row": 4
+        },
+        {
+          "kind": "bomber",
+          "col": 5,
+          "row": 4
         },
         {
           "kind": "archer",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 9
-        },
-        {
-          "kind": "bulwark",
           "col": 3,
-          "row": 9
+          "row": 7
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 3
         }
       ],
       "enemy": [
         {
           "kind": "king",
           "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
           "row": 2
         },
         {
-          "kind": "bulwark",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 0,
-          "row": 3
-        },
-        {
           "kind": "archer",
-          "col": 5,
-          "row": 0
-        },
-        {
-          "kind": "magician",
           "col": 4,
           "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "A caravan of iron and shields rumbles toward your lines. Break the wagons, scatter the guard.",
-      "newElements": []
+      "roleplay": "An iron convoy squeezes between the lakes. Your bombers have reached opposite banks and your ninja the outer road. Break the clustered escorts before bringing the vanguard into the blast zone.",
+      "newElements": [
+        {
+          "name": "Blast discipline",
+          "description": "Choose empty centers to catch several defenders. Each Protect redirects only one hit; repeated area attacks wear down a tight formation. Keep the two bombers apart."
+        }
+      ]
     }
   },
   {
@@ -942,8 +986,8 @@
         "ssssssss",
         "ssssssss",
         "ssssssss",
-        "sssssp~s",
-        "sssss~~s",
+        "s~~ssp~s",
+        "s~~ss~~s",
         "ssssH~~s",
         "ssssssps",
         "ssssssss",
@@ -954,69 +998,74 @@
       "player": [
         {
           "kind": "king",
-          "col": 5,
-          "row": 9
+          "col": 2,
+          "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 2,
-          "row": 11
+          "col": 3,
+          "row": 9
         },
         {
           "kind": "archer",
-          "col": 6,
-          "row": 10
+          "col": 1,
+          "row": 9
         },
         {
           "kind": "magician",
-          "col": 2,
+          "col": 5,
           "row": 10
         },
         {
+          "kind": "bomber",
+          "col": 4,
+          "row": 9
+        },
+        {
           "kind": "bulwark",
-          "col": 6,
+          "col": 2,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 6,
+          "col": 4,
           "row": 1
         },
         {
           "kind": "swordsman",
-          "col": 7,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 1,
-          "row": 1
+          "col": 2,
+          "row": 3
         },
         {
           "kind": "archer",
-          "col": 2,
-          "row": 0
-        },
-        {
-          "kind": "ninja",
-          "col": 5,
-          "row": 1
+          "col": 4,
+          "row": 2
         },
         {
           "kind": "magician",
-          "col": 3,
+          "col": 6,
           "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bomber",
+          "col": 5,
+          "row": 3
         }
       ]
     },
     "intro": {
-      "roleplay": "The last water for a hundred miles lies behind their lines, a pale spring at the heart of the camp.",
+      "roleplay": "The spring is worth holding, not dying on. Rotate a wounded fighter onto it while a guardian covers from two tiles away. A stationary group is a gift to the enemy bomber.",
       "newElements": [
         {
           "name": "Healing spring",
-          "description": "Stay on a spring; at its next activation the unit recovers 1 health, up to its maximum."
+          "description": "Remain on the spring until the unit's next activation to recover 1 health, up to maximum. There is no healing on arrival, and leaving cancels it."
         }
       ]
     }
@@ -1044,18 +1093,18 @@
       "player": [
         {
           "kind": "king",
-          "col": 7,
+          "col": 6,
           "row": 11
         },
         {
           "kind": "swordsman",
           "col": 3,
-          "row": 10
+          "row": 9
         },
         {
           "kind": "archer",
           "col": 1,
-          "row": 11
+          "row": 10
         },
         {
           "kind": "magician",
@@ -1063,206 +1112,206 @@
           "row": 10
         },
         {
-          "kind": "bulwark",
-          "col": 0,
+          "kind": "bomber",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 5,
-          "row": 2
+          "col": 4,
+          "row": 1
         },
         {
           "kind": "bulwark",
-          "col": 2,
+          "col": 3,
           "row": 3
         },
         {
           "kind": "swordsman",
-          "col": 1,
-          "row": 1
-        },
-        {
-          "kind": "archer",
-          "col": 0,
-          "row": 0
-        },
-        {
-          "kind": "magician",
-          "col": 7,
+          "col": 3,
           "row": 2
         },
         {
           "kind": "magician",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "bomber",
           "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
           "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "The keep burns from within. Strange runes glow along its corridors, humming with borrowed strength.",
+      "roleplay": "A rune glows at the edge of the furnace. Claim it for a sudden attack, or let the enemy overextend for it. Extra energy will not save a ninja who lands in lava.",
       "newElements": [
         {
           "name": "Power rune",
-          "description": "The first unit to step on a rune gains +2 energy for this round, then the rune vanishes."
+          "description": "The first unit entering the rune gains 2 energy for this round; the rune disappears. Use it for a longer Charge, a Jump followed by attacks, or another bomb."
         }
       ]
     }
   },
   {
     "id": 16,
-    "name": "Homeward",
+    "name": "Wizard Curtain",
     "seed": "campaign-v1-16",
     "setup": {
       "biome": "verdant",
       "map": [
-        "....~~..",
-        "...~~.~.",
-        "~~f.~.~~",
-        "~~fff.~.",
-        ".ff.fff.",
         "........",
-        "ff.....~",
-        "f.ff..~~",
-        ".f.~~...",
-        "...~....",
-        ".f......",
+        "f......f",
+        ".~....~.",
+        ".~....~.",
+        "........",
+        "..f..f..",
+        "..f..f..",
+        "........",
+        ".~....~.",
+        ".~....~.",
+        "f......f",
         "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 6,
+          "col": 4,
           "row": 11
         },
         {
           "kind": "swordsman",
-          "col": 0,
-          "row": 10
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 11
+          "col": 2,
+          "row": 9
         },
         {
           "kind": "magician",
-          "col": 3,
-          "row": 10
+          "col": 0,
+          "row": 3
         },
         {
           "kind": "bulwark",
-          "col": 6,
-          "row": 9
+          "col": 0,
+          "row": 5
+        },
+        {
+          "kind": "bomber",
+          "col": 5,
+          "row": 7
         },
         {
           "kind": "ninja",
           "col": 7,
-          "row": 9
+          "row": 5
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 5,
-          "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 5,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 7,
+          "col": 3,
           "row": 1
         },
         {
           "kind": "magician",
           "col": 2,
-          "row": 0
+          "row": 3
         },
         {
-          "kind": "ninja",
+          "kind": "magician",
           "col": 3,
-          "row": 2
+          "row": 3
         },
         {
-          "kind": "swordsman",
-          "col": 0,
-          "row": 1
+          "kind": "magician",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 3
         }
       ]
     },
     "intro": {
-      "roleplay": "The road home at last, verdant and familiar. One enemy host is all that stands between you and the gate.",
-      "newElements": []
+      "roleplay": "Four wizards form a living barrier across the valley. Your magician and guardian have reached its left flank; your ninja waits on the right. Turn the firing line against itself before it turns toward your crown.",
+      "newElements": [
+        {
+          "name": "Enfilade",
+          "description": "A Fireball fired along the wizard row can hit all four. A ninja can remove one fragile caster outright; bombs can catch neighbors. Protect your approach, not an immobile firing squad."
+        }
+      ]
     }
   },
   {
     "id": 17,
-    "name": "Frozen Gate",
+    "name": "Forked Gate",
     "seed": "campaign-v1-17",
     "setup": {
       "biome": "mountains",
       "map": [
-        "...^....",
-        "...^..^.",
-        "....^.^.",
-        "..^.^.^.",
-        "..^..^.^",
-        ".^.....^",
-        ".^..^^^.",
-        "^..^....",
-        "^..^....",
-        "..^.....",
         "........",
-        "^^^^^^^."
+        "........",
+        "........",
+        "........",
+        "........",
+        "^^W^^.^^",
+        "^^.^^H^^",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 3,
-          "row": 9
+          "col": 4,
+          "row": 11
         },
         {
           "kind": "swordsman",
-          "col": 6,
+          "col": 2,
           "row": 9
         },
         {
           "kind": "archer",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "magician",
-          "col": 6,
+          "col": 2,
           "row": 10
         },
         {
           "kind": "bulwark",
-          "col": 1,
+          "col": 3,
           "row": 9
         },
         {
-          "kind": "ninja",
-          "col": 3,
+          "kind": "bomber",
+          "col": 5,
           "row": 10
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 2
-        },
-        {
-          "kind": "bulwark",
-          "col": 1,
-          "row": 3
+          "col": 3,
+          "row": 0
         },
         {
           "kind": "bulwark",
@@ -1270,30 +1319,35 @@
           "row": 3
         },
         {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 3
+        },
+        {
           "kind": "archer",
-          "col": 0,
-          "row": 0
+          "col": 2,
+          "row": 4
         },
         {
           "kind": "magician",
-          "col": 7,
-          "row": 0
+          "col": 5,
+          "row": 4
         },
         {
-          "kind": "ninja",
-          "col": 7,
+          "kind": "bomber",
+          "col": 4,
           "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 7,
-          "row": 1
         }
       ]
     },
     "intro": {
-      "roleplay": "Winter has sealed the high gate shut. Their whole host waits in the snow, and so do you.",
-      "newElements": []
+      "roleplay": "One gate offers a watchtower, the other a healing spring. Choose a ranged duel or a slower supported breach. Your ninja can switch fronts without queuing through either gate.",
+      "newElements": [
+        {
+          "name": "Two gates",
+          "description": "Both openings connect the armies. Splitting your force contests both rewards, but each half must survive its own defender. The wall still does not stop spells."
+        }
+      ]
     }
   },
   {
@@ -1308,8 +1362,8 @@
         "bbbbbbbb",
         "bllbblbb",
         "bllbllbb",
-        "bbbbllbb",
-        "blllbbbb",
+        "bbbWllbb",
+        "blllRbbb",
         "bbllbllb",
         "bbbbbllb",
         "bbbbbbbb",
@@ -1319,21 +1373,31 @@
       "player": [
         {
           "kind": "king",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "swordsman",
           "col": 3,
           "row": 10
         },
         {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 9
+        },
+        {
           "kind": "archer",
-          "col": 6,
+          "col": 1,
           "row": 11
         },
         {
           "kind": "magician",
+          "col": 5,
+          "row": 11
+        },
+        {
+          "kind": "bomber",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "ninja",
           "col": 6,
           "row": 9
         },
@@ -1341,54 +1405,49 @@
           "kind": "bulwark",
           "col": 3,
           "row": 9
-        },
-        {
-          "kind": "ninja",
-          "col": 7,
-          "row": 10
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 7,
-          "row": 2
-        },
-        {
-          "kind": "ninja",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "ninja",
-          "col": 0,
+          "col": 4,
           "row": 1
         },
         {
-          "kind": "archer",
-          "col": 3,
-          "row": 0
+          "kind": "ninja",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 2
         },
         {
           "kind": "archer",
-          "col": 2,
+          "col": 3,
           "row": 2
         },
         {
           "kind": "magician",
-          "col": 0,
+          "col": 5,
           "row": 2
         },
         {
-          "kind": "swordsman",
-          "col": 0,
-          "row": 0
+          "kind": "bomber",
+          "col": 4,
+          "row": 3
         }
       ]
     },
     "intro": {
-      "roleplay": "Cut through the caldera before the hunt catches you. Fast feet, faster blade.",
-      "newElements": []
+      "roleplay": "Assassins hunt both safe channels through the caldera. The tower commands one route; the rune can launch a counterattack from the other. Bombs make crowded landings dangerous for both armies.",
+      "newElements": [
+        {
+          "name": "Safe landing",
+          "description": "Jump ignores crossed lava, not the landing tile. Keep a safe retreat square and do not let both assassins approach your crown from different sides."
+        }
+      ]
     }
   },
   {
@@ -1398,97 +1457,102 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        ".......f",
-        "fff~~f..",
-        "....~~.f",
-        "~~f.f.~~",
-        "~~f~f.~~",
-        "~f~~..f.",
-        "...f.~~.",
-        "f....~~.",
-        "..f.ff~f",
-        "f.f.f...",
-        "..f~.f..",
-        "..~~...f"
+        "........",
+        "ff....ff",
+        "........",
+        "........",
+        ".~~..~~.",
+        ".~~..~~.",
+        "....H...",
+        ".~~..~~.",
+        ".~~..~~.",
+        "........",
+        "ff....ff",
+        "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 6,
+          "col": 3,
           "row": 11
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 11
+          "col": 2,
+          "row": 9
         },
         {
           "kind": "archer",
-          "col": 5,
-          "row": 11
-        },
-        {
-          "kind": "magician",
           "col": 0,
           "row": 10
         },
         {
+          "kind": "magician",
+          "col": 6,
+          "row": 10
+        },
+        {
           "kind": "bulwark",
-          "col": 1,
+          "col": 3,
           "row": 9
         },
         {
+          "kind": "bomber",
+          "col": 5,
+          "row": 10
+        },
+        {
           "kind": "ninja",
-          "col": 3,
+          "col": 7,
           "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 2
+          "col": 3,
+          "row": 1
         },
         {
           "kind": "bulwark",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
           "col": 3,
           "row": 3
         },
         {
-          "kind": "bulwark",
-          "col": 2,
-          "row": 3
-        },
-        {
           "kind": "swordsman",
-          "col": 0,
+          "col": 5,
           "row": 2
         },
         {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 0
-        },
-        {
           "kind": "archer",
-          "col": 0,
-          "row": 0
+          "col": 1,
+          "row": 2
         },
         {
-          "kind": "magician",
+          "kind": "bomber",
           "col": 4,
-          "row": 0
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 1
+          "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "The pretender's personal guard, shield to shield, bars the meadow. Past them, the crown is a formality.",
-      "newElements": []
+      "roleplay": "Two guardians shield the pretender from behind his front line. Use area damage to strip protection, then send a finisher through. The spring can sustain your siege, but it is not safe from bombs.",
+      "newElements": [
+        {
+          "name": "Break the guard",
+          "description": "Protection reaches two tiles, so an empty space does not mean an exposed king. Force the guardians to take hits or separate from their charge before committing your ninja."
+        }
+      ]
     }
   },
   {
@@ -1498,97 +1562,102 @@
     "setup": {
       "biome": "mountains",
       "map": [
-        "......^.",
-        "..^^^^.^",
-        "^......^",
-        "^.....^.",
-        ".^....^.",
-        ".^...^..",
-        "^.^..^..",
-        "^.^.^...",
-        ".^.^....",
-        ".^......",
-        "..^.....",
+        "........",
+        "........",
+        "..^..^..",
+        "..^..^..",
+        "..^..^..",
+        "..R..^..",
+        "..^..H..",
+        "..^..^..",
+        "..^..^..",
+        "........",
+        "........",
         "........"
       ],
       "player": [
         {
           "kind": "king",
-          "col": 6,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
-          "col": 6,
+          "col": 4,
           "row": 10
         },
         {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 8
+        },
+        {
           "kind": "archer",
-          "col": 5,
-          "row": 11
+          "col": 1,
+          "row": 8
         },
         {
           "kind": "magician",
-          "col": 2,
-          "row": 11
+          "col": 6,
+          "row": 8
         },
         {
           "kind": "bulwark",
-          "col": 5,
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "bomber",
+          "col": 2,
           "row": 9
         },
         {
           "kind": "ninja",
           "col": 6,
-          "row": 9
+          "row": 7
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 2,
-          "row": 0
+          "col": 3,
+          "row": 1
         },
         {
           "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "archer",
           "col": 1,
-          "row": 0
+          "row": 2
         },
         {
-          "kind": "archer",
-          "col": 3,
-          "row": 0
-        },
-        {
-          "kind": "archer",
+          "kind": "magician",
           "col": 6,
-          "row": 1
-        },
-        {
-          "kind": "magician",
-          "col": 1,
-          "row": 1
-        },
-        {
-          "kind": "magician",
-          "col": 2,
           "row": 2
         },
         {
           "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bomber",
           "col": 4,
           "row": 3
         },
         {
           "kind": "ninja",
-          "col": 0,
-          "row": 0
+          "col": 1,
+          "row": 3
         }
       ]
     },
     "intro": {
-      "roleplay": "One throne, one battle, one crown. Everything you have learned ends here.",
-      "newElements": []
+      "roleplay": "Every discipline stands before the last crown. A rune opens the aggressive left route; a spring supports the right. Choose where to break through, keep your firing lines clear, and never let your own powder decide the succession.",
+      "newElements": [
+        {
+          "name": "Final command",
+          "description": "Both armies field all seven classes. Win a flank, preserve your king, and combine shields, ranged attacks, jumps, and carefully placed blasts."
+        }
+      ]
     }
   }
 ]
