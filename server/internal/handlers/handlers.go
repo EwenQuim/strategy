@@ -93,65 +93,37 @@ func Register(s *fuego.Server, svc *service.Service) {
 	api := fuego.Group(s, "/api")
 
 	fuego.Get(api, "/health", h.health,
-
 		option.OperationID("health"),
-
 		option.Summary("Health check"),
-
-		option.Tags("health"),
-	)
+		option.Tags("health"))
 
 	fuego.Post(api, "/games", h.createGame,
-
 		option.OperationID("createGame"),
-
 		option.Summary("Create a game"),
-
 		option.Tags("games"),
-
-		option.DefaultStatusCode(http.StatusCreated),
-	)
+		option.DefaultStatusCode(http.StatusCreated))
 
 	fuego.Post(api, "/games/{code}/join", h.joinGame,
-
 		option.OperationID("joinGame"),
-
 		option.Summary("Join a game"),
-
 		option.Tags("games"),
-
 		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}),
-
-		option.AddResponse(http.StatusConflict, "Game already has two players", fuego.Response{Type: fuego.HTTPError{}}),
-	)
+		option.AddResponse(http.StatusConflict, "Game already has two players", fuego.Response{Type: fuego.HTTPError{}}))
 
 	fuego.Get(api, "/games/{code}", h.getGame,
-
 		option.OperationID("getGame"),
-
 		option.Summary("Get a game"),
-
 		option.Tags("games"),
-
-		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}),
-	)
+		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}))
 
 	fuego.Post(api, "/games/{code}/actions", h.playAction,
-
 		option.OperationID("playAction"),
-
 		option.Summary("Submit a game action"),
-
 		option.Tags("games"),
-
 		option.AddResponse(http.StatusUnauthorized, "Token is not a participant", fuego.Response{Type: fuego.HTTPError{}}),
-
 		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}),
-
 		option.AddResponse(http.StatusConflict, "Version mismatch, resync from the current game", fuego.Response{Type: fuego.HTTPError{}}),
-
-		option.AddResponse(http.StatusUnprocessableEntity, "Game is waiting or finished", fuego.Response{Type: fuego.HTTPError{}}),
-	)
+		option.AddResponse(http.StatusUnprocessableEntity, "Game is waiting or finished", fuego.Response{Type: fuego.HTTPError{}}))
 }
 
 func (h *Handlers) health(fuego.ContextNoBody) (healthResponse, error) {
