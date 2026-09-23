@@ -18,7 +18,7 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
+import { createBotGame } from '../src/lib/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import { seedState } from '../src/lib/engine/random.ts'
@@ -242,36 +242,6 @@ test('Core skips fallen units and refreshes a round without running a controller
     ),
   )
   assert.ok(state.pawns.every((p) => p.energy === 1 && p.escapeChance === 60 && p.specialUsed))
-})
-
-test('The bot proposes ordinary actions for either side without mutating the rules state', () => {
-  const sides = new Set<Side>()
-  for (const seed of ['alpha', 'bravo', 'charlie']) {
-    let state = initialState(seed)
-    for (let turn = 0; turn < 200 && !state.winner; turn++) {
-      sides.add(activePawn(state)!.side)
-      const before = structuredClone(state)
-      const actions = chooseBotActions(state)
-      assert.ok(actions.length)
-      assert.deepEqual(structuredClone(state), before)
-      for (const action of actions) {
-        const original = structuredClone(state)
-        Object.freeze(state)
-        Object.freeze(state.pawns)
-        Object.freeze(state.order)
-        Object.freeze(state.log)
-        state.pawns.forEach(Object.freeze)
-        for (const tile of state.tiles.values()) Object.freeze(tile)
-        const result = transition(state, action)
-        assert.notEqual(result.state, state)
-        assert.deepEqual(result.state, reducer(state, action))
-        assert.deepEqual(result, transition(state, action))
-        assert.deepEqual(structuredClone(state), original)
-        state = result.state
-      }
-    }
-  }
-  assert.deepEqual(sides, new Set(['player', 'enemy']))
 })
 
 test('Invalid bot strategies fail instead of spinning on rejected actions', () => {

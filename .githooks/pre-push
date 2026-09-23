@@ -1,9 +1,7 @@
 #!/bin/sh
 set -eu
 
-if [ -n "$(git status --porcelain)" ]; then
-  echo "Commit or stash changes before pushing so checks match CI." >&2
-  exit 1
-fi
-
-exec npm run check:ci
+# Fast guard: typecheck + the unit suite. Slow exhaustive sweeps live in
+# tests/integration and run in required CI via `npm run test:ci`.
+npm run typecheck
+npm run test

@@ -31,4 +31,4 @@ build:
 	npm run build
 
 check:
-	npm run check
+	npm run test:ci

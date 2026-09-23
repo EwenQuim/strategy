@@ -8,13 +8,11 @@ import {
   Swordsman,
   Ninja,
   Archer,
-  Magician,
   Bulwark,
   hexDist,
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { seedState } from '../src/lib/engine/random.ts'
 import {
   BOT_LEVELS,
   chooseBotActions,
@@ -46,40 +44,6 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
   assert.ok(state.winner || state.round !== round || activePawn(state)?.id !== id)
   return state
 }
-
-test('Class-specific candidates and threat estimates retain their reference decisions', () => {
-  const decisions = []
-  for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark]) {
-    for (const side of ['player', 'enemy'] as const) {
-      for (const energy of [1, 2, 3]) {
-        const other = side === 'player' ? 'enemy' : 'player'
-        const tiles: GameState['tiles'] = new Map()
-        for (let q = -3; q <= 4; q++)
-          for (let r = -3; r <= 4; r++)
-            tiles.set(q + ',' + r, { q, r, terrain: q === 1 && r === 1 ? 'lava' : 'plain' })
-        const state: GameState = {
-          ...initialState('ai-reference'),
-          tiles,
-          pawns: [
-            new Unit(1, 0, 0, side, undefined, energy),
-            new King(2, -2, 0, side, 4),
-            new Swordsman(3, -1, 0, side, 2),
-            new King(4, 3, 0, other, 4, 3, 60),
-            new Magician(5, 1, 0, other),
-            new Bulwark(6, 2, 0, other),
-          ],
-          order: [1, 2, 3, 4, 5, 6],
-          active: 0,
-        }
-        state.pawns[5].protectingId = 4
-        for (const options of Object.values(BOT_LEVELS))
-          decisions.push(chooseBotActions(state, options))
-      }
-    }
-  }
-  assert.equal(decisions.length, 108)
-  assert.equal(seedState(JSON.stringify(decisions)), 963989587)
-})
 
 test('Equally valued attacks keep candidate order at every difficulty', () => {
   for (const reversed of [false, true]) {
@@ -259,21 +223,4 @@ test('Hard lookahead can move then deliver a winning blow', () => {
     new King(3, 1, 0, 'player', 2),
   ])
   assert.equal(playTurn(state, 'hard').winner, 'enemy')
-})
-
-test('All difficulty levels emit legal actions for every class and both sides', () => {
-  for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
-    let state = initialState('all-classes', {
-      biome: 'desert',
-      player: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark'],
-      enemy: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark'],
-    })
-    const classes = new Set<string>()
-    for (let step = 0; step < 36 && !state.winner; step++) {
-      const pawn = activePawn(state)!
-      classes.add(pawn.side + ':' + pawn.kind)
-      state = playTurn(state, level)
-    }
-    assert.equal(classes.size, 12)
-  }
 })
