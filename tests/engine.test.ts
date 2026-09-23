@@ -6,6 +6,7 @@ import {
   Magician,
   Ninja,
   Bulwark,
+  BIOMES,
   RECRUIT_CLASSES,
   jumpDestinations,
   hexDist,
@@ -818,10 +819,7 @@ test('Every seed places distinct pawns in their own three-row starting area', ()
       const firstRow = pawn.side === 'enemy' ? 0 : MAP_HEIGHT - 3
       assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
       const tileKey = key(pawn.q, pawn.r)
-      assert.equal(
-        state.tiles.get(tileKey)?.terrain,
-        state.biome === 'desert' ? 'sand' : state.biome === 'volcano' ? 'basalt' : 'plain',
-      )
+      assert.equal(state.tiles.get(tileKey)?.terrain, BIOMES[state.biome].ground)
       assert.equal(pawn.hp, pawn.maxHp)
       assert.equal(pawn.energy, pawn.maxEnergy)
       assert.equal(pawn.escapeChance, 0)
@@ -886,13 +884,10 @@ test('Seeded armies mirror one King, a guaranteed swordsman, and three random re
   }
   assert.ok(rosters.size > 1)
   assert.ok(duplicateRecruits)
-  assert.deepEqual([...recruits].sort(), [
-    'archer',
-    'bulwark',
-    'magician',
-    'ninja',
-    'swordsman',
-  ])
+  assert.deepEqual(
+    [...recruits].sort(),
+    RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player').kind).sort(),
+  )
 })
 
 test('Jump crosses blocked paths, targets only empty passable tiles within three hexes, and costs two energy', () => {

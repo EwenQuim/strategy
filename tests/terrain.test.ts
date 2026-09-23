@@ -91,18 +91,19 @@ test('Deserts have small lakes and rare decorative palms; volcanoes have passabl
     for (let index = 0; index < 100; index++) {
       const tiles = makeMap(new SeededRandom(seedState('decor-' + index)), biome)
       const all = [...tiles.values()]
+      const featureTerrain = BIOMES[biome].feature?.terrain
       assert.equal(
         all.some((tile) => tile.terrain === 'lava'),
-        biome === 'volcano',
+        featureTerrain === 'lava',
       )
       assert.equal(
         all.some((tile) => tile.terrain === 'lake'),
-        biome === 'desert' || biome === 'verdant',
+        featureTerrain === 'lake',
       )
       for (const tile of all.filter((tile) => tile.terrain === 'palm')) {
-        assert.equal(biome, 'desert')
+        assert.equal(BIOMES[biome].scatter?.terrain, 'palm')
         assert.ok(passable(tile))
-        palms++
+        if (biome === 'desert') palms++
       }
     }
   }
