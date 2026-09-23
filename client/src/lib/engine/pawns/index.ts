@@ -1,12 +1,13 @@
 import { Archer } from './archer.ts'
 import { Bulwark } from './bulwark.ts'
+import { Bomber } from './bomber.ts'
 import { King } from './king.ts'
 import { Magician } from './magician.ts'
 import { Ninja } from './ninja.ts'
 import { Swordsman } from './swordsman.ts'
 
 export * from './pawn.ts'
-export { Archer, Bulwark, King, Magician, Ninja, Swordsman }
+export { Archer, Bomber, Bulwark, King, Magician, Ninja, Swordsman }
 export { chargeDestinations } from './swordsman.ts'
 export { jumpDestinations } from './ninja.ts'
 
@@ -17,6 +18,7 @@ export const PAWN_CLASSES = {
   magician: Magician,
   ninja: Ninja,
   bulwark: Bulwark,
+  bomber: Bomber,
 }
 
 export type PawnKind = keyof typeof PAWN_CLASSES

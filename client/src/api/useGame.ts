@@ -110,7 +110,13 @@ export function useGame({
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timer = window.setTimeout(
       () => dispatch({ type: 'playbackNext' }),
-      frame.effect?.impacts?.length ? 700 : reducedMotion ? 0 : frame.effect ? 460 : 180,
+      frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length
+        ? 700
+        : reducedMotion
+          ? 0
+          : frame.effect
+            ? 460
+            : 180,
     )
     return () => window.clearTimeout(timer)
   }, [frame])

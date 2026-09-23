@@ -90,7 +90,7 @@ export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
       p.protectingId === target.id &&
       p.side === target.side &&
       p.id !== target.id &&
-      hexDist(p, target) === 1,
+      p.special.targets(p, [target]).length > 0,
   )
 }
 
@@ -162,6 +162,24 @@ export function strike(
     log.push(label(target) + ' has fallen.')
   }
   return { q: target.q, r: target.r, damage: profile.damage }
+}
+
+export function strikeArea(
+  pawns: Pawn[],
+  attacker: Pawn,
+  targets: Pawn[],
+  log: string[],
+  random: SeededRandom,
+): BattleImpact[] {
+  const impacts: BattleImpact[] = []
+  for (const target of targets) {
+    if (!pawns.includes(target)) continue
+    const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log, random)
+    const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
+    if (previous) previous.damage += hit.damage
+    else impacts.push(hit)
+  }
+  return impacts
 }
 
 export function performAttack(

@@ -251,7 +251,7 @@
       "newElements": [
         {
           "name": "Magician",
-          "description": "Rival caster. Attacks 1 to 2 tiles away for 1. Special Fireball (2 energy): 1 damage to the target and every enemy adjacent to it, though each may Escape."
+          "description": "Rival caster. Attacks 1 to 2 tiles away for 1. Special Fireball (2 energy): choose one of six directions and deal 1 damage to every enemy along that line, through terrain and units to the board edge. Each may Escape; allies are unharmed."
         }
       ]
     }
@@ -466,7 +466,7 @@
       "newElements": [
         {
           "name": "Bulwark",
-          "description": "Enemy wall-bearer. 10 health, strikes adjacent enemies for 1, and every tile of movement costs 2 energy. Special Protect (2 energy): take the next hit for an adjacent ally."
+          "description": "Enemy wall-bearer. 10 health, strikes adjacent enemies for 1. Moving costs 2 energy for the first tile, then 1 per extra tile. Special Protect (2 energy): take the next hit for an ally within 2 tiles. Ends beyond that range or at the start of its next turn."
         }
       ]
     }
