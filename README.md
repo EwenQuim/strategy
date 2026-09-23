@@ -20,10 +20,10 @@ The app runs under `/strategy/`. Game URLs contain a seed: the same seed and act
 - `make typecheck`: strict TypeScript checks for the app, library, tooling, and tests.
 - `make lint`: typecheck, formatting validation, and Oxlint with no warnings allowed.
 - `make test`: run the Node.js built-in test runner; no browser or test framework required.
-- `make check`: run all checks, engine tests, the production build, and PWA browser tests.
+- `make check`: run `npm run check`: formatting, lint, typechecks, all unit tests, integration tests, and the production build.
 - `npm run test:pwa`: test the existing build in Chrome at a small portrait viewport, including offline play, safe upgrades, and failed downloads.
 
-CI and `.githooks/pre-push` both run `npm run check:ci`: a fresh locked install with lifecycle scripts disabled, formatting, lint, typechecks, all unit tests, the production build, four browser smoke tests, and a clean tracked diff. CI has a four-minute job timeout. `npm run test:pwa:smoke` skips the slow full-battle animation, local multiplayer, and campaign browser scenarios; these remain available through `make check` or `npm run test:pwa`. `npm run prepare` installs the hook locally, including when automatic npm lifecycle scripts are disabled. The hook rejects uncommitted or untracked changes so checks run against the code being pushed.
+`.githooks/pre-push` runs only `npm run typecheck` so pushing stays fast; `npm run prepare` installs the hook locally. The full gate lives in CI: `npm run check` plus a browser smoke job (`npm run test:pwa:smoke`, which skips the slow full-battle animation, local multiplayer, and campaign scenarios), run against a fresh locked install with a clean tracked diff and a four-minute job timeout. The slow browser scenarios remain available through `npm run test:pwa`.
 
 The same checks gate pull requests and GitHub Pages deployment. The build includes a `404.html` fallback for seeded game URLs.
 
