@@ -1,15 +1,10 @@
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Link } from '@tanstack/react-router'
-import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
-import { useGame } from '../useGame'
-import { armyLabels, playerNames, type GameMode } from '../lib/game-mode'
+import { useRef, useSyncExternalStore } from 'react'
+import { useGame, type GameOptions } from '../useGame'
+import { armyLabels, playerNames } from '../lib/game-mode'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
-import type { BotDifficulty } from '../lib/bot'
-import {
-  recordCampaignVictory,
-  subscribeCampaignProgress,
-  campaignProgressSaved,
-} from '../campaignProgress'
+import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { Battlefield } from './Battlefield'
 import { BattleNotifications } from './BattleNotifications'
 import { Icon, PawnIcon } from './Icon'
@@ -28,8 +23,11 @@ import {
   key,
   movementDestinations,
   type Tile,
-  type BattleSetup,
 } from '../lib/engine'
+
+const resultButtonClassName =
+  buttonClassName +
+  ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
 
 const actionButtonClassName =
   'grid min-h-16 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:hover]:border-[#bcc8a670] [&:enabled:hover]:bg-[#ffffff0c] max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
@@ -42,20 +40,18 @@ export function Game({
   setup,
   campaignLevel,
   difficulty = 'normal',
-}: {
-  seed: string
-  mode: GameMode
-  setup?: BattleSetup
-  campaignLevel?: number
-  difficulty?: BotDifficulty
-}) {
+  onVictory,
+}: GameOptions & { campaignLevel?: number }) {
   const local = mode === 'local'
   const labels = armyLabels[mode]
-  const { state, dispatch, effect, effectId, playing } = useGame(seed, mode, setup, difficulty)
+  const { state, dispatch, effect, effectId, playing } = useGame({
+    seed,
+    mode,
+    setup,
+    difficulty,
+    onVictory,
+  })
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, campaignProgressSaved)
-  useEffect(() => {
-    if (campaignLevel && state.winner === 'player') recordCampaignVictory(campaignLevel)
-  }, [campaignLevel, state.winner])
   const winnerLabel =
     campaignLevel === CAMPAIGN_LEVELS.length && state.winner === 'player'
       ? 'Campaign complete!'
@@ -71,7 +67,7 @@ export function Game({
   const myTurn = !!pawn && (local || pawn.side === 'player') && !state.winner && !playing
   const attacking = myTurn && state.phase === 'attack'
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
-  const targets = useMemo(() => targetingTiles(state), [state])
+  const targets = targetingTiles(state)
   const targetLabel = attacking
     ? 'Attack'
     : state.phase === 'special' && pawn?.kind === 'swordsman'
@@ -84,11 +80,10 @@ export function Game({
     return unit ? [{ unit, index }] : []
   })
 
-  const reach = useMemo(() => {
-    if (!myTurn || !pawn || pawn.energy <= 0 || state.phase !== 'move')
-      return new Map<string, number>()
-    return movementDestinations(state.tiles, state.pawns, pawn)
-  }, [state.pawns, state.tiles, state.phase, myTurn, pawn])
+  const reach =
+    myTurn && pawn.energy > 0 && state.phase === 'move'
+      ? movementDestinations(state.tiles, state.pawns, pawn)
+      : new Map<string, number>()
 
   const onTileClick = (tile: Tile) => {
     if (!myTurn) return
@@ -258,32 +253,20 @@ export function Game({
                       <Link
                         to="/campaign/$level"
                         params={{ level: String(campaignLevel + 1) }}
-                        className={
-                          buttonClassName +
-                          ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-                        }
+                        className={resultButtonClassName}
                         preload={false}
                       >
                         Next level
                         <Icon name="arrow" />
                       </Link>
                     ) : (
-                      <Link
-                        to="/campaign"
-                        className={
-                          buttonClassName +
-                          ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-                        }
-                      >
+                      <Link to="/campaign" className={resultButtonClassName}>
                         Back to campaign
                       </Link>
                     )
                   ) : (
                     <button
-                      className={
-                        buttonClassName +
-                        ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-                      }
+                      className={resultButtonClassName}
                       onClick={() => dispatch({ type: 'restart' })}
                     >
                       Retry level
@@ -308,10 +291,7 @@ export function Game({
                     difficulty,
                     setup: setup?.map === undefined ? setup : undefined,
                   }}
-                  className={
-                    buttonClassName +
-                    ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-                  }
+                  className={resultButtonClassName}
                   preload={false}
                 >
                   New game

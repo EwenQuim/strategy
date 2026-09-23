@@ -1,7 +1,8 @@
 import { hexDist, key } from './hex.ts'
-import type { Pawn, Side } from './pawns.ts'
+import type { Pawn, Side, SpecialResult } from './pawns.ts'
 import type {
   Action,
+  Axial,
   BattleEffect,
   BattleFrame,
   BattleSetup,
@@ -16,13 +17,9 @@ import {
   walkingPaths,
   enterTiles,
   canUseSpecial,
-  chargeDestinations,
-  jumpDestinations,
-  performJump,
   specialTargets,
   performAttack,
-  performRally,
-  performSpecial,
+  label,
 } from './combat.ts'
 
 function winnerFrom(pawns: Pawn[]): Side | null {
@@ -36,17 +33,7 @@ function finishTurn(pawn: Pawn, log: string[]): boolean {
   pawn.endTurn()
   const gained = pawn.escapeChance - previousEscape
   if (gained <= 0) return false
-  log.push(
-    (pawn.side === 'player' ? 'Your ' : 'Enemy ') +
-      pawn.kind +
-      ' #' +
-      pawn.id +
-      ' ends turn: +' +
-      gained +
-      '% escape (' +
-      pawn.escapeChance +
-      '% total).',
-  )
+  log.push(`${label(pawn)} ends turn: +${gained}% escape (${pawn.escapeChance}% total).`)
   return true
 }
 
@@ -79,13 +66,7 @@ function advanceTurn(state: GameState): GameState {
         next.hp < next.maxHp
       ) {
         next.hp++
-        log.push(
-          (next.side === 'player' ? 'Your ' : 'Enemy ') +
-            next.kind +
-            ' #' +
-            next.id +
-            ' recovers 1 health at the spring.',
-        )
+        log.push(label(next) + ' recovers 1 health at the spring.')
         logCount++
       }
       break
@@ -135,23 +116,24 @@ export function reducer(state: GameState, action: Action): GameState {
 export function targetingTiles(state: GameState): Set<string> {
   const pawn = activePawn(state)
   if (!pawn || state.winner) return new Set()
-  if (state.phase === 'special' && pawn.kind === 'ninja') {
+  if (state.phase === 'attack')
     return new Set(
-      jumpDestinations(state.tiles, state.pawns, pawn).map((tile) => key(tile.q, tile.r)),
+      state.pawns
+        .filter((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
+        .map((target) => key(target.q, target.r)),
     )
-  }
-  if (state.phase === 'special' && pawn.kind === 'swordsman') {
-    return new Set(chargeDestinations(state.tiles, state.pawns, pawn).keys())
-  }
-  const targets =
-    state.phase === 'attack'
-      ? state.pawns.filter((target) =>
-          canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))),
-        )
-      : state.phase === 'special' || state.phase === 'charge'
-        ? specialTargets(state.pawns, pawn, state.chargeDestination ?? pawn)
-        : []
-  return new Set(targets.map((target) => key(target.q, target.r)))
+  if (state.phase === 'special')
+    return (
+      pawn.special.tileTargets?.(pawn, state.tiles, state.pawns) ??
+      new Set(specialTargets(state.pawns, pawn).map((target) => key(target.q, target.r)))
+    )
+  if (state.phase === 'charge')
+    return new Set(
+      specialTargets(state.pawns, pawn, state.chargeDestination ?? pawn).map((target) =>
+        key(target.q, target.r),
+      ),
+    )
+  return new Set()
 }
 
 type ActionResult = {
@@ -163,6 +145,12 @@ type ActionResult = {
   effect: BattleEffect | null
 }
 
+const effectFrom = ({ kind, ...rest }: SpecialResult, from: Axial): BattleEffect => ({
+  kind,
+  from,
+  ...rest,
+})
+
 function executeAction(state: GameState, action: Action): ActionResult | null {
   const tiles = new Map(state.tiles)
   const pawns = state.pawns.map((pawn) => pawn.clone())
@@ -170,13 +158,24 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   const log: string[] = []
   const random = new SeededRandom(state.randomState)
   const from = { q: actor.q, r: actor.r }
+  const context = {
+    pawn: actor,
+    tiles,
+    pawns,
+    round: state.round,
+    log,
+    random,
+  }
   let effect: BattleEffect | null = null
 
   switch (action.type) {
-    case 'act':
-      if (action.action !== 'special' || !performRally(pawns, actor, log)) return null
-      effect = { kind: 'rally', from, to: from }
+    case 'act': {
+      if (action.action !== 'special') return null
+      const result = actor.special.perform(context)
+      if (!result) return null
+      effect = effectFrom(result, from)
       break
+    }
     case 'move': {
       if (state.phase !== 'move' || actor.energy <= 0) return null
       const route = walkingPaths(tiles, pawns, actor).get(key(action.q, action.r))
@@ -191,56 +190,24 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       }
       break
     }
-    case 'attackAt':
-    case 'specialAt': {
-      if (action.type === 'specialAt' && actor.kind === 'ninja') {
-        if (state.phase !== 'special' || !performJump(state.tiles, pawns, actor, action))
-          return null
-        const impacts = enterTiles(
-          tiles,
-          pawns,
-          actor,
-          [tiles.get(key(actor.q, actor.r))!],
-          state.round,
-          log,
-        )
-        effect = {
-          kind: 'move',
-          from,
-          to: { q: actor.q, r: actor.r },
-          ...(impacts.length ? { impacts } : {}),
-        }
-        break
-      }
-      const expectedPhase =
-        action.type === 'attackAt'
-          ? 'attack'
-          : actor.kind === 'swordsman'
-            ? 'charge'
-            : 'special'
-      if (state.phase !== expectedPhase) return null
+    case 'attackAt': {
+      if (state.phase !== 'attack') return null
       const target = pawns.find((pawn) => pawn.q === action.q && pawn.r === action.r)
       if (!target) return null
-      const impacts =
-        action.type === 'attackAt'
-          ? performAttack(tiles, pawns, actor, target, log, random)
-          : performSpecial(
-              tiles,
-              pawns,
-              actor,
-              target,
-              log,
-              random,
-              state.round,
-              state.chargeDestination ?? undefined,
-            )
+      const impacts = performAttack(tiles, pawns, actor, target, log, random)
       if (!impacts) return null
-      let kind: BattleEffect['kind'] = 'attack'
-      if (action.type === 'specialAt') {
-        if (actor.kind === 'magician') kind = 'fireball'
-        if (actor.kind === 'bulwark') kind = 'protect'
-      }
-      effect = { kind, from, to: { q: target.q, r: target.r }, impacts }
+      effect = { kind: 'attack', from, to: { q: target.q, r: target.r }, impacts }
+      break
+    }
+    case 'specialAt': {
+      if (state.phase !== 'special' && state.phase !== 'charge') return null
+      const result = actor.special.perform({
+        ...context,
+        tile: { q: action.q, r: action.r },
+        destination: state.chargeDestination ?? undefined,
+      })
+      if (!result) return null
+      effect = effectFrom(result, from)
       break
     }
     case 'endTurn':
@@ -293,12 +260,16 @@ function reduce(
     case 'act':
       if (state.phase !== 'move' || pawn.energy <= 0) return state
       if (action.action === 'attack') return { ...state, phase: 'attack' }
-      if (action.action === 'special' && pawn.kind !== 'king')
+      if (action.action === 'special' && pawn.special.targeted)
         return canUseSpecial(pawn) ? { ...state, phase: 'special' } : state
       break
     case 'specialAt':
-      if (state.phase === 'special' && pawn.kind === 'swordsman') {
-        if (!chargeDestinations(state.tiles, state.pawns, pawn).has(key(action.q, action.r)))
+      if (state.phase === 'special' && pawn.special.choosesDestination) {
+        if (
+          !pawn.special
+            .tileTargets?.(pawn, state.tiles, state.pawns)
+            .has(key(action.q, action.r))
+        )
           return state
         return { ...state, phase: 'charge', chargeDestination: { q: action.q, r: action.r } }
       }

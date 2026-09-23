@@ -6,7 +6,7 @@ export type Terrain =
   'plain' | 'forest' | 'mountain' | 'lake' | 'sand' | 'palm' | 'basalt' | 'lava'
 export type TileFeature = 'watchtower' | 'spring' | 'rune'
 export type Tile = { q: number; r: number; terrain: Terrain; feature?: TileFeature }
-export type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
+type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
 
 export type PawnPlacement = {
   readonly kind: Pawn['kind']

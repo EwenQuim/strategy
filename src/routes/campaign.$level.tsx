@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Briefing } from '../components/Briefing'
 import { Game } from '../components/Game'
 import { CAMPAIGN_LEVELS, isLevelUnlocked } from '../lib/campaign'
-import { readCampaignProgress } from '../campaignProgress'
+import { readCampaignProgress, recordCampaignVictory } from '../campaignProgress'
 
 export const Route = createFileRoute('/campaign/$level')({
   beforeLoad: ({ params }) => {
@@ -19,7 +19,13 @@ export const Route = createFileRoute('/campaign/$level')({
     const { level } = Route.useRouteContext()
     return (
       <>
-        <Game seed={level.seed} mode="ai" setup={level.setup} campaignLevel={level.id} />
+        <Game
+          seed={level.seed}
+          mode="ai"
+          setup={level.setup}
+          campaignLevel={level.id}
+          onVictory={() => recordCampaignVictory(level.id)}
+        />
         <Briefing level={level} />
       </>
     )
