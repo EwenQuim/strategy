@@ -3,7 +3,7 @@
 NPM := npm --prefix client
 GO := go -C server
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker go-format go-lint go-test
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test
 
 onboarding: installdeps
 
@@ -47,3 +47,6 @@ check:
 
 docker:
 	docker build -t hexmate --build-arg VITE_GIT_COMMIT=$$(git rev-parse HEAD) .
+
+run: build
+	$(GO) run .

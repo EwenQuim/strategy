@@ -14,7 +14,7 @@ const appBase = "/strategy/"
 
 func main() {
 	addr := cmp.Or(os.Getenv("ADDR"), ":8080")
-	dist := cmp.Or(os.Getenv("DIST"), "./dist")
+	dist := cmp.Or(os.Getenv("DIST"), "../client/dist")
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /api", apiHandler())
