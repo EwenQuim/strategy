@@ -1,9 +1,5 @@
 #!/bin/sh
 set -eu
 
-if [ -n "$(git status --porcelain)" ]; then
-  echo "Commit or stash changes before pushing so checks match CI." >&2
-  exit 1
-fi
-
-exec npm run check:ci
+# Fast guard only. Full test suite runs in required CI (.github/workflows/ci.yml).
+exec npm run typecheck
