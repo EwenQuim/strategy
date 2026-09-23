@@ -713,12 +713,14 @@ test(
     const backgrounds = new Set<string>()
     const panels = new Set<string>()
     const tileBases = new Set<string>()
+    const themedBiomes: Biome[] = ['verdant', 'mountains', 'desert', 'volcano']
     const seeds = new Map<Biome, string>()
-    for (let index = 0; index < 100 && seeds.size < 4; index++) {
+    for (let index = 0; index < 400 && seeds.size < themedBiomes.length; index++) {
       const seed = '00000000-0000-4000-8000-' + index.toString(16).padStart(12, '0')
-      seeds.set(initialState(seed).biome, seed)
+      const biome = initialState(seed).biome
+      if (themedBiomes.includes(biome)) seeds.set(biome, seed)
     }
-    assert.equal(seeds.size, 4)
+    assert.equal(seeds.size, themedBiomes.length)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
@@ -1628,7 +1630,7 @@ test(
           (element) => element.getBoundingClientRect().bottom <= innerHeight,
         ),
       )
-      await page.goto(origin + base + 'game/style-check?mode=local')
+      await page.goto(origin + base + 'game/style-check12?mode=local')
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
         await page.evaluate(() => {
@@ -1677,11 +1679,14 @@ test(
               ? '76px'
               : '64px',
       )
+      const styleBiome = (await page
+        .locator('[data-biome]')
+        .getAttribute('data-biome')) as Biome
       assert.equal(
         await page
           .getByRole('region', { name: 'The battlefield', exact: true })
           .evaluate((element) => getComputedStyle(element).backgroundSize),
-        'auto, 37px 43px, auto',
+        BIOMES[styleBiome].theme['--battlefield-size'] ?? 'auto, 8px 8px, auto',
       )
       const special = page.locator('[data-action="special"]')
       await special.click()

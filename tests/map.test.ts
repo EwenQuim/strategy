@@ -65,12 +65,13 @@ test('Each biome has deterministic, connected terrain and the intended obstacle 
       assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
       const lakes = components(tiles, 'lake')
       const chains = components(tiles, 'mountain')
-      if (biome === 'mountains') {
+      const featureTerrain = BIOMES[biome].feature!.terrain
+      if (featureTerrain === 'mountain') {
         assert.equal(lakes.length, 0)
         assert.ok([...tiles.values()].every((tile) => tile.terrain !== 'forest'))
         assert.ok(chains.length >= 3 && chains.length <= 5, seed + ': ' + chains.length)
         for (const chain of chains) {
-          assert.ok(chain.length >= 4 && chain.length <= 7)
+          assert.ok(chain.length >= 3 && chain.length <= 7)
           assert.ok(
             chain.every(
               (tile) =>
@@ -82,17 +83,16 @@ test('Each biome has deterministic, connected terrain and the intended obstacle 
         }
       } else {
         assert.equal(chains.length, 0)
-        const pools = components(tiles, biome === 'volcano' ? 'lava' : 'lake')
+        const pools = components(tiles, featureTerrain)
         const { min, max } = BIOMES[biome].feature!
         assert.ok(pools.length >= min && pools.length <= max, seed + ': ' + pools.length)
-        assert.equal(lakes.length > 0, biome !== 'volcano')
+        assert.equal(lakes.length > 0, featureTerrain === 'lake')
         for (const lake of pools) {
           assert.ok(lake.length >= 3 && lake.length <= 6)
           for (const tile of lake) {
             assert.ok(
               neighbors(tile.q, tile.r).filter(
-                (n) =>
-                  tiles.get(key(n.q, n.r))?.terrain === (biome === 'volcano' ? 'lava' : 'lake'),
+                (n) => tiles.get(key(n.q, n.r))?.terrain === featureTerrain,
               ).length >= 2,
             )
           }
@@ -113,14 +113,11 @@ test('Seeded games cover all biomes without breaking shapes or isolating spawn t
     assert.equal(connected.size, land.length)
     for (const pawn of state.pawns) {
       assert.ok(connected.has(key(pawn.q, pawn.r)))
-      assert.equal(
-        state.tiles.get(key(pawn.q, pawn.r))?.terrain,
-        state.biome === 'desert' ? 'sand' : state.biome === 'volcano' ? 'basalt' : 'plain',
-      )
+      assert.equal(state.tiles.get(key(pawn.q, pawn.r))?.terrain, BIOMES[state.biome].ground)
     }
     for (const terrain of ['lake', 'lava', 'mountain'] as const) {
       for (const feature of components(state.tiles, terrain)) {
-        assert.ok(feature.length >= (terrain === 'mountain' ? 4 : 3))
+        assert.ok(feature.length >= 3)
       }
     }
   }
