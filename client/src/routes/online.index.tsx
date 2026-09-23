@@ -3,12 +3,11 @@ import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-ro
 import { useQueries } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import {
-  getGetGameQueryOptions,
-  useCreateGame,
-  useJoinGame,
-  type PublicGame,
-} from '../../generated/sdk.gen.ts'
-import { ApiError } from '../api/client.ts'
+  ApiError,
+  onlineGameQueryOptions,
+  useCreateOnlineGame,
+  useJoinOnlineGame,
+} from '../api/online.ts'
 import { Icon } from '../components/Icon'
 import {
   onlineEnabled,
@@ -33,8 +32,8 @@ export const Route = createFileRoute('/online/')({
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
     const [games, setGames] = useState<StoredGame[]>([])
-    const createGame = useCreateGame()
-    const joinGame = useJoinGame()
+    const createGame = useCreateOnlineGame()
+    const joinGame = useJoinOnlineGame()
     const busy = createGame.isPending || joinGame.isPending
 
     useEffect(() => {
@@ -42,7 +41,7 @@ export const Route = createFileRoute('/online/')({
     }, [])
 
     const docs = useQueries({
-      queries: games.map((game) => getGetGameQueryOptions(game.code)),
+      queries: games.map((game) => onlineGameQueryOptions(game.code)),
     })
 
     const trimmedName = name.trim()
@@ -79,9 +78,9 @@ export const Route = createFileRoute('/online/')({
             event.preventDefault()
             if (!trimmedName || busy) return
             void start(async () => {
-              const creds = await createGame.mutateAsync({ data: { name: trimmedName } })
-              saveStoredGame({ code: creds.game.code, token: creds.token, side: 'player' })
-              return creds.game.code
+              const game = await createGame.mutateAsync(trimmedName)
+              saveStoredGame(game)
+              return game.code
             })
           }}
         >
@@ -115,12 +114,9 @@ export const Route = createFileRoute('/online/')({
             event.preventDefault()
             if (!trimmedName || joinCode.length !== 6 || busy) return
             void start(async () => {
-              const creds = await joinGame.mutateAsync({
-                data: { name: trimmedName },
-                code: joinCode,
-              })
-              saveStoredGame({ code: creds.game.code, token: creds.token, side: 'enemy' })
-              return creds.game.code
+              const game = await joinGame.mutateAsync(joinCode, trimmedName)
+              saveStoredGame(game)
+              return game.code
             })
           }}
         >
@@ -163,7 +159,7 @@ export const Route = createFileRoute('/online/')({
               Your games
             </h2>
             {games.map((game, index) => {
-              const doc: PublicGame | undefined = docs[index]?.data
+              const doc = docs[index]?.data
               const missing = docs[index]?.isError
               return (
                 <Link
@@ -186,7 +182,7 @@ export const Route = createFileRoute('/online/')({
                         ? 'Waiting for opponent'
                         : doc.status === 'finished'
                           ? 'Finished'
-                          : (doc.namePlayer ?? '?') + ' vs ' + (doc.nameEnemy ?? '?')}
+                          : doc.namePlayer + ' vs ' + doc.nameEnemy}
                   </span>
                 </Link>
               )

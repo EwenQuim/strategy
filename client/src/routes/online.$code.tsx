@@ -1,7 +1,6 @@
 import { buttonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { useGetGame } from '../../generated/sdk.gen.ts'
-import { ApiError } from '../api/client.ts'
+import { ApiError, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
 import { onlineEnabled, readStoredGames } from '../online.ts'
 
@@ -15,7 +14,7 @@ export const Route = createFileRoute('/online/$code')({
   component: function OnlineBattle() {
     const { code } = Route.useParams()
     const stored = readStoredGames().find((game) => game.code === code)
-    const game = useGetGame(code, {
+    const game = useOnlineGame(code, {
       query: {
         refetchInterval: (query) =>
           query.state.data?.status === 'waiting' ? POLL_INTERVAL_MS : false,

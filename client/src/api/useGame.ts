@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
-import { initialPlayback, playbackReducer, type PlaybackAction } from './lib/playback.ts'
-import { getGame, useGetGame, usePlayAction } from '../generated/sdk.gen.ts'
-import type { Side } from './lib/engine/pawns/pawn.ts'
-import type { GameMode } from './lib/game-mode.ts'
-import type { OnlineAction } from './lib/online.ts'
-import type { BattleSetup, Transition } from './lib/engine/types.ts'
-import type { BotDifficulty } from './lib/bot.ts'
+import { initialPlayback, playbackReducer, type PlaybackAction } from '../lib/playback.ts'
+import { usePlayAction } from '../../generated/sdk.gen.ts'
+import { fetchOnlineGame, useOnlineGame } from './online.ts'
+import type { Side } from '../lib/engine/pawns/pawn.ts'
+import type { GameMode } from '../lib/game-mode.ts'
+import type { OnlineAction } from '../lib/online.ts'
+import type { BattleSetup, Transition } from '../lib/engine/types.ts'
+import type { BotDifficulty } from '../lib/bot.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -42,7 +43,7 @@ export function useGame({
   const appliedActions = useRef(0)
 
   const live = !!online && !playback.state.winner
-  const game = useGetGame(online?.code ?? '', {
+  const game = useOnlineGame(online?.code ?? '', {
     query: {
       enabled: live,
       refetchInterval: live ? POLL_INTERVAL_MS : false,
@@ -52,7 +53,7 @@ export function useGame({
 
   useEffect(() => {
     if (!online) return
-    const actions = game.data?.actions as unknown as OnlineAction[] | null | undefined
+    const actions: OnlineAction[] | undefined = game.data?.actions
     if (!actions) return
     if (actions.length !== appliedActions.current) {
       appliedActions.current = actions.length
@@ -63,10 +64,9 @@ export function useGame({
   const resync = useCallback(async () => {
     if (!online) return
     try {
-      const doc = await getGame(online.code)
-      const actions = (doc.actions ?? []) as unknown as OnlineAction[]
-      appliedActions.current = actions.length
-      dispatch({ type: 'resync', actions })
+      const doc = await fetchOnlineGame(online.code)
+      appliedActions.current = doc.actions.length
+      dispatch({ type: 'resync', actions: doc.actions })
     } catch {
       // server unreachable: keep local state, next poll retries
     }

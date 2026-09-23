@@ -1,7 +1,7 @@
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Link } from '@tanstack/react-router'
 import { useRef, useSyncExternalStore } from 'react'
-import { useGame, type GameOptions, type OnlineSession } from '../useGame'
+import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import { possessiveArmyLabels, playerNames, type PlayerNames } from '../lib/game-mode'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
