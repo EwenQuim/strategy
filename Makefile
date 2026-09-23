@@ -3,7 +3,7 @@
 NPM := npm --prefix client
 GO := go -C server
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp
 
 onboarding: installdeps
 
@@ -33,6 +33,12 @@ go-lint:
 go-test:
 	$(GO) test ./...
 
+openapi:
+	$(GO) run ./cmd/specgen
+
+sdk: openapi
+	$(NPM) run sdk
+
 test:
 	$(NPM) test
 
@@ -47,6 +53,9 @@ check:
 
 docker:
 	docker build -t hexmate --build-arg VITE_GIT_COMMIT=$$(git rev-parse HEAD) .
+
+pvp:
+	docker compose --profile 2players up --build
 
 run: build
 	$(GO) run .

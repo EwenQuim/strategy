@@ -3,3 +3,4 @@ dist
 .tanstack
 src/routeTree.gen.ts
 package-lock.json
+generated

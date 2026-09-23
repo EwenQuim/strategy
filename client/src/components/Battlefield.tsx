@@ -10,7 +10,7 @@ import {
   type Tile,
 } from '../lib/engine'
 import { Icon, PawnIcon } from './Icon'
-import { armyLabels, type GameMode } from '../lib/game-mode'
+import type { PlayerNames } from '../lib/game-mode'
 
 const SIZE = 34
 const hexX = (q: number, r: number) => SIZE * Math.sqrt(3) * (q + r / 2)
@@ -32,7 +32,7 @@ const terrainColors = {
 }
 
 interface BattlefieldProps {
-  mode: GameMode
+  labels: PlayerNames
   tiles: Map<string, Tile>
   pawns: Pawn[]
   active?: Pawn
@@ -46,7 +46,7 @@ interface BattlefieldProps {
 }
 
 export function Battlefield({
-  mode,
+  labels,
   tiles,
   pawns,
   active,
@@ -167,7 +167,7 @@ export function Battlefield({
                   : terrainColors[tile.terrain]
         const label =
           (occupant
-            ? armyLabels[mode][occupant.side] +
+            ? labels[occupant.side] +
               ' ' +
               occupant.kind +
               ' #' +

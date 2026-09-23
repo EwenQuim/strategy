@@ -20,13 +20,18 @@ function gitCommit(): string {
 
 export default defineConfig({
   base: '/strategy/',
+  server: { proxy: { '/api': 'http://localhost:8080' } },
   define: {
     'import.meta.env.VITE_GIT_COMMIT': JSON.stringify(gitCommit()),
   },
   plugins: [
     tailwindcss(),
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
-    react({ compiler: { panicThreshold: 'all_errors' } }),
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+      generatedRouteTree: './generated/routeTree.gen.ts',
+    }),
+    react({ compiler: { panicThreshold: 'all_errors' }, exclude: [/generated\//] }),
     pwa(),
   ],
 })

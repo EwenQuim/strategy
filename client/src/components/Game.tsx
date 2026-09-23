@@ -1,8 +1,8 @@
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Link } from '@tanstack/react-router'
 import { useRef, useSyncExternalStore } from 'react'
-import { useGame, type GameOptions } from '../useGame'
-import { armyLabels, playerNames } from '../lib/game-mode'
+import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
+import { possessiveArmyLabels, playerNames, type PlayerNames } from '../lib/game-mode'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { Battlefield } from './Battlefield'
@@ -40,22 +40,27 @@ export function Game({
   campaignLevel,
   difficulty = 'normal',
   onVictory,
-}: GameOptions & { campaignLevel?: number }) {
+  online,
+  players,
+}: GameOptions & { campaignLevel?: number; online?: OnlineSession; players?: PlayerNames }) {
   const local = mode === 'local'
-  const labels = armyLabels[mode]
+  const isOnline = mode === 'online'
+  const names = players ?? playerNames
+  const labels = possessiveArmyLabels(mode, names)
   const { state, dispatch, effect, effectId, playing } = useGame({
     seed,
     mode,
     setup,
     difficulty,
     onVictory,
+    online,
   })
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, campaignProgressSaved)
   const winnerLabel =
     campaignLevel === CAMPAIGN_LEVELS.length && state.winner === 'player'
       ? 'Campaign complete!'
-      : state.winner && local
-        ? playerNames[state.winner] + ' wins!'
+      : state.winner && (local || isOnline)
+        ? names[state.winner] + ' wins!'
         : null
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
@@ -63,7 +68,11 @@ export function Game({
   const hasFoes =
     !!pawn &&
     state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
-  const myTurn = !!pawn && (local || pawn.side === 'player') && !state.winner && !playing
+  const myTurn =
+    !!pawn &&
+    (isOnline ? pawn.side === online?.side : local || pawn.side === 'player') &&
+    !state.winner &&
+    !playing
   const attacking = myTurn && state.phase === 'attack'
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
   const targets = targetingTiles(state)
@@ -113,9 +122,11 @@ export function Game({
       >
         <div className="m-auto flex min-h-[50px] max-w-[1040px] items-center justify-between min-[900px]:min-h-[53px] [@media(max-height:650px)]:min-h-[43px] [@media(min-width:600px)_and_(max-height:480px)]:min-h-[42px]">
           <Link
-            to={campaignLevel ? '/campaign' : '/'}
+            to={campaignLevel ? '/campaign' : isOnline ? '/online' : '/'}
             className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]"
-            aria-label={campaignLevel ? 'Campaign levels' : 'Hexmate home'}
+            aria-label={
+              campaignLevel ? 'Campaign levels' : isOnline ? 'Online lobby' : 'Hexmate home'
+            }
           >
             <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
               <Icon name="crown" />
@@ -133,17 +144,19 @@ export function Game({
             </span>
           </Link>
           <div className="flex gap-0">
-            {local && pawn && !state.winner && (
+            {(local || isOnline) && pawn && !state.winner && (
               <span
                 className="mr-2.5 self-center text-[10px] text-[#d69b81] data-[side=player]:text-[#b6d2b5]"
                 data-testid="player-turn"
                 data-side={pawn.side}
                 role="status"
               >
-                {playerNames[pawn.side]} turn
+                {isOnline && pawn.side === online?.side
+                  ? 'Your turn'
+                  : names[pawn.side] + ' turn'}
               </span>
             )}
-            {!local && playing && pawn?.side === 'enemy' && (
+            {mode === 'ai' && playing && pawn?.side === 'enemy' && (
               <span
                 className="mr-2.5 self-center text-[10px] text-[#d69b81]"
                 data-testid="enemy-turn"
@@ -195,7 +208,7 @@ export function Game({
       >
         <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] max-[601px]:px-[3px]">
           <Battlefield
-            mode={mode}
+            labels={labels}
             tiles={state.tiles}
             pawns={state.pawns}
             active={state.winner ? undefined : pawn}
@@ -208,7 +221,12 @@ export function Game({
             onTileClick={onTileClick}
           />
         </div>
-        <BattleNotifications log={state.log} logCount={state.logCount} mode={mode} />
+        <BattleNotifications
+          log={state.log}
+          logCount={state.logCount}
+          mode={mode}
+          names={names}
+        />
         {state.winner && (
           <div
             className="absolute inset-0 grid place-items-center bg-[#14281eab] p-4 backdrop-blur-[5px]"
@@ -234,7 +252,7 @@ export function Game({
                     : 'A crown has fallen.')}
               </h1>
               <p>
-                {local
+                {local || isOnline
                   ? labels[state.winner === 'player' ? 'enemy' : 'player'] + ' king has fallen.'
                   : state.winner === 'player'
                     ? 'Their king has fallen. Your guard stands victorious.'
@@ -280,6 +298,11 @@ export function Game({
                     </p>
                   )}
                 </div>
+              ) : isOnline ? (
+                <Link to="/online" className={resultButtonClassName} preload={false}>
+                  New online game
+                  <Icon name="arrow" />
+                </Link>
               ) : (
                 <Link
                   to="/game"
@@ -618,7 +641,9 @@ export function Game({
                   of energy also ends your turn, with no extra Escape bonus.{' '}
                   {local
                     ? 'Share this device: Player 1 commands green units and Player 2 commands red units. Follow the turn indicator for each unit; the same player may act several times in a row.'
-                    : 'You move first; enemy units act automatically.'}{' '}
+                    : isOnline
+                      ? 'You play against a real opponent online. Only your own units answer to you; wait while the opponent acts. Moves sync every few seconds.'
+                      : 'You move first; enemy units act automatically.'}{' '}
                   Turn order is decided once at the start and stays the same, skipping fallen
                   units. Each new round restores all energy and resets Escape to 0%.
                 </p>

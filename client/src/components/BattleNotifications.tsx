@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import { battleMessage, type GameMode } from '../lib/game-mode'
+import { battleMessage, playerNames, type GameMode, type PlayerNames } from '../lib/game-mode'
 
 export function BattleNotifications({
   log,
   logCount,
   mode,
+  names = playerNames,
 }: {
   log: string[]
   logCount: number
   mode: GameMode
+  names?: PlayerNames
 }) {
   const latest = log.slice(-5)
   return (
@@ -21,7 +23,7 @@ export function BattleNotifications({
       {latest.map((message, index) => (
         <Notification
           key={logCount - latest.length + index}
-          message={battleMessage(message, mode)}
+          message={battleMessage(message, mode, names)}
         />
       ))}
     </ol>

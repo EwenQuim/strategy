@@ -1,12 +1,39 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc"],
-  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts"],
+  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts", "generated"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ]
   },
   "overrides": [
+    {
+      "files": ["src/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/generated/sdk.gen", "**/generated/sdk.gen.ts"],
+                "message": "Import the generated SDK from src/api/ instead."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/api/**"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
     {
       "files": ["src/lib/**"],
       "rules": {
@@ -15,8 +42,14 @@
           {
             "patterns": [
               {
-                "group": ["*", "!./**", "!../**"],
-                "message": "Library modules must use relative imports, not runtime dependencies."
+                "group": [
+                  "*",
+                  "!./**",
+                  "!../**",
+                  "**/generated/sdk.gen",
+                  "**/generated/sdk.gen.ts"
+                ],
+                "message": "Library modules must use relative imports and never the generated SDK."
               }
             ]
           }
@@ -26,7 +59,16 @@
     {
       "files": ["src/lib/engine/**"],
       "rules": {
-        "no-restricted-imports": ["error", { "patterns": [{ "group": ["*", "!./**"] }] }]
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["*", "!./**"]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -34,7 +76,13 @@
       "rules": {
         "no-restricted-imports": [
           "error",
-          { "patterns": [{ "group": ["*", "!./**", "!../*.ts"] }] }
+          {
+            "patterns": [
+              {
+                "group": ["*", "!./**", "!../*.ts"]
+              }
+            ]
+          }
         ]
       }
     }
