@@ -7,12 +7,11 @@ Mobile-first, turn-based hex strategy game built with React, Vite, TanStack Rout
 Use Node.js 22 (22.12 or newer), npm, and Google Chrome. The PWA browser checks use the same Chrome channel locally and on the GitHub-hosted Ubuntu runner.
 
 ```sh
-npm ci --ignore-scripts
-npm run prepare
+make onboarding
 make dev
 ```
 
-The app runs under `/strategy/`. Game URLs contain a seed: the same seed and actions reproduce the same battle.
+The frontend lives in `client/`; every npm script runs there, and the `make` targets invoke them for you. The app runs under `/strategy/`. Game URLs contain a seed: the same seed and actions reproduce the same battle.
 
 ## Checks
 
@@ -23,7 +22,7 @@ The app runs under `/strategy/`. Game URLs contain a seed: the same seed and act
 - `make check`: run `npm run test:ci`: formatting, lint, typechecks, all unit tests, integration tests, and the production build.
 - `npm run test:pwa`: test the existing build in Chrome at a small portrait viewport, including offline play, safe upgrades, and failed downloads.
 
-`.githooks/pre-push` runs `npm run typecheck` and the fast unit suite (`npm test`) so pushing stays quick; the slow exhaustive bot sweeps live in `tests/integration` and run in CI, not on push. `npm run prepare` installs the hook locally. The full gate lives in CI: `npm run test:ci` plus a browser smoke job (`npm run test:pwa:smoke`, which skips the slow full-battle animation, local multiplayer, and campaign scenarios), run against a fresh locked install with a clean tracked diff and a four-minute job timeout. The slow browser scenarios remain available through `npm run test:pwa`.
+`.githooks/pre-push` runs `npm run typecheck` and the fast unit suite (`npm test`) so pushing stays quick; the slow exhaustive bot sweeps live in `client/tests/integration` and run in CI, not on push. `npm run prepare` installs the hook locally. The full gate lives in CI: `npm run test:ci` plus a browser smoke job (`npm run test:pwa:smoke`, which skips the slow full-battle animation, local multiplayer, and campaign scenarios), run against a fresh locked install with a clean tracked diff and a four-minute job timeout. The slow browser scenarios remain available through `npm run test:pwa`.
 
 The same checks gate pull requests and GitHub Pages deployment. The build includes a `404.html` fallback for seeded game URLs.
 
@@ -40,7 +39,7 @@ Battles still live in memory: reloading restarts the seeded battle. Offline supp
 Campaign encounters can supply a plain, JSON-compatible setup instead of random mirrored armies:
 
 ```ts
-import { initialState, type FixedBattleSetup } from './src/lib/engine/index.ts'
+import { initialState, type FixedBattleSetup } from 'client/src/lib/engine/index.ts'
 
 const setup = {
   biome: 'mountains',
@@ -95,17 +94,17 @@ Choose Campaign on the home screen to play 20 fixed AI encounters across all fou
 
 Completed levels are stored in localStorage under `hexmate:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 
-All 20 level definitions live in `src/lib/campaign-levels.json`. Each level explicitly includes its ID, name, seed, biome, full terrain map, and both armies as `{ kind, col, row }` entries, including both kings. Edit that single JSON file to design terrain lines and starting formations; campaign terrain and positions are never randomly generated at runtime. `src/lib/campaign.ts` imports those levels and contains the progression helpers.
+All 20 level definitions live in `client/src/lib/campaign-levels.json`. Each level explicitly includes its ID, name, seed, biome, full terrain map, and both armies as `{ kind, col, row }` entries, including both kings. Edit that single JSON file to design terrain lines and starting formations; campaign terrain and positions are never randomly generated at runtime. `client/src/lib/campaign.ts` imports those levels and contains the progression helpers.
 
 The selector is at `/strategy/campaign` and battles at `/strategy/campaign/1` through `/strategy/campaign/20`. Locked and invalid battle URLs return to the selector.
 
 ## Boundaries
 
-- `src/lib/engine/`: deterministic game rules. `initialState(seed)` creates an untouched battle; `reducer(state, action)` applies an action for whichever side owns the active pawn. It never runs a bot or mutates its input. `transition` additionally returns effect snapshots before turn advancement or the victory screen.
-- `src/lib/bot.ts`: the optional single-player controller. It proposes ordinary actions and applies them through the same engine as human actions. The existing nearest-target and king-hunting strategies remain interchangeable.
-- `src/lib/playback.ts`: pure playback state and input locking.
-- `src/useGame.ts`, routes, and components: React, browser timers, reduced-motion preferences, and rendering.
+- `client/src/lib/engine/`: deterministic game rules. `initialState(seed)` creates an untouched battle; `reducer(state, action)` applies an action for whichever side owns the active pawn. It never runs a bot or mutates its input. `transition` additionally returns effect snapshots before turn advancement or the victory screen.
+- `client/src/lib/bot.ts`: the optional single-player controller. It proposes ordinary actions and applies them through the same engine as human actions. The existing nearest-target and king-hunting strategies remain interchangeable.
+- `client/src/lib/playback.ts`: pure playback state and input locking.
+- `client/src/useGame.ts`, routes, and components: React, browser timers, reduced-motion preferences, and rendering.
 
-The library is checked without DOM or Node globals and cannot import runtime packages or files outside `src/lib/`. Seeded randomness is stored in game state; the engine does not read clocks or global randomness.
+The library is checked without DOM or Node globals and cannot import runtime packages or files outside `client/src/lib/`. Seeded randomness is stored in game state; the engine does not read clocks or global randomness.
 
 A local two-player controller can use the engine directly. Networking, action authorization, and serialization of Maps and pawn class instances belong in a future adapter, not in the rules engine.

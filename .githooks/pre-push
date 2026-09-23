@@ -3,5 +3,5 @@ set -eu
 
 # Fast guard: typecheck + the unit suite. Slow exhaustive sweeps live in
 # tests/integration and run in required CI via `npm run test:ci`.
-npm run typecheck
-npm run test
+npm --prefix client run typecheck
+npm --prefix client run test
