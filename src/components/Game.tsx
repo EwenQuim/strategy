@@ -12,8 +12,7 @@ import {
   activePawn,
   BIOMES,
   TILE_FEATURES,
-  King,
-  RECRUIT_CLASSES,
+  PAWN_CLASSES,
   canAttack,
   canUseSpecial,
   specialTargets,
@@ -32,7 +31,7 @@ const resultButtonClassName =
 const actionButtonClassName =
   'grid min-h-16 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:hover]:border-[#bcc8a670] [&:enabled:hover]:bg-[#ffffff0c] max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
 
-const classes = [King, ...RECRUIT_CLASSES].map((Unit) => new Unit(0, 0, 0, 'player'))
+const classes = Object.values(PAWN_CLASSES).map((Unit) => new Unit(0, 0, 0, 'player'))
 
 export function Game({
   seed,
@@ -60,7 +59,7 @@ export function Game({
         : null
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
-  const hasAllies = !!pawn && specialTargets(state.pawns, pawn).length > 0
+  const hasSpecialTargets = !!pawn && specialTargets(state.pawns, pawn).length > 0
   const hasFoes =
     !!pawn &&
     state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
@@ -70,11 +69,8 @@ export function Game({
   const targets = targetingTiles(state)
   const targetLabel = attacking
     ? 'Attack'
-    : state.phase === 'special' && pawn?.kind === 'swordsman'
-      ? 'Charge to'
-      : pawn?.kind === 'ninja'
-        ? 'Jump to'
-        : (pawn?.special.name ?? 'Special')
+    : (state.phase === 'special' && pawn?.special.targetLabel) ||
+      (pawn?.special.name ?? 'Special')
   const turnOrder = state.order.flatMap((id, index) => {
     const unit = state.pawns.find((p) => p.id === id)
     return unit ? [{ unit, index }] : []
@@ -94,8 +90,9 @@ export function Game({
 
   return (
     <main
-      className="group/biome [--biome-background:#1c3025] [--biome-glow:#51634069] [--biome-panel:#172a21] [--tile-base:#263f30] [--tile-shade:#10291b] [--move-tint:#a3bd88] data-[biome=mountains]:[--biome-background:#263b4c] data-[biome=mountains]:[--biome-glow:#9db9d078] data-[biome=mountains]:[--biome-panel:#1b2935] data-[biome=mountains]:[--tile-base:#435562] data-[biome=mountains]:[--tile-shade:#263544] data-[biome=desert]:[--biome-background:#805537] data-[biome=desert]:[--biome-glow:#f4c46e85] data-[biome=desert]:[--biome-panel:#3f2b20] data-[biome=desert]:[--tile-base:#996437] data-[biome=desert]:[--tile-shade:#8b4e28] data-[biome=desert]:[--move-tint:#c7c79b] data-[biome=desert]:[--plain-tile:#e5bc70] data-[biome=volcano]:[--biome-background:#2b202b] data-[biome=volcano]:[--biome-glow:#d56b3b55] data-[biome=volcano]:[--biome-panel:#241c27] data-[biome=volcano]:[--tile-base:#44373f] data-[biome=volcano]:[--tile-shade:#392d33] data-[biome=volcano]:[--plain-tile:#594e53] data-[biome=volcano]:[--move-tint:#8c7b7c] data-[biome=volcano]:[--selected-tint:#b39b86] data-[biome=volcano]:[--tile-stroke-opacity:0.075] data-[biome=volcano]:[--muted:#b7a5aa] grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background)"
+      className="grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background)"
       data-biome={state.biome}
+      style={BIOMES[state.biome].theme}
     >
       {!!effect?.impacts?.length && (
         <div
@@ -193,7 +190,7 @@ export function Game({
       </header>
 
       <section
-        className="bg-(--biome-background) bg-[image:radial-gradient(ellipse_at_50%_45%,var(--biome-glow),transparent_66%),radial-gradient(#d7d8b308_1px,transparent_1px),none] bg-[size:auto,8px_8px,auto] group-data-[biome=volcano]/biome:bg-[image:radial-gradient(ellipse_at_45%_65%,var(--biome-glow),transparent_65%),radial-gradient(#e9995b33_1px,transparent_1px),none] group-data-[biome=volcano]/biome:bg-[size:auto,37px_43px,auto] before:pointer-events-none before:absolute before:inset-x-1/5 before:inset-y-[10%] before:-z-1 before:rounded-[50%] before:border before:border-[#c5d09c08] before:shadow-[0_0_0_50px_#c5d09c03,0_0_0_100px_#c5d09c02] relative isolate grid min-h-0 grid-rows-[minmax(0,1fr)]"
+        className="bg-(--biome-background) bg-[image:var(--battlefield-image,radial-gradient(ellipse_at_50%_45%,var(--biome-glow),transparent_66%),radial-gradient(#d7d8b308_1px,transparent_1px),none)] bg-[size:var(--battlefield-size,auto,8px_8px,auto)] before:pointer-events-none before:absolute before:inset-x-1/5 before:inset-y-[10%] before:-z-1 before:rounded-[50%] before:border before:border-[#c5d09c08] before:shadow-[0_0_0_50px_#c5d09c03,0_0_0_100px_#c5d09c02] relative isolate grid min-h-0 grid-rows-[minmax(0,1fr)]"
         aria-label="The battlefield"
       >
         <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] max-[601px]:px-[3px]">
@@ -430,7 +427,7 @@ export function Game({
                 attacking ||
                 !pawn ||
                 !canUseSpecial(pawn) ||
-                ((pawn.kind === 'king' || pawn.kind === 'bulwark') && !hasAllies)
+                (!!pawn.special.noTargets && !hasSpecialTargets)
               }
               title={pawn?.special.description}
               aria-pressed={usingSpecial}
@@ -455,18 +452,12 @@ export function Game({
                     ? 'No targets'
                     : state.phase === 'charge'
                       ? 'Choose enemy'
-                      : pawn?.kind === 'swordsman' || pawn?.kind === 'ninja'
-                        ? 'Choose tile'
-                        : pawn?.kind === 'bulwark'
-                          ? 'Choose ally'
-                          : 'Choose enemy'
-                  : pawn?.kind === 'king' && pawn.specialUsed
+                      : (pawn?.special.prompt ?? 'Choose enemy')
+                  : pawn?.special.oncePerRound && pawn.specialUsed
                     ? 'Used this round'
-                    : pawn?.kind === 'king' && !hasAllies
-                      ? 'No allies to heal'
-                      : pawn?.kind === 'bulwark' && !hasAllies
-                        ? 'No nearby allies'
-                        : (pawn?.special.cost ?? 2) + ' energy'}
+                    : pawn?.special.noTargets && !hasSpecialTargets
+                      ? pawn.special.noTargets
+                      : (pawn?.special.cost ?? 2) + ' energy'}
               </small>
             </button>
             <button
@@ -533,7 +524,9 @@ export function Game({
               {setup && !campaignLevel && !local && 'AI difficulty: ' + difficulty + '. '}
               {setup?.map
                 ? 'Terrain and starting positions are designed for this level; the biome sets its visual theme.'
-                : 'Verdant Vale has lakes and forests, Mountain Ranges has mountain chains, Open Desert has oases and rare decorative palms, and Ember Caldera has lava pools over dark basalt.'}
+                : Object.values(BIOMES)
+                    .map((biome) => biome.name + ' has ' + biome.description + '.')
+                    .join(' ')}
             </p>
             <section>
               <Icon name="energy" />

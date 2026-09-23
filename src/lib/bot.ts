@@ -3,13 +3,8 @@ import {
   initialState as createState,
   transition as applyAction,
 } from './engine/engine.ts'
-import {
-  canAttack,
-  chargeDestinations,
-  jumpDestinations,
-  specialTargets,
-  protectorFor,
-} from './engine/combat.ts'
+import { canAttack, specialTargets, protectorFor } from './engine/combat.ts'
+import { chargeDestinations, jumpDestinations } from './engine/pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './engine/hex.ts'
 import type { Action, BattleFrame, BattleSetup, GameState, Transition } from './engine/types.ts'
 import { type BotStrategy } from './strategies.ts'

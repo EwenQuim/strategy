@@ -28,6 +28,15 @@
       "rules": {
         "no-restricted-imports": ["error", { "patterns": [{ "group": ["*", "!./**"] }] }]
       }
+    },
+    {
+      "files": ["src/lib/engine/*/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          { "patterns": [{ "group": ["*", "!./**", "!../*.ts"] }] }
+        ]
+      }
     }
   ]
 }

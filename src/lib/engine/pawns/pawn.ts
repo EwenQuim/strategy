@@ -1,6 +1,6 @@
-import { aimedShot, charge, fireball, jump, protect, rally } from './combat.ts'
-import type { Action, Axial, BattleEffect, GameState, Tile } from './types.ts'
-import type { SeededRandom } from './random.ts'
+import type { Action, Axial, BattleEffect, GameState, Tile } from '../types.ts'
+import type { SeededRandom } from '../random.ts'
+import type { PawnKind } from './index.ts'
 
 export type Side = 'player' | 'enemy'
 
@@ -43,6 +43,9 @@ export interface SpecialAbility {
   readonly targeted: boolean
   readonly oncePerRound?: boolean
   readonly choosesDestination?: boolean
+  readonly targetLabel?: string
+  readonly prompt?: string
+  readonly noTargets?: string
   targets(pawn: Pawn, pawns: readonly Pawn[], from?: Axial): Pawn[]
   tileTargets?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
   perform(context: SpecialContext): SpecialResult | null
@@ -52,7 +55,8 @@ export interface SpecialAbility {
 
 export abstract class Pawn {
   static readonly startsOnFrontRow: boolean = false
-  abstract readonly kind: 'king' | 'swordsman' | 'archer' | 'magician' | 'ninja' | 'bulwark'
+  static readonly icon: string
+  abstract readonly kind: PawnKind
   abstract readonly attack: AttackProfile
   abstract get special(): SpecialAbility
   bonusEnergy = 0
@@ -114,69 +118,3 @@ export abstract class Pawn {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this)
   }
 }
-
-export class Swordsman extends Pawn {
-  readonly kind = 'swordsman' as const
-  get maxHp(): number {
-    return 5
-  }
-  readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
-  get special(): SpecialAbility {
-    return charge
-  }
-}
-
-export class King extends Pawn {
-  readonly kind = 'king' as const
-  get maxHp(): number {
-    return 7
-  }
-  readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
-  get special(): SpecialAbility {
-    return rally
-  }
-}
-
-export class Archer extends Pawn {
-  readonly kind = 'archer' as const
-  readonly attack: AttackProfile = { damage: 1, minRange: 2, maxRange: 3, rangeBonus: 1 }
-  get special(): SpecialAbility {
-    return aimedShot
-  }
-}
-
-export class Magician extends Pawn {
-  readonly kind = 'magician' as const
-  readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
-  get special(): SpecialAbility {
-    return fireball
-  }
-}
-
-export class Ninja extends Pawn {
-  readonly kind = 'ninja' as const
-  get maxHp(): number {
-    return 1
-  }
-  readonly attack: AttackProfile = { damage: 5, minRange: 1, maxRange: 1 }
-  get special(): SpecialAbility {
-    return jump
-  }
-}
-
-export class Bulwark extends Pawn {
-  static override readonly startsOnFrontRow = true
-  readonly kind = 'bulwark' as const
-  get maxHp(): number {
-    return 10
-  }
-  override get moveCost(): number {
-    return 2
-  }
-  readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 1 }
-  get special(): SpecialAbility {
-    return protect
-  }
-}
-
-export const RECRUIT_CLASSES = [Swordsman, Archer, Magician, Ninja, Bulwark] as const

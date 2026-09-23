@@ -233,7 +233,7 @@ export function Battlefield({
             <polygon
               points={hexPoints}
               fill="url(#tile-light)"
-              className="pointer-events-none group-data-[biome=volcano]/biome:opacity-45"
+              className="pointer-events-none opacity-[var(--tile-light-opacity,1)]"
             />
             {(tile.terrain === 'lava' || (!occupant && !tile.feature)) && (
               <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />

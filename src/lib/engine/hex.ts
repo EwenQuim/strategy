@@ -1,5 +1,7 @@
 import type { SeededRandom } from './random.ts'
-import type { Axial, Biome, Terrain, Tile, TileFeature } from './types.ts'
+import { BIOMES, type Biome } from './biomes/index.ts'
+import type { MapFeature, Shape } from './biomes/biome.ts'
+import type { Axial, Terrain, Tile, TileFeature } from './types.ts'
 
 export const MAP_WIDTH = 8
 export const MAP_HEIGHT = 12
@@ -31,54 +33,8 @@ export function passable(tile: Tile | undefined): boolean {
   return !!tile && tile.terrain !== 'mountain' && tile.terrain !== 'lake'
 }
 
-type Shape = [number, number][]
-
-type MapFeature = {
-  terrain: Terrain
-  min: number
-  max: number
-  shapes: Shape[]
-}
-
 const roll = (min: number, max: number, random: SeededRandom) =>
   min + Math.floor(random.next() * (max - min + 1))
-
-const lineShape = (length: number): Shape =>
-  Array.from({ length }, (_, i) => [i, 0] as [number, number])
-
-const bendShape = (first: number, second: number): Shape => [
-  ...lineShape(first),
-  ...lineShape(second - 1).map(([q]) => [first - 1, q + 1] as [number, number]),
-]
-
-const poolShapes: Shape[] = [
-  [
-    [0, 0],
-    [1, 0],
-    [0, 1],
-  ],
-  [
-    [0, 0],
-    [1, 0],
-    [0, 1],
-    [1, -1],
-  ],
-  [
-    [0, 0],
-    [1, 0],
-    [0, 1],
-    [1, -1],
-    [-1, 1],
-  ],
-  [
-    [0, 0],
-    [1, 0],
-    [0, 1],
-    [1, -1],
-    [-1, 1],
-    [-1, 2],
-  ],
-]
 
 export const TILE_FEATURES = {
   watchtower: {
@@ -97,38 +53,6 @@ export const TILE_FEATURES = {
       'Collect once for +2 energy this round. Disappears on entry; no permanent bonus.',
   },
 } as const
-
-export const BIOMES: Record<Biome, { name: string; feature: MapFeature | null }> = {
-  verdant: {
-    name: 'Verdant Vale',
-    feature: {
-      terrain: 'lake',
-      min: 3,
-      max: 6,
-      shapes: poolShapes,
-    },
-  },
-  mountains: {
-    name: 'Mountain Ranges',
-    feature: {
-      terrain: 'mountain',
-      min: 3,
-      max: 5,
-      shapes: [
-        ...[4, 5, 6, 7].map(lineShape),
-        ...[2, 3].flatMap((first) => [3, 4].map((second) => bendShape(first, second))),
-      ],
-    },
-  },
-  desert: {
-    name: 'Open Desert',
-    feature: { terrain: 'lake', min: 1, max: 3, shapes: poolShapes },
-  },
-  volcano: {
-    name: 'Ember Caldera',
-    feature: { terrain: 'lava', min: 3, max: 6, shapes: poolShapes },
-  },
-}
 
 function orient(shape: Shape, random: SeededRandom): Shape {
   const rotations = Math.floor(random.next() * 6)
@@ -249,25 +173,19 @@ export function makeMap(
   biome: Biome,
   protectedTiles: Axial[] = [],
 ): Map<string, Tile> {
+  const { ground, scatter, feature } = BIOMES[biome]
   const tiles = new Map<string, Tile>()
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))
   for (let row = 0; row < MAP_HEIGHT; row++) {
     for (let col = 0; col < MAP_WIDTH; col++) {
       const { q, r } = hexOf(col, row)
-      const terrain: Terrain =
-        biome === 'volcano'
-          ? 'basalt'
-          : biome === 'desert'
-            ? !reserved.has(key(q, r)) && random.next() < 0.04
-              ? 'palm'
-              : 'sand'
-            : biome === 'verdant' && !reserved.has(key(q, r)) && random.next() < 0.25
-              ? 'forest'
-              : 'plain'
+      const terrain =
+        scatter && !reserved.has(key(q, r)) && random.next() < scatter.chance
+          ? scatter.terrain
+          : ground
       tiles.set(key(q, r), { q, r, terrain })
     }
   }
-  const feature = BIOMES[biome].feature
   if (feature) placeFeature(tiles, [...tiles.values()], reserved, feature, random)
   const roll = random.next()
   const count = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2

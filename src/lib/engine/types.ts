@@ -1,7 +1,7 @@
-import type { Pawn, Side } from './pawns.ts'
+import type { Biome } from './biomes/index.ts'
+import type { Pawn, Side } from './pawns/index.ts'
 
 export type Axial = { q: number; r: number }
-export type Biome = 'verdant' | 'mountains' | 'desert' | 'volcano'
 export type Terrain =
   'plain' | 'forest' | 'mountain' | 'lake' | 'sand' | 'palm' | 'basalt' | 'lava'
 export type TileFeature = 'watchtower' | 'spring' | 'rune'

@@ -1,5 +1,5 @@
 import { hexDist } from './engine/hex.ts'
-import type { Pawn } from './engine/pawns.ts'
+import type { Pawn } from './engine/pawns/index.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
