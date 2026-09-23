@@ -15,7 +15,7 @@
     "test:integration": "node --experimental-strip-types --test tests/integration/*.test.ts",
     "test:pwa": "node --experimental-strip-types --test tests/*.browser.ts",
     "test:pwa:smoke": "node --experimental-strip-types --test --test-skip-pattern='^(Hits and misses|Local mode|Campaign)' tests/*.browser.ts",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:integration && npm run build",
+    "test:ci": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:integration && npm run build",
     "prepare": "git config --local core.hooksPath .githooks"
   },
   "dependencies": {
