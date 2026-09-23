@@ -18,8 +18,13 @@ func TestAPIHelloWorld(t *testing.T) {
 
 func TestSPAFallback(t *testing.T) {
 	dir := t.TempDir()
-	os.WriteFile(filepath.Join(dir, "index.html"), []byte("<!doctype html>app"), 0o644)
-	os.WriteFile(filepath.Join(dir, "app.js"), []byte("code"), 0o644)
+	write := func(name, content string) {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("index.html", "<!doctype html>app")
+	write("app.js", "code")
 
 	h := spa(dir)
 	for _, tc := range []struct{ path, want string }{

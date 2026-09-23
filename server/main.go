@@ -34,7 +34,7 @@ func apiHandler() http.Handler {
 	backend := os.Getenv("BACKEND_URL")
 	if backend == "" {
 		return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-			w.Write([]byte("hello world\n"))
+			_, _ = w.Write([]byte("hello world\n"))
 		})
 	}
 	target, err := url.Parse(backend)

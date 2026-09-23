@@ -5,3 +5,16 @@ set -eu
 # tests/integration and run in required CI via `npm run test:ci`.
 npm --prefix client run typecheck
 npm --prefix client run test
+
+if command -v go >/dev/null 2>&1; then
+	unformatted=$(gofmt -l server)
+	if [ -n "$unformatted" ]; then
+		echo "gofmt needed:"
+		echo "$unformatted"
+		exit 1
+	fi
+	go -C server test ./...
+	if command -v golangci-lint >/dev/null 2>&1; then
+		(cd server && golangci-lint run)
+	fi
+fi

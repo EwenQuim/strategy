@@ -1,8 +1,9 @@
 .DEFAULT_GOAL := lint
 
 NPM := npm --prefix client
+GO := go -C server
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker go-format go-lint go-test
 
 onboarding: installdeps
 
@@ -13,15 +14,24 @@ installdeps:
 dev:
 	$(NPM) run dev
 
-format:
+format: go-format
 	$(NPM) run format
 
-lint: typecheck
+lint: typecheck go-lint
 	$(NPM) run format:check
 	$(NPM) run lint
 
 typecheck:
 	$(NPM) run typecheck
+
+go-format:
+	$(GO) fmt ./...
+
+go-lint:
+	cd server && golangci-lint run
+
+go-test:
+	$(GO) test ./...
 
 test:
 	$(NPM) test
