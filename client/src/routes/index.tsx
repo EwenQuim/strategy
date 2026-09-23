@@ -21,15 +21,7 @@ export const Route = createFileRoute('/')({
             <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
               <Icon name="crown" />
             </span>
-            <span>
-              HEX
-              <span
-                className="mt-[5px] block font-label text-[7px] leading-[normal] tracking-[0.29em] text-muted"
-                data-testid="battle-subtitle"
-              >
-                MATE
-              </span>
-            </span>
+            Hexmate
           </span>
         </header>
         <div className="flex flex-1 flex-col items-center px-5 pt-[5px] pb-9 text-center [@media(max-height:650px)]:pb-4">
@@ -85,8 +77,6 @@ export const Route = createFileRoute('/')({
           </div>
           <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-[32px]">
             Hexmate.
-            <br />
-            <em className="font-normal text-[#c7d1b0]">Corner the king.</em>
           </h1>
           <div
             className="mt-[27px] flex w-[min(100%,300px)] flex-col gap-3 [@media(max-height:650px)]:mt-[18px]"
