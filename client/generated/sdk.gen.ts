@@ -244,7 +244,7 @@ export interface UnknownInterface {}
 /**
  * #### Controller: 
 
-`hexmate/server/internal/httpapi.createGame.func1`
+`hexmate/server/internal/handlers.createGame.func1`
 
 #### Middlewares:
 
@@ -302,7 +302,7 @@ export const createGame = async (createGameRequest: CreateGameRequest, options?:
 /**
  * #### Controller: 
 
-`hexmate/server/internal/httpapi.getGame.func1`
+`hexmate/server/internal/handlers.getGame.func1`
 
 #### Middlewares:
 
@@ -359,7 +359,7 @@ export const getGame = async (code: string, options?: RequestInit): Promise<getG
 /**
  * #### Controller: 
 
-`hexmate/server/internal/httpapi.playAction.func1`
+`hexmate/server/internal/handlers.playAction.func1`
 
 #### Middlewares:
 
@@ -418,7 +418,7 @@ export const playAction = async (code: string,
 /**
  * #### Controller: 
 
-`hexmate/server/internal/httpapi.joinGame.func1`
+`hexmate/server/internal/handlers.joinGame.func1`
 
 #### Middlewares:
 
@@ -477,7 +477,7 @@ export const joinGame = async (code: string,
 /**
  * #### Controller: 
 
-`hexmate/server/internal/httpapi.Register.func1`
+`hexmate/server/internal/handlers.Register.func1`
 
 #### Middlewares:
 

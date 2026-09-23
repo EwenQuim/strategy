@@ -251,7 +251,7 @@
   "paths": {
     "/api/games": {
       "post": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/httpapi.createGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.createGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "createGame",
         "parameters": [
           {
@@ -270,7 +270,7 @@
               }
             }
           },
-          "description": "Request body for httpapi.createGameRequest",
+          "description": "Request body for handlers.createGameRequest",
           "required": true
         },
         "responses": {
@@ -329,7 +329,7 @@
     },
     "/api/games/{code}": {
       "get": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/httpapi.getGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.getGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "getGame",
         "parameters": [
           {
@@ -419,7 +419,7 @@
     },
     "/api/games/{code}/actions": {
       "post": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/httpapi.playAction.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.playAction.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "playAction",
         "parameters": [
           {
@@ -446,7 +446,7 @@
               }
             }
           },
-          "description": "Request body for httpapi.playActionRequest",
+          "description": "Request body for handlers.playActionRequest",
           "required": true
         },
         "responses": {
@@ -565,7 +565,7 @@
     },
     "/api/games/{code}/join": {
       "post": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/httpapi.joinGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.joinGame.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "joinGame",
         "parameters": [
           {
@@ -592,7 +592,7 @@
               }
             }
           },
-          "description": "Request body for httpapi.joinGameRequest",
+          "description": "Request body for handlers.joinGameRequest",
           "required": true
         },
         "responses": {
@@ -681,7 +681,7 @@
     },
     "/api/health": {
       "get": {
-        "description": "#### Controller: \n\n`hexmate/server/internal/httpapi.Register.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.Register.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "health",
         "parameters": [
           {
