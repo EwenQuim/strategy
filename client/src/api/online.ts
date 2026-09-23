@@ -4,7 +4,7 @@ import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { OnlineAction, OnlineGame, StoredGame } from '../lib/online.ts'
 
 export { ApiError } from './client.ts'
-export { useHealth } from '../../generated/sdk.gen.ts'
+export { health, useHealth } from '../../generated/sdk.gen.ts'
 
 const toOnlineGame = (game: PublicGame): OnlineGame => ({
   code: game.code,

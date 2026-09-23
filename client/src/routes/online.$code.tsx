@@ -1,15 +1,19 @@
 import { buttonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { ApiError, useOnlineGame } from '../api/online.ts'
+import { ApiError, health, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
-import { onlineEnabled, readStoredGames } from '../online.ts'
+import { readStoredGames } from '../online.ts'
 
 const POLL_INTERVAL_MS = 2000
 
 export const Route = createFileRoute('/online/$code')({
-  beforeLoad: ({ params }) => {
-    if (!onlineEnabled()) throw redirect({ to: '/' })
+  beforeLoad: async ({ params }) => {
     if (!/^[A-Z0-9]{6}$/.test(params.code)) throw redirect({ to: '/online' })
+    try {
+      await health()
+    } catch {
+      throw redirect({ to: '/' })
+    }
   },
   component: function OnlineBattle() {
     const { code } = Route.useParams()

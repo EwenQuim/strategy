@@ -2,15 +2,6 @@ import type { StoredGame } from './lib/online.ts'
 
 const NAME_KEY = 'hexmate.online.name'
 const GAMES_KEY = 'hexmate.online.games'
-const FLAG_KEY = 'hexmate.online'
-
-export function onlineEnabled(): boolean {
-  try {
-    return localStorage.getItem(FLAG_KEY) === '1'
-  } catch {
-    return false
-  }
-}
 
 export function readPlayerName(): string {
   try {
