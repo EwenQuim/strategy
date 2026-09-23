@@ -1,34 +1,36 @@
 .DEFAULT_GOAL := lint
 
+NPM := npm --prefix client
+
 .PHONY: onboarding installdeps dev format lint typecheck test test-integration build check
 
 onboarding: installdeps
 
 installdeps:
-	npm install
-	npm run prepare
+	$(NPM) install
+	$(NPM) run prepare
 
 dev:
-	npm run dev
+	$(NPM) run dev
 
 format:
-	npm run format
+	$(NPM) run format
 
 lint: typecheck
-	npm run format:check
-	npm run lint
+	$(NPM) run format:check
+	$(NPM) run lint
 
 typecheck:
-	npm run typecheck
+	$(NPM) run typecheck
 
 test:
-	npm test
+	$(NPM) test
 
 test-integration:
-	npm run test:integration
+	$(NPM) run test:integration
 
 build:
-	npm run build
+	$(NPM) run build
 
 check:
-	npm run test:ci
+	$(NPM) run test:ci
