@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/go-fuego/fuego"
+	"github.com/go-fuego/fuego/option"
 
 	"hexmate/server/internal/game"
 	"hexmate/server/internal/service"
@@ -90,27 +91,29 @@ type Handlers struct {
 func Register(s *fuego.Server, svc *service.Service) {
 	h := &Handlers{svc: svc}
 	api := fuego.Group(s, "/api")
-	errorResponse := func(status int, description string) fuego.RouteOption {
-		return fuego.OptionAddResponse(status, description, fuego.Response{Type: fuego.HTTPError{}})
-	}
+
 	fuego.Get(api, "/health", h.health,
-		fuego.OptionOperationID("health"), fuego.OptionSummary("Health check"), fuego.OptionTags("health"))
+		option.OperationID("health"), option.Summary("Health check"), option.Tags("health"))
+
 	fuego.Post(api, "/games", h.createGame,
-		fuego.OptionOperationID("createGame"), fuego.OptionSummary("Create a game"),
-		fuego.OptionTags("games"), fuego.OptionDefaultStatusCode(http.StatusCreated))
+		option.OperationID("createGame"), option.Summary("Create a game"),
+		option.Tags("games"), option.DefaultStatusCode(http.StatusCreated))
+
 	fuego.Post(api, "/games/{code}/join", h.joinGame,
-		fuego.OptionOperationID("joinGame"), fuego.OptionSummary("Join a game"), fuego.OptionTags("games"),
-		errorResponse(http.StatusNotFound, "No game with this code"),
-		errorResponse(http.StatusConflict, "Game already has two players"))
+		option.OperationID("joinGame"), option.Summary("Join a game"), option.Tags("games"),
+		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}),
+		option.AddResponse(http.StatusConflict, "Game already has two players", fuego.Response{Type: fuego.HTTPError{}}))
+
 	fuego.Get(api, "/games/{code}", h.getGame,
-		fuego.OptionOperationID("getGame"), fuego.OptionSummary("Get a game"), fuego.OptionTags("games"),
-		errorResponse(http.StatusNotFound, "No game with this code"))
+		option.OperationID("getGame"), option.Summary("Get a game"), option.Tags("games"),
+		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}))
+
 	fuego.Post(api, "/games/{code}/actions", h.playAction,
-		fuego.OptionOperationID("playAction"), fuego.OptionSummary("Submit a game action"), fuego.OptionTags("games"),
-		errorResponse(http.StatusUnauthorized, "Token is not a participant"),
-		errorResponse(http.StatusNotFound, "No game with this code"),
-		errorResponse(http.StatusConflict, "Version mismatch, resync from the current game"),
-		errorResponse(http.StatusUnprocessableEntity, "Game is waiting or finished"))
+		option.OperationID("playAction"), option.Summary("Submit a game action"), option.Tags("games"),
+		option.AddResponse(http.StatusUnauthorized, "Token is not a participant", fuego.Response{Type: fuego.HTTPError{}}),
+		option.AddResponse(http.StatusNotFound, "No game with this code", fuego.Response{Type: fuego.HTTPError{}}),
+		option.AddResponse(http.StatusConflict, "Version mismatch, resync from the current game", fuego.Response{Type: fuego.HTTPError{}}),
+		option.AddResponse(http.StatusUnprocessableEntity, "Game is waiting or finished", fuego.Response{Type: fuego.HTTPError{}}))
 }
 
 func (h *Handlers) health(fuego.ContextNoBody) (healthResponse, error) {
