@@ -10,7 +10,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-fuego/fuego"
 
-	"hexmate/server/internal/httpapi"
+	"hexmate/server/internal/handlers"
 	"hexmate/server/internal/memory"
 	"hexmate/server/internal/service"
 	"hexmate/server/internal/sqlite"
@@ -40,7 +40,7 @@ func main() {
 			}),
 		),
 	)
-	httpapi.Register(s, svc)
+	handlers.Register(s, svc)
 	s.Mux.Handle("GET "+appBase, http.StripPrefix(appBase, spa(dist)))
 	s.Mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, appBase, http.StatusFound)

@@ -1,4 +1,4 @@
-package httpapi_test
+package handlers_test
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-fuego/fuego"
 
-	"hexmate/server/internal/httpapi"
+	"hexmate/server/internal/handlers"
 	"hexmate/server/internal/memory"
 	"hexmate/server/internal/service"
 )
@@ -41,7 +41,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 	s := fuego.NewServer(fuego.WithoutStartupMessages(), fuego.WithoutLogger(), fuego.WithEngineOptions(
 		fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{Disabled: true}),
 	))
-	httpapi.Register(s, service.New(memory.New()))
+	handlers.Register(s, service.New(memory.New()))
 	ts := httptest.NewServer(s.Mux)
 	t.Cleanup(ts.Close)
 	return ts

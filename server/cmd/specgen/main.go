@@ -8,7 +8,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-fuego/fuego"
 
-	"hexmate/server/internal/httpapi"
+	"hexmate/server/internal/handlers"
 	"hexmate/server/internal/memory"
 	"hexmate/server/internal/service"
 )
@@ -31,7 +31,7 @@ func main() {
 			}),
 		),
 	)
-	httpapi.Register(s, service.New(memory.New()))
+	handlers.Register(s, service.New(memory.New()))
 	data, err := json.MarshalIndent(s.OutputOpenAPISpec(), "", "  ")
 	if err != nil {
 		log.Fatal(err)
