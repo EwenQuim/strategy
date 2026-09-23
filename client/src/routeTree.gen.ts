@@ -17,6 +17,8 @@ import { Route as CampaignIndexRouteImport } from './routes/campaign.index'
 import { Route as CampaignLevelRouteImport } from './routes/campaign.$level'
 import { Route as GameIndexRouteImport } from './routes/game.index'
 import { Route as GameSeedRouteImport } from './routes/game.$seed'
+import { Route as OnlineIndexRouteImport } from './routes/online.index'
+import { Route as OnlineCodeRouteImport } from './routes/online.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +60,16 @@ const GameSeedRoute = GameSeedRouteImport.update({
   path: '/$seed',
   getParentRoute: () => GameRoute,
 } as any)
+const OnlineIndexRoute = OnlineIndexRouteImport.update({
+  id: '/online/',
+  path: '/online/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnlineCodeRoute = OnlineCodeRouteImport.update({
+  id: '/online/$code',
+  path: '/online/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,16 +78,20 @@ export interface FileRoutesByFullPath {
   '/game': typeof GameRouteWithChildren
   '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
+  '/online/$code': typeof OnlineCodeRoute
   '/campaign/': typeof CampaignIndexRoute
   '/game/': typeof GameIndexRoute
+  '/online/': typeof OnlineIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/custom': typeof CustomRoute
   '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
+  '/online/$code': typeof OnlineCodeRoute
   '/campaign': typeof CampaignIndexRoute
   '/game': typeof GameIndexRoute
+  '/online': typeof OnlineIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,8 +101,10 @@ export interface FileRoutesById {
   '/game': typeof GameRouteWithChildren
   '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
+  '/online/$code': typeof OnlineCodeRoute
   '/campaign/': typeof CampaignIndexRoute
   '/game/': typeof GameIndexRoute
+  '/online/': typeof OnlineIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,11 +115,20 @@ export interface FileRouteTypes {
     | '/game'
     | '/campaign/$level'
     | '/game/$seed'
+    | '/online/$code'
     | '/campaign/'
     | '/game/'
+    | '/online/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/custom' | '/campaign/$level' | '/game/$seed' | '/campaign' | '/game'
+    | '/'
+    | '/custom'
+    | '/campaign/$level'
+    | '/game/$seed'
+    | '/online/$code'
+    | '/campaign'
+    | '/game'
+    | '/online'
   id:
     | '__root__'
     | '/'
@@ -110,8 +137,10 @@ export interface FileRouteTypes {
     | '/game'
     | '/campaign/$level'
     | '/game/$seed'
+    | '/online/$code'
     | '/campaign/'
     | '/game/'
+    | '/online/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +148,8 @@ export interface RootRouteChildren {
   CampaignRoute: typeof CampaignRouteWithChildren
   CustomRoute: typeof CustomRoute
   GameRoute: typeof GameRouteWithChildren
+  OnlineCodeRoute: typeof OnlineCodeRoute
+  OnlineIndexRoute: typeof OnlineIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -179,6 +210,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameSeedRouteImport
       parentRoute: typeof GameRoute
     }
+    '/online/': {
+      id: '/online/'
+      path: '/online'
+      fullPath: '/online/'
+      preLoaderRoute: typeof OnlineIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/online/$code': {
+      id: '/online/$code'
+      path: '/online/$code'
+      fullPath: '/online/$code'
+      preLoaderRoute: typeof OnlineCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -213,6 +258,8 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignRoute: CampaignRouteWithChildren,
   CustomRoute: CustomRoute,
   GameRoute: GameRouteWithChildren,
+  OnlineCodeRoute: OnlineCodeRoute,
+  OnlineIndexRoute: OnlineIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

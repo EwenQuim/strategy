@@ -20,6 +20,7 @@ function gitCommit(): string {
 
 export default defineConfig({
   base: '/strategy/',
+  server: { proxy: { '/api': 'http://localhost:8080' } },
   define: {
     'import.meta.env.VITE_GIT_COMMIT': JSON.stringify(gitCommit()),
   },

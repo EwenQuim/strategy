@@ -3,7 +3,7 @@ services:
     build: .
     ports:
       - "8080:8080"
-    # BACKEND_URL: http://backend:9000  # proxy /api to the real backend once it exists
+    # DB_PATH: /data/hexmate.db  # persist online games across restarts (needs a writable volume)
     develop:
       watch:
         - path: ./server

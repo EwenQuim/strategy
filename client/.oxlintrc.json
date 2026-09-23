@@ -1,10 +1,15 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc"],
-  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts"],
+  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts", "src/api"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ]
   },
   "overrides": [
     {
@@ -26,7 +31,16 @@
     {
       "files": ["src/lib/engine/**"],
       "rules": {
-        "no-restricted-imports": ["error", { "patterns": [{ "group": ["*", "!./**"] }] }]
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["*", "!./**"]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -34,7 +48,13 @@
       "rules": {
         "no-restricted-imports": [
           "error",
-          { "patterns": [{ "group": ["*", "!./**", "!../*.ts"] }] }
+          {
+            "patterns": [
+              {
+                "group": ["*", "!./**", "!../*.ts"]
+              }
+            ]
+          }
         ]
       }
     }

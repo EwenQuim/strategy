@@ -8,14 +8,6 @@ import (
 	"testing"
 )
 
-func TestAPIHelloWorld(t *testing.T) {
-	w := httptest.NewRecorder()
-	apiHandler().ServeHTTP(w, httptest.NewRequest("GET", "/api", nil))
-	if got := w.Body.String(); got != "hello world\n" {
-		t.Fatalf("body = %q", got)
-	}
-}
-
 func TestSPAFallback(t *testing.T) {
 	dir := t.TempDir()
 	write := func(name, content string) {

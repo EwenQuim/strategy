@@ -23,7 +23,7 @@ import {
 } from '../src/lib/bot.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/strategies.ts'
-import { armyLabels, playerNames } from '../src/lib/game-mode.ts'
+import { possessiveArmyLabels, playerNames } from '../src/lib/game-mode.ts'
 import { CAMPAIGN_LEVELS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
 
@@ -1297,7 +1297,7 @@ test(
           const pawn = activePawn(state)!
           assert.equal(
             await page.locator('[aria-current="step"]').getAttribute('title'),
-            armyLabels.local[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
+            possessiveArmyLabels('local')[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
           )
           assert.equal(
             await page.locator('[data-testid="player-turn"]').textContent(),

@@ -3,7 +3,7 @@
 NPM := npm --prefix client
 GO := go -C server
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk
 
 onboarding: installdeps
 
@@ -32,6 +32,12 @@ go-lint:
 
 go-test:
 	$(GO) test ./...
+
+openapi:
+	$(GO) run ./cmd/specgen
+
+sdk: openapi
+	$(NPM) run sdk
 
 test:
 	$(NPM) test

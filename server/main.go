@@ -4,10 +4,16 @@ import (
 	"cmp"
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-fuego/fuego"
+
+	"hexmate/server/internal/httpapi"
+	"hexmate/server/internal/memory"
+	"hexmate/server/internal/service"
+	"hexmate/server/internal/sqlite"
 )
 
 const appBase = "/strategy/"
@@ -15,33 +21,44 @@ const appBase = "/strategy/"
 func main() {
 	addr := cmp.Or(os.Getenv("ADDR"), ":8080")
 	dist := cmp.Or(os.Getenv("DIST"), "../client/dist")
+	dbPath := os.Getenv("DB_PATH")
 
-	mux := http.NewServeMux()
-	mux.Handle("GET /api", apiHandler())
-	mux.Handle("GET /api/", apiHandler())
-	mux.Handle("GET "+appBase, http.StripPrefix(appBase, spa(dist)))
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+	svc, err := newService(dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := fuego.NewServer(
+		fuego.WithAddr(addr),
+		fuego.WithoutStartupMessages(),
+		fuego.WithEngineOptions(
+			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
+				DisableDefaultServer: true,
+				DisableLocalSave:     true,
+				DisableSwaggerUI:     true,
+				Info:                 &openapi3.Info{Title: "Hexmate online API", Version: "1.0.0"},
+			}),
+		),
+	)
+	httpapi.Register(s, svc)
+	s.Mux.Handle("GET "+appBase, http.StripPrefix(appBase, spa(dist)))
+	s.Mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, appBase, http.StatusFound)
 	})
 
-	log.Printf("listening on %s (dist=%s)", addr, dist)
-	log.Fatal(http.ListenAndServe(addr, mux))
+	log.Printf("listening on %s (dist=%s, db=%s)", addr, dist, cmp.Or(dbPath, "memory"))
+	log.Fatal(s.Run())
 }
 
-// apiHandler proxies /api to the real backend when BACKEND_URL is set, and
-// otherwise stands in for the not-yet-existent backend with a hello world.
-func apiHandler() http.Handler {
-	backend := os.Getenv("BACKEND_URL")
-	if backend == "" {
-		return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-			_, _ = w.Write([]byte("hello world\n"))
-		})
+func newService(dbPath string) (*service.Service, error) {
+	if dbPath == "" {
+		return service.New(memory.New()), nil
 	}
-	target, err := url.Parse(backend)
+	store, err := sqlite.Open(dbPath)
 	if err != nil {
-		log.Fatalf("invalid BACKEND_URL %q: %v", backend, err)
+		return nil, err
 	}
-	return httputil.NewSingleHostReverseProxy(target)
+	return service.New(store), nil
 }
 
 // spa serves static files from dir, falling back to index.html for client-side routes.
