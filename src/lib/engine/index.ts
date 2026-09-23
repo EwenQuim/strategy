@@ -1,14 +1,13 @@
 export * from './hex.ts'
-export * from './pawns.ts'
+export * from './pawns/index.ts'
 export * from './types.ts'
 export * from './engine.ts'
 export {
   canAttack,
   canUseSpecial,
-  chargeDestinations,
-  jumpDestinations,
   specialTargets,
   movementDestinations,
   walkingPaths,
   protectorFor,
 } from './combat.ts'
+export { BIOMES, type Biome } from './biomes/index.ts'

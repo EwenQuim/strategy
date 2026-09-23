@@ -1,13 +1,13 @@
 import { activePawn, reducer } from './engine.ts'
-import {
-  canAttack,
-  jumpDestinations,
-  movementDestinations,
-  walkingPaths,
-  protectorFor,
-} from './combat.ts'
+import { canAttack, movementDestinations, walkingPaths, protectorFor } from './combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import { START_ENERGY, type Pawn, type Side, type ThreatPosition } from './pawns.ts'
+import {
+  START_ENERGY,
+  jumpDestinations,
+  type Pawn,
+  type Side,
+  type ThreatPosition,
+} from './pawns/index.ts'
 import type { Action, GameState } from './types.ts'
 
 export type BotOptions = {

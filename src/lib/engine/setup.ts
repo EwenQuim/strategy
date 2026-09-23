@@ -1,35 +1,15 @@
-import {
-  BIOMES,
-  MAP_WIDTH,
-  MAP_HEIGHT,
-  hexOf,
-  key,
-  makeMap,
-  mapFromRows,
-  passable,
-} from './hex.ts'
+import { BIOMES, type Biome } from './biomes/index.ts'
+import { MAP_WIDTH, MAP_HEIGHT, hexOf, key, makeMap, mapFromRows, passable } from './hex.ts'
 import {
   King,
-  Swordsman,
-  Archer,
-  Magician,
-  Ninja,
-  Bulwark,
+  PAWN_CLASSES,
   RECRUIT_CLASSES,
+  Swordsman,
   type Pawn,
   type Side,
-} from './pawns.ts'
-import type { BattleSetup, Biome, PawnPlacement, Tile } from './types.ts'
+} from './pawns/index.ts'
+import type { BattleSetup, PawnPlacement, Tile } from './types.ts'
 import { SeededRandom, seedState } from './random.ts'
-
-const pawnClasses = {
-  king: King,
-  swordsman: Swordsman,
-  archer: Archer,
-  magician: Magician,
-  ninja: Ninja,
-  bulwark: Bulwark,
-}
 
 export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))
@@ -42,7 +22,7 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
     let kings = 0
     for (const unit of army) {
       const kind = typeof unit === 'string' ? unit : unit?.kind
-      if (typeof kind !== 'string' || !Object.hasOwn(pawnClasses, kind))
+      if (typeof kind !== 'string' || !Object.hasOwn(PAWN_CLASSES, kind))
         throw new Error(side + ' army contains an unknown pawn kind')
       if (kind === 'king') kings++
       if (tiles) {
@@ -71,7 +51,8 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
     if (
       !tiles &&
       side === 'player' &&
-      army.filter((unit) => unit === 'bulwark').length > MAP_WIDTH
+      army.filter((unit) => PAWN_CLASSES[unit as Pawn['kind']].startsOnFrontRow).length >
+        MAP_WIDTH
     )
       throw new RangeError('Player Bulwarks must fit on one starting row')
   }
@@ -89,13 +70,13 @@ function shuffle<T>(items: T[], random: SeededRandom): T[] {
 function spawnPlacedArmy(army: readonly PawnPlacement[], side: Side, firstId: number): Pawn[] {
   return army.map((unit, index) => {
     const { q, r } = hexOf(unit.col, unit.row)
-    const Unit = pawnClasses[unit.kind]
+    const Unit = PAWN_CLASSES[unit.kind]
     return new Unit(firstId + index, q, r, side)
   })
 }
 
 function spawnRandomArmy(
-  army: readonly (typeof pawnClasses)[Pawn['kind']][],
+  army: readonly (typeof PAWN_CLASSES)[Pawn['kind']][],
   side: Side,
   firstId: number,
   random: SeededRandom,
@@ -153,7 +134,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup) {
     const biomes = Object.keys(BIOMES) as Biome[]
     biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
     const playerArmy = setup
-      ? setup.player.map((kind) => pawnClasses[kind])
+      ? setup.player.map((kind) => PAWN_CLASSES[kind])
       : [
           Swordsman,
           King,
@@ -162,7 +143,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup) {
             () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
           ),
         ]
-    const enemyArmy = setup ? setup.enemy.map((kind) => pawnClasses[kind]) : playerArmy
+    const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
     pawns = [
       ...spawnRandomArmy(playerArmy, 'player', 1, random),
       ...spawnRandomArmy(enemyArmy, 'enemy', playerArmy.length + 1, random),

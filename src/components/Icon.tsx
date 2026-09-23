@@ -1,19 +1,9 @@
-const pawnIcons = {
-  king: 'crown',
-  swordsman: 'sword',
-  archer: 'bow',
-  magician: 'wand',
-  ninja: 'mask',
-  bulwark: 'shield',
-} as const
+import { Bulwark, King, PAWN_CLASSES, Swordsman, type PawnKind } from '../lib/engine'
 
 const paths = {
-  shield: 'M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7L12 3Zm0 0v18M3 7l9 4 9-4',
-  mask: 'M4 9a8 8 0 0 1 16 0v6a8 8 0 0 1-16 0V9Zm0 0h16M4 15h16M7 12h2m6 0h2M4 9 1 5m3 4L1 12',
-  bow: 'M5 3c14 0 14 18 0 18V3Zm0 9h16m-4-4 4 4-4 4',
-  wand: 'm4 20 12-12m-9 9 3 3M17 2l1.5 4.5L23 8l-4.5 1.5L17 14l-1.5-4.5L11 8l4.5-1.5L17 2Z',
-  crown: 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12',
-  sword: 'm14 4 6-1-1 6L8 20l-4-4L14 4ZM3 13l8 8M5 19l-3 3M14 8l2 2',
+  shield: Bulwark.icon,
+  crown: King.icon,
+  sword: Swordsman.icon,
   escape: 'M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M5 16h5a3 3 0 1 1-3 3',
   energy: 'm13 2-9 12h7l-1 8 10-13h-8l1-7Z',
   spark: 'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z',
@@ -26,11 +16,15 @@ const paths = {
 
 export type IconName = keyof typeof paths
 
-export function PawnIcon({ kind }: { kind: keyof typeof pawnIcons }) {
-  return <Icon name={pawnIcons[kind]} />
+export function PawnIcon({ kind }: { kind: PawnKind }) {
+  return <SvgIcon path={PAWN_CLASSES[kind].icon} />
 }
 
-export function Icon({ name, className = '' }: { name: IconName; className?: string }) {
+export function Icon({ name, className }: { name: IconName; className?: string }) {
+  return <SvgIcon path={paths[name]} className={className} />
+}
+
+function SvgIcon({ path, className = '' }: { path: string; className?: string }) {
   return (
     <svg
       className={className}
@@ -44,7 +38,7 @@ export function Icon({ name, className = '' }: { name: IconName; className?: str
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d={paths[name]} />
+      <path d={path} />
     </svg>
   )
 }

@@ -1,5 +1,5 @@
 import { hexDist, key } from './hex.ts'
-import type { Pawn, Side, SpecialResult } from './pawns.ts'
+import type { Pawn, Side, SpecialResult } from './pawns/index.ts'
 import type {
   Action,
   Axial,

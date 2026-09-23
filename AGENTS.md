@@ -7,7 +7,8 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 - Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.
 - Prioritize space for the grid: keep top information and bottom actions compact, remove redundant instructions, and show battle history as transient overlays rather than permanent panels.
 - Game logic is plain TypeScript in `src/lib/engine/` (hex math, pawn classes, reducer), pure and framework-free. Routes only render it.
-- Pawn types are TS classes extending `Pawn` in `src/lib/engine/pawns.ts` (`Swordsman`, `King`, `Archer`, `Magician`, `Ninja`). Non-king classes available for random recruitment are listed in `RECRUIT_CLASSES`.
+- Each pawn type lives in its own file in `src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`; every non-king class is recruitable. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
+- Each biome lives in its own file in `src/lib/engine/biomes/` (name, description, terrain generation, theme CSS variables). Register it in `BIOMES` in `biomes/index.ts`; the game screen applies `theme` as inline CSS variables.
 - Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
 
 ## Styling
