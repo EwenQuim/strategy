@@ -150,6 +150,16 @@ func TestOnlineGameFlow(t *testing.T) {
 	}
 }
 
+func TestHealth(t *testing.T) {
+	ts := newTestServer(t)
+	status, body := do[struct {
+		Status string `json:"status"`
+	}](t, ts, http.MethodGet, "/api/health", nil)
+	if status != http.StatusOK || body.Status != "ok" {
+		t.Fatalf("health: status=%d body=%+v", status, body)
+	}
+}
+
 func TestCreateNameValidation(t *testing.T) {
 	ts := newTestServer(t)
 	for _, name := range []string{"", "   ", "0123456789012345678901"} {

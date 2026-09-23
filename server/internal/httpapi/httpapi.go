@@ -25,6 +25,10 @@ type playActionRequest struct {
 	Winner  *string        `json:"winner" description:"Side of the winner, only on the final action"`
 }
 
+type healthResponse struct {
+	Status string `json:"status"`
+}
+
 type publicGame struct {
 	Code       string        `json:"code"`
 	Status     game.Status   `json:"status"`
@@ -48,6 +52,10 @@ type playActionResponse struct {
 
 func Register(s *fuego.Server, svc *service.Service) {
 	api := fuego.Group(s, "/api")
+	fuego.Get(api, "/health", func(fuego.ContextNoBody) (healthResponse, error) {
+		return healthResponse{Status: "ok"}, nil
+	},
+		fuego.OptionOperationID("health"), fuego.OptionSummary("Health check"), fuego.OptionTags("health"))
 	errorResponse := func(status int, description string) fuego.RouteOption {
 		return fuego.OptionAddResponse(status, description, fuego.Response{Type: fuego.HTTPError{}})
 	}

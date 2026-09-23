@@ -99,6 +99,18 @@
         ],
         "type": "object"
       },
+      "healthResponse": {
+        "description": "healthResponse schema",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "joinGameRequest": {
         "description": "joinGameRequest schema",
         "properties": {
@@ -666,6 +678,73 @@
           "games"
         ]
       }
+    },
+    "/api/health": {
+      "get": {
+        "description": "#### Controller: \n\n`hexmate/server/internal/httpapi.Register.func1`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "operationId": "health",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/healthResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/healthResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Bad Request _(validation or deserialization error)_"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Internal Server Error _(panics)_"
+          }
+        },
+        "summary": "Health check",
+        "tags": [
+          "api",
+          "health"
+        ]
+      }
     }
   },
   "tags": [
@@ -674,6 +753,9 @@
     },
     {
       "name": "games"
+    },
+    {
+      "name": "health"
     }
   ]
 }

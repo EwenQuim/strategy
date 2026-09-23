@@ -165,6 +165,13 @@ export interface CreateGameRequest {
 }
 
 /**
+ * healthResponse schema
+ */
+export interface HealthResponse {
+  status: string;
+}
+
+/**
  * joinGameRequest schema
  */
 export interface JoinGameRequest {
@@ -463,4 +470,61 @@ export const joinGame = async (code: string,
   const data: joinGameResponse['data'] = body ? JSON.parse(body) : {}
 
   return { data, status: res.status, headers: res.headers } as joinGameResponse
+}
+
+
+
+/**
+ * #### Controller: 
+
+`hexmate/server/internal/httpapi.Register.func1`
+
+#### Middlewares:
+
+- `github.com/go-fuego/fuego.defaultLogger.middleware`
+
+---
+
+
+ * @summary Health check
+ */
+export type healthResponse200 = {
+  data: HealthResponse
+  status: 200
+}
+
+export type healthResponse400 = {
+  data: HTTPError
+  status: 400
+}
+    
+export type healthResponseComposite = healthResponse200 | healthResponse400;
+    
+export type healthResponse = healthResponseComposite & {
+  headers: Headers;
+}
+
+export const getHealthUrl = () => {
+
+
+  
+
+  return `/api/health`
+}
+
+export const health = async ( options?: RequestInit): Promise<healthResponse> => {
+  
+  const res = await fetch(getHealthUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: healthResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as healthResponse
 }

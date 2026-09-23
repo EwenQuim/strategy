@@ -1,8 +1,9 @@
 import { buttonClassName } from '../components/styles'
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
+import { health } from '../api/sdk.gen.ts'
 import { onlineEnabled } from '../online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
@@ -10,7 +11,21 @@ export const Route = createFileRoute('/')({
   component: function Landing() {
     const completed = useSyncExternalStore(subscribeCampaignProgress, readCampaignProgress)
     const done = completed === CAMPAIGN_LEVELS.length
-    const online = onlineEnabled()
+    const flagged = onlineEnabled()
+    const [apiUp, setApiUp] = useState(false)
+    useEffect(() => {
+      if (!flagged) return
+      let cancelled = false
+      health()
+        .then((res) => {
+          if (!cancelled) setApiUp(res.status === 200)
+        })
+        .catch(() => {})
+      return () => {
+        cancelled = true
+      }
+    }, [flagged])
+    const online = flagged && apiUp
     return (
       <main className="[background:radial-gradient(ellipse_at_50%_38%,#465c3880,transparent_60%),#182c22] flex min-h-dvh flex-col">
         <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 max-[601px]:px-[23px] max-[601px]:py-5 [@media(max-height:650px)]:py-3">
@@ -150,7 +165,13 @@ export const Route = createFileRoute('/')({
               preload={false}
               data-enabled={online}
               aria-disabled={!online}
-              title={online ? 'Play online, turn by turn' : 'Online play is not available yet'}
+              title={
+                online
+                  ? 'Play online, turn by turn'
+                  : flagged
+                    ? 'Game server unreachable'
+                    : 'Online play is not available yet'
+              }
             >
               Online
               <Icon name="arrow" />
