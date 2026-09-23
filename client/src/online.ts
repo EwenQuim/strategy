@@ -5,7 +5,6 @@ const GAMES_KEY = 'hexmate.online.games'
 const FLAG_KEY = 'hexmate.online'
 
 export function onlineEnabled(): boolean {
-  if (!['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) return false
   try {
     return localStorage.getItem(FLAG_KEY) === '1'
   } catch {
