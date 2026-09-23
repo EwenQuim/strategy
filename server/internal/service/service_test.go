@@ -32,7 +32,7 @@ func TestGameLifecycle(t *testing.T) {
 				t.Fatalf("new game status=%s version=%d", creds.Game.Status, creds.Game.Version)
 			}
 
-			endTurn := map[string]any{"type": "endTurn"}
+			endTurn := game.EngineAction{Type: game.ActionEndTurn}
 			if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, endTurn, nil); !errors.Is(err, game.ErrNotStarted) {
 				t.Fatalf("want ErrNotStarted, got %v", err)
 			}
@@ -142,6 +142,40 @@ func TestNameValidation(t *testing.T) {
 	}
 	if creds.Game.NamePlayer != "padded" {
 		t.Fatalf("name not trimmed: %q", creds.Game.NamePlayer)
+	}
+}
+
+func TestInvalidActions(t *testing.T) {
+	store, cleanup := stores()["memory"](t)
+	defer cleanup()
+	ctx := context.Background()
+	svc := service.New(store)
+	creds, err := svc.Create(ctx, "Ewen")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.Join(ctx, creds.Game.Code, "Bob"); err != nil {
+		t.Fatal(err)
+	}
+
+	intPtr := func(v int) *int { return &v }
+	for _, action := range []game.EngineAction{
+		{Type: "jump"},
+		{Type: game.ActionRestart},
+		{Type: game.ActionMove},
+		{Type: game.ActionMove, Q: intPtr(0)},
+		{Type: game.ActionAttackAt, R: intPtr(0)},
+		{Type: game.ActionAct},
+		{Type: game.ActionAct, Action: new(game.AttackKind)},
+	} {
+		if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, action, nil); !errors.Is(err, game.ErrInvalidAction) {
+			t.Errorf("%s: want ErrInvalidAction, got %v", action.Type, err)
+		}
+	}
+
+	move := game.EngineAction{Type: game.ActionMove, Q: intPtr(0), R: intPtr(0)}
+	if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, move, nil); err != nil {
+		t.Fatalf("valid move rejected: %v", err)
 	}
 }
 

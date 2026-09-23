@@ -97,7 +97,10 @@ func (s *Service) Game(ctx context.Context, code string) (game.Game, error) {
 	return s.store.Game(ctx, code)
 }
 
-func (s *Service) Play(ctx context.Context, code, token string, version int, action map[string]any, winner *game.Side) (game.Game, error) {
+func (s *Service) Play(ctx context.Context, code, token string, version int, action game.EngineAction, winner *game.Side) (game.Game, error) {
+	if err := action.Validate(); err != nil {
+		return game.Game{}, err
+	}
 	g, err := s.store.Game(ctx, code)
 	if err != nil {
 		return game.Game{}, err

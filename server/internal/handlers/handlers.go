@@ -19,10 +19,10 @@ type joinGameRequest struct {
 }
 
 type playActionRequest struct {
-	Token   string         `json:"token" description:"Player token received at game creation or join"`
-	Version int            `json:"version" description:"Game version the action applies to"`
-	Action  map[string]any `json:"action" description:"Game engine action"`
-	Winner  *string        `json:"winner" description:"Side of the winner, only on the final action"`
+	Token   string            `json:"token" description:"Player token received at game creation or join"`
+	Version int               `json:"version" description:"Game version the action applies to"`
+	Action  game.EngineAction `json:"action" description:"Game engine action"`
+	Winner  *game.Side        `json:"winner" description:"Side of the winner, only on the final action"`
 }
 
 type healthResponse struct {
@@ -123,7 +123,7 @@ func playAction(svc *service.Service) func(c fuego.ContextWithBody[playActionReq
 		}
 		var winner *game.Side
 		if req.Winner != nil {
-			side, ok := game.ParseSide(*req.Winner)
+			side, ok := game.ParseSide(string(*req.Winner))
 			if !ok {
 				return playActionResponse{}, fuego.BadRequestError{Detail: "winner must be player or enemy"}
 			}

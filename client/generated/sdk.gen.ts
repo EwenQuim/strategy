@@ -108,15 +108,21 @@ func getAllPets(ctx fuego.ContextNoBody) (*MyResponse, error) {
 
  * OpenAPI spec version: 1.0.0
  */
-export type ActionActionAnyOf = {[key: string]: unknown};
-
-export type ActionAction = ActionActionAnyOf | null;
-
 export interface Action {
-  action: ActionAction;
+  action: EngineAction;
   side: string;
   /** @nullable */
   winner?: string | null;
+}
+
+export interface EngineAction {
+  /** @nullable */
+  action?: string | null;
+  /** @nullable */
+  q?: number | null;
+  /** @nullable */
+  r?: number | null;
+  type: string;
 }
 
 /**
@@ -180,21 +186,10 @@ export interface JoinGameRequest {
 }
 
 /**
- * Game engine action
- */
-export type PlayActionRequestActionAnyOf = {[key: string]: unknown};
-
-/**
- * Game engine action
- */
-export type PlayActionRequestAction = PlayActionRequestActionAnyOf | null;
-
-/**
  * playActionRequest schema
  */
 export interface PlayActionRequest {
-  /** Game engine action */
-  action: PlayActionRequestAction;
+  action: EngineAction;
   /** Player token received at game creation or join */
   token: string;
   /** Game version the action applies to */

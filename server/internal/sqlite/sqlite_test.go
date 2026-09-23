@@ -42,13 +42,14 @@ func TestGamePersistsAcrossReopen(t *testing.T) {
 			t.Fatal(err)
 		}
 		winner := game.Enemy
+		q, r := 2, 0
 		if _, err := store.Append(ctx, code, 0, game.Action{
-			Side: game.Player, Action: map[string]any{"type": "endTurn"},
+			Side: game.Player, Action: game.EngineAction{Type: game.ActionEndTurn},
 		}); err != nil {
 			t.Fatal(err)
 		}
 		if _, err := store.Append(ctx, code, 1, game.Action{
-			Side: game.Enemy, Action: map[string]any{"type": "attackAt", "q": 2, "r": 0}, Winner: &winner,
+			Side: game.Enemy, Action: game.EngineAction{Type: game.ActionAttackAt, Q: &q, R: &r}, Winner: &winner,
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -73,8 +74,8 @@ func TestGamePersistsAcrossReopen(t *testing.T) {
 	if g.Version != 2 || len(g.Actions) != 2 {
 		t.Fatalf("reopened version=%d actions=%d", g.Version, len(g.Actions))
 	}
-	if g.Actions[1].Action["type"] != "attackAt" || g.Actions[1].Action["q"] != float64(2) {
-		t.Fatalf("action payload not round-tripped: %v", g.Actions[1].Action)
+	if g.Actions[1].Action.Type != game.ActionAttackAt || *g.Actions[1].Action.Q != 2 {
+		t.Fatalf("action payload not round-tripped: %+v", g.Actions[1].Action)
 	}
 	if _, err := store.Game(ctx, "NOPE12"); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("want ErrNotFound, got %v", err)
@@ -106,7 +107,7 @@ func TestConcurrentAppendOnlyOneVersionWins(t *testing.T) {
 		wg.Go(func() {
 			<-start
 			_, err := store.Append(ctx, "CONCUR", 0, game.Action{
-				Side: game.Player, Action: map[string]any{"type": "endTurn"},
+				Side: game.Player, Action: game.EngineAction{Type: game.ActionEndTurn},
 			})
 			results <- err
 		})
@@ -160,7 +161,7 @@ func TestAppendAcrossTwoConnectionsYieldsVersionConflict(t *testing.T) {
 	if _, err := player2.Join(ctx, "SHARE1", "Bob", "hash2"); err != nil {
 		t.Fatal(err)
 	}
-	move := game.Action{Side: game.Player, Action: map[string]any{"type": "endTurn"}}
+	move := game.Action{Side: game.Player, Action: game.EngineAction{Type: game.ActionEndTurn}}
 	if _, err := player1.Append(ctx, "SHARE1", 0, move); err != nil {
 		t.Fatal(err)
 	}

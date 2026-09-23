@@ -4,11 +4,7 @@
       "Action": {
         "properties": {
           "action": {
-            "additionalProperties": {},
-            "type": [
-              "object",
-              "null"
-            ]
+            "$ref": "#/components/schemas/EngineAction"
           },
           "side": {
             "type": "string"
@@ -21,6 +17,29 @@
         "required": [
           "action",
           "side"
+        ],
+        "type": "object"
+      },
+      "EngineAction": {
+        "properties": {
+          "action": {
+            "nullable": true,
+            "type": "string"
+          },
+          "q": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "r": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -128,14 +147,7 @@
         "description": "playActionRequest schema",
         "properties": {
           "action": {
-            "additionalProperties": {
-              "description": "Game engine action"
-            },
-            "description": "Game engine action",
-            "type": [
-              "object",
-              "null"
-            ]
+            "$ref": "#/components/schemas/EngineAction"
           },
           "token": {
             "description": "Player token received at game creation or join",

@@ -148,6 +148,12 @@ func TestOnlineGameFlow(t *testing.T) {
 	if status, _ := play(creator.Token, 2, endTurn, nil); status != http.StatusUnprocessableEntity {
 		t.Fatalf("play after finish: status=%d", status)
 	}
+	if status, _ := play(creator.Token, 2, map[string]any{"type": "restart"}, nil); status != http.StatusBadRequest {
+		t.Fatalf("restart rejected: status=%d", status)
+	}
+	if status, _ := play(creator.Token, 2, map[string]any{"type": "move", "q": 1}, nil); status != http.StatusBadRequest {
+		t.Fatalf("half a move rejected: status=%d", status)
+	}
 }
 
 func TestHealth(t *testing.T) {

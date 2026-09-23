@@ -101,7 +101,6 @@ func (s *Store) Game(ctx context.Context, code string) (game.Game, error) {
 		if err := rows.Scan(&a.Side, &payload, &winner); err != nil {
 			return game.Game{}, err
 		}
-		a.Action = map[string]any{}
 		if err := json.Unmarshal([]byte(payload), &a.Action); err != nil {
 			return game.Game{}, err
 		}

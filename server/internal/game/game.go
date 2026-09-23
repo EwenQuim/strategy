@@ -29,9 +29,9 @@ func ParseSide(value string) (Side, bool) {
 }
 
 type Action struct {
-	Side   Side           `json:"side"`
-	Action map[string]any `json:"action"`
-	Winner *Side          `json:"winner,omitempty"`
+	Side   Side         `json:"side"`
+	Action EngineAction `json:"action"`
+	Winner *Side        `json:"winner,omitempty"`
 }
 
 type Game struct {

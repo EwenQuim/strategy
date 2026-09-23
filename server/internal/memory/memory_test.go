@@ -32,7 +32,7 @@ func TestConcurrentAppendOnlyOneVersionWins(t *testing.T) {
 		wg.Go(func() {
 			<-start
 			_, err := store.Append(ctx, "CONCUR", 0, game.Action{
-				Side: game.Player, Action: map[string]any{"type": "endTurn"},
+				Side: game.Player, Action: game.EngineAction{Type: game.ActionEndTurn},
 			})
 			results <- err
 		})
