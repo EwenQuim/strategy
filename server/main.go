@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -12,8 +13,8 @@ import (
 const appBase = "/strategy/"
 
 func main() {
-	addr := env("ADDR", ":8080")
-	dist := env("DIST", "./dist")
+	addr := cmp.Or(os.Getenv("ADDR"), ":8080")
+	dist := cmp.Or(os.Getenv("DIST"), "./dist")
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /api", apiHandler())
@@ -55,11 +56,4 @@ func spa(dir string) http.Handler {
 		}
 		files.ServeHTTP(w, r)
 	})
-}
-
-func env(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }
