@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/go-fuego/fuego"
 
@@ -14,8 +17,24 @@ type createGameRequest struct {
 	Name string `json:"name" description:"Player name, 1 to 20 characters"`
 }
 
+func (r *createGameRequest) InTransform(_ context.Context) error {
+	return normalizeName(&r.Name)
+}
+
 type joinGameRequest struct {
 	Name string `json:"name" description:"Player name, 1 to 20 characters"`
+}
+
+func (r *joinGameRequest) InTransform(_ context.Context) error {
+	return normalizeName(&r.Name)
+}
+
+func normalizeName(name *string) error {
+	*name = strings.TrimSpace(*name)
+	if n := utf8.RuneCountInString(*name); n < 1 || n > 20 {
+		return errors.New("name must be 1 to 20 characters")
+	}
+	return nil
 }
 
 type playActionRequest struct {
@@ -115,6 +134,18 @@ func getGame(svc *service.Service) func(c fuego.ContextNoBody) (publicGame, erro
 	}
 }
 
+func (r *playActionRequest) InTransform(_ context.Context) error {
+	if err := r.Action.Validate(); err != nil {
+		return err
+	}
+	if r.Winner != nil {
+		if _, ok := game.ParseSide(string(*r.Winner)); !ok {
+			return errors.New("winner must be player or enemy")
+		}
+	}
+	return nil
+}
+
 func playAction(svc *service.Service) func(c fuego.ContextWithBody[playActionRequest]) (playActionResponse, error) {
 	return func(c fuego.ContextWithBody[playActionRequest]) (playActionResponse, error) {
 		req, err := c.Body()
@@ -123,10 +154,7 @@ func playAction(svc *service.Service) func(c fuego.ContextWithBody[playActionReq
 		}
 		var winner *game.Side
 		if req.Winner != nil {
-			side, ok := game.ParseSide(string(*req.Winner))
-			if !ok {
-				return playActionResponse{}, fuego.BadRequestError{Detail: "winner must be player or enemy"}
-			}
+			side := *req.Winner
 			winner = &side
 		}
 		g, err := svc.Play(c.Context(), c.PathParam("code"), req.Token, req.Version, req.Action, winner)

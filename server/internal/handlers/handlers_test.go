@@ -174,4 +174,46 @@ func TestCreateNameValidation(t *testing.T) {
 			t.Fatalf("name %q: status=%d body=%+v", name, status, res)
 		}
 	}
+	status, created := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]string{"name": "  Ewen  "})
+	if status != http.StatusCreated || created.Game.NamePlayer != "Ewen" {
+		t.Fatalf("trimmed name: status=%d body=%+v", status, created)
+	}
+	if status, _ := do[credentialsResponse](t, ts, http.MethodPost, fmt.Sprintf("/api/games/%s/join", created.Game.Code), map[string]string{"name": ""}); status != http.StatusBadRequest {
+		t.Fatalf("join with empty name: status=%d", status)
+	}
+}
+
+func TestPlayActionValidation(t *testing.T) {
+	ts := newTestServer(t)
+	_, creator := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]string{"name": "Ewen"})
+	code := creator.Game.Code
+	do[credentialsResponse](t, ts, http.MethodPost, fmt.Sprintf("/api/games/%s/join", code), map[string]string{"name": "Bob"})
+
+	invalid := []struct {
+		name   string
+		action map[string]any
+	}{
+		{"unknown type", map[string]any{"type": "jump"}},
+		{"restart", map[string]any{"type": "restart"}},
+		{"no target", map[string]any{"type": "move"}},
+		{"half a target", map[string]any{"type": "move", "q": 1}},
+		{"act", map[string]any{"type": "act"}},
+		{"bad act kind", map[string]any{"type": "act", "action": "rally"}},
+	}
+	for _, tc := range invalid {
+		body := map[string]any{"token": creator.Token, "version": 0, "action": tc.action, "winner": nil}
+		if status, _ := do[playResponse](t, ts, http.MethodPost, "/api/games/"+code+"/actions", body); status != http.StatusBadRequest {
+			t.Fatalf("%s: status=%d", tc.name, status)
+		}
+	}
+	body := map[string]any{"token": creator.Token, "version": 0, "action": map[string]any{"type": "endTurn"}, "winner": "green"}
+	if status, _ := do[playResponse](t, ts, http.MethodPost, "/api/games/"+code+"/actions", body); status != http.StatusBadRequest {
+		t.Fatalf("bad winner: status=%d", status)
+	}
+	body = map[string]any{"token": creator.Token, "version": 0, "action": map[string]any{"type": "endTurn"}, "winner": nil}
+	if status, res := do[playResponse](t, ts, http.MethodPost, "/api/games/"+code+"/actions", body); status != http.StatusOK {
+		t.Fatalf("valid endTurn: status=%d", status)
+	} else if res.Version != 1 {
+		t.Fatalf("valid endTurn version=%d", res.Version)
+	}
 }

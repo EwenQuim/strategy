@@ -122,63 +122,6 @@ func TestCredentialsAreHashedAndWellFormed(t *testing.T) {
 	}
 }
 
-func TestNameValidation(t *testing.T) {
-	store, cleanup := stores()["memory"](t)
-	defer cleanup()
-	svc := service.New(store)
-
-	if _, err := svc.Create(context.Background(), ""); err == nil {
-		t.Fatal("empty name accepted")
-	}
-	if _, err := svc.Create(context.Background(), "  \t"); err == nil {
-		t.Fatal("blank name accepted")
-	}
-	if _, err := svc.Create(context.Background(), strings.Repeat("x", 21)); err == nil {
-		t.Fatal("21-character name accepted")
-	}
-	creds, err := svc.Create(context.Background(), "  padded  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if creds.Game.NamePlayer != "padded" {
-		t.Fatalf("name not trimmed: %q", creds.Game.NamePlayer)
-	}
-}
-
-func TestInvalidActions(t *testing.T) {
-	store, cleanup := stores()["memory"](t)
-	defer cleanup()
-	ctx := context.Background()
-	svc := service.New(store)
-	creds, err := svc.Create(ctx, "Ewen")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := svc.Join(ctx, creds.Game.Code, "Bob"); err != nil {
-		t.Fatal(err)
-	}
-
-	intPtr := func(v int) *int { return &v }
-	for _, action := range []game.EngineAction{
-		{Type: "jump"},
-		{Type: game.ActionRestart},
-		{Type: game.ActionMove},
-		{Type: game.ActionMove, Q: intPtr(0)},
-		{Type: game.ActionAttackAt, R: intPtr(0)},
-		{Type: game.ActionAct},
-		{Type: game.ActionAct, Action: new(game.AttackKind)},
-	} {
-		if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, action, nil); !errors.Is(err, game.ErrInvalidAction) {
-			t.Errorf("%s: want ErrInvalidAction, got %v", action.Type, err)
-		}
-	}
-
-	move := game.EngineAction{Type: game.ActionMove, Q: intPtr(0), R: intPtr(0)}
-	if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, move, nil); err != nil {
-		t.Fatalf("valid move rejected: %v", err)
-	}
-}
-
 func TestUnknownGame(t *testing.T) {
 	store, cleanup := stores()["memory"](t)
 	defer cleanup()

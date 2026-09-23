@@ -7,9 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"math/big"
-	"strings"
 	"time"
-	"unicode/utf8"
 
 	"hexmate/server/internal/game"
 )
@@ -40,10 +38,6 @@ type PlayerCredentials struct {
 }
 
 func (s *Service) Create(ctx context.Context, name string) (PlayerCredentials, error) {
-	name, err := validName(name)
-	if err != nil {
-		return PlayerCredentials{}, err
-	}
 	token, err := randomString(32, tokenAlphabet)
 	if err != nil {
 		return PlayerCredentials{}, err
@@ -78,10 +72,6 @@ func (s *Service) Create(ctx context.Context, name string) (PlayerCredentials, e
 }
 
 func (s *Service) Join(ctx context.Context, code, name string) (PlayerCredentials, error) {
-	name, err := validName(name)
-	if err != nil {
-		return PlayerCredentials{}, err
-	}
 	token, err := randomString(32, tokenAlphabet)
 	if err != nil {
 		return PlayerCredentials{}, err
@@ -98,9 +88,6 @@ func (s *Service) Game(ctx context.Context, code string) (game.Game, error) {
 }
 
 func (s *Service) Play(ctx context.Context, code, token string, version int, action game.EngineAction, winner *game.Side) (game.Game, error) {
-	if err := action.Validate(); err != nil {
-		return game.Game{}, err
-	}
 	g, err := s.store.Game(ctx, code)
 	if err != nil {
 		return game.Game{}, err
@@ -134,14 +121,6 @@ func participantSide(g game.Game, tokenHash string) (game.Side, bool) {
 func hash(token string) string {
 	sum := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(sum[:])
-}
-
-func validName(name string) (string, error) {
-	name = strings.TrimSpace(name)
-	if n := utf8.RuneCountInString(name); n < 1 || n > 20 {
-		return "", errors.New("name must be 1 to 20 characters")
-	}
-	return name, nil
 }
 
 func randomString(n int, alphabet string) (string, error) {
