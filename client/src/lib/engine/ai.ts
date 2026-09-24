@@ -140,12 +140,6 @@ function evaluatePosition(
   caution: number,
   distance: Map<string, number>,
 ): number {
-  if (state.winner)
-    return state.winner === 'draw'
-      ? 0
-      : state.winner === actor.side
-        ? SCORE.victory
-        : -SCORE.victory
   const sameTurn = activePawn(state)?.id === actor.id
   const settled = sameTurn ? reducer(state, { type: 'endTurn' }) : state
   if (settled.winner)

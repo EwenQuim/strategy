@@ -1,4 +1,4 @@
-import { initialTransition, createBotGame, type BotDifficulty } from './bot.ts'
+import { initialTransition, createBotGame, isImpactFrame, type BotDifficulty } from './bot.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, Transition } from './engine/types.ts'
 import type { GameMode } from './game-mode.ts'
@@ -34,12 +34,7 @@ export function playbackReducer(
     const result = applyAction(playback.state, action)
     return {
       ...result,
-      frames: result.frames.filter(
-        (frame) =>
-          frame.effect?.kind === 'bomb' ||
-          frame.effect?.kind === 'hellfire' ||
-          frame.effect?.impacts?.length,
-      ),
+      frames: result.frames.filter(isImpactFrame),
     }
   }
   return createBotGame(difficulty).transition(playback.state, action)

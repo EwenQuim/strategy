@@ -19,6 +19,11 @@ export { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 
 type BotController = BotStrategy | BotDifficulty | BotOptions
 
+export const isImpactFrame = (frame: BattleFrame): boolean =>
+  frame.effect?.kind === 'bomb' ||
+  frame.effect?.kind === 'hellfire' ||
+  !!frame.effect?.impacts?.length
+
 export function chooseBotActions(
   state: GameState,
   strategy: BotController = 'normal',
@@ -198,15 +203,7 @@ export function createBotGame(strategy: BotController = 'normal') {
     const bots = playBots(player.state)
     return {
       state: bots.state,
-      frames: [
-        ...player.frames.filter(
-          (frame) =>
-            frame.effect?.kind === 'bomb' ||
-            frame.effect?.kind === 'hellfire' ||
-            frame.effect?.impacts?.length,
-        ),
-        ...bots.frames,
-      ],
+      frames: [...player.frames.filter(isImpactFrame), ...bots.frames],
     }
   }
   return {
