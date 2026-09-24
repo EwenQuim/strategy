@@ -4,7 +4,7 @@ import { playbackReducer, type PlaybackAction } from '../lib/playback.ts'
 import type { OnlineAction } from '../lib/online.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BotDifficulty } from '../lib/engine/ai.ts'
-import type { Transition } from '../lib/engine/types.ts'
+import type { Transition } from '../lib/engine/index.ts'
 import { fetchOnlineGame, useOnlineGame } from './online.ts'
 import type { OnlineSession } from './useGame.ts'
 

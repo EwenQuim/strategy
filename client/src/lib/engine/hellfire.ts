@@ -1,6 +1,6 @@
-import { hexDist } from './hex.ts'
+import { hexDist, type Axial } from './hex.ts'
 import { SeededRandom } from './random.ts'
-import type { Axial, GameState } from './types.ts'
+import type { GameState } from './engine.ts'
 
 export const inHellfire = (centers: readonly Axial[], at: Axial): boolean =>
   centers.some((center) => hexDist(center, at) <= 1)

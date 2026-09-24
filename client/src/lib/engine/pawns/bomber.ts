@@ -1,6 +1,6 @@
 import { hexDist, key } from '../hex.ts'
 import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
-import type { Tile } from '../types.ts'
+import type { Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 function bombTiles(pawn: Pawn, tiles: Map<string, Tile>): Tile[] {

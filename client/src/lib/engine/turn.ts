@@ -2,7 +2,7 @@ import { key } from './hex.ts'
 import { inHellfire, markHellfire } from './hellfire.ts'
 import { label } from './combat.ts'
 import type { Pawn, Side } from './pawns/index.ts'
-import type { BattleEffect, BattleFrame, GameState } from './types.ts'
+import type { BattleEffect, BattleFrame, GameState } from './engine.ts'
 
 export function winnerFrom(pawns: Pawn[], actingSide: Side): Side | null {
   if (!pawns.some((p) => p.kind === 'king' && p.side === actingSide))

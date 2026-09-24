@@ -1,6 +1,6 @@
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 import { validateSetup } from './engine/setup.ts'
-import type { BattleSetup } from './engine/types.ts'
+import type { BattleSetup } from './engine/index.ts'
 
 export type GameMode = 'ai' | 'local' | 'online'
 

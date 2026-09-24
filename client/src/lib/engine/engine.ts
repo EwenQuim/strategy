@@ -1,17 +1,8 @@
-import { key } from './hex.ts'
-import type { Pawn, SpecialResult } from './pawns/index.ts'
-import type {
-  Action,
-  Axial,
-  BattleEffect,
-  BattleFrame,
-  BattleSetup,
-  GameState,
-  Transition,
-  Tile,
-} from './types.ts'
+import { key, type Axial, type Tile } from './hex.ts'
+import type { Pawn, Side, SpecialResult } from './pawns/index.ts'
 import { SeededRandom } from './random.ts'
-import { prepareBattle } from './setup.ts'
+import { prepareBattle, type BattleSetup } from './setup.ts'
+import type { Biome } from './biomes/index.ts'
 import {
   advanceTurn,
   captureFrame,
@@ -28,7 +19,54 @@ import {
   canUseSpecial,
   specialTargets,
   performAttack,
+  type BattleImpact,
 } from './combat.ts'
+
+type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
+
+export type Action =
+  | { type: 'move'; q: number; r: number }
+  | { type: 'act'; action: 'attack' | 'special' }
+  | { type: 'attackAt'; q: number; r: number }
+  | { type: 'specialAt'; q: number; r: number }
+  | { type: 'cancelTargeting' }
+  | { type: 'endTurn' }
+  | { type: 'restart' }
+
+export type GameState = {
+  seed: string
+  readonly setup?: BattleSetup
+  biome: Biome
+  randomState: number
+  tiles: Map<string, Tile>
+  hellfire: Axial[]
+  pawns: Pawn[]
+  order: number[]
+  active: number
+  round: number
+  phase: Phase
+  chargeDestination: Axial | null
+  winner: Side | 'draw' | null
+  log: string[]
+  logCount: number
+}
+
+export type BattleEffect = {
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'escape' | 'protect' | 'hellfire'
+  from: Axial
+  to: Axial
+  centers?: Axial[]
+  impacts?: BattleImpact[]
+}
+
+export type BattleFrame = { state: GameState; effect: BattleEffect | null }
+
+export const isImpactFrame = (frame: BattleFrame): boolean =>
+  frame.effect?.kind === 'bomb' ||
+  frame.effect?.kind === 'hellfire' ||
+  !!frame.effect?.impacts?.length
+
+export type Transition = { state: GameState; frames: BattleFrame[] }
 
 export function activePawn(state: GameState): Pawn | undefined {
   return state.pawns.find((p) => p.id === state.order[state.active])

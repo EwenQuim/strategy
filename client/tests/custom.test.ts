@@ -5,7 +5,7 @@ import { createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { initialState, transition } from '../src/lib/engine/engine.ts'
 import { MAP_WIDTH } from '../src/lib/engine/hex.ts'
-import type { BattleSetup } from '../src/lib/engine/types.ts'
+import type { BattleSetup } from '../src/lib/engine/index.ts'
 
 const setup = {
   biome: 'desert',

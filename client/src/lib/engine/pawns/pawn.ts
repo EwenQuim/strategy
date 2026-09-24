@@ -1,4 +1,5 @@
-import type { Action, Axial, BattleEffect, GameState, Tile } from '../types.ts'
+import type { Axial, Tile } from '../hex.ts'
+import type { Action, BattleEffect, GameState } from '../engine.ts'
 import type { SeededRandom } from '../random.ts'
 import type { PawnKind } from './index.ts'
 

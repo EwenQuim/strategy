@@ -10,8 +10,8 @@ import {
   strike,
   walkingPaths,
 } from '../combat.ts'
-import { key } from '../hex.ts'
-import type { Action, Tile } from '../types.ts'
+import { key, type Tile } from '../hex.ts'
+import type { Action } from '../engine.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 export function chargeDestinations(

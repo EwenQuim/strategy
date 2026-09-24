@@ -9,7 +9,7 @@ import {
   type Side,
   type ThreatPosition,
 } from './pawns/index.ts'
-import type { Action, GameState } from './types.ts'
+import type { Action, GameState } from './engine.ts'
 
 export type BotOptions = {
   depth: 1 | 2 | 3

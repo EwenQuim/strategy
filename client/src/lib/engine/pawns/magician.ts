@@ -1,6 +1,6 @@
 import { hexDist, key, neighbors } from '../hex.ts'
 import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
-import type { Axial } from '../types.ts'
+import type { Axial } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 function direction(from: Axial, to: Axial): string | null {

@@ -1,5 +1,14 @@
 import { BIOMES, type Biome } from './biomes/index.ts'
-import { MAP_WIDTH, MAP_HEIGHT, hexOf, key, makeMap, mapFromRows, passable } from './hex.ts'
+import {
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  hexOf,
+  key,
+  makeMap,
+  mapFromRows,
+  passable,
+  type Tile,
+} from './hex.ts'
 import {
   King,
   PAWN_CLASSES,
@@ -8,8 +17,30 @@ import {
   type Pawn,
   type Side,
 } from './pawns/index.ts'
-import type { BattleSetup, PawnPlacement, Tile } from './types.ts'
 import { SeededRandom, seedState } from './random.ts'
+
+type PawnPlacement = {
+  readonly kind: Pawn['kind']
+  readonly col: number
+  readonly row: number
+}
+
+export type FixedBattleSetup = {
+  readonly biome: Biome
+  readonly map: readonly string[]
+  readonly hellfireCount?: 1 | 2
+  readonly player: readonly PawnPlacement[]
+  readonly enemy: readonly PawnPlacement[]
+}
+
+export type BattleSetup =
+  | FixedBattleSetup
+  | {
+      readonly biome: Biome
+      readonly map?: undefined
+      readonly player: readonly Pawn['kind'][]
+      readonly enemy: readonly Pawn['kind'][]
+    }
 
 export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))

@@ -1,15 +1,17 @@
-import { activePawn, initialState as createState, transition as applyAction } from './engine.ts'
+import {
+  activePawn,
+  initialState as createState,
+  isImpactFrame,
+  transition as applyAction,
+  type Action,
+  type BattleFrame,
+  type GameState,
+  type Transition,
+} from './engine.ts'
 import { canAttack, specialTargets, protectorFor } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import {
-  isImpactFrame,
-  type Action,
-  type BattleFrame,
-  type BattleSetup,
-  type GameState,
-  type Transition,
-} from './types.ts'
+import type { BattleSetup } from './setup.ts'
 import { BOT_LEVELS, chooseTacticalActions, type BotDifficulty, type BotOptions } from './ai.ts'
 
 export interface BotStrategy {
