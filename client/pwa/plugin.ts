@@ -20,7 +20,8 @@ export function pwa(): Plugin {
             statSync(join(directory, file)).isFile() &&
             !file.endsWith('.map') &&
             file !== 'sw.js' &&
-            file !== '404.html',
+            file !== '404.html' &&
+            file.split(/[\\/]/).every((segment) => segment[0] !== '.'),
         )
         .sort()
       const hash = createHash('sha256').update(source)

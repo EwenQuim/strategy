@@ -1,7 +1,9 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -29,6 +31,62 @@ func TestSPAFallback(t *testing.T) {
 		if got := w.Body.String(); got != tc.want {
 			t.Errorf("%s: body = %q, want %q", tc.path, got, tc.want)
 		}
+	}
+}
+
+func TestSPAAssetCachingAndGzip(t *testing.T) {
+	dir := t.TempDir()
+	assets := filepath.Join(dir, "assets")
+	if err := os.MkdirAll(assets, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(assets, "app-abc123.js"), []byte("code"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte("<!doctype html>app"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	h := spa(dir)
+
+	plain := httptest.NewRecorder()
+	h.ServeHTTP(plain, httptest.NewRequest("GET", "/assets/app-abc123.js", nil))
+	if plain.Header().Get("Cache-Control") != hashedAssetCache {
+		t.Errorf("hashed asset cache-control = %q, want %q", plain.Header().Get("Cache-Control"), hashedAssetCache)
+	}
+	if plain.Body.String() != "code" {
+		t.Errorf("plain body = %q", plain.Body.String())
+	}
+
+	compressed := httptest.NewRecorder()
+	request := httptest.NewRequest("GET", "/assets/app-abc123.js", nil)
+	request.Header.Set("Accept-Encoding", "gzip")
+	h.ServeHTTP(compressed, request)
+	if compressed.Header().Get("Content-Encoding") != "gzip" {
+		t.Errorf("content-encoding = %q", compressed.Header().Get("Content-Encoding"))
+	}
+	if compressed.Header().Get("Vary") != "Accept-Encoding" {
+		t.Errorf("vary = %q", compressed.Header().Get("Vary"))
+	}
+	reader, err := gzip.NewReader(compressed.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != "code" {
+		t.Errorf("gzipped body = %q", body)
+	}
+
+	fallback := httptest.NewRecorder()
+	h.ServeHTTP(fallback, httptest.NewRequest("GET", "/deep/route", nil))
+	if fallback.Header().Get("Cache-Control") != "" {
+		t.Errorf("fallback cache-control = %q, want none", fallback.Header().Get("Cache-Control"))
+	}
+	if fallback.Body.String() != "<!doctype html>app" {
+		t.Errorf("fallback body = %q", fallback.Body.String())
 	}
 }
 
