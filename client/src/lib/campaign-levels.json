@@ -185,7 +185,7 @@
   {
     "id": 4,
     "name": "Forest Magic",
-    "seed": "campaign-v1-4",
+    "seed": "campaign-v1-4-23",
     "setup": {
       "biome": "verdant",
       "map": [
@@ -205,39 +205,39 @@
       "player": [
         {
           "kind": "king",
-          "col": 5,
+          "col": 3,
           "row": 10
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 9
+          "col": 5,
+          "row": 8
         },
         {
           "kind": "archer",
-          "col": 2,
-          "row": 10
+          "col": 6,
+          "row": 11
         },
         {
           "kind": "magician",
-          "col": 2,
-          "row": 8
+          "col": 5,
+          "row": 9
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 2,
+          "col": 4,
           "row": 1
         },
         {
           "kind": "swordsman",
-          "col": 3,
+          "col": 2,
           "row": 3
         },
         {
           "kind": "magician",
-          "col": 3,
+          "col": 2,
           "row": 2
         }
       ]
