@@ -71,7 +71,7 @@ const fireball: SpecialAbility = {
 
 export class Magician extends Pawn {
   static override readonly icon =
-    'm4 20 12-12m-9 9 3 3M17 2l1.5 4.5L23 8l-4.5 1.5L17 14l-1.5-4.5L11 8l4.5-1.5L17 2Z'
+    'M4 20 14.5 9.5M13 8l3 3M18 2.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9ZM9.5 4.5v2m-1-1h2M20 13.5v2m-1-1h2'
   readonly kind = 'magician' as const
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
   get special(): SpecialAbility {
