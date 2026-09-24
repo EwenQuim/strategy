@@ -621,11 +621,9 @@ export function Game({
                 </p>
                 {state.biome === 'hell' && (
                   <p>
-                    Hellfire warnings stay fixed for the full round. At round end, each marked
-                    center and its six neighbors take 1 damage, ignoring Escape and Protect.
-                    Hatching shows the whole blast area; a triangle marks each impact center.
-                    Move clear before the last unit finishes. If both kings fall, the battle is
-                    a draw.
+                    Hellfire warnings stay fixed for the full round. At round end, units on
+                    hatched tiles take 1 damage, ignoring Escape and Protect. Move clear before
+                    the last unit finishes. If both kings fall, the battle is a draw.
                   </p>
                 )}
               </div>

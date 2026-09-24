@@ -918,7 +918,9 @@ test(
           elements.map((element) => ({
             warned: element.hasAttribute('data-hellfire'),
             center: element.hasAttribute('data-hellfire-center'),
-            hatch: !!element.querySelector('polygon[fill="url(#hellfire-hatch)"]'),
+            hatch:
+              element.querySelector('polygon[fill="url(#hellfire-hatch)"]')?.parentElement
+                ?.children.length === 1,
             described:
               /Hellfire (impact center|blast area), 1 unavoidable damage at round end$/.test(
                 element.getAttribute('aria-label')!,

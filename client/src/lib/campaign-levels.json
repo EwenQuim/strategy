@@ -1346,7 +1346,7 @@
       "newElements": [
         {
           "name": "Hellfire",
-          "description": "The triangle marks the impact center; hatching covers it and its six neighbors. Warnings stay fixed for a full round, then every unit in the blast takes 1 damage at round end, ignoring Escape and Protect. This battle has one warning, alternating armies each round. If both kings fall, the battle is a draw."
+          "description": "Hatching shows the whole blast area. Warnings stay fixed for a full round, then every unit in the blast takes 1 damage at round end, ignoring Escape and Protect. This battle has one warning, alternating armies each round. If both kings fall, the battle is a draw."
         }
       ]
     }

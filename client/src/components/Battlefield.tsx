@@ -248,14 +248,6 @@ export function Battlefield({
             {warned && (
               <g className="pointer-events-none" aria-hidden="true">
                 <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
-                {impactCenter && (
-                  <path
-                    d="m0-32 7 11H-7Z"
-                    fill="var(--hellfire-warning, #ffb27f)"
-                    stroke="var(--biome-panel)"
-                    strokeWidth="1.5"
-                  />
-                )}
               </g>
             )}
             {canMove && !occupant && (
