@@ -2,12 +2,13 @@ import { iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSyncExternalStore } from 'react'
 import { Icon } from '../components/Icon'
+import { LevelMiniature } from '../components/LevelMiniature'
 import { CAMPAIGN_LEVELS, isLevelUnlocked } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
 const levelCardClassName =
-  'flex size-full flex-col items-center justify-center gap-[3px] rounded-lg border border-line bg-(--biome-background) bg-[radial-gradient(ellipse_at_50%_75%,var(--biome-glow),transparent_70%)] p-[5px] text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere disabled:opacity-55 data-[status=completed]:border-[#89bba477] data-[status=ready]:border-gold [&:not(:disabled):hover]:brightness-125'
+  'flex size-full flex-col gap-1 overflow-hidden rounded-lg border border-line bg-(--biome-background) p-1.5 text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=completed]:border-[#89bba477] data-[status=ready]:border-gold disabled:text-muted [&:disabled>svg]:opacity-55 [&:not(:disabled):hover]:brightness-115'
 
 export const Route = createFileRoute('/campaign/')({
   component: function Campaign() {
@@ -42,10 +43,13 @@ export const Route = createFileRoute('/campaign/')({
             const status = cleared ? 'Completed' : unlocked ? 'Ready' : 'Locked'
             const content = (
               <>
-                <strong className="font-serif text-[20px] leading-[normal] font-normal text-gold">
-                  {level.id.toString().padStart(2, '0')}
-                </strong>
-                <span>{level.name}</span>
+                <LevelMiniature setup={level.setup} />
+                <span>
+                  <strong className="font-serif font-normal text-gold">
+                    {level.id.toString().padStart(2, '0')}
+                  </strong>{' '}
+                  {level.name}
+                </span>
                 <small className="text-[8px] text-muted">{status}</small>
               </>
             )
