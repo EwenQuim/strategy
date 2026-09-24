@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Hexmate",
   "short_name": "Hexmate",
-  "description": "Turn-based hex strategy, playable offline.",
+  "description": "Free hex strategy game",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
