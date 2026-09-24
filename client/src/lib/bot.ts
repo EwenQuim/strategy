@@ -200,7 +200,10 @@ export function createBotGame(strategy: BotController = 'normal') {
       state: bots.state,
       frames: [
         ...player.frames.filter(
-          (frame) => frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length,
+          (frame) =>
+            frame.effect?.kind === 'bomb' ||
+            frame.effect?.kind === 'hellfire' ||
+            frame.effect?.impacts?.length,
         ),
         ...bots.frames,
       ],

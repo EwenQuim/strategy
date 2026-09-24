@@ -4,6 +4,7 @@ import {
   walkingPaths,
   TILE_FEATURES,
   protectorFor,
+  inHellfire,
   type Axial,
   type BattleEffect,
   type Pawn,
@@ -23,11 +24,11 @@ const hexPoints = Array.from({ length: 6 }, (_, i) => {
 const terrainColors = {
   plain: 'var(--plain-tile, #7d8963)',
   forest: '#536e51',
-  mountain: '#737c69',
+  mountain: 'var(--mountain-tile, #737c69)',
   lake: '#4c7186',
   sand: '#e5bc70',
   palm: '#d5b774',
-  basalt: '#594e53',
+  basalt: 'var(--basalt-tile, #594e53)',
   lava: 'url(#lava-melt)',
 }
 
@@ -35,6 +36,7 @@ interface BattlefieldProps {
   labels: PlayerNames
   tiles: Map<string, Tile>
   pawns: Pawn[]
+  hellfire: readonly Axial[]
   active?: Pawn
   reach: Map<string, number>
   targets: Set<string>
@@ -49,6 +51,7 @@ export function Battlefield({
   labels,
   tiles,
   pawns,
+  hellfire,
   active,
   reach,
   targets,
@@ -102,6 +105,15 @@ export function Battlefield({
       aria-label="Battlefield. Select a highlighted tile to move or an enemy to attack."
     >
       <defs>
+        <pattern id="hellfire-hatch" width="9" height="9" patternUnits="userSpaceOnUse">
+          <path
+            d="M-2 2 2-2M0 9 9 0M7 11 11 7"
+            fill="none"
+            stroke="var(--hellfire-warning, #ffb27f)"
+            strokeWidth="1.5"
+            opacity=".6"
+          />
+        </pattern>
         <linearGradient id="lava-melt" x1="0" y1="0" x2=".8" y2="1">
           <stop stopColor="#815c51" />
           <stop offset=".45" stopColor="#b9825d" />
@@ -139,6 +151,10 @@ export function Battlefield({
       </g>
       {allTiles.map((tile) => {
         const tileKey = key(tile.q, tile.r)
+        const warned = inHellfire(hellfire, tile)
+        const impactCenter = hellfire.some(
+          (center) => center.q === tile.q && center.r === tile.r,
+        )
         const occupant = pawns.find((p) => p.q === tile.q && p.r === tile.r)
         const protector = occupant && protectorFor(pawns, occupant)
         const selected = active?.q === tile.q && active.r === tile.r
@@ -181,25 +197,33 @@ export function Battlefield({
               (tile.q + Math.floor(tile.r / 2) + 1) +
               ', row ' +
               (tile.r + 1)) + (feature ? ', ' + feature.name + '. ' + feature.description : '')
-        const actionLabel = target
-          ? targetLabel +
-            ' ' +
-            label +
-            (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '')
-          : canMove
-            ? 'Move to ' +
+        const warning = warned
+          ? ', Hellfire' +
+            (impactCenter ? ' impact center' : ' blast area') +
+            ', 1 unavoidable damage at round end'
+          : ''
+        const actionLabel =
+          (target
+            ? targetLabel +
+              ' ' +
               label +
-              (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '') +
-              ', ' +
-              cost +
-              ' energy'
-            : label
+              (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '')
+            : canMove
+              ? 'Move to ' +
+                label +
+                (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '') +
+                ', ' +
+                cost +
+                ' energy'
+              : label) + warning
         return (
           <g
             key={tileKey}
             transform={'translate(' + hexX(tile.q, tile.r) + ' ' + hexY(tile.r) + ')'}
             data-terrain={tile.terrain}
             data-feature={tile.feature}
+            data-hellfire={warned || undefined}
+            data-hellfire-center={impactCenter || undefined}
             className="group/tile outline-none [&[role=button]]:cursor-pointer"
             data-testid="hex-tile"
             role={interactive ? 'button' : 'img'}
@@ -239,6 +263,19 @@ export function Battlefield({
               <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
             )}
             {!occupant && tile.feature && <FeatureArt feature={tile.feature} />}
+            {warned && (
+              <g className="pointer-events-none" aria-hidden="true">
+                <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
+                {impactCenter && (
+                  <path
+                    d="m0-32 7 11H-7Z"
+                    fill="var(--hellfire-warning, #ffb27f)"
+                    stroke="var(--biome-panel)"
+                    strokeWidth="1.5"
+                  />
+                )}
+              </g>
+            )}
             {canMove && !occupant && (
               <g className="pointer-events-none">
                 <circle cy="20" r="7" fill="#213f30" fillOpacity=".8" />
@@ -283,41 +320,60 @@ export function Battlefield({
       {effect && (
         <g
           key={effectId}
-          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] motion-reduce:animate-none"
+          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
           data-kind={effect.kind}
           aria-hidden="true"
         >
-          {effect.kind !== 'escape' && effect.kind !== 'rally' && (
-            <line
-              x1={hexX(effect.from.q, effect.from.r)}
-              y1={hexY(effect.from.r)}
-              x2={hexX(effect.to.q, effect.to.r)}
-              y2={hexY(effect.to.r)}
-              pathLength="1"
-              className={
-                'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
-                (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
-              }
-            />
-          )}
-          {effect.kind === 'bomb' && (
-            <g
-              data-testid="bomb-effect"
-              transform={
-                'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
-              }
-            >
-              <circle
-                r="66"
-                className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box] motion-reduce:animate-none"
+          {effect.kind !== 'escape' &&
+            effect.kind !== 'rally' &&
+            effect.kind !== 'hellfire' && (
+              <line
+                x1={hexX(effect.from.q, effect.from.r)}
+                y1={hexY(effect.from.r)}
+                x2={hexX(effect.to.q, effect.to.r)}
+                y2={hexY(effect.to.r)}
+                pathLength="1"
+                className={
+                  'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
+                  (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
+                }
               />
-              <g transform="translate(-22 -30) scale(2)" className="text-[#ffe1a3]">
-                <circle cx="11" cy="15" r="7" className="fill-[#25252d]" />
-                <PawnIcon kind="bomber" />
-              </g>
-            </g>
-          )}
-          {effect.kind !== 'bomb' && !effect.impacts?.length && (
+            )}
+          {(effect.kind === 'bomb' || effect.kind === 'hellfire') &&
+            (effect.kind === 'hellfire' ? (effect.centers ?? [effect.to]) : [effect.to]).map(
+              (center) => (
+                <g
+                  key={key(center.q, center.r)}
+                  data-testid={effect.kind === 'hellfire' ? 'hellfire-effect' : 'bomb-effect'}
+                  transform={
+                    'translate(' + hexX(center.q, center.r) + ' ' + hexY(center.r) + ')'
+                  }
+                >
+                  <circle
+                    r="66"
+                    className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box] motion-reduce:animate-none"
+                  />
+                  {effect.kind === 'hellfire' ? (
+                    <g className="hellfire-flame motion-reduce:animate-none">
+                      <path
+                        d="M0-30C9-16 21-9 21 5a21 21 0 0 1-42 0c0-9 5-16 11-21-1 9 3 12 5 12C-1-9 3-18 0-30Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M1-9C8 0 11 4 11 9a11 11 0 0 1-22 0c0-6 7-10 12-18Z"
+                        fill="#ffe1a3"
+                      />
+                    </g>
+                  ) : (
+                    <g transform="translate(-22 -30) scale(2)" className="text-[#ffe1a3]">
+                      <circle cx="11" cy="15" r="7" className="fill-[#25252d]" />
+                      <PawnIcon kind="bomber" />
+                    </g>
+                  )}
+                </g>
+              ),
+            )}
+          {effect.kind !== 'bomb' && effect.kind !== 'hellfire' && !effect.impacts?.length && (
             <g
               transform={
                 'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
@@ -454,24 +510,46 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
         data-art="basalt"
         transform={'rotate(' + variant * 120 + ')'}
       >
-        <path d="m-23-7 14-11 15 5 12 12-15 5-15-3Z" fill="#75666b" opacity=".18" />
-        <path d="m-20 9 10-6 16 4 13 9-15 6-16-5Z" fill="#433b42" opacity=".18" />
+        <path
+          d="m-23-7 14-11 15 5 12 12-15 5-15-3Z"
+          fill="var(--basalt-light, #75666b)"
+          opacity=".18"
+        />
+        <path
+          d="m-20 9 10-6 16 4 13 9-15 6-16-5Z"
+          fill="var(--basalt-shadow, #433b42)"
+          opacity=".18"
+        />
         <path
           d="m-21-7 12 3 9-4 14 7M0-8l4-9"
           fill="none"
-          stroke="#40373e"
+          stroke="var(--basalt-crack, #40373e)"
           strokeWidth=".8"
           opacity=".4"
         />
         <path
           d="m-19-8 10 3M-7 14l8 2"
           fill="none"
-          stroke="#9a8388"
+          stroke="var(--basalt-edge, #9a8388)"
           strokeWidth=".7"
           opacity=".22"
         />
-        <ellipse cx="12" cy="10" rx="3.5" ry="1.8" fill="#6c5c62" opacity=".65" />
-        <ellipse cx="-12" cy="12" rx="1.5" ry=".8" fill="#a28b88" opacity=".25" />
+        <ellipse
+          cx="12"
+          cy="10"
+          rx="3.5"
+          ry="1.8"
+          fill="var(--basalt-stone, #6c5c62)"
+          opacity=".65"
+        />
+        <ellipse
+          cx="-12"
+          cy="12"
+          rx="1.5"
+          ry=".8"
+          fill="var(--basalt-speck, #a28b88)"
+          opacity=".25"
+        />
       </g>
     )
   if (terrain === 'palm')
@@ -536,12 +614,12 @@ function TerrainArt({ terrain, variant }: { terrain: Tile['terrain']; variant: n
   if (terrain === 'mountain')
     return (
       <g className="pointer-events-none">
-        <ellipse cy="15" rx="20" ry="5" fill="#263c2e" opacity=".25" />
-        <path d="m-23 15 13-23 13 23Z" fill="#8f9980" />
-        <path d="m-10-8 13 23h-13Z" fill="#576651" />
-        <path d="m-10 17 16-36 19 36Z" fill="#b2b69a" />
-        <path d="M6-19 25 17H6Z" fill="#7d8b70" />
-        <path d="m6-19-6 14 6-3 7 3Z" fill="#dedec0" />
+        <ellipse cy="15" rx="20" ry="5" fill="var(--mountain-shadow, #263c2e)" opacity=".25" />
+        <path d="m-23 15 13-23 13 23Z" fill="var(--mountain-back, #8f9980)" />
+        <path d="m-10-8 13 23h-13Z" fill="var(--mountain-back-shade, #576651)" />
+        <path d="m-10 17 16-36 19 36Z" fill="var(--mountain-front, #b2b69a)" />
+        <path d="M6-19 25 17H6Z" fill="var(--mountain-front-shade, #7d8b70)" />
+        <path d="m6-19-6 14 6-3 7 3Z" fill="var(--mountain-peak, #dedec0)" />
       </g>
     )
   if (terrain === 'forest')

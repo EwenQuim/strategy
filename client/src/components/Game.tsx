@@ -57,11 +57,13 @@ export function Game({
   })
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, campaignProgressSaved)
   const winnerLabel =
-    campaignLevel === CAMPAIGN_LEVELS.length && state.winner === 'player'
-      ? 'Campaign complete!'
-      : state.winner && (local || isOnline)
-        ? names[state.winner] + ' wins!'
-        : null
+    state.winner === 'draw'
+      ? 'Draw'
+      : campaignLevel === CAMPAIGN_LEVELS.length && state.winner === 'player'
+        ? 'Campaign complete!'
+        : state.winner && (local || isOnline)
+          ? names[state.winner] + ' wins!'
+          : null
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
   const hasSpecialTargets = !!pawn && specialTargets(state.pawns, pawn).length > 0
@@ -99,7 +101,7 @@ export function Game({
 
   return (
     <main
-      className="grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background)"
+      className="grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background) text-ink"
       data-biome={state.biome}
       style={BIOMES[state.biome].theme}
     >
@@ -143,6 +145,22 @@ export function Game({
               </span>
             </span>
           </Link>
+          {state.hellfire.length > 0 && !state.winner && (
+            <span
+              className="px-2 text-center text-[10px] leading-snug text-gold"
+              data-testid="hellfire-cue"
+              data-hellfire-round={state.round}
+              role="status"
+              aria-label={
+                'Round ' +
+                state.round +
+                '. Hellfire: hatched tiles take 1 unavoidable damage at round end. Warnings stay fixed for the full round.'
+              }
+            >
+              Hellfire / Round {state.round}
+              <span className="block text-[9px] text-muted">1 damage at round end</span>
+            </span>
+          )}
           <div className="flex gap-0">
             {(local || isOnline) && pawn && !state.winner && (
               <span
@@ -211,6 +229,7 @@ export function Game({
             labels={labels}
             tiles={state.tiles}
             pawns={state.pawns}
+            hellfire={state.hellfire}
             active={state.winner ? undefined : pawn}
             reach={reach}
             targets={targets}
@@ -229,12 +248,12 @@ export function Game({
         />
         {state.winner && (
           <div
-            className="absolute inset-0 grid place-items-center bg-[#14281eab] p-4 backdrop-blur-[5px]"
+            className="absolute inset-0 grid place-items-center bg-[var(--result-scrim,#14281eab)] p-4 backdrop-blur-[5px]"
             data-testid="battle-result"
             role="status"
           >
             <div
-              className="max-w-[390px] rounded-2xl border border-[#dcc48a59] bg-[#20362bee] p-7 text-center shadow-[0_20px_60px_#07180f80] [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-[normal] [&_p]:text-[12px] [&_p]:leading-[1.7] [&_p]:text-[#bfccb4] [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]"
+              className="max-w-[390px] rounded-2xl border border-[#dcc48a59] bg-[var(--result-panel,#20362bee)] p-7 text-center shadow-[0_20px_60px_#07180f80] [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-[normal] [&_p]:text-[12px] [&_p]:leading-[1.7] [&_p]:text-[#bfccb4] [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]"
               data-testid="result-card"
             >
               <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-[#dcc48a40] text-gold [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
@@ -252,11 +271,14 @@ export function Game({
                     : 'A crown has fallen.')}
               </h1>
               <p>
-                {local || isOnline
-                  ? labels[state.winner === 'player' ? 'enemy' : 'player'] + ' king has fallen.'
-                  : state.winner === 'player'
-                    ? 'Their king has fallen. Your guard stands victorious.'
-                    : 'Your king has fallen. Regroup, rethink, and return.'}
+                {state.winner === 'draw'
+                  ? 'Both kings have fallen. Neither army wins.'
+                  : local || isOnline
+                    ? labels[state.winner === 'player' ? 'enemy' : 'player'] +
+                      ' king has fallen.'
+                    : state.winner === 'player'
+                      ? 'Their king has fallen. Your guard stands victorious.'
+                      : 'Your king has fallen. Regroup, rethink, and return.'}
               </p>
               {campaignLevel ? (
                 <div
@@ -513,7 +535,7 @@ export function Game({
 
       <dialog
         ref={dialog}
-        className="fixed inset-0 m-auto max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] rounded-2xl border border-[#d1cf9b40] bg-[#20362b] p-0 text-ink shadow-[0_25px_90px_#07180f99] backdrop:bg-[#091910b8] backdrop:backdrop-blur-[7px]"
+        className="fixed inset-0 m-auto max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] rounded-2xl border border-[#d1cf9b40] bg-[var(--biome-panel,#20362b)] p-0 text-ink shadow-[0_25px_90px_#07180f99] backdrop:bg-[#091910b8] backdrop:backdrop-blur-[7px]"
         aria-labelledby="dialog-title"
         onClick={(event) => {
           if (event.target === event.currentTarget) dialog.current?.close()
@@ -597,6 +619,15 @@ export function Game({
                   cannot be escaped or redirected by Protect and can be lethal. Jump crosses
                   lava safely but landing on it deals damage. Forests and palms are decorative.
                 </p>
+                {state.biome === 'hell' && (
+                  <p>
+                    Hellfire warnings stay fixed for the full round. At round end, each marked
+                    center and its six neighbors take 1 damage, ignoring Escape and Protect.
+                    Hatching shows the whole blast area; a triangle marks each impact center.
+                    Move clear before the last unit finishes. If both kings fall, the battle is
+                    a draw.
+                  </p>
+                )}
               </div>
             </section>
             {classes.map((unit) => (

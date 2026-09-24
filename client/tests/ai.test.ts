@@ -24,7 +24,15 @@ function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
   const tiles: GameState['tiles'] = new Map()
   for (let q = -6; q <= 6; q++)
     for (let r = -6; r <= 6; r++) tiles.set(q + ',' + r, { q, r, terrain: 'plain' })
-  return { ...initialState('ai-test'), pawns, tiles, order, active: 0 }
+  return {
+    ...initialState('ai-test'),
+    biome: 'verdant',
+    hellfire: [],
+    pawns,
+    tiles,
+    order,
+    active: 0,
+  }
 }
 
 function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState {

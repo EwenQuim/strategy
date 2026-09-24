@@ -37,7 +37,7 @@ test('All twenty distinct campaign encounters are winnable against normal AI', (
       initialState(level.seed, level.setup),
     )
   }
-  assert.deepEqual(biomes, new Set(['verdant', 'mountains', 'desert', 'volcano']))
+  assert.deepEqual(biomes, new Set(['verdant', 'mountains', 'desert', 'volcano', 'hell']))
 })
 
 test('The introductory bowman can finish the battle if the player stays idle', () => {

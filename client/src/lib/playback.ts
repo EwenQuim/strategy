@@ -35,7 +35,10 @@ export function playbackReducer(
     return {
       ...result,
       frames: result.frames.filter(
-        (frame) => frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length,
+        (frame) =>
+          frame.effect?.kind === 'bomb' ||
+          frame.effect?.kind === 'hellfire' ||
+          frame.effect?.impacts?.length,
       ),
     }
   }

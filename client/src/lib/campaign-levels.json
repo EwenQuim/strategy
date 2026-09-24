@@ -1257,23 +1257,23 @@
   },
   {
     "id": 17,
-    "name": "Forked Gate",
+    "name": "Hell's Gate",
     "seed": "campaign-v1-17",
     "setup": {
-      "biome": "mountains",
+      "biome": "hell",
       "map": [
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        "^^W^^.^^",
-        "^^.^^H^^",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........"
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "^^Wb^bb^",
+        "^^bb^Hb^",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
       ],
       "player": [
         {
@@ -1338,14 +1338,15 @@
           "col": 4,
           "row": 2
         }
-      ]
+      ],
+      "hellfireCount": 1
     },
     "intro": {
-      "roleplay": "One gate offers a watchtower, the other a healing spring. Choose a ranged duel or a slower supported breach. Your ninja can switch fronts without queuing through either gate.",
+      "roleplay": "Beyond the forked wall, Hell marks the battlefield. One gate offers a watchtower, the other a healing spring. A single Hellfire warning alternates between the armies each round. Leave its hatched area before the round ends; your ninja can switch gates without queuing.",
       "newElements": [
         {
-          "name": "Two gates",
-          "description": "Both openings connect the armies. Splitting your force contests both rewards, but each half must survive its own defender. The wall still does not stop spells."
+          "name": "Hellfire",
+          "description": "The triangle marks the impact center; hatching covers it and its six neighbors. Warnings stay fixed for a full round, then every unit in the blast takes 1 damage at round end, ignoring Escape and Protect. This battle has one warning, alternating armies each round. If both kings fall, the battle is a draw."
         }
       ]
     }
@@ -1355,7 +1356,7 @@
     "name": "Caldera Run",
     "seed": "campaign-v1-18",
     "setup": {
-      "biome": "volcano",
+      "biome": "hell",
       "map": [
         "bbbbbbbb",
         "bbbbbbbb",
@@ -1441,11 +1442,11 @@
       ]
     },
     "intro": {
-      "roleplay": "Assassins hunt both safe channels through the caldera. The tower commands one route; the rune can launch a counterattack from the other. Bombs make crowded landings dangerous for both armies.",
+      "roleplay": "Assassins hunt both safe channels through the caldera, while two Hellfire warnings mark the coming round-end blasts. The tower commands one route; the rune can launch a counterattack from the other. Neither basalt nor a shield makes a marked landing safe.",
       "newElements": [
         {
-          "name": "Safe landing",
-          "description": "Jump ignores crossed lava, not the landing tile. Keep a safe retreat square and do not let both assassins approach your crown from different sides."
+          "name": "Fire above and below",
+          "description": "Two Hellfire centers stay fixed for the full round. Each center and its six neighbors take 1 unavoidable damage at round end. Lava still hurts on entry: Jump avoids crossed lava, not a lava landing or Hellfire. Keep your ninja outside the hatched areas."
         }
       ]
     }
@@ -1455,20 +1456,20 @@
     "name": "Royal Guard",
     "seed": "campaign-v1-19",
     "setup": {
-      "biome": "verdant",
+      "biome": "hell",
       "map": [
-        "........",
-        "ff....ff",
-        "........",
-        "........",
-        ".~~..~~.",
-        ".~~..~~.",
-        "....H...",
-        ".~~..~~.",
-        ".~~..~~.",
-        "........",
-        "ff....ff",
-        "........"
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "b^^bb^^b",
+        "b^^bb^^b",
+        "bbbbHbbb",
+        "b^^bb^^b",
+        "b^^bb^^b",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
       ],
       "player": [
         {
@@ -1546,11 +1547,11 @@
       ]
     },
     "intro": {
-      "roleplay": "Two guardians shield the pretender from behind his front line. Use area damage to strip protection, then send a finisher through. The spring can sustain your siege, but it is not safe from bombs.",
+      "roleplay": "Two guardians shield the pretender between black mountain walls. Two Hellfire warnings give you a full round to reposition before the blasts. Use area damage to strip protection, then send a finisher through. The spring can sustain your siege, but cannot shelter you from the sky.",
       "newElements": [
         {
-          "name": "Break the guard",
-          "description": "Protection reaches two tiles, so an empty space does not mean an exposed king. Force the guardians to take hits or separate from their charge before committing your ninja."
+          "name": "Beyond the shield",
+          "description": "Each Hellfire center and its six neighbors take 1 damage at round end. Warnings do not move during the round, and neither Escape nor Protect prevents the damage. Break the guard without ending the round in a hatched area."
         }
       ]
     }
@@ -1560,20 +1561,20 @@
     "name": "Last Crown",
     "seed": "campaign-v1-20",
     "setup": {
-      "biome": "mountains",
+      "biome": "hell",
       "map": [
-        "........",
-        "........",
-        "..^..^..",
-        "..^..^..",
-        "..^..^..",
-        "..R..^..",
-        "..^..H..",
-        "..^..^..",
-        "..^..^..",
-        "........",
-        "........",
-        "........"
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bb^bb^bb",
+        "bb^bb^bb",
+        "bb^bb^bb",
+        "bbRbb^bb",
+        "bb^bbHbb",
+        "bb^bb^bb",
+        "bb^bb^bb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
       ],
       "player": [
         {
@@ -1651,11 +1652,11 @@
       ]
     },
     "intro": {
-      "roleplay": "Every discipline stands before the last crown. A rune opens the aggressive left route; a spring supports the right. Choose where to break through, keep your firing lines clear, and never let your own powder decide the succession.",
+      "roleplay": "Every discipline stands before the last crown under a crimson sky. A rune opens the aggressive left route; a spring supports the right. Two fixed Hellfire warnings give both armies a full round to move clear before the sky strikes. Win the flank without sacrificing your crown.",
       "newElements": [
         {
           "name": "Final command",
-          "description": "Both armies field all seven classes. Win a flank, preserve your king, and combine shields, ranged attacks, jumps, and carefully placed blasts."
+          "description": "Both armies field all seven classes. At each round end, the two marked centers and their six neighbors take 1 damage, ignoring Escape and Protect. Plan every move around the full-round warnings. If Hellfire takes both kings, neither side wins: retry the level."
         }
       ]
     }

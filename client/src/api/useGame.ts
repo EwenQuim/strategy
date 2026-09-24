@@ -107,7 +107,9 @@ export function useGame({
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timer = window.setTimeout(
       () => dispatch({ type: 'playbackNext' }),
-      frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length
+      frame.effect?.kind === 'bomb' ||
+        frame.effect?.kind === 'hellfire' ||
+        frame.effect?.impacts?.length
         ? 700
         : reducedMotion
           ? 0

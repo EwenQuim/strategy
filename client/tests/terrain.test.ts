@@ -37,6 +37,8 @@ function battle(pawn: Pawn): GameState {
     for (let r = 0; r < 12; r++) tiles.set(key(q, r), { q, r, terrain: 'plain' })
   return {
     ...initialState('terrain-test'),
+    biome: 'verdant',
+    hellfire: [],
     tiles,
     pawns: [pawn, new King(2, -3, 0, pawn.side), new King(3, 5, 11, other)],
     order: [1, 2, 3],
