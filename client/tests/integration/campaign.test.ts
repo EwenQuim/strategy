@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CAMPAIGN_LEVELS } from '../../src/lib/campaign.ts'
 import { initialState as coreState } from '../../src/lib/engine/index.ts'
-import { initialState, transition } from '../../src/lib/bot.ts'
+import { initialState, transition } from '../../src/lib/engine/bot.ts'
 import { campaignActions } from '../campaign-actions.ts'
 
 test('All twenty distinct campaign encounters are winnable against normal AI', () => {

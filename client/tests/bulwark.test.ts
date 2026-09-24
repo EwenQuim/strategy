@@ -21,8 +21,8 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/bot.ts'
-import { nearestTarget } from '../src/lib/strategies.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { nearestTarget } from '../src/lib/engine/bot.ts'
 
 function battle(side: Side = 'player'): GameState {
   const other = side === 'player' ? 'enemy' : 'player'

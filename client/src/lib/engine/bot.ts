@@ -1,11 +1,7 @@
-import {
-  activePawn,
-  initialState as createState,
-  transition as applyAction,
-} from './engine/engine.ts'
-import { canAttack, specialTargets, protectorFor } from './engine/combat.ts'
-import { chargeDestinations, jumpDestinations } from './engine/pawns/index.ts'
-import { distFrom, key, neighbors, passable } from './engine/hex.ts'
+import { activePawn, initialState as createState, transition as applyAction } from './engine.ts'
+import { canAttack, specialTargets, protectorFor } from './combat.ts'
+import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
+import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import {
   isImpactFrame,
   type Action,
@@ -13,18 +9,40 @@ import {
   type BattleSetup,
   type GameState,
   type Transition,
-} from './engine/types.ts'
-import { type BotStrategy } from './strategies.ts'
-import {
-  BOT_LEVELS,
-  chooseTacticalActions,
-  type BotDifficulty,
-  type BotOptions,
-} from './engine/ai.ts'
+} from './types.ts'
+import { BOT_LEVELS, chooseTacticalActions, type BotDifficulty, type BotOptions } from './ai.ts'
 
-export { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
+export interface BotStrategy {
+  chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
+}
+
+export const nearestTarget: BotStrategy = {
+  chooseTarget: (attacker, targets) =>
+    targets.toSorted((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
+}
+
+export const huntTheKing: BotStrategy = {
+  chooseTarget: (attacker, targets) =>
+    nearestTarget.chooseTarget(
+      attacker,
+      targets.filter((p) => p.kind === 'king'),
+    ) ?? nearestTarget.chooseTarget(attacker, targets),
+}
 
 type BotController = BotStrategy | BotDifficulty | BotOptions
+
+const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
+  !!options &&
+  [1, 2, 3].includes(options.depth) &&
+  Number.isInteger(options.beamWidth) &&
+  options.beamWidth >= 1 &&
+  options.beamWidth <= 32 &&
+  Number.isInteger(options.samples) &&
+  options.samples >= 1 &&
+  options.samples <= 16 &&
+  Number.isFinite(options.caution) &&
+  options.caution >= 0 &&
+  options.caution <= 2
 
 export function chooseBotActions(
   state: GameState,
@@ -32,37 +50,36 @@ export function chooseBotActions(
 ): Action[] {
   if (typeof strategy === 'string' || !('chooseTarget' in strategy)) {
     const options = typeof strategy === 'string' ? BOT_LEVELS[strategy] : strategy
-    if (
-      !options ||
-      ![1, 2, 3].includes(options.depth) ||
-      !Number.isInteger(options.beamWidth) ||
-      options.beamWidth < 1 ||
-      options.beamWidth > 32 ||
-      !Number.isInteger(options.samples) ||
-      options.samples < 1 ||
-      options.samples > 16 ||
-      !Number.isFinite(options.caution) ||
-      options.caution < 0 ||
-      options.caution > 2
-    ) {
-      throw new RangeError('Invalid bot options')
-    }
+    if (!validBotOptions(options)) throw new RangeError('Invalid bot options')
     return chooseTacticalActions(state, options)
   }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
   if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-  const { pawns, tiles } = state
-  const foes = pawns.filter((p) => p.side !== pawn.side)
-  const specials = specialTargets(pawns, pawn)
+  const foes = state.pawns.filter((p) => p.side !== pawn.side)
+  const specials = specialTargets(state.pawns, pawn)
+  return (
+    ruleSpecial(state, pawn, foes, specials, strategy) ??
+    ruleAttack(state, pawn, foes, strategy) ??
+    ruleApproach(state, pawn, foes)
+  )
+}
+
+function ruleSpecial(
+  state: GameState,
+  pawn: Pawn,
+  foes: Pawn[],
+  specials: Pawn[],
+  strategy: BotStrategy,
+): Action[] | null {
   if (pawn.kind === 'king' && specials.length) return [{ type: 'act', action: 'special' }]
   if (pawn.kind === 'bulwark') {
     const ally = specials
       .filter(
         (p) =>
-          !protectorFor(pawns, p) &&
-          foes.some((foe) => canAttack(foe, p, tiles.get(key(foe.q, foe.r)))),
+          !protectorFor(state.pawns, p) &&
+          foes.some((foe) => canAttack(foe, p, state.tiles.get(key(foe.q, foe.r)))),
       )
       .sort((a, b) => Number(b.kind === 'king') - Number(a.kind === 'king') || a.hp - b.hp)[0]
     if (ally)
@@ -76,7 +93,7 @@ export function chooseBotActions(
       .candidates(pawn, state)
       .map((actions) => {
         const aim = actions.find((action) => action.type === 'specialAt')!
-        const targets = pawn.special.areaTargets!(pawns, aim, pawn)
+        const targets = pawn.special.areaTargets!(state.pawns, aim, pawn)
         const score = targets.reduce(
           (total, target) => total + (target.side === pawn.side ? -1 : 1),
           0,
@@ -94,7 +111,7 @@ export function chooseBotActions(
     if (
       area &&
       (area.score > 1 ||
-        !foes.some((foe) => canAttack(pawn, foe, tiles.get(key(pawn.q, pawn.r)))))
+        !foes.some((foe) => canAttack(pawn, foe, state.tiles.get(key(pawn.q, pawn.r)))))
     )
       return area.actions
   }
@@ -107,10 +124,18 @@ export function chooseBotActions(
       { type: 'act', action: 'special' },
       { type: 'specialAt', q: special.q, r: special.r },
     ]
+  return null
+}
 
+function ruleAttack(
+  state: GameState,
+  pawn: Pawn,
+  foes: Pawn[],
+  strategy: BotStrategy,
+): Action[] | null {
   const target = strategy.chooseTarget(
     pawn,
-    foes.filter((p) => canAttack(pawn, p, tiles.get(key(pawn.q, pawn.r)))),
+    foes.filter((p) => canAttack(pawn, p, state.tiles.get(key(pawn.q, pawn.r)))),
   )
   if (target)
     return [
@@ -118,31 +143,34 @@ export function chooseBotActions(
       { type: 'attackAt', q: target.q, r: target.r },
     ]
 
-  const chargeTiles = [...chargeDestinations(tiles, pawns, pawn).keys()].map((k) =>
-    tiles.get(k)!,
+  const chargeTiles = [...chargeDestinations(state.tiles, state.pawns, pawn).keys()].map((k) =>
+    state.tiles.get(k)!,
   )
   const chargeTarget = strategy.chooseTarget(
     pawn,
     foes.filter((p) => chargeTiles.some((tile) => canAttack(pawn, p, tile))),
   )
-  if (chargeTarget) {
-    const destination = chargeTiles.find((tile) => canAttack(pawn, chargeTarget, tile))!
-    return [
-      { type: 'act', action: 'special' },
-      { type: 'specialAt', q: destination.q, r: destination.r },
-      { type: 'specialAt', q: chargeTarget.q, r: chargeTarget.r },
-    ]
-  }
+  if (!chargeTarget) return null
+  const destination = chargeTiles.find((tile) => canAttack(pawn, chargeTarget, tile))!
+  return [
+    { type: 'act', action: 'special' },
+    { type: 'specialAt', q: destination.q, r: destination.r },
+    { type: 'specialAt', q: chargeTarget.q, r: chargeTarget.r },
+  ]
+}
 
-  const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
-  const firingTiles = [...tiles.values()].filter(
+function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
+  const occupied = new Set(
+    state.pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)),
+  )
+  const firingTiles = [...state.tiles.values()].filter(
     (tile) =>
       passable(tile) &&
       !occupied.has(key(tile.q, tile.r)) &&
       foes.some((foe) => canAttack(pawn, foe, tile)),
   )
   const dist = distFrom(
-    new Map([...tiles].filter(([position]) => !occupied.has(position))),
+    new Map([...state.tiles].filter(([position]) => !occupied.has(position))),
     firingTiles,
   )
   const here = dist.get(key(pawn.q, pawn.r)) ?? Infinity
@@ -151,10 +179,10 @@ export function chooseBotActions(
       (n) =>
         !occupied.has(key(n.q, n.r)) &&
         (dist.get(key(n.q, n.r)) ?? Infinity) < here &&
-        (pawn.hp > 1 || tiles.get(key(n.q, n.r))?.terrain !== 'lava'),
+        (pawn.hp > 1 || state.tiles.get(key(n.q, n.r))?.terrain !== 'lava'),
     )
     .sort((a, b) => dist.get(key(a.q, a.r))! - dist.get(key(b.q, b.r))!)[0]
-  const jump = jumpDestinations(tiles, pawns, pawn)
+  const jump = jumpDestinations(state.tiles, state.pawns, pawn)
     .filter((tile) => tile.terrain !== 'lava')
     .sort(
       (a, b) => (dist.get(key(a.q, a.r)) ?? Infinity) - (dist.get(key(b.q, b.r)) ?? Infinity),

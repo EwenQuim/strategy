@@ -19,8 +19,8 @@ import {
   type Pawn,
   type Side,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/bot.ts'
-import { nearestTarget } from '../src/lib/strategies.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 
 function battle(pawn: Pawn): GameState {

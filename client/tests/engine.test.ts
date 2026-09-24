@@ -24,8 +24,8 @@ import {
   type Tile,
   reducer as coreReducer,
 } from '../src/lib/engine/index.ts'
-import { createBotGame } from '../src/lib/bot.ts'
-import { huntTheKing, nearestTarget } from '../src/lib/strategies.ts'
+import { createBotGame } from '../src/lib/engine/bot.ts'
+import { huntTheKing, nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 

@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import { possessiveArmyLabels, type GameMode, type PlayerNames } from '../lib/game-mode'
-import type { BotDifficulty } from '../lib/bot'
+import type { BotDifficulty } from '../lib/engine/ai'
 import { Icon } from './Icon'
 import { buttonClassName } from './styles'
 

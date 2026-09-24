@@ -18,7 +18,7 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { createBotGame } from '../src/lib/bot.ts'
+import { createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import { seedState } from '../src/lib/engine/random.ts'

@@ -26,8 +26,8 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
-import { nearestTarget } from '../src/lib/strategies.ts'
+import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 
 function battle(pawn: Pawn): GameState {

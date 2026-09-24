@@ -2,7 +2,7 @@ import { buttonClassName, iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
-import { BOT_LEVELS, type BotDifficulty } from '../lib/bot'
+import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
 import {
   BIOMES,
   MAP_WIDTH,

@@ -1,4 +1,6 @@
 import levels from './campaign-levels.json' with { type: 'json' }
+import { mapFromRows } from './engine/hex.ts'
+import { validateSetup } from './engine/setup.ts'
 import type { FixedBattleSetup } from './engine/index.ts'
 
 export interface CampaignLevel {
@@ -11,6 +13,12 @@ export interface CampaignLevel {
     readonly newElements: readonly { name: string; description: string }[]
   }
 }
+
+levels.forEach((level, index) => {
+  if (level.id !== index + 1 || !level.name || !level.seed)
+    throw new Error('Campaign level ' + (index + 1) + ' is malformed')
+  validateSetup(level.setup as FixedBattleSetup, mapFromRows(level.setup.map))
+})
 
 export const CAMPAIGN_LEVELS = levels as CampaignLevel[]
 
