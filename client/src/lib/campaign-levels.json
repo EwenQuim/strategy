@@ -254,10 +254,10 @@
   },
   {
     "id": 5,
-    "name": "Vale Keep",
+    "name": "Highland Keep",
     "seed": "campaign-v1-5",
     "setup": {
-      "biome": "verdant",
+      "biome": "mountains",
       "map": [
         "........",
         "........",
@@ -553,103 +553,23 @@
   },
   {
     "id": 9,
-    "name": "Ember Crossing",
-    "seed": "campaign-v1-9",
-    "setup": {
-      "biome": "volcano",
-      "map": [
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bllbbbbb",
-        "bllbbblb",
-        "bbbbbllb",
-        "bbllbllb",
-        "bbllbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb"
-      ],
-      "player": [
-        {
-          "kind": "king",
-          "col": 2,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        }
-      ],
-      "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "bomber",
-          "col": 2,
-          "row": 2
-        }
-      ]
-    },
-    "intro": {
-      "roleplay": "The quarry opens onto a burning caldera. Both sides carry powder now. Use the safe channels instead of crowding the shortest crossing: enemy bombs punish a packed bridgehead.",
-      "newElements": [
-        {
-          "name": "Lava",
-          "description": "Each lava tile entered costs 1 health, ignoring Escape and Protect. It also hurts during Charge. Basalt is safe; there is always a route around the pools."
-        }
-      ]
-    }
-  },
-  {
-    "id": 10,
     "name": "Split Battery",
     "seed": "campaign-v1-10",
     "setup": {
-      "biome": "mountains",
+      "biome": "desert",
       "map": [
-        "........",
-        "........",
-        "...^^...",
-        "...^^...",
-        "...^^...",
-        "........",
-        "........",
-        "..^^....",
-        "..^^....",
-        "........",
-        "........",
-        "........"
+        "ssssssss",
+        "ssssssss",
+        "sss~~sss",
+        "sss~~sss",
+        "sss~~sss",
+        "ssssssss",
+        "ssssssss",
+        "ss~~ssss",
+        "ss~~ssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
       ],
       "player": [
         {
@@ -707,17 +627,17 @@
       ]
     },
     "intro": {
-      "roleplay": "Archers hold one bank of the ridge, a magician the other. Commit to one side or divide your force. The crossing in the middle lets a bomber punish defenders who rotate together.",
+      "roleplay": "Archers hold one bank of the oasis, a magician the other. Commit to one side or divide your force. The crossing in the middle lets a bomber punish defenders who rotate together.",
       "newElements": [
         {
           "name": "Split the battery",
-          "description": "Mountains divide movement, not fire. Break one firing position before advancing your king; piling every ally behind the same guardian invites trouble."
+          "description": "Lakes divide movement, not fire. Break one firing position before advancing your king; piling every ally behind the same guardian invites trouble."
         }
       ]
     }
   },
   {
-    "id": 11,
+    "id": 10,
     "name": "Dune Patrol",
     "seed": "campaign-v1-11",
     "setup": {
@@ -801,7 +721,7 @@
     }
   },
   {
-    "id": 12,
+    "id": 11,
     "name": "Twin Daggers",
     "seed": "campaign-v1-12",
     "setup": {
@@ -886,7 +806,7 @@
     }
   },
   {
-    "id": 13,
+    "id": 12,
     "name": "Iron Caravan",
     "seed": "campaign-v1-13",
     "setup": {
@@ -976,24 +896,104 @@
     }
   },
   {
+    "id": 13,
+    "name": "Ember Crossing",
+    "seed": "campaign-v1-9",
+    "setup": {
+      "biome": "volcano",
+      "map": [
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bllbbbbb",
+        "bllbbblb",
+        "bbbbbllb",
+        "bbllbllb",
+        "bbllbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 10
+        },
+        {
+          "kind": "bomber",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "bomber",
+          "col": 2,
+          "row": 2
+        }
+      ]
+    },
+    "intro": {
+      "roleplay": "Beyond the caravan road, the sand gives way to a burning caldera. Both sides carry powder now. Use the safe channels instead of crowding the shortest crossing: enemy bombs punish a packed bridgehead.",
+      "newElements": [
+        {
+          "name": "Lava",
+          "description": "Each lava tile entered costs 1 health, ignoring Escape and Protect. It also hurts during Charge. Basalt is safe; there is always a route around the pools."
+        }
+      ]
+    }
+  },
+  {
     "id": 14,
-    "name": "Oasis Siege",
+    "name": "Ember Spring",
     "seed": "campaign-v1-14",
     "setup": {
-      "biome": "desert",
+      "biome": "volcano",
       "map": [
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "s~~ssp~s",
-        "s~~ss~~s",
-        "ssssH~~s",
-        "ssssssps",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss"
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bllbbblb",
+        "bllbbllb",
+        "bbbbHllb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
       ],
       "player": [
         {
@@ -1170,20 +1170,20 @@
     "name": "Wizard Curtain",
     "seed": "campaign-v1-16",
     "setup": {
-      "biome": "verdant",
+      "biome": "volcano",
       "map": [
-        "........",
-        "f......f",
-        ".~....~.",
-        ".~....~.",
-        "........",
-        "..f..f..",
-        "..f..f..",
-        "........",
-        ".~....~.",
-        ".~....~.",
-        "f......f",
-        "........"
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "blbbbblb",
+        "blbbbblb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "blbbbblb",
+        "blbbbblb",
+        "bbbbbbbb",
+        "bbbbbbbb"
       ],
       "player": [
         {
@@ -1246,7 +1246,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Four wizards form a living barrier across the valley. Your magician and guardian have reached its left flank; your ninja waits on the right. Turn the firing line against itself before it turns toward your crown.",
+      "roleplay": "Four wizards form a living barrier across the caldera. Your magician and guardian have reached its left flank; your ninja waits on the right. Turn the firing line against itself before it turns toward your crown.",
       "newElements": [
         {
           "name": "Enfilade",

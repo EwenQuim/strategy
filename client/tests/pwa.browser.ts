@@ -817,7 +817,7 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
     await context.setOffline(true)
-    for (const id of [5, 9, 14, 15, 18]) {
+    for (const id of [5, 13, 14, 15, 18]) {
       const level = CAMPAIGN_LEVELS[id - 1]
       await page.goto(origin + base + 'campaign/' + id)
       await page.getByRole('button', { name: 'Go !', exact: true }).click()

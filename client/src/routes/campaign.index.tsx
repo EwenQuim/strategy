@@ -3,7 +3,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSyncExternalStore } from 'react'
 import { Icon } from '../components/Icon'
 import { CAMPAIGN_LEVELS, isLevelUnlocked } from '../lib/campaign'
+import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
+
+const levelCardClassName =
+  'flex size-full flex-col items-center justify-center gap-[3px] rounded-lg border border-line bg-(--biome-background) bg-[radial-gradient(ellipse_at_50%_75%,var(--biome-glow),transparent_70%)] p-[5px] text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere disabled:opacity-55 data-[status=completed]:border-[#89bba477] data-[status=ready]:border-gold [&:not(:disabled):hover]:brightness-125'
 
 export const Route = createFileRoute('/campaign/')({
   component: function Campaign() {
@@ -51,8 +55,9 @@ export const Route = createFileRoute('/campaign/')({
                   <Link
                     to="/campaign/$level"
                     params={{ level: String(level.id) }}
-                    className="flex size-full flex-col items-center justify-center gap-[3px] rounded-lg border border-line bg-[#ffffff04] p-[5px] text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=ready]:border-gold data-[status=ready]:bg-[#dcc48a16] data-[status=completed]:border-[#89bba477] data-[status=completed]:bg-[#89bba412] [&:not(:disabled):hover]:bg-[#ffffff12]"
+                    className={levelCardClassName}
                     data-testid="campaign-level"
+                    style={BIOMES[level.setup.biome].theme}
                     data-status={cleared ? 'completed' : 'ready'}
                     aria-label={'Level ' + level.id + ': ' + level.name + ', ' + status}
                     preload={false}
@@ -61,8 +66,9 @@ export const Route = createFileRoute('/campaign/')({
                   </Link>
                 ) : (
                   <button
-                    className="flex size-full flex-col items-center justify-center gap-[3px] rounded-lg border border-line bg-[#ffffff04] p-[5px] text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=ready]:border-gold data-[status=ready]:bg-[#dcc48a16] data-[status=completed]:border-[#89bba477] data-[status=completed]:bg-[#89bba412] [&:not(:disabled):hover]:bg-[#ffffff12]"
+                    className={levelCardClassName}
                     data-testid="campaign-level"
+                    style={BIOMES[level.setup.biome].theme}
                     disabled
                     aria-label={'Level ' + level.id + ': ' + level.name + ', Locked'}
                   >

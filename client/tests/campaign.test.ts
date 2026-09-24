@@ -64,6 +64,15 @@ test('The last four encounters use Hell, introducing one warning before two', ()
   )
 })
 
+test('The campaign crosses the Vale, Mountains, Desert, Volcano then Hell, four levels each', () => {
+  assert.deepEqual(
+    CAMPAIGN_LEVELS.map((level) => level.setup.biome),
+    (['verdant', 'mountains', 'desert', 'volcano', 'hell'] as const).flatMap((biome) =>
+      Array<string>(4).fill(biome),
+    ),
+  )
+})
+
 test('Authored guardians cover their partners, including the wizard-flank deployment', () => {
   for (const [id, side, kind] of [
     [7, 'player', 'king'],
@@ -81,11 +90,6 @@ test('Authored guardians cover their partners, including the wizard-flank deploy
 })
 
 test('All encounters have safe routes and later levels combine previously introduced features', () => {
-  const volcanic = CAMPAIGN_LEVELS.filter((level) => level.setup.biome === 'volcano')
-  assert.deepEqual(
-    volcanic.map((level) => level.id),
-    [9, 15],
-  )
   const features: Record<TileFeature, number[]> = { watchtower: [], spring: [], rune: [] }
   for (const level of CAMPAIGN_LEVELS) {
     const state = coreState(level.seed, level.setup)
@@ -150,7 +154,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     magician: 4,
     bulwark: 7,
     bomber: 8,
-    ninja: 11,
+    ninja: 10,
   })
   assert.equal(CAMPAIGN_LEVELS[0].setup.player.length, 2)
   assert.equal(CAMPAIGN_LEVELS[0].setup.enemy.length, 1)
@@ -159,7 +163,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     assert.ok(level.intro.newElements.length <= 2)
   }
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.setup.map.join(''))).size, 20)
-  assert.ok(CAMPAIGN_LEVELS[10].setup.map.every((row) => row === 'ssssssss'))
+  assert.ok(CAMPAIGN_LEVELS[9].setup.map.every((row) => row === 'ssssssss'))
   for (const side of ['player', 'enemy'] as const)
     assert.deepEqual(
       new Set(CAMPAIGN_LEVELS[19].setup[side].map((pawn) => pawn.kind)),
@@ -170,7 +174,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
 test('Powder Lesson and Iron Caravan offer useful blasts without requiring friendly fire', () => {
   for (const [id, minimumHits] of [
     [8, 2],
-    [13, 3],
+    [12, 3],
   ] as const) {
     const level = CAMPAIGN_LEVELS[id - 1]
     const state = coreState(level.seed, level.setup)
