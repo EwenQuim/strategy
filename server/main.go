@@ -2,10 +2,13 @@ package main
 
 import (
 	"cmp"
+	"compress/gzip"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-fuego/fuego"
@@ -61,7 +64,10 @@ func newService(dbPath string) (*service.Service, error) {
 	return service.New(store), nil
 }
 
+const hashedAssetCache = "public, max-age=2592000, immutable"
+
 // spa serves static files from dir, falling back to index.html for client-side routes.
+// Hashed build assets get a month of immutable caching and gzip compression.
 func spa(dir string) http.Handler {
 	files := http.FileServer(http.Dir(dir))
 	index := filepath.Join(dir, "index.html")
@@ -71,6 +77,36 @@ func spa(dir string) http.Handler {
 			http.ServeFile(w, r, index)
 			return
 		}
-		files.ServeHTTP(w, r)
+		if !strings.HasPrefix(strings.TrimPrefix(r.URL.Path, "/"), "assets/") {
+			files.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", hashedAssetCache)
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			files.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Add("Vary", "Accept-Encoding")
+		if contentType := mime.TypeByExtension(filepath.Ext(path)); contentType != "" {
+			w.Header().Set("Content-Type", contentType)
+		}
+		gz := gzip.NewWriter(w)
+		defer func() { _ = gz.Close() }()
+		files.ServeHTTP(gzipResponseWriter{w, gz}, r)
 	})
+}
+
+type gzipResponseWriter struct {
+	http.ResponseWriter
+	gz *gzip.Writer
+}
+
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.gz.Write(b)
+}
+
+func (w gzipResponseWriter) WriteHeader(status int) {
+	w.ResponseWriter.Header().Del("Content-Length")
+	w.ResponseWriter.WriteHeader(status)
 }
