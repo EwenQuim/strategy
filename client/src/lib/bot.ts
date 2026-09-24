@@ -6,7 +6,14 @@ import {
 import { canAttack, specialTargets, protectorFor } from './engine/combat.ts'
 import { chargeDestinations, jumpDestinations } from './engine/pawns/index.ts'
 import { distFrom, key, neighbors, passable } from './engine/hex.ts'
-import type { Action, BattleFrame, BattleSetup, GameState, Transition } from './engine/types.ts'
+import {
+  isImpactFrame,
+  type Action,
+  type BattleFrame,
+  type BattleSetup,
+  type GameState,
+  type Transition,
+} from './engine/types.ts'
 import { type BotStrategy } from './strategies.ts'
 import {
   BOT_LEVELS,
@@ -18,11 +25,6 @@ import {
 export { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 
 type BotController = BotStrategy | BotDifficulty | BotOptions
-
-export const isImpactFrame = (frame: BattleFrame): boolean =>
-  frame.effect?.kind === 'bomb' ||
-  frame.effect?.kind === 'hellfire' ||
-  !!frame.effect?.impacts?.length
 
 export function chooseBotActions(
   state: GameState,

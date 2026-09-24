@@ -30,6 +30,73 @@ interface BattlefieldProps {
   onTileClick: (tile: Tile) => void
 }
 
+function tileAriaLabel({
+  tile,
+  occupant,
+  protector,
+  feature,
+  labels,
+  warned,
+  impactCenter,
+  target,
+  targetLabel,
+  damage,
+  lethal,
+  canMove,
+  cost,
+}: {
+  tile: Tile
+  occupant?: Pawn
+  protector?: Pawn
+  feature?: { name: string; description: string }
+  labels: PlayerNames
+  warned: boolean
+  impactCenter: boolean
+  target: boolean
+  targetLabel: string
+  damage: number
+  lethal: boolean
+  canMove: boolean
+  cost?: number
+}): string {
+  const label =
+    (occupant
+      ? labels[occupant.side] +
+        ' ' +
+        occupant.kind +
+        ' #' +
+        occupant.id +
+        ', ' +
+        occupant.hp +
+        ' health' +
+        (protector ? ', protected by bulwark #' + protector.id : '')
+      : tile.terrain +
+        ', column ' +
+        (tile.q + Math.floor(tile.r / 2) + 1) +
+        ', row ' +
+        (tile.r + 1)) + (feature ? ', ' + feature.name + '. ' + feature.description : '')
+  const warning = warned
+    ? ', Hellfire' +
+      (impactCenter ? ' impact center' : ' blast area') +
+      ', 1 unavoidable damage at round end'
+    : ''
+  return (
+    (target
+      ? targetLabel +
+        ' ' +
+        label +
+        (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '')
+      : canMove
+        ? 'Move to ' +
+          label +
+          (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '') +
+          ', ' +
+          cost +
+          ' energy'
+        : label) + warning
+  )
+}
+
 export function Battlefield({
   labels,
   tiles,
@@ -152,6 +219,21 @@ export function Battlefield({
             ? Number(tile.terrain === 'lava')
             : (paths.get(tileKey)?.damage ?? 0)
         const lethal = !!active && damage >= active.hp
+        const actionLabel = tileAriaLabel({
+          tile,
+          occupant,
+          protector,
+          feature,
+          labels,
+          warned,
+          impactCenter,
+          target,
+          targetLabel,
+          damage,
+          lethal,
+          canMove,
+          cost,
+        })
         const fill =
           interactive && damage > 0 && !occupant
             ? '#94716d'
@@ -164,41 +246,6 @@ export function Battlefield({
                 : canMove
                   ? 'var(--move-tint)'
                   : terrainColors[tile.terrain]
-        const label =
-          (occupant
-            ? labels[occupant.side] +
-              ' ' +
-              occupant.kind +
-              ' #' +
-              occupant.id +
-              ', ' +
-              occupant.hp +
-              ' health' +
-              (protector ? ', protected by bulwark #' + protector.id : '')
-            : tile.terrain +
-              ', column ' +
-              (tile.q + Math.floor(tile.r / 2) + 1) +
-              ', row ' +
-              (tile.r + 1)) + (feature ? ', ' + feature.name + '. ' + feature.description : '')
-        const warning = warned
-          ? ', Hellfire' +
-            (impactCenter ? ' impact center' : ' blast area') +
-            ', 1 unavoidable damage at round end'
-          : ''
-        const actionLabel =
-          (target
-            ? targetLabel +
-              ' ' +
-              label +
-              (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '')
-            : canMove
-              ? 'Move to ' +
-                label +
-                (damage ? ', ' + damage + ' lava damage' + (lethal ? ' (lethal)' : '') : '') +
-                ', ' +
-                cost +
-                ' energy'
-              : label) + warning
         return (
           <g
             key={tileKey}

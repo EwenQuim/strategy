@@ -2,7 +2,7 @@ import { buttonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { ApiError, health, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
-import { readStoredGames } from '../online.ts'
+import { readStoredGames } from '../onlineSession.ts'
 
 export const Route = createFileRoute('/online/$code')({
   beforeLoad: async ({ params }) => {

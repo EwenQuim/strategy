@@ -60,6 +60,11 @@ export type BattleEffect = {
 }
 
 export type BattleFrame = { state: GameState; effect: BattleEffect | null }
+
+export const isImpactFrame = (frame: BattleFrame): boolean =>
+  frame.effect?.kind === 'bomb' ||
+  frame.effect?.kind === 'hellfire' ||
+  !!frame.effect?.impacts?.length
 export type Transition = { state: GameState; frames: BattleFrame[] }
 
 export type Action =

@@ -15,6 +15,13 @@
     {
       "files": ["src/**"],
       "rules": {
+        "complexity": ["warn", 50],
+        "max-lines": ["warn", 750]
+      }
+    },
+    {
+      "files": ["src/**"],
+      "rules": {
         "no-restricted-imports": [
           "error",
           {
