@@ -9,7 +9,7 @@ import { useOnlineSync } from './onlineSync.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/types.ts'
-import type { BotDifficulty } from '../lib/bot.ts'
+import type { BotDifficulty } from '../lib/engine/ai.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 

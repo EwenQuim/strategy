@@ -9,7 +9,7 @@ import {
   type Biome,
 } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
-import type { BotDifficulty } from '../lib/bot'
+import type { BotDifficulty } from '../lib/engine/ai'
 import { Icon, PawnIcon } from './Icon'
 import { iconButtonClassName } from './styles'
 

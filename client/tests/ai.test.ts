@@ -13,12 +13,8 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import {
-  BOT_LEVELS,
-  chooseBotActions,
-  createBotGame,
-  type BotDifficulty,
-} from '../src/lib/bot.ts'
+import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
   const tiles: GameState['tiles'] = new Map()

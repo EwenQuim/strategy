@@ -21,9 +21,9 @@ import {
   initialState as botState,
   transition as botTransition,
   chooseBotActions,
-} from '../src/lib/bot.ts'
+} from '../src/lib/engine/bot.ts'
 import { transition } from '../src/lib/engine/engine.ts'
-import { huntTheKing } from '../src/lib/strategies.ts'
+import { huntTheKing } from '../src/lib/engine/bot.ts'
 import { possessiveArmyLabels, playerNames } from '../src/lib/game-mode.ts'
 import { CAMPAIGN_LEVELS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'

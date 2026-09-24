@@ -16,7 +16,8 @@ import {
   type Side,
 } from '../../src/lib/engine/index.ts'
 import { seedState } from '../../src/lib/engine/random.ts'
-import { BOT_LEVELS, chooseBotActions, type BotDifficulty } from '../../src/lib/bot.ts'
+import { chooseBotActions } from '../../src/lib/engine/bot.ts'
+import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
 
 function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState {
   const id = activePawn(state)!.id

@@ -25,7 +25,7 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 
 function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][] {

@@ -1,4 +1,5 @@
-import { initialTransition, createBotGame, type BotDifficulty } from './bot.ts'
+import { initialTransition, createBotGame } from './engine/bot.ts'
+import type { BotDifficulty } from './engine/ai.ts'
 import { isImpactFrame, type BattleFrame } from './engine/types.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, Transition } from './engine/types.ts'

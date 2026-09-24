@@ -17,7 +17,7 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 
 const encounter = {

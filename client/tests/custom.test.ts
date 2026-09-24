@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { parseGameSearch } from '../src/lib/game-mode.ts'
-import { createBotGame } from '../src/lib/bot.ts'
+import { createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { initialState, transition } from '../src/lib/engine/engine.ts'
 import { MAP_WIDTH } from '../src/lib/engine/hex.ts'

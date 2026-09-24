@@ -1,6 +1,7 @@
 import type { Action, GameState } from '../src/lib/engine/index.ts'
-import { BOT_LEVELS, chooseBotActions } from '../src/lib/bot.ts'
-import { huntTheKing } from '../src/lib/strategies.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+import { huntTheKing } from '../src/lib/engine/bot.ts'
 
 export function campaignActions(state: GameState, caution = 0.25): Action[] {
   // Press the attack in long endgames instead of testing two kings retreating forever.
