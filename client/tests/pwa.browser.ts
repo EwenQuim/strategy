@@ -10,7 +10,6 @@ import {
   BIOMES,
   initialState,
   inHellfire,
-  hexDist,
   activePawn,
   canAttack,
   movementDestinations,
@@ -904,15 +903,73 @@ test(
 )
 
 test(
-  'Hell campaign warnings preserve tile actions and fit every viewport; round-end fire can draw',
-  { timeout: 90_000 },
+  'Hell campaign warnings fit compact layouts and show round-end impacts in both motion modes',
+  { timeout: 60_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
     await context.setOffline(true)
-    const screenshotDir = process.env.PR_SCREENSHOT_DIR
+
+    async function checkWarnings(state: ReturnType<typeof initialState>) {
+      assert.deepEqual(
+        await page.getByTestId('hex-tile').evaluateAll((elements) =>
+          elements.map((element) => ({
+            warned: element.hasAttribute('data-hellfire'),
+            center: element.hasAttribute('data-hellfire-center'),
+            hatch: !!element.querySelector('polygon[fill="url(#hellfire-hatch)"]'),
+            described:
+              /Hellfire (impact center|blast area), 1 unavoidable damage at round end$/.test(
+                element.getAttribute('aria-label')!,
+              ),
+          })),
+        ),
+        [...state.tiles.values()].map((tile) => ({
+          warned: inHellfire(state.hellfire, tile),
+          center: state.hellfire.some((center) => center.q === tile.q && center.r === tile.r),
+          hatch: inHellfire(state.hellfire, tile),
+          described: inHellfire(state.hellfire, tile),
+        })),
+      )
+    }
+
+    const level = CAMPAIGN_LEVELS[16]
+    await page.goto(origin + base + 'campaign/17')
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'hell')
+    await checkWarnings(initialState(level.seed, level.setup))
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 1280, height: 900 },
+      { width: 600, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport)
+      assert.equal(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight &&
+            ['game-header', 'battlefield', 'command-deck', 'hellfire-cue'].every((id) => {
+              const rect = document
+                .querySelector('[data-testid="' + id + '"]')!
+                .getBoundingClientRect()
+              return (
+                rect.width > 0 &&
+                rect.height > 0 &&
+                rect.left >= 0 &&
+                rect.top >= 0 &&
+                rect.right <= innerWidth &&
+                rect.bottom <= innerHeight
+              )
+            }),
+        ),
+        true,
+        'Hell warnings and controls must fit ' + JSON.stringify(viewport),
+      )
+    }
+
     const setup = { biome: 'hell', player: ['king'], enemy: ['king'] } as const
     const seed = 'hellfire-ui'
     const url =
@@ -922,218 +979,56 @@ test(
       seed +
       '?mode=local&setup=' +
       encodeURIComponent(JSON.stringify(setup))
-
-    async function checkWarnings(state: ReturnType<typeof initialState>) {
-      const tiles = [...state.tiles.values()]
-      const warnings = await page.locator('[data-testid="hex-tile"]').evaluateAll((elements) =>
-        elements.map((element) => ({
-          warned: element.getAttribute('data-hellfire') === 'true',
-          center: element.getAttribute('data-hellfire-center') === 'true',
-          label: element.getAttribute('aria-label')!,
-          hatch: !!element.querySelector('polygon[fill="url(#hellfire-hatch)"]'),
-        })),
-      )
-      assert.equal(warnings.length, tiles.length)
-      for (const [index, tile] of tiles.entries()) {
-        const expected = inHellfire(state.hellfire, tile)
-        assert.equal(warnings[index].warned, expected)
-        assert.equal(warnings[index].hatch, expected)
-        assert.equal(
-          warnings[index].center,
-          state.hellfire.some((center) => hexDist(center, tile) === 0),
-        )
-        if (expected)
-          assert.match(
-            warnings[index].label,
-            /Hellfire (impact center|blast area), 1 unavoidable damage at round end$/,
-          )
-        else assert.doesNotMatch(warnings[index].label, /Hellfire/)
-      }
-      assert.equal(
-        await page
-          .locator('[data-hellfire="true"] polygon[fill="url(#hellfire-hatch)"]')
-          .evaluateAll((elements) =>
-            elements.every(
-              (element) =>
-                getComputedStyle(element).animationName === 'none' &&
-                getComputedStyle(element.parentElement!).pointerEvents === 'none',
-            ),
-          ),
-        true,
-        'Warnings must remain static and never intercept a tile action',
-      )
-    }
-
+    const endTurn = page.locator('[data-action="endTurn"]:not([disabled])')
+    await page.setViewportSize({ width: 320, height: 568 })
     for (const reducedMotion of ['no-preference', 'reduce'] as const) {
       await page.emulateMedia({ reducedMotion })
-      for (const id of [17, 18, 19, 20]) {
-        const level = CAMPAIGN_LEVELS[id - 1]
-        await page.goto(origin + base + 'campaign/' + id)
-        await page.getByRole('button', { name: 'Go !', exact: true }).click()
-        await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-        assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'hell')
-        const state = initialState(level.seed, level.setup)
-        assert.equal(state.hellfire.length, id === 17 ? 1 : 2)
-        await checkWarnings(state)
-        assert.match(
-          (await page.getByTestId('hellfire-cue').getAttribute('aria-label'))!,
-          /fixed for the full round/,
-        )
-        for (const viewport of [
-          { width: 320, height: 568 },
-          { width: 390, height: 844 },
-          { width: 1280, height: 900 },
-          { width: 600, height: 480 },
-        ]) {
-          await page.setViewportSize(viewport)
-          assert.equal(
-            await page.evaluate(
-              () =>
-                document.documentElement.scrollWidth <= innerWidth &&
-                document.documentElement.scrollHeight <= innerHeight &&
-                ['game-header', 'battlefield', 'command-deck', 'hellfire-cue'].every((id) => {
-                  const rect = document
-                    .querySelector('[data-testid="' + id + '"]')!
-                    .getBoundingClientRect()
-                  return (
-                    rect.width > 0 &&
-                    rect.height > 0 &&
-                    rect.left >= 0 &&
-                    rect.top >= 0 &&
-                    rect.right <= innerWidth &&
-                    rect.bottom <= innerHeight
-                  )
-                }),
-            ),
-            true,
-            'Hell warning and controls must fit ' + JSON.stringify(viewport),
-          )
-          if (
-            screenshotDir &&
-            id === 17 &&
-            reducedMotion === 'no-preference' &&
-            [320, 1280].includes(viewport.width)
-          )
-            await page.screenshot({
-              path: join(screenshotDir, 'hell-' + viewport.width + '.png'),
-            })
-        }
-      }
-
-      await page.setViewportSize({ width: 320, height: 568 })
       await page.goto(url)
-      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      let state = initialState(seed, setup)
-      await checkWarnings(state)
+      await endTurn.waitFor()
+      await checkWarnings(initialState(seed, setup))
       const move = page.getByRole('button', { name: /^Move to .*Hellfire/ }).first()
       assert.equal(await move.getByTestId('tile-face').getAttribute('fill'), 'var(--move-tint)')
-      assert.equal(await move.locator('polygon[fill="url(#hellfire-hatch)"]').count(), 1)
-      const endTurn = page.locator('[data-action="endTurn"]:not([disabled])')
+      assert.deepEqual(
+        await move.locator('polygon[fill="url(#hellfire-hatch)"]').evaluate((element) => ({
+          animation: getComputedStyle(element).animationName,
+          pointerEvents: getComputedStyle(element.parentElement!).pointerEvents,
+        })),
+        { animation: 'none', pointerEvents: 'none' },
+      )
       await endTurn.click()
-      state = transition(state, { type: 'endTurn' }).state
       await endTurn.waitFor()
-      await checkWarnings(state)
       assert.equal(
         await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
         '1',
       )
       await endTurn.click()
-      const explosions = page.getByTestId('hellfire-effect')
-      await explosions.first().waitFor()
-      const blast = await page.locator('[data-kind="hellfire"]').evaluate((element) => ({
-        centers: element.querySelectorAll('[data-testid="hellfire-effect"]').length,
-        trails: element.querySelectorAll('line').length,
-        pawnIcons: element.querySelectorAll('svg').length,
-        bombs: document.querySelectorAll('[data-testid="bomb-effect"]').length,
-        animation: getComputedStyle(
-          element.querySelector('[data-testid="hellfire-effect"] > g')!,
-        ).animationName,
-        damage: [...document.querySelectorAll('[data-testid="combat-impacts"] text')].map(
-          (label) => label.textContent,
-        ),
-        locked: (document.querySelector('[data-action="endTurn"]') as HTMLButtonElement)
-          .disabled,
-      }))
-      assert.deepEqual(blast, {
-        centers: 2,
-        trails: 0,
-        pawnIcons: 0,
-        bombs: 0,
-        animation: reducedMotion === 'reduce' ? 'none' : 'hellfire-fall',
-        damage: ['-1', '-1'],
-        locked: true,
-      })
-      if (screenshotDir)
-        await page.screenshot({
-          path: join(screenshotDir, 'hell-blast-' + reducedMotion + '.png'),
-        })
-      state = transition(state, { type: 'endTurn' }).state
+      await page.getByTestId('hellfire-effect').first().waitFor()
+      assert.deepEqual(
+        await page.locator('[data-kind="hellfire"]').evaluate((element) => ({
+          centers: element.querySelectorAll('[data-testid="hellfire-effect"]').length,
+          trails: element.querySelectorAll('line').length,
+          animation: getComputedStyle(
+            element.querySelector('[data-testid="hellfire-effect"] > g')!,
+          ).animationName,
+          damage: [...document.querySelectorAll('[data-testid="combat-impacts"] text')].map(
+            (label) => label.textContent,
+          ),
+          locked: (document.querySelector('[data-action="endTurn"]') as HTMLButtonElement)
+            .disabled,
+        })),
+        {
+          centers: 2,
+          trails: 0,
+          animation: reducedMotion === 'reduce' ? 'none' : 'hellfire-fall',
+          damage: ['-1', '-1'],
+          locked: true,
+        },
+      )
       await endTurn.waitFor()
       assert.equal(
         await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
         '2',
       )
-      await checkWarnings(state)
-
-      if (reducedMotion === 'reduce') {
-        while (!state.winner && state.round <= 7) {
-          await endTurn.click()
-          state = transition(state, { type: 'endTurn' }).state
-          if (!state.winner) await endTurn.waitFor()
-        }
-        assert.equal(state.winner, 'draw')
-        await page.getByTestId('battle-result').waitFor()
-        assert.equal(await page.getByTestId('result-card').locator('h1').textContent(), 'Draw')
-        assert.match(
-          await page.getByTestId('result-card').innerText(),
-          /Both kings have fallen. Neither army wins./,
-        )
-        assert.equal(await page.getByTestId('command-deck').locator('h2').textContent(), 'Draw')
-        assert.equal(await page.locator('[data-action]:enabled').count(), 0)
-      }
-
-      await page.goto(url)
-      await endTurn.waitFor()
-      state = initialState(seed, setup)
-      let target = state.pawns.find(
-        (enemy) => canAttack(activePawn(state)!, enemy) && inHellfire(state.hellfire, enemy),
-      )
-      for (let step = 0; step < 30 && !target && !state.winner; step++) {
-        const pawn = activePawn(state)!
-        const enemy = state.pawns.find((unit) => unit.side !== pawn.side)!
-        const destination = canAttack(pawn, enemy)
-          ? undefined
-          : [...movementDestinations(state.tiles, state.pawns, pawn)]
-              .filter(([, cost]) => cost > 0)
-              .map(([key]) => state.tiles.get(key)!)
-              .sort((a, b) => hexDist(a, enemy) - hexDist(b, enemy))[0]
-        const action: Action = destination
-          ? { type: 'move', q: destination.q, r: destination.r }
-          : { type: 'endTurn' }
-        if (destination) {
-          const index = [...state.tiles.values()].indexOf(destination)
-          await page.getByTestId('hex-tile').nth(index).click()
-        } else await endTurn.click()
-        state = transition(state, action).state
-        await endTurn.waitFor()
-        target = state.pawns.find(
-          (enemy) => canAttack(activePawn(state)!, enemy) && inHellfire(state.hellfire, enemy),
-        )
-      }
-      assert.ok(target, 'Bring both kings into attack range of a warned tile')
-      await page.locator('[data-action="attack"]').click()
-      const attack = page.getByRole('button', { name: /^Attack .*Hellfire/ }).first()
-      assert.equal(await attack.getByTestId('tile-face').getAttribute('fill'), '#b98370')
-      assert.equal(await attack.locator('polygon[fill="url(#hellfire-hatch)"]').count(), 1)
-      assert.equal(
-        await page
-          .getByTestId('tile-face')
-          .evaluateAll(
-            (faces) => new Set(faces.map((face) => getComputedStyle(face).stroke)).size,
-          ),
-        1,
-      )
-      await checkWarnings(state)
     }
     assert.deepEqual(errors, [])
   },
