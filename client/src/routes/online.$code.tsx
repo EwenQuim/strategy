@@ -4,8 +4,6 @@ import { ApiError, health, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
 import { readStoredGames } from '../online.ts'
 
-const POLL_INTERVAL_MS = 2000
-
 export const Route = createFileRoute('/online/$code')({
   beforeLoad: async ({ params }) => {
     if (!/^[A-Z0-9]{6}$/.test(params.code)) throw redirect({ to: '/online' })
@@ -18,12 +16,7 @@ export const Route = createFileRoute('/online/$code')({
   component: function OnlineBattle() {
     const { code } = Route.useParams()
     const stored = readStoredGames().find((game) => game.code === code)
-    const game = useOnlineGame(code, {
-      query: {
-        refetchInterval: (query) =>
-          query.state.data?.status === 'waiting' ? POLL_INTERVAL_MS : false,
-      },
-    })
+    const game = useOnlineGame(code, !!stored)
 
     if (!stored) {
       return (
@@ -106,9 +99,6 @@ export const Route = createFileRoute('/online/$code')({
                 >
                   Copy code
                 </button>
-                <p className="text-[10px] text-muted" role="status">
-                  This page checks every two seconds.
-                </p>
               </>
             )}
             <Link

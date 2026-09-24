@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"math/big"
+	"sync"
 	"time"
 
 	"hexmate/server/internal/game"
@@ -23,12 +24,14 @@ type Store interface {
 }
 
 type Service struct {
-	store Store
-	now   func() time.Time
+	store       Store
+	now         func() time.Time
+	mu          sync.Mutex
+	subscribers map[string]map[chan struct{}]struct{}
 }
 
 func New(store Store) *Service {
-	return &Service{store: store, now: time.Now}
+	return &Service{store: store, now: time.Now, subscribers: make(map[string]map[chan struct{}]struct{})}
 }
 
 type PlayerCredentials struct {
@@ -80,6 +83,7 @@ func (s *Service) Join(ctx context.Context, code, name string) (PlayerCredential
 	if err != nil {
 		return PlayerCredentials{}, err
 	}
+	s.notify(code)
 	return PlayerCredentials{Token: token, Side: game.Enemy, Game: g}, nil
 }
 
@@ -105,7 +109,40 @@ func (s *Service) Play(ctx context.Context, code, token string, version int, act
 	if g.Version != version {
 		return game.Game{}, game.ErrVersionConflict
 	}
-	return s.store.Append(ctx, code, version, game.Action{Side: side, Action: action, Winner: winner})
+	g, err = s.store.Append(ctx, code, version, game.Action{Side: side, Action: action, Winner: winner})
+	if err == nil {
+		s.notify(code)
+	}
+	return g, err
+}
+
+func (s *Service) Subscribe(code string) (<-chan struct{}, func()) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	updates := make(chan struct{}, 1)
+	if s.subscribers[code] == nil {
+		s.subscribers[code] = make(map[chan struct{}]struct{})
+	}
+	s.subscribers[code][updates] = struct{}{}
+	return updates, func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		delete(s.subscribers[code], updates)
+		if len(s.subscribers[code]) == 0 {
+			delete(s.subscribers, code)
+		}
+	}
+}
+
+func (s *Service) notify(code string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for updates := range s.subscribers[code] {
+		select {
+		case updates <- struct{}{}:
+		default:
+		}
+	}
 }
 
 func participantSide(g game.Game, tokenHash string) (game.Side, bool) {

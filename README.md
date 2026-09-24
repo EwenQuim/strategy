@@ -26,6 +26,18 @@ The frontend lives in `client/`; every npm script runs there, and the `make` tar
 
 The same checks gate pull requests and GitHub Pages deployment. The build includes a `404.html` fallback for seeded game URLs.
 
+## Online synchronization
+
+The game page opens one SSE connection at `/api/games/{code}/events` for both the waiting room and the battle. Moves still use the version-checked POST endpoint. Every connection sends the complete public game snapshot, including the action log, so reconnecting catches up without event replay or `Last-Event-ID` bookkeeping.
+
+The browser's native `EventSource` retries dropped connections after two seconds. The server sends a heartbeat every 15 seconds; a 45-second client watchdog replaces silently stalled streams. Returning online or foregrounding the tab reconnects immediately. Leaving the game or receiving its confirmed finished state closes the stream and its timers.
+
+Responses disable caching, transformations, and nginx buffering. Configure other reverse proxies to stream responses without buffering and use an idle timeout longer than 15 seconds. Server write deadlines are renewed on each heartbeat instead of ending every stream at Fuego's default 30-second timeout.
+
+Successful joins and moves notify subscribers in the monolith after the storage write succeeds. Streams read a fresh snapshot on notification; idle connections do not poll storage. Notifications are process-local: running multiple instances against the same storage would also require cross-instance notifications. No shared messaging service is needed for the current single-instance deployment. Games survive server restarts only when `DB_PATH` is configured.
+
+For local two-player testing, Docker exposes the same server on ports 8080 and 8081. The two browser origins keep player credentials separate without running a second backend.
+
 ## Offline play and installation
 
 Open the production site once online, then use your browser's Install app or Add to Home Screen command. The app caches its HTML, styles, icons, and every JavaScript chunk, so new seeded games also work offline. Development mode does not register a service worker.

@@ -1,20 +1,8 @@
-# Plain "docker compose up" serves one instance on :8080 with a persistent SQLite store.
-# "docker compose --profile 2players up" adds a second instance on :8081 sharing the same
-# database: two origins mean two separate localStorage, so two local players can join the
-# same game without overwriting each other's stored credentials.
 services:
   app:
     build: .
     ports:
       - "8080:8080"
-    environment:
-      DB_PATH: /data/hexmate.db
-    volumes:
-      - db:/data
-  player2:
-    profiles: ["2players"]
-    build: .
-    ports:
       - "8081:8080"
     environment:
       DB_PATH: /data/hexmate.db

@@ -91,6 +91,7 @@ type Handlers struct {
 func Register(s *fuego.Server, svc *service.Service) {
 	h := &Handlers{svc: svc}
 	api := fuego.Group(s, "/api")
+	s.Mux.HandleFunc("GET /api/games/{code}/events", h.gameEvents)
 
 	fuego.Get(api, "/health", h.health,
 		option.OperationID("health"),

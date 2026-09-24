@@ -189,8 +189,8 @@ export const Route = createFileRoute('/online/')({
           </section>
         )}
         <p className="mt-auto text-[11px] leading-[1.5] text-muted">
-          Online battles are turn by turn, no timer. Moves sync every two seconds, so you can
-          close the tab and resume later.
+          Online battles are turn by turn, no timer. Moves sync automatically, so you can close
+          the tab and resume later.
         </p>
       </main>
     )
