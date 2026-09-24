@@ -105,6 +105,7 @@ func (s *Service) Play(ctx context.Context, code, token string, version int, act
 		return game.Game{}, game.ErrNotStarted
 	case game.Finished:
 		return game.Game{}, game.ErrFinished
+	case game.Active:
 	}
 	if g.Version != version {
 		return game.Game{}, game.ErrVersionConflict
@@ -162,9 +163,9 @@ func hash(token string) string {
 
 func randomString(n int, alphabet string) (string, error) {
 	out := make([]byte, n)
-	max := big.NewInt(int64(len(alphabet)))
+	limit := big.NewInt(int64(len(alphabet)))
 	for i := range out {
-		v, err := rand.Int(rand.Reader, max)
+		v, err := rand.Int(rand.Reader, limit)
 		if err != nil {
 			return "", err
 		}

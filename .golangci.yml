@@ -3,6 +3,22 @@ version: "2"
 linters:
   enable:
     - modernize
+    - contextcheck
+    - errorlint
+    - exhaustive
+    - gocritic
+    - misspell
+    - nilerr
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
+
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
 
 formatters:
   enable:
