@@ -11,6 +11,7 @@ import {
   type Tile,
 } from '../lib/engine'
 import { Icon, PawnIcon } from './Icon'
+import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY, terrainColors } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
 
@@ -405,39 +406,6 @@ export function Battlefield({
         </g>
       )}
     </svg>
-  )
-}
-
-function FeatureArt({ feature }: { feature: NonNullable<Tile['feature']> }) {
-  return (
-    <g className="pointer-events-none" data-art="feature" data-feature-art={feature}>
-      {feature === 'watchtower' ? (
-        <>
-          <ellipse cy="17" rx="19" ry="5" fill="#26312c" opacity=".4" />
-          <path d="M-13 16-10-9h20l3 25Z" fill="#d2b984" />
-          <path d="M2-9h8l3 25H2Z" fill="#94765d" />
-          <path d="M-15-9v-13h7v6h5v-6h6v6h5v-6h7v13Z" fill="#f0d4a0" />
-          <path d="M-4 16V6a4 4 0 0 1 8 0v10M-3-7h6v6h-6Z" fill="#463d39" />
-        </>
-      ) : feature === 'spring' ? (
-        <>
-          <ellipse cy="7" rx="22" ry="13" fill="#a9bbb0" />
-          <ellipse cy="5" rx="18" ry="10" fill="#287c87" />
-          <ellipse cy="4" rx="11" ry="5" fill="none" stroke="#91efda" strokeWidth="2" />
-          <path d="M0-21C-13-7-9 0 0 0s13-7 0-21Z" fill="#a6f5e4" />
-          <path d="M-17 14q17 10 34 0" fill="none" stroke="#647e76" strokeWidth="3" />
-        </>
-      ) : (
-        <>
-          <ellipse cy="17" rx="17" ry="5" fill="#392851" opacity=".4" />
-          <path d="m0-23 15 17L0 12-15-6Z" fill="#c8a2ed" stroke="#f1d4ff" strokeWidth="1.5" />
-          <path d="m0-23 4 17L0 12-4-6Z" fill="#f8e4ff" />
-          <text y="24" textAnchor="middle" fill="#f8e4ff" fontSize="11" fontWeight="700">
-            +2
-          </text>
-        </>
-      )}
-    </g>
   )
 }
 
