@@ -15,8 +15,8 @@
     {
       "files": ["src/**"],
       "rules": {
-        "complexity": ["warn", 50],
-        "max-lines": ["warn", 750]
+        "complexity": ["warn", 45],
+        "max-lines": ["warn", 400]
       }
     },
     {

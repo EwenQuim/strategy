@@ -60,97 +60,25 @@ export function GameCommandDeck({
           {pawn && !winner && <UnitStats pawn={pawn} />}
         </div>
         <div className="grid grid-cols-3 gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
-          <button
-            className={
-              actionButtonClassName +
-              ' border-[#d69e803d] bg-[#b8795809] text-[#e3b096] aria-pressed:border-[#e0a586] aria-pressed:bg-[#ab695333]'
-            }
-            data-action="attack"
-            disabled={!myTurn || usingSpecial || !pawn?.energy || (!attacking && !hasFoes)}
-            onClick={() =>
-              dispatch(
-                attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' },
-              )
-            }
-            aria-pressed={attacking}
-          >
-            <Icon
-              className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-              name={attacking ? 'close' : 'sword'}
-            />
-            <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-              {attacking ? 'Cancel' : 'Attack'}
-            </span>
-            <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
-              {attacking ? 'Choose enemy' : '1 energy'}
-            </small>
-          </button>
-          <button
-            className={
-              actionButtonClassName +
-              ' border-[#bcc8a62e] bg-[#ffffff04] text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
-            }
-            data-action="special"
-            disabled={
-              !myTurn ||
-              attacking ||
-              !pawn ||
-              !canUseSpecial(pawn) ||
-              (!!pawn.special.noTargets && !hasSpecialTargets)
-            }
-            title={pawn?.special.description}
-            aria-pressed={usingSpecial}
-            onClick={() =>
-              dispatch(
-                usingSpecial ? { type: 'cancelTargeting' } : { type: 'act', action: 'special' },
-              )
-            }
-          >
-            <Icon
-              className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-              name={usingSpecial ? 'close' : 'spark'}
-            />
-            <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-              {usingSpecial ? 'Cancel' : (pawn?.special.name ?? 'Special')}
-            </span>
-            <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-              {usingSpecial
-                ? !targetCount
-                  ? 'No targets'
-                  : phase === 'charge'
-                    ? 'Choose enemy'
-                    : (pawn?.special.prompt ?? 'Choose enemy')
-                : pawn?.special.oncePerRound && pawn.specialUsed
-                  ? 'Used this round'
-                  : pawn?.special.noTargets && !hasSpecialTargets
-                    ? pawn.special.noTargets
-                    : (pawn?.special.cost ?? 2) + ' energy'}
-            </small>
-          </button>
-          <button
-            className={
-              actionButtonClassName + ' border-[#bcc8a62e] bg-[#ffffff04] text-[#e6e7d4]'
-            }
-            data-action="endTurn"
-            disabled={!myTurn}
-            onClick={() => dispatch({ type: 'endTurn' })}
-            title={
-              'Spend all remaining energy and end this turn. Escape: ' +
-              (pawn?.endTurnEscapeChance ?? 0) +
-              '% until the round ends.'
-            }
-          >
-            <Icon
-              className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-              name="escape"
-            />
-            <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-              End turn
-            </span>
-            <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-              +{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape
-            </small>
-          </button>
+          <AttackButton
+            pawn={pawn}
+            myTurn={myTurn}
+            attacking={attacking}
+            usingSpecial={usingSpecial}
+            hasFoes={hasFoes}
+            dispatch={dispatch}
+          />
+          <SpecialButton
+            pawn={pawn}
+            myTurn={myTurn}
+            attacking={attacking}
+            usingSpecial={usingSpecial}
+            hasSpecialTargets={hasSpecialTargets}
+            targetCount={targetCount}
+            phase={phase}
+            dispatch={dispatch}
+          />
+          <EndTurnButton pawn={pawn} myTurn={myTurn} dispatch={dispatch} />
         </div>
       </div>
     </footer>
@@ -231,5 +159,147 @@ function UnitStats({ pawn }: { pawn: Pawn }) {
         </strong>
       </div>
     </div>
+  )
+}
+
+function AttackButton({
+  pawn,
+  myTurn,
+  attacking,
+  usingSpecial,
+  hasFoes,
+  dispatch,
+}: {
+  pawn?: Pawn
+  myTurn: boolean
+  attacking: boolean
+  usingSpecial: boolean
+  hasFoes: boolean
+  dispatch: (action: Action) => void
+}) {
+  return (
+    <button
+      className={
+        actionButtonClassName +
+        ' border-[#d69e803d] bg-[#b8795809] text-[#e3b096] aria-pressed:border-[#e0a586] aria-pressed:bg-[#ab695333]'
+      }
+      data-action="attack"
+      disabled={!myTurn || usingSpecial || !pawn?.energy || (!attacking && !hasFoes)}
+      onClick={() =>
+        dispatch(attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' })
+      }
+      aria-pressed={attacking}
+    >
+      <Icon
+        className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
+        name={attacking ? 'close' : 'sword'}
+      />
+      <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
+        {attacking ? 'Cancel' : 'Attack'}
+      </span>
+      <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
+        {attacking ? 'Choose enemy' : '1 energy'}
+      </small>
+    </button>
+  )
+}
+
+function SpecialButton({
+  pawn,
+  myTurn,
+  attacking,
+  usingSpecial,
+  hasSpecialTargets,
+  targetCount,
+  phase,
+  dispatch,
+}: {
+  pawn?: Pawn
+  myTurn: boolean
+  attacking: boolean
+  usingSpecial: boolean
+  hasSpecialTargets: boolean
+  targetCount: number
+  phase: 'move' | 'attack' | 'special' | 'charge' | 'over'
+  dispatch: (action: Action) => void
+}) {
+  return (
+    <button
+      className={
+        actionButtonClassName +
+        ' border-[#bcc8a62e] bg-[#ffffff04] text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
+      }
+      data-action="special"
+      disabled={
+        !myTurn ||
+        attacking ||
+        !pawn ||
+        !canUseSpecial(pawn) ||
+        (!!pawn.special.noTargets && !hasSpecialTargets)
+      }
+      title={pawn?.special.description}
+      aria-pressed={usingSpecial}
+      onClick={() =>
+        dispatch(
+          usingSpecial ? { type: 'cancelTargeting' } : { type: 'act', action: 'special' },
+        )
+      }
+    >
+      <Icon
+        className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
+        name={usingSpecial ? 'close' : 'spark'}
+      />
+      <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
+        {usingSpecial ? 'Cancel' : (pawn?.special.name ?? 'Special')}
+      </span>
+      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+        {usingSpecial
+          ? !targetCount
+            ? 'No targets'
+            : phase === 'charge'
+              ? 'Choose enemy'
+              : (pawn?.special.prompt ?? 'Choose enemy')
+          : pawn?.special.oncePerRound && pawn.specialUsed
+            ? 'Used this round'
+            : pawn?.special.noTargets && !hasSpecialTargets
+              ? pawn.special.noTargets
+              : (pawn?.special.cost ?? 2) + ' energy'}
+      </small>
+    </button>
+  )
+}
+
+function EndTurnButton({
+  pawn,
+  myTurn,
+  dispatch,
+}: {
+  pawn?: Pawn
+  myTurn: boolean
+  dispatch: (action: Action) => void
+}) {
+  return (
+    <button
+      className={actionButtonClassName + ' border-[#bcc8a62e] bg-[#ffffff04] text-[#e6e7d4]'}
+      data-action="endTurn"
+      disabled={!myTurn}
+      onClick={() => dispatch({ type: 'endTurn' })}
+      title={
+        'Spend all remaining energy and end this turn. Escape: ' +
+        (pawn?.endTurnEscapeChance ?? 0) +
+        '% until the round ends.'
+      }
+    >
+      <Icon
+        className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
+        name="escape"
+      />
+      <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
+        End turn
+      </span>
+      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+        +{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape
+      </small>
+    </button>
   )
 }
