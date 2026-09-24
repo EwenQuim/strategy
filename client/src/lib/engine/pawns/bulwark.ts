@@ -32,7 +32,8 @@ const protect: SpecialAbility = {
 
 export class Bulwark extends Pawn {
   static override readonly startsOnFrontRow = true
-  static override readonly icon = 'M12 3 4 6v6c0 5 8 8.5 8 8.5s8-3.5 8-8.5V6l-8-3ZM8 10l4 3 4-3M8 14l4 3 4-3'
+  static override readonly icon =
+    'M12 3 4 6v6c0 5 8 8.5 8 8.5s8-3.5 8-8.5V6l-8-3ZM8 10l4 3 4-3M8 14l4 3 4-3'
   readonly kind = 'bulwark' as const
   get maxHp(): number {
     return 10

@@ -72,7 +72,8 @@ const charge: SpecialAbility = {
 }
 
 export class Swordsman extends Pawn {
-  static override readonly icon = 'M20 3.5 9.5 14M20 3.5h-3.2L7.5 12.8M20 3.5v3.2l-9.3 9.3M5.5 11.5l7 7M8 16.5 3.5 21'
+  static override readonly icon =
+    'M20 3.5 9.5 14M20 3.5h-3.2L7.5 12.8M20 3.5v3.2l-9.3 9.3M5.5 11.5l7 7M8 16.5 3.5 21'
   readonly kind = 'swordsman' as const
   get maxHp(): number {
     return 5
