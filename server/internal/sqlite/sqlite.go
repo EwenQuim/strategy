@@ -148,6 +148,7 @@ func (s *Store) Append(ctx context.Context, code string, version int, action gam
 		return game.Game{}, game.ErrNotStarted
 	case game.Finished:
 		return game.Game{}, game.ErrFinished
+	case game.Active:
 	}
 	if g.Version != version {
 		return game.Game{}, game.ErrVersionConflict

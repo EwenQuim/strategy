@@ -27,7 +27,7 @@ func TestSPAFallback(t *testing.T) {
 		{"/deep/route", "<!doctype html>app"}, // unknown path falls back to index
 	} {
 		w := httptest.NewRecorder()
-		h.ServeHTTP(w, httptest.NewRequest("GET", tc.path, nil))
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, tc.path, nil))
 		if got := w.Body.String(); got != tc.want {
 			t.Errorf("%s: body = %q, want %q", tc.path, got, tc.want)
 		}
@@ -50,7 +50,7 @@ func TestSPAAssetCachingAndGzip(t *testing.T) {
 	h := spa(dir)
 
 	plain := httptest.NewRecorder()
-	h.ServeHTTP(plain, httptest.NewRequest("GET", "/assets/app-abc123.js", nil))
+	h.ServeHTTP(plain, httptest.NewRequest(http.MethodGet, "/assets/app-abc123.js", nil))
 	if plain.Header().Get("Cache-Control") != hashedAssetCache {
 		t.Errorf("hashed asset cache-control = %q, want %q", plain.Header().Get("Cache-Control"), hashedAssetCache)
 	}
@@ -59,7 +59,7 @@ func TestSPAAssetCachingAndGzip(t *testing.T) {
 	}
 
 	compressed := httptest.NewRecorder()
-	request := httptest.NewRequest("GET", "/assets/app-abc123.js", nil)
+	request := httptest.NewRequest(http.MethodGet, "/assets/app-abc123.js", nil)
 	request.Header.Set("Accept-Encoding", "gzip")
 	h.ServeHTTP(compressed, request)
 	if compressed.Header().Get("Content-Encoding") != "gzip" {
@@ -81,7 +81,7 @@ func TestSPAAssetCachingAndGzip(t *testing.T) {
 	}
 
 	fallback := httptest.NewRecorder()
-	h.ServeHTTP(fallback, httptest.NewRequest("GET", "/deep/route", nil))
+	h.ServeHTTP(fallback, httptest.NewRequest(http.MethodGet, "/deep/route", nil))
 	if fallback.Header().Get("Cache-Control") != "" {
 		t.Errorf("fallback cache-control = %q, want none", fallback.Header().Get("Cache-Control"))
 	}
@@ -96,7 +96,7 @@ func TestRootRedirectsToApp(t *testing.T) {
 		http.Redirect(w, r, appBase, http.StatusFound)
 	})
 	w := httptest.NewRecorder()
-	mux.ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
+	mux.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
 	if w.Code != http.StatusFound || w.Header().Get("Location") != appBase {
 		t.Fatalf("code=%d location=%q", w.Code, w.Header().Get("Location"))
 	}
