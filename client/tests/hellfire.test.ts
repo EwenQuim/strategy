@@ -58,9 +58,12 @@ function finishRound(state: GameState): GameState {
   return state
 }
 
-test('Hell is explicit-only, has basalt and mountains rather than lava, and starts seeded warnings beneath both armies', () => {
+test('Hell is explicit-only, has basalt with small lava pools and short mountain chains, and starts seeded warnings beneath both armies', () => {
   assert.equal(BIOMES.hell.ground, 'basalt')
-  assert.equal(BIOMES.hell.feature?.terrain, 'mountain')
+  assert.deepEqual(
+    BIOMES.hell.features.map((feature) => feature.terrain),
+    ['lava', 'mountain'],
+  )
   const selected = { player: new Set<string>(), enemy: new Set<string>() }
   for (let index = 0; index < 30; index++) {
     const seed = 'hellfire-' + index
@@ -96,7 +99,8 @@ test('Hell is explicit-only, has basalt and mountains rather than lava, and star
   })
   assert.equal(generated.biome, 'hell')
   assert.equal(generated.hellfire.length, 2)
-  assert.ok([...generated.tiles.values()].every((tile) => tile.terrain !== 'lava'))
+  for (const terrain of ['lava', 'mountain'])
+    assert.ok([...generated.tiles.values()].some((tile) => tile.terrain === terrain))
 })
 
 test('inHellfire covers the center and all six adjacent hexes, but not radius two', () => {

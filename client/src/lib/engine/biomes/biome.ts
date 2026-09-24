@@ -14,7 +14,7 @@ export type BiomeDefinition = {
   readonly description: string
   readonly ground: Terrain
   readonly scatter?: { readonly terrain: Terrain; readonly chance: number }
-  readonly feature?: MapFeature
+  readonly features: readonly MapFeature[]
   readonly theme: Readonly<Record<`--${string}`, string>>
 }
 

@@ -1,7 +1,11 @@
 import { hexOf, mapFromRows, type FixedBattleSetup } from '../lib/engine'
 import { SIZE, hexPoints, hexX, hexY, terrainColors } from './hex-art'
 
-const colors = { ...terrainColors, lava: '#d0643c' }
+const colors = {
+  ...terrainColors,
+  mountain: 'var(--mountain-front, #b2b69a)',
+  lava: '#d0643c',
+}
 const armyColors = { player: '#dfeccf', enemy: '#f09a78' }
 
 export function LevelMiniature({ setup }: { setup: FixedBattleSetup }) {

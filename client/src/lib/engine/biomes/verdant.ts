@@ -5,7 +5,7 @@ export const verdant: BiomeDefinition = {
   description: 'lakes and forests',
   ground: 'plain',
   scatter: { terrain: 'forest', chance: 0.25 },
-  feature: { terrain: 'lake', min: 3, max: 6, shapes: poolShapes },
+  features: [{ terrain: 'lake', min: 3, max: 6, shapes: poolShapes }],
   theme: {
     '--biome-background': '#1c3025',
     '--biome-glow': '#51634069',

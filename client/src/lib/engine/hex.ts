@@ -117,6 +117,7 @@ function placeFeature(
         if (!shapeFits(tiles, reserved, anchor, shape, feature.terrain)) continue
         const placedTiles = shape.map(([q, r]) => tiles.get(key(anchor.q + q, anchor.r + r))!)
         if (!tryPlaceConnectedTerrain(tiles, anchors, placedTiles, feature.terrain)) continue
+        for (const tile of placedTiles) reserved.add(key(tile.q, tile.r))
         placed = true
         break
       }
@@ -173,7 +174,7 @@ export function makeMap(
   biome: Biome,
   protectedTiles: Axial[] = [],
 ): Map<string, Tile> {
-  const { ground, scatter, feature } = BIOMES[biome]
+  const { ground, scatter, features: terrainFeatures } = BIOMES[biome]
   const tiles = new Map<string, Tile>()
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))
   for (let row = 0; row < MAP_HEIGHT; row++) {
@@ -186,7 +187,8 @@ export function makeMap(
       tiles.set(key(q, r), { q, r, terrain })
     }
   }
-  if (feature) placeFeature(tiles, [...tiles.values()], reserved, feature, random)
+  for (const feature of terrainFeatures)
+    placeFeature(tiles, [...tiles.values()], reserved, feature, random)
   const roll = random.next()
   const count = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
   const candidates = [...tiles.values()].filter(

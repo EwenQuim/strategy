@@ -1,10 +1,19 @@
-import { lineShape, type BiomeDefinition } from './biome.ts'
+import { bendShape, lineShape, poolShapes, type BiomeDefinition } from './biome.ts'
 
 export const hell: BiomeDefinition = {
   name: 'Hell',
-  description: 'obsidian basalt, sparse mountain lines, and full-round Hellfire warnings',
+  description:
+    'obsidian basalt, small lava pools, short mountain chains, and full-round Hellfire warnings',
   ground: 'basalt',
-  feature: { terrain: 'mountain', min: 1, max: 2, shapes: [4, 5].map(lineShape) },
+  features: [
+    { terrain: 'lava', min: 2, max: 3, shapes: poolShapes.slice(0, 2) },
+    {
+      terrain: 'mountain',
+      min: 2,
+      max: 3,
+      shapes: [lineShape(3), lineShape(4), bendShape(2, 3)],
+    },
+  ],
   theme: {
     '--biome-background': '#160d17',
     '--biome-glow': '#a52c4255',

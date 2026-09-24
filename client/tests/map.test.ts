@@ -63,21 +63,24 @@ test('Each biome has deterministic, connected terrain and the intended obstacle 
       assert.equal(tiles.size, MAP_WIDTH * MAP_HEIGHT)
       const land = [...tiles.values()].filter(passable)
       assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
-      const { terrain, min, max, shapes } = BIOMES[biome].feature!
-      const features = components(tiles, terrain)
-      assert.ok(features.length >= min && features.length <= max, biome + ': ' + seed)
+      const { features } = BIOMES[biome]
       for (const obstacle of ['mountain', 'lake', 'lava'] as const) {
-        if (obstacle !== terrain) assert.equal(components(tiles, obstacle).length, 0)
+        if (!features.some((feature) => feature.terrain === obstacle))
+          assert.equal(components(tiles, obstacle).length, 0)
       }
-      if (terrain === 'mountain')
+      if (features.some((feature) => feature.terrain === 'mountain'))
         assert.ok([...tiles.values()].every((tile) => tile.terrain !== 'forest'))
-      for (const feature of features) {
-        assert.ok(shapes.some((shape) => shape.length === feature.length))
-        for (const tile of feature) {
-          const adjacent = neighbors(tile.q, tile.r).filter(
-            (n) => tiles.get(key(n.q, n.r))?.terrain === terrain,
-          ).length
-          assert.ok(terrain === 'mountain' ? adjacent <= 2 : adjacent >= 2)
+      for (const { terrain, min, max, shapes } of features) {
+        const groups = components(tiles, terrain)
+        assert.ok(groups.length >= min && groups.length <= max, biome + ': ' + seed)
+        for (const group of groups) {
+          assert.ok(shapes.some((shape) => shape.length === group.length))
+          for (const tile of group) {
+            const adjacent = neighbors(tile.q, tile.r).filter(
+              (n) => tiles.get(key(n.q, n.r))?.terrain === terrain,
+            ).length
+            assert.ok(terrain === 'mountain' ? adjacent <= 2 : adjacent >= 2)
+          }
         }
       }
     }
