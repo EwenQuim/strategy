@@ -63,4 +63,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
       - run: npm ci --ignore-scripts
       - run: npm run build
+      - name: Warm up Chrome so the first tests do not pay its cold start
+        run: |
+          node -e "require('playwright-core').chromium.launch({ channel: 'chrome' }).then((browser) => browser.close())"
       - run: npm run test:pwa:smoke

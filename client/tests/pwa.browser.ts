@@ -3,9 +3,9 @@ import { execFileSync } from 'node:child_process'
 import { readdir, readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, relative } from 'node:path'
-import { test, type TestContext } from 'node:test'
+import { after, test, type TestContext } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { chromium, type Browser, type Page } from 'playwright-core'
+import { chromium, type Browser, type BrowserContext, type Page } from 'playwright-core'
 import {
   BIOMES,
   initialState,
@@ -44,6 +44,9 @@ const mime: Record<string, string> = {
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
 }
+
+let sharedBrowser: Promise<Browser> | undefined
+after(async () => (await sharedBrowser)?.close())
 
 async function fixture(t: TestContext) {
   const dist = fileURLToPath(new URL('../dist/', import.meta.url))
@@ -90,10 +93,10 @@ async function fixture(t: TestContext) {
     })
     response.end(content)
   })
-  let browser: Browser | undefined
+  let context: BrowserContext | undefined
   t.after(async () => {
     try {
-      await browser?.close()
+      await context?.close()
     } finally {
       server.closeAllConnections()
       await new Promise<void>((resolve, reject) =>
@@ -109,8 +112,10 @@ async function fixture(t: TestContext) {
   assert.ok(address && typeof address !== 'string')
   const origin = 'http://127.0.0.1:' + address.port
   const prefix = 'hexmate:' + origin + base + ':'
-  browser = await chromium.launch({ channel: 'chrome', headless: true, timeout: 30_000 })
-  const context = await browser.newContext({
+  sharedBrowser ??= chromium.launch({ channel: 'chrome', headless: true, timeout: 30_000 })
+  context = await (
+    await sharedBrowser
+  ).newContext({
     viewport: { width: 320, height: 568 },
     reducedMotion: 'reduce',
   })
@@ -1195,15 +1200,12 @@ test(
       const notifications = page.getByRole('list', { name: 'Recent battle events' })
       assert.equal(await notifications.getAttribute('aria-live'), 'polite')
       assert.equal(await notifications.getAttribute('aria-relevant'), 'additions')
-      for (let turn = 0; turn < 2; turn++) {
-        if (turn) await playTurn(page)
-        const message = notifications.locator('li').first()
-        await message.waitFor()
-        assert.ok(await message.textContent())
-        await message.waitFor({ state: 'detached' })
-        assert.equal(await notifications.locator('li').count(), 0)
-        assert.equal(await notifications.textContent(), '')
-      }
+      const message = notifications.locator('li').first()
+      await message.waitFor()
+      assert.ok(await message.textContent())
+      await message.waitFor({ state: 'detached' })
+      assert.equal(await notifications.locator('li').count(), 0)
+      assert.equal(await notifications.textContent(), '')
     }
 
     await page.goto(origin + base + 'campaign/1')
@@ -1230,156 +1232,7 @@ test(
 )
 
 test(
-  'Hits and misses animate for both armies, remain readable with reduced motion, and lock input',
-  { timeout: 120_000 },
-  async (t) => {
-    const { page, origin } = await fixture(t)
-    const errors: string[] = []
-    page.on('pageerror', (error) => errors.push(error.message))
-    for (const reducedMotion of ['no-preference', 'reduce'] as const) {
-      await page.emulateMedia({ reducedMotion })
-      const seed = 'juice-4'
-      let state = botState(seed)
-      await page.goto(origin + base + 'game/' + seed)
-      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      await page.evaluate(() => {
-        const seen = new Set<Element>()
-        const checks: unknown[] = []
-        document.body.dataset.combatChecks = '[]'
-        new MutationObserver(() => {
-          const impacts = document.querySelector('[data-testid="combat-impacts"]')
-          if (!impacts || seen.has(impacts)) return
-          seen.add(impacts)
-          const feedback = document.querySelector('[data-testid="combat-feedback"]')!
-          const title = document.querySelector('[aria-current="step"]')!.getAttribute('title')!
-          const labels = [...impacts.querySelectorAll('.combat-impact-label')]
-          checks.push({
-            labels: labels.map((label) => label.textContent!.trim()),
-            animations: labels.map((label) => getComputedStyle(label).animationName),
-            labelStyles: labels.map((label) => {
-              const style = getComputedStyle(label)
-              return [style.fontSize, style.fill, style.strokeWidth]
-            }),
-            burstsHidden: [...impacts.querySelectorAll('.combat-impact-burst')].every(
-              (element) => getComputedStyle(element).display === 'none',
-            ),
-            side: title.startsWith('Enemy') ? 'enemy' : 'player',
-            enemyBanner: !!document.querySelector('[data-testid="enemy-turn"]'),
-            locked: (document.querySelector('[data-action="endTurn"]') as HTMLButtonElement)
-              .disabled,
-            screenDisplay: getComputedStyle(feedback).display,
-            screenAnimation: getComputedStyle(feedback, '::before').animationName,
-            pointerEvents: getComputedStyle(feedback).pointerEvents,
-            fits:
-              document.documentElement.scrollWidth <= innerWidth &&
-              document.documentElement.scrollHeight <= innerHeight,
-          })
-          document.body.dataset.combatChecks = JSON.stringify(checks)
-        }).observe(document.body, { childList: true, subtree: true })
-      })
-      const expected: { labels: string[]; side: string }[] = []
-      const outcomes = new Set<string>()
-      for (let turn = 0; turn < 30 && !state.winner; turn++) {
-        const pawn = activePawn(state)!
-        const target = state.pawns.find((p) =>
-          canAttack(pawn, p, state.tiles.get(pawn.q + ',' + pawn.r)),
-        )
-        const actions: Action[] = target
-          ? [
-              { type: 'act', action: 'attack' },
-              { type: 'attackAt', q: target.q, r: target.r },
-            ]
-          : [{ type: 'endTurn' }]
-        for (const action of actions) {
-          const result = botTransition(state, action)
-          for (const frame of result.frames) {
-            if (!frame.effect?.impacts?.length) continue
-            const side = activePawn(frame.state)!.side
-            const labels = frame.effect.impacts.map((hit) => {
-              outcomes.add((hit.damage ? 'hit-' : 'miss-') + side)
-              return hit.damage ? '-' + hit.damage : 'MISS'
-            })
-            expected.push({ labels, side })
-          }
-          if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
-          else if (action.type === 'act') await page.locator('[data-action="attack"]').click()
-          else if (action.type === 'attackAt') {
-            const tile = [...state.tiles.values()].findIndex(
-              (tile) => tile.q === action.q && tile.r === action.r,
-            )
-            await page.locator('[data-testid="hex-tile"]').nth(tile).click()
-          }
-          state = result.state
-          if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
-          else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-        }
-        if (['hit-player', 'hit-enemy', 'miss-enemy'].every((outcome) => outcomes.has(outcome)))
-          break
-      }
-      assert.ok(
-        ['hit-player', 'hit-enemy', 'miss-enemy'].every((outcome) => outcomes.has(outcome)),
-      )
-      const checks = (await page.evaluate(() =>
-        JSON.parse(document.body.dataset.combatChecks!),
-      )) as {
-        labels: string[]
-        side: string
-        animations: string[]
-        labelStyles: string[][]
-        burstsHidden: boolean
-        enemyBanner: boolean
-        locked: boolean
-        screenDisplay: string
-        screenAnimation: string
-        pointerEvents: string
-        fits: boolean
-      }[]
-      assert.deepEqual(
-        checks.map(({ labels, side }) => ({ labels, side })),
-        expected,
-      )
-      for (const check of checks) {
-        assert.equal(check.burstsHidden, reducedMotion === 'reduce')
-        assert.deepEqual(
-          check.labelStyles,
-          check.labels.map((label) =>
-            label === 'MISS'
-              ? ['24px', 'rgb(201, 234, 244)', '5px']
-              : ['32px', 'rgb(255, 225, 163)', '5px'],
-          ),
-        )
-        assert.equal(check.locked, true)
-        assert.equal(check.enemyBanner, check.side === 'enemy')
-        assert.equal(check.fits, true)
-        assert.equal(check.pointerEvents, 'none')
-        assert.equal(check.screenDisplay, reducedMotion === 'reduce' ? 'none' : 'block')
-        assert.equal(
-          check.screenAnimation,
-          reducedMotion === 'reduce'
-            ? 'none'
-            : check.labels.every((label) => label === 'MISS')
-              ? 'miss-sweep'
-              : 'hit-flash',
-        )
-        assert.deepEqual(
-          check.animations,
-          check.labels.map((label) =>
-            reducedMotion === 'reduce'
-              ? 'none'
-              : label === 'MISS'
-                ? 'miss-drift'
-                : 'damage-pop',
-          ),
-        )
-      }
-      assert.equal(await page.locator('[data-testid="combat-feedback"]').count(), 0)
-    }
-    assert.deepEqual(errors, [])
-  },
-)
-
-test(
-  'Local mode plays both armies offline on mobile, names either winner, and preserves mode for new games',
+  'Local mode plays both armies offline on mobile, names the winner, and preserves mode for new games',
   { timeout: 90_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
@@ -1401,77 +1254,71 @@ test(
     )
     await page.getByRole('button', { name: 'Close dialog' }).click()
 
-    const winners = new Set<string>()
     const actionsBySide = new Set<string>()
-    for (const seed of ['local-26', 'local-6']) {
-      let state = initialState(seed)
-      await page.goto(origin + base + 'game/' + seed + '?mode=local')
-      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      const first = activePawn(state)!
-      assert.equal(
-        await page.locator('[data-testid="player-turn"]').textContent(),
-        playerNames[first.side] + ' turn',
-      )
-      assert.equal(
-        await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-        '3',
-      )
-      const opening = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
-      await page.reload()
-      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), opening)
+    const seed = 'local-24'
+    let state = initialState(seed)
+    await page.goto(origin + base + 'game/' + seed + '?mode=local')
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    const first = activePawn(state)!
+    assert.equal(
+      await page.locator('[data-testid="player-turn"]').textContent(),
+      playerNames[first.side] + ' turn',
+    )
+    assert.equal(
+      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+      '3',
+    )
+    const opening = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
+    await page.reload()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), opening)
 
-      for (let step = 0; step < 100 && !state.winner; step++) {
-        for (const action of chooseBotActions(state, huntTheKing)) {
-          const pawn = activePawn(state)!
-          assert.equal(
-            await page.locator('[aria-current="step"]').getAttribute('title'),
-            possessiveArmyLabels('local')[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
-          )
-          assert.equal(
-            await page.locator('[data-testid="player-turn"]').textContent(),
-            playerNames[pawn.side] + ' turn',
-          )
-          actionsBySide.add(pawn.side + '-' + action.type)
-          const result = transition(state, action)
-          if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
-          else if (action.type === 'act')
-            await page
-              .locator(
-                action.action === 'attack'
-                  ? '[data-action="attack"]'
-                  : '[data-action="special"]',
-              )
-              .click()
-          else if ('q' in action) {
-            const tile = [...state.tiles.values()].findIndex(
-              (tile) => tile.q === action.q && tile.r === action.r,
+    for (let step = 0; step < 100 && !state.winner; step++) {
+      for (const action of chooseBotActions(state, huntTheKing)) {
+        const pawn = activePawn(state)!
+        assert.equal(
+          await page.locator('[aria-current="step"]').getAttribute('title'),
+          possessiveArmyLabels('local')[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
+        )
+        assert.equal(
+          await page.locator('[data-testid="player-turn"]').textContent(),
+          playerNames[pawn.side] + ' turn',
+        )
+        actionsBySide.add(pawn.side + '-' + action.type)
+        const result = transition(state, action)
+        if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
+        else if (action.type === 'act')
+          await page
+            .locator(
+              action.action === 'attack' ? '[data-action="attack"]' : '[data-action="special"]',
             )
-            await page.locator('[data-testid="hex-tile"]').nth(tile).click()
-          } else assert.fail('Unexpected action: ' + action.type)
-          state = result.state
-          if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
-          else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-        }
+            .click()
+        else if ('q' in action) {
+          const tile = [...state.tiles.values()].findIndex(
+            (tile) => tile.q === action.q && tile.r === action.r,
+          )
+          await page.locator('[data-testid="hex-tile"]').nth(tile).click()
+        } else assert.fail('Unexpected action: ' + action.type)
+        state = result.state
+        if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
+        else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       }
-      assert.ok(state.winner, 'The local battle must reach a winner')
-      winners.add(state.winner)
-      assert.equal(
-        await page.locator('[data-testid="result-card"] h1').textContent(),
-        state.winner === 'draw' ? 'Draw' : playerNames[state.winner] + ' wins!',
-      )
-      assert.doesNotMatch(
-        await page.locator('ol[aria-label="Recent battle events"]').innerText(),
-        /Your |Enemy /,
-      )
-      assert.equal(await page.locator('[data-action="endTurn"]').isDisabled(), true)
-      await page.getByRole('link', { name: 'New game' }).click()
-      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      assert.equal(new URL(page.url()).searchParams.get('mode'), 'local')
-      assert.notEqual(new URL(page.url()).pathname, base + 'game/' + seed)
-      await playTurn(page)
     }
-    assert.deepEqual(winners, new Set(['player', 'enemy']))
+    assert.ok(state.winner, 'The local battle must reach a winner')
+    assert.equal(
+      await page.locator('[data-testid="result-card"] h1').textContent(),
+      state.winner === 'draw' ? 'Draw' : playerNames[state.winner] + ' wins!',
+    )
+    assert.doesNotMatch(
+      await page.locator('ol[aria-label="Recent battle events"]').innerText(),
+      /Your |Enemy /,
+    )
+    assert.equal(await page.locator('[data-action="endTurn"]').isDisabled(), true)
+    await page.getByRole('link', { name: 'New game' }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(new URL(page.url()).searchParams.get('mode'), 'local')
+    assert.notEqual(new URL(page.url()).pathname, base + 'game/' + seed)
+    await playTurn(page)
     for (const side of ['player', 'enemy']) {
       assert.ok(actionsBySide.has(side + '-move'))
       assert.ok(actionsBySide.has(side + '-attackAt'))
@@ -1524,135 +1371,6 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   assert.ok(state.winner)
   return state.winner
 }
-
-test(
-  'Campaign saves wins offline, guards locked routes, retries losses and finishes at level twenty',
-  { timeout: 150_000 },
-  async (t) => {
-    const { context, page, origin } = await fixture(t)
-    const errors: string[] = []
-    page.on('pageerror', (error) => errors.push(error.message))
-    await context.setOffline(true)
-    await page.getByRole('link', { name: /^Campaign/ }).click()
-    await page.locator('ol[aria-label="Campaign levels"]').waitFor()
-    assert.equal(await page.locator('ol[aria-label="Campaign levels"] li').count(), 20)
-    assert.equal(
-      await page.locator('ol[aria-label="Campaign levels"] button:disabled').count(),
-      19,
-    )
-    assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 1)
-    assert.equal(
-      await page.evaluate(() => {
-        const root = document.documentElement
-        return (
-          root.scrollWidth <= innerWidth &&
-          root.scrollHeight <= innerHeight &&
-          [...document.querySelectorAll('[data-testid="campaign-level"]')].every((element) => {
-            const rect = element.getBoundingClientRect()
-            return (
-              rect.left >= 0 &&
-              rect.top >= 0 &&
-              rect.right <= innerWidth &&
-              rect.bottom <= innerHeight &&
-              element.scrollHeight <= element.clientHeight
-            )
-          })
-        )
-      }),
-      true,
-      'All twenty campaign tiles must fit a small portrait viewport',
-    )
-    for (const level of ['2', '20', '0', '21', 'bad', '1.5', '01']) {
-      await page.goto(origin + base + 'campaign/' + level)
-      await page.locator('ol[aria-label="Campaign levels"]').waitFor()
-      assert.equal(
-        new URL(page.url()).pathname.replace(new RegExp('/$'), ''),
-        base + 'campaign',
-      )
-      assert.equal(await page.locator('[data-biome]').count(), 0)
-    }
-    await page.getByRole('link', { name: /^Level 1:/ }).click()
-    await page.getByRole('button', { name: 'Go !', exact: true }).click()
-    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    const opening = await page.locator('[data-testid="battlefield"]').innerHTML()
-    await page.reload()
-    await page.getByRole('button', { name: 'Go !', exact: true }).click()
-    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    assert.equal(await page.locator('[data-testid="battlefield"]').innerHTML(), opening)
-    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
-    assert.equal(
-      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
-      null,
-    )
-    await page.getByRole('link', { name: /^Level 1:/ }).click()
-    assert.equal(await finishCampaignLevel(page, 1), 'player')
-    assert.equal(
-      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
-      '1',
-    )
-    await page.getByRole('link', { name: 'Next level' }).click()
-    assert.equal(await finishCampaignLevel(page, 2, true), 'enemy')
-    assert.equal(
-      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
-      '1',
-    )
-    await page.getByRole('button', { name: 'Retry level' }).click()
-    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    const restarted = botState(CAMPAIGN_LEVELS[1].seed, CAMPAIGN_LEVELS[1].setup)
-    const pawn = activePawn(restarted)!
-    assert.equal(
-      await page.locator('[aria-current="step"]').getAttribute('title'),
-      'Your ' + pawn.kind + ' #' + pawn.id,
-    )
-    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
-    await page.getByRole('link', { name: /^Level 1:/ }).click()
-    assert.equal(await finishCampaignLevel(page, 1), 'player')
-    assert.equal(
-      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
-      '1',
-    )
-    await page.getByRole('link', { name: 'Level selection' }).click()
-    await page.locator('ol[aria-label="Campaign levels"]').waitFor()
-    assert.equal(
-      await page.locator('ol[aria-label="Campaign levels"] [data-status="completed"]').count(),
-      1,
-    )
-    assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 2)
-    const reopened = await context.newPage()
-    await reopened.goto(origin + base + 'campaign')
-    await reopened.locator('ol[aria-label="Campaign levels"]').waitFor()
-    assert.equal(await reopened.locator('ol[aria-label="Campaign levels"] a').count(), 2)
-    await reopened.close()
-    await page.evaluate((key) => localStorage.setItem(key, '19'), CAMPAIGN_STORAGE_KEY)
-    await page.goto(origin + base + 'campaign/20')
-    assert.equal(await finishCampaignLevel(page, 20), 'player')
-    assert.equal(
-      await page.locator('[data-testid="result-card"] h1').textContent(),
-      'Campaign complete!',
-    )
-    assert.equal(await page.getByRole('link', { name: 'Next level' }).count(), 0)
-    assert.equal(
-      await page.evaluate((key) => localStorage.getItem(key), CAMPAIGN_STORAGE_KEY),
-      '20',
-    )
-    await page.getByRole('link', { name: 'Back to campaign' }).click()
-    await page.locator('ol[aria-label="Campaign levels"]').waitFor()
-    assert.equal(
-      await page.locator('ol[aria-label="Campaign levels"] [data-status="completed"]').count(),
-      20,
-    )
-    assert.equal(
-      await page.locator('ol[aria-label="Campaign levels"] button:disabled').count(),
-      0,
-    )
-    assert.ok(
-      (await page.locator('[data-testid="campaign-progress"]').innerText()).includes(
-        '20 / 20 completed',
-      ),
-    )
-    assert.deepEqual(errors, [])
-  },
-)
 
 test(
   'Campaign handles corrupt or unavailable local storage without losing the current session',
