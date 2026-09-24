@@ -1,7 +1,12 @@
 import type { SeededRandom } from './random.ts'
 import { BIOMES, type Biome } from './biomes/index.ts'
 import type { MapFeature, Shape } from './biomes/biome.ts'
-import type { Axial, Terrain, Tile, TileFeature } from './types.ts'
+
+export type Axial = { q: number; r: number }
+export type Terrain =
+  'plain' | 'forest' | 'mountain' | 'lake' | 'sand' | 'palm' | 'basalt' | 'lava'
+export type TileFeature = 'watchtower' | 'spring' | 'rune'
+export type Tile = { q: number; r: number; terrain: Terrain; feature?: TileFeature }
 
 export const MAP_WIDTH = 8
 export const MAP_HEIGHT = 12

@@ -1,7 +1,9 @@
-import { hexDist, key, neighbors, passable } from './hex.ts'
+import { hexDist, key, neighbors, passable, type Axial, type Tile } from './hex.ts'
 import type { AttackProfile, Pawn } from './pawns/index.ts'
 import type { SeededRandom } from './random.ts'
-import type { Action, Axial, BattleImpact, Tile } from './types.ts'
+import type { Action } from './engine.ts'
+
+export type BattleImpact = Axial & { damage: number }
 
 type WalkingPath = { path: Tile[]; damage: number }
 

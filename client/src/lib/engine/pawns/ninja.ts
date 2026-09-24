@@ -1,6 +1,6 @@
 import { aimAt, canUseSpecial, enterTiles } from '../combat.ts'
 import { hexDist, key, passable } from '../hex.ts'
-import type { Tile } from '../types.ts'
+import type { Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {

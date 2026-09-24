@@ -1,8 +1,8 @@
 import { initialTransition, createBotGame } from './engine/bot.ts'
 import type { BotDifficulty } from './engine/ai.ts'
-import { isImpactFrame, type BattleFrame } from './engine/types.ts'
+import { isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
-import type { Action, BattleSetup, Transition } from './engine/types.ts'
+import type { Action, BattleSetup, Transition } from './engine/index.ts'
 import type { GameMode } from './game-mode.ts'
 import type { OnlineAction } from './online.ts'
 

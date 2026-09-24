@@ -1,4 +1,4 @@
-import type { Terrain } from '../types.ts'
+import type { Terrain } from '../hex.ts'
 
 export type Shape = [number, number][]
 
