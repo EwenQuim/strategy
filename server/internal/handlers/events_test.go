@@ -92,7 +92,9 @@ func newEventServer(t *testing.T, svc *service.Service) *httptest.Server {
 	))
 	handlers.Register(s, svc)
 	ts := httptest.NewUnstartedServer(s.Mux)
-	ts.Config.WriteTimeout = 100 * time.Millisecond
+	// Slow enough for regular handlers on a loaded CI runner, short enough
+	// that the events stream must extend its write deadline before the 15s heartbeat.
+	ts.Config.WriteTimeout = 5 * time.Second
 	ts.Start()
 	t.Cleanup(ts.Close)
 	return ts
