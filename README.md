@@ -34,7 +34,9 @@ The browser's native `EventSource` retries dropped connections after two seconds
 
 Responses disable caching, transformations, and nginx buffering. Configure other reverse proxies to stream responses without buffering and use an idle timeout longer than 15 seconds. Server write deadlines are renewed on each heartbeat instead of ending every stream at Fuego's default 30-second timeout.
 
-The server checks the store once per second per connection and only sends changed snapshots. This preserves the two-process, shared-SQLite Docker setup; it removes browser polling, not database polling. An in-process broadcast alone would miss the other instance's moves. Games survive server restarts only when `DB_PATH` is configured.
+Successful joins and moves notify subscribers in the monolith after the storage write succeeds. Streams read a fresh snapshot on notification; idle connections do not poll storage. Notifications are process-local: running multiple instances against the same storage would also require cross-instance notifications. No shared messaging service is needed for the current single-instance deployment. Games survive server restarts only when `DB_PATH` is configured.
+
+For local two-player testing, Docker exposes the same server on ports 8080 and 8081. The two browser origins keep player credentials separate without running a second backend.
 
 ## Offline play and installation
 

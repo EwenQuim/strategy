@@ -32,10 +32,28 @@ func TestGameLifecycle(t *testing.T) {
 				t.Fatalf("new game status=%s version=%d", creds.Game.Status, creds.Game.Version)
 			}
 
+			updates, unsubscribe := svc.Subscribe(creds.Game.Code)
+			defer unsubscribe()
+			checkUpdate := func(want bool) {
+				t.Helper()
+				select {
+				case <-updates:
+					if !want {
+						t.Fatal("rejected write notified subscribers")
+					}
+				default:
+					if want {
+						t.Fatal("committed write did not notify subscribers")
+					}
+				}
+			}
+
 			endTurn := game.EngineAction{Type: game.ActionEndTurn}
 			if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, endTurn, nil); !errors.Is(err, game.ErrNotStarted) {
 				t.Fatalf("want ErrNotStarted, got %v", err)
 			}
+
+			checkUpdate(false)
 
 			joined, err := svc.Join(ctx, creds.Game.Code, "Bob")
 			if err != nil {
@@ -44,6 +62,7 @@ func TestGameLifecycle(t *testing.T) {
 			if joined.Side != game.Enemy || joined.Token == creds.Token {
 				t.Fatalf("bad joiner credentials: %+v", joined)
 			}
+			checkUpdate(true)
 			if _, err := svc.Join(ctx, creds.Game.Code, "Bob 2"); !errors.Is(err, game.ErrAlreadyJoined) {
 				t.Fatalf("want ErrAlreadyJoined, got %v", err)
 			}
@@ -52,6 +71,8 @@ func TestGameLifecycle(t *testing.T) {
 				t.Fatalf("want ErrNotParticipant, got %v", err)
 			}
 
+			checkUpdate(false)
+
 			g, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, endTurn, nil)
 			if err != nil {
 				t.Fatal(err)
@@ -59,9 +80,12 @@ func TestGameLifecycle(t *testing.T) {
 			if g.Version != 1 {
 				t.Fatalf("version after play = %d", g.Version)
 			}
+			checkUpdate(true)
 			if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 0, endTurn, nil); !errors.Is(err, game.ErrVersionConflict) {
 				t.Fatalf("want ErrVersionConflict, got %v", err)
 			}
+
+			checkUpdate(false)
 
 			winner := game.Enemy
 			g, err = svc.Play(ctx, creds.Game.Code, joined.Token, 1, endTurn, &winner)
@@ -71,9 +95,12 @@ func TestGameLifecycle(t *testing.T) {
 			if g.Status != game.Finished || g.Winner == nil || *g.Winner != game.Enemy {
 				t.Fatalf("finished game status=%s winner=%v", g.Status, g.Winner)
 			}
+			checkUpdate(true)
 			if _, err := svc.Play(ctx, creds.Game.Code, creds.Token, 2, endTurn, nil); !errors.Is(err, game.ErrFinished) {
 				t.Fatalf("want ErrFinished, got %v", err)
 			}
+
+			checkUpdate(false)
 
 			g, err = svc.Game(ctx, creds.Game.Code)
 			if err != nil {

@@ -11,7 +11,10 @@ import (
 )
 
 func (h *Handlers) gameEvents(w http.ResponseWriter, r *http.Request) {
-	g, err := h.svc.Game(r.Context(), r.PathValue("code"))
+	code := r.PathValue("code")
+	updates, unsubscribe := h.svc.Subscribe(code)
+	defer unsubscribe()
+	g, err := h.svc.Game(r.Context(), code)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if errors.Is(err, game.ErrNotFound) {
@@ -45,9 +48,6 @@ func (h *Handlers) gameEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read the shared store so updates from the other Docker instance reach this stream.
-	updates := time.NewTicker(time.Second)
-	defer updates.Stop()
 	heartbeat := time.NewTicker(15 * time.Second)
 	defer heartbeat.Stop()
 	for {
@@ -58,7 +58,7 @@ func (h *Handlers) gameEvents(w http.ResponseWriter, r *http.Request) {
 			if err := write("event: heartbeat\ndata: {}\n\n"); err != nil {
 				return
 			}
-		case <-updates.C:
+		case <-updates:
 			next, err := h.svc.Game(r.Context(), g.Code)
 			if err != nil {
 				return

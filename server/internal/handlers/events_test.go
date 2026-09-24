@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 
 	"hexmate/server/internal/game"
 	"hexmate/server/internal/handlers"
+	"hexmate/server/internal/memory"
 	"hexmate/server/internal/service"
 	"hexmate/server/internal/sqlite"
 )
@@ -67,27 +70,42 @@ func readSnapshot(t *testing.T, reader *bufio.Reader) gameResponse {
 	return g
 }
 
-func TestGameEventsAcrossInstancesAndReconnect(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "game.db")
-	first, err := sqlite.Open(path)
-	if err != nil {
-		t.Fatal(err)
+type observedStore struct {
+	service.Store
+	reads     atomic.Int64
+	afterRead func()
+}
+
+func (s *observedStore) Game(ctx context.Context, code string) (game.Game, error) {
+	g, err := s.Store.Game(ctx, code)
+	s.reads.Add(1)
+	if s.afterRead != nil {
+		s.afterRead()
 	}
-	t.Cleanup(func() { _ = first.Close() })
-	second, err := sqlite.Open(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = second.Close() })
-	writer := service.New(second)
+	return g, err
+}
+
+func newEventServer(t *testing.T, svc *service.Service) *httptest.Server {
+	t.Helper()
 	s := fuego.NewServer(fuego.WithoutStartupMessages(), fuego.WithoutLogger(), fuego.WithEngineOptions(
 		fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{Disabled: true}),
 	))
-	handlers.Register(s, service.New(first))
+	handlers.Register(s, svc)
 	ts := httptest.NewUnstartedServer(s.Mux)
 	ts.Config.WriteTimeout = 100 * time.Millisecond
 	ts.Start()
 	t.Cleanup(ts.Close)
+	return ts
+}
+
+func TestGameEventsAndReconnect(t *testing.T) {
+	store, err := sqlite.Open(filepath.Join(t.TempDir(), "game.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+	writer := service.New(store)
+	ts := newEventServer(t, writer)
 
 	_, creator := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]string{"name": "Ewen"})
 	res, stream := openEvents(t, ts, creator.Game.Code)
@@ -118,14 +136,46 @@ func TestGameEventsAcrossInstancesAndReconnect(t *testing.T) {
 	}
 }
 
-func TestGameEventsHeartbeat(t *testing.T) {
+func TestGameEventsHeartbeatDoesNotReadStorage(t *testing.T) {
 	t.Parallel()
-	ts := newTestServer(t)
+	store := &observedStore{Store: memory.New()}
+	ts := newEventServer(t, service.New(store))
 	_, creator := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]string{"name": "Ewen"})
 	_, stream := openEvents(t, ts, creator.Game.Code)
 	readSnapshot(t, stream)
 	if event := readEvent(t, stream); event != "event: heartbeat\ndata: {}\n" {
 		t.Fatalf("idle stream: %q", event)
+	}
+	if reads := store.reads.Load(); reads != 1 {
+		t.Fatalf("idle stream read storage %d times, want only the initial snapshot", reads)
+	}
+}
+
+func TestGameEventsSubscribeBeforeSnapshot(t *testing.T) {
+	store := &observedStore{Store: memory.New()}
+	svc := service.New(store)
+	creator, err := svc.Create(t.Context(), "Ewen")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var once sync.Once
+	joined := make(chan error, 1)
+	store.afterRead = func() {
+		once.Do(func() {
+			_, err := svc.Join(t.Context(), creator.Game.Code, "Bob")
+			joined <- err
+		})
+	}
+	ts := newEventServer(t, svc)
+	_, stream := openEvents(t, ts, creator.Game.Code)
+	if err := <-joined; err != nil {
+		t.Fatal(err)
+	}
+	if g := readSnapshot(t, stream); g.Status != "waiting" {
+		t.Fatalf("initial snapshot: %+v", g)
+	}
+	if g := readSnapshot(t, stream); g.Status != "active" {
+		t.Fatalf("join during the initial read was missed: %+v", g)
 	}
 }
 
