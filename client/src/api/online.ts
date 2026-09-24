@@ -1,4 +1,13 @@
-import { getGame, useCreateGame, useGetGame, useJoinGame } from '../../generated/sdk.gen.ts'
+import { useEffect, useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  getGame,
+  getGetGameQueryKey,
+  useCreateGame,
+  useGetGame,
+  useJoinGame,
+} from '../../generated/sdk.gen.ts'
+import { watchOnlineGame } from './events.ts'
 import type { PublicGame } from '../../generated/sdk.gen.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { OnlineAction, OnlineGame, StoredGame } from '../lib/online.ts'
@@ -22,9 +31,22 @@ export const onlineGameQueryOptions = (code: string) => ({
   queryFn: async () => fetchOnlineGame(code),
 })
 
-export function useOnlineGame(code: string, options?: Parameters<typeof useGetGame>[1]) {
-  const query = useGetGame(code, options)
-  return { ...query, data: query.data ? toOnlineGame(query.data as PublicGame) : undefined }
+export function useOnlineGame(code: string, stream = false) {
+  const client = useQueryClient()
+  const query = useGetGame(code, {
+    query: { staleTime: Infinity, refetchOnReconnect: false },
+  })
+  const live = stream && !!query.data && query.data.status !== 'finished'
+
+  useEffect(() => {
+    if (!live) return
+    return watchOnlineGame(code, (data) => {
+      client.setQueryData(getGetGameQueryKey(code), JSON.parse(data) as PublicGame)
+    })
+  }, [client, code, live])
+
+  const data = useMemo(() => (query.data ? toOnlineGame(query.data) : undefined), [query.data])
+  return { ...query, data }
 }
 
 export async function fetchOnlineGame(code: string): Promise<OnlineGame> {

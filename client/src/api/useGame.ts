@@ -19,8 +19,6 @@ export interface GameOptions {
   online?: OnlineSession
 }
 
-const POLL_INTERVAL_MS = 2000
-
 export function useGame({
   seed,
   mode,
@@ -41,34 +39,33 @@ export function useGame({
   )
   const frame = playback.frames[0]
   const appliedActions = useRef(0)
+  const needsResync = useRef(false)
 
-  const live = !!online && !playback.state.winner
-  const game = useOnlineGame(online?.code ?? '', {
-    query: {
-      enabled: live,
-      refetchInterval: live ? POLL_INTERVAL_MS : false,
-    },
-  })
+  const game = useOnlineGame(online?.code ?? '')
   const playAction = usePlayAction()
 
   useEffect(() => {
     if (!online) return
     const actions: OnlineAction[] | undefined = game.data?.actions
     if (!actions) return
-    if (actions.length !== appliedActions.current) {
+    if (actions.length !== appliedActions.current || needsResync.current) {
       appliedActions.current = actions.length
+      needsResync.current = false
       dispatch({ type: 'resync', actions })
     }
-  }, [game.data, online])
+  }, [game.data, game.dataUpdatedAt, online])
 
   const resync = useCallback(async () => {
     if (!online) return
+    needsResync.current = true
     try {
       const doc = await fetchOnlineGame(online.code)
+      if (doc.actions.length < appliedActions.current) return
       appliedActions.current = doc.actions.length
+      needsResync.current = false
       dispatch({ type: 'resync', actions: doc.actions })
     } catch {
-      // server unreachable: keep local state, next poll retries
+      // A reconnect snapshot also repairs rejected optimistic moves at the same version.
     }
   }, [online])
 
@@ -96,7 +93,7 @@ export function useGame({
               winner: winner ?? null,
             },
           })
-          appliedActions.current = res.version
+          appliedActions.current = Math.max(appliedActions.current, res.version)
         } catch {
           await resync()
         }
