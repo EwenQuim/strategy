@@ -4,7 +4,7 @@ export const volcano: BiomeDefinition = {
   name: 'Ember Caldera',
   description: 'lava pools over dark basalt',
   ground: 'basalt',
-  feature: { terrain: 'lava', min: 3, max: 6, shapes: poolShapes },
+  features: [{ terrain: 'lava', min: 3, max: 6, shapes: poolShapes }],
   theme: {
     '--biome-background': '#2b202b',
     '--biome-glow': '#d56b3b55',

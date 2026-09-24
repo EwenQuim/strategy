@@ -5,7 +5,7 @@ export const desert: BiomeDefinition = {
   description: 'oases and rare decorative palms',
   ground: 'sand',
   scatter: { terrain: 'palm', chance: 0.04 },
-  feature: { terrain: 'lake', min: 1, max: 3, shapes: poolShapes },
+  features: [{ terrain: 'lake', min: 1, max: 3, shapes: poolShapes }],
   theme: {
     '--biome-background': '#805537',
     '--biome-glow': '#f4c46e85',

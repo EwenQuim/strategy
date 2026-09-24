@@ -63,38 +63,23 @@ test('Each biome has deterministic, connected terrain and the intended obstacle 
       assert.equal(tiles.size, MAP_WIDTH * MAP_HEIGHT)
       const land = [...tiles.values()].filter(passable)
       assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
-      const lakes = components(tiles, 'lake')
-      const chains = components(tiles, 'mountain')
-      if (biome === 'mountains') {
-        assert.equal(lakes.length, 0)
+      const { features } = BIOMES[biome]
+      for (const obstacle of ['mountain', 'lake', 'lava'] as const) {
+        if (!features.some((feature) => feature.terrain === obstacle))
+          assert.equal(components(tiles, obstacle).length, 0)
+      }
+      if (features.some((feature) => feature.terrain === 'mountain'))
         assert.ok([...tiles.values()].every((tile) => tile.terrain !== 'forest'))
-        assert.ok(chains.length >= 3 && chains.length <= 5, seed + ': ' + chains.length)
-        for (const chain of chains) {
-          assert.ok(chain.length >= 4 && chain.length <= 7)
-          assert.ok(
-            chain.every(
-              (tile) =>
-                neighbors(tile.q, tile.r).filter(
-                  (n) => tiles.get(key(n.q, n.r))?.terrain === 'mountain',
-                ).length <= 2,
-            ),
-          )
-        }
-      } else {
-        assert.equal(chains.length, 0)
-        const pools = components(tiles, biome === 'volcano' ? 'lava' : 'lake')
-        const { min, max } = BIOMES[biome].feature!
-        assert.ok(pools.length >= min && pools.length <= max, seed + ': ' + pools.length)
-        assert.equal(lakes.length > 0, biome !== 'volcano')
-        for (const lake of pools) {
-          assert.ok(lake.length >= 3 && lake.length <= 6)
-          for (const tile of lake) {
-            assert.ok(
-              neighbors(tile.q, tile.r).filter(
-                (n) =>
-                  tiles.get(key(n.q, n.r))?.terrain === (biome === 'volcano' ? 'lava' : 'lake'),
-              ).length >= 2,
-            )
+      for (const { terrain, min, max, shapes } of features) {
+        const groups = components(tiles, terrain)
+        assert.ok(groups.length >= min && groups.length <= max, biome + ': ' + seed)
+        for (const group of groups) {
+          assert.ok(shapes.some((shape) => shape.length === group.length))
+          for (const tile of group) {
+            const adjacent = neighbors(tile.q, tile.r).filter(
+              (n) => tiles.get(key(n.q, n.r))?.terrain === terrain,
+            ).length
+            assert.ok(terrain === 'mountain' ? adjacent <= 2 : adjacent >= 2)
           }
         }
       }
@@ -102,7 +87,7 @@ test('Each biome has deterministic, connected terrain and the intended obstacle 
   }
 })
 
-test('Seeded games cover all biomes without breaking shapes or isolating spawn tiles', () => {
+test('Seeded games cover random biomes without Hell, broken shapes or isolated spawn tiles', () => {
   const biomes = new Set<Biome>()
   for (let index = 0; index < 100; index++) {
     const state = initialState('biome-' + index)
@@ -113,10 +98,7 @@ test('Seeded games cover all biomes without breaking shapes or isolating spawn t
     assert.equal(connected.size, land.length)
     for (const pawn of state.pawns) {
       assert.ok(connected.has(key(pawn.q, pawn.r)))
-      assert.equal(
-        state.tiles.get(key(pawn.q, pawn.r))?.terrain,
-        state.biome === 'desert' ? 'sand' : state.biome === 'volcano' ? 'basalt' : 'plain',
-      )
+      assert.equal(state.tiles.get(key(pawn.q, pawn.r))?.terrain, BIOMES[state.biome].ground)
     }
     for (const terrain of ['lake', 'lava', 'mountain'] as const) {
       for (const feature of components(state.tiles, terrain)) {
@@ -124,7 +106,7 @@ test('Seeded games cover all biomes without breaking shapes or isolating spawn t
       }
     }
   }
-  assert.deepEqual(biomes, new Set(Object.keys(BIOMES)))
+  assert.deepEqual(biomes, new Set(Object.keys(BIOMES).filter((biome) => biome !== 'hell')))
 })
 
 function lakeBattle(side: Side): GameState {
@@ -132,6 +114,7 @@ function lakeBattle(side: Side): GameState {
   return {
     ...initialState('lake-battle'),
     biome: 'verdant',
+    hellfire: [],
     tiles: new Map(
       Array.from({ length: 7 }, (_, q) => [
         key(q, 0),

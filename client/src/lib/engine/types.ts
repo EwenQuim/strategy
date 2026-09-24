@@ -17,6 +17,7 @@ export type PawnPlacement = {
 export type FixedBattleSetup = {
   readonly biome: Biome
   readonly map: readonly string[]
+  readonly hellfireCount?: 1 | 2
   readonly player: readonly PawnPlacement[]
   readonly enemy: readonly PawnPlacement[]
 }
@@ -36,13 +37,14 @@ export type GameState = {
   biome: Biome
   randomState: number
   tiles: Map<string, Tile>
+  hellfire: Axial[]
   pawns: Pawn[]
   order: number[]
   active: number
   round: number
   phase: Phase
   chargeDestination: Axial | null
-  winner: Side | null
+  winner: Side | 'draw' | null
   log: string[]
   logCount: number
 }
@@ -50,9 +52,10 @@ export type GameState = {
 export type BattleImpact = Axial & { damage: number }
 
 export type BattleEffect = {
-  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'escape' | 'protect'
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'escape' | 'protect' | 'hellfire'
   from: Axial
   to: Axial
+  centers?: Axial[]
   impacts?: BattleImpact[]
 }
 

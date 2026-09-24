@@ -1,0 +1,53 @@
+import { bendShape, lineShape, poolShapes, type BiomeDefinition } from './biome.ts'
+
+export const hell: BiomeDefinition = {
+  name: 'Hell',
+  description:
+    'obsidian basalt, small lava pools, short mountain chains, and full-round Hellfire warnings',
+  ground: 'basalt',
+  features: [
+    { terrain: 'lava', min: 2, max: 3, shapes: poolShapes.slice(0, 2) },
+    {
+      terrain: 'mountain',
+      min: 2,
+      max: 3,
+      shapes: [lineShape(3), lineShape(4), bendShape(2, 3)],
+    },
+  ],
+  theme: {
+    '--biome-background': '#160d17',
+    '--biome-glow': '#a52c4255',
+    '--biome-panel': '#21121d',
+    '--tile-base': '#321927',
+    '--tile-shade': '#0d080f',
+    '--move-tint': '#877a91',
+    '--selected-tint': '#c5a0a5',
+    '--plain-tile': '#433039',
+    '--basalt-tile': '#433039',
+    '--mountain-tile': '#4c303e',
+    '--basalt-light': '#504149',
+    '--basalt-shadow': '#180f17',
+    '--basalt-crack': '#120c12',
+    '--basalt-edge': '#a45459',
+    '--basalt-stone': '#604049',
+    '--basalt-speck': '#cf8e83',
+    '--mountain-shadow': '#130b13',
+    '--mountain-back': '#5b3c4b',
+    '--mountain-back-shade': '#2d1c2b',
+    '--mountain-front': '#7d4c59',
+    '--mountain-front-shade': '#452337',
+    '--mountain-peak': '#cf8e83',
+    '--tile-stroke-opacity': '0.14',
+    '--tile-light-opacity': '0.35',
+    '--ink': '#f4e5df',
+    '--muted': '#c3a8b4',
+    '--gold': '#f1b28d',
+    '--line': '#cf728733',
+    '--hellfire-warning': '#ffc193',
+    '--hellfire-impact': '#ff785e',
+    '--result-panel': '#21121df5',
+    '--result-scrim': '#160d17b8',
+    '--battlefield-image':
+      'radial-gradient(ellipse at 50% 60%, var(--biome-glow), transparent 70%), none, none',
+  },
+}

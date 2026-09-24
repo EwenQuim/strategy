@@ -1,4 +1,5 @@
 import { activePawn, reducer } from './engine.ts'
+import { inHellfire } from './hellfire.ts'
 import { canAttack, movementDestinations, walkingPaths, protectorFor } from './combat.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import {
@@ -32,7 +33,7 @@ function generateCandidates(state: GameState): Action[][] {
   const foes = state.pawns.filter((p) => p.side !== pawn.side)
   const moves = movementDestinations(state.tiles, state.pawns, pawn)
   const destinations =
-    pawn.kind === 'king'
+    pawn.kind === 'king' || inHellfire(state.hellfire, pawn)
       ? [...moves.keys()].map((position) => state.tiles.get(position)!).filter(Boolean)
       : neighbors(pawn.q, pawn.r)
   for (const tile of destinations) {
@@ -64,8 +65,9 @@ function estimateIncomingDamage(state: GameState, side: Side): Map<number, numbe
   const turnOffset = (id: number) =>
     (state.order.indexOf(id) - state.active + state.order.length) % state.order.length
   for (const foe of state.pawns.filter((p) => p.side !== side)) {
-    const attacker = foe.clone()
     const actsNextRound = state.order.indexOf(foe.id) < state.active
+    if (actsNextRound && foe.hp <= 1 && inHellfire(state.hellfire, foe)) continue
+    const attacker = foe.clone()
     attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
     if (attacker.energy <= 0) continue
     const moves = walkingPaths(state.tiles, state.pawns, attacker)
@@ -128,6 +130,7 @@ const SCORE = {
   kingLethalThreat: 100_000,
   kingAllyDistance: 0.5,
   attackDistance: 8,
+  hellfireDamage: 24,
 }
 const UNREACHABLE_DISTANCE = 100
 
@@ -137,28 +140,40 @@ function evaluatePosition(
   caution: number,
   distance: Map<string, number>,
 ): number {
-  if (state.winner) return state.winner === actor.side ? SCORE.victory : -SCORE.victory
   const sameTurn = activePawn(state)?.id === actor.id
   const settled = sameTurn ? reducer(state, { type: 'endTurn' }) : state
+  if (settled.winner)
+    return settled.winner === 'draw'
+      ? 0
+      : settled.winner === actor.side
+        ? SCORE.victory
+        : -SCORE.victory
   const danger = estimateIncomingDamage(settled, actor.side)
   let score = 0
   for (const pawn of settled.pawns) {
     const allied = pawn.side === actor.side
+    const hellfireDamage = Number(
+      settled.order.indexOf(pawn.id) < settled.active && inHellfire(settled.hellfire, pawn),
+    )
+    const health = pawn.hp - hellfireDamage
     const value =
-      pawn.kind === 'king'
-        ? SCORE.king + pawn.hp * SCORE.kingHealth
-        : SCORE.unit + pawn.attack.damage * SCORE.attackDamage + pawn.hp * SCORE.unitHealth
+      health <= 0
+        ? 0
+        : pawn.kind === 'king'
+          ? SCORE.king + health * SCORE.kingHealth
+          : SCORE.unit + pawn.attack.damage * SCORE.attackDamage + health * SCORE.unitHealth
     score += allied ? value : -value
     if (!allied) continue
     const incoming = danger.get(pawn.id) ?? 0
+    score -= hellfireDamage * SCORE.hellfireDamage
     if (pawn.kind === 'king') {
-      score -= incoming * SCORE.kingIncomingDamage
-      if (incoming >= pawn.hp) score -= SCORE.kingLethalThreat
+      score -= (incoming + hellfireDamage) * SCORE.kingIncomingDamage
+      if (incoming >= health) score -= SCORE.kingLethalThreat
     } else {
       const expected = incoming * (1 - pawn.escapeChance / 100)
       score -=
         caution *
-        (Math.min(pawn.hp, expected) * SCORE.unitHealth + (expected >= pawn.hp ? value : 0))
+        (Math.min(health, expected) * SCORE.unitHealth + (expected >= health ? value : 0))
     }
   }
   const pawn = settled.pawns.find((p) => p.id === actor.id) ?? actor

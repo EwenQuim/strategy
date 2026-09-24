@@ -6,7 +6,7 @@ import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { OnlineAction } from '../lib/online.ts'
 import type { BattleSetup, Transition } from '../lib/engine/types.ts'
-import type { BotDifficulty } from '../lib/bot.ts'
+import { isImpactFrame, type BotDifficulty } from '../lib/bot.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -107,13 +107,7 @@ export function useGame({
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timer = window.setTimeout(
       () => dispatch({ type: 'playbackNext' }),
-      frame.effect?.kind === 'bomb' || frame.effect?.impacts?.length
-        ? 700
-        : reducedMotion
-          ? 0
-          : frame.effect
-            ? 460
-            : 180,
+      isImpactFrame(frame) ? 700 : reducedMotion ? 0 : frame.effect ? 460 : 180,
     )
     return () => window.clearTimeout(timer)
   }, [frame])

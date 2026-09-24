@@ -4,15 +4,17 @@ export const mountains: BiomeDefinition = {
   name: 'Mountain Ranges',
   description: 'mountain chains',
   ground: 'plain',
-  feature: {
-    terrain: 'mountain',
-    min: 3,
-    max: 5,
-    shapes: [
-      ...[4, 5, 6, 7].map(lineShape),
-      ...[2, 3].flatMap((first) => [3, 4].map((second) => bendShape(first, second))),
-    ],
-  },
+  features: [
+    {
+      terrain: 'mountain',
+      min: 3,
+      max: 5,
+      shapes: [
+        ...[4, 5, 6, 7].map(lineShape),
+        ...[2, 3].flatMap((first) => [3, 4].map((second) => bendShape(first, second))),
+      ],
+    },
+  ],
   theme: {
     '--biome-background': '#263b4c',
     '--biome-glow': '#9db9d078',

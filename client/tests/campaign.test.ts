@@ -30,7 +30,13 @@ test('Every campaign level comes directly from one JSON with both complete armie
       assert.deepEqual(Object.keys(element).sort(), ['description', 'name'])
       assert.ok(element.name.length > 0 && element.description.length > 0)
     }
-    assert.deepEqual(Object.keys(level.setup).sort(), ['biome', 'enemy', 'map', 'player'])
+    assert.deepEqual(Object.keys(level.setup).sort(), [
+      'biome',
+      'enemy',
+      ...(level.id === 17 ? ['hellfireCount'] : []),
+      'map',
+      'player',
+    ])
     const state = coreState(level.seed, CAMPAIGN_LEVELS[level.id - 1].setup)
     for (const side of ['player', 'enemy'] as const)
       assert.deepEqual(
@@ -44,6 +50,27 @@ test('Every campaign level comes directly from one JSON with both complete armie
         level.setup[side],
       )
   }
+})
+
+test('The last four encounters use Hell, introducing one warning before two', () => {
+  const hell = CAMPAIGN_LEVELS.filter((level) => level.setup.biome === 'hell')
+  assert.deepEqual(
+    hell.map((level) => level.id),
+    [17, 18, 19, 20],
+  )
+  assert.deepEqual(
+    hell.map((level) => coreState(level.seed, level.setup).hellfire.length),
+    [1, 2, 2, 2],
+  )
+})
+
+test('The campaign crosses the Vale, Mountains, Desert, Volcano then Hell, four levels each', () => {
+  assert.deepEqual(
+    CAMPAIGN_LEVELS.map((level) => level.setup.biome),
+    (['verdant', 'mountains', 'desert', 'volcano', 'hell'] as const).flatMap((biome) =>
+      Array<string>(4).fill(biome),
+    ),
+  )
 })
 
 test('Authored guardians cover their partners, including the wizard-flank deployment', () => {
@@ -63,11 +90,6 @@ test('Authored guardians cover their partners, including the wizard-flank deploy
 })
 
 test('All encounters have safe routes and later levels combine previously introduced features', () => {
-  const volcanic = CAMPAIGN_LEVELS.filter((level) => level.setup.biome === 'volcano')
-  assert.deepEqual(
-    volcanic.map((level) => level.id),
-    [9, 15, 18],
-  )
   const features: Record<TileFeature, number[]> = { watchtower: [], spring: [], rune: [] }
   for (const level of CAMPAIGN_LEVELS) {
     const state = coreState(level.seed, level.setup)
@@ -132,7 +154,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     magician: 4,
     bulwark: 7,
     bomber: 8,
-    ninja: 11,
+    ninja: 10,
   })
   assert.equal(CAMPAIGN_LEVELS[0].setup.player.length, 2)
   assert.equal(CAMPAIGN_LEVELS[0].setup.enemy.length, 1)
@@ -141,7 +163,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     assert.ok(level.intro.newElements.length <= 2)
   }
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.setup.map.join(''))).size, 20)
-  assert.ok(CAMPAIGN_LEVELS[10].setup.map.every((row) => row === 'ssssssss'))
+  assert.ok(CAMPAIGN_LEVELS[9].setup.map.every((row) => row === 'ssssssss'))
   for (const side of ['player', 'enemy'] as const)
     assert.deepEqual(
       new Set(CAMPAIGN_LEVELS[19].setup[side].map((pawn) => pawn.kind)),
@@ -152,7 +174,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
 test('Powder Lesson and Iron Caravan offer useful blasts without requiring friendly fire', () => {
   for (const [id, minimumHits] of [
     [8, 2],
-    [13, 3],
+    [12, 3],
   ] as const) {
     const level = CAMPAIGN_LEVELS[id - 1]
     const state = coreState(level.seed, level.setup)
@@ -201,7 +223,7 @@ test('Powder Lesson groups two bowmen above the swordsmen within one advanced bo
   assert.equal(fired.pawns.find((pawn) => pawn.id === bomber.id)?.energy, 0)
 })
 
-test('Wizard Curtain has four aligned casters and Forked Gate has two distinct crossings', () => {
+test('Wizard Curtain has four aligned casters and Hell has two connected double-width gates', () => {
   const level = CAMPAIGN_LEVELS[15]
   const state = coreState(level.seed, level.setup)
   const wizards = state.pawns.filter(
@@ -212,9 +234,18 @@ test('Wizard Curtain has four aligned casters and Forked Gate has two distinct c
   assert.deepEqual(mage.special.areaTargets!(state.pawns, wizards[0], mage), wizards)
   const gates = CAMPAIGN_LEVELS[16]
   for (const row of gates.setup.map.slice(5, 7))
-    assert.equal([...row].filter((tile) => tile !== '^').length, 2)
-  assert.ok(gates.setup.map[5].includes('W'))
-  assert.ok(gates.setup.map[6].includes('H'))
+    assert.deepEqual(
+      [...row].flatMap((tile, col) => (tile !== '^' ? [col] : [])),
+      [2, 3, 5, 6],
+    )
+  const passages = new Map(
+    [...coreState(gates.seed, gates.setup).tiles].filter(
+      ([, tile]) => tile.r === 5 || tile.r === 6,
+    ),
+  )
+  for (const col of [2, 5]) assert.equal(distFrom(passages, [hexOf(col, 5)]).size, 4)
+  assert.equal(gates.setup.map[5][2], 'W')
+  assert.equal(gates.setup.map[6][5], 'H')
 })
 
 test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {

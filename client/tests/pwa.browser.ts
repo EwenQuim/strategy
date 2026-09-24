@@ -9,6 +9,7 @@ import { chromium, type Browser, type Page } from 'playwright-core'
 import {
   BIOMES,
   initialState,
+  inHellfire,
   activePawn,
   canAttack,
   movementDestinations,
@@ -815,7 +816,7 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
     await context.setOffline(true)
-    for (const id of [5, 9, 14, 15, 18]) {
+    for (const id of [5, 13, 14, 15, 18]) {
       const level = CAMPAIGN_LEVELS[id - 1]
       await page.goto(origin + base + 'campaign/' + id)
       await page.getByRole('button', { name: 'Go !', exact: true }).click()
@@ -895,6 +896,140 @@ test(
             document.documentElement.scrollHeight <= innerHeight,
         ),
         true,
+      )
+    }
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'Hell campaign warnings fit compact layouts and show round-end impacts in both motion modes',
+  { timeout: 60_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
+    await context.setOffline(true)
+
+    async function checkWarnings(state: ReturnType<typeof initialState>) {
+      assert.deepEqual(
+        await page.getByTestId('hex-tile').evaluateAll((elements) =>
+          elements.map((element) => ({
+            warned: element.hasAttribute('data-hellfire'),
+            center: element.hasAttribute('data-hellfire-center'),
+            hatch:
+              element.querySelector('polygon[fill="url(#hellfire-hatch)"]')?.parentElement
+                ?.children.length === 1,
+            described:
+              /Hellfire (impact center|blast area), 1 unavoidable damage at round end$/.test(
+                element.getAttribute('aria-label')!,
+              ),
+          })),
+        ),
+        [...state.tiles.values()].map((tile) => ({
+          warned: inHellfire(state.hellfire, tile),
+          center: state.hellfire.some((center) => center.q === tile.q && center.r === tile.r),
+          hatch: inHellfire(state.hellfire, tile),
+          described: inHellfire(state.hellfire, tile),
+        })),
+      )
+    }
+
+    const level = CAMPAIGN_LEVELS[16]
+    await page.goto(origin + base + 'campaign/17')
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'hell')
+    await checkWarnings(initialState(level.seed, level.setup))
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 1280, height: 900 },
+      { width: 600, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport)
+      assert.equal(
+        await page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight &&
+            ['game-header', 'battlefield', 'command-deck', 'hellfire-cue'].every((id) => {
+              const rect = document
+                .querySelector('[data-testid="' + id + '"]')!
+                .getBoundingClientRect()
+              return (
+                rect.width > 0 &&
+                rect.height > 0 &&
+                rect.left >= 0 &&
+                rect.top >= 0 &&
+                rect.right <= innerWidth &&
+                rect.bottom <= innerHeight
+              )
+            }),
+        ),
+        true,
+        'Hell warnings and controls must fit ' + JSON.stringify(viewport),
+      )
+    }
+
+    const setup = { biome: 'hell', player: ['king'], enemy: ['king'] } as const
+    const seed = 'hellfire-ui'
+    const url =
+      origin +
+      base +
+      'game/' +
+      seed +
+      '?mode=local&setup=' +
+      encodeURIComponent(JSON.stringify(setup))
+    const endTurn = page.locator('[data-action="endTurn"]:not([disabled])')
+    await page.setViewportSize({ width: 320, height: 568 })
+    for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+      await page.emulateMedia({ reducedMotion })
+      await page.goto(url)
+      await endTurn.waitFor()
+      await checkWarnings(initialState(seed, setup))
+      const move = page.getByRole('button', { name: /^Move to .*Hellfire/ }).first()
+      assert.equal(await move.getByTestId('tile-face').getAttribute('fill'), 'var(--move-tint)')
+      assert.deepEqual(
+        await move.locator('polygon[fill="url(#hellfire-hatch)"]').evaluate((element) => ({
+          animation: getComputedStyle(element).animationName,
+          pointerEvents: getComputedStyle(element.parentElement!).pointerEvents,
+        })),
+        { animation: 'none', pointerEvents: 'none' },
+      )
+      await endTurn.click()
+      await endTurn.waitFor()
+      assert.equal(
+        await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
+        '1',
+      )
+      await endTurn.click()
+      await page.getByTestId('hellfire-effect').first().waitFor()
+      assert.deepEqual(
+        await page.locator('[data-kind="hellfire"]').evaluate((element) => ({
+          centers: element.querySelectorAll('[data-testid="hellfire-effect"]').length,
+          trails: element.querySelectorAll('line').length,
+          animation: getComputedStyle(
+            element.querySelector('[data-testid="hellfire-effect"] > g')!,
+          ).animationName,
+          damage: [...document.querySelectorAll('[data-testid="combat-impacts"] text')].map(
+            (label) => label.textContent,
+          ),
+          locked: (document.querySelector('[data-action="endTurn"]') as HTMLButtonElement)
+            .disabled,
+        })),
+        {
+          centers: 2,
+          trails: 0,
+          animation: reducedMotion === 'reduce' ? 'none' : 'hellfire-fall',
+          damage: ['-1', '-1'],
+          locked: true,
+        },
+      )
+      await endTurn.waitFor()
+      assert.equal(
+        await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
+        '2',
       )
     }
     assert.deepEqual(errors, [])
@@ -1323,7 +1458,7 @@ test(
       winners.add(state.winner)
       assert.equal(
         await page.locator('[data-testid="result-card"] h1').textContent(),
-        playerNames[state.winner] + ' wins!',
+        state.winner === 'draw' ? 'Draw' : playerNames[state.winner] + ' wins!',
       )
       assert.doesNotMatch(
         await page.locator('ol[aria-label="Recent battle events"]').innerText(),

@@ -2,8 +2,13 @@ import { iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSyncExternalStore } from 'react'
 import { Icon } from '../components/Icon'
+import { LevelMiniature } from '../components/LevelMiniature'
 import { CAMPAIGN_LEVELS, isLevelUnlocked } from '../lib/campaign'
+import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
+
+const levelCardClassName =
+  'flex size-full flex-col gap-1 overflow-hidden rounded-lg border border-line bg-(--biome-background) p-1.5 text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=completed]:border-[#89bba477] data-[status=ready]:border-gold disabled:text-muted [&:disabled>svg]:opacity-55 [&:not(:disabled):hover]:brightness-115'
 
 export const Route = createFileRoute('/campaign/')({
   component: function Campaign() {
@@ -38,10 +43,13 @@ export const Route = createFileRoute('/campaign/')({
             const status = cleared ? 'Completed' : unlocked ? 'Ready' : 'Locked'
             const content = (
               <>
-                <strong className="font-serif text-[20px] leading-[normal] font-normal text-gold">
-                  {level.id.toString().padStart(2, '0')}
-                </strong>
-                <span>{level.name}</span>
+                <LevelMiniature setup={level.setup} />
+                <span>
+                  <strong className="font-serif font-normal text-gold">
+                    {level.id.toString().padStart(2, '0')}
+                  </strong>{' '}
+                  {level.name}
+                </span>
                 <small className="text-[8px] text-muted">{status}</small>
               </>
             )
@@ -51,8 +59,9 @@ export const Route = createFileRoute('/campaign/')({
                   <Link
                     to="/campaign/$level"
                     params={{ level: String(level.id) }}
-                    className="flex size-full flex-col items-center justify-center gap-[3px] rounded-lg border border-line bg-[#ffffff04] p-[5px] text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=ready]:border-gold data-[status=ready]:bg-[#dcc48a16] data-[status=completed]:border-[#89bba477] data-[status=completed]:bg-[#89bba412] [&:not(:disabled):hover]:bg-[#ffffff12]"
+                    className={levelCardClassName}
                     data-testid="campaign-level"
+                    style={BIOMES[level.setup.biome].theme}
                     data-status={cleared ? 'completed' : 'ready'}
                     aria-label={'Level ' + level.id + ': ' + level.name + ', ' + status}
                     preload={false}
@@ -61,8 +70,9 @@ export const Route = createFileRoute('/campaign/')({
                   </Link>
                 ) : (
                   <button
-                    className="flex size-full flex-col items-center justify-center gap-[3px] rounded-lg border border-line bg-[#ffffff04] p-[5px] text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=ready]:border-gold data-[status=ready]:bg-[#dcc48a16] data-[status=completed]:border-[#89bba477] data-[status=completed]:bg-[#89bba412] [&:not(:disabled):hover]:bg-[#ffffff12]"
+                    className={levelCardClassName}
                     data-testid="campaign-level"
+                    style={BIOMES[level.setup.biome].theme}
                     disabled
                     aria-label={'Level ' + level.id + ': ' + level.name + ', Locked'}
                   >

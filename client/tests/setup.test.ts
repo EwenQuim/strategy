@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+  BIOMES,
   initialState,
   reducer,
   activePawn,
@@ -10,6 +11,7 @@ import {
   MAP_WIDTH,
   MAP_HEIGHT,
   type BattleSetup,
+  type Biome,
   type Pawn,
 } from '../src/lib/engine/index.ts'
 import { chooseBotActions, createBotGame } from '../src/lib/bot.ts'
@@ -29,7 +31,7 @@ test('Authored setups control both army sizes and classes with legal determinist
     'king',
     ...Array.from({ length: size - 1 }, (_, index) => recruits[index % recruits.length]),
   ]
-  for (const biome of ['verdant', 'mountains', 'desert', 'volcano'] as const) {
+  for (const biome of Object.keys(BIOMES) as Biome[]) {
     for (const [player, enemy] of [
       [1, 1],
       [3, 7],
@@ -220,7 +222,14 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
     initialState('setup-compatibility-' + index),
   )
   assert.equal(
-    seedState(JSON.stringify(states.map((state) => ({ ...state, tiles: [...state.tiles] })))),
+    seedState(
+      JSON.stringify(
+        states.map(({ hellfire, ...state }) => {
+          assert.deepEqual(hellfire, [])
+          return { ...state, tiles: [...state.tiles] }
+        }),
+      ),
+    ),
     4013518002,
   )
   for (const state of states) {

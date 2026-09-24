@@ -14,6 +14,12 @@ import { SeededRandom, seedState } from './random.ts'
 export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))
     throw new Error('Battle setup must specify a valid biome')
+  if (
+    setup.map !== undefined &&
+    setup.hellfireCount !== undefined &&
+    (setup.biome !== 'hell' || ![1, 2].includes(setup.hellfireCount))
+  )
+    throw new Error('Hellfire count must be 1 or 2 in a Hell battle')
   const occupied = new Set<string>()
   for (const side of ['player', 'enemy'] as const) {
     const army = setup[side]
@@ -109,6 +115,7 @@ function copySetup(setup: BattleSetup | undefined): BattleSetup | undefined {
     return {
       biome: setup.biome,
       map: [...setup.map],
+      ...(setup.hellfireCount !== undefined ? { hellfireCount: setup.hellfireCount } : {}),
       player: setup.player.map((unit) => ({ ...unit })),
       enemy: setup.enemy.map((unit) => ({ ...unit })),
     }
@@ -131,7 +138,8 @@ export function prepareBattle(seed: string, setup?: BattleSetup) {
       ...spawnPlacedArmy(setup.enemy, 'enemy', setup.player.length + 1),
     ]
   } else {
-    const biomes = Object.keys(BIOMES) as Biome[]
+    // Keep existing seeded and online battles stable; Hell is an explicit setup choice.
+    const biomes = (Object.keys(BIOMES) as Biome[]).filter((biome) => biome !== 'hell')
     biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
     const playerArmy = setup
       ? setup.player.map((kind) => PAWN_CLASSES[kind])

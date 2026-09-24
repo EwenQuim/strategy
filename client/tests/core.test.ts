@@ -143,7 +143,13 @@ test('Special previews and outcomes have a stable reference across all classes',
   assert.equal(results.length, 7552)
   assert.equal(
     seedState(
-      JSON.stringify(results, (_, value) => (value instanceof Map ? [...value] : value)),
+      JSON.stringify(results, (name, value) => {
+        if (name === 'hellfire') {
+          assert.deepEqual(value, [])
+          return undefined
+        }
+        return value instanceof Map ? [...value] : value
+      }),
     ),
     1092823723,
   )

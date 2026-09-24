@@ -12,6 +12,7 @@ import type {
 } from './types.ts'
 import { SeededRandom } from './random.ts'
 import { prepareBattle } from './setup.ts'
+import { inHellfire, markHellfire } from './hellfire.ts'
 import {
   canAttack,
   walkingPaths,
@@ -39,13 +40,59 @@ function finishTurn(pawn: Pawn, log: string[]): boolean {
   return true
 }
 
-function advanceTurn(state: GameState): GameState {
-  const { pawns } = state
+function endBattle(state: GameState, winner: NonNullable<GameState['winner']>): GameState {
+  const message =
+    winner === 'draw'
+      ? 'Both crowns have fallen. Draw.'
+      : winner === 'player'
+        ? 'The enemy crown has fallen. Victory!'
+        : 'Your crown has fallen.'
+  return {
+    ...state,
+    winner,
+    phase: 'over',
+    log: [...state.log, message].slice(-40),
+    logCount: state.logCount + 1,
+  }
+}
+
+function advanceTurn(state: GameState, record?: (frame: BattleFrame) => void): GameState {
+  let { pawns, hellfire, randomState } = state
   const log = [...state.log]
   let { order, round, logCount } = state
   let active = state.active + 1
   while (true) {
     if (active >= order.length) {
+      if (hellfire.length) {
+        const impacts = pawns
+          .filter((pawn) => inHellfire(hellfire, pawn))
+          .map((pawn) => {
+            pawn.hp--
+            log.push(label(pawn) + ' takes 1 Hellfire damage.')
+            logCount++
+            if (pawn.hp <= 0) {
+              log.push(label(pawn) + ' has fallen.')
+              logCount++
+            }
+            return { q: pawn.q, r: pawn.r, damage: 1 }
+          })
+        const burned = { ...state, pawns, log, logCount }
+        record?.(
+          captureFrame(burned, {
+            kind: 'hellfire',
+            from: hellfire[0],
+            to: hellfire[0],
+            centers: hellfire,
+            impacts,
+          }),
+        )
+        pawns = pawns.filter((pawn) => pawn.hp > 0)
+        clearBrokenProtection(pawns)
+        const winner = pawns.some((pawn) => pawn.kind === 'king')
+          ? winnerFrom(pawns, 'player')
+          : 'draw'
+        if (winner) return endBattle({ ...burned, pawns, hellfire: [] }, winner)
+      }
       round++
       order = order.filter((id) => pawns.some((p) => p.id === id))
       for (const pawn of pawns) {
@@ -54,6 +101,7 @@ function advanceTurn(state: GameState): GameState {
         pawn.escapeChance = 0
         pawn.specialUsed = false
       }
+      ;({ hellfire, randomState } = markHellfire({ ...state, pawns, round, randomState }))
       active = 0
       log.push('Round ' + round + '. Energy restored; escape chances reset.')
       logCount++
@@ -77,6 +125,9 @@ function advanceTurn(state: GameState): GameState {
   }
   return {
     ...state,
+    pawns,
+    hellfire,
+    randomState,
     order,
     active,
     round,
@@ -94,8 +145,9 @@ export function initialState(seed: string, setup?: BattleSetup): GameState {
   for (const pawn of battle.pawns) {
     if (battle.tiles.get(key(pawn.q, pawn.r))?.feature === 'spring') pawn.springSince = 1
   }
-  return advanceTurn({
+  const state: GameState = {
     ...battle,
+    hellfire: [],
     active: -1,
     round: 1,
     phase: 'move',
@@ -103,7 +155,8 @@ export function initialState(seed: string, setup?: BattleSetup): GameState {
     winner: null,
     log: ['The battle begins. Protect your crown.'],
     logCount: 1,
-  })
+  }
+  return advanceTurn({ ...state, ...markHellfire(state) })
 }
 
 export function transition(state: GameState, action: Action): Transition {
@@ -229,12 +282,13 @@ function clearBrokenProtection(pawns: Pawn[]): void {
   }
 }
 
-function captureFrame(state: GameState, effect: BattleEffect, actor: Pawn): BattleFrame {
+function captureFrame(state: GameState, effect: BattleEffect, actor?: Pawn): BattleFrame {
   return {
     state: {
       ...state,
       tiles: new Map([...state.tiles].map(([k, tile]) => [k, { ...tile }])),
-      pawns: (actor.hp <= 0 ? [...state.pawns, actor] : state.pawns).map((pawn) =>
+      hellfire: state.hellfire.map((center) => ({ ...center })),
+      pawns: (actor && actor.hp <= 0 ? [...state.pawns, actor] : state.pawns).map((pawn) =>
         pawn.clone(),
       ),
       order: [...state.order],
@@ -303,12 +357,6 @@ function reduce(
     logCount: state.logCount + log.length,
   }
   if (effect) record?.(captureFrame(next, effect, actor))
-  if (winner) {
-    next.log = [
-      ...next.log,
-      winner === 'player' ? 'The enemy crown has fallen. Victory!' : 'Your crown has fallen.',
-    ].slice(-40)
-    next.logCount++
-  }
-  return turnEnded ? advanceTurn(next) : next
+  if (winner) return endBattle(next, winner)
+  return turnEnded ? advanceTurn(next, record) : next
 }

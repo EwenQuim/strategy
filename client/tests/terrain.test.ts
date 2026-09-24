@@ -37,6 +37,8 @@ function battle(pawn: Pawn): GameState {
     for (let r = 0; r < 12; r++) tiles.set(key(q, r), { q, r, terrain: 'plain' })
   return {
     ...initialState('terrain-test'),
+    biome: 'verdant',
+    hellfire: [],
     tiles,
     pawns: [pawn, new King(2, -3, 0, pawn.side), new King(3, 5, 11, other)],
     order: [1, 2, 3],
@@ -85,7 +87,7 @@ test('Random special tiles follow 50/40/10 odds, are distinct, and stay in the c
   assert.deepEqual(kinds, new Set(['watchtower', 'spring', 'rune']))
 })
 
-test('Deserts have small lakes and rare decorative palms; volcanoes have passable lava pools', () => {
+test('Deserts have small lakes and rare decorative palms; volcanoes and Hell have passable lava pools', () => {
   let palms = 0
   for (const biome of Object.keys(BIOMES) as Biome[]) {
     for (let index = 0; index < 100; index++) {
@@ -93,7 +95,7 @@ test('Deserts have small lakes and rare decorative palms; volcanoes have passabl
       const all = [...tiles.values()]
       assert.equal(
         all.some((tile) => tile.terrain === 'lava'),
-        biome === 'volcano',
+        biome === 'volcano' || biome === 'hell',
       )
       assert.equal(
         all.some((tile) => tile.terrain === 'lake'),
