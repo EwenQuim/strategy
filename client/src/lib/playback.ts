@@ -1,4 +1,5 @@
-import { initialTransition, createBotGame, isImpactFrame, type BotDifficulty } from './bot.ts'
+import { initialTransition, createBotGame, type BotDifficulty } from './bot.ts'
+import { isImpactFrame, type BattleFrame } from './engine/types.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, Transition } from './engine/types.ts'
 import type { GameMode } from './game-mode.ts'
@@ -44,4 +45,9 @@ export function replay(seed: string, actions: OnlineAction[]) {
   let state = initialState(seed)
   for (const { action } of actions) state = applyAction(state, action).state
   return state
+}
+
+export function frameDelay(frame: BattleFrame, reducedMotion: boolean): number {
+  if (isImpactFrame(frame)) return 700
+  return reducedMotion ? 0 : frame.effect ? 460 : 180
 }

@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import type { OnlineAction, StoredGame } from '../src/lib/online.ts'
 import { initialPlayback, playbackReducer, replay } from '../src/lib/playback.ts'
-import { readStoredGames, saveStoredGame } from '../src/online.ts'
+import { readStoredGames, saveStoredGame } from '../src/onlineSession.ts'
 import { activePawn } from '../src/lib/engine/index.ts'
 
 test('Online mode applies actions like local mode, without a bot', () => {

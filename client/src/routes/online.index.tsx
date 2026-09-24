@@ -10,7 +10,12 @@ import {
   useJoinOnlineGame,
 } from '../api/online.ts'
 import { Icon } from '../components/Icon'
-import { readPlayerName, readStoredGames, savePlayerName, saveStoredGame } from '../online.ts'
+import {
+  readPlayerName,
+  readStoredGames,
+  savePlayerName,
+  saveStoredGame,
+} from '../onlineSession.ts'
 import type { StoredGame } from '../lib/online.ts'
 
 const inputClassName =
