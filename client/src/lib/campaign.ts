@@ -3,7 +3,13 @@ import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
 import { mapFromRows, TILE_FEATURES, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
-import { ESCAPE_BONUS, MAX_ESCAPE, PAWN_CLASSES, type PawnKind } from './engine/pawns/index.ts'
+import {
+  ESCAPE_BONUS,
+  MAX_ESCAPE,
+  PAWN_CLASSES,
+  START_ENERGY,
+  type PawnKind,
+} from './engine/pawns/index.ts'
 import type { Biome, FixedBattleSetup } from './engine/index.ts'
 
 interface BriefingElement {
@@ -49,20 +55,20 @@ type IntroducedElement =
   | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
 
 const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
-  swordsman: [unit('swordsman', 'move up to 2, then hit adjacent for 2')],
   king: [
-    unit('king', 'heal adjacent allies +1, once per round', 'Lose your king, lose the battle'),
-  ],
-  archer: [
-    unit('archer', '2 dmg, ignores Escape', 'Cannot shoot adjacent enemies'),
+    { name: 'Goal', points: ['Kill the enemy king'] },
     {
-      name: 'Escape',
+      name: 'Energy',
       points: [
-        'Unused energy at end of turn → +' + ESCAPE_BONUS + '% dodge each',
-        'Max ' + MAX_ESCAPE + '%',
+        START_ENERGY + ' per unit each round',
+        'Spend it to move, attack or use a special',
+        `Unused energy at end of turn → +${ESCAPE_BONUS}% dodge each, max ${MAX_ESCAPE}%`,
       ],
     },
+    unit('king', 'heal adjacent allies +1, once per round', 'Lose your king, lose the battle'),
   ],
+  swordsman: [unit('swordsman', 'move up to 2, then hit adjacent for 2')],
+  archer: [unit('archer', '2 dmg, ignores Escape', 'Cannot shoot adjacent enemies')],
   magician: [
     unit(
       'magician',
