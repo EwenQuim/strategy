@@ -21,13 +21,11 @@ import {
 import levels from '../src/lib/campaign-levels.json' with { type: 'json' }
 
 test('Every campaign level comes directly from one JSON with both complete armies', () => {
-  assert.equal(CAMPAIGN_LEVELS, levels)
+  CAMPAIGN_LEVELS.forEach((level, index) =>
+    assert.deepEqual(level, { ...levels[index], newElements: level.newElements }),
+  )
   for (const level of levels) {
-    assert.deepEqual(Object.keys(level).sort(), ['id', 'intro', 'name', 'seed', 'setup'])
-    for (const element of level.intro.newElements) {
-      assert.deepEqual(Object.keys(element).sort(), ['name', 'points'])
-      assert.ok(element.name.length > 0 && element.points.length > 0)
-    }
+    assert.deepEqual(Object.keys(level).sort(), ['id', 'name', 'seed', 'setup'])
     assert.deepEqual(Object.keys(level.setup).sort(), [
       'biome',
       'enemy',
@@ -157,10 +155,6 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     for (const pawn of [...level.setup.player, ...level.setup.enemy]) {
       if (firstAppearance[pawn.kind]) continue
       firstAppearance[pawn.kind] = level.id
-      assert.ok(
-        level.intro.newElements.some((element) => element.name.toLowerCase() === pawn.kind),
-        'Missing introduction for ' + pawn.kind,
-      )
     }
   }
   assert.deepEqual(firstAppearance, {
@@ -176,7 +170,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
   assert.equal(CAMPAIGN_LEVELS[0].setup.enemy.length, 1)
   for (const level of CAMPAIGN_LEVELS.slice(0, 2)) {
     assert.ok(level.setup.map.every((row) => /^[.f_]+$/.test(row)))
-    assert.ok(level.intro.newElements.length <= 2)
+    assert.ok(level.newElements.length <= 2)
   }
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.setup.map.join(''))).size, 20)
   assert.ok(CAMPAIGN_LEVELS[9].setup.map.every((row) => /^[s_]+$/.test(row)))
@@ -187,34 +181,31 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     )
 })
 
-test('Each terrain, feature and biome hazard is introduced where it first appears', () => {
-  const introductions: Record<string, string> = {
-    lake: 'Lakes',
-    mountain: 'Mountains',
-    sand: 'Desert',
-    lava: 'Lava',
-    watchtower: 'Watchtower',
-    spring: 'Healing spring',
-    rune: 'Power rune',
-    hell: 'Hellfire',
-  }
-  const seen = new Set<string>()
-  for (const level of CAMPAIGN_LEVELS) {
-    const state = coreState(level.seed, level.setup)
-    const present = [
-      state.biome,
-      ...[...state.tiles.values()].flatMap((tile) => [tile.terrain, tile.feature ?? '']),
-    ]
-    for (const name of present) {
-      if (!(name in introductions) || seen.has(name)) continue
-      seen.add(name)
-      assert.ok(
-        level.intro.newElements.some((element) => element.name === introductions[name]),
-        'Missing introduction for ' + name + ' in level ' + level.id,
-      )
-    }
-  }
-  assert.equal(seen.size, Object.keys(introductions).length)
+test('Briefings introduce each unit, terrain, feature and Hellfire on its first level', () => {
+  assert.deepEqual(
+    Object.fromEntries(
+      CAMPAIGN_LEVELS.filter((level) => level.newElements.length).map((level) => [
+        level.id,
+        level.newElements.map((element) => element.name),
+      ]),
+    ),
+    {
+      1: ['Swordsman', 'King'],
+      2: ['Archer', 'Escape'],
+      3: ['Lakes'],
+      4: ['Magician'],
+      5: ['Watchtower'],
+      6: ['Mountains'],
+      7: ['Bulwark'],
+      8: ['Bomber'],
+      9: ['Desert'],
+      10: ['Ninja'],
+      13: ['Lava'],
+      14: ['Healing spring'],
+      15: ['Power rune'],
+      17: ['Hellfire'],
+    },
+  )
 })
 
 test('Powder Lesson and Iron Caravan offer useful blasts without requiring friendly fire', () => {

@@ -25,21 +25,6 @@
           "row": 0
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Swordsman",
-          "points": ["5 HP · 2 dmg · range 1", "Charge (2 energy): move 2, then hit adjacent"]
-        },
-        {
-          "name": "King",
-          "points": [
-            "7 HP · lose it, lose the battle",
-            "Rally (1 energy): heal adjacent allies +1, once per round"
-          ]
-        }
-      ]
     }
   },
   {
@@ -76,21 +61,6 @@
           "kind": "archer",
           "col": 1,
           "row": 2
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Archer",
-          "points": [
-            "1 dmg · range 2-3, not adjacent",
-            "Aimed shot (2 energy): 2 dmg, ignores Escape"
-          ]
-        },
-        {
-          "name": "Escape",
-          "points": ["Unused energy → +20% dodge each", "Max 60%"]
         }
       ]
     }
@@ -147,18 +117,6 @@
           "kind": "archer",
           "col": 5,
           "row": 3
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Lakes",
-          "points": [
-            "Block walking and Charge",
-            "Arrows and spells pass",
-            "Forest: decorative, no cover"
-          ]
         }
       ]
     }
@@ -222,18 +180,6 @@
           "row": 2
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Magician",
-          "points": [
-            "3 HP · 1 dmg · range 1-2",
-            "Fireball (2 energy): 1 dmg to every enemy on a ray",
-            "Unblockable, allies safe"
-          ]
-        }
-      ]
     }
   },
   {
@@ -295,14 +241,6 @@
           "row": 2
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Watchtower",
-          "points": ["Archer / Magician: +1 max range", "Specials unchanged"]
-        }
-      ]
     }
   },
   {
@@ -362,14 +300,6 @@
           "kind": "archer",
           "col": 2,
           "row": 4
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Mountains",
-          "points": ["Block walking and Charge", "Ranged attacks and Fireball pass"]
         }
       ]
     }
@@ -436,18 +366,6 @@
           "kind": "archer",
           "col": 3,
           "row": 2
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Bulwark",
-          "points": [
-            "10 HP · 1 dmg · range 1",
-            "Protect (2 energy): takes one hit for an ally within 2",
-            "Slow: first step costs 2 energy"
-          ]
         }
       ]
     }
@@ -519,22 +437,6 @@
           "kind": "archer",
           "col": 4,
           "row": 4
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Bomber",
-          "points": [
-            "3 HP · 1 dmg · range 1-2",
-            "Bomb (2 energy): any tile within 2",
-            "1 dmg to center + 6 neighbors"
-          ]
-        },
-        {
-          "name": "Friendly fire",
-          "points": ["Bombs hit everyone, bomber included", "Own king down = defeat"]
         }
       ]
     }
@@ -613,22 +515,6 @@
           "row": 2
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Desert",
-          "points": ["Open sand, no cover", "Range and angles decide"]
-        },
-        {
-          "name": "Split the battery",
-          "points": [
-            "Lakes split movement, not fire",
-            "Break one firing spot first",
-            "Don't stack behind one guardian"
-          ]
-        }
-      ]
     }
   },
   {
@@ -697,18 +583,6 @@
           "kind": "swordsman",
           "col": 5,
           "row": 2
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Ninja",
-          "points": [
-            "1 HP · 5 dmg · range 1",
-            "Jump (2 energy): up to 3 tiles, over anything",
-            "Keep 1 energy to strike"
-          ]
         }
       ]
     }
@@ -785,14 +659,6 @@
           "kind": "archer",
           "col": 4,
           "row": 2
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Twin threats",
-          "points": ["Shield blocks one hit, not two", "Guard both flanks of your king"]
         }
       ]
     }
@@ -876,14 +742,6 @@
           "row": 2
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Blast discipline",
-          "points": ["Aim at empty centers", "Protect stops one hit only", "Keep bombers apart"]
-        }
-      ]
     }
   },
   {
@@ -953,18 +811,6 @@
           "kind": "bomber",
           "col": 2,
           "row": 2
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Lava",
-          "points": [
-            "-1 HP per tile entered, even on Charge",
-            "Ignores Escape and Protect",
-            "Basalt is safe"
-          ]
         }
       ]
     }
@@ -1053,14 +899,6 @@
           "row": 3
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Healing spring",
-          "points": ["Stay until next turn: +1 HP", "No heal on arrival"]
-        }
-      ]
     }
   },
   {
@@ -1147,14 +985,6 @@
           "row": 2
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Power rune",
-          "points": ["First unit in: +2 energy this round", "Single use"]
-        }
-      ]
     }
   },
   {
@@ -1234,17 +1064,6 @@
           "kind": "magician",
           "col": 5,
           "row": 3
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Enfilade",
-          "points": [
-            "Wizards lined up: one Fireball hits all",
-            "Ninjas and bombs punish the line"
-          ]
         }
       ]
     }
@@ -1334,19 +1153,6 @@
         }
       ],
       "hellfireCount": 1
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Hellfire",
-          "points": [
-            "Hatched area: 1 dmg at round end",
-            "Warning lasts a full round",
-            "Ignores Escape and Protect",
-            "Both kings down = draw"
-          ]
-        }
-      ]
     }
   },
   {
@@ -1436,18 +1242,6 @@
           "kind": "bomber",
           "col": 4,
           "row": 3
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Fire above and below",
-          "points": [
-            "Two Hellfire zones per round",
-            "Jump skips lava, not landing on it",
-            "Stay out of hatching"
-          ]
         }
       ]
     }
@@ -1546,14 +1340,6 @@
           "row": 2
         }
       ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Beyond the shield",
-          "points": ["Hellfire ignores Escape and Protect", "Don't end the round in hatching"]
-        }
-      ]
     }
   },
   {
@@ -1648,18 +1434,6 @@
           "kind": "ninja",
           "col": 1,
           "row": 3
-        }
-      ]
-    },
-    "intro": {
-      "newElements": [
-        {
-          "name": "Final command",
-          "points": [
-            "All seven classes on both sides",
-            "Two Hellfire zones per round",
-            "Both kings down = retry"
-          ]
         }
       ]
     }
