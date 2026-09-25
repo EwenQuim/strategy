@@ -5,42 +5,29 @@
     "seed": "campaign-v1-1",
     "setup": {
       "biome": "verdant",
-      "map": [
-        "........",
-        "f......f",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        "f......f",
-        "........"
-      ],
+      "map": ["__..__", "_...._", "......", "......", "......", "_...._", "__..__"],
       "player": [
         {
           "kind": "king",
-          "col": 3,
-          "row": 9
+          "col": 2,
+          "row": 5
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 8
+          "col": 3,
+          "row": 4
         }
       ],
       "enemy": [
         {
           "kind": "king",
-          "col": 3,
-          "row": 4
+          "col": 2,
+          "row": 0
         }
       ]
     },
     "intro": {
-      "roleplay": "One raider holds the watch road. Bring your swordsman forward and keep your crown behind him. No obstacles, no tricks: learn to move, strike, and finish a turn.",
+      "roleplay": "A lone raider waits in a small oval clearing. Bring your swordsman forward and keep your crown behind him. No obstacles, no tricks: learn to move, strike, and finish a turn.",
       "newElements": [
         {
           "name": "Swordsman",
@@ -59,52 +46,39 @@
     "seed": "campaign-v1-2",
     "setup": {
       "biome": "verdant",
-      "map": [
-        "........",
-        "........",
-        "f......f",
-        "........",
-        "........",
-        "f......f",
-        "ff....ff",
-        "........",
-        "........",
-        "f......f",
-        "........",
-        "........"
-      ],
+      "map": ["__...__", "_....._", "ff....f", "_....._", "__.....", "_....._", "__...__"],
       "player": [
         {
           "kind": "king",
           "col": 2,
-          "row": 9
+          "row": 5
         },
         {
           "kind": "swordsman",
           "col": 3,
-          "row": 8
+          "row": 4
         },
         {
           "kind": "archer",
           "col": 4,
-          "row": 9
+          "row": 5
         }
       ],
       "enemy": [
         {
           "kind": "king",
           "col": 5,
-          "row": 6
+          "row": 2
         },
         {
           "kind": "archer",
           "col": 1,
-          "row": 6
+          "row": 2
         }
       ]
     },
     "intro": {
-      "roleplay": "A bowman has slipped around your patrol. He cannot shoot an adjacent swordsman: close that flank while your own archer fires from behind. Keep your king out of the shooting lane.",
+      "roleplay": "A bowman has slipped around your patrol on the wide edge of a fan-shaped clearing. He cannot shoot an adjacent swordsman: close that flank while your own archer fires from behind. Keep your king out of the shooting lane.",
       "newElements": [
         {
           "name": "Archer",
@@ -124,18 +98,18 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "........",
-        "........",
-        "........",
+        "__....__",
+        "_......_",
+        "_......_",
         "..~~....",
-        "..~~....",
-        "...~....",
-        "....~~..",
-        "....~~..",
+        "_.~~..._",
+        "__....__",
+        "__..~~__",
+        "_...~~._",
         "........",
-        "........",
-        "........",
-        "........"
+        "_......_",
+        "__....__",
+        "___..___"
       ],
       "player": [
         {
@@ -173,7 +147,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Two bends of the river divide the road. Take the short middle crossing or the wide bank, but do not leave your archer alone on the other side.",
+      "roleplay": "The riverbanks pinch into an hourglass around a narrow crossing. Take the short middle crossing or the wide bank, but do not leave your archer alone on the other side.",
       "newElements": [
         {
           "name": "Lakes",
@@ -189,18 +163,18 @@
     "setup": {
       "biome": "verdant",
       "map": [
-        "........",
-        ".f....f.",
-        "........",
-        "........",
-        ".~~.....",
-        ".~~..~..",
-        ".....~~.",
-        ".....~~.",
-        "........",
-        "........",
-        ".f....f.",
-        "........"
+        "_....___",
+        ".f....__",
+        "......__",
+        "......__",
+        ".~~...._",
+        "__~..~..",
+        "__...~~.",
+        "__...~~.",
+        "__......",
+        "__......",
+        "__....f.",
+        "___...._"
       ],
       "player": [
         {
@@ -243,7 +217,7 @@
       ]
     },
     "intro": {
-      "roleplay": "A rival caster draws a line of fire through the trees. Your own magician can answer. Step sideways out of a firing line, then line up the raider and its escort.",
+      "roleplay": "A winding forest peninsula bends away from the rival firing line. Your own magician can answer. Step sideways out of a firing line, then line up the raider and its escort.",
       "newElements": [
         {
           "name": "Magician",
@@ -259,18 +233,18 @@
     "setup": {
       "biome": "mountains",
       "map": [
-        "........",
-        "........",
+        "_._.._._",
+        "_......_",
         "........",
         ".~....~.",
-        "~~....~~",
-        "...W....",
-        ".~....~.",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........"
+        "_~....~_",
+        "__.W..__",
+        "__....__",
+        "_......_",
+        "_......_",
+        "_......_",
+        "__....__",
+        "__....__"
       ],
       "player": [
         {
@@ -313,7 +287,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Two bowmen guard the keep. The central watchtower can outrange them, but its open approach invites crossfire. Send a fighter ahead of your archer.",
+      "roleplay": "Two bowmen guard a battlement-shaped keep above the narrow tower approach. The central watchtower can outrange them, but its open approach invites crossfire. Send a fighter ahead of your archer.",
       "newElements": [
         {
           "name": "Watchtower",
@@ -329,18 +303,18 @@
     "setup": {
       "biome": "mountains",
       "map": [
+        "__....__",
+        "_......_",
         "........",
         "........",
+        "_......_",
+        "__^.^___",
+        "__^.^___",
+        "_......_",
         "........",
         "........",
-        "........",
-        "^^^.^^^^",
-        "^^^.^^^^",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........"
+        "_......_",
+        "__....__"
       ],
       "player": [
         {
@@ -383,7 +357,7 @@
       ]
     },
     "intro": {
-      "roleplay": "The mountain wall has only one walking pass. Your archer can already reach the bowman on the other side. Win that duel before feeding soldiers into the gap.",
+      "roleplay": "Two rocky bowls meet at a single mountain pass. Your archer can already reach the bowman on the other side. Win that duel before feeding soldiers into the gap.",
       "newElements": [
         {
           "name": "Mountains",
@@ -399,18 +373,18 @@
     "setup": {
       "biome": "mountains",
       "map": [
-        "........",
-        "........",
-        "........",
-        "........",
-        "..^..^..",
-        "..^..^..",
-        "........",
-        "..^..^..",
+        "__....__",
+        "__....__",
+        "__....__",
+        "_......_",
+        "_.^..^._",
         "..^..^..",
         "........",
-        "........",
-        "........"
+        "_.^..^._",
+        "_.^..^._",
+        "__....__",
+        "__....__",
+        "__....__"
       ],
       "player": [
         {
@@ -458,7 +432,7 @@
       ]
     },
     "intro": {
-      "roleplay": "A wall-bearer joins you. Protect a fragile ally across the gap while the swordsman works around the enemy shield. A guardian cannot stop every blow.",
+      "roleplay": "A wall-bearer joins you in a cross-shaped courtyard. Protect a fragile ally across the gap while the swordsman works around the enemy shield. A guardian cannot stop every blow.",
       "newElements": [
         {
           "name": "Bulwark",
@@ -474,15 +448,15 @@
     "setup": {
       "biome": "mountains",
       "map": [
+        "__....__",
+        "_......_",
         "........",
-        "........",
-        "........",
         ".^....^.",
-        ".^....^.",
-        ".^....^.",
-        ".^....^.",
-        ".^....^.",
-        "........",
+        "_^....^_",
+        "_^....^_",
+        "__....__",
+        "__....__",
+        "__....__",
         "........",
         "........",
         "........"
@@ -538,7 +512,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Two soldiers stand shoulder to shoulder in the quarry, with two grouped bowmen directly behind them. Advance your bomber to catch the formation in one blast, but keep your escort clear of your own powder.",
+      "roleplay": "The quarry fans out above a narrow approach, with two soldiers and two grouped bowmen holding its broad end. Advance your bomber to catch the formation in one blast, but keep your escort clear of your own powder.",
       "newElements": [
         {
           "name": "Bomber",
@@ -558,18 +532,18 @@
     "setup": {
       "biome": "desert",
       "map": [
+        "___sss__",
+        "__sssss_",
+        "_ss~~sss",
+        "sss__sss",
+        "sss__sss",
         "ssssssss",
         "ssssssss",
-        "sss~~sss",
-        "sss~~sss",
-        "sss~~sss",
+        "ss~~sss_",
+        "ss~~sss_",
         "ssssssss",
-        "ssssssss",
-        "ss~~ssss",
-        "ss~~ssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss"
+        "_ssssss_",
+        "___sss__"
       ],
       "player": [
         {
@@ -627,7 +601,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Archers hold one bank of the oasis, a magician the other. Commit to one side or divide your force. The crossing in the middle lets a bomber punish defenders who rotate together.",
+      "roleplay": "Two banks loop around a broken oasis, connected by a broad central crossing. Commit to one side or divide your force. The crossing in the middle lets a bomber punish defenders who rotate together.",
       "newElements": [
         {
           "name": "Split the battery",
@@ -643,18 +617,17 @@
     "setup": {
       "biome": "desert",
       "map": [
+        "___ss___",
+        "__ssss__",
+        "_ssssss_",
         "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss"
+        "_ssssss_",
+        "__ssss__",
+        "__ssss__",
+        "__ssss__",
+        "__ssss__",
+        "_ssssss_",
+        "__ssss__"
       ],
       "player": [
         {
@@ -707,7 +680,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Nothing but sand: no choke to hide behind, no detour to blame. Your new ninja can threaten a whole flank, but a single arrow or fireball will end that threat.",
+      "roleplay": "The dunes form a spearhead: a broad fighting ground narrows into an exposed approach. Your new ninja can threaten a whole flank, but a single arrow or fireball will end that threat.",
       "newElements": [
         {
           "name": "Desert",
@@ -727,18 +700,18 @@
     "setup": {
       "biome": "desert",
       "map": [
-        "ssssssss",
-        "ssssssss",
+        "___ss___",
+        "_ssssss_",
         "ssssssss",
         "ss~~ssss",
-        "ss~~ssss",
-        "sssp~sss",
-        "sss~~pss",
-        "ssss~~ss",
+        "ss___sss",
+        "sss__sss",
+        "sss__pss",
+        "ssss__ss",
         "ssss~~ss",
         "ssssssss",
-        "ssssssss",
-        "ssssssss"
+        "_ssssss_",
+        "__ssss__"
       ],
       "player": [
         {
@@ -796,7 +769,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Two assassins circle the oasis from opposite sides. Their jumps ignore the lakes. Keep your crown within protection range while your ranged units cut off the landing tiles.",
+      "roleplay": "Two assassins circle a hollow oasis loop from opposite sides. Their jumps ignore the lakes. Keep your crown within protection range while your ranged units cut off the landing tiles.",
       "newElements": [
         {
           "name": "Twin threats",
@@ -812,18 +785,18 @@
     "setup": {
       "biome": "desert",
       "map": [
-        "ssssssss",
-        "ssssssss",
+        "__ssss__",
+        "_ssssss_",
         "ssssssss",
         "s~ssss~s",
         "s~ssss~s",
         "s~~ss~~s",
-        "s~~ss~~s",
-        "s~ssss~s",
-        "s~ssss~s",
-        "ssssssss",
-        "ssssssss",
-        "ssssssss"
+        "_~~ss~~_",
+        "__ssss__",
+        "__ssss__",
+        "__ssss__",
+        "___ss___",
+        "___ss___"
       ],
       "player": [
         {
@@ -886,7 +859,7 @@
       ]
     },
     "intro": {
-      "roleplay": "An iron convoy squeezes between the lakes. Your bombers have reached opposite banks and your ninja the outer road. Break the clustered escorts before bringing the vanguard into the blast zone.",
+      "roleplay": "An iron convoy waits at the broad head of a narrow caravan road. Your bombers have reached opposite banks and your ninja the outer road. Break the clustered escorts before bringing the vanguard into the blast zone.",
       "newElements": [
         {
           "name": "Blast discipline",
@@ -902,18 +875,18 @@
     "setup": {
       "biome": "volcano",
       "map": [
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bllbbbbb",
-        "bllbbblb",
-        "bbbbbllb",
-        "bbllbllb",
-        "bbllbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb"
+        "__bbbb__",
+        "_bbbbbb_",
+        "_bbbbbb_",
+        "bllbbbb_",
+        "bllbbbl_",
+        "_bbbbllb",
+        "_bllbllb",
+        "_bllbbbb",
+        "bbbbbbb_",
+        "bbbbbbb_",
+        "_bbbbbb_",
+        "__bbbb__"
       ],
       "player": [
         {
@@ -966,7 +939,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Beyond the caravan road, the sand gives way to a burning caldera. Both sides carry powder now. Use the safe channels instead of crowding the shortest crossing: enemy bombs punish a packed bridgehead.",
+      "roleplay": "The caravan road becomes a zigzag basalt shelf above the caldera. Both sides carry powder now. Use the safe channels instead of crowding the shortest crossing: enemy bombs punish a packed bridgehead.",
       "newElements": [
         {
           "name": "Lava",
@@ -982,18 +955,18 @@
     "setup": {
       "biome": "volcano",
       "map": [
+        "__bbbb__",
+        "_bbbbbb_",
         "bbbbbbbb",
         "bbbbbbbb",
+        "bllbbbl_",
+        "bllbbl__",
+        "bbbbH___",
+        "bbbbbb__",
+        "bbbbbbb_",
         "bbbbbbbb",
-        "bbbbbbbb",
-        "bllbbblb",
-        "bllbbllb",
-        "bbbbHllb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb"
+        "_bbbbbb_",
+        "__bbbb__"
       ],
       "player": [
         {
@@ -1061,7 +1034,7 @@
       ]
     },
     "intro": {
-      "roleplay": "The spring is worth holding, not dying on. Rotate a wounded fighter onto it while a guardian covers from two tiles away. A stationary group is a gift to the enemy bomber.",
+      "roleplay": "A crescent of basalt cradles a spring on its inner edge. Rotate a wounded fighter onto it while a guardian covers from two tiles away. A stationary group is a gift to the enemy bomber.",
       "newElements": [
         {
           "name": "Healing spring",
@@ -1077,18 +1050,18 @@
     "setup": {
       "biome": "volcano",
       "map": [
+        "__bbbb__",
+        "_bbbbbb_",
         "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbllbb",
-        "bllbllbb",
+        "bbbb__bb",
+        "_llb__b_",
         "bllRbbbb",
-        "bbbblllb",
-        "bbbbblbb",
-        "bbblllbb",
+        "bbbb__lb",
+        "_bbbblb_",
+        "bbbl_lbb",
         "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb"
+        "_bbbbbb_",
+        "____bbb_"
       ],
       "player": [
         {
@@ -1156,7 +1129,7 @@
       ]
     },
     "intro": {
-      "roleplay": "A rune glows at the edge of the furnace. Claim it for a sudden attack, or let the enemy overextend for it. Extra energy will not save a ninja who lands in lava.",
+      "roleplay": "A rune glows between the broken vents of a jagged furnace. Claim it for a sudden attack, or let the enemy overextend for it. Extra energy will not save a ninja who lands in lava.",
       "newElements": [
         {
           "name": "Power rune",
@@ -1172,18 +1145,18 @@
     "setup": {
       "biome": "volcano",
       "map": [
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "blbbbblb",
-        "blbbbblb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "blbbbblb",
+        "__bbbb__",
+        "__bbbb__",
+        "_lbbbbl_",
         "blbbbblb",
         "bbbbbbbb",
-        "bbbbbbbb"
+        "bbbbbbbb",
+        "_bbbbbb_",
+        "__bbbb__",
+        "__bbbb__",
+        "__bbbb__",
+        "___bb___",
+        "___bb___"
       ],
       "player": [
         {
@@ -1246,7 +1219,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Four wizards form a living barrier across the caldera. Your magician and guardian have reached its left flank; your ninja waits on the right. Turn the firing line against itself before it turns toward your crown.",
+      "roleplay": "Four wizards hold the broad arms of a wing-shaped platform, with your crown on its narrow southern approach. Your magician and guardian have reached its left flank; your ninja waits on the right. Turn the firing line against itself before it turns toward your crown.",
       "newElements": [
         {
           "name": "Enfilade",
@@ -1262,14 +1235,14 @@
     "setup": {
       "biome": "hell",
       "map": [
-        "bbbbbbbb",
-        "bbbbbbbb",
+        "__bbb___",
+        "_bbbbbb_",
         "bbbbbbbb",
         "llbbbbbb",
-        "lbbbbbbb",
-        "^^Wb^bb^",
-        "^^bb^Hb^",
-        "bbbbbbbl",
+        "_bbbbbb_",
+        "__Wb_bb_",
+        "__bb_Hb_",
+        "bbbbbbbb",
         "bbbbbbll",
         "bbbbbbbb",
         "bbbbbbbb",
@@ -1342,7 +1315,7 @@
       "hellfireCount": 1
     },
     "intro": {
-      "roleplay": "Beyond the forked wall, Hell marks the battlefield. One gate offers a watchtower, the other a healing spring. A single Hellfire warning alternates between the armies each round. Leave its hatched area before the round ends; your ninja can switch gates without queuing.",
+      "roleplay": "Two suspended gates cross a split in the battlefield of Hell. One gate offers a watchtower, the other a healing spring. A single Hellfire warning alternates between the armies each round. Leave its hatched area before the round ends; your ninja can switch gates without queuing.",
       "newElements": [
         {
           "name": "Hellfire",
@@ -1358,18 +1331,18 @@
     "setup": {
       "biome": "hell",
       "map": [
-        "bbbbbbbb",
-        "bbbbbbbb",
+        "__bbbb__",
+        "_bbbbbb_",
         "bbbbbbbb",
         "bllbblbb",
-        "bllbllbb",
-        "bbbWllbb",
-        "blllRbbb",
-        "bbllbllb",
-        "bbbbbllb",
+        "b__bllb_",
+        "bbbW__b_",
+        "_lllRbbb",
+        "_b__bllb",
+        "_bbbbllb",
         "bbbbbbbb",
         "bbbbbbbb",
-        "bbbbbbbb"
+        "_bbbbbb_"
       ],
       "player": [
         {
@@ -1442,7 +1415,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Assassins hunt both safe channels through the caldera, while two Hellfire warnings mark the coming round-end blasts. The tower commands one route; the rune can launch a counterattack from the other. Neither basalt nor a shield makes a marked landing safe.",
+      "roleplay": "Assassins hunt the twisting paths of a shattered caldera, while two Hellfire warnings mark the coming round-end blasts. The tower commands one route; the rune can launch a counterattack from the other. Neither basalt nor a shield makes a marked landing safe.",
       "newElements": [
         {
           "name": "Fire above and below",
@@ -1458,18 +1431,18 @@
     "setup": {
       "biome": "hell",
       "map": [
-        "bbbbbbbb",
+        "_b_bb_b_",
         "bbbbbbbb",
         "bbbbbbll",
         "bbbbbbbl",
-        "b^^bb^^b",
-        "b^^bb^^b",
+        "b_^bb^_b",
+        "b__bb__b",
         "bbbbHbbb",
-        "b^^bb^^b",
-        "l^^bb^^b",
+        "b_^bb^_b",
+        "l__bb__b",
         "llbbbbbb",
         "bbbbbbbb",
-        "bbbbbbbb"
+        "__bbbb__"
       ],
       "player": [
         {
@@ -1547,7 +1520,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Two guardians shield the pretender between black mountain walls. Two Hellfire warnings give you a full round to reposition before the blasts. Use area damage to strip protection, then send a finisher through. The spring can sustain your siege, but cannot shelter you from the sky.",
+      "roleplay": "Two guardians shield the pretender beyond four broken fortress courtyards. Two Hellfire warnings give you a full round to reposition before the blasts. Use area damage to strip protection, then send a finisher through. The spring can sustain your siege, but cannot shelter you from the sky.",
       "newElements": [
         {
           "name": "Beyond the shield",
@@ -1563,18 +1536,18 @@
     "setup": {
       "biome": "hell",
       "map": [
-        "bbbbbbbb",
+        "_b_bb_b_",
         "bbbbbbbb",
         "bb^bb^bb",
         "bb^bb^bb",
-        "lb^bb^bb",
-        "lbRbb^bl",
-        "lb^bbHbl",
-        "bb^bb^bl",
-        "bb^bb^bb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb"
+        "lb_bb_b_",
+        "_bRbb^b_",
+        "_b^bbHb_",
+        "_b_bb_bl",
+        "_b^bb^b_",
+        "_bbbbbb_",
+        "__bbbb__",
+        "__bbbb__"
       ],
       "player": [
         {
@@ -1652,7 +1625,7 @@
       ]
     },
     "intro": {
-      "roleplay": "Every discipline stands before the last crown under a crimson sky. A rune opens the aggressive left route; a spring supports the right. Two fixed Hellfire warnings give both armies a full round to move clear before the sky strikes. Win the flank without sacrificing your crown.",
+      "roleplay": "The battlefield itself forms a jagged crown beneath a crimson sky. A rune opens the aggressive left route; a spring supports the right. Two fixed Hellfire warnings give both armies a full round to move clear before the sky strikes. Win the flank without sacrificing your crown.",
       "newElements": [
         {
           "name": "Final command",
