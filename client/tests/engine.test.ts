@@ -562,6 +562,12 @@ test('Bomb hits nearby units including allies and handles multiple kills and vic
   assert.equal(fired.pawns.find((p) => p.id === 7)!.hp, 3)
   assert.equal(fired.winner, 'player')
   assert.equal(fired.phase, 'over')
+  const frame = transition(preview, { type: 'specialAt', q: 1, r: 0 }).frames[0]
+  assert.deepEqual(
+    frame.state.pawns.filter((pawn) => pawn.hp <= 0).map((pawn) => pawn.id),
+    [3, 4],
+  )
+  assert.equal(frame.state.winner, null)
   assert.deepEqual(fired, reducer(preview, { type: 'specialAt', q: 1, r: 0 }))
   assert.equal(state.pawns.length, 7)
 })
@@ -697,7 +703,7 @@ test('Playback snapshots keep intermediate health, logs, and dead target coordin
   assert.equal(result.frames.length, 4)
   assert.deepEqual(
     result.frames.map((frame) => frame.state.pawns.find((p) => p.id === 1)?.hp),
-    [5, 3, 1, undefined],
+    [5, 3, 1, -1],
   )
   assert.deepEqual(
     result.frames.map((frame) => frame.state.logCount),

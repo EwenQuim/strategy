@@ -1154,6 +1154,20 @@ test(
         assert.equal(await destination.locator('[data-feature-art=' + kind + ']').count(), 1)
       }
       await destination.click()
+      if (kind === 'lava') {
+        const fallen = page.locator('[data-fallen="true"]')
+        await fallen.waitFor()
+        const message = page.getByTestId('killed-message')
+        assert.equal(await message.textContent(), 'Killed')
+        assert.equal(
+          await message.evaluate((element) => getComputedStyle(element).animationName),
+          'none',
+        )
+        assert.equal(
+          await fallen.evaluate((element) => getComputedStyle(element).animationName),
+          'none',
+        )
+      }
       state = transition(state, { type: 'move', q: tile.q, r: tile.r }).state
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       if (kind === 'lava') {
@@ -1279,7 +1293,9 @@ test(
     )
     await page.getByRole('button', { name: 'Close dialog' }).click()
 
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
     const actionsBySide = new Set<string>()
+    let deaths = 0
     const seed = 'local-24'
     let state = initialState(seed)
     await page.goto(origin + base + 'game/' + seed + '?mode=local')
@@ -1324,12 +1340,58 @@ test(
           )
           await page.locator('[data-testid="hex-tile"]').nth(tile).click()
         } else assert.fail('Unexpected action: ' + action.type)
+        const fallen = result.frames[0]?.state.pawns.filter((unit) => unit.hp <= 0) ?? []
+        if (fallen.length) {
+          const chips = page.locator('[data-fallen="true"]')
+          await chips.first().waitFor()
+          assert.equal(await chips.count(), fallen.length)
+          const messages = page.getByTestId('killed-message')
+          assert.deepEqual(
+            await messages.allTextContents(),
+            fallen.map(() => 'Killed'),
+          )
+          assert.ok(
+            await messages.evaluateAll((elements) =>
+              elements.every(
+                (element) => getComputedStyle(element).animationName === 'damage-pop',
+              ),
+            ),
+          )
+          assert.ok(
+            await chips.evaluateAll((elements) =>
+              elements.every(
+                (element) => getComputedStyle(element).animationName === 'pawn-fall',
+              ),
+            ),
+          )
+          assert.equal(await page.getByTestId('battle-result').count(), 0)
+          deaths += fallen.length
+        }
         state = result.state
         if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
         else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       }
     }
     assert.ok(state.winner, 'The local battle must reach a winner')
+    assert.ok(deaths > 0)
+    assert.equal(
+      await page.getByTestId('battle-result').getAttribute('data-outcome'),
+      'victory',
+    )
+    assert.equal(
+      await page
+        .getByTestId('result-card')
+        .evaluate((element) => getComputedStyle(element).animationName),
+      'battle-result-victory',
+    )
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    assert.equal(
+      await page
+        .getByTestId('result-card')
+        .evaluate((element) => getComputedStyle(element).animationName),
+      'none',
+    )
+    assert.equal(await page.getByTestId('battle-result-effect').isVisible(), false)
     assert.equal(
       await page.locator('[data-testid="result-card"] h1').textContent(),
       state.winner === 'draw' ? 'Draw' : playerNames[state.winner] + ' wins!',
@@ -1392,6 +1454,74 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   assert.ok(state.winner)
   return state.winner
 }
+
+test(
+  'Battle results distinguish AI victory and defeat without blocking compact controls',
+  { timeout: 120_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    for (const surrender of [false, true]) {
+      const level = surrender ? 2 : 1
+      await page.goto(origin + base + 'campaign/original/' + level)
+      assert.equal(
+        await finishCampaignLevel(page, level, surrender),
+        surrender ? 'enemy' : 'player',
+      )
+      const outcome = surrender ? 'defeat' : 'victory'
+      const result = page.getByTestId('battle-result')
+      const card = page.getByTestId('result-card')
+      assert.equal(await result.getAttribute('data-outcome'), outcome)
+      assert.equal(
+        await card.evaluate((element) => getComputedStyle(element).animationName),
+        'battle-result-' + outcome,
+      )
+      assert.equal(
+        await page
+          .getByTestId('battle-result-effect')
+          .evaluate((element) => getComputedStyle(element).pointerEvents),
+        'none',
+      )
+      await card.evaluate(async (element) => {
+        await Promise.all(element.getAnimations().map((animation) => animation.finished))
+      })
+      for (const viewport of [
+        { width: 320, height: 568 },
+        { width: 390, height: 844 },
+        { width: 600, height: 480 },
+      ]) {
+        await page.setViewportSize(viewport)
+        assert.ok(
+          await card.evaluate((element) => {
+            const rect = element.getBoundingClientRect()
+            return (
+              rect.left >= 0 &&
+              rect.top >= 0 &&
+              rect.right <= innerWidth &&
+              rect.bottom <= innerHeight &&
+              document.documentElement.scrollHeight <= innerHeight
+            )
+          }),
+        )
+      }
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      assert.equal(
+        await card.evaluate((element) => getComputedStyle(element).animationName),
+        'none',
+      )
+      assert.equal(await page.getByTestId('battle-result-effect').isVisible(), false)
+      if (surrender) {
+        await page.getByRole('button', { name: 'Retry level' }).click()
+        await result.waitFor({ state: 'detached' })
+        await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      }
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+    }
+    assert.deepEqual(errors, [])
+  },
+)
 
 test(
   'Campaign handles corrupt or unavailable local storage without losing the current session',

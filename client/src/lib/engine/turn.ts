@@ -135,16 +135,14 @@ export function clearBrokenProtection(pawns: Pawn[]): void {
 export function captureFrame(
   state: GameState,
   effect: BattleEffect,
-  actor?: Pawn,
+  fallen: Pawn[] = [],
 ): BattleFrame {
   return {
     state: {
       ...state,
       tiles: new Map([...state.tiles].map(([k, tile]) => [k, { ...tile }])),
       hellfire: state.hellfire.map((center) => ({ ...center })),
-      pawns: (actor && actor.hp <= 0 ? [...state.pawns, actor] : state.pawns).map((pawn) =>
-        pawn.clone(),
-      ),
+      pawns: [...state.pawns, ...fallen].map((pawn) => pawn.clone()),
       order: [...state.order],
       log: [...state.log],
       winner: null,
