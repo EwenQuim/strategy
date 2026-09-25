@@ -8,11 +8,21 @@ const shell = new URL('index.html', self.registration.scope).href
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches
-      .open(cacheName)
-      .then((cache) =>
-        cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))),
-      ),
+    caches.open(cacheName).then(async (cache) => {
+      await Promise.all(
+        ASSETS.map(async (url) => {
+          const response = await fetch(new Request(url, { cache: 'reload' }))
+          if (!response.ok) throw new Error('Precaching failed: ' + url)
+          await cache.put(
+            url,
+            // Safari rejects responses that followed redirects
+            response.redirected
+              ? new Response(await response.blob(), { headers: response.headers })
+              : response,
+          )
+        }),
+      )
+    }),
   )
 })
 
