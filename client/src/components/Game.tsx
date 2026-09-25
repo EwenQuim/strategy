@@ -14,7 +14,7 @@ import {
   activePawn,
   BIOMES,
   canAttack,
-  specialTargets,
+  specialTargetingTiles,
   targetingTiles,
   key,
   movementDestinations,
@@ -66,7 +66,8 @@ export function Game({
           : null
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
-  const hasSpecialTargets = !!pawn && specialTargets(state.pawns, pawn).length > 0
+  const hasSpecialTargets =
+    !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
   const hasFoes =
     !!pawn &&
     state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))

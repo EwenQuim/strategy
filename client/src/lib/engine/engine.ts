@@ -100,6 +100,17 @@ export function reducer(state: GameState, action: Action): GameState {
   return reduce(state, action)
 }
 
+export function specialTargetingTiles(
+  pawn: Pawn,
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+): Set<string> {
+  return (
+    pawn.special.tileTargets?.(pawn, tiles, pawns) ??
+    new Set(specialTargets(pawns, pawn).map((target) => key(target.q, target.r)))
+  )
+}
+
 export function targetingTiles(state: GameState): Set<string> {
   const pawn = activePawn(state)
   if (!pawn || state.winner) return new Set()
@@ -109,11 +120,7 @@ export function targetingTiles(state: GameState): Set<string> {
         .filter((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
         .map((target) => key(target.q, target.r)),
     )
-  if (state.phase === 'special')
-    return (
-      pawn.special.tileTargets?.(pawn, state.tiles, state.pawns) ??
-      new Set(specialTargets(state.pawns, pawn).map((target) => key(target.q, target.r)))
-    )
+  if (state.phase === 'special') return specialTargetingTiles(pawn, state.tiles, state.pawns)
   if (state.phase === 'charge')
     return new Set(
       specialTargets(state.pawns, pawn, state.chargeDestination ?? pawn).map((target) =>
