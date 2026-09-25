@@ -1,4 +1,4 @@
-const locales = ['en', 'fr'] as const
+const locales = ['en', 'fr', 'de', 'es', 'it'] as const
 type Locale = (typeof locales)[number]
 
 const isLocale = (tag: string): tag is Locale => locales.includes(tag as Locale)
