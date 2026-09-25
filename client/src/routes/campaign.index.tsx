@@ -26,7 +26,7 @@ export const Route = createFileRoute('/campaign/')({
           </Link>
         </header>
         <ol
-          className="m-0 flex min-h-0 flex-1 list-none flex-col justify-center gap-3 p-0"
+          className="m-0 grid min-h-0 flex-1 list-none auto-rows-fr grid-cols-1 gap-3 p-0 min-[601px]:grid-cols-2 min-[601px]:content-center min-[601px]:auto-rows-[minmax(0,340px)]"
           aria-label="Campaigns"
         >
           {CAMPAIGNS.map((campaign) => (

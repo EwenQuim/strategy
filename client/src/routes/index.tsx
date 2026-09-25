@@ -13,6 +13,10 @@ export const Route = createFileRoute('/')({
       readCampaignProgress(original.slug),
     )
     const done = completed === original.levels.length
+    const allCompleted = useSyncExternalStore(subscribeCampaignProgress, () =>
+      CAMPAIGNS.reduce((sum, campaign) => sum + readCampaignProgress(campaign.slug), 0),
+    )
+    const allLevels = CAMPAIGNS.reduce((sum, campaign) => sum + campaign.levels.length, 0)
     const health = useHealth()
     const online = health.isSuccess
     return (
@@ -95,7 +99,9 @@ export const Route = createFileRoute('/')({
             >
               {done ? 'Campaigns' : 'Campaign'}
               <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
-                {completed} / {original.levels.length}
+                {done
+                  ? allCompleted + ' / ' + allLevels
+                  : completed + ' / ' + original.levels.length}
                 <Icon name="crown" className={done ? 'fill-current' : undefined} />
               </span>
             </Link>
