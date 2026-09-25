@@ -190,6 +190,41 @@ test('Authored encounters replay and restart identically through AI and local pl
   }
 })
 
+test('Opening pawn numbers follow the final initiative in every mode, including AI rotation', () => {
+  const startingSides = new Set<string>()
+  for (const setup of [undefined, encounter]) {
+    for (let index = 0; index < 10; index++) {
+      const seed = 'setup-compatibility-' + index
+      const core = initialState(seed, setup)
+      startingSides.add(activePawn(core)!.side)
+      const initiative = core.order.map((id) => core.pawns.find((pawn) => pawn.id === id)!)
+      const firstPlayer = initiative.findIndex((pawn) => pawn.side === 'player')
+      const withoutId = ({ id: _id, ...pawn }: Pawn) => pawn
+      for (const mode of ['ai', 'local', 'online'] as const) {
+        const opening = initialPlayback(seed, mode, setup)
+        const { state } = opening
+        assert.deepEqual(
+          state.order,
+          Array.from({ length: state.pawns.length }, (_, i) => i + 1),
+        )
+        assert.equal(activePawn(state)!.id, 1)
+        const expected =
+          mode === 'ai'
+            ? [...initiative.slice(firstPlayer), ...initiative.slice(0, firstPlayer)]
+            : initiative
+        assert.deepEqual(
+          state.order.map((id) => withoutId(state.pawns.find((pawn) => pawn.id === id)!)),
+          expected.map(withoutId),
+        )
+        assert.equal(state.randomState, core.randomState)
+        assert.deepEqual(state.tiles, core.tiles)
+        assert.deepEqual(playbackReducer(opening, { type: 'restart' }, mode), opening)
+      }
+    }
+  }
+  assert.deepEqual(startingSides, new Set(['player', 'enemy']))
+})
+
 test('Invalid setups reject unknown classes, invalid biomes, oversized armies and missing kings', () => {
   const invalid: unknown[] = [
     null,
