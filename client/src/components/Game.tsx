@@ -1,7 +1,7 @@
 import { useRef, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import { possessiveArmyLabels, playerNames, type PlayerNames } from '../lib/game-mode'
-import { CAMPAIGN_LEVELS } from '../lib/campaign'
+import type { Campaign } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { Battlefield } from './Battlefield'
 import { GameHeader } from './GameHeader'
@@ -19,16 +19,26 @@ import {
   type Tile,
 } from '../lib/engine'
 
+function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: number | undefined) {
+  return !!campaign && campaignLevel === campaign.levels.length
+}
+
 export function Game({
   seed,
   mode,
   setup,
+  campaign,
   campaignLevel,
   difficulty = 'normal',
   onVictory,
   online,
   players,
-}: GameOptions & { campaignLevel?: number; online?: OnlineSession; players?: PlayerNames }) {
+}: GameOptions & {
+  campaign?: Campaign
+  campaignLevel?: number
+  online?: OnlineSession
+  players?: PlayerNames
+}) {
   const local = mode === 'local'
   const isOnline = mode === 'online'
   const names = players ?? playerNames
@@ -41,11 +51,13 @@ export function Game({
     onVictory,
     online,
   })
-  const progressSaved = useSyncExternalStore(subscribeCampaignProgress, campaignProgressSaved)
+  const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
+    campaignProgressSaved(campaign?.slug ?? ''),
+  )
   const winnerLabel =
     state.winner === 'draw'
       ? 'Draw'
-      : campaignLevel === CAMPAIGN_LEVELS.length && state.winner === 'player'
+      : isCampaignComplete(campaign, campaignLevel) && state.winner === 'player'
         ? 'Campaign complete!'
         : state.winner && (local || isOnline)
           ? names[state.winner] + ' wins!'
@@ -113,6 +125,7 @@ export function Game({
         order={state.order}
         pawns={state.pawns}
         active={state.active}
+        campaign={campaign}
         campaignLevel={campaignLevel}
         onHelp={() => dialog.current?.showModal()}
       />
@@ -145,6 +158,7 @@ export function Game({
             difficulty={difficulty}
             setup={setup}
             names={names}
+            campaign={campaign}
             campaignLevel={campaignLevel}
             progressSaved={progressSaved}
             onRestart={() => dispatch({ type: 'restart' })}

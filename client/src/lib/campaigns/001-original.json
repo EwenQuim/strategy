@@ -3,6 +3,7 @@
     "id": 1,
     "name": "First Watch",
     "seed": "campaign-v1-1",
+    "difficulty": "normal",
     "setup": {
       "biome": "verdant",
       "map": ["__..__", "_...._", "......", "......", "......", "_...._", "__..__"],
@@ -31,6 +32,7 @@
     "id": 2,
     "name": "Bowmen",
     "seed": "campaign-v1-2",
+    "difficulty": "normal",
     "setup": {
       "biome": "verdant",
       "map": ["__...__", "_....._", "ff....f", "_....._", "__.....", "_....._", "__...__"],
@@ -69,6 +71,7 @@
     "id": 3,
     "name": "River Guard",
     "seed": "campaign-v1-3",
+    "difficulty": "normal",
     "setup": {
       "biome": "verdant",
       "map": [
@@ -125,6 +128,7 @@
     "id": 4,
     "name": "Forest Magic",
     "seed": "campaign-v1-4-23",
+    "difficulty": "normal",
     "setup": {
       "biome": "verdant",
       "map": [
@@ -186,6 +190,7 @@
     "id": 5,
     "name": "Highland Keep",
     "seed": "campaign-v1-5",
+    "difficulty": "normal",
     "setup": {
       "biome": "mountains",
       "map": [
@@ -247,6 +252,7 @@
     "id": 6,
     "name": "High Pass",
     "seed": "campaign-v1-6",
+    "difficulty": "normal",
     "setup": {
       "biome": "mountains",
       "map": [
@@ -308,6 +314,7 @@
     "id": 7,
     "name": "Stone Wall",
     "seed": "campaign-v1-7",
+    "difficulty": "normal",
     "setup": {
       "biome": "mountains",
       "map": [
@@ -374,6 +381,7 @@
     "id": 8,
     "name": "Powder Lesson",
     "seed": "campaign-v1-8",
+    "difficulty": "normal",
     "setup": {
       "biome": "mountains",
       "map": [
@@ -445,6 +453,7 @@
     "id": 9,
     "name": "Split Battery",
     "seed": "campaign-v1-10",
+    "difficulty": "normal",
     "setup": {
       "biome": "desert",
       "map": [
@@ -521,6 +530,7 @@
     "id": 10,
     "name": "Dune Patrol",
     "seed": "campaign-v1-11",
+    "difficulty": "normal",
     "setup": {
       "biome": "desert",
       "map": [
@@ -591,6 +601,7 @@
     "id": 11,
     "name": "Twin Daggers",
     "seed": "campaign-v1-12",
+    "difficulty": "normal",
     "setup": {
       "biome": "desert",
       "map": [
@@ -667,6 +678,7 @@
     "id": 12,
     "name": "Iron Caravan",
     "seed": "campaign-v1-13",
+    "difficulty": "normal",
     "setup": {
       "biome": "desert",
       "map": [
@@ -748,6 +760,7 @@
     "id": 13,
     "name": "Ember Crossing",
     "seed": "campaign-v1-9",
+    "difficulty": "normal",
     "setup": {
       "biome": "volcano",
       "map": [
@@ -819,6 +832,7 @@
     "id": 14,
     "name": "Ember Spring",
     "seed": "campaign-v1-14",
+    "difficulty": "normal",
     "setup": {
       "biome": "volcano",
       "map": [
@@ -905,6 +919,7 @@
     "id": 15,
     "name": "Cinder Keep",
     "seed": "campaign-v1-15",
+    "difficulty": "normal",
     "setup": {
       "biome": "volcano",
       "map": [
@@ -991,6 +1006,7 @@
     "id": 16,
     "name": "Wizard Curtain",
     "seed": "campaign-v1-16",
+    "difficulty": "normal",
     "setup": {
       "biome": "volcano",
       "map": [
@@ -1072,6 +1088,7 @@
     "id": 17,
     "name": "Hell's Gate",
     "seed": "campaign-v1-17",
+    "difficulty": "normal",
     "setup": {
       "biome": "hell",
       "map": [
@@ -1159,6 +1176,7 @@
     "id": 18,
     "name": "Caldera Run",
     "seed": "campaign-v1-18",
+    "difficulty": "normal",
     "setup": {
       "biome": "hell",
       "map": [
@@ -1250,6 +1268,7 @@
     "id": 19,
     "name": "Royal Guard",
     "seed": "campaign-v1-19",
+    "difficulty": "normal",
     "setup": {
       "biome": "hell",
       "map": [
@@ -1346,6 +1365,7 @@
     "id": 20,
     "name": "Last Crown",
     "seed": "campaign-v1-20",
+    "difficulty": "normal",
     "setup": {
       "biome": "hell",
       "map": [

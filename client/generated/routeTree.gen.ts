@@ -14,11 +14,12 @@ import { Route as CampaignRouteImport } from './../src/routes/campaign'
 import { Route as CustomRouteImport } from './../src/routes/custom'
 import { Route as GameRouteImport } from './../src/routes/game'
 import { Route as CampaignIndexRouteImport } from './../src/routes/campaign.index'
-import { Route as CampaignLevelRouteImport } from './../src/routes/campaign.$level'
 import { Route as GameIndexRouteImport } from './../src/routes/game.index'
 import { Route as GameSeedRouteImport } from './../src/routes/game.$seed'
 import { Route as OnlineIndexRouteImport } from './../src/routes/online.index'
 import { Route as OnlineCodeRouteImport } from './../src/routes/online.$code'
+import { Route as CampaignCampaignIndexRouteImport } from './../src/routes/campaign.$campaign.index'
+import { Route as CampaignCampaignLevelRouteImport } from './../src/routes/campaign.$campaign.$level'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,11 +46,6 @@ const CampaignIndexRoute = CampaignIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CampaignRoute,
 } as any)
-const CampaignLevelRoute = CampaignLevelRouteImport.update({
-  id: '/$level',
-  path: '/$level',
-  getParentRoute: () => CampaignRoute,
-} as any)
 const GameIndexRoute = GameIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -70,28 +66,40 @@ const OnlineCodeRoute = OnlineCodeRouteImport.update({
   path: '/online/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignCampaignIndexRoute = CampaignCampaignIndexRouteImport.update({
+  id: '/$campaign/',
+  path: '/$campaign/',
+  getParentRoute: () => CampaignRoute,
+} as any)
+const CampaignCampaignLevelRoute = CampaignCampaignLevelRouteImport.update({
+  id: '/$campaign/$level',
+  path: '/$campaign/$level',
+  getParentRoute: () => CampaignRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campaign': typeof CampaignRouteWithChildren
   '/custom': typeof CustomRoute
   '/game': typeof GameRouteWithChildren
-  '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
   '/online/$code': typeof OnlineCodeRoute
   '/campaign/': typeof CampaignIndexRoute
   '/game/': typeof GameIndexRoute
   '/online/': typeof OnlineIndexRoute
+  '/campaign/$campaign/$level': typeof CampaignCampaignLevelRoute
+  '/campaign/$campaign/': typeof CampaignCampaignIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/custom': typeof CustomRoute
-  '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
   '/online/$code': typeof OnlineCodeRoute
   '/campaign': typeof CampaignIndexRoute
   '/game': typeof GameIndexRoute
   '/online': typeof OnlineIndexRoute
+  '/campaign/$campaign/$level': typeof CampaignCampaignLevelRoute
+  '/campaign/$campaign': typeof CampaignCampaignIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -99,12 +107,13 @@ export interface FileRoutesById {
   '/campaign': typeof CampaignRouteWithChildren
   '/custom': typeof CustomRoute
   '/game': typeof GameRouteWithChildren
-  '/campaign/$level': typeof CampaignLevelRoute
   '/game/$seed': typeof GameSeedRoute
   '/online/$code': typeof OnlineCodeRoute
   '/campaign/': typeof CampaignIndexRoute
   '/game/': typeof GameIndexRoute
   '/online/': typeof OnlineIndexRoute
+  '/campaign/$campaign/$level': typeof CampaignCampaignLevelRoute
+  '/campaign/$campaign/': typeof CampaignCampaignIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,34 +122,37 @@ export interface FileRouteTypes {
     | '/campaign'
     | '/custom'
     | '/game'
-    | '/campaign/$level'
     | '/game/$seed'
     | '/online/$code'
     | '/campaign/'
     | '/game/'
     | '/online/'
+    | '/campaign/$campaign/$level'
+    | '/campaign/$campaign/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/custom'
-    | '/campaign/$level'
     | '/game/$seed'
     | '/online/$code'
     | '/campaign'
     | '/game'
     | '/online'
+    | '/campaign/$campaign/$level'
+    | '/campaign/$campaign'
   id:
     | '__root__'
     | '/'
     | '/campaign'
     | '/custom'
     | '/game'
-    | '/campaign/$level'
     | '/game/$seed'
     | '/online/$code'
     | '/campaign/'
     | '/game/'
     | '/online/'
+    | '/campaign/$campaign/$level'
+    | '/campaign/$campaign/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -189,13 +201,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CampaignIndexRouteImport
       parentRoute: typeof CampaignRoute
     }
-    '/campaign/$level': {
-      id: '/campaign/$level'
-      path: '/$level'
-      fullPath: '/campaign/$level'
-      preLoaderRoute: typeof CampaignLevelRouteImport
-      parentRoute: typeof CampaignRoute
-    }
     '/game/': {
       id: '/game/'
       path: '/'
@@ -224,17 +229,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnlineCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaign/$campaign/': {
+      id: '/campaign/$campaign/'
+      path: '/$campaign'
+      fullPath: '/campaign/$campaign/'
+      preLoaderRoute: typeof CampaignCampaignIndexRouteImport
+      parentRoute: typeof CampaignRoute
+    }
+    '/campaign/$campaign/$level': {
+      id: '/campaign/$campaign/$level'
+      path: '/$campaign/$level'
+      fullPath: '/campaign/$campaign/$level'
+      preLoaderRoute: typeof CampaignCampaignLevelRouteImport
+      parentRoute: typeof CampaignRoute
+    }
   }
 }
 
 interface CampaignRouteChildren {
-  CampaignLevelRoute: typeof CampaignLevelRoute
   CampaignIndexRoute: typeof CampaignIndexRoute
+  CampaignCampaignLevelRoute: typeof CampaignCampaignLevelRoute
+  CampaignCampaignIndexRoute: typeof CampaignCampaignIndexRoute
 }
 
 const CampaignRouteChildren: CampaignRouteChildren = {
-  CampaignLevelRoute: CampaignLevelRoute,
   CampaignIndexRoute: CampaignIndexRoute,
+  CampaignCampaignLevelRoute: CampaignCampaignLevelRoute,
+  CampaignCampaignIndexRoute: CampaignCampaignIndexRoute,
 }
 
 const CampaignRouteWithChildren = CampaignRoute._addFileChildren(

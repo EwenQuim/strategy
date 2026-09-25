@@ -25,7 +25,7 @@ import {
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/engine/bot.ts'
 import { possessiveArmyLabels, playerNames } from '../src/lib/game-mode.ts'
-import { CAMPAIGN_LEVELS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
 
 const base = '/strategy/'
@@ -868,9 +868,10 @@ test(
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
     await context.setOffline(true)
     for (const id of [5, 13, 14, 15, 18]) {
-      const level = CAMPAIGN_LEVELS[id - 1]
-      await page.goto(origin + base + 'campaign/' + id)
-      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      const level = CAMPAIGNS[0].levels[id - 1]
+      await page.goto(origin + base + 'campaign/original/' + id)
+      if (level.newElements.length > 0)
+        await page.getByRole('button', { name: 'Go !', exact: true }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
         await page.locator('[data-biome]').getAttribute('data-biome'),
@@ -987,8 +988,8 @@ test(
       )
     }
 
-    const level = CAMPAIGN_LEVELS[16]
-    await page.goto(origin + base + 'campaign/17')
+    const level = CAMPAIGNS[0].levels[16]
+    await page.goto(origin + base + 'campaign/original/17')
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'hell')
@@ -1236,9 +1237,9 @@ test('Briefings stay dismissed until route remount', { timeout: 60_000 }, async 
   const { page, origin } = await fixture(t)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.goto(origin + base + 'campaign/1')
+  await page.goto(origin + base + 'campaign/original/1')
   const briefing = page.getByRole('dialog', {
-    name: CAMPAIGN_LEVELS[0].name,
+    name: CAMPAIGNS[0].levels[0].name,
     exact: true,
     includeHidden: true,
   })
@@ -1361,7 +1362,7 @@ test(
 )
 
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
-  const level = CAMPAIGN_LEVELS[id - 1]
+  const level = CAMPAIGNS[0].levels[id - 1]
   let state = botState(level.seed, level.setup)
   await page.getByRole('button', { name: 'Go !', exact: true }).click()
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
