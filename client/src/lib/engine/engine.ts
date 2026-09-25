@@ -138,6 +138,7 @@ type ActionResult = {
   tiles: Map<string, Tile>
   pawns: Pawn[]
   actor: Pawn
+  fallen: Pawn[]
   log: string[]
   randomState: number
   effect: BattleEffect | null
@@ -151,7 +152,8 @@ const effectFrom = ({ kind, ...rest }: SpecialResult, from: Axial): BattleEffect
 
 function executeAction(state: GameState, action: Action): ActionResult | null {
   const tiles = new Map(state.tiles)
-  const pawns = state.pawns.map((pawn) => pawn.clone())
+  const participants = state.pawns.map((pawn) => pawn.clone())
+  const pawns = [...participants]
   const actor = pawns.find((pawn) => pawn.id === state.order[state.active])!
   const log: string[] = []
   const random = new SeededRandom(state.randomState)
@@ -213,7 +215,15 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     default:
       return null
   }
-  return { tiles, pawns, actor, log, randomState: random.state, effect }
+  return {
+    tiles,
+    pawns,
+    actor,
+    fallen: participants.filter((pawn) => pawn.hp <= 0),
+    log,
+    randomState: random.state,
+    effect,
+  }
 }
 
 function reduce(
@@ -251,7 +261,7 @@ function reduce(
 
   const result = executeAction(state, action)
   if (!result) return state
-  const { tiles, pawns, actor, log, randomState } = result
+  const { tiles, pawns, actor, fallen, log, randomState } = result
   let { effect } = result
   clearBrokenProtection(pawns)
   const winner = winnerFrom(pawns, actor.side)
@@ -272,7 +282,7 @@ function reduce(
     log: [...state.log, ...log].slice(-40),
     logCount: state.logCount + log.length,
   }
-  if (effect) record?.(captureFrame(next, effect, actor))
+  if (effect) record?.(captureFrame(next, effect, fallen))
   if (winner) return endBattle(next, winner)
   return turnEnded ? advanceTurn(next, record) : next
 }

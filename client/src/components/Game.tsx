@@ -43,6 +43,7 @@ export function Game({
 }) {
   const local = mode === 'local'
   const isOnline = mode === 'online'
+  const viewerSide = online?.side
   const names = players ?? playerNames
   const labels = possessiveArmyLabels(mode, names)
   const { state, dispatch, effect, effectId, playing } = useGame({
@@ -73,7 +74,7 @@ export function Game({
     state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
   const myTurn =
     !!pawn &&
-    (isOnline ? pawn.side === online?.side : local || pawn.side === 'player') &&
+    (isOnline ? pawn.side === viewerSide : local || pawn.side === 'player') &&
     !state.winner &&
     !playing
   const attacking = myTurn && state.phase === 'attack'
@@ -154,6 +155,7 @@ export function Game({
         {state.winner && (
           <GameResult
             winner={state.winner}
+            viewerSide={viewerSide}
             winnerLabel={winnerLabel}
             mode={mode}
             difficulty={difficulty}

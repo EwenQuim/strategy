@@ -151,7 +151,7 @@ test('Special previews and outcomes have a stable reference across all classes',
         return value instanceof Map ? [...value] : value
       }),
     ),
-    1092823723,
+    3953863195,
   )
 })
 
@@ -214,6 +214,10 @@ test('A final-energy kill wins for either side before advancing or resetting the
     assert.equal(result.frames[0].state.winner, null)
     assert.equal(activePawn(result.frames[0].state)?.id, 1)
     assert.deepEqual(result.frames[0].effect?.to, { q: 2, r: 0 })
+    const fallen = result.frames[0].state.pawns.find((pawn) => pawn.id === 3)!
+    assert.equal(fallen.hp, -1)
+    assert.equal(fallen.side, side === 'player' ? 'enemy' : 'player')
+    assert.ok(!result.state.pawns.some((pawn) => pawn.id === fallen.id))
     assert.equal(reducer(result.state, { type: 'endTurn' }), result.state)
     assert.equal(state.pawns[2].hp, 1)
   }
@@ -315,6 +319,7 @@ test('Fireball reports each hit and dodge, including a killed target, without hi
     { q: 2, r: 0, damage: 1 },
   ])
   assert.ok(!result.state.pawns.some((p) => p.id === 4))
+  assert.equal(result.frames[0].state.pawns.find((pawn) => pawn.id === 4)?.hp, 0)
   assert.equal(result.state.pawns.find((p) => p.id === 5)?.hp, 3)
 })
 
