@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Icon } from './Icon'
 import { LevelMiniature } from './LevelMiniature'
+import * as m from '../i18n/menus'
 import type { Campaign } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
@@ -22,7 +23,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
       data-done={done}
       preload={false}
       data-testid="campaign-pack"
-      aria-label={campaign.name + ' campaign, ' + completed + ' / ' + total + ' completed'}
+      aria-label={m.campaignCard(campaign.name, completed, total)}
     >
       <LevelMiniature setup={showcase} />
       <span className="flex items-end justify-between gap-3">

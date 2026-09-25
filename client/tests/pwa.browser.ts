@@ -354,7 +354,9 @@ test(
       assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
       await page.getByRole('button', { name: 'How to play' }).click()
       assert.ok(
-        (await page.locator('dialog').innerText()).includes('AI difficulty: ' + difficulty),
+        (await page.locator('dialog').innerText())
+          .toLowerCase()
+          .includes('ai difficulty: ' + difficulty),
       )
       await page.getByRole('button', { name: 'Close dialog' }).click()
       await playTurn(page)

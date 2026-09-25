@@ -1,6 +1,8 @@
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Icon } from './Icon'
 import type { CampaignLevel } from '../lib/campaign'
+import * as common from '../i18n/common'
+import * as m from '../i18n/game'
 
 function showBriefing(dialog: HTMLDialogElement) {
   dialog.showModal()
@@ -23,13 +25,13 @@ export function Briefing({ level }: { level: CampaignLevel }) {
       >
         <div>
           <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
-            Level {String(level.id).padStart(2, '0')}
+            {m.levelNumber(String(level.id).padStart(2, '0'))}
           </span>
           <h2 className="mt-2 font-serif text-[27px] leading-[normal]" id="briefing-title">
             {level.name}
           </h2>
         </div>
-        <button className={iconButtonClassName} type="submit" aria-label="Close dialog">
+        <button className={iconButtonClassName} type="submit" aria-label={common.closeDialog}>
           <Icon name="close" />
         </button>
       </form>
@@ -58,7 +60,7 @@ export function Briefing({ level }: { level: CampaignLevel }) {
             ' min-h-13 w-full justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
           }
         >
-          Go !
+          {m.go}
         </button>
       </form>
     </dialog>

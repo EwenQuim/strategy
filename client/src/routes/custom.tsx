@@ -12,6 +12,8 @@ import {
   type Pawn,
 } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
+import * as common from '../i18n/common'
+import * as m from '../i18n/menus'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
@@ -30,13 +32,13 @@ export const Route = createFileRoute('/custom')({
     ])
     const [enemy, setEnemy] = useState<Pawn['kind'][] | null>(null)
     const enemyRoster = enemy ?? player
-    const labels = mode === 'local' ? ['Player 1', 'Player 2'] : ['Player', 'Enemy']
+    const labels = mode === 'local' ? m.localSides : m.aiSides
 
     return (
       <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&_select:focus-visible]:outline-2 [&_select:focus-visible]:outline-offset-1 [&_select:focus-visible]:outline-gold [&_:disabled]:opacity-50">
         <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">Custom play</h1>
-          <Link to="/" className={iconButtonClassName} aria-label="Back to home">
+          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{common.customPlay}</h1>
+          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
         </header>
@@ -53,20 +55,21 @@ export const Route = createFileRoute('/custom')({
           <div className="min-h-0 overflow-y-auto p-1">
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5 text-[12px] text-muted">
-                <label htmlFor="custom-mode">Mode</label>
+                <label htmlFor="custom-mode">{m.mode}</label>
                 <select
                   className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
                   id="custom-mode"
                   value={mode}
                   onChange={(event) => setMode(event.target.value as GameMode)}
                 >
-                  <option value="ai">Quick play</option>
-                  <option value="local">2 players</option>
+                  <option value="ai">{common.quickPlay}</option>
+                  <option value="local">{m.twoPlayers}</option>
                 </select>
               </div>
               <div className="grid gap-1.5 text-[12px] text-muted">
                 <label htmlFor="custom-difficulty">
-                  Difficulty{mode === 'local' ? ' (AI only)' : ''}
+                  {m.difficulty}
+                  {mode === 'local' && m.aiOnly}
                 </label>
                 <select
                   className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
@@ -77,13 +80,13 @@ export const Route = createFileRoute('/custom')({
                 >
                   {Object.keys(BOT_LEVELS).map((level) => (
                     <option key={level} value={level}>
-                      {level[0].toUpperCase() + level.slice(1)}
+                      {m.difficulties[level as BotDifficulty]}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
-                <label htmlFor="custom-biome">Biome</label>
+                <label htmlFor="custom-biome">{m.biome}</label>
                 <select
                   className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
                   id="custom-biome"
@@ -105,14 +108,14 @@ export const Route = createFileRoute('/custom')({
                 checked={enemy === null}
                 onChange={(event) => setEnemy(event.target.checked ? null : [...player])}
               />
-              Mirror player roster
+              {m.mirrorRoster}
             </label>
             <table className="w-full border-separate border-spacing-2 text-[13px] [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
-              <caption className="text-left font-semibold text-gold">Rosters</caption>
+              <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
               <thead className="text-[11px] text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="col">
-                    Unit
+                    {m.unit}
                   </th>
                   <th className="font-medium w-1/4 text-center" scope="col">
                     {labels[0]}
@@ -127,7 +130,7 @@ export const Route = createFileRoute('/custom')({
                   <th className="text-left font-medium" scope="row">
                     <span className="flex items-center gap-2 capitalize">
                       <PawnIcon kind="king" />
-                      King
+                      {m.king}
                     </span>
                   </th>
                   <td className="w-1/4 text-center">1</td>
@@ -181,7 +184,7 @@ export const Route = createFileRoute('/custom')({
               <tfoot className="text-[11px] text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="row">
-                    Total
+                    {m.total}
                   </th>
                   <td className="w-1/4 text-center">{player.length}</td>
                   <td className="w-1/4 text-center">{enemyRoster.length}</td>
@@ -189,8 +192,7 @@ export const Route = createFileRoute('/custom')({
               </tfoot>
             </table>
             <p className="text-[11px] leading-[1.5] text-muted">
-              One king per side. Up to {MAP_WIDTH * 3} units; player Bulwarks are limited to{' '}
-              {MAP_WIDTH}.
+              {m.rosterLimits(MAP_WIDTH * 3, MAP_WIDTH)}
             </p>
           </div>
           <button
@@ -200,7 +202,7 @@ export const Route = createFileRoute('/custom')({
               ' min-h-13 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3] mt-auto shrink-0'
             }
           >
-            Start battle
+            {m.startBattle}
             <Icon name="arrow" />
           </button>
         </form>

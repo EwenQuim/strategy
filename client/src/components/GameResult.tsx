@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import type { Campaign } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
-import { possessiveArmyLabels, type GameMode, type PlayerNames } from '../lib/game-mode'
+import * as m from '../i18n/game'
+import { type GameMode, type PlayerNames } from '../lib/game-mode'
 import type { BotDifficulty } from '../lib/engine/ai'
 import { Icon } from './Icon'
 import { buttonClassName } from './styles'
@@ -37,7 +38,6 @@ export function GameResult({
 }: GameResultProps) {
   const local = mode === 'local'
   const isOnline = mode === 'online'
-  const labels = possessiveArmyLabels(mode, names)
 
   return (
     <div
@@ -54,21 +54,18 @@ export function GameResult({
         </div>
         <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
           {campaign && campaignLevel
-            ? 'Level ' + campaignLevel + ': ' + campaign.levels[campaignLevel - 1].name
-            : 'The battle is over'}
+            ? m.resultLevel(campaignLevel, campaign.levels[campaignLevel - 1].name)
+            : m.battleOver}
         </span>
-        <h1>
-          {winnerLabel ??
-            (winner === 'player' ? 'The battlefield is yours.' : 'A crown has fallen.')}
-        </h1>
+        <h1>{winnerLabel ?? (winner === 'player' ? m.battlefieldYours : m.crownFallen)}</h1>
         <p>
           {winner === 'draw'
-            ? 'Both kings have fallen. Neither army wins.'
+            ? m.bothKingsFallen
             : local || isOnline
-              ? labels[winner === 'player' ? 'enemy' : 'player'] + ' king has fallen.'
+              ? m.kingFallen(names[winner === 'player' ? 'enemy' : 'player'])
               : winner === 'player'
-                ? 'Their king has fallen. Your guard stands victorious.'
-                : 'Your king has fallen. Regroup, rethink, and return.'}
+                ? m.enemyKingFallen
+                : m.yourKingFallen}
         </p>
         {campaign && campaignLevel ? (
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
@@ -80,7 +77,7 @@ export function GameResult({
                   className={resultButtonClassName}
                   preload={false}
                 >
-                  Next level
+                  {m.nextLevel}
                   <Icon name="arrow" />
                 </Link>
               ) : (
@@ -89,12 +86,12 @@ export function GameResult({
                   params={{ campaign: campaign.slug }}
                   className={resultButtonClassName}
                 >
-                  Back to campaign
+                  {m.backToCampaign}
                 </Link>
               )
             ) : (
               <button className={resultButtonClassName} onClick={onRestart}>
-                Retry level
+                {m.retryLevel}
               </button>
             )}
             {!(winner === 'player' && campaignLevel === campaign.levels.length) && (
@@ -103,16 +100,14 @@ export function GameResult({
                 params={{ campaign: campaign.slug }}
                 className="p-3 text-[11px] underline"
               >
-                Level selection
+                {m.levelSelection}
               </Link>
             )}
-            {!progressSaved && (
-              <p role="status">Progress could not be saved. It will last only for this tab.</p>
-            )}
+            {!progressSaved && <p role="status">{m.progressNotSaved}</p>}
           </div>
         ) : isOnline ? (
           <Link to="/online" className={resultButtonClassName} preload={false}>
-            New online game
+            {m.newOnlineGame}
             <Icon name="arrow" />
           </Link>
         ) : (
@@ -126,7 +121,7 @@ export function GameResult({
             className={resultButtonClassName}
             preload={false}
           >
-            New game
+            {m.newGame}
             <Icon name="arrow" />
           </Link>
         )}

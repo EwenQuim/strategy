@@ -2,6 +2,8 @@ import { buttonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { ApiError, health, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
+import * as common from '../i18n/common'
+import * as m from '../i18n/online'
 import { readStoredGames } from '../onlineSession.ts'
 
 export const Route = createFileRoute('/online/$code')({
@@ -22,10 +24,8 @@ export const Route = createFileRoute('/online/$code')({
       return (
         <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
           <div className="grid gap-4">
-            <h1 className="font-serif text-[28px]">You are not a player in this game.</h1>
-            <p className="text-[12px] text-muted">
-              Join it from the lobby with the game code, then come back.
-            </p>
+            <h1 className="font-serif text-[28px]">{m.notAPlayer}</h1>
+            <p className="text-[12px] text-muted">{m.joinFromLobby}</p>
             <Link
               to="/online"
               className={
@@ -34,7 +34,7 @@ export const Route = createFileRoute('/online/$code')({
               }
               preload={false}
             >
-              Back to the lobby
+              {common.backToLobby}
             </Link>
           </div>
         </main>
@@ -47,9 +47,7 @@ export const Route = createFileRoute('/online/$code')({
         <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
           <div className="grid gap-4">
             <h1 className="font-serif text-[28px]">
-              {status === 404
-                ? 'This game does not exist anymore.'
-                : 'Could not reach the game server.'}
+              {status === 404 ? m.gameGone : common.serverUnreachable}
             </h1>
             <Link
               to="/online"
@@ -59,7 +57,7 @@ export const Route = createFileRoute('/online/$code')({
               }
               preload={false}
             >
-              Back to the lobby
+              {common.backToLobby}
             </Link>
           </div>
         </main>
@@ -72,16 +70,15 @@ export const Route = createFileRoute('/online/$code')({
         <main className="grid min-h-dvh place-items-center bg-[#182c22] px-5 py-8 text-center">
           <div className="grid w-full max-w-[340px] justify-items-center gap-5">
             <span className="text-[9px] font-semibold tracking-[0.17em] text-muted uppercase">
-              Online game
+              {m.onlineGame}
             </span>
-            <h1 className="font-serif text-[30px] leading-[normal]">Waiting for an opponent</h1>
+            <h1 className="font-serif text-[30px] leading-[normal]">{m.waitingTitle}</h1>
             {!doc ? (
-              <p className="text-[12px] text-muted">Loading...</p>
+              <p className="text-[12px] text-muted">{m.loading}</p>
             ) : (
               <>
                 <p className="text-[12px] leading-[1.6] text-muted">
-                  {doc.namePlayer}, share this code. The battle starts as soon as{' '}
-                  {doc.nameEnemy ? doc.nameEnemy + ' has' : 'someone has'} joined.
+                  {m.shareCode(doc.namePlayer, doc.nameEnemy || undefined)}
                 </p>
                 <div
                   className="rounded-2xl border border-[#dcc48a59] bg-[#20362bee] px-8 py-5 font-mono text-[34px] tracking-[0.25em] text-gold"
@@ -97,7 +94,7 @@ export const Route = createFileRoute('/online/$code')({
                   }
                   onClick={() => void navigator.clipboard?.writeText(code)}
                 >
-                  Copy code
+                  {m.copyCode}
                 </button>
               </>
             )}
@@ -109,7 +106,7 @@ export const Route = createFileRoute('/online/$code')({
               }
               preload={false}
             >
-              Back to the lobby
+              {common.backToLobby}
             </Link>
           </div>
         </main>

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import * as m from '../i18n/game'
 import {
   key,
   walkingPaths,
@@ -89,7 +90,7 @@ export function Battlefield({
       className="block size-full max-w-[860px] touch-manipulation select-none drop-shadow-[0_18px_20px_#0a211b60]"
       data-testid="battlefield"
       role="group"
-      aria-label="Battlefield. Select a highlighted tile to move or an enemy to attack."
+      aria-label={m.battlefieldHint}
     >
       <defs>
         <pattern id="hellfire-hatch" width="9" height="9" patternUnits="userSpaceOnUse">
