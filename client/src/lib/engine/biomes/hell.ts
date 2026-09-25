@@ -45,8 +45,6 @@ export const hell: BiomeDefinition = {
     '--line': '#cf728733',
     '--hellfire-warning': '#ffc193',
     '--hellfire-impact': '#ff785e',
-    '--result-panel': '#21121df5',
-    '--result-scrim': '#160d17b8',
     '--battlefield-image':
       'radial-gradient(ellipse at 50% 60%, var(--biome-glow), transparent 70%), none, none',
   },

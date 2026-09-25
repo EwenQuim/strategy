@@ -15,6 +15,7 @@ import type { Biome, FixedBattleSetup } from './engine/index.ts'
 export interface BriefingElement {
   readonly name: string
   readonly points: readonly string[]
+  readonly art?: IntroducedElement
 }
 
 export interface CampaignLevel {
@@ -40,6 +41,7 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
       : attack.minRange + '-' + attack.maxRange
   return {
     name: kind[0].toUpperCase() + kind.slice(1),
+    art: kind,
     points: [
       maxHp + ' HP · ' + attack.damage + ' dmg · range ' + range,
       special.name + ' (' + special.cost + ' energy): ' + specialPoints[0],
@@ -48,7 +50,7 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
   }
 }
 
-type IntroducedElement =
+export type IntroducedElement =
   | PawnKind
   | Exclude<Terrain, 'plain' | 'forest' | 'palm' | 'basalt'>
   | TileFeature
@@ -97,14 +99,27 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
       'Jump does not attack: keep 1 energy to strike',
     ),
   ],
-  lake: [{ name: 'Lakes', points: ['Block walking and Charge', 'Arrows and spells pass'] }],
-  mountain: [
-    { name: 'Mountains', points: ['Block walking and Charge', 'Arrows and spells pass'] },
+  lake: [
+    {
+      name: 'Lakes',
+      art: 'lake',
+      points: ['Block walking and Charge', 'Arrows and spells pass'],
+    },
   ],
-  sand: [{ name: 'Desert', points: ['Open sand, no cover', 'Palms are decorative'] }],
+  mountain: [
+    {
+      name: 'Mountains',
+      art: 'mountain',
+      points: ['Block walking and Charge', 'Arrows and spells pass'],
+    },
+  ],
+  sand: [
+    { name: 'Desert', art: 'sand', points: ['Open sand, no cover', 'Palms are decorative'] },
+  ],
   lava: [
     {
       name: 'Lava',
+      art: 'lava',
       points: [
         '-1 HP per tile entered, even on Charge',
         'Ignores Escape and Protect',
@@ -113,18 +128,26 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     },
   ],
   watchtower: [
-    { name: TILE_FEATURES.watchtower.name, points: ['Archer and Magician: +1 max range'] },
+    {
+      name: TILE_FEATURES.watchtower.name,
+      art: 'watchtower',
+      points: ['Archer and Magician: +1 max range'],
+    },
   ],
-  spring: [{ name: TILE_FEATURES.spring.name, points: ['Stay until next turn: +1 HP'] }],
+  spring: [
+    { name: TILE_FEATURES.spring.name, art: 'spring', points: ['Stay until next turn: +1 HP'] },
+  ],
   rune: [
     {
       name: TILE_FEATURES.rune.name,
+      art: 'rune',
       points: ['First unit in: +2 energy this round', 'Single use'],
     },
   ],
   hell: [
     {
       name: 'Hellfire',
+      art: 'hell',
       points: [
         'Hatched area: 1 dmg at round end',
         'Ignores Escape and Protect',

@@ -5,11 +5,10 @@ import * as m from '../i18n/game'
 import { type GameMode, type PlayerNames } from '../lib/game-mode'
 import type { BotDifficulty } from '../lib/engine/ai'
 import { Icon } from './Icon'
-import { buttonClassName } from './styles'
+import { panelClassName, primaryButtonClassName } from './styles'
 
 const resultButtonClassName =
-  buttonClassName +
-  ' mt-5 min-h-[46px] [@media(max-height:650px)]:mt-3 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
+  primaryButtonClassName + ' mt-5 min-h-12 [@media(max-height:650px)]:mt-3'
 
 interface GameResultProps {
   winner: Side | 'draw'
@@ -41,18 +40,21 @@ export function GameResult({
 
   return (
     <div
-      className="absolute inset-0 grid place-items-center bg-[var(--result-scrim,#14281eab)] p-4 backdrop-blur-[5px]"
+      className="absolute inset-0 grid place-items-center bg-black/35 p-4 backdrop-blur-[5px]"
       data-testid="battle-result"
       role="status"
     >
       <div
-        className="max-w-[390px] rounded-2xl border border-[#dcc48a59] bg-[var(--result-panel,#20362bee)] p-7 text-center shadow-[0_20px_60px_#07180f80] [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-[normal] [&_p]:text-[12px] [&_p]:leading-[1.7] [&_p]:text-[#bfccb4] [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]"
+        className={
+          panelClassName +
+          ' max-w-[390px] p-7 text-center [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-tight [&_p]:text-[14px] [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]'
+        }
         data-testid="result-card"
       >
-        <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-[#dcc48a40] text-gold [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
+        <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-gold/25 text-gold [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
           <Icon name="crown" />
         </div>
-        <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
+        <span className="text-[11px] font-semibold text-muted tracking-[0.17em] uppercase">
           {campaign && campaignLevel
             ? m.resultLevel(campaignLevel, campaign.levels[campaignLevel - 1].name)
             : m.battleOver}
@@ -98,7 +100,7 @@ export function GameResult({
               <Link
                 to="/campaign/$campaign"
                 params={{ campaign: campaign.slug }}
-                className="p-3 text-[11px] underline"
+                className="p-3 text-[13px] underline"
               >
                 {m.levelSelection}
               </Link>
