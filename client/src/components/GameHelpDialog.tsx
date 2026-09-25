@@ -9,7 +9,7 @@ import * as m from '../i18n/help'
 import * as menus from '../i18n/menus'
 import { BriefingElements } from './Briefing'
 import { Icon } from './Icon'
-import { iconButtonClassName } from './styles'
+import { dialogClassName, iconButtonClassName } from './styles'
 
 interface GameHelpDialogProps {
   dialogRef: RefObject<HTMLDialogElement | null>
@@ -32,14 +32,14 @@ export function GameHelpDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 m-auto open:flex max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] flex-col rounded-2xl border border-[#d1cf9b40] bg-[var(--biome-panel,#20362b)] p-0 text-ink shadow-[0_25px_90px_#07180f99] backdrop:bg-[#091910b8] backdrop:backdrop-blur-[7px]"
+      className={dialogClassName}
       aria-labelledby="dialog-title"
       onClick={(event) => {
         if (event.target === event.currentTarget) dialogRef.current?.close()
       }}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-[25px] pt-[25px] pb-5 [&>button]:shrink-0">
-        <h2 className="font-serif text-[27px] leading-[normal]" id="dialog-title">
+      <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-6 pt-6 pb-4 [&>button]:shrink-0">
+        <h2 className="font-serif text-[30px] leading-tight" id="dialog-title">
           {game.howToPlay}
         </h2>
         <button
@@ -50,8 +50,8 @@ export function GameHelpDialog({
           <Icon name="close" />
         </button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-[25px]">
-        <p className="pt-4 text-[12px] leading-[1.5] text-muted">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6">
+        <p className="pt-5 text-[14px] leading-normal text-muted">
           {campaignLevel ? m.campaignIntro : setup ? m.customIntro : m.randomIntro}
           {setup &&
             mode !== 'local' &&

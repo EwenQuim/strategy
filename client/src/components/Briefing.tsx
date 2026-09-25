@@ -1,23 +1,74 @@
-import { buttonClassName, iconButtonClassName } from './styles'
-import { Icon } from './Icon'
-import type { BriefingElement, CampaignLevel } from '../lib/campaign'
+import { dialogClassName, iconButtonClassName, primaryButtonClassName } from './styles'
+import { Icon, PawnIcon } from './Icon'
+import { hexPoints, terrainColors } from './hex-art'
+import { TerrainArt } from './terrains/TerrainArt'
+import { FeatureArt } from './features/FeatureArt'
+import type { BriefingElement, CampaignLevel, IntroducedElement } from '../lib/campaign'
+import {
+  BIOMES,
+  PAWN_CLASSES,
+  TILE_FEATURES,
+  type PawnKind,
+  type TileFeature,
+} from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 
+const isPawn = (art: IntroducedElement): art is PawnKind => art in PAWN_CLASSES
+const isFeature = (art: IntroducedElement): art is TileFeature => art in TILE_FEATURES
+
+function ElementArt({ art }: { art: IntroducedElement }) {
+  return (
+    <svg
+      className="size-16 shrink-0 max-[360px]:size-12"
+      viewBox="-34 -34 68 68"
+      aria-hidden="true"
+    >
+      {isPawn(art) ? (
+        <>
+          <polygon points={hexPoints} fill="var(--tile-base, #263f30)" />
+          <circle r="22" fill="url(#player-chip)" stroke="#b2ceaa" strokeWidth="1.5" />
+          <g transform="translate(-12 -12)" color={art === 'king' ? '#f0d38e' : '#f1e8d2'}>
+            <PawnIcon kind={art} />
+          </g>
+        </>
+      ) : isFeature(art) ? (
+        <>
+          <polygon points={hexPoints} fill={terrainColors.plain} />
+          <FeatureArt feature={art} />
+        </>
+      ) : art === 'hell' ? (
+        <>
+          <polygon points={hexPoints} fill={terrainColors.basalt} />
+          <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
+        </>
+      ) : (
+        <>
+          <polygon points={hexPoints} fill={terrainColors[art]} />
+          <TerrainArt terrain={art} variant={0} />
+        </>
+      )}
+    </svg>
+  )
+}
+
 export function BriefingElements({ elements }: { elements: readonly BriefingElement[] }) {
   return (
-    <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5 pb-5">
+    <ul className="m-0 flex list-none flex-col gap-3 p-0 py-5">
       {elements.map((element) => (
         <li
-          className="rounded-lg border border-line bg-[#ffffff04] px-3 py-2.5"
+          className="flex items-center gap-4 rounded-xl border border-line bg-[#ffffff06] px-4 py-3.5"
           key={element.name}
         >
-          <strong className="mb-1 block text-[13px] text-gold">{element.name}</strong>
-          <ul className="m-0 list-disc pl-4 text-[12px] leading-[1.5] text-muted">
-            {element.points.map((point) => (
-              <li key={point}>{point}</li>
-            ))}
-          </ul>
+          {element.art && <ElementArt art={element.art} />}
+          <div className="min-w-0">
+            <strong className="block text-[16px] text-gold">{element.name}</strong>
+            <ul className="mt-1 mb-0 list-disc pl-4 text-[14px] leading-normal text-muted marker:text-line">
+              {element.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </div>
         </li>
       ))}
     </ul>
@@ -33,7 +84,8 @@ export function Briefing({ level }: { level: CampaignLevel }) {
   return (
     <dialog
       ref={showBriefing}
-      className="fixed inset-0 m-auto open:flex max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] flex-col rounded-2xl border border-[#d1cf9b40] bg-[#20362b] p-0 text-ink shadow-[0_25px_90px_#07180f99] backdrop:bg-[#091910b8] backdrop:backdrop-blur-[7px]"
+      className={dialogClassName}
+      style={BIOMES[level.setup.biome].theme}
       aria-labelledby="briefing-title"
       onClick={(event) => {
         if (event.target === event.currentTarget) event.currentTarget.close()
@@ -41,13 +93,13 @@ export function Briefing({ level }: { level: CampaignLevel }) {
     >
       <form
         method="dialog"
-        className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-[25px] pt-[25px] pb-5 [&>button]:shrink-0"
+        className="flex shrink-0 items-start justify-between gap-2.5 border-b border-line px-6 pt-6 pb-4 [&>button]:-mt-1 [&>button]:-mr-2 [&>button]:shrink-0"
       >
         <div>
-          <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
+          <span className="text-[11px] font-semibold tracking-[0.17em] text-muted uppercase">
             {m.levelNumber(String(level.id).padStart(2, '0'))}
           </span>
-          <h2 className="mt-2 font-serif text-[27px] leading-[normal]" id="briefing-title">
+          <h2 className="mt-1 font-serif text-[30px] leading-tight" id="briefing-title">
             {level.name}
           </h2>
         </div>
@@ -55,17 +107,11 @@ export function Briefing({ level }: { level: CampaignLevel }) {
           <Icon name="close" />
         </button>
       </form>
-      <div className="min-h-0 flex-1 overflow-y-auto px-[25px]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6">
         <BriefingElements elements={level.newElements} />
       </div>
-      <form method="dialog" className="shrink-0 px-[25px] pb-[25px]">
-        <button
-          type="submit"
-          className={
-            buttonClassName +
-            ' min-h-13 w-full justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-          }
-        >
+      <form method="dialog" className="shrink-0 px-6 pb-6">
+        <button type="submit" className={primaryButtonClassName + ' min-h-12 w-full'}>
           {m.go}
         </button>
       </form>
