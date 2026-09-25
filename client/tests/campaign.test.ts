@@ -196,7 +196,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
   assert.equal(original.levels[0].setup.enemy.length, 1)
   for (const level of original.levels.slice(0, 2)) {
     assert.ok(level.setup.map.every((row) => /^[.f_]+$/.test(row)))
-    assert.ok(level.newElements.length <= 2)
+    assert.ok(level.newElements.length <= (level.id === 1 ? 4 : 2))
   }
   assert.equal(new Set(original.levels.map((level) => level.setup.map.join(''))).size, 20)
   assert.ok(original.levels[9].setup.map.every((row) => /^[s_]+$/.test(row)))
@@ -215,8 +215,8 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
         .map((level) => [level.id, level.newElements.map((element) => element.name)]),
     ),
     {
-      1: ['Swordsman', 'King'],
-      2: ['Archer', 'Escape'],
+      1: ['Goal', 'Energy', 'King', 'Swordsman'],
+      2: ['Archer'],
       3: ['Lakes'],
       4: ['Magician'],
       5: ['Watchtower'],
