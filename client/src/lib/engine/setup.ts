@@ -153,7 +153,7 @@ function copySetup(setup: BattleSetup | undefined): BattleSetup | undefined {
   return { biome: setup.biome, player: [...setup.player], enemy: [...setup.enemy] }
 }
 
-export function prepareBattle(seed: string, setup?: BattleSetup) {
+export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: Side) {
   const authoredTiles = setup?.map === undefined ? undefined : mapFromRows(setup.map)
   if (setup !== undefined) validateSetup(setup, authoredTiles)
   const random = new SeededRandom(seedState(seed))
@@ -189,14 +189,20 @@ export function prepareBattle(seed: string, setup?: BattleSetup) {
     tiles = makeMap(random, biome, pawns)
   }
   const savedSetup = copySetup(setup)
+  const initiative = shuffle(pawns, random)
+  if (startingSide) {
+    const first = initiative.findIndex((pawn) => pawn.side === startingSide)
+    initiative.push(...initiative.splice(0, first))
+  }
+  // Number the finalized initiative, including any starting-side rotation.
+  initiative.forEach((pawn, index) => {
+    ;(pawn as { id: number }).id = index + 1
+  })
   return {
     tiles,
     biome,
     pawns,
-    order: shuffle(
-      pawns.map((pawn) => pawn.id),
-      random,
-    ),
+    order: initiative.map((_, index) => index + 1),
     seed,
     ...(savedSetup ? { setup: savedSetup } : {}),
     randomState: random.state,

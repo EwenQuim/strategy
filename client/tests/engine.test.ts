@@ -318,7 +318,7 @@ test('Different seeds vary terrain and turn order without depending on global ra
       maps.add(JSON.stringify([...state.tiles.values()]))
       const next = reducer(state, { type: 'endTurn' })
       assert.deepEqual(next, reducer(state, { type: 'endTurn' }))
-      return state.order.join(',')
+      return state.order.map((id) => state.pawns.findIndex((pawn) => pawn.id === id)).join(',')
     }),
   )
   assert.ok(orders.size > 1)

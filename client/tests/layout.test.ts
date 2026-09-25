@@ -147,7 +147,7 @@ test('Holes block walking and landing, but permit detours, ranged attacks and ju
     enemy: [{ kind: 'king', col: 1, row: 0 }],
   }
   const state = initialState('ring-layout', setup)
-  state.order = [1, 2, 3]
+  state.order = state.pawns.map((pawn) => pawn.id)
   state.active = 0
   const pawn = state.pawns[0]
   const hole = hexOf(2, 2)
@@ -181,7 +181,10 @@ test('Campaign maps and character placements are explicit and independent of the
     const differentSeed = initialState(level.seed + '-different', level.setup)
     assert.deepEqual(first.tiles, mapFromRows(level.setup.map))
     assert.deepEqual(first.tiles, differentSeed.tiles)
-    assert.deepEqual(first.pawns, differentSeed.pawns)
+    assert.deepEqual(
+      first.pawns.map(({ id: _id, ...pawn }) => pawn),
+      differentSeed.pawns.map(({ id: _id, ...pawn }) => pawn),
+    )
     assert.deepEqual(level.setup, original)
     for (const side of ['player', 'enemy'] as const) {
       assert.deepEqual(

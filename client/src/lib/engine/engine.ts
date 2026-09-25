@@ -72,8 +72,12 @@ export function activePawn(state: GameState): Pawn | undefined {
   return state.pawns.find((p) => p.id === state.order[state.active])
 }
 
-export function initialState(seed: string, setup?: BattleSetup): GameState {
-  const battle = prepareBattle(seed, setup)
+export function initialState(
+  seed: string,
+  setup?: BattleSetup,
+  startingSide?: Side,
+): GameState {
+  const battle = prepareBattle(seed, setup, startingSide)
   for (const pawn of battle.pawns) {
     if (battle.tiles.get(key(pawn.q, pawn.r))?.feature === 'spring') pawn.springSince = 1
   }

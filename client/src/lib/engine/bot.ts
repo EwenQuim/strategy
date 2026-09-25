@@ -221,11 +221,7 @@ export function createBotGame(strategy: BotController = 'normal') {
   }
 
   const initialTransition = (seed: string, setup?: BattleSetup): Transition => {
-    const state = createState(seed, setup)
-    const first = state.order.findIndex(
-      (id) => state.pawns.find((p) => p.id === id)?.side === 'player',
-    )
-    state.order = [...state.order.slice(first), ...state.order.slice(0, first)]
+    const state = createState(seed, setup, 'player')
     return { state, frames: [] }
   }
   const transition = (state: GameState, action: Action): Transition => {

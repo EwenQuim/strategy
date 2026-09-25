@@ -106,7 +106,7 @@ export function GameHeader({
           </button>
         </div>
       </div>
-      <div className="m-auto flex min-h-[41px] max-w-[1040px] items-center gap-3 border-t border-line min-[900px]:min-h-[43px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[34px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
+      <div className="m-auto flex min-h-[46px] max-w-[1040px] items-center gap-3 border-t border-line min-[900px]:min-h-[48px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[38px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
         <ol
           className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
           aria-label={m.turnOrder}
@@ -114,7 +114,7 @@ export function GameHeader({
           {turnOrder.map(({ unit, index }) => (
             <li
               key={unit.id}
-              className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[5px] py-1 text-[8px] text-[#b6d2b5] data-[side=enemy]:not-aria-[current=step]:text-[#d69b81] data-[acted=true]:opacity-35 aria-[current=step]:border-[#d7c78a66] aria-[current=step]:bg-[#d7c78a14] aria-[current=step]:text-[#ead99e] [&>svg]:size-3.5 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[3px] max-[601px]:[&>svg]:size-3"
+              className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[11px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
               data-testid="initiative-unit"
               data-side={unit.side}
               data-acted={index < active}
