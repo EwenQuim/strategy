@@ -47,13 +47,13 @@ test('Authored setups control both army sizes and classes with legal determinist
       assert.equal(state.tiles.size, MAP_WIDTH * MAP_HEIGHT)
       assert.equal(state.pawns.length, player + enemy)
       assert.deepEqual(
-        state.pawns.map((pawn) => pawn.id),
+        state.pawns.map((pawn) => pawn.id).toSorted((a, b) => a - b),
         Array.from({ length: player + enemy }, (_, i) => i + 1),
       )
       assert.equal(new Set(state.pawns.map((pawn) => key(pawn.q, pawn.r))).size, player + enemy)
       assert.deepEqual(
-        state.order.toSorted((a, b) => a - b),
-        state.pawns.map((pawn) => pawn.id),
+        state.order,
+        state.pawns.toSorted((a, b) => a.id - b.id).map((pawn) => pawn.id),
       )
       assert.equal(state.active, 0)
       assert.equal(state.round, 1)
@@ -230,7 +230,7 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
         }),
       ),
     ),
-    4013518002,
+    3811068134,
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

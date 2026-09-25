@@ -189,14 +189,16 @@ export function prepareBattle(seed: string, setup?: BattleSetup) {
     tiles = makeMap(random, biome, pawns)
   }
   const savedSetup = copySetup(setup)
+  // Pawn numbers mirror the initial turn order instead of the setup file order.
+  const initiative = shuffle(pawns, random)
+  initiative.forEach((pawn, index) => {
+    ;(pawn as { id: number }).id = index + 1
+  })
   return {
     tiles,
     biome,
     pawns,
-    order: shuffle(
-      pawns.map((pawn) => pawn.id),
-      random,
-    ),
+    order: initiative.map((_, index) => index + 1),
     seed,
     ...(savedSetup ? { setup: savedSetup } : {}),
     randomState: random.state,
