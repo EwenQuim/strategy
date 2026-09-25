@@ -114,7 +114,7 @@ export function GameHeader({
           {turnOrder.map(({ unit, index }) => (
             <li
               key={unit.id}
-              className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[9px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
+              className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[10px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
               data-testid="initiative-unit"
               data-side={unit.side}
               data-acted={index < active}
