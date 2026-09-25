@@ -1,5 +1,5 @@
 import type { BotDifficulty } from '../lib/engine/ai'
-import { t } from './locale'
+import { plural, t } from './locale'
 
 export const chooseMode = t({ en: 'Choose game mode', fr: 'Choisir un mode de jeu' })
 export const campaign = t({ en: 'Campaign', fr: 'Campagne' })
@@ -57,7 +57,8 @@ export const startBattle = t({ en: 'Start battle', fr: 'Lancer la bataille' })
 
 export const levelsCompleted = t({
   en: (completed: number, total: number) => `${completed} / ${total} completed`,
-  fr: (completed: number, total: number) => `${completed} / ${total} terminés`,
+  fr: (completed: number, total: number) =>
+    `${completed} / ${total} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
 })
 export const campaignCard = t({
   en: (name: string, completed: number, total: number) =>

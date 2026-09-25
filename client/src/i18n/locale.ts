@@ -8,3 +8,10 @@ export const locale: Locale =
 
 export const t = <Message>(translations: Record<Locale, Message>): Message =>
   translations[locale]
+
+const pluralRules = new Intl.PluralRules(locale)
+
+export const plural = (
+  count: number,
+  forms: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string },
+) => forms[pluralRules.select(count)] ?? forms.other

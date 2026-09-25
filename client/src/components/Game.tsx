@@ -122,8 +122,6 @@ export function Game({
         pawn={pawn}
         winner={state.winner}
         playing={playing}
-        hellfire={state.hellfire}
-        round={state.round}
         order={state.order}
         pawns={state.pawns}
         active={state.active}

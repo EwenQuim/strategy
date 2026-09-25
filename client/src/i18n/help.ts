@@ -1,105 +1,106 @@
-import { t } from './locale'
-
-export const eyebrow = t({ en: "Commander's field notes", fr: 'Carnet du commandant' })
-export const title = t({ en: 'The art of the turn.', fr: "L'art du tour." })
+import { plural, t } from './locale'
 
 export const campaignIntro = t({
-  en: 'This campaign battle has fixed armies and terrain. Defeat the enemy king to unlock the next level. Losing or leaving does not erase completed levels.',
-  fr: "Cette bataille de campagne a des armées et un terrain fixes. Battez le roi ennemi pour débloquer le niveau suivant. Perdre ou quitter n'efface pas les niveaux terminés.",
+  en: 'Fixed armies and terrain. Defeat the enemy king to unlock the next level.',
+  fr: 'Armées et terrain fixes. Battez le roi ennemi pour débloquer le niveau suivant.',
 })
 export const customIntro = t({
-  en: 'This custom battle uses your chosen armies and biome. Defeat the opposing king to win; losing yours ends the battle.',
-  fr: 'Cette bataille personnalisée utilise les armées et le biome choisis. Battez le roi adverse pour gagner ; perdre le vôtre met fin à la bataille.',
+  en: 'This custom battle uses your armies and biome. Defeat the enemy king to win.',
+  fr: 'Cette bataille utilise vos armées et votre biome. Battez le roi ennemi pour gagner.',
 })
 export const randomIntro = t({
-  en: 'Each army has one king, at least one swordsman, and three random recruits. Repeated classes are possible. Both sides get the same lineup, chosen by the game seed. Defeat the enemy king to win; losing yours ends the battle.',
-  fr: 'Chaque armée a un roi, au moins un épéiste et trois recrues aléatoires. Une classe peut apparaître plusieurs fois. Les deux camps ont la même composition, tirée de la graine de la partie. Battez le roi ennemi pour gagner ; perdre le vôtre met fin à la bataille.',
+  en: 'Both sides get the same random lineup: a king, a swordsman and three recruits. Defeat the enemy king to win.',
+  fr: 'Les deux camps ont la même composition aléatoire : un roi, un épéiste et trois recrues. Battez le roi ennemi pour gagner.',
 })
 export const aiDifficulty = t({
   en: (difficulty: string) => `AI difficulty: ${difficulty}.`,
   fr: (difficulty: string) => `Difficulté de l'IA : ${difficulty}.`,
 })
-export const designedMap = t({
-  en: 'Terrain and starting positions are designed for this level; the biome sets its visual theme.',
-  fr: 'Le terrain et les positions de départ sont conçus pour ce niveau ; le biome définit son thème visuel.',
-})
-export const biomeLine = t({
-  en: (name: string, description: string) => `${name} has ${description}.`,
-  fr: (name: string, description: string) => `${name} : ${description}.`,
+
+export const energyTitle = t({ en: 'Energy', fr: 'Énergie' })
+export const energyPoints = t({
+  en: [
+    '3 energy per unit, every round',
+    'Moving costs 1 per tile; a Bulwark pays 2 for its first',
+    'Mountains and lakes block walking and Charge',
+  ],
+  fr: [
+    '3 énergies par unité, à chaque manche',
+    'Se déplacer coûte 1 par case ; un Rempart paie 2 pour la première',
+    'Montagnes et lacs bloquent la marche et la Charge',
+  ],
 })
 
-export const energyTitle = t({
-  en: 'Three energy. Every round.',
-  fr: 'Trois énergies. À chaque manche.',
-})
-export const energyBody = t({
-  en: 'Each unit starts with 3 energy. The lit unit is yours to command. Moving costs 1 energy per tile; a Bulwark pays 2 for its first tile and 1 after. Numbers show the full cost. Mountains and lakes block walking and Charge. Arrows and magic pass over them.',
-  fr: "Chaque unité commence avec 3 énergies. L'unité éclairée est sous vos ordres. Se déplacer coûte 1 énergie par case ; un Rempart paie 2 pour sa première case puis 1. Les nombres indiquent le coût total. Montagnes et lacs bloquent la marche et la Charge. Flèches et magie passent au-dessus.",
+export const combatTitle = t({ en: 'Combat', fr: 'Combat' })
+export const combatPoints = t({
+  en: [
+    'Attack costs 1 energy',
+    'Pick an action, then a highlighted target; cancelling is free',
+    'Arrows and magic fly over terrain',
+  ],
+  fr: [
+    'Attaquer coûte 1 énergie',
+    'Choisissez une action, puis une cible en surbrillance ; annuler est gratuit',
+    'Flèches et magie passent au-dessus du terrain',
+  ],
 })
 
-export const moveTitle = t({ en: 'Make your move.', fr: 'À vous de jouer.' })
-export const moveBody = t({
-  en: 'Normal attacks cost 1 energy. Each class has its own damage and range. Choose Attack or a targeted special, then a highlighted target. Jump selects an empty landing tile, not an enemy. Rally heals every adjacent ally immediately. Protect selects an adjacent ally; a shield marks the protected unit. Charge first asks for a destination, then an adjacent enemy. Cancelling either step costs nothing. Ranged attacks can pass over terrain.',
-  fr: "Une attaque normale coûte 1 énergie. Chaque classe a ses propres dégâts et sa portée. Choisissez Attaque ou une capacité ciblée, puis une cible en surbrillance. Jump choisit une case d'atterrissage vide, pas un ennemi. Rally soigne immédiatement chaque allié adjacent. Protect choisit un allié adjacent ; un bouclier marque l'unité protégée. Charge demande d'abord une destination, puis un ennemi adjacent. Annuler l'une ou l'autre étape ne coûte rien. Les attaques à distance passent au-dessus du terrain.",
+export const terrainTitle = t({ en: 'Terrain', fr: 'Terrain' })
+export const terrainPoints = t({
+  en: [
+    'Special tiles only appear in the two middle rows',
+    'Lava deals 1 unavoidable damage per tile entered',
+  ],
+  fr: [
+    "Les cases spéciales n'apparaissent que sur les deux rangées du milieu",
+    'La lave inflige 1 dégât inévitable par case traversée',
+  ],
 })
-
-export const centerTitle = t({ en: 'Control the center.', fr: 'Contrôlez le centre.' })
-export const centerOdds = t({
-  en: 'Random maps have zero (50%), one (40%), or two (10%) special tiles, only in the two middle rows.',
-  fr: 'Les cartes aléatoires ont zéro (50 %), une (40 %) ou deux (10 %) cases spéciales, uniquement sur les deux rangées du milieu.',
-})
-export const lavaBody = t({
-  en: 'Lava costs 1 health for every tile entered, including during Charge. Damage cannot be escaped or redirected by Protect and can be lethal. Jump crosses lava safely but landing on it deals damage. Forests and palms are decorative.',
-  fr: 'La lave coûte 1 point de vie par case traversée, Charge comprise. Ces dégâts ne peuvent être esquivés ni redirigés par Protect et peuvent être mortels. Jump franchit la lave sans risque, mais y atterrir inflige des dégâts. Forêts et palmiers sont décoratifs.',
-})
-export const hellfireBody = t({
-  en: 'Hellfire warnings stay fixed for the full round. At round end, units on hatched tiles take 1 damage, ignoring Escape and Protect. Move clear before the last unit finishes. If both kings fall, the battle is a draw.',
-  fr: "Les alertes de feu infernal restent fixes toute la manche. En fin de manche, les unités sur les cases hachurées subissent 1 dégât, sans Esquive ni Protect. Écartez-vous avant que la dernière unité ait fini. Si les deux rois tombent, c'est un match nul.",
+export const hellfirePoints = t({
+  en: ['Hatched tiles take 1 damage at round end', 'If both kings fall, it is a draw'],
+  fr: [
+    'Les cases hachurées subissent 1 dégât en fin de manche',
+    "Si les deux rois tombent, c'est un match nul",
+  ],
 })
 
 export const unitTitle = t({
   en: (kind: string, health: number) => `${kind}: ${health} health`,
-  fr: (kind: string, health: number) => `${kind} : ${health} points de vie`,
+  fr: (kind: string, health: number) =>
+    `${kind} : ${health} ${plural(health, { one: 'point de vie', other: 'points de vie' })}`,
 })
-export const unitBody = t({
-  en: (damage: number, range: string, special: string, cost: number) =>
-    `${damage} damage, range ${range}. ${special} costs ${cost} energy.`,
-  fr: (damage: number, range: string, special: string, cost: number) =>
-    `${damage} dégâts, portée ${range}. ${special} coûte ${cost} énergie.`,
+export const unitAttack = t({
+  en: (damage: number, range: string) => `${damage} damage, range ${range}`,
+  fr: (damage: number, range: string) =>
+    `${damage} ${plural(damage, { one: 'dégât', other: 'dégâts' })}, portée ${range}`,
+})
+export const unitSpecial = t({
+  en: (special: string, cost: number, description: string) =>
+    `${special} (${cost} energy): ${description}`,
+  fr: (special: string, cost: number, description: string) =>
+    `${special} (${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}) : ${description}`,
 })
 
-export const escapeTitle = t({
-  en: 'Live to fight another turn.',
-  fr: 'Survivre pour mieux combattre.',
-})
-export const escapeBody = t({
+export const turnTitle = t({ en: 'Turns', fr: 'Tours' })
+export const escapePoint = t({
   en: (bonus: number, max: number) =>
-    `End turn converts all remaining energy into Escape: +${bonus} percentage points per energy, up to ${max}% chance to avoid each incoming attack. The bonus lasts until the round ends. It is not a movement action.`,
+    `End turn turns leftover energy into Escape: +${bonus}% each, up to ${max}%, until the round ends`,
   fr: (bonus: number, max: number) =>
-    `Finir le tour convertit toute l'énergie restante en Esquive : +${bonus} points de pourcentage par énergie, jusqu'à ${max} % de chances d'éviter chaque attaque. Le bonus dure jusqu'à la fin de la manche. Ce n'est pas un déplacement.`,
-})
-
-export const roundTitle = t({
-  en: 'A fresh round. The same order.',
-  fr: 'Nouvelle manche. Même ordre.',
-})
-export const roundBody = t({
-  en: 'End turn spends your remaining energy and passes to the next unit. Running out of energy also ends your turn, with no extra Escape bonus.',
-  fr: "Finir le tour dépense votre énergie restante et passe à l'unité suivante. Tomber à court d'énergie termine aussi votre tour, sans bonus d'Esquive.",
+    `Finir le tour convertit l'énergie restante en Esquive : +${bonus} % chacune, jusqu'à ${max} %, jusqu'à la fin de la manche`,
 })
 export const localPlayers = t({
-  en: 'Share this device: Player 1 commands green units and Player 2 commands red units. Follow the turn indicator for each unit; the same player may act several times in a row.',
-  fr: "Partagez cet appareil : le joueur 1 commande les unités vertes et le joueur 2 les rouges. Suivez l'indicateur de tour de chaque unité ; un même joueur peut agir plusieurs fois de suite.",
+  en: 'Player 1 commands green units, Player 2 red units',
+  fr: 'Le joueur 1 commande les unités vertes, le joueur 2 les rouges',
 })
 export const onlinePlayers = t({
-  en: 'You play against a real opponent online. Only your own units answer to you; wait while the opponent acts. Moves sync every few seconds.',
-  fr: "Vous affrontez un vrai adversaire en ligne. Seules vos unités vous obéissent ; patientez pendant que l'adversaire joue. Les coups se synchronisent toutes les quelques secondes.",
+  en: 'Only your units answer to you; moves sync every few seconds',
+  fr: 'Seules vos unités vous obéissent ; les coups se synchronisent toutes les quelques secondes',
 })
 export const aiPlayers = t({
-  en: 'You move first; enemy units act automatically.',
-  fr: 'Vous jouez en premier ; les unités ennemies agissent automatiquement.',
+  en: 'You move first; enemy units act automatically',
+  fr: 'Vous jouez en premier ; les unités ennemies agissent seules',
 })
 export const turnOrder = t({
-  en: 'Turn order is decided once at the start and stays the same, skipping fallen units. Each new round restores all energy and resets Escape to 0%.',
-  fr: "L'ordre des tours est fixé au début et ne change plus, en sautant les unités tombées. Chaque nouvelle manche restaure toute l'énergie et remet l'Esquive à 0 %.",
+  en: 'Turn order is decided once and never changes',
+  fr: "L'ordre des tours est fixé une fois pour toutes",
 })

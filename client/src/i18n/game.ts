@@ -1,4 +1,4 @@
-import { t } from './locale'
+import { plural, t } from './locale'
 
 export const battlefield = t({ en: 'The battlefield', fr: 'Le champ de bataille' })
 export const battlefieldHint = t({
@@ -19,17 +19,6 @@ export const levelProgress = t({
   en: (level: number, total: number) => `Level ${level} / ${total}`,
   fr: (level: number, total: number) => `Niveau ${level} / ${total}`,
 })
-export const hellfireCue = t({
-  en: (round: number) =>
-    `Round ${round}. Hellfire: hatched tiles take 1 unavoidable damage at round end. Warnings stay fixed for the full round.`,
-  fr: (round: number) =>
-    `Manche ${round}. Feu infernal : les cases hachurées subissent 1 dégât inévitable en fin de manche. Les alertes restent fixes toute la manche.`,
-})
-export const hellfireRound = t({
-  en: (round: number) => `Hellfire / Round ${round}`,
-  fr: (round: number) => `Feu infernal / Manche ${round}`,
-})
-export const hellfireDamage = t({ en: '1 damage at round end', fr: '1 dégât en fin de manche' })
 export const yourTurn = t({ en: 'Your turn', fr: 'À vous' })
 export const playerTurn = t({
   en: (name: string) => `${name} turn`,
@@ -49,7 +38,7 @@ export const cancel = t({ en: 'Cancel', fr: 'Annuler' })
 export const chooseEnemy = t({ en: 'Choose enemy', fr: 'Choisir un ennemi' })
 export const energyCost = t({
   en: (cost: number) => `${cost} energy`,
-  fr: (cost: number) => `${cost} énergie`,
+  fr: (cost: number) => `${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}`,
 })
 export const noTargets = t({ en: 'No targets', fr: 'Aucune cible' })
 export const usedThisRound = t({ en: 'Used this round', fr: 'Déjà utilisé' })

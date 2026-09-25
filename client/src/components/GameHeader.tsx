@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import type { OnlineSession } from '../api/useGame'
 import type { Campaign } from '../lib/campaign'
-import { BIOMES, type Axial, type Biome, type Pawn, type Side } from '../lib/engine'
+import { BIOMES, type Biome, type Pawn, type Side } from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { possessiveArmyLabels, type GameMode, type PlayerNames } from '../lib/game-mode'
@@ -16,8 +16,6 @@ interface GameHeaderProps {
   pawn?: Pawn
   winner: Side | 'draw' | null
   playing: boolean
-  hellfire: readonly Axial[]
-  round: number
   order: readonly number[]
   pawns: readonly Pawn[]
   active: number
@@ -34,8 +32,6 @@ export function GameHeader({
   pawn,
   winner,
   playing,
-  hellfire,
-  round,
   order,
   pawns,
   active,
@@ -78,18 +74,6 @@ export function GameHeader({
             </span>
           </span>
         </Link>
-        {hellfire.length > 0 && !winner && (
-          <span
-            className="px-2 text-center text-[10px] leading-snug text-gold"
-            data-testid="hellfire-cue"
-            data-hellfire-round={round}
-            role="status"
-            aria-label={m.hellfireCue(round)}
-          >
-            {m.hellfireRound(round)}
-            <span className="block text-[9px] text-muted">{m.hellfireDamage}</span>
-          </span>
-        )}
         <div className="flex gap-0">
           {(local || isOnline) && pawn && !winner && (
             <span

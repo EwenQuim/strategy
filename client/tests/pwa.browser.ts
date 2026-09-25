@@ -1007,7 +1007,7 @@ test(
           () =>
             document.documentElement.scrollWidth <= innerWidth &&
             document.documentElement.scrollHeight <= innerHeight &&
-            ['game-header', 'battlefield', 'command-deck', 'hellfire-cue'].every((id) => {
+            ['game-header', 'battlefield', 'command-deck'].every((id) => {
               const rect = document
                 .querySelector('[data-testid="' + id + '"]')!
                 .getBoundingClientRect()
@@ -1053,10 +1053,6 @@ test(
       )
       await endTurn.click()
       await endTurn.waitFor()
-      assert.equal(
-        await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
-        '1',
-      )
       await endTurn.click()
       await page.getByTestId('hellfire-effect').first().waitFor()
       assert.deepEqual(
@@ -1081,10 +1077,6 @@ test(
         },
       )
       await endTurn.waitFor()
-      assert.equal(
-        await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
-        '2',
-      )
     }
     assert.deepEqual(errors, [])
   },
