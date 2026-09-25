@@ -12,7 +12,7 @@ import {
 } from './engine/pawns/index.ts'
 import type { Biome, FixedBattleSetup } from './engine/index.ts'
 
-interface BriefingElement {
+export interface BriefingElement {
   readonly name: string
   readonly points: readonly string[]
 }
@@ -54,7 +54,7 @@ type IntroducedElement =
   | TileFeature
   | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
 
-const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
+export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
   king: [
     { name: 'Goal', points: ['Kill the enemy king'] },
     {

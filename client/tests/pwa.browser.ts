@@ -1221,8 +1221,11 @@ test(
       if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
     }
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('dialog').innerText(), /two middle rows/)
-    assert.match(await page.locator('dialog').innerText(), /no permanent bonus/)
+    assert.match(await page.locator('dialog').innerText(), /Stay until next turn: \+1 HP/)
+    assert.match(
+      await page.locator('dialog').innerText(),
+      /First unit in: \+2 energy this round/,
+    )
     assert.deepEqual(errors, [])
   },
 )

@@ -1,8 +1,28 @@
 import { buttonClassName, iconButtonClassName } from './styles'
 import { Icon } from './Icon'
-import type { CampaignLevel } from '../lib/campaign'
+import type { BriefingElement, CampaignLevel } from '../lib/campaign'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
+
+export function BriefingElements({ elements }: { elements: readonly BriefingElement[] }) {
+  return (
+    <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5 pb-5">
+      {elements.map((element) => (
+        <li
+          className="rounded-lg border border-line bg-[#ffffff04] px-3 py-2.5"
+          key={element.name}
+        >
+          <strong className="mb-1 block text-[13px] text-gold">{element.name}</strong>
+          <ul className="m-0 list-disc pl-4 text-[12px] leading-[1.5] text-muted">
+            {element.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 function showBriefing(dialog: HTMLDialogElement) {
   dialog.showModal()
@@ -36,21 +56,7 @@ export function Briefing({ level }: { level: CampaignLevel }) {
         </button>
       </form>
       <div className="min-h-0 flex-1 overflow-y-auto px-[25px]">
-        <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5 pb-5">
-          {level.newElements.map((element) => (
-            <li
-              className="rounded-lg border border-line bg-[#ffffff04] px-3 py-2.5"
-              key={element.name}
-            >
-              <strong className="mb-1 block text-[13px] text-gold">{element.name}</strong>
-              <ul className="m-0 list-disc pl-4 text-[12px] leading-[1.5] text-muted">
-                {element.points.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
+        <BriefingElements elements={level.newElements} />
       </div>
       <form method="dialog" className="shrink-0 px-[25px] pb-[25px]">
         <button
