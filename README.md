@@ -82,7 +82,15 @@ const setup = {
 const battle = initialState('campaign-01', setup)
 ```
 
-Each map has 12 rows of 8 terrain symbols: `.` plain, `f` forest, `^` mountain, `~` lake, and `s` sand. Pawn `col` and `row` are zero-based: column 0 is the left edge, row 0 is the top; odd rows are offset half a hex to the right. Each side must have exactly one king and 1 to 24 units. Pawns can start anywhere on the board, but every starting tile must be distinct and passable. Invalid maps and placements are rejected, never silently moved or regenerated.
+Authored maps can have any number of rows and different row lengths. Use `_` for absent tiles, including holes and cut-out edges; omitted trailing columns and empty rows are also absent. Symbols keep their original column and row positions. At least one tile must exist. For example, this small ring has a hole in its middle row:
+
+```ts
+map: ['_...', '.....', '.._..', '.....', '_...']
+```
+
+Terrain symbols are `.` plain, `f` forest, `^` mountain, `~` lake, and `s` sand. Pawn `col` and `row` are zero-based: column 0 is the left edge, row 0 is the top; odd rows are offset half a hex to the right. Each side must have exactly one king. Authored army sizes are limited by the available passable tiles, not a fixed deployment rectangle. Every starting tile must exist, be distinct, and be passable. Invalid maps and placements are rejected, never silently moved or regenerated.
+
+Walking and Charge cannot cross absent tiles. Ranged attacks, spells, and Ninja jumps still use hex distance, so they can cross gaps; jumps must land on existing passable tiles. Keep walking routes connected unless isolated areas are intentional, and keep map sizes compact for readable tiles on portrait screens.
 
 Authored maps and positions are loaded literally from the setup, independently of the seed. The biome controls the visual theme, not which terrain can appear. The seed controls initiative and combat rolls; the same actions still replay deterministically. Restart restores an independent copy of the full map and formation, even after units die or the caller edits the original data. Seed-only games and roster-only setups retain their existing generated maps and deployments.
 
@@ -96,7 +104,7 @@ Generated maps have no special tiles 50% of the time, one 40%, and two 10%. Thes
 - Healing spring: +1 health, capped at maximum, at a unit's next activation after staying on it. Leaving cancels the pending healing.
 - Power rune: consumed on entry for +2 energy usable in the current round only. Normal energy capacity returns next round.
 
-Authored maps additionally accept `p` (decorative palm), `b` (basalt), `l` (lava), `W` (watchtower), `H` (healing spring), and `R` (power rune). Special symbols sit on plain ground and obey the same two-tile, center-row limit. Their ground color follows the biome.
+Authored maps additionally accept `p` (decorative palm), `b` (basalt), `l` (lava), `W` (watchtower), `H` (healing spring), and `R` (power rune). Special symbols sit on plain ground and are limited to two tiles, but can appear anywhere in an authored map. Their ground color follows the biome.
 
 The same optional setup is accepted by bot `initialState(seed, setup)` / `initialTransition(seed, setup)`, `initialPlayback(seed, mode, setup)`, and `useGame(seed, mode, setup)`. Campaign routes pass their encounter directly and remount the game between levels. Custom setups are not encoded in the existing random-game URLs.
 

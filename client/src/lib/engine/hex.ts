@@ -144,15 +144,14 @@ const terrainSymbols: Record<string, Terrain> = {
 const featureSymbols: Record<string, TileFeature> = { W: 'watchtower', H: 'spring', R: 'rune' }
 
 export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
-  if (!Array.isArray(rows) || rows.length !== MAP_HEIGHT)
-    throw new Error('Map must contain ' + MAP_HEIGHT + ' rows')
+  if (!Array.isArray(rows) || !rows.length) throw new Error('Map must contain at least one row')
   const tiles = new Map<string, Tile>()
-  for (let row = 0; row < MAP_HEIGHT; row++) {
+  for (let row = 0; row < rows.length; row++) {
     const line = rows[row]
-    if (typeof line !== 'string' || line.length !== MAP_WIDTH)
-      throw new Error('Map row ' + row + ' must contain ' + MAP_WIDTH + ' tiles')
-    for (let col = 0; col < MAP_WIDTH; col++) {
+    if (typeof line !== 'string') throw new Error('Map row ' + row + ' must be a string')
+    for (let col = 0; col < line.length; col++) {
       const symbol = line[col]
+      if (symbol === '_') continue
       const feature = Object.hasOwn(featureSymbols, symbol) ? featureSymbols[symbol] : undefined
       if (!feature && !Object.hasOwn(terrainSymbols, symbol))
         throw new Error('Unknown map terrain: ' + symbol)
@@ -165,12 +164,9 @@ export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
       })
     }
   }
+  if (!tiles.size) throw new Error('Map must contain at least one tile')
   const features = [...tiles.values()].filter((tile) => tile.feature)
-  if (
-    features.length > 2 ||
-    features.some((tile) => tile.r !== MAP_HEIGHT / 2 - 1 && tile.r !== MAP_HEIGHT / 2)
-  )
-    throw new Error('Map features must be limited to two tiles in the center two rows')
+  if (features.length > 2) throw new Error('Map features must be limited to two tiles')
   return tiles
 }
 

@@ -9,6 +9,10 @@ import {
   key,
   canAttack,
   distFrom,
+  walkingPaths,
+  jumpDestinations,
+  Ninja,
+  Archer,
   type BattleSetup,
   type FixedBattleSetup,
 } from '../src/lib/engine/index.ts'
@@ -64,6 +68,112 @@ test('Authored terrain symbols and offset coordinates map exactly to the hex boa
   assert.equal(rows[0], '.f^~s...')
 })
 
+test('Authored outlines preserve coordinates across ragged rows, holes and empty rows', () => {
+  for (const rows of [
+    ['.'],
+    ['_...', '.....', '.._..', '.....', '_...'],
+    ['..', '', '_..'],
+    ['___', '__.', '', '.'],
+    Array<string>(13).fill('.........'),
+  ]) {
+    const tiles = mapFromRows(rows)
+    assert.equal(tiles.size, rows.join('').replaceAll('_', '').length)
+    for (const [row, line] of rows.entries()) {
+      for (let col = 0; col <= line.length; col++) {
+        const { q, r } = hexOf(col, row)
+        assert.deepEqual(
+          tiles.get(key(q, r)),
+          line[col] === '.' ? { q, r, terrain: 'plain' } : undefined,
+        )
+      }
+    }
+  }
+})
+
+test('Authored placements and army capacity follow the tiles rather than 8 by 12 bounds', () => {
+  const setup: FixedBattleSetup = {
+    biome: 'verdant',
+    map: Array<string>(13).fill('.........'),
+    player: [
+      { kind: 'king', col: 8, row: 12 },
+      ...Array.from({ length: 24 }, (_, i) => ({
+        kind: 'archer' as const,
+        col: i % 8,
+        row: 9 + Math.floor(i / 8),
+      })),
+    ],
+    enemy: [{ kind: 'king', col: 0, row: 0 }],
+  }
+  const state = initialState('large-layout', setup)
+  assert.equal(state.tiles.size, 117)
+  assert.equal(state.pawns.length, 26)
+  assert.deepEqual({ q: state.pawns[0].q, r: state.pawns[0].r }, hexOf(8, 12))
+  assert.deepEqual(reducer(state, { type: 'restart' }), state)
+  for (const [col, row] of [
+    [0, 0],
+    [2, 0],
+    [1, 2],
+    [0, 3],
+  ]) {
+    assert.throws(
+      () =>
+        initialState('void-spawn', {
+          biome: 'verdant',
+          map: ['_.', '.._', '.'],
+          player: [{ kind: 'king', col, row }],
+          enemy: [{ kind: 'king', col: 0, row: 1 }],
+        }),
+      /terrain|position/,
+    )
+  }
+  assert.throws(
+    () =>
+      initialState('small-layout', {
+        ...setup,
+        map: ['..'],
+      }),
+    /army/,
+  )
+})
+
+test('Holes block walking and landing, but permit detours, ranged attacks and jumps', () => {
+  const setup: FixedBattleSetup = {
+    biome: 'verdant',
+    map: ['_...', '.....', '.._..', '.....', '_...'],
+    player: [
+      { kind: 'swordsman', col: 1, row: 2 },
+      { kind: 'king', col: 1, row: 4 },
+    ],
+    enemy: [{ kind: 'king', col: 1, row: 0 }],
+  }
+  const state = initialState('ring-layout', setup)
+  state.order = [1, 2, 3]
+  state.active = 0
+  const pawn = state.pawns[0]
+  const hole = hexOf(2, 2)
+  const destination = hexOf(3, 2)
+  const position = key(destination.q, destination.r)
+  assert.equal(reducer(state, { type: 'move', ...hole }), state)
+  assert.ok(!walkingPaths(state.tiles, state.pawns, pawn, 2).has(position))
+  assert.equal(walkingPaths(state.tiles, state.pawns, pawn).get(position)?.path.length, 3)
+  const moved = reducer(state, { type: 'move', ...destination }).pawns[0]
+  assert.deepEqual({ q: moved.q, r: moved.r }, destination)
+  const ninja = new Ninja(1, pawn.q, pawn.r, 'player')
+  const jumps = jumpDestinations(state.tiles, [ninja, ...state.pawns.slice(1)], ninja)
+  assert.ok(jumps.some((tile) => key(tile.q, tile.r) === position))
+  assert.ok(!jumps.some((tile) => tile.q === hole.q && tile.r === hole.r))
+  const archer = new Archer(1, pawn.q, pawn.r, 'player')
+  assert.ok(canAttack(archer, new Archer(4, destination.q, destination.r, 'enemy')))
+  for (const mode of ['ai', 'local'] as const) {
+    const opening = initialPlayback('ring-layout', mode, setup)
+    let playback = playbackReducer(opening, { type: 'playbackFinish' }, mode)
+    playback = playbackReducer(playback, { type: 'endTurn' }, mode)
+    playback = playbackReducer(playback, { type: 'playbackFinish' }, mode)
+    assert.ok(playback.state.pawns.every((unit) => state.tiles.has(key(unit.q, unit.r))))
+    assert.deepEqual(playbackReducer(playback, { type: 'restart' }, mode), opening)
+  }
+})
+
 test('Campaign maps and character placements are explicit and independent of the seed', () => {
   for (const level of CAMPAIGN_LEVELS) {
     const original = structuredClone(level.setup)
@@ -116,10 +226,11 @@ test('Invalid terrain, missing positions, blocked spawns, and overlaps are rejec
   for (const map of [
     null,
     [],
-    Array(11).fill('........'),
-    Array(13).fill('........'),
+    [''],
+    ['___', '', '__'],
+    [null],
+    [8],
     new Array(12),
-    ['.......', ...Array(11).fill('........')],
     ['.......?', ...Array(11).fill('........')],
   ])
     assert.throws(

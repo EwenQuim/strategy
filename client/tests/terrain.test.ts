@@ -117,7 +117,7 @@ test('Deserts have small lakes and rare decorative palms; volcanoes and Hell hav
   assert.deepEqual(moved.log, state.log)
 })
 
-test('Authored maps support new terrain and reject special tiles outside the center or above the cap', () => {
+test('Authored maps support terrain and special tiles anywhere while keeping the two-tile cap', () => {
   const rows = ['pbl.....', ...Array<string>(11).fill('........')]
   rows[5] = 'W.......'
   rows[6] = 'H.......'
@@ -136,7 +136,9 @@ test('Authored maps support new terrain and reject special tiles outside the cen
   assert.throws(() => mapFromRows(rows), /two tiles/)
   rows[5] = '........'
   rows[0] = 'R.......'
-  assert.throws(() => mapFromRows(rows), /center/)
+  assert.equal(mapFromRows(rows).get('0,0')?.feature, 'rune')
+  assert.equal(mapFromRows(['W_', '_H']).get('1,1')?.feature, 'spring')
+  assert.throws(() => mapFromRows(['WHR']), /two tiles/)
 })
 
 for (const side of ['player', 'enemy'] as const) {

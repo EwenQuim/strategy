@@ -51,11 +51,12 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
     (setup.biome !== 'hell' || ![1, 2].includes(setup.hellfireCount))
   )
     throw new Error('Hellfire count must be 1 or 2 in a Hell battle')
+  const maxUnits = tiles ? [...tiles.values()].filter(passable).length : MAP_WIDTH * 3
   const occupied = new Set<string>()
   for (const side of ['player', 'enemy'] as const) {
     const army = setup[side]
-    if (!Array.isArray(army) || army.length < 1 || army.length > MAP_WIDTH * 3)
-      throw new RangeError(side + ' army must contain 1 to ' + MAP_WIDTH * 3 + ' units')
+    if (!Array.isArray(army) || army.length < 1 || army.length > maxUnits)
+      throw new RangeError(side + ' army must contain 1 to ' + maxUnits + ' units')
     let kings = 0
     for (const unit of army) {
       const kind = typeof unit === 'string' ? unit : unit?.kind
@@ -69,9 +70,7 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
           !Number.isInteger(unit.col) ||
           !Number.isInteger(unit.row) ||
           unit.col < 0 ||
-          unit.col >= MAP_WIDTH ||
-          unit.row < 0 ||
-          unit.row >= MAP_HEIGHT
+          unit.row < 0
         )
           throw new Error(side + ' army must specify valid col and row positions')
         const { q, r } = hexOf(unit.col, unit.row)

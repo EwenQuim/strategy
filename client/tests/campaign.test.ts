@@ -52,6 +52,24 @@ test('Every campaign level comes directly from one JSON with both complete armie
   }
 })
 
+test('Campaign outlines are distinct, compact and smaller in the introductory battles', () => {
+  const outlines = new Set<string>()
+  for (const level of CAMPAIGN_LEVELS) {
+    const { map } = level.setup
+    outlines.add(map.map((row) => row.replace(/[^_]/g, '.')).join('/'))
+    assert.ok(
+      map.some((row) => row.includes('_')),
+      'Shaped outline in level ' + level.id,
+    )
+    assert.ok(map.length <= 12 && map.every((row) => row.length <= 8))
+    const state = coreState(level.seed, level.setup)
+    assert.ok(state.tiles.size < 96)
+    if (level.id <= 2) assert.ok(state.tiles.size <= 36)
+    assert.ok(state.pawns.every((pawn) => passable(state.tiles.get(key(pawn.q, pawn.r)))))
+  }
+  assert.equal(outlines.size, CAMPAIGN_LEVELS.length)
+})
+
 test('The last four encounters use Hell, introducing one warning before two', () => {
   const hell = CAMPAIGN_LEVELS.filter((level) => level.setup.biome === 'hell')
   assert.deepEqual(
@@ -159,11 +177,11 @@ test('The campaign introduces units gradually and keeps the opening free of obst
   assert.equal(CAMPAIGN_LEVELS[0].setup.player.length, 2)
   assert.equal(CAMPAIGN_LEVELS[0].setup.enemy.length, 1)
   for (const level of CAMPAIGN_LEVELS.slice(0, 2)) {
-    assert.ok(level.setup.map.every((row) => /^[.f]{8}$/.test(row)))
+    assert.ok(level.setup.map.every((row) => /^[.f_]+$/.test(row)))
     assert.ok(level.intro.newElements.length <= 2)
   }
   assert.equal(new Set(CAMPAIGN_LEVELS.map((level) => level.setup.map.join(''))).size, 20)
-  assert.ok(CAMPAIGN_LEVELS[9].setup.map.every((row) => row === 'ssssssss'))
+  assert.ok(CAMPAIGN_LEVELS[9].setup.map.every((row) => /^[s_]+$/.test(row)))
   for (const side of ['player', 'enemy'] as const)
     assert.deepEqual(
       new Set(CAMPAIGN_LEVELS[19].setup[side].map((pawn) => pawn.kind)),
@@ -235,7 +253,7 @@ test('Wizard Curtain has four aligned casters and Hell has two connected double-
   const gates = CAMPAIGN_LEVELS[16]
   for (const row of gates.setup.map.slice(5, 7))
     assert.deepEqual(
-      [...row].flatMap((tile, col) => (tile !== '^' ? [col] : [])),
+      [...row].flatMap((tile, col) => (tile !== '^' && tile !== '_' ? [col] : [])),
       [2, 3, 5, 6],
     )
   const passages = new Map(
