@@ -1,6 +1,6 @@
 import { buttonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { ApiError, health, useOnlineGame } from '../api/online.ts'
+import { ApiError, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
@@ -9,11 +9,6 @@ import { readStoredGames } from '../onlineSession.ts'
 export const Route = createFileRoute('/online/$code')({
   beforeLoad: async ({ params }) => {
     if (!/^[A-Z0-9]{6}$/.test(params.code)) throw redirect({ to: '/online' })
-    try {
-      await health()
-    } catch {
-      throw redirect({ to: '/' })
-    }
   },
   component: function OnlineBattle() {
     const { code } = Route.useParams()

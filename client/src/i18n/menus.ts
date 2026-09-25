@@ -57,13 +57,6 @@ export const onlineHint = t({
   es: 'Juega en línea, por turnos',
   it: 'Gioca online, a turni',
 })
-export const serverDown = t({
-  en: 'Game server unreachable',
-  fr: 'Serveur de jeu injoignable',
-  de: 'Spielserver nicht erreichbar',
-  es: 'Servidor de juego inaccesible',
-  it: 'Server di gioco irraggiungibile',
-})
 export const buildHint = t({
   en: 'Git commit used for this build',
   fr: 'Commit Git utilisé pour cette version',

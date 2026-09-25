@@ -5,7 +5,6 @@ import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
 import { CAMPAIGNS } from '../lib/campaign'
-import { useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
 export const Route = createFileRoute('/')({
@@ -19,8 +18,6 @@ export const Route = createFileRoute('/')({
       CAMPAIGNS.reduce((sum, campaign) => sum + readCampaignProgress(campaign.slug), 0),
     )
     const allLevels = CAMPAIGNS.reduce((sum, campaign) => sum + campaign.levels.length, 0)
-    const health = useHealth()
-    const online = health.isSuccess
     return (
       <main className="[background:radial-gradient(ellipse_at_50%_38%,#465c3880,transparent_60%),#182c22] flex min-h-dvh flex-col">
         <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 max-[601px]:px-[23px] max-[601px]:py-5 [@media(max-height:650px)]:py-3">
@@ -148,12 +145,10 @@ export const Route = createFileRoute('/')({
               to="/online"
               className={
                 buttonClassName +
-                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c] data-[enabled=false]:pointer-events-none data-[enabled=false]:opacity-35 data-[enabled=false]:hover:shadow-[0_6px_24px_#07180f30]'
+                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
               }
               preload={false}
-              data-enabled={online}
-              aria-disabled={!online}
-              title={online ? m.onlineHint : m.serverDown}
+              title={m.onlineHint}
             >
               {m.online}
               <Icon name="arrow" />

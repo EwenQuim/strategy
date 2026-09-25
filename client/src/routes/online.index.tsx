@@ -1,12 +1,11 @@
 import { buttonClassName, iconButtonClassName } from '../components/styles'
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
 import {
   ApiError,
-  health,
   onlineGameQueryOptions,
   useCreateOnlineGame,
   useJoinOnlineGame,
@@ -25,13 +24,6 @@ const inputClassName =
 const onlineButtonClassName = buttonClassName + ' min-h-13 justify-center border-line'
 
 export const Route = createFileRoute('/online/')({
-  beforeLoad: async () => {
-    try {
-      await health()
-    } catch {
-      throw redirect({ to: '/' })
-    }
-  },
   component: function OnlineLobby() {
     const navigate = useNavigate()
     const [name, setName] = useState(readPlayerName())

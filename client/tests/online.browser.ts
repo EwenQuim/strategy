@@ -41,10 +41,7 @@ test(
     }
     const server = createServer(async (request, response) => {
       const path = new URL(request.url!, 'http://localhost').pathname
-      if (path === '/api/health') {
-        response.setHeader('Content-Type', 'application/json')
-        response.end(JSON.stringify({ status: 'ok' }))
-      } else if (path === '/api/games/' + game.code + '/events') {
+      if (path === '/api/games/' + game.code + '/events') {
         connections++
         if (unavailableOnce) {
           unavailableOnce = false
