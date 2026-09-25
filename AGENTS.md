@@ -10,6 +10,7 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 - Each pawn type lives in its own file in `client/src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`; every non-king class is recruitable. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
 - Each biome lives in its own file in `client/src/lib/engine/biomes/` (name, description, terrain generation, theme CSS variables). Register it in `BIOMES` in `biomes/index.ts`; the game screen applies `theme` as inline CSS variables.
 - Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
+- UI text lives in `client/src/i18n/`: one exported `t({ en, fr, de, es, it })` constant per message, imported as `import * as m from '../i18n/<area>'`. Use `plural()` for count-dependent words. A missing locale or unknown key fails `tsc`; an unused message fails knip. Engine text (pawns, biomes, battle log, campaign JSON) is not translated yet.
 
 ## Styling
 

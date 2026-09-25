@@ -354,7 +354,9 @@ test(
       assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
       await page.getByRole('button', { name: 'How to play' }).click()
       assert.ok(
-        (await page.locator('dialog').innerText()).includes('AI difficulty: ' + difficulty),
+        (await page.locator('dialog').innerText())
+          .toLowerCase()
+          .includes('ai difficulty: ' + difficulty),
       )
       await page.getByRole('button', { name: 'Close dialog' }).click()
       await playTurn(page)
@@ -1005,7 +1007,7 @@ test(
           () =>
             document.documentElement.scrollWidth <= innerWidth &&
             document.documentElement.scrollHeight <= innerHeight &&
-            ['game-header', 'battlefield', 'command-deck', 'hellfire-cue'].every((id) => {
+            ['game-header', 'battlefield', 'command-deck'].every((id) => {
               const rect = document
                 .querySelector('[data-testid="' + id + '"]')!
                 .getBoundingClientRect()
@@ -1051,10 +1053,6 @@ test(
       )
       await endTurn.click()
       await endTurn.waitFor()
-      assert.equal(
-        await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
-        '1',
-      )
       await endTurn.click()
       await page.getByTestId('hellfire-effect').first().waitFor()
       assert.deepEqual(
@@ -1079,10 +1077,6 @@ test(
         },
       )
       await endTurn.waitFor()
-      assert.equal(
-        await page.getByTestId('hellfire-cue').getAttribute('data-hellfire-round'),
-        '2',
-      )
     }
     assert.deepEqual(errors, [])
   },
@@ -1227,8 +1221,11 @@ test(
       if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
     }
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('dialog').innerText(), /two middle rows/)
-    assert.match(await page.locator('dialog').innerText(), /no permanent bonus/)
+    assert.match(await page.locator('dialog').innerText(), /Stay until next turn: \+1 HP/)
+    assert.match(
+      await page.locator('dialog').innerText(),
+      /First unit in: \+2 energy this round/,
+    )
     assert.deepEqual(errors, [])
   },
 )

@@ -1,4 +1,6 @@
 import { buttonClassName } from '../components/styles'
+import * as common from '../i18n/common'
+import * as m from '../i18n/menus'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
@@ -86,7 +88,7 @@ export const Route = createFileRoute('/')({
           <div
             className="mt-[27px] flex w-[min(100%,300px)] flex-col gap-3 [@media(max-height:650px)]:mt-[18px]"
             role="group"
-            aria-label="Choose game mode"
+            aria-label={m.chooseMode}
           >
             <Link
               to={done ? '/campaign' : '/campaign/$campaign'}
@@ -97,7 +99,7 @@ export const Route = createFileRoute('/')({
               }
               preload={false}
             >
-              {done ? 'Campaigns' : 'Campaign'}
+              {done ? m.campaigns : m.campaign}
               <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
                 {done
                   ? allCompleted + ' / ' + allLevels
@@ -113,9 +115,9 @@ export const Route = createFileRoute('/')({
                 ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
               }
               preload={false}
-              title="Play a new seeded battle against AI"
+              title={m.quickPlayHint}
             >
-              Quick play
+              {common.quickPlay}
               <Icon name="arrow" />
             </Link>
             <Link
@@ -126,7 +128,7 @@ export const Route = createFileRoute('/')({
               }
               preload={false}
             >
-              Custom play
+              {common.customPlay}
               <Icon name="hex" />
             </Link>
             <Link
@@ -137,9 +139,9 @@ export const Route = createFileRoute('/')({
                 ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
               }
               preload={false}
-              title="Play together on this device"
+              title={m.twoPlayersHint}
             >
-              2 players
+              {m.twoPlayers}
               <Icon name="arrow" />
             </Link>
             <Link
@@ -151,18 +153,16 @@ export const Route = createFileRoute('/')({
               preload={false}
               data-enabled={online}
               aria-disabled={!online}
-              title={online ? 'Play online, turn by turn' : 'Game server unreachable'}
+              title={online ? m.onlineHint : m.serverDown}
             >
-              Online
+              {m.online}
               <Icon name="arrow" />
             </Link>
           </div>
         </div>
         <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:text-[8px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
-          <span title="Git commit used for this build">
-            Build {import.meta.env.VITE_GIT_COMMIT}
-          </span>
-          <span>Made with ❤️ by EwenQuim</span>
+          <span title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</span>
+          <span>{m.madeBy}</span>
         </footer>
       </main>
     )

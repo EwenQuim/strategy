@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import type { OnlineSession } from '../api/useGame'
 import type { Campaign } from '../lib/campaign'
-import { BIOMES, type Axial, type Biome, type Pawn, type Side } from '../lib/engine'
+import { BIOMES, type Biome, type Pawn, type Side } from '../lib/engine'
+import * as common from '../i18n/common'
+import * as m from '../i18n/game'
 import { possessiveArmyLabels, type GameMode, type PlayerNames } from '../lib/game-mode'
 import { Icon, PawnIcon } from './Icon'
 import { iconButtonClassName } from './styles'
@@ -14,8 +16,6 @@ interface GameHeaderProps {
   pawn?: Pawn
   winner: Side | 'draw' | null
   playing: boolean
-  hellfire: readonly Axial[]
-  round: number
   order: readonly number[]
   pawns: readonly Pawn[]
   active: number
@@ -32,8 +32,6 @@ export function GameHeader({
   pawn,
   winner,
   playing,
-  hellfire,
-  round,
   order,
   pawns,
   active,
@@ -59,7 +57,7 @@ export function GameHeader({
           to={campaign ? '/campaign/$campaign' : isOnline ? '/online' : '/'}
           params={campaign ? { campaign: campaign.slug } : undefined}
           className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]"
-          aria-label={campaign ? 'Campaign levels' : isOnline ? 'Online lobby' : 'Hexmate home'}
+          aria-label={campaign ? common.campaignLevels : isOnline ? m.onlineLobby : m.home}
         >
           <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
             <Icon name="crown" />
@@ -71,27 +69,11 @@ export function GameHeader({
               data-testid="battle-subtitle"
             >
               {campaign && campaignLevel
-                ? 'Level ' + campaignLevel + ' / ' + campaign.levels.length
+                ? m.levelProgress(campaignLevel, campaign.levels.length)
                 : BIOMES[biome].name}
             </span>
           </span>
         </Link>
-        {hellfire.length > 0 && !winner && (
-          <span
-            className="px-2 text-center text-[10px] leading-snug text-gold"
-            data-testid="hellfire-cue"
-            data-hellfire-round={round}
-            role="status"
-            aria-label={
-              'Round ' +
-              round +
-              '. Hellfire: hatched tiles take 1 unavoidable damage at round end. Warnings stay fixed for the full round.'
-            }
-          >
-            Hellfire / Round {round}
-            <span className="block text-[9px] text-muted">1 damage at round end</span>
-          </span>
-        )}
         <div className="flex gap-0">
           {(local || isOnline) && pawn && !winner && (
             <span
@@ -101,8 +83,8 @@ export function GameHeader({
               role="status"
             >
               {isOnline && pawn.side === online?.side
-                ? 'Your turn'
-                : names[pawn.side] + ' turn'}
+                ? m.yourTurn
+                : m.playerTurn(names[pawn.side])}
             </span>
           )}
           {mode === 'ai' && playing && pawn?.side === 'enemy' && (
@@ -111,14 +93,14 @@ export function GameHeader({
               data-testid="enemy-turn"
               role="status"
             >
-              Enemy turn
+              {m.enemyTurn}
             </span>
           )}
           <button
             className={iconButtonClassName}
             onClick={onHelp}
-            aria-label="How to play"
-            title="How to play"
+            aria-label={m.howToPlay}
+            title={m.howToPlay}
           >
             <Icon name="help" />
           </button>
@@ -127,7 +109,7 @@ export function GameHeader({
       <div className="m-auto flex min-h-[41px] max-w-[1040px] items-center gap-3 border-t border-line min-[900px]:min-h-[43px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[34px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
         <ol
           className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
-          aria-label="Round turn order"
+          aria-label={m.turnOrder}
         >
           {turnOrder.map(({ unit, index }) => (
             <li

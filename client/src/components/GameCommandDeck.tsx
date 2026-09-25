@@ -1,5 +1,6 @@
 import type { Action, Pawn, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
+import * as m from '../i18n/game'
 import { Icon, PawnIcon } from './Icon'
 
 const actionButtonClassName =
@@ -46,8 +47,8 @@ export function GameCommandDeck({
             <div>
               <h2 className="font-display text-[20px] leading-[normal] capitalize whitespace-nowrap min-[900px]:text-[24px] max-[601px]:text-[19px] max-[360px]:text-[16px] [@media(min-width:600px)_and_(max-height:480px)]:text-[16px]">
                 {winner
-                  ? (winnerLabel ?? (winner === 'player' ? 'Victory' : 'Defeat'))
-                  : (pawn?.kind ?? 'Your guard')}
+                  ? (winnerLabel ?? (winner === 'player' ? m.victory : m.defeat))
+                  : (pawn?.kind ?? m.yourGuard)}
                 {!winner && pawn && (
                   <span className="font-label text-[10px] leading-[normal] tracking-[0.05em] text-[#7f957e] max-[601px]:text-[9px] max-[360px]:hidden">
                     {' '}
@@ -136,13 +137,13 @@ function UnitStats({ pawn }: { pawn: Pawn }) {
       data-testid="unit-stats"
     >
       <StatMeter
-        name="Health"
+        name={m.health}
         value={pawn.hp}
         max={pawn.maxHp}
         filledClass="data-[filled=true]:bg-[#b7c9a0]"
       />
       <StatMeter
-        name={'Energy'}
+        name={m.energy}
         note={pawn.bonusEnergy ? '+' + pawn.bonusEnergy : undefined}
         value={pawn.energy}
         max={pawn.maxEnergy}
@@ -150,7 +151,7 @@ function UnitStats({ pawn }: { pawn: Pawn }) {
       />
       <div className="w-[60px] min-w-[43px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[41px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] max-[601px]:pl-2 max-[601px]:[&_svg]:hidden [@media(min-width:600px)_and_(max-height:480px)]:pl-2">
         <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
-          Escape
+          {m.escape}
         </span>
         <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] max-[601px]:text-[17px]">
           <Icon name="escape" />
@@ -195,10 +196,10 @@ function AttackButton({
         name={attacking ? 'close' : 'sword'}
       />
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-        {attacking ? 'Cancel' : 'Attack'}
+        {attacking ? m.cancel : m.attack}
       </span>
       <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
-        {attacking ? 'Choose enemy' : '1 energy'}
+        {attacking ? m.chooseEnemy : m.energyCost(1)}
       </small>
     </button>
   )
@@ -250,20 +251,20 @@ function SpecialButton({
         name={usingSpecial ? 'close' : 'spark'}
       />
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-        {usingSpecial ? 'Cancel' : (pawn?.special.name ?? 'Special')}
+        {usingSpecial ? m.cancel : (pawn?.special.name ?? m.special)}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
         {usingSpecial
           ? !targetCount
-            ? 'No targets'
+            ? m.noTargets
             : phase === 'charge'
-              ? 'Choose enemy'
-              : (pawn?.special.prompt ?? 'Choose enemy')
+              ? m.chooseEnemy
+              : (pawn?.special.prompt ?? m.chooseEnemy)
           : pawn?.special.oncePerRound && pawn.specialUsed
-            ? 'Used this round'
+            ? m.usedThisRound
             : pawn?.special.noTargets && !hasSpecialTargets
               ? pawn.special.noTargets
-              : (pawn?.special.cost ?? 2) + ' energy'}
+              : m.energyCost(pawn?.special.cost ?? 2)}
       </small>
     </button>
   )
@@ -284,21 +285,17 @@ function EndTurnButton({
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
-      title={
-        'Spend all remaining energy and end this turn. Escape: ' +
-        (pawn?.endTurnEscapeChance ?? 0) +
-        '% until the round ends.'
-      }
+      title={m.endTurnHint(pawn?.endTurnEscapeChance ?? 0)}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
         name="escape"
       />
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-        End turn
+        {m.endTurn}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-        +{pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0}% escape
+        {m.escapeGain(pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0)}
       </small>
     </button>
   )

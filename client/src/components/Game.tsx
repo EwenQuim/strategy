@@ -1,5 +1,7 @@
 import { useRef, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
+import * as common from '../i18n/common'
+import * as m from '../i18n/game'
 import { possessiveArmyLabels, playerNames, type PlayerNames } from '../lib/game-mode'
 import type { Campaign } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
@@ -56,11 +58,11 @@ export function Game({
   )
   const winnerLabel =
     state.winner === 'draw'
-      ? 'Draw'
+      ? m.draw
       : isCampaignComplete(campaign, campaignLevel) && state.winner === 'player'
-        ? 'Campaign complete!'
+        ? common.campaignComplete
         : state.winner && (local || isOnline)
-          ? names[state.winner] + ' wins!'
+          ? m.wins(names[state.winner])
           : null
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
@@ -77,9 +79,9 @@ export function Game({
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
   const targets = targetingTiles(state)
   const targetLabel = attacking
-    ? 'Attack'
+    ? m.attack
     : (state.phase === 'special' && pawn?.special.targetLabel) ||
-      (pawn?.special.name ?? 'Special')
+      (pawn?.special.name ?? m.special)
 
   const reach =
     myTurn && pawn.energy > 0 && state.phase === 'move'
@@ -120,8 +122,6 @@ export function Game({
         pawn={pawn}
         winner={state.winner}
         playing={playing}
-        hellfire={state.hellfire}
-        round={state.round}
         order={state.order}
         pawns={state.pawns}
         active={state.active}
@@ -132,7 +132,7 @@ export function Game({
 
       <section
         className="bg-(--biome-background) bg-[image:var(--battlefield-image,radial-gradient(ellipse_at_50%_45%,var(--biome-glow),transparent_66%),radial-gradient(#d7d8b308_1px,transparent_1px),none)] bg-[size:var(--battlefield-size,auto,8px_8px,auto)] before:pointer-events-none before:absolute before:inset-x-1/5 before:inset-y-[10%] before:-z-1 before:rounded-[50%] before:border before:border-[#c5d09c08] before:shadow-[0_0_0_50px_#c5d09c03,0_0_0_100px_#c5d09c02] relative isolate grid min-h-0 grid-rows-[minmax(0,1fr)]"
-        aria-label="The battlefield"
+        aria-label={m.battlefield}
       >
         <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] max-[601px]:px-[3px]">
           <Battlefield

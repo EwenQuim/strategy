@@ -2,6 +2,8 @@ import { buttonClassName, iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import * as common from '../i18n/common'
+import * as m from '../i18n/online'
 import {
   ApiError,
   health,
@@ -59,11 +61,7 @@ export const Route = createFileRoute('/online/')({
       } catch (cause) {
         const status = cause instanceof ApiError ? cause.status : 0
         setError(
-          status === 404
-            ? 'No game with this code.'
-            : status === 409
-              ? 'This game already has two players.'
-              : 'Could not reach the game server.',
+          status === 404 ? m.noGame : status === 409 ? m.gameFull : common.serverUnreachable,
         )
       }
     }
@@ -71,8 +69,8 @@ export const Route = createFileRoute('/online/')({
     return (
       <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&:disabled]:opacity-50">
         <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">Online play</h1>
-          <Link to="/" className={iconButtonClassName} aria-label="Back to home">
+          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{m.title}</h1>
+          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
         </header>
@@ -89,7 +87,7 @@ export const Route = createFileRoute('/online/')({
           }}
         >
           <label htmlFor="online-name" className="grid gap-1.5 text-[12px] text-muted">
-            Your name
+            {m.yourName}
             <input
               className={inputClassName}
               id="online-name"
@@ -108,7 +106,7 @@ export const Route = createFileRoute('/online/')({
               ' gap-3 border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
             }
           >
-            Create new game
+            {m.createGame}
             <Icon name="arrow" />
           </button>
         </form>
@@ -125,7 +123,7 @@ export const Route = createFileRoute('/online/')({
           }}
         >
           <label htmlFor="online-code" className="grid gap-1.5 text-[12px] text-muted">
-            Game code
+            {m.gameCode}
             <input
               className={inputClassName + ' text-center font-mono tracking-[0.3em] uppercase'}
               id="online-code"
@@ -145,7 +143,7 @@ export const Route = createFileRoute('/online/')({
               ' gap-3 px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
             }
           >
-            Join game
+            {m.joinGame}
             <Icon name="hex" />
           </button>
         </form>
@@ -157,10 +155,10 @@ export const Route = createFileRoute('/online/')({
         {games.length > 0 && (
           <section
             className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto"
-            aria-label="Resume a game"
+            aria-label={m.resumeGame}
           >
             <h2 className="text-[12px] font-semibold tracking-[0.17em] text-muted uppercase">
-              Your games
+              {m.yourGames}
             </h2>
             {games.map((game, index) => {
               const doc = docs[index]?.data
@@ -180,23 +178,20 @@ export const Route = createFileRoute('/online/')({
                   <span className="text-[11px] text-muted">
                     {!doc
                       ? missing
-                        ? 'Not found'
-                        : 'Loading...'
+                        ? m.notFound
+                        : m.loading
                       : doc.status === 'waiting'
-                        ? 'Waiting for opponent'
+                        ? m.waitingForOpponent
                         : doc.status === 'finished'
-                          ? 'Finished'
-                          : doc.namePlayer + ' vs ' + doc.nameEnemy}
+                          ? m.finished
+                          : m.versus(doc.namePlayer, doc.nameEnemy)}
                   </span>
                 </Link>
               )
             })}
           </section>
         )}
-        <p className="mt-auto text-[11px] leading-[1.5] text-muted">
-          Online battles are turn by turn, no timer. Moves sync automatically, so you can close
-          the tab and resume later.
-        </p>
+        <p className="mt-auto text-[11px] leading-[1.5] text-muted">{m.lobbyNote}</p>
       </main>
     )
   },

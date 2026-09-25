@@ -1,6 +1,8 @@
 import { iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useSyncExternalStore } from 'react'
+import * as common from '../i18n/common'
+import * as m from '../i18n/menus'
 import { Icon } from '../components/Icon'
 import { LevelMiniature } from '../components/LevelMiniature'
 import { CAMPAIGNS, isLevelUnlocked } from '../lib/campaign'
@@ -27,7 +29,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
           <div>
             <h1 className="font-serif text-[32px] leading-[normal]">{campaign.name}</h1>
           </div>
-          <Link to="/" className={iconButtonClassName} aria-label="Back to home">
+          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
         </header>
@@ -36,19 +38,17 @@ export const Route = createFileRoute('/campaign/$campaign/')({
           data-testid="campaign-progress"
           role="status"
         >
-          <span>
-            {completed} / {campaign.levels.length} completed
-          </span>
-          {completed === campaign.levels.length && <span>Campaign complete!</span>}
+          <span>{m.levelsCompleted(completed, campaign.levels.length)}</span>
+          {completed === campaign.levels.length && <span>{common.campaignComplete}</span>}
         </div>
         <ol
           className="m-0 grid min-h-0 flex-1 list-none grid-cols-4 grid-rows-5 gap-2 p-0"
-          aria-label="Campaign levels"
+          aria-label={common.campaignLevels}
         >
           {campaign.levels.map((level) => {
             const unlocked = isLevelUnlocked(campaign, level.id, completed)
             const cleared = level.id <= completed
-            const status = cleared ? 'Completed' : unlocked ? 'Ready' : 'Locked'
+            const status = m.levelStatus[cleared ? 'completed' : unlocked ? 'ready' : 'locked']
             const content = (
               <>
                 <LevelMiniature setup={level.setup} />
@@ -71,7 +71,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                     data-testid="campaign-level"
                     style={BIOMES[level.setup.biome].theme}
                     data-status={cleared ? 'completed' : 'ready'}
-                    aria-label={'Level ' + level.id + ': ' + level.name + ', ' + status}
+                    aria-label={m.levelCard(level.id, level.name, status)}
                     preload={false}
                   >
                     {content}
@@ -82,7 +82,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                     data-testid="campaign-level"
                     style={BIOMES[level.setup.biome].theme}
                     disabled
-                    aria-label={'Level ' + level.id + ': ' + level.name + ', Locked'}
+                    aria-label={m.levelCard(level.id, level.name, m.levelStatus.locked)}
                   >
                     {content}
                   </button>
@@ -91,7 +91,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
             )
           })}
         </ol>
-        <p className="text-center text-[10px] text-muted">Wins are saved on this device.</p>
+        <p className="text-center text-[10px] text-muted">{common.savedOnDevice}</p>
       </main>
     )
   },
