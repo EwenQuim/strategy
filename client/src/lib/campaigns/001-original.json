@@ -682,18 +682,18 @@
     "setup": {
       "biome": "desert",
       "map": [
+        "___ss___",
         "__ssss__",
         "_ssssss_",
+        "s~ssss~s",
+        "s~ssss~s",
+        "s~ssss~s",
+        "ssssssss",
         "ssssssss",
         "s~ssss~s",
         "s~ssss~s",
-        "s~~ss~~s",
-        "_~~ss~~_",
-        "__ssss__",
-        "__ssss__",
-        "__ssss__",
-        "___ss___",
-        "___ss___"
+        "_ssssss_",
+        "__ssss__"
       ],
       "player": [
         {
@@ -702,35 +702,50 @@
           "row": 10
         },
         {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 9
+        },
+        {
           "kind": "bomber",
           "col": 2,
-          "row": 4
+          "row": 5
         },
         {
           "kind": "bomber",
           "col": 5,
-          "row": 4
+          "row": 5
         },
         {
           "kind": "archer",
           "col": 3,
-          "row": 7
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 7
+          "row": 6
         },
         {
           "kind": "ninja",
-          "col": 0,
-          "row": 3
+          "col": 7,
+          "row": 5
         }
       ],
       "enemy": [
         {
           "kind": "king",
           "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
           "row": 1
         },
         {
@@ -746,12 +761,7 @@
         {
           "kind": "swordsman",
           "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 2
+          "row": 4
         }
       ]
     }
