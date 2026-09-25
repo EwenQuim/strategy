@@ -21,7 +21,7 @@ import {
 import type { StoredGame } from '../lib/online.ts'
 
 const inputClassName =
-  'w-full min-w-0 min-h-13 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]'
+  'w-full min-w-0 min-h-13 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-base text-ink [color-scheme:dark]'
 const onlineButtonClassName = buttonClassName + ' min-h-13 justify-center border-line'
 
 export const Route = createFileRoute('/online/')({
@@ -69,7 +69,7 @@ export const Route = createFileRoute('/online/')({
     return (
       <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&:disabled]:opacity-50">
         <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{m.title}</h1>
+          <h1 className="mt-1 font-serif text-3xl leading-[normal]">{m.title}</h1>
           <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
@@ -86,7 +86,7 @@ export const Route = createFileRoute('/online/')({
             })
           }}
         >
-          <label htmlFor="online-name" className="grid gap-1.5 text-[12px] text-muted">
+          <label htmlFor="online-name" className="grid gap-1.5 text-xs text-muted">
             {m.yourName}
             <input
               className={inputClassName}
@@ -122,7 +122,7 @@ export const Route = createFileRoute('/online/')({
             })
           }}
         >
-          <label htmlFor="online-code" className="grid gap-1.5 text-[12px] text-muted">
+          <label htmlFor="online-code" className="grid gap-1.5 text-xs text-muted">
             {m.gameCode}
             <input
               className={inputClassName + ' text-center font-mono tracking-[0.3em] uppercase'}
@@ -148,7 +148,7 @@ export const Route = createFileRoute('/online/')({
           </button>
         </form>
         {error && (
-          <p role="alert" className="text-[12px] text-[#e0a586]">
+          <p role="alert" className="text-xs text-[#e0a586]">
             {error}
           </p>
         )}
@@ -157,7 +157,7 @@ export const Route = createFileRoute('/online/')({
             className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto"
             aria-label={m.resumeGame}
           >
-            <h2 className="text-[12px] font-semibold tracking-[0.17em] text-muted uppercase">
+            <h2 className="text-xs font-semibold tracking-[0.17em] text-muted uppercase">
               {m.yourGames}
             </h2>
             {games.map((game, index) => {
@@ -175,7 +175,7 @@ export const Route = createFileRoute('/online/')({
                   preload={false}
                 >
                   <span className="font-mono tracking-[0.2em]">{game.code}</span>
-                  <span className="text-[11px] text-muted">
+                  <span className="text-xs text-muted">
                     {!doc
                       ? missing
                         ? m.notFound
@@ -191,7 +191,7 @@ export const Route = createFileRoute('/online/')({
             })}
           </section>
         )}
-        <p className="mt-auto text-[11px] leading-[1.5] text-muted">{m.lobbyNote}</p>
+        <p className="mt-auto text-xs leading-[1.5] text-muted">{m.lobbyNote}</p>
       </main>
     )
   },

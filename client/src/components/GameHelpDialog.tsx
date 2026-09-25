@@ -39,7 +39,7 @@ export function GameHelpDialog({
       }}
     >
       <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-6 pt-6 pb-4 [&>button]:shrink-0">
-        <h2 className="font-serif text-[30px] leading-tight" id="dialog-title">
+        <h2 className="font-serif text-3xl leading-tight" id="dialog-title">
           {game.howToPlay}
         </h2>
         <button
@@ -51,7 +51,7 @@ export function GameHelpDialog({
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-6">
-        <p className="pt-5 text-[14px] leading-normal text-muted">
+        <p className="pt-5 text-sm leading-normal text-muted">
           {campaignLevel ? m.campaignIntro : setup ? m.customIntro : m.randomIntro}
           {setup &&
             mode !== 'local' &&

@@ -37,7 +37,7 @@ export const Route = createFileRoute('/custom')({
     return (
       <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&_select:focus-visible]:outline-2 [&_select:focus-visible]:outline-offset-1 [&_select:focus-visible]:outline-gold [&_:disabled]:opacity-50">
         <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{common.customPlay}</h1>
+          <h1 className="mt-1 font-serif text-3xl leading-[normal]">{common.customPlay}</h1>
           <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
@@ -54,10 +54,10 @@ export const Route = createFileRoute('/custom')({
         >
           <div className="min-h-0 overflow-y-auto p-1">
             <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5 text-[12px] text-muted">
+              <div className="grid gap-1.5 text-xs text-muted">
                 <label htmlFor="custom-mode">{m.mode}</label>
                 <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-base text-ink [color-scheme:dark]"
                   id="custom-mode"
                   value={mode}
                   onChange={(event) => setMode(event.target.value as GameMode)}
@@ -66,13 +66,13 @@ export const Route = createFileRoute('/custom')({
                   <option value="local">{m.twoPlayers}</option>
                 </select>
               </div>
-              <div className="grid gap-1.5 text-[12px] text-muted">
+              <div className="grid gap-1.5 text-xs text-muted">
                 <label htmlFor="custom-difficulty">
                   {m.difficulty}
                   {mode === 'local' && m.aiOnly}
                 </label>
                 <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-base text-ink [color-scheme:dark]"
                   id="custom-difficulty"
                   value={difficulty}
                   disabled={mode === 'local'}
@@ -85,10 +85,10 @@ export const Route = createFileRoute('/custom')({
                   ))}
                 </select>
               </div>
-              <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
+              <div className="grid gap-1.5 text-xs text-muted col-span-full">
                 <label htmlFor="custom-biome">{m.biome}</label>
                 <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-base text-ink [color-scheme:dark]"
                   id="custom-biome"
                   value={biome}
                   onChange={(event) => setBiome(event.target.value as Biome)}
@@ -101,7 +101,7 @@ export const Route = createFileRoute('/custom')({
                 </select>
               </div>
             </div>
-            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
+            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-xs">
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
@@ -110,9 +110,9 @@ export const Route = createFileRoute('/custom')({
               />
               {m.mirrorRoster}
             </label>
-            <table className="w-full border-separate border-spacing-2 text-[13px] [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
+            <table className="w-full border-separate border-spacing-2 text-sm [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
               <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
-              <thead className="text-[11px] text-muted">
+              <thead className="text-xs text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="col">
                     {m.unit}
@@ -155,7 +155,7 @@ export const Route = createFileRoute('/custom')({
                       return (
                         <td className="w-1/4 text-center" key={side}>
                           <input
-                            className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark] text-center"
+                            className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-base text-ink [color-scheme:dark] text-center"
                             type="number"
                             inputMode="numeric"
                             min={0}
@@ -181,7 +181,7 @@ export const Route = createFileRoute('/custom')({
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="text-[11px] text-muted">
+              <tfoot className="text-xs text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="row">
                     {m.total}
@@ -191,7 +191,7 @@ export const Route = createFileRoute('/custom')({
                 </tr>
               </tfoot>
             </table>
-            <p className="text-[11px] leading-[1.5] text-muted">
+            <p className="text-xs leading-[1.5] text-muted">
               {m.rosterLimits(MAP_WIDTH * 3, MAP_WIDTH)}
             </p>
           </div>

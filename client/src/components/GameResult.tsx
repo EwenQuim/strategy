@@ -12,6 +12,7 @@ const resultButtonClassName =
 
 interface GameResultProps {
   winner: Side | 'draw'
+  viewerSide?: Side
   winnerLabel: string | null
   mode: GameMode
   difficulty: BotDifficulty
@@ -25,6 +26,7 @@ interface GameResultProps {
 
 export function GameResult({
   winner,
+  viewerSide = 'player',
   winnerLabel,
   mode,
   difficulty,
@@ -37,24 +39,46 @@ export function GameResult({
 }: GameResultProps) {
   const local = mode === 'local'
   const isOnline = mode === 'online'
+  const outcome = local || winner === viewerSide ? 'victory' : winner === 'draw' ? 'draw' : 'defeat'
 
   return (
     <div
-      className="absolute inset-0 grid place-items-center bg-black/35 p-4 backdrop-blur-[5px]"
+      className="battle-result-enter group/result absolute inset-0 isolate grid place-items-center overflow-hidden bg-black/35 p-4 backdrop-blur-[5px] motion-reduce:animate-none"
       data-testid="battle-result"
+      data-outcome={outcome}
       role="status"
     >
+      {outcome !== 'draw' && (
+        <div
+          data-testid="battle-result-effect"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-1 overflow-hidden motion-reduce:hidden"
+        >
+          <div className="battle-result-glow absolute inset-0 bg-[radial-gradient(ellipse,#bd635866,transparent_70%)] group-data-[outcome=victory]/result:bg-[radial-gradient(ellipse,#f6d78999,transparent_70%)]" />
+          {outcome === 'victory' && (
+            <svg viewBox="-160 -160 320 320" className="battle-result-sparks size-full fill-gold stroke-gold" >
+              {Array.from({ length: 12 }, (_, index) => (
+                <g key={index} transform={'rotate(' + index * 30 + ')'}>
+                  <path d="M0-110l3 7-3 7-3-7Z" />
+                  <path d="M0-120v-12" strokeWidth="2" strokeLinecap="round" />
+                </g>
+              ))}
+            </svg>
+          )}
+        </div>
+      )}
       <div
         className={
-          panelClassName +
-          ' max-w-[390px] p-7 text-center [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-tight [&_p]:text-[14px] [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]'
+          (outcome === 'victory' ? 'battle-result-victory ' : outcome === 'defeat' ? 'battle-result-defeat ' : '') +
+          'motion-reduce:animate-none ' + panelClassName +
+          ' max-w-[390px] p-7 text-center [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:leading-tight [&_p]:text-sm [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-2xl'
         }
         data-testid="result-card"
       >
-        <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-gold/25 text-gold [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
+        <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-[#d59d81] [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
           <Icon name="crown" />
         </div>
-        <span className="text-[11px] font-semibold text-muted tracking-[0.17em] uppercase">
+        <span className="text-xs font-semibold text-muted tracking-[0.17em] uppercase">
           {campaign && campaignLevel
             ? m.resultLevel(campaignLevel, campaign.levels[campaignLevel - 1].name)
             : m.battleOver}
@@ -100,7 +124,7 @@ export function GameResult({
               <Link
                 to="/campaign/$campaign"
                 params={{ campaign: campaign.slug }}
-                className="p-3 text-[13px] underline"
+                className="p-3 text-sm underline"
               >
                 {m.levelSelection}
               </Link>

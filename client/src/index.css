@@ -11,6 +11,8 @@
   --font-display: Georgia, 'Times New Roman', serif;
   --font-serif: Georgia, serif;
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
+  --text-2xs: 10px;
+  --text-3xs: 9px;
 }
 
 @layer base {

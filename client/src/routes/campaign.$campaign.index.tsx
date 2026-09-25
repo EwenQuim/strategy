@@ -27,14 +27,14 @@ export const Route = createFileRoute('/campaign/$campaign/')({
       <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
         <header className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="font-serif text-[32px] leading-[normal]">{campaign.name}</h1>
+            <h1 className="font-serif text-3xl leading-[normal]">{campaign.name}</h1>
           </div>
           <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
         </header>
         <div
-          className="flex items-center justify-between gap-3 text-[10px] text-muted"
+          className="flex items-center justify-between gap-3 text-2xs text-muted"
           data-testid="campaign-progress"
           role="status"
         >
@@ -58,7 +58,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                   </strong>{' '}
                   {level.name}
                 </span>
-                <small className="text-[9px] text-muted">{status}</small>
+                <small className="text-3xs text-muted">{status}</small>
               </>
             )
             return (
@@ -91,7 +91,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
             )
           })}
         </ol>
-        <p className="text-center text-[10px] text-muted">{common.savedOnDevice}</p>
+        <p className="text-center text-2xs text-muted">{common.savedOnDevice}</p>
       </main>
     )
   },

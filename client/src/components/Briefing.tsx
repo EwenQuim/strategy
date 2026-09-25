@@ -62,8 +62,8 @@ export function BriefingElements({ elements }: { elements: readonly BriefingElem
         >
           {element.art && <ElementArt art={element.art} />}
           <div className="min-w-0">
-            <strong className="block text-[16px] text-gold">{element.name}</strong>
-            <ul className="mt-1 mb-0 list-disc pl-4 text-[14px] leading-normal text-muted marker:text-line">
+            <strong className="block text-base text-gold">{element.name}</strong>
+            <ul className="mt-1 mb-0 list-disc pl-4 text-sm leading-normal text-muted marker:text-line">
               {element.points.map((point) => (
                 <li key={point}>{point}</li>
               ))}
@@ -96,10 +96,10 @@ export function Briefing({ level }: { level: CampaignLevel }) {
         className="flex shrink-0 items-start justify-between gap-2.5 border-b border-line px-6 pt-6 pb-4 [&>button]:-mt-1 [&>button]:-mr-2 [&>button]:shrink-0"
       >
         <div>
-          <span className="text-[11px] font-semibold tracking-[0.17em] text-muted uppercase">
+          <span className="text-xs font-semibold tracking-[0.17em] text-muted uppercase">
             {m.levelNumber(String(level.id).padStart(2, '0'))}
           </span>
-          <h2 className="mt-1 font-serif text-[30px] leading-tight" id="briefing-title">
+          <h2 className="mt-1 font-serif text-3xl leading-tight" id="briefing-title">
             {level.name}
           </h2>
         </div>

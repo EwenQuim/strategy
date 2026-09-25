@@ -27,8 +27,8 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
     >
       <LevelMiniature setup={showcase} />
       <span className="flex items-end justify-between gap-3">
-        <span className="font-serif text-[24px] leading-none">{campaign.name}</span>
-        <span className="flex items-center gap-1.5 text-[11px] text-muted [&>svg]:size-4 [&>svg]:text-gold">
+        <span className="font-serif text-2xl leading-none">{campaign.name}</span>
+        <span className="flex items-center gap-1.5 text-xs text-muted [&>svg]:size-4 [&>svg]:text-gold">
           {completed} / {total}
           <Icon name={done ? 'crown' : 'arrow'} className={done ? 'fill-current' : undefined} />
         </span>

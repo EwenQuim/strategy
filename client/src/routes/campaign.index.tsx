@@ -21,7 +21,7 @@ export const Route = createFileRoute('/campaign/')({
       <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
         <header className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="font-serif text-[32px] leading-[normal]">{m.campaigns}</h1>
+            <h1 className="font-serif text-3xl leading-[normal]">{m.campaigns}</h1>
           </div>
           <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
@@ -37,7 +37,7 @@ export const Route = createFileRoute('/campaign/')({
             </li>
           ))}
         </ol>
-        <p className="text-center text-[10px] text-muted">{common.savedOnDevice}</p>
+        <p className="text-center text-2xs text-muted">{common.savedOnDevice}</p>
       </main>
     )
   },

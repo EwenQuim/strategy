@@ -24,7 +24,7 @@ export const Route = createFileRoute('/')({
     return (
       <main className="[background:radial-gradient(ellipse_at_50%_38%,#465c3880,transparent_60%),#182c22] flex min-h-dvh flex-col">
         <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 max-[601px]:px-[23px] max-[601px]:py-5 [@media(max-height:650px)]:py-3">
-          <span className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]">
+          <span className="flex items-center gap-2.5 font-display text-2xl leading-none tracking-[0.15em]">
             <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
               <Icon name="crown" />
             </span>
@@ -82,7 +82,7 @@ export const Route = createFileRoute('/')({
               <Icon name="crown" />
             </div>
           </div>
-          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-[32px]">
+          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-3xl">
             Hexmate.
           </h1>
           <div
@@ -100,7 +100,7 @@ export const Route = createFileRoute('/')({
               preload={false}
             >
               {done ? m.campaigns : m.campaign}
-              <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
+              <span className="flex items-center gap-2 text-2xs tracking-[0.08em] [&>svg]:size-4">
                 {done
                   ? allCompleted + ' / ' + allLevels
                   : completed + ' / ' + original.levels.length}
@@ -160,7 +160,7 @@ export const Route = createFileRoute('/')({
             </Link>
           </div>
         </div>
-        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[10px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
+        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-2xs tracking-[0.05em] text-[#9caf92] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
           <span title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</span>
           <span>{m.madeBy}</span>
         </footer>

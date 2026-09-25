@@ -24,8 +24,8 @@ export const Route = createFileRoute('/online/$code')({
       return (
         <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
           <div className="grid gap-4">
-            <h1 className="font-serif text-[28px]">{m.notAPlayer}</h1>
-            <p className="text-[12px] text-muted">{m.joinFromLobby}</p>
+            <h1 className="font-serif text-3xl">{m.notAPlayer}</h1>
+            <p className="text-xs text-muted">{m.joinFromLobby}</p>
             <Link
               to="/online"
               className={
@@ -46,7 +46,7 @@ export const Route = createFileRoute('/online/$code')({
       return (
         <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
           <div className="grid gap-4">
-            <h1 className="font-serif text-[28px]">
+            <h1 className="font-serif text-3xl">
               {status === 404 ? m.gameGone : common.serverUnreachable}
             </h1>
             <Link
@@ -69,19 +69,19 @@ export const Route = createFileRoute('/online/$code')({
       return (
         <main className="grid min-h-dvh place-items-center bg-[#182c22] px-5 py-8 text-center">
           <div className="grid w-full max-w-[340px] justify-items-center gap-5">
-            <span className="text-[9px] font-semibold tracking-[0.17em] text-muted uppercase">
+            <span className="text-3xs font-semibold tracking-[0.17em] text-muted uppercase">
               {m.onlineGame}
             </span>
-            <h1 className="font-serif text-[30px] leading-[normal]">{m.waitingTitle}</h1>
+            <h1 className="font-serif text-3xl leading-[normal]">{m.waitingTitle}</h1>
             {!doc ? (
-              <p className="text-[12px] text-muted">{m.loading}</p>
+              <p className="text-xs text-muted">{m.loading}</p>
             ) : (
               <>
-                <p className="text-[12px] leading-[1.6] text-muted">
+                <p className="text-xs leading-[1.6] text-muted">
                   {m.shareCode(doc.namePlayer, doc.nameEnemy || undefined)}
                 </p>
                 <div
-                  className="rounded-2xl border border-[#dcc48a59] bg-[#20362bee] px-8 py-5 font-mono text-[34px] tracking-[0.25em] text-gold"
+                  className="rounded-2xl border border-[#dcc48a59] bg-[#20362bee] px-8 py-5 font-mono text-4xl tracking-[0.25em] text-gold"
                   data-testid="game-code"
                 >
                   {code}
@@ -90,7 +90,7 @@ export const Route = createFileRoute('/online/$code')({
                   type="button"
                   className={
                     buttonClassName +
-                    ' min-h-11 justify-center border-line bg-[#ffffff04] px-4 text-[12px] hover:bg-[#ffffff0c]'
+                    ' min-h-11 justify-center border-line bg-[#ffffff04] px-4 text-xs hover:bg-[#ffffff0c]'
                   }
                   onClick={() => void navigator.clipboard?.writeText(code)}
                 >
