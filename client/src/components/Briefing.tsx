@@ -34,24 +34,21 @@ export function Briefing({ level }: { level: CampaignLevel }) {
         </button>
       </form>
       <div className="min-h-0 flex-1 overflow-y-auto px-[25px]">
-        <p className="m-0 pt-5 font-serif text-[16px] leading-[1.5] italic">
-          {level.intro.roleplay}
-        </p>
-        {level.intro.newElements.length > 0 && (
-          <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5 pb-5">
-            {level.intro.newElements.map((element) => (
-              <li
-                className="rounded-lg border border-line bg-[#ffffff04] px-3 py-2.5"
-                key={element.name}
-              >
-                <strong className="mb-1 block text-[13px] text-gold">{element.name}</strong>
-                <p className="m-0 text-[12px] leading-[1.5] text-muted">
-                  {element.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5 pb-5">
+          {level.newElements.map((element) => (
+            <li
+              className="rounded-lg border border-line bg-[#ffffff04] px-3 py-2.5"
+              key={element.name}
+            >
+              <strong className="mb-1 block text-[13px] text-gold">{element.name}</strong>
+              <ul className="m-0 list-disc pl-4 text-[12px] leading-[1.5] text-muted">
+                {element.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
       </div>
       <form method="dialog" className="shrink-0 px-[25px] pb-[25px]">
         <button

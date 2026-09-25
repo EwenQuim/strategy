@@ -26,7 +26,7 @@ export const Route = createFileRoute('/campaign/$level')({
           campaignLevel={level.id}
           onVictory={() => recordCampaignVictory(level.id)}
         />
-        <Briefing level={level} />
+        {level.newElements.length > 0 && <Briefing level={level} />}
       </>
     )
   },
