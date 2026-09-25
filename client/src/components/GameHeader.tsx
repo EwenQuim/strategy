@@ -63,7 +63,7 @@ export function GameHeader({
             <Icon name="crown" />
           </span>
           <span>
-            HEX
+            Hexmate
             <span
               className="mt-[5px] block font-label text-[7px] leading-[normal] tracking-[0.29em] text-muted"
               data-testid="battle-subtitle"
