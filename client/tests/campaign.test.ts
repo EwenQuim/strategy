@@ -187,6 +187,36 @@ test('The campaign introduces units gradually and keeps the opening free of obst
     )
 })
 
+test('Each terrain, feature and biome hazard is introduced where it first appears', () => {
+  const introductions: Record<string, string> = {
+    lake: 'Lakes',
+    mountain: 'Mountains',
+    sand: 'Desert',
+    lava: 'Lava',
+    watchtower: 'Watchtower',
+    spring: 'Healing spring',
+    rune: 'Power rune',
+    hell: 'Hellfire',
+  }
+  const seen = new Set<string>()
+  for (const level of CAMPAIGN_LEVELS) {
+    const state = coreState(level.seed, level.setup)
+    const present = [
+      state.biome,
+      ...[...state.tiles.values()].flatMap((tile) => [tile.terrain, tile.feature ?? '']),
+    ]
+    for (const name of present) {
+      if (!(name in introductions) || seen.has(name)) continue
+      seen.add(name)
+      assert.ok(
+        level.intro.newElements.some((element) => element.name === introductions[name]),
+        'Missing introduction for ' + name + ' in level ' + level.id,
+      )
+    }
+  }
+  assert.equal(seen.size, Object.keys(introductions).length)
+})
+
 test('Powder Lesson and Iron Caravan offer useful blasts without requiring friendly fire', () => {
   for (const [id, minimumHits] of [
     [8, 2],

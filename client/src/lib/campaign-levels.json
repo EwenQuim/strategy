@@ -617,6 +617,10 @@
     "intro": {
       "newElements": [
         {
+          "name": "Desert",
+          "points": ["Open sand, no cover", "Range and angles decide"]
+        },
+        {
           "name": "Split the battery",
           "points": [
             "Lakes split movement, not fire",
@@ -698,10 +702,6 @@
     },
     "intro": {
       "newElements": [
-        {
-          "name": "Desert",
-          "points": ["Open sand, no cover", "Range and angles decide"]
-        },
         {
           "name": "Ninja",
           "points": [
