@@ -141,16 +141,11 @@ export const aiSides = t({
   it: ['Giocatore', 'Nemico'],
 })
 export const rosterLimits = t({
-  en: (maxUnits: number, maxBulwarks: number) =>
-    `One king per side. Up to ${maxUnits} units; player Bulwarks are limited to ${maxBulwarks}.`,
-  fr: (maxUnits: number, maxBulwarks: number) =>
-    `Un roi par camp. Jusqu'à ${maxUnits} unités ; les Bulwarks du joueur sont limités à ${maxBulwarks}.`,
-  de: (maxUnits: number, maxBulwarks: number) =>
-    `Ein König pro Seite. Bis zu ${maxUnits} Einheiten; Bulwarks des Spielers sind auf ${maxBulwarks} begrenzt.`,
-  es: (maxUnits: number, maxBulwarks: number) =>
-    `Un rey por bando. Hasta ${maxUnits} unidades; los Bulwarks del jugador están limitados a ${maxBulwarks}.`,
-  it: (maxUnits: number, maxBulwarks: number) =>
-    `Un re per schieramento. Fino a ${maxUnits} unità; i Bulwark del giocatore sono limitati a ${maxBulwarks}.`,
+  en: (maxUnits: number) => `One king per side. Up to ${maxUnits} units.`,
+  fr: (maxUnits: number) => `Un roi par camp. Jusqu'à ${maxUnits} unités.`,
+  de: (maxUnits: number) => `Ein König pro Seite. Bis zu ${maxUnits} Einheiten.`,
+  es: (maxUnits: number) => `Un rey por bando. Hasta ${maxUnits} unidades.`,
+  it: (maxUnits: number) => `Un re per schieramento. Fino a ${maxUnits} unità.`,
 })
 export const startBattle = t({
   en: 'Start battle',

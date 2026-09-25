@@ -117,10 +117,11 @@ function ruleSpecial(
     )
       return area.actions
   }
-  const special = strategy.chooseTarget(
-    pawn,
-    specials.filter((p) => pawn.kind === 'archer' && p.escapeChance > 0),
-  )
+  const strikeTargets =
+    pawn.special.targeted && !pawn.special.areaTargets && !pawn.special.choosesDestination
+      ? specials.filter((p) => p.side !== pawn.side)
+      : []
+  const special = strategy.chooseTarget(pawn, strikeTargets)
   if (special)
     return [
       { type: 'act', action: 'special' },

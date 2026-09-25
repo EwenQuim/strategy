@@ -119,15 +119,6 @@ test('Row 10 is reserved for all player Bulwarks before placing the rest of a fu
   assert.ok(bulwarks.every((p) => p.r === 9))
   assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
   assert.deepEqual(reducer(state, { type: 'restart' }), state)
-  assert.throws(
-    () =>
-      initialState('too-many-bulwarks', {
-        biome: 'desert',
-        player: ['king', ...Array<Pawn['kind']>(9).fill('bulwark')],
-        enemy: ['king'],
-      }),
-    /Bulwarks/,
-  )
 })
 
 test('Setup snapshots survive caller edits, combat changes and restarts without sharing mutable input', () => {

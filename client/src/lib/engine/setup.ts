@@ -84,13 +84,6 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
       }
     }
     if (kings !== 1) throw new Error(side + ' army must contain exactly one king')
-    if (
-      !tiles &&
-      side === 'player' &&
-      army.filter((unit) => PAWN_CLASSES[unit as Pawn['kind']].startsOnFrontRow).length >
-        MAP_WIDTH
-    )
-      throw new RangeError('Player Bulwarks must fit on one starting row')
   }
 }
 
@@ -133,7 +126,9 @@ function spawnRandomArmy(
   const otherPositions = positions.filter((tile) => !frontPositions.includes(tile))
   return army.map((Unit, index) => {
     const available =
-      side === 'player' && Unit.startsOnFrontRow ? frontPositions : otherPositions
+      side === 'player' && Unit.startsOnFrontRow && frontPositions.length
+        ? frontPositions
+        : otherPositions
     const tile = available.shift()!
     return new Unit(firstId + index, tile.q, tile.r, side)
   })
