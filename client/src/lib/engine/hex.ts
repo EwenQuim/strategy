@@ -41,23 +41,7 @@ export function passable(tile: Tile | undefined): boolean {
 const roll = (min: number, max: number, random: SeededRandom) =>
   min + Math.floor(random.next() * (max - min + 1))
 
-export const TILE_FEATURES = {
-  watchtower: {
-    name: 'Watchtower',
-    description:
-      '+1 basic-attack range for Archers and Magicians. Specials and minimum range are unchanged.',
-  },
-  spring: {
-    name: 'Healing spring',
-    description:
-      'Heal 1 health at your next activation after staying here, up to maximum health.',
-  },
-  rune: {
-    name: 'Power rune',
-    description:
-      'Collect once for +2 energy this round. Disappears on entry; no permanent bonus.',
-  },
-} as const
+export const TILE_FEATURES: readonly TileFeature[] = ['watchtower', 'spring', 'rune']
 
 function orient(shape: Shape, random: SeededRandom): Shape {
   const rotations = Math.floor(random.next() * 6)
@@ -199,7 +183,7 @@ export function makeMap(
       tile.terrain !== 'lava' &&
       !reserved.has(key(tile.q, tile.r)),
   )
-  const features = Object.keys(TILE_FEATURES) as TileFeature[]
+  const features = [...TILE_FEATURES]
   for (let i = 0; i < count && candidates.length; i++) {
     const [tile] = candidates.splice(Math.floor(random.next() * candidates.length), 1)
     const [feature] = features.splice(Math.floor(random.next() * features.length), 1)

@@ -37,16 +37,42 @@ export type ThreatPosition = {
   movementCost: number
 }
 
+export type SpecialTextKey =
+  | 'rally'
+  | 'rallyDescription'
+  | 'noAlliesToHeal'
+  | 'charge'
+  | 'chargeDescription'
+  | 'noEnemiesWithinReach'
+  | 'chargeTo'
+  | 'chooseTile'
+  | 'aimedShot'
+  | 'aimedShotDescription'
+  | 'noEnemiesInRange'
+  | 'fireball'
+  | 'fireballDescription'
+  | 'fireballToward'
+  | 'chooseDirection'
+  | 'bomb'
+  | 'bombDescription'
+  | 'protect'
+  | 'protectDescription'
+  | 'chooseAlly'
+  | 'noNearbyAllies'
+  | 'jump'
+  | 'jumpDescription'
+  | 'jumpTo'
+
 export interface SpecialAbility {
-  readonly name: string
+  readonly name: SpecialTextKey
   readonly cost: number
-  readonly description: string
+  readonly description: SpecialTextKey
   readonly targeted: boolean
   readonly oncePerRound?: boolean
   readonly choosesDestination?: boolean
-  readonly targetLabel?: string
-  readonly prompt?: string
-  readonly noTargets?: string
+  readonly targetLabel?: SpecialTextKey
+  readonly prompt?: SpecialTextKey
+  readonly noTargets?: SpecialTextKey
   targets(pawn: Pawn, pawns: readonly Pawn[], from?: Axial): Pawn[]
   tileTargets?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
   areaTargets?(pawns: readonly Pawn[], tile: Axial, pawn: Pawn): Pawn[]

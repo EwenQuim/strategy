@@ -7,7 +7,6 @@ import { after, test, type TestContext } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright-core'
 import {
-  BIOMES,
   initialState,
   inHellfire,
   activePawn,
@@ -24,7 +23,9 @@ import {
 } from '../src/lib/engine/bot.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/engine/bot.ts'
-import { possessiveArmyLabels, playerNames } from '../src/lib/game-mode.ts'
+import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'
+import { biomeNames } from '../src/i18n/biomes.ts'
+import { unitNames } from '../src/i18n/units.ts'
 import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
 
@@ -247,8 +248,8 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
     await page.getByRole('link', { name: 'Custom play' }).click()
-    const playerArcher = page.getByRole('spinbutton', { name: 'Player archer', exact: true })
-    const enemyArcher = page.getByRole('spinbutton', { name: 'Enemy archer', exact: true })
+    const playerArcher = page.getByRole('spinbutton', { name: 'Player Archer', exact: true })
+    const enemyArcher = page.getByRole('spinbutton', { name: 'Enemy Archer', exact: true })
     const mirror = page.getByRole('checkbox', { name: 'Mirror player roster' })
     assert.equal(await mirror.isChecked(), true)
     assert.equal(await enemyArcher.isDisabled(), true)
@@ -267,8 +268,8 @@ test(
     await page.getByLabel('Mode', { exact: true }).selectOption('local')
     assert.equal(await page.getByLabel('Difficulty', { exact: false }).isDisabled(), true)
     await page.getByLabel('Biome', { exact: true }).selectOption('mountains')
-    await page.getByRole('spinbutton', { name: 'Player 1 swordsman', exact: true }).fill('17')
-    await page.getByRole('spinbutton', { name: 'Player 2 swordsman', exact: true }).fill('20')
+    await page.getByRole('spinbutton', { name: 'Player 1 Swordsman', exact: true }).fill('17')
+    await page.getByRole('spinbutton', { name: 'Player 2 Swordsman', exact: true }).fill('20')
     for (const viewport of [
       { width: 320, height: 568 },
       { width: 390, height: 844 },
@@ -315,13 +316,13 @@ test(
     )
     assert.equal(
       await page
-        .locator('[data-testid="initiative-unit"][data-side="player"][title*="archer"]')
+        .locator('[data-testid="initiative-unit"][data-side="player"][title*="Archer"]')
         .count(),
       4,
     )
     assert.equal(
       await page
-        .locator('[data-testid="initiative-unit"][data-side="enemy"][title*="archer"]')
+        .locator('[data-testid="initiative-unit"][data-side="enemy"][title*="Archer"]')
         .count(),
       1,
     )
@@ -429,7 +430,7 @@ test(
         .locator('[data-testid="hex-tile"]')
         .nth(tileIndex)
         .getAttribute('aria-label'))!,
-      /protected by bulwark/,
+      /protected by Bulwark/,
     )
     assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
     assert.equal(await moves.count(), 0)
@@ -784,7 +785,7 @@ test(
       assert.equal(await page.locator('[data-action]').count(), 3)
       assert.equal(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
-        BIOMES[biome].name,
+        biomeNames[biome],
       )
       assert.equal(await page.locator('[data-testid="hex-tile"]').count(), 96)
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), biome)
@@ -812,19 +813,19 @@ test(
         .locator('[data-testid="hex-tile"]')
         .evaluateAll((tiles) => tiles.map((tile) => tile.getAttribute('aria-label')!))
       assert.equal(
-        terrain.some((label) => label.includes('lake')),
+        terrain.some((label) => label.includes('Lake')),
         biome === 'verdant' || biome === 'desert',
       )
       assert.equal(
-        terrain.some((label) => label.includes('mountain')),
+        terrain.some((label) => label.includes('Mountain')),
         biome === 'mountains',
       )
       assert.equal(
-        terrain.some((label) => label.includes('sand')),
+        terrain.some((label) => label.includes('Sand')),
         biome === 'desert',
       )
       if (biome === 'desert') {
-        assert.ok(terrain.every((label) => /sand|palm|lake|health/.test(label)))
+        assert.ok(terrain.every((label) => /Sand|Palm|Lake|health/.test(label)))
         assert.ok((await page.locator('[data-art="sand"]').count()) > 0)
         const faces = await page.locator('[data-testid="tile-face"]').evaluateAll((tiles) =>
           tiles.map((tile) => ({
@@ -847,7 +848,7 @@ test(
         )
       }
       if (biome === 'volcano') {
-        assert.ok(terrain.some((label) => label.includes('lava')))
+        assert.ok(terrain.some((label) => label.includes('Lava')))
         assert.ok(await page.locator('[data-art="lava"]').count())
         assert.ok(await page.locator('[data-terrain=basalt]').count())
       }
@@ -897,12 +898,12 @@ test(
       if (level.setup.biome === 'volcano') {
         const basalt = page
           .locator(
-            '[data-testid="hex-tile"][data-terrain=basalt][role=img][aria-label^="basalt,"] [data-testid="tile-face"]',
+            '[data-testid="hex-tile"][data-terrain=basalt][role=img][aria-label^="Basalt,"] [data-testid="tile-face"]',
           )
           .first()
         const lava = page
           .locator(
-            '[data-testid="hex-tile"][data-terrain=lava][role=img][aria-label^="lava,"] [data-testid="tile-face"]',
+            '[data-testid="hex-tile"][data-terrain=lava][role=img][aria-label^="Lava,"] [data-testid="tile-face"]',
           )
           .first()
         assert.equal(
@@ -1319,7 +1320,11 @@ test(
         const pawn = activePawn(state)!
         assert.equal(
           await page.locator('[aria-current="step"]').getAttribute('title'),
-          possessiveArmyLabels('local')[pawn.side] + ' ' + pawn.kind + ' #' + pawn.id,
+          possessiveArmyLabels('local')[pawn.side] +
+            ' ' +
+            unitNames[pawn.kind] +
+            ' #' +
+            pawn.id,
         )
         assert.equal(
           await page.locator('[data-testid="player-turn"]').textContent(),

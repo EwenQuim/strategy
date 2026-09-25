@@ -10,8 +10,6 @@ export type MapFeature = {
 }
 
 export type BiomeDefinition = {
-  readonly name: string
-  readonly description: string
   readonly ground: Terrain
   readonly scatter?: { readonly terrain: Terrain; readonly chance: number }
   readonly features: readonly MapFeature[]

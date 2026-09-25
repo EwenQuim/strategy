@@ -28,15 +28,14 @@ export function chargeDestinations(
 }
 
 const charge: SpecialAbility = {
-  name: 'Charge',
+  name: 'charge',
   cost: 2,
   targeted: true,
-  noTargets: 'No enemies within reach',
+  noTargets: 'noEnemiesWithinReach',
   choosesDestination: true,
-  targetLabel: 'Charge to',
-  prompt: 'Choose tile',
-  description:
-    'Choose a tile up to 2 steps away, then an adjacent enemy. Move and strike for 2 damage. Mountains, lakes, and occupied tiles block the path.',
+  targetLabel: 'chargeTo',
+  prompt: 'chooseTile',
+  description: 'chargeDescription',
   targets: attackTargets,
   tileTargets: (pawn, tiles, pawns) => new Set(chargeDestinations(tiles, pawns, pawn).keys()),
   candidates: (pawn, { tiles, pawns }) =>

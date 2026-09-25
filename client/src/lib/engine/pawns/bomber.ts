@@ -10,13 +10,12 @@ function bombTiles(pawn: Pawn, tiles: Map<string, Tile>): Tile[] {
 }
 
 const bomb: SpecialAbility = {
-  name: 'Bomb',
+  name: 'bomb',
   cost: 2,
   targeted: true,
-  targetLabel: 'Bomb',
-  prompt: 'Choose tile',
-  description:
-    'Choose any tile within 2 tiles, even empty or blocked ground. Deal 1 damage to every unit on it and its six neighboring tiles, including allies and yourself. Each may Escape.',
+  targetLabel: 'bomb',
+  prompt: 'chooseTile',
+  description: 'bombDescription',
   targets: (pawn, pawns, from = pawn) =>
     pawns.filter((target) => target.side !== pawn.side && hexDist(from, target) <= 3),
   areaTargets: (pawns, tile) => pawns.filter((target) => hexDist(tile, target) <= 1),

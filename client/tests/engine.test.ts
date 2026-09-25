@@ -630,7 +630,7 @@ test('Enemy archers retreat out of melee before shooting and can use Aimed shot'
   const aimed = reducer(state, { type: 'endTurn' })
   assert.equal(aimed.pawns[0].hp, 3)
   assert.equal(aimed.randomState, state.randomState)
-  assert.ok(aimed.log.some((line) => line.includes('Aimed shot')))
+  assert.ok(aimed.log.some((line) => line.includes('aimedShot')))
 })
 
 test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
@@ -655,7 +655,7 @@ test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
     assert.equal(next.pawns[0].hp, Ctor === Swordsman ? 3 : 4)
     assert.equal(next.pawns[2].energy, 0)
     assert.ok(
-      next.log.some((line) => line.includes(Ctor === Swordsman ? 'Charge' : 'Fireball')),
+      next.log.some((line) => line.includes(Ctor === Swordsman ? 'charge' : 'fireball')),
     )
   }
 })

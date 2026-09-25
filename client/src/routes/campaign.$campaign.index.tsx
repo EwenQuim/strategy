@@ -3,6 +3,7 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useSyncExternalStore } from 'react'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
+import { campaignName, levelName } from '../i18n/campaign'
 import { Icon } from '../components/Icon'
 import { LevelMiniature } from '../components/LevelMiniature'
 import { CAMPAIGNS, isLevelUnlocked } from '../lib/campaign'
@@ -27,7 +28,9 @@ export const Route = createFileRoute('/campaign/$campaign/')({
       <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
         <header className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="font-serif text-[32px] leading-[normal]">{campaign.name}</h1>
+            <h1 className="font-serif text-[32px] leading-[normal]">
+              {campaignName(campaign)}
+            </h1>
           </div>
           <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
@@ -56,7 +59,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                   <strong className="font-serif font-normal text-gold">
                     {level.id.toString().padStart(2, '0')}
                   </strong>{' '}
-                  {level.name}
+                  {levelName(level)}
                 </span>
                 <small className="text-[8px] text-muted">{status}</small>
               </>
@@ -71,7 +74,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                     data-testid="campaign-level"
                     style={BIOMES[level.setup.biome].theme}
                     data-status={cleared ? 'completed' : 'ready'}
-                    aria-label={m.levelCard(level.id, level.name, status)}
+                    aria-label={m.levelCard(level.id, levelName(level), status)}
                     preload={false}
                   >
                     {content}
@@ -82,7 +85,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                     data-testid="campaign-level"
                     style={BIOMES[level.setup.biome].theme}
                     disabled
-                    aria-label={m.levelCard(level.id, level.name, m.levelStatus.locked)}
+                    aria-label={m.levelCard(level.id, levelName(level), m.levelStatus.locked)}
                   >
                     {content}
                   </button>

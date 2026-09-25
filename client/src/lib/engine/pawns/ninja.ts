@@ -12,13 +12,12 @@ export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: 
 }
 
 const jump: SpecialAbility = {
-  name: 'Jump',
+  name: 'jump',
   cost: 2,
   targeted: true,
-  targetLabel: 'Jump to',
-  prompt: 'Choose tile',
-  description:
-    'Jump up to 3 tiles, passing over terrain and units. Land on empty ground, never a mountain or lake. Jump does not attack.',
+  targetLabel: 'jumpTo',
+  prompt: 'chooseTile',
+  description: 'jumpDescription',
   targets: () => [],
   candidates: (pawn, { tiles, pawns }) => jumpDestinations(tiles, pawns, pawn).map(aimAt),
   tileTargets: (pawn, tiles, pawns) =>

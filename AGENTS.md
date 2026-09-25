@@ -8,9 +8,9 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 - Prioritize space for the grid: keep top information and bottom actions compact, remove redundant instructions, and show battle history as transient overlays rather than permanent panels.
 - Game logic is plain TypeScript in `client/src/lib/engine/` (hex math, pawn classes, reducer), pure and framework-free. Routes only render it.
 - Each pawn type lives in its own file in `client/src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`; every non-king class is recruitable. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
-- Each biome lives in its own file in `client/src/lib/engine/biomes/` (name, description, terrain generation, theme CSS variables). Register it in `BIOMES` in `biomes/index.ts`; the game screen applies `theme` as inline CSS variables.
+- Each biome lives in its own file in `client/src/lib/engine/biomes/` (terrain generation, theme CSS variables). Register it in `BIOMES` in `biomes/index.ts`; the game screen applies `theme` as inline CSS variables, and display names come from `i18n/biomes.ts`.
 - Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
-- UI text lives in `client/src/i18n/`: one exported `t({ en, fr, de, es, it })` constant per message, imported as `import * as m from '../i18n/<area>'`. Use `plural()` for count-dependent words. A missing locale or unknown key fails `tsc`; an unused message fails knip. Engine text (pawns, biomes, battle log, campaign JSON) is not translated yet.
+- UI text lives in `client/src/i18n/`: one exported `t({ en, fr, de, es, it })` constant per message, imported as `import * as m from '../i18n/<area>'`. Use `plural()` for count-dependent words. A missing locale or unknown key fails `tsc`; an unused message fails knip. Engine display text (unit and ability names, biomes, tile features, terrain, campaign and level names) lives in i18n maps keyed by stable ids; ability text fields hold `SpecialTextKey` message keys resolved through `i18n/units.ts`. The battle log is the only engine text still untranslated.
 
 ## Styling
 

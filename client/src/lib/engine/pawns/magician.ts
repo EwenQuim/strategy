@@ -12,13 +12,12 @@ function direction(from: Axial, to: Axial): string | null {
 }
 
 const fireball: SpecialAbility = {
-  name: 'Fireball',
+  name: 'fireball',
   cost: 2,
   targeted: true,
-  targetLabel: 'Fireball toward',
-  prompt: 'Choose direction',
-  description:
-    'Choose one of six directions by selecting a tile in that line. Deal 1 damage to every enemy along it to the edge of the board, through terrain and units. Each may Escape; allies are unharmed.',
+  targetLabel: 'fireballToward',
+  prompt: 'chooseDirection',
+  description: 'fireballDescription',
   targets: (pawn, pawns, from = pawn) =>
     pawns.filter((target) => target.side !== pawn.side && direction(from, target)),
   areaTargets: (pawns, tile, pawn) =>

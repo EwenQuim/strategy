@@ -1,6 +1,7 @@
 import type { Action, Pawn, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
 import * as m from '../i18n/game'
+import { specialTexts, unitNames } from '../i18n/units'
 import { Icon, PawnIcon } from './Icon'
 
 const actionButtonClassName =
@@ -48,7 +49,9 @@ export function GameCommandDeck({
               <h2 className="font-display text-[20px] leading-[normal] capitalize whitespace-nowrap min-[900px]:text-[24px] max-[601px]:text-[19px] max-[360px]:text-[16px] [@media(min-width:600px)_and_(max-height:480px)]:text-[16px]">
                 {winner
                   ? (winnerLabel ?? (winner === 'player' ? m.victory : m.defeat))
-                  : (pawn?.kind ?? m.yourGuard)}
+                  : pawn
+                    ? unitNames[pawn.kind]
+                    : m.yourGuard}
                 {!winner && pawn && (
                   <span className="font-label text-[10px] leading-[normal] tracking-[0.05em] text-[#7f957e] max-[601px]:text-[9px] max-[360px]:hidden">
                     {' '}
@@ -232,7 +235,7 @@ function SpecialButton({
       }
       data-action="special"
       disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets}
-      title={pawn?.special.description}
+      title={pawn ? specialTexts[pawn.special.description] : undefined}
       aria-pressed={usingSpecial}
       onClick={() =>
         dispatch(
@@ -245,7 +248,7 @@ function SpecialButton({
         name={usingSpecial ? 'close' : 'spark'}
       />
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-        {usingSpecial ? m.cancel : (pawn?.special.name ?? m.special)}
+        {usingSpecial ? m.cancel : pawn ? specialTexts[pawn.special.name] : m.special}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
         {usingSpecial
@@ -253,11 +256,15 @@ function SpecialButton({
             ? m.noTargets
             : phase === 'charge'
               ? m.chooseEnemy
-              : (pawn?.special.prompt ?? m.chooseEnemy)
+              : pawn?.special.prompt
+                ? specialTexts[pawn.special.prompt]
+                : m.chooseEnemy
           : pawn?.special.oncePerRound && pawn.specialUsed
             ? m.usedThisRound
             : !hasSpecialTargets
-              ? (pawn?.special.noTargets ?? m.noTargets)
+              ? pawn?.special.noTargets
+                ? specialTexts[pawn.special.noTargets]
+                : m.noTargets
               : m.energyCost(pawn?.special.cost ?? 2)}
       </small>
     </button>

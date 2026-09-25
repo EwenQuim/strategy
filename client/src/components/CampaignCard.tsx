@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { Icon } from './Icon'
 import { LevelMiniature } from './LevelMiniature'
 import * as m from '../i18n/menus'
+import { campaignName } from '../i18n/campaign'
 import type { Campaign } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
@@ -23,11 +24,11 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
       data-done={done}
       preload={false}
       data-testid="campaign-pack"
-      aria-label={m.campaignCard(campaign.name, completed, total)}
+      aria-label={m.campaignCard(campaignName(campaign), completed, total)}
     >
       <LevelMiniature setup={showcase} />
       <span className="flex items-end justify-between gap-3">
-        <span className="font-serif text-[24px] leading-none">{campaign.name}</span>
+        <span className="font-serif text-[24px] leading-none">{campaignName(campaign)}</span>
         <span className="flex items-center gap-1.5 text-[11px] text-muted [&>svg]:size-4 [&>svg]:text-gold">
           {completed} / {total}
           <Icon name={done ? 'crown' : 'arrow'} className={done ? 'fill-current' : undefined} />

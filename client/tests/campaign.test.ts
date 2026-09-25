@@ -212,23 +212,23 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
     Object.fromEntries(
       original.levels
         .filter((level) => level.newElements.length)
-        .map((level) => [level.id, level.newElements.map((element) => element.name)]),
+        .map((level) => [level.id, level.newElements]),
     ),
     {
-      1: ['Goal', 'Energy', 'King', 'Swordsman'],
-      2: ['Archer'],
-      3: ['Lakes'],
-      4: ['Magician'],
-      5: ['Watchtower'],
-      6: ['Mountains'],
-      7: ['Bulwark'],
-      8: ['Bomber'],
-      9: ['Desert'],
-      10: ['Ninja'],
-      13: ['Lava'],
-      14: ['Healing spring'],
-      15: ['Power rune'],
-      17: ['Hellfire'],
+      1: ['king', 'swordsman'],
+      2: ['archer'],
+      3: ['lake'],
+      4: ['magician'],
+      5: ['watchtower'],
+      6: ['mountain'],
+      7: ['bulwark'],
+      8: ['bomber'],
+      9: ['sand'],
+      10: ['ninja'],
+      13: ['lava'],
+      14: ['spring'],
+      15: ['rune'],
+      17: ['hell'],
     },
   )
 })
@@ -236,10 +236,7 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
 test('Later campaigns only introduce elements that earlier campaigns never showed', () => {
   assert.ok(brutal.levels.every((level) => level.newElements.length === 0))
   const [, [volcanoOnly]] = withBriefings([original.levels.slice(0, 12), [original.levels[12]]])
-  assert.deepEqual(
-    volcanoOnly.newElements.map((element) => element.name),
-    ['Lava'],
-  )
+  assert.deepEqual(volcanoOnly.newElements, ['lava'])
 })
 
 test('Powder Lesson and Iron Caravan offer useful blasts without requiring friendly fire', () => {

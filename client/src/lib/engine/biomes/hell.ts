@@ -1,9 +1,6 @@
 import { bendShape, lineShape, poolShapes, type BiomeDefinition } from './biome.ts'
 
 export const hell: BiomeDefinition = {
-  name: 'Hell',
-  description:
-    'obsidian basalt, small lava pools, short mountain chains, and full-round Hellfire warnings',
   ground: 'basalt',
   features: [
     { terrain: 'lava', min: 2, max: 3, shapes: poolShapes.slice(0, 2) },
