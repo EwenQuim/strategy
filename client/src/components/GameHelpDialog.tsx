@@ -69,7 +69,7 @@ export function GameHelpDialog({
               : setup
                 ? 'This custom battle uses your chosen armies and biome. Defeat the opposing king to win; losing yours ends the battle.'
                 : 'Each army has one king, at least one swordsman, and three random recruits. Repeated classes are possible. Both sides get the same lineup, chosen by the game seed. Defeat the enemy king to win; losing yours ends the battle.'}{' '}
-            {setup && !campaignLevel && !local && 'AI difficulty: ' + difficulty + '. '}
+            {setup && !local && 'AI difficulty: ' + difficulty + '. '}
             {setup?.map
               ? 'Terrain and starting positions are designed for this level; the biome sets its visual theme.'
               : Object.values(BIOMES)

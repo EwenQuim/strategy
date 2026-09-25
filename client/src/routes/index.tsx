@@ -2,14 +2,17 @@ import { buttonClassName } from '../components/styles'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
-import { CAMPAIGN_LEVELS } from '../lib/campaign'
+import { CAMPAIGNS } from '../lib/campaign'
 import { useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
 export const Route = createFileRoute('/')({
   component: function Landing() {
-    const completed = useSyncExternalStore(subscribeCampaignProgress, readCampaignProgress)
-    const done = completed === CAMPAIGN_LEVELS.length
+    const original = CAMPAIGNS[0]
+    const completed = useSyncExternalStore(subscribeCampaignProgress, () =>
+      readCampaignProgress(original.slug),
+    )
+    const done = completed === original.levels.length
     const health = useHealth()
     const online = health.isSuccess
     return (
@@ -82,16 +85,17 @@ export const Route = createFileRoute('/')({
             aria-label="Choose game mode"
           >
             <Link
-              to="/campaign"
+              to={done ? '/campaign' : '/campaign/$campaign'}
+              params={done ? undefined : { campaign: original.slug }}
               className={
                 buttonClassName +
                 ' min-h-13 justify-between gap-3 border-[#e5d19a] bg-[#d8c38a] px-[18px] text-[#24392a] hover:bg-[#ecdaa3]'
               }
               preload={false}
             >
-              Campaign
+              {done ? 'Campaigns' : 'Campaign'}
               <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
-                {completed} / {CAMPAIGN_LEVELS.length}
+                {completed} / {original.levels.length}
                 <Icon name="crown" className={done ? 'fill-current' : undefined} />
               </span>
             </Link>

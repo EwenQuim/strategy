@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { CAMPAIGN_LEVELS } from '../lib/campaign'
+import type { Campaign } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import { possessiveArmyLabels, type GameMode, type PlayerNames } from '../lib/game-mode'
 import type { BotDifficulty } from '../lib/engine/ai'
@@ -17,6 +17,7 @@ interface GameResultProps {
   difficulty: BotDifficulty
   setup?: BattleSetup
   names: PlayerNames
+  campaign?: Campaign
   campaignLevel?: number
   progressSaved: boolean
   onRestart: () => void
@@ -29,6 +30,7 @@ export function GameResult({
   difficulty,
   setup,
   names,
+  campaign,
   campaignLevel,
   progressSaved,
   onRestart,
@@ -51,8 +53,8 @@ export function GameResult({
           <Icon name="crown" />
         </div>
         <span className="text-muted text-[9px] font-semibold tracking-[0.17em] uppercase">
-          {campaignLevel
-            ? 'Level ' + campaignLevel + ': ' + CAMPAIGN_LEVELS[campaignLevel - 1].name
+          {campaign && campaignLevel
+            ? 'Level ' + campaignLevel + ': ' + campaign.levels[campaignLevel - 1].name
             : 'The battle is over'}
         </span>
         <h1>
@@ -68,13 +70,13 @@ export function GameResult({
                 ? 'Their king has fallen. Your guard stands victorious.'
                 : 'Your king has fallen. Regroup, rethink, and return.'}
         </p>
-        {campaignLevel ? (
+        {campaign && campaignLevel ? (
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
             {winner === 'player' ? (
-              campaignLevel < CAMPAIGN_LEVELS.length ? (
+              campaignLevel < campaign.levels.length ? (
                 <Link
-                  to="/campaign/$level"
-                  params={{ level: String(campaignLevel + 1) }}
+                  to="/campaign/$campaign/$level"
+                  params={{ campaign: campaign.slug, level: String(campaignLevel + 1) }}
                   className={resultButtonClassName}
                   preload={false}
                 >
@@ -82,7 +84,11 @@ export function GameResult({
                   <Icon name="arrow" />
                 </Link>
               ) : (
-                <Link to="/campaign" className={resultButtonClassName}>
+                <Link
+                  to="/campaign/$campaign"
+                  params={{ campaign: campaign.slug }}
+                  className={resultButtonClassName}
+                >
                   Back to campaign
                 </Link>
               )
@@ -91,8 +97,12 @@ export function GameResult({
                 Retry level
               </button>
             )}
-            {!(winner === 'player' && campaignLevel === CAMPAIGN_LEVELS.length) && (
-              <Link to="/campaign" className="p-3 text-[11px] underline">
+            {!(winner === 'player' && campaignLevel === campaign.levels.length) && (
+              <Link
+                to="/campaign/$campaign"
+                params={{ campaign: campaign.slug }}
+                className="p-3 text-[11px] underline"
+              >
                 Level selection
               </Link>
             )}
