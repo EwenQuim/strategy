@@ -3,14 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
-import {
-  BIOMES,
-  MAP_WIDTH,
-  PAWN_CLASSES,
-  RECRUIT_CLASSES,
-  type Biome,
-  type Pawn,
-} from '../lib/engine'
+import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
@@ -148,9 +141,7 @@ export const Route = createFileRoute('/custom')({
                       const count = roster.filter((unit) => unit === kind).length
                       const max = Math.min(
                         MAP_WIDTH * 3 - roster.length + count,
-                        side === 0 && PAWN_CLASSES[kind].startsOnFrontRow
-                          ? MAP_WIDTH
-                          : MAP_WIDTH * 3 - 1,
+                        MAP_WIDTH * 3 - 1,
                       )
                       return (
                         <td className="w-1/4 text-center" key={side}>
@@ -192,7 +183,7 @@ export const Route = createFileRoute('/custom')({
               </tfoot>
             </table>
             <p className="text-[11px] leading-[1.5] text-muted">
-              {m.rosterLimits(MAP_WIDTH * 3, MAP_WIDTH)}
+              {m.rosterLimits(MAP_WIDTH * 3)}
             </p>
           </div>
           <button

@@ -37,7 +37,6 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
     { ...setup, player: ['swordsman'] },
     { ...setup, player: ['king', 'king'] },
     { ...setup, player: ['king', 'toString'] },
-    { ...setup, player: ['king', ...Array(MAP_WIDTH + 1).fill('bulwark')] },
     { ...setup, enemy: ['king', ...Array(MAP_WIDTH * 3).fill('archer')] },
     { ...setup, enemy: ['king', { kind: 'archer', col: 0, row: 0 }] },
   ]) {
@@ -46,6 +45,17 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
       difficulty: 'hard',
     })
   }
+})
+
+test('Custom search accepts more Bulwarks than one front row', () => {
+  const bulwarks: BattleSetup['player'] = ['king', ...Array(MAP_WIDTH + 1).fill('bulwark')]
+  const many = { ...setup, player: bulwarks }
+  const search = parseGameSearch({ mode: 'local', difficulty: 'hard', setup: many })
+  assert.deepEqual(search, { mode: 'local', difficulty: 'hard', setup: many })
+  assert.equal(
+    initialState('custom', search.setup).pawns.filter((p) => p.kind === 'bulwark').length,
+    MAP_WIDTH + 1,
+  )
 })
 
 test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', () => {
