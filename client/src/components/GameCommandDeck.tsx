@@ -231,13 +231,7 @@ function SpecialButton({
         ' border-[#bcc8a62e] bg-[#ffffff04] text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
       }
       data-action="special"
-      disabled={
-        !myTurn ||
-        attacking ||
-        !pawn ||
-        !canUseSpecial(pawn) ||
-        (!!pawn.special.noTargets && !hasSpecialTargets)
-      }
+      disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets}
       title={pawn?.special.description}
       aria-pressed={usingSpecial}
       onClick={() =>
@@ -262,8 +256,8 @@ function SpecialButton({
               : (pawn?.special.prompt ?? m.chooseEnemy)
           : pawn?.special.oncePerRound && pawn.specialUsed
             ? m.usedThisRound
-            : pawn?.special.noTargets && !hasSpecialTargets
-              ? pawn.special.noTargets
+            : !hasSpecialTargets
+              ? (pawn?.special.noTargets ?? m.noTargets)
               : m.energyCost(pawn?.special.cost ?? 2)}
       </small>
     </button>

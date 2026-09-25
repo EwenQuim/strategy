@@ -5,6 +5,7 @@ const aimedShot: SpecialAbility = {
   name: 'Aimed shot',
   cost: 2,
   targeted: true,
+  noTargets: 'No enemies in range',
   description:
     'Deal 2 damage to an enemy 2 to 3 tiles away, ignoring Escape. Cannot shoot adjacent enemies.',
   targets: attackTargets,

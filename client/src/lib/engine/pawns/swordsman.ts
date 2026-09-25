@@ -31,6 +31,7 @@ const charge: SpecialAbility = {
   name: 'Charge',
   cost: 2,
   targeted: true,
+  noTargets: 'No enemies within reach',
   choosesDestination: true,
   targetLabel: 'Charge to',
   prompt: 'Choose tile',
