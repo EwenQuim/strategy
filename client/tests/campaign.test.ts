@@ -5,6 +5,7 @@ import {
   parseCampaignProgress,
   isLevelUnlocked,
   completeCampaignLevel,
+  withBriefings,
 } from '../src/lib/campaign.ts'
 import {
   initialState as coreState,
@@ -205,6 +206,16 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
       15: ['Power rune'],
       17: ['Hellfire'],
     },
+  )
+})
+
+test('Later campaigns only introduce elements that earlier campaigns never showed', () => {
+  const [, rerun] = withBriefings([CAMPAIGN_LEVELS, CAMPAIGN_LEVELS])
+  assert.ok(rerun.every((level) => level.newElements.length === 0))
+  const [, [volcanoOnly]] = withBriefings([CAMPAIGN_LEVELS.slice(0, 12), [CAMPAIGN_LEVELS[12]]])
+  assert.deepEqual(
+    volcanoOnly.newElements.map((element) => element.name),
+    ['Lava'],
   )
 })
 

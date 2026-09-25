@@ -1,8 +1,8 @@
 import levels from './campaign-levels.json' with { type: 'json' }
-import { mapFromRows, TILE_FEATURES } from './engine/hex.ts'
+import { mapFromRows, TILE_FEATURES, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { ESCAPE_BONUS, MAX_ESCAPE, PAWN_CLASSES, type PawnKind } from './engine/pawns/index.ts'
-import type { FixedBattleSetup } from './engine/index.ts'
+import type { Biome, FixedBattleSetup } from './engine/index.ts'
 
 interface BriefingElement {
   readonly name: string
@@ -33,7 +33,13 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
   }
 }
 
-const INTRODUCTIONS: Record<string, readonly BriefingElement[]> = {
+type IntroducedElement =
+  | PawnKind
+  | Exclude<Terrain, 'plain' | 'forest' | 'palm' | 'basalt'>
+  | TileFeature
+  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
+
+const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
   swordsman: [unit('swordsman', 'move up to 2, then hit adjacent for 2')],
   king: [
     unit('king', 'heal adjacent allies +1, once per round', 'Lose your king, lose the battle'),
@@ -113,25 +119,27 @@ const INTRODUCTIONS: Record<string, readonly BriefingElement[]> = {
   ],
 }
 
-function withBriefings<Level extends { setup: FixedBattleSetup }>(
-  levels: readonly Level[],
-): (Level & { newElements: readonly BriefingElement[] })[] {
+export function withBriefings<Level extends { setup: FixedBattleSetup }>(
+  campaignsInReleaseOrder: readonly (readonly Level[])[],
+): (Level & { newElements: readonly BriefingElement[] })[][] {
   const introduced = new Set<string>()
-  return levels.map((level) => {
-    const present = new Set<string>([
-      level.setup.biome,
-      ...[...level.setup.player, ...level.setup.enemy].map((pawn) => pawn.kind),
-      ...[...mapFromRows(level.setup.map).values()].flatMap((tile) => [
-        tile.terrain,
-        tile.feature ?? '',
-      ]),
-    ])
-    const fresh = Object.keys(INTRODUCTIONS).filter(
-      (tag) => present.has(tag) && !introduced.has(tag),
-    )
-    for (const tag of fresh) introduced.add(tag)
-    return { ...level, newElements: fresh.flatMap((tag) => INTRODUCTIONS[tag]) }
-  })
+  return campaignsInReleaseOrder.map((levels) =>
+    levels.map((level) => {
+      const present = new Set<string>([
+        level.setup.biome,
+        ...[...level.setup.player, ...level.setup.enemy].map((pawn) => pawn.kind),
+        ...[...mapFromRows(level.setup.map).values()].flatMap((tile) => [
+          tile.terrain,
+          tile.feature ?? '',
+        ]),
+      ])
+      const fresh = (Object.keys(INTRODUCTIONS) as IntroducedElement[]).filter(
+        (element) => present.has(element) && !introduced.has(element),
+      )
+      for (const element of fresh) introduced.add(element)
+      return { ...level, newElements: fresh.flatMap((element) => INTRODUCTIONS[element]) }
+    }),
+  )
 }
 
 levels.forEach((level, index) => {
@@ -140,9 +148,7 @@ levels.forEach((level, index) => {
   validateSetup(level.setup as FixedBattleSetup, mapFromRows(level.setup.map))
 })
 
-export const CAMPAIGN_LEVELS: CampaignLevel[] = withBriefings(
-  levels as Omit<CampaignLevel, 'newElements'>[],
-)
+export const [CAMPAIGN_LEVELS] = withBriefings([levels as Omit<CampaignLevel, 'newElements'>[]])
 
 export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'
 
