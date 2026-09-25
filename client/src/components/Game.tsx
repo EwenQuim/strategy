@@ -4,7 +4,6 @@ import { possessiveArmyLabels, playerNames, type PlayerNames } from '../lib/game
 import { CAMPAIGN_LEVELS } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { Battlefield } from './Battlefield'
-import { BattleNotifications } from './BattleNotifications'
 import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
@@ -138,12 +137,6 @@ export function Game({
             onTileClick={onTileClick}
           />
         </div>
-        <BattleNotifications
-          log={state.log}
-          logCount={state.logCount}
-          mode={mode}
-          names={names}
-        />
         {state.winner && (
           <GameResult
             winner={state.winner}
