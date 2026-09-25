@@ -113,25 +113,36 @@ const INTRODUCTIONS: Record<string, readonly BriefingElement[]> = {
   ],
 }
 
-const introduced = new Set<string>()
+function withBriefings<Level extends { setup: FixedBattleSetup }>(
+  levels: readonly Level[],
+): (Level & { newElements: readonly BriefingElement[] })[] {
+  const introduced = new Set<string>()
+  return levels.map((level) => {
+    const present = new Set<string>([
+      level.setup.biome,
+      ...[...level.setup.player, ...level.setup.enemy].map((pawn) => pawn.kind),
+      ...[...mapFromRows(level.setup.map).values()].flatMap((tile) => [
+        tile.terrain,
+        tile.feature ?? '',
+      ]),
+    ])
+    const fresh = Object.keys(INTRODUCTIONS).filter(
+      (tag) => present.has(tag) && !introduced.has(tag),
+    )
+    for (const tag of fresh) introduced.add(tag)
+    return { ...level, newElements: fresh.flatMap((tag) => INTRODUCTIONS[tag]) }
+  })
+}
 
-export const CAMPAIGN_LEVELS: CampaignLevel[] = levels.map((level, index) => {
+levels.forEach((level, index) => {
   if (level.id !== index + 1 || !level.name || !level.seed)
     throw new Error('Campaign level ' + (index + 1) + ' is malformed')
-  const setup = level.setup as FixedBattleSetup
-  const tiles = mapFromRows(setup.map)
-  validateSetup(setup, tiles)
-  const present = new Set<string>([
-    setup.biome,
-    ...[...setup.player, ...setup.enemy].map((pawn) => pawn.kind),
-    ...[...tiles.values()].flatMap((tile) => [tile.terrain, tile.feature ?? '']),
-  ])
-  const fresh = Object.keys(INTRODUCTIONS).filter(
-    (tag) => present.has(tag) && !introduced.has(tag),
-  )
-  for (const tag of fresh) introduced.add(tag)
-  return { ...level, setup, newElements: fresh.flatMap((tag) => INTRODUCTIONS[tag]) }
+  validateSetup(level.setup as FixedBattleSetup, mapFromRows(level.setup.map))
 })
+
+export const CAMPAIGN_LEVELS: CampaignLevel[] = withBriefings(
+  levels as Omit<CampaignLevel, 'newElements'>[],
+)
 
 export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'
 
