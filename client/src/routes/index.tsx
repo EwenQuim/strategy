@@ -160,7 +160,7 @@ export const Route = createFileRoute('/')({
             </Link>
           </div>
         </div>
-        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:text-[8px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
+        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[10px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
           <span title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</span>
           <span>{m.madeBy}</span>
         </footer>

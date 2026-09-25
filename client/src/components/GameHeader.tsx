@@ -65,7 +65,7 @@ export function GameHeader({
           <span>
             HEX
             <span
-              className="mt-[5px] block font-label text-[7px] leading-[normal] tracking-[0.29em] text-muted"
+              className="mt-[5px] block font-label text-[9px] leading-[normal] tracking-[0.29em] text-muted"
               data-testid="battle-subtitle"
             >
               {campaign && campaignLevel

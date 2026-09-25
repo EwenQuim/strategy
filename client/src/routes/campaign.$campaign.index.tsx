@@ -58,7 +58,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                   </strong>{' '}
                   {level.name}
                 </span>
-                <small className="text-[8px] text-muted">{status}</small>
+                <small className="text-[9px] text-muted">{status}</small>
               </>
             )
             return (

@@ -101,10 +101,10 @@ function StatMeter({
 }) {
   return (
     <div className="w-[60px] min-w-[60px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[49px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px]">
-      <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
+      <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px]">
         {name}
         {note ? ' ' + note : ''}{' '}
-        <b className="text-[9px] font-medium text-[#d9dfc9] max-[601px]:text-[8px]">
+        <b className="text-[9px] font-medium text-[#d9dfc9]">
           {value}/{max}
         </b>
       </span>
@@ -150,7 +150,7 @@ function UnitStats({ pawn }: { pawn: Pawn }) {
         filledClass="data-[filled=true]:bg-[#d4bb7b]"
       />
       <div className="w-[60px] min-w-[43px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[41px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] max-[601px]:pl-2 max-[601px]:[&_svg]:hidden [@media(min-width:600px)_and_(max-height:480px)]:pl-2">
-        <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
+        <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px]">
           {m.escape}
         </span>
         <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] max-[601px]:text-[17px]">
@@ -198,7 +198,7 @@ function AttackButton({
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
         {attacking ? m.cancel : m.attack}
       </span>
-      <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
+      <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 text-[#b5a997]">
         {attacking ? m.chooseEnemy : m.energyCost(1)}
       </small>
     </button>
@@ -247,7 +247,7 @@ function SpecialButton({
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
         {usingSpecial ? m.cancel : (pawn?.special.name ?? m.special)}
       </span>
-      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0">
         {usingSpecial
           ? !targetCount
             ? m.noTargets
@@ -288,7 +288,7 @@ function EndTurnButton({
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
         {m.endTurn}
       </span>
-      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0">
         {m.escapeGain(pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0)}
       </small>
     </button>
