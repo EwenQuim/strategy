@@ -24,11 +24,9 @@ test('Every campaign level comes directly from one JSON with both complete armie
   assert.equal(CAMPAIGN_LEVELS, levels)
   for (const level of levels) {
     assert.deepEqual(Object.keys(level).sort(), ['id', 'intro', 'name', 'seed', 'setup'])
-    assert.equal(typeof level.intro.roleplay, 'string')
-    assert.ok(level.intro.roleplay.length > 0)
     for (const element of level.intro.newElements) {
-      assert.deepEqual(Object.keys(element).sort(), ['description', 'name'])
-      assert.ok(element.name.length > 0 && element.description.length > 0)
+      assert.deepEqual(Object.keys(element).sort(), ['name', 'points'])
+      assert.ok(element.name.length > 0 && element.points.length > 0)
     }
     assert.deepEqual(Object.keys(level.setup).sort(), [
       'biome',

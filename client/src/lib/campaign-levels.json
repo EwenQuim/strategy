@@ -27,15 +27,17 @@
       ]
     },
     "intro": {
-      "roleplay": "A lone raider waits in a small oval clearing. Bring your swordsman forward and keep your crown behind him. No obstacles, no tricks: learn to move, strike, and finish a turn.",
       "newElements": [
         {
           "name": "Swordsman",
-          "description": "5 health, 2 damage at range 1. Charge costs 2 energy: choose a destination up to 2 steps away, then an adjacent enemy."
+          "points": ["5 HP · 2 dmg · range 1", "Charge (2 energy): move 2, then hit adjacent"]
         },
         {
           "name": "King",
-          "description": "Your king has 7 health. Losing it ends the battle. Rally costs 1 energy and heals adjacent allies by 1, once per round."
+          "points": [
+            "7 HP · lose it, lose the battle",
+            "Rally (1 energy): heal adjacent allies +1, once per round"
+          ]
         }
       ]
     }
@@ -78,15 +80,17 @@
       ]
     },
     "intro": {
-      "roleplay": "A bowman has slipped around your patrol on the wide edge of a fan-shaped clearing. He cannot shoot an adjacent swordsman: close that flank while your own archer fires from behind. Keep your king out of the shooting lane.",
       "newElements": [
         {
           "name": "Archer",
-          "description": "1 damage at range 2 to 3, but cannot shoot adjacent enemies. Aimed shot costs 2 energy for 2 damage that ignores Escape."
+          "points": [
+            "1 dmg · range 2-3, not adjacent",
+            "Aimed shot (2 energy): 2 dmg, ignores Escape"
+          ]
         },
         {
           "name": "Escape",
-          "description": "Ending a turn converts unused energy into +20% Escape per energy, up to 60%. Saving energy can keep a wounded unit alive."
+          "points": ["Unused energy → +20% dodge each", "Max 60%"]
         }
       ]
     }
@@ -147,11 +151,14 @@
       ]
     },
     "intro": {
-      "roleplay": "The riverbanks pinch into an hourglass around a narrow crossing. Take the short middle crossing or the wide bank, but do not leave your archer alone on the other side.",
       "newElements": [
         {
           "name": "Lakes",
-          "description": "Water blocks walking and Charge, not arrows or spells. Forest is decorative: it does not provide cover."
+          "points": [
+            "Block walking and Charge",
+            "Arrows and spells pass",
+            "Forest: decorative, no cover"
+          ]
         }
       ]
     }
@@ -217,11 +224,14 @@
       ]
     },
     "intro": {
-      "roleplay": "A winding forest peninsula bends away from the rival firing line. Your own magician can answer. Step sideways out of a firing line, then line up the raider and its escort.",
       "newElements": [
         {
           "name": "Magician",
-          "description": "3 health; basic attack deals 1 damage at range 1 to 2. Fireball costs 2 energy: select a tile in one of six directions to hit every enemy along that ray for 1, to the board edge. Terrain and units do not stop it; allies are safe."
+          "points": [
+            "3 HP · 1 dmg · range 1-2",
+            "Fireball (2 energy): 1 dmg to every enemy on a ray",
+            "Unblockable, allies safe"
+          ]
         }
       ]
     }
@@ -287,11 +297,10 @@
       ]
     },
     "intro": {
-      "roleplay": "Two bowmen guard a battlement-shaped keep above the narrow tower approach. The central watchtower can outrange them, but its open approach invites crossfire. Send a fighter ahead of your archer.",
       "newElements": [
         {
           "name": "Watchtower",
-          "description": "A unit on the tower gains +1 maximum basic-attack range if it is an Archer or Magician. Minimum range and specials do not change."
+          "points": ["Archer / Magician: +1 max range", "Specials unchanged"]
         }
       ]
     }
@@ -357,11 +366,10 @@
       ]
     },
     "intro": {
-      "roleplay": "Two rocky bowls meet at a single mountain pass. Your archer can already reach the bowman on the other side. Win that duel before feeding soldiers into the gap.",
       "newElements": [
         {
           "name": "Mountains",
-          "description": "Mountains block walking and Charge, but not ranged attacks or Fireball. The pass is a route, not shelter from magic."
+          "points": ["Block walking and Charge", "Ranged attacks and Fireball pass"]
         }
       ]
     }
@@ -432,11 +440,14 @@
       ]
     },
     "intro": {
-      "roleplay": "A wall-bearer joins you in a cross-shaped courtyard. Protect a fragile ally across the gap while the swordsman works around the enemy shield. A guardian cannot stop every blow.",
       "newElements": [
         {
           "name": "Bulwark",
-          "description": "10 health and 1 adjacent damage. Protect costs 2 energy and redirects one successful hit from an ally within 2 tiles. It expires beyond range 2 or at the guardian's next turn. Moving costs 2 energy for the first tile, then 1 per extra tile."
+          "points": [
+            "10 HP · 1 dmg · range 1",
+            "Protect (2 energy): takes one hit for an ally within 2",
+            "Slow: first step costs 2 energy"
+          ]
         }
       ]
     }
@@ -512,15 +523,18 @@
       ]
     },
     "intro": {
-      "roleplay": "The quarry fans out above a narrow approach, with two soldiers and two grouped bowmen holding its broad end. Advance your bomber to catch the formation in one blast, but keep your escort clear of your own powder.",
       "newElements": [
         {
           "name": "Bomber",
-          "description": "3 health; basic attack deals 1 damage at range 1 to 2. Bomb costs 2 energy: choose any tile within 2 tiles, including empty or blocked ground. The center and its six neighbors take 1 damage."
+          "points": [
+            "3 HP · 1 dmg · range 1-2",
+            "Bomb (2 energy): any tile within 2",
+            "1 dmg to center + 6 neighbors"
+          ]
         },
         {
           "name": "Friendly fire",
-          "description": "Bombs hit allies, enemies, and the bomber. Everyone may Escape. Destroying your own king loses, even if the enemy king falls in the same blast."
+          "points": ["Bombs hit everyone, bomber included", "Own king down = defeat"]
         }
       ]
     }
@@ -601,11 +615,14 @@
       ]
     },
     "intro": {
-      "roleplay": "Two banks loop around a broken oasis, connected by a broad central crossing. Commit to one side or divide your force. The crossing in the middle lets a bomber punish defenders who rotate together.",
       "newElements": [
         {
           "name": "Split the battery",
-          "description": "Lakes divide movement, not fire. Break one firing position before advancing your king; piling every ally behind the same guardian invites trouble."
+          "points": [
+            "Lakes split movement, not fire",
+            "Break one firing spot first",
+            "Don't stack behind one guardian"
+          ]
         }
       ]
     }
@@ -680,15 +697,18 @@
       ]
     },
     "intro": {
-      "roleplay": "The dunes form a spearhead: a broad fighting ground narrows into an exposed approach. Your new ninja can threaten a whole flank, but a single arrow or fireball will end that threat.",
       "newElements": [
         {
           "name": "Desert",
-          "description": "Open sand has no movement penalty and no cover. Spacing, attack ranges, and the six firing directions decide the battle."
+          "points": ["Open sand, no cover", "Range and angles decide"]
         },
         {
           "name": "Ninja",
-          "description": "Only 1 health, but 5 adjacent damage. Jump costs 2 energy and lands up to 3 tiles away on empty passable ground, crossing obstacles and units. It does not attack; save the last energy for your blade."
+          "points": [
+            "1 HP · 5 dmg · range 1",
+            "Jump (2 energy): up to 3 tiles, over anything",
+            "Keep 1 energy to strike"
+          ]
         }
       ]
     }
@@ -769,11 +789,10 @@
       ]
     },
     "intro": {
-      "roleplay": "Two assassins circle a hollow oasis loop from opposite sides. Their jumps ignore the lakes. Keep your crown within protection range while your ranged units cut off the landing tiles.",
       "newElements": [
         {
           "name": "Twin threats",
-          "description": "A shield covers one hit, not two assassins. Do not chase one flank so far that the other can jump beside your king."
+          "points": ["Shield blocks one hit, not two", "Guard both flanks of your king"]
         }
       ]
     }
@@ -859,11 +878,10 @@
       ]
     },
     "intro": {
-      "roleplay": "An iron convoy waits at the broad head of a narrow caravan road. Your bombers have reached opposite banks and your ninja the outer road. Break the clustered escorts before bringing the vanguard into the blast zone.",
       "newElements": [
         {
           "name": "Blast discipline",
-          "description": "Choose empty centers to catch several defenders. Each Protect redirects only one hit; repeated area attacks wear down a tight formation. Keep the two bombers apart."
+          "points": ["Aim at empty centers", "Protect stops one hit only", "Keep bombers apart"]
         }
       ]
     }
@@ -939,11 +957,14 @@
       ]
     },
     "intro": {
-      "roleplay": "The caravan road becomes a zigzag basalt shelf above the caldera. Both sides carry powder now. Use the safe channels instead of crowding the shortest crossing: enemy bombs punish a packed bridgehead.",
       "newElements": [
         {
           "name": "Lava",
-          "description": "Each lava tile entered costs 1 health, ignoring Escape and Protect. It also hurts during Charge. Basalt is safe; there is always a route around the pools."
+          "points": [
+            "-1 HP per tile entered, even on Charge",
+            "Ignores Escape and Protect",
+            "Basalt is safe"
+          ]
         }
       ]
     }
@@ -1034,11 +1055,10 @@
       ]
     },
     "intro": {
-      "roleplay": "A crescent of basalt cradles a spring on its inner edge. Rotate a wounded fighter onto it while a guardian covers from two tiles away. A stationary group is a gift to the enemy bomber.",
       "newElements": [
         {
           "name": "Healing spring",
-          "description": "Remain on the spring until the unit's next activation to recover 1 health, up to maximum. There is no healing on arrival, and leaving cancels it."
+          "points": ["Stay until next turn: +1 HP", "No heal on arrival"]
         }
       ]
     }
@@ -1129,11 +1149,10 @@
       ]
     },
     "intro": {
-      "roleplay": "A rune glows between the broken vents of a jagged furnace. Claim it for a sudden attack, or let the enemy overextend for it. Extra energy will not save a ninja who lands in lava.",
       "newElements": [
         {
           "name": "Power rune",
-          "description": "The first unit entering the rune gains 2 energy for this round; the rune disappears. Use it for a longer Charge, a Jump followed by attacks, or another bomb."
+          "points": ["First unit in: +2 energy this round", "Single use"]
         }
       ]
     }
@@ -1219,11 +1238,13 @@
       ]
     },
     "intro": {
-      "roleplay": "Four wizards hold the broad arms of a wing-shaped platform, with your crown on its narrow southern approach. Your magician and guardian have reached its left flank; your ninja waits on the right. Turn the firing line against itself before it turns toward your crown.",
       "newElements": [
         {
           "name": "Enfilade",
-          "description": "A Fireball fired along the wizard row can hit all four. A ninja can remove one fragile caster outright; bombs can catch neighbors. Protect your approach, not an immobile firing squad."
+          "points": [
+            "Wizards lined up: one Fireball hits all",
+            "Ninjas and bombs punish the line"
+          ]
         }
       ]
     }
@@ -1315,11 +1336,15 @@
       "hellfireCount": 1
     },
     "intro": {
-      "roleplay": "Two suspended gates cross a split in the battlefield of Hell. One gate offers a watchtower, the other a healing spring. A single Hellfire warning alternates between the armies each round. Leave its hatched area before the round ends; your ninja can switch gates without queuing.",
       "newElements": [
         {
           "name": "Hellfire",
-          "description": "Hatching shows the whole blast area. Warnings stay fixed for a full round, then every unit in the blast takes 1 damage at round end, ignoring Escape and Protect. This battle has one warning, alternating armies each round. If both kings fall, the battle is a draw."
+          "points": [
+            "Hatched area: 1 dmg at round end",
+            "Warning lasts a full round",
+            "Ignores Escape and Protect",
+            "Both kings down = draw"
+          ]
         }
       ]
     }
@@ -1415,11 +1440,14 @@
       ]
     },
     "intro": {
-      "roleplay": "Assassins hunt the twisting paths of a shattered caldera, while two Hellfire warnings mark the coming round-end blasts. The tower commands one route; the rune can launch a counterattack from the other. Neither basalt nor a shield makes a marked landing safe.",
       "newElements": [
         {
           "name": "Fire above and below",
-          "description": "Two Hellfire centers stay fixed for the full round. Each center and its six neighbors take 1 unavoidable damage at round end. Lava still hurts on entry: Jump avoids crossed lava, not a lava landing or Hellfire. Keep your ninja outside the hatched areas."
+          "points": [
+            "Two Hellfire zones per round",
+            "Jump skips lava, not landing on it",
+            "Stay out of hatching"
+          ]
         }
       ]
     }
@@ -1520,11 +1548,10 @@
       ]
     },
     "intro": {
-      "roleplay": "Two guardians shield the pretender beyond four broken fortress courtyards. Two Hellfire warnings give you a full round to reposition before the blasts. Use area damage to strip protection, then send a finisher through. The spring can sustain your siege, but cannot shelter you from the sky.",
       "newElements": [
         {
           "name": "Beyond the shield",
-          "description": "Each Hellfire center and its six neighbors take 1 damage at round end. Warnings do not move during the round, and neither Escape nor Protect prevents the damage. Break the guard without ending the round in a hatched area."
+          "points": ["Hellfire ignores Escape and Protect", "Don't end the round in hatching"]
         }
       ]
     }
@@ -1625,11 +1652,14 @@
       ]
     },
     "intro": {
-      "roleplay": "The battlefield itself forms a jagged crown beneath a crimson sky. A rune opens the aggressive left route; a spring supports the right. Two fixed Hellfire warnings give both armies a full round to move clear before the sky strikes. Win the flank without sacrificing your crown.",
       "newElements": [
         {
           "name": "Final command",
-          "description": "Both armies field all seven classes. At each round end, the two marked centers and their six neighbors take 1 damage, ignoring Escape and Protect. Plan every move around the full-round warnings. If Hellfire takes both kings, neither side wins: retry the level."
+          "points": [
+            "All seven classes on both sides",
+            "Two Hellfire zones per round",
+            "Both kings down = retry"
+          ]
         }
       ]
     }

@@ -9,8 +9,7 @@ export interface CampaignLevel {
   seed: string
   setup: FixedBattleSetup
   intro: {
-    readonly roleplay: string
-    readonly newElements: readonly { name: string; description: string }[]
+    readonly newElements: readonly { name: string; points: readonly string[] }[]
   }
 }
 
