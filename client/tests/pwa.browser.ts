@@ -628,6 +628,52 @@ test(
 )
 
 test(
+  'The install suggestion follows beforeinstallprompt and disappears once used',
+  { timeout: 30_000 },
+  async (t) => {
+    const { page } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    assert.equal(await page.locator('#pwa-install').count(), 0)
+    await page.evaluate(() => {
+      const event = new Event('beforeinstallprompt')
+      Object.defineProperty(event, 'prompt', {
+        value: () => {
+          ;(globalThis as typeof globalThis & { prompted?: boolean }).prompted = true
+          return Promise.resolve()
+        },
+      })
+      window.dispatchEvent(event)
+    })
+    const notice = page.locator('#pwa-install')
+    await notice.waitFor()
+    assert.match(await notice.innerText(), /offline play/)
+    assert.equal(
+      await notice.evaluate((element) => {
+        const rect = element.getBoundingClientRect()
+        return (
+          rect.left >= 0 &&
+          rect.top >= 0 &&
+          rect.right <= innerWidth &&
+          rect.bottom <= innerHeight
+        )
+      }),
+      true,
+      'The install notice must fit a small portrait viewport',
+    )
+    await page.getByRole('button', { name: 'Install', exact: true }).click()
+    await notice.waitFor({ state: 'hidden' })
+    assert.equal(
+      await page.evaluate(
+        () => (globalThis as typeof globalThis & { prompted?: boolean }).prompted,
+      ),
+      true,
+    )
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
   'A failed release precache leaves the old app usable offline',
   { timeout: 60_000 },
   async (t) => {
