@@ -719,7 +719,12 @@
         {
           "kind": "archer",
           "col": 3,
-          "row": 7
+          "row": 6
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 5
         }
       ],
       "enemy": [
@@ -732,6 +737,16 @@
           "kind": "archer",
           "col": 4,
           "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 1
         },
         {
           "kind": "bulwark",
