@@ -5,7 +5,13 @@ import { createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { initialState, transition } from '../src/lib/engine/engine.ts'
 import { MAP_WIDTH } from '../src/lib/engine/hex.ts'
-import type { BattleSetup } from '../src/lib/engine/index.ts'
+import {
+  key,
+  mirrorAxial,
+  passable,
+  symmetricSeed,
+  type BattleSetup,
+} from '../src/lib/engine/index.ts'
 
 const setup = {
   biome: 'desert',
@@ -86,4 +92,22 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
     })
   }
   assert.ok(outcomes.size > 1, 'The fixture must distinguish difficulty settings')
+})
+
+test('Symmetric custom battles mirror pawn positions for equal rosters', () => {
+  const equal: BattleSetup = {
+    biome: 'desert',
+    player: ['king', 'archer', 'bulwark'],
+    enemy: ['king', 'archer', 'bulwark'],
+  }
+  const mirrored = initialState(symmetricSeed('custom-mirror'), equal)
+  for (let i = 0; i < 3; i++) {
+    const mirror = mirrorAxial(mirrored.pawns[i])
+    assert.equal(mirrored.pawns[3 + i].q, mirror.q)
+    assert.equal(mirrored.pawns[3 + i].r, mirror.r)
+  }
+  const uneven = initialState(symmetricSeed('custom-uneven'), setup)
+  const spots = new Set(uneven.pawns.map((pawn) => key(pawn.q, pawn.r)))
+  assert.equal(spots.size, uneven.pawns.length)
+  for (const pawn of uneven.pawns) assert.ok(passable(uneven.tiles.get(key(pawn.q, pawn.r))))
 })

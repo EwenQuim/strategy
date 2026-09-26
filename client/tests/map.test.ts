@@ -160,6 +160,14 @@ test('Symmetric seeded battles stay symmetric across restarts and keep kings con
     const kings = state.pawns.filter((pawn) => pawn.kind === 'king')
     assert.equal(kings.length, 2)
     assert.ok(distFrom(state.tiles, [kings[0]]).has(key(kings[1].q, kings[1].r)))
+    const half = state.pawns.length / 2
+    for (let i = 0; i < half; i++) {
+      const mirror = mirrorAxial(state.pawns[i])
+      const enemy = state.pawns[half + i]
+      assert.equal(enemy.q, mirror.q)
+      assert.equal(enemy.r, mirror.r)
+      assert.equal(enemy.kind, state.pawns[i].kind)
+    }
     assert.deepEqual(reducer(state, { type: 'restart' }), state)
   }
 })

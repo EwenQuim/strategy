@@ -6,6 +6,7 @@ import {
   key,
   makeMap,
   mapFromRows,
+  mirrorAxial,
   passable,
   type Tile,
 } from './hex.ts'
@@ -182,10 +183,15 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
           ),
         ]
     const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
-    pawns = [
-      ...spawnRandomArmy(playerArmy, 'player', 1, random),
-      ...spawnRandomArmy(enemyArmy, 'enemy', playerArmy.length + 1, random),
-    ]
+    const playerPawns = spawnRandomArmy(playerArmy, 'player', 1, random)
+    const enemyPawns =
+      isSymmetricSeed(seed) && enemyArmy.length === playerArmy.length
+        ? enemyArmy.map((Unit, index) => {
+            const mirror = mirrorAxial(playerPawns[index])
+            return new Unit(playerArmy.length + 1 + index, mirror.q, mirror.r, 'enemy')
+          })
+        : spawnRandomArmy(enemyArmy, 'enemy', playerArmy.length + 1, random)
+    pawns = [...playerPawns, ...enemyPawns]
     tiles = makeMap(random, biome, pawns, isSymmetricSeed(seed))
   }
   const savedSetup = copySetup(setup)

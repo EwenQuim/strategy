@@ -43,6 +43,12 @@ test('Online battles from server seeds are centrally symmetric, live and after r
     actions.push({ side: pawn.side, action: { type: 'endTurn' } })
     playback = playbackReducer(playback, { type: 'endTurn' }, 'online')
   }
+  const half = playback.state.pawns.length / 2
+  for (let i = 0; i < half; i++) {
+    const mirror = mirrorAxial(playback.state.pawns[i])
+    assert.equal(playback.state.pawns[half + i].q, mirror.q)
+    assert.equal(playback.state.pawns[half + i].r, mirror.r)
+  }
   const resynced = playbackReducer(
     initialPlayback(seed, 'online'),
     {
