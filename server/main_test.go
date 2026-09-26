@@ -102,6 +102,35 @@ func TestRootRedirectsToApp(t *testing.T) {
 	}
 }
 
+func TestAssetlinks(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, ".well-known"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(dir, ".well-known", "assetlinks.json")
+	if err := os.WriteFile(file, []byte("[{\"relation\": []}]"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	assetlinks(dir).ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/.well-known/assetlinks.json", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("code=%d, want 200", w.Code)
+	}
+	if got := w.Header().Get("Content-Type"); got != "application/json" {
+		t.Errorf("content-type = %q, want application/json", got)
+	}
+	if w.Body.String() != "[{\"relation\": []}]" {
+		t.Errorf("body = %q", w.Body.String())
+	}
+
+	missing := httptest.NewRecorder()
+	assetlinks(t.TempDir()).ServeHTTP(missing, httptest.NewRequest(http.MethodGet, "/.well-known/assetlinks.json", nil))
+	if missing.Code != http.StatusNotFound {
+		t.Errorf("missing file code=%d, want 404", missing.Code)
+	}
+}
+
 func TestNewServiceStoreSelection(t *testing.T) {
 	svc, err := newService("")
 	if err != nil {

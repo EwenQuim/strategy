@@ -2,8 +2,10 @@
 
 NPM := npm --prefix client
 GO := go -C server
+BUBBLEWRAP := npx --yes @bubblewrap/cli
+WEB_MANIFEST := https://ewen.quimerch.com/strategy/manifest.webmanifest
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp android-init android-build android-doctor
 
 onboarding: installdeps
 
@@ -56,6 +58,15 @@ docker:
 
 pvp:
 	docker compose --profile 2players up --build
+
+android-init:
+	$(BUBBLEWRAP) init --manifest $(WEB_MANIFEST)
+
+android-build:
+	$(BUBBLEWRAP) build
+
+android-doctor:
+	$(BUBBLEWRAP) doctor
 
 run: build
 	$(GO) run .
