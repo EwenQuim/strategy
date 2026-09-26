@@ -53,7 +53,7 @@ const levelNames: Record<string, string> = {
   }),
   'Highland Keep': t({
     en: 'Highland Keep',
-    fr: 'Don des hauteurs',
+    fr: 'Forteresse des hauteurs',
     de: 'Hochlandfestung',
     es: 'Fortaleza de las tierras altas',
     it: 'Fortezza degli altipiani',
@@ -67,7 +67,7 @@ const levelNames: Record<string, string> = {
   }),
   'Stone Wall': t({
     en: 'Stone Wall',
-    fr: 'Muraille de pierre',
+    fr: 'Muraille rocailleuse',
     de: 'Steinmauer',
     es: 'Muralla de piedra',
     it: 'Muro di pietra',
@@ -123,7 +123,7 @@ const levelNames: Record<string, string> = {
   }),
   'Cinder Keep': t({
     en: 'Cinder Keep',
-    fr: 'Don de cendres',
+    fr: 'Forteresse de cendres',
     de: 'Aschenfestung',
     es: 'Fortaleza de cenizas',
     it: 'Fortezza di cenere',

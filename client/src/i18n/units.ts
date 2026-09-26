@@ -62,11 +62,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Raduno',
   }),
   rallyDescription: t({
-    en: 'Restore 1 health to every adjacent ally, once per round. Activates immediately. Cannot heal yourself or exceed maximum health.',
-    fr: 'Rend 1 point de vie à chaque allié adjacent, une fois par manche. Agit immédiatement. Ne peut pas se soigner ni dépasser la vie maximale.',
-    de: 'Stellt 1 Leben bei jedem angrenzenden Verbündeten wieder her, einmal pro Runde. Wirkt sofort. Kann dich nicht selbst heilen und nicht über das Maximum hinaus heilen.',
-    es: 'Restaura 1 de vida a cada aliado adyacente, una vez por ronda. Actúa de inmediato. No puede curarse a sí mismo ni superar la vida máxima.',
-    it: 'Recupera 1 vita a ogni alleato adiacente, una volta per round. Agisce subito. Non può curare se stesso né superare la vita massima.',
+    en: 'Restore 1 health to every adjacent ally, once per round. Activates immediately. Cannot heal yourself.',
+    fr: 'Rend 1 point de vie à chaque allié adjacent, une fois par manche. Agit immédiatement. Ne peut pas se soigner.',
+    de: 'Stellt 1 Leben bei jedem angrenzenden Verbündeten wieder her, einmal pro Runde. Wirkt sofort. Kann dich nicht selbst heilen.',
+    es: 'Restaura 1 de vida a cada aliado adyacente, una vez por ronda. Actúa de inmediato. No puede curarse a sí mismo.',
+    it: 'Recupera 1 vita a ogni alleato adiacente, una volta per round. Agisce subito. Non può curare se stesso.',
   }),
   noAlliesToHeal: t({
     en: 'No allies to heal',
@@ -83,11 +83,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Carica',
   }),
   chargeDescription: t({
-    en: 'Choose a tile up to 2 steps away, then an adjacent enemy. Move and strike for 2 damage. Mountains, lakes, and occupied tiles block the path.',
-    fr: 'Choisissez une case à 2 pas maximum, puis un ennemi adjacent. Déplacez-vous et frappez pour 2 dégâts. Montagnes, lacs et cases occupées bloquent le chemin.',
-    de: 'Wähle ein Feld bis zu 2 Schritte entfernt, dann einen angrenzenden Gegner. Bewege dich und triff für 2 Schaden. Berge, Seen und besetzte Felder blockieren den Weg.',
-    es: 'Elige una casilla a hasta 2 pasos, luego un enemigo adyacente. Muévete y golpea por 2 de daño. Montañas, lagos y casillas ocupadas bloquean el paso.',
-    it: 'Scegli una casella fino a 2 passi, poi un nemico adiacente. Muoviti e colpisci per 2 danni. Montagne, laghi e caselle occupate bloccano il percorso.',
+    en: 'Choose a tile up to 2 steps away, then an adjacent enemy. Move and strike for 2 damage.',
+    fr: 'Choisissez une case à 2 pas maximum, puis un ennemi adjacent. Déplacez-vous et frappez pour 2 dégâts.',
+    de: 'Wähle ein Feld bis zu 2 Schritte entfernt, dann einen angrenzenden Gegner. Bewege dich und triff für 2 Schaden.',
+    es: 'Elige una casilla a hasta 2 pasos, luego un enemigo adyacente. Muévete y golpea por 2 de daño.',
+    it: 'Scegli una casella fino a 2 passi, poi un nemico adiacente. Muoviti e colpisci per 2 danni.',
   }),
   noEnemiesWithinReach: t({
     en: 'No enemies within reach',
