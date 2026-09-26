@@ -115,7 +115,8 @@ export const Route = createFileRoute('/custom')({
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
-                checked={symmetric}
+                checked={symmetric || mode === 'local'}
+                disabled={mode === 'local'}
                 onChange={(event) => setSymmetric(event.target.checked)}
               />
               {m.symmetricMap}

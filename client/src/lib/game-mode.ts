@@ -30,6 +30,9 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   return result
 }
 
+export const usesSymmetricField = (search: GameSearch): boolean =>
+  search.symmetric === true || search.mode === 'local'
+
 export type PlayerNames = { player: string; enemy: string }
 
 const playerNames: PlayerNames = { player: 'Player 1', enemy: 'Player 2' }

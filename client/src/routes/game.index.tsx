@@ -1,12 +1,15 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { symmetricSeed } from '../lib/engine'
+import { usesSymmetricField } from '../lib/game-mode'
 
 export const Route = createFileRoute('/game/')({
   beforeLoad: ({ search }) => {
     throw redirect({
       to: '/game/$seed',
       params: {
-        seed: search.symmetric ? symmetricSeed(crypto.randomUUID()) : crypto.randomUUID(),
+        seed: usesSymmetricField(search)
+          ? symmetricSeed(crypto.randomUUID())
+          : crypto.randomUUID(),
       },
       search,
       replace: true,
