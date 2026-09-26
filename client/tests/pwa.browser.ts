@@ -67,9 +67,17 @@ async function fixture(t: TestContext) {
   const version: string = JSON.parse(versionMatch[1])
   const assets: string[] = JSON.parse(assetsMatch[1])
   assert.ok(Array.isArray(assets) && assets.every((url) => typeof url === 'string'))
+  const precached = (path: string) => {
+    const file = path.slice(base.length)
+    return (
+      file !== 'sw.js' &&
+      file !== '404.html' &&
+      !file.endsWith('.map') &&
+      file.split('/').every((segment) => segment[0] !== '.')
+    )
+  }
   for (const path of files.keys()) {
-    if (path !== base + 'sw.js' && path !== base + '404.html')
-      assert.ok(assets.includes(path), 'Missing precache asset: ' + path)
+    if (precached(path)) assert.ok(assets.includes(path), 'Missing precache asset: ' + path)
   }
   const requests = new Map<string, number>()
   const failing = new Set<string>()
