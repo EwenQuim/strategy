@@ -116,6 +116,13 @@ export const mirrorRoster = t({
   es: 'Copiar la alineación del jugador',
   it: 'Copia la formazione del giocatore',
 })
+export const symmetricMap = t({
+  en: 'Mirror the battlefield (central symmetry)',
+  fr: 'Symétrie centrale du champ de bataille',
+  de: 'Punktsymmetrisches Schlachtfeld',
+  es: 'Simetría central del campo de batalla',
+  it: 'Simmetria centrale del campo di battaglia',
+})
 export const rosters = t({
   en: 'Rosters',
   fr: 'Compositions',

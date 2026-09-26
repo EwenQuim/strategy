@@ -144,8 +144,8 @@ func TestCredentialsAreHashedAndWellFormed(t *testing.T) {
 			t.Fatalf("code %q contains ambiguous character %q", creds.Game.Code, c)
 		}
 	}
-	if creds.Game.Seed == "" {
-		t.Fatal("seed is empty")
+	if !strings.HasPrefix(creds.Game.Seed, "sym-") {
+		t.Fatalf("seed = %q, want sym- prefix for a fair mirrored field", creds.Game.Seed)
 	}
 }
 

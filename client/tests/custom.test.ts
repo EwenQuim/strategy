@@ -1,11 +1,17 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { parseGameSearch } from '../src/lib/game-mode.ts'
+import { parseGameSearch, usesSymmetricField } from '../src/lib/game-mode.ts'
 import { createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { initialState, transition } from '../src/lib/engine/engine.ts'
 import { MAP_WIDTH } from '../src/lib/engine/hex.ts'
-import type { BattleSetup } from '../src/lib/engine/index.ts'
+import {
+  key,
+  mirrorAxial,
+  passable,
+  symmetricSeed,
+  type BattleSetup,
+} from '../src/lib/engine/index.ts'
 
 const setup = {
   biome: 'desert',
@@ -16,6 +22,12 @@ const setup = {
 test('Custom search keeps valid settings, snapshots armies and safely rejects malformed URLs', () => {
   assert.deepEqual(parseGameSearch({}), { mode: 'ai' })
   assert.deepEqual(parseGameSearch({ mode: 'bad', difficulty: 'toString' }), { mode: 'ai' })
+  assert.equal(usesSymmetricField({ mode: 'ai' }, true), false)
+  assert.equal(usesSymmetricField({ mode: 'ai', setup }, false), false)
+  assert.equal(usesSymmetricField({ mode: 'ai', setup }, true), true)
+  assert.equal(usesSymmetricField({ mode: 'local' }, false), true)
+  assert.equal(usesSymmetricField({ mode: 'local', setup }, false), false)
+  assert.equal(usesSymmetricField({ mode: 'local', setup }, true), true)
   for (const mode of ['ai', 'local'] as const) {
     for (const difficulty of ['easy', 'normal', 'hard'] as const) {
       const search = parseGameSearch({ mode, difficulty, setup })
@@ -80,4 +92,22 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
     })
   }
   assert.ok(outcomes.size > 1, 'The fixture must distinguish difficulty settings')
+})
+
+test('Symmetric custom battles mirror pawn positions for equal rosters', () => {
+  const equal: BattleSetup = {
+    biome: 'desert',
+    player: ['king', 'archer', 'bulwark'],
+    enemy: ['king', 'archer', 'bulwark'],
+  }
+  const mirrored = initialState(symmetricSeed('custom-mirror'), equal)
+  for (let i = 0; i < 3; i++) {
+    const mirror = mirrorAxial(mirrored.pawns[i])
+    assert.equal(mirrored.pawns[3 + i].q, mirror.q)
+    assert.equal(mirrored.pawns[3 + i].r, mirror.r)
+  }
+  const uneven = initialState(symmetricSeed('custom-uneven'), setup)
+  const spots = new Set(uneven.pawns.map((pawn) => key(pawn.q, pawn.r)))
+  assert.equal(spots.size, uneven.pawns.length)
+  for (const pawn of uneven.pawns) assert.ok(passable(uneven.tiles.get(key(pawn.q, pawn.r))))
 })

@@ -34,6 +34,10 @@ export function hexDist(a: Axial, b: Axial) {
   return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2
 }
 
+export function mirrorAxial({ q, r }: Axial): Axial {
+  return { q: MAP_WIDTH - q - MAP_HEIGHT / 2, r: MAP_HEIGHT - 1 - r }
+}
+
 export function passable(tile: Tile | undefined): boolean {
   return !!tile && tile.terrain !== 'mountain' && tile.terrain !== 'lake'
 }
@@ -87,15 +91,35 @@ function tryPlaceConnectedTerrain(
   return false
 }
 
+type Placement = { anchor: Axial; shape: Shape }
+
+const placementCells = ({ anchor, shape }: Placement): Axial[] =>
+  shape.map(([q, r]) => ({ q: anchor.q + q, r: anchor.r + r }))
+
+function placementsTouch(a: Placement, b: Placement): boolean {
+  const aKeys = new Set(placementCells(a).map((cell) => key(cell.q, cell.r)))
+  const bKeys = new Set(placementCells(b).map((cell) => key(cell.q, cell.r)))
+  return placementCells(a).some(
+    (cell) =>
+      bKeys.has(key(cell.q, cell.r)) ||
+      neighbors(cell.q, cell.r).some((n) => {
+        const k = key(n.q, n.r)
+        return bKeys.has(k) && !aKeys.has(k)
+      }),
+  )
+}
+
 function placeFeature(
   tiles: Map<string, Tile>,
   anchors: Tile[],
   reserved: Set<string>,
   feature: MapFeature,
   random: SeededRandom,
+  symmetric = false,
 ) {
   const count = roll(feature.min, feature.max, random)
-  for (let i = 0; i < count; i++) {
+  const placementsWanted = symmetric ? Math.ceil(count / 2) : count
+  for (let i = 0; i < placementsWanted; i++) {
     const first = Math.floor(random.next() * feature.shapes.length)
     let placed = false
     for (let s = 0; s < feature.shapes.length && !placed; s++) {
@@ -103,8 +127,25 @@ function placeFeature(
       const offset = Math.floor(random.next() * anchors.length)
       for (let a = 0; a < anchors.length; a++) {
         const anchor = anchors[(offset + a) % anchors.length]
-        if (!shapeFits(tiles, reserved, anchor, shape, feature.terrain)) continue
-        const placedTiles = shape.map(([q, r]) => tiles.get(key(anchor.q + q, anchor.r + r))!)
+        const placements: Placement[] = symmetric
+          ? [
+              { anchor, shape },
+              {
+                anchor: mirrorAxial(anchor),
+                shape: shape.map(([q, r]) => [-q, -r] as [number, number]),
+              },
+            ]
+          : [{ anchor, shape }]
+        if (
+          !placements.every((p) =>
+            shapeFits(tiles, reserved, p.anchor, p.shape, feature.terrain),
+          )
+        )
+          continue
+        if (symmetric && placementsTouch(placements[0], placements[1])) continue
+        const placedTiles = placements.flatMap((p) =>
+          placementCells(p).map((cell) => tiles.get(key(cell.q, cell.r))!),
+        )
         if (!tryPlaceConnectedTerrain(tiles, anchors, placedTiles, feature.terrain)) continue
         for (const tile of placedTiles) reserved.add(key(tile.q, tile.r))
         placed = true
@@ -158,24 +199,32 @@ export function makeMap(
   random: SeededRandom,
   biome: Biome,
   protectedTiles: Axial[] = [],
+  symmetric = false,
 ): Map<string, Tile> {
   const { ground, scatter, features: terrainFeatures } = BIOMES[biome]
   const tiles = new Map<string, Tile>()
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))
-  for (let row = 0; row < MAP_HEIGHT; row++) {
+  if (symmetric)
+    for (const p of protectedTiles) {
+      const mirror = mirrorAxial(p)
+      reserved.add(key(mirror.q, mirror.r))
+    }
+  const rows = symmetric ? MAP_HEIGHT / 2 : MAP_HEIGHT
+  for (let row = 0; row < rows; row++) {
     for (let col = 0; col < MAP_WIDTH; col++) {
       const { q, r } = hexOf(col, row)
+      const pair: Axial[] = symmetric ? [{ q, r }, mirrorAxial({ q, r })] : [{ q, r }]
+      const blocked = pair.some((t) => reserved.has(key(t.q, t.r)))
       const terrain =
-        scatter && !reserved.has(key(q, r)) && random.next() < scatter.chance
-          ? scatter.terrain
-          : ground
-      tiles.set(key(q, r), { q, r, terrain })
+        scatter && !blocked && random.next() < scatter.chance ? scatter.terrain : ground
+      for (const t of pair) tiles.set(key(t.q, t.r), { q: t.q, r: t.r, terrain })
     }
   }
   for (const feature of terrainFeatures)
-    placeFeature(tiles, [...tiles.values()], reserved, feature, random)
+    placeFeature(tiles, [...tiles.values()], reserved, feature, random, symmetric)
   const roll = random.next()
-  const count = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+  const drawn = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+  const count = symmetric ? Math.ceil(drawn / 2) : drawn
   const candidates = [...tiles.values()].filter(
     (tile) =>
       (tile.r === MAP_HEIGHT / 2 - 1 || tile.r === MAP_HEIGHT / 2) &&
@@ -188,6 +237,12 @@ export function makeMap(
     const [tile] = candidates.splice(Math.floor(random.next() * candidates.length), 1)
     const [feature] = features.splice(Math.floor(random.next() * features.length), 1)
     tile.feature = feature
+    if (symmetric) {
+      const mirror = mirrorAxial(tile)
+      const mirrorTile = tiles.get(key(mirror.q, mirror.r))!
+      mirrorTile.feature = feature
+      candidates.splice(candidates.indexOf(mirrorTile), 1)
+    }
   }
   return tiles
 }

@@ -6,11 +6,13 @@ import {
   MAP_HEIGHT,
   key,
   makeMap,
+  mirrorAxial,
   neighbors,
   passable,
   distFrom,
   initialState,
   reducer,
+  symmetricSeed,
   targetingTiles,
   chargeDestinations,
   jumpDestinations,
@@ -107,6 +109,91 @@ test('Seeded games cover random biomes without Hell, broken shapes or isolated s
     }
   }
   assert.deepEqual(biomes, new Set(Object.keys(BIOMES).filter((biome) => biome !== 'hell')))
+})
+
+test('Symmetric seeds generate mirrored, connected battlefields with authored obstacle shapes', () => {
+  const spawns = [new King(1, 0, 10, 'player'), new King(2, 4, 1, 'enemy')]
+  for (const biome of Object.keys(BIOMES) as Biome[]) {
+    for (let index = 0; index < 30; index++) {
+      const seed = symmetricSeed(biome + '-' + index)
+      const tiles = makeMap(new SeededRandom(seedState(seed)), biome, spawns, true)
+      assert.deepEqual(tiles, makeMap(new SeededRandom(seedState(seed)), biome, spawns, true))
+      assert.equal(tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      for (const tile of tiles.values()) {
+        const mirror = mirrorAxial(tile)
+        const mirrored = tiles.get(key(mirror.q, mirror.r))
+        assert.ok(mirrored, biome + ': ' + seed)
+        assert.equal(mirrored.terrain, tile.terrain)
+        assert.equal(mirrored.feature, tile.feature)
+      }
+      const land = [...tiles.values()].filter(passable)
+      assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
+      for (const spawn of spawns) {
+        assert.equal(tiles.get(key(spawn.q, spawn.r))?.terrain, BIOMES[biome].ground)
+        const mirror = mirrorAxial(spawn)
+        assert.equal(tiles.get(key(mirror.q, mirror.r))?.terrain, BIOMES[biome].ground)
+      }
+      for (const { terrain, max, shapes } of BIOMES[biome].features) {
+        const groups = components(tiles, terrain)
+        assert.ok(groups.length <= 2 * Math.ceil(max / 2), biome + ': ' + seed)
+        assert.equal(groups.length % 2, 0, biome + ': ' + seed)
+        for (const group of groups)
+          assert.ok(
+            shapes.some((shape) => shape.length === group.length),
+            biome + ': ' + seed,
+          )
+      }
+    }
+  }
+})
+
+test('Symmetric maps keep special terrain density close to asymmetric ones', () => {
+  for (const biome of Object.keys(BIOMES) as Biome[]) {
+    const terrains = BIOMES[biome].features.map((feature) => feature.terrain)
+    const specialCells = (symmetric: boolean) => {
+      let cells = 0
+      for (let index = 0; index < 50; index++) {
+        const tiles = makeMap(
+          new SeededRandom(seedState('density-' + index)),
+          biome,
+          [],
+          symmetric,
+        )
+        cells += [...tiles.values()].filter((tile) => terrains.includes(tile.terrain)).length
+      }
+      return cells
+    }
+    const asymmetric = specialCells(false)
+    assert.ok(
+      specialCells(true) <= asymmetric * 1.5,
+      biome + ' doubles its special terrain in symmetric mode',
+    )
+  }
+})
+
+test('Symmetric seeded battles stay symmetric across restarts and keep kings connected', () => {
+  for (let index = 0; index < 20; index++) {
+    const state = initialState(symmetricSeed('battle-' + index))
+    for (const tile of state.tiles.values()) {
+      const mirror = mirrorAxial(tile)
+      const mirrored = state.tiles.get(key(mirror.q, mirror.r))
+      assert.ok(mirrored)
+      assert.equal(mirrored.terrain, tile.terrain)
+      assert.equal(mirrored.feature, tile.feature)
+    }
+    const kings = state.pawns.filter((pawn) => pawn.kind === 'king')
+    assert.equal(kings.length, 2)
+    assert.ok(distFrom(state.tiles, [kings[0]]).has(key(kings[1].q, kings[1].r)))
+    const half = state.pawns.length / 2
+    for (let i = 0; i < half; i++) {
+      const mirror = mirrorAxial(state.pawns[i])
+      const enemy = state.pawns[half + i]
+      assert.equal(enemy.q, mirror.q)
+      assert.equal(enemy.r, mirror.r)
+      assert.equal(enemy.kind, state.pawns[i].kind)
+    }
+    assert.deepEqual(reducer(state, { type: 'restart' }), state)
+  }
 })
 
 function lakeBattle(side: Side): GameState {

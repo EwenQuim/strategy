@@ -28,6 +28,12 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   return result
 }
 
+const isQuickLocalGame = (search: GameSearch): boolean =>
+  search.mode === 'local' && search.setup === undefined
+
+export const usesSymmetricField = (search: GameSearch, prefersSymmetric: boolean): boolean =>
+  isQuickLocalGame(search) || (search.setup !== undefined && prefersSymmetric)
+
 export type PlayerNames = { player: string; enemy: string }
 
 const playerNames: PlayerNames = { player: 'Player 1', enemy: 'Player 2' }
