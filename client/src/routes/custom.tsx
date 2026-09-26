@@ -5,6 +5,7 @@ import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
+import { readSymmetricPreference, saveSymmetricPreference } from '../customPreferences'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { unitNames } from '../i18n/units'
@@ -18,7 +19,7 @@ export const Route = createFileRoute('/custom')({
     const [mode, setMode] = useState<GameMode>('ai')
     const [difficulty, setDifficulty] = useState<BotDifficulty>('normal')
     const [biome, setBiome] = useState<Biome>('verdant')
-    const [symmetric, setSymmetric] = useState(false)
+    const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [player, setPlayer] = useState<Pawn['kind'][]>([
       'king',
       'swordsman',
@@ -44,12 +45,7 @@ export const Route = createFileRoute('/custom')({
             event.preventDefault()
             void navigate({
               to: '/game',
-              search: {
-                mode,
-                difficulty,
-                setup: { biome, player, enemy: enemyRoster },
-                symmetric,
-              },
+              search: { mode, difficulty, setup: { biome, player, enemy: enemyRoster } },
             })
           }}
         >
@@ -115,9 +111,11 @@ export const Route = createFileRoute('/custom')({
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
-                checked={symmetric || mode === 'local'}
-                disabled={mode === 'local'}
-                onChange={(event) => setSymmetric(event.target.checked)}
+                checked={symmetric}
+                onChange={(event) => {
+                  setSymmetric(event.target.checked)
+                  saveSymmetricPreference(event.target.checked)
+                }}
               />
               {m.symmetricMap}
             </label>

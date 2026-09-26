@@ -8,14 +8,12 @@ export type GameSearch = {
   mode: GameMode
   difficulty?: BotDifficulty
   setup?: Extract<BattleSetup, { map?: undefined }>
-  symmetric?: boolean
 }
 
 export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   const result: GameSearch = {
     mode: search.mode === 'local' ? 'local' : search.mode === 'online' ? 'online' : 'ai',
   }
-  if (search.symmetric === true) result.symmetric = true
   if (typeof search.difficulty === 'string' && Object.hasOwn(BOT_LEVELS, search.difficulty))
     result.difficulty = search.difficulty as BotDifficulty
   if (search.setup && typeof search.setup === 'object' && !('map' in search.setup)) {
@@ -30,8 +28,11 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   return result
 }
 
-export const usesSymmetricField = (search: GameSearch): boolean =>
-  search.symmetric === true || search.mode === 'local'
+const isQuickLocalGame = (search: GameSearch): boolean =>
+  search.mode === 'local' && search.setup === undefined
+
+export const usesSymmetricField = (search: GameSearch, prefersSymmetric: boolean): boolean =>
+  isQuickLocalGame(search) || (search.setup !== undefined && prefersSymmetric)
 
 export type PlayerNames = { player: string; enemy: string }
 
