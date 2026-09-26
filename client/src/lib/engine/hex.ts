@@ -118,7 +118,8 @@ function placeFeature(
   symmetric = false,
 ) {
   const count = roll(feature.min, feature.max, random)
-  for (let i = 0; i < count; i++) {
+  const placementsWanted = symmetric ? Math.ceil(count / 2) : count
+  for (let i = 0; i < placementsWanted; i++) {
     const first = Math.floor(random.next() * feature.shapes.length)
     let placed = false
     for (let s = 0; s < feature.shapes.length && !placed; s++) {
@@ -222,7 +223,8 @@ export function makeMap(
   for (const feature of terrainFeatures)
     placeFeature(tiles, [...tiles.values()], reserved, feature, random, symmetric)
   const roll = random.next()
-  const count = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+  const drawn = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+  const count = symmetric ? Math.ceil(drawn / 2) : drawn
   const candidates = [...tiles.values()].filter(
     (tile) =>
       (tile.r === MAP_HEIGHT / 2 - 1 || tile.r === MAP_HEIGHT / 2) &&

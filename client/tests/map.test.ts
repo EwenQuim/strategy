@@ -135,7 +135,7 @@ test('Symmetric seeds generate mirrored, connected battlefields with authored ob
       }
       for (const { terrain, max, shapes } of BIOMES[biome].features) {
         const groups = components(tiles, terrain)
-        assert.ok(groups.length <= 2 * max, biome + ': ' + seed)
+        assert.ok(groups.length <= 2 * Math.ceil(max / 2), biome + ': ' + seed)
         assert.equal(groups.length % 2, 0, biome + ': ' + seed)
         for (const group of groups)
           assert.ok(
@@ -144,6 +144,30 @@ test('Symmetric seeds generate mirrored, connected battlefields with authored ob
           )
       }
     }
+  }
+})
+
+test('Symmetric maps keep special terrain density close to asymmetric ones', () => {
+  for (const biome of Object.keys(BIOMES) as Biome[]) {
+    const terrains = BIOMES[biome].features.map((feature) => feature.terrain)
+    const specialCells = (symmetric: boolean) => {
+      let cells = 0
+      for (let index = 0; index < 50; index++) {
+        const tiles = makeMap(
+          new SeededRandom(seedState('density-' + index)),
+          biome,
+          [],
+          symmetric,
+        )
+        cells += [...tiles.values()].filter((tile) => terrains.includes(tile.terrain)).length
+      }
+      return cells
+    }
+    const asymmetric = specialCells(false)
+    assert.ok(
+      specialCells(true) <= asymmetric * 1.5,
+      biome + ' doubles its special terrain in symmetric mode',
+    )
   }
 })
 
