@@ -16,6 +16,8 @@ const setup = {
 test('Custom search keeps valid settings, snapshots armies and safely rejects malformed URLs', () => {
   assert.deepEqual(parseGameSearch({}), { mode: 'ai' })
   assert.deepEqual(parseGameSearch({ mode: 'bad', difficulty: 'toString' }), { mode: 'ai' })
+  assert.deepEqual(parseGameSearch({ symmetric: true }), { mode: 'ai', symmetric: true })
+  assert.deepEqual(parseGameSearch({ symmetric: 'false' }), { mode: 'ai' })
   for (const mode of ['ai', 'local'] as const) {
     for (const difficulty of ['easy', 'normal', 'hard'] as const) {
       const search = parseGameSearch({ mode, difficulty, setup })

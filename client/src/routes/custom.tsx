@@ -18,6 +18,7 @@ export const Route = createFileRoute('/custom')({
     const [mode, setMode] = useState<GameMode>('ai')
     const [difficulty, setDifficulty] = useState<BotDifficulty>('normal')
     const [biome, setBiome] = useState<Biome>('verdant')
+    const [symmetric, setSymmetric] = useState(false)
     const [player, setPlayer] = useState<Pawn['kind'][]>([
       'king',
       'swordsman',
@@ -43,7 +44,12 @@ export const Route = createFileRoute('/custom')({
             event.preventDefault()
             void navigate({
               to: '/game',
-              search: { mode, difficulty, setup: { biome, player, enemy: enemyRoster } },
+              search: {
+                mode,
+                difficulty,
+                setup: { biome, player, enemy: enemyRoster },
+                symmetric,
+              },
             })
           }}
         >
@@ -104,6 +110,15 @@ export const Route = createFileRoute('/custom')({
                 onChange={(event) => setEnemy(event.target.checked ? null : [...player])}
               />
               {m.mirrorRoster}
+            </label>
+            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
+              <input
+                className="size-[18px] accent-gold"
+                type="checkbox"
+                checked={symmetric}
+                onChange={(event) => setSymmetric(event.target.checked)}
+              />
+              {m.symmetricMap}
             </label>
             <table className="w-full border-separate border-spacing-2 text-[13px] [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
               <caption className="text-left font-semibold text-gold">{m.rosters}</caption>

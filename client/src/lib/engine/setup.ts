@@ -19,6 +19,11 @@ import {
 } from './pawns/index.ts'
 import { SeededRandom, seedState } from './random.ts'
 
+const SYMMETRIC_SEED_PREFIX = 'sym-'
+
+export const symmetricSeed = (seed: string) => SYMMETRIC_SEED_PREFIX + seed
+const isSymmetricSeed = (seed: string) => seed.startsWith(SYMMETRIC_SEED_PREFIX)
+
 type PawnPlacement = {
   readonly kind: Pawn['kind']
   readonly col: number
@@ -181,7 +186,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
       ...spawnRandomArmy(playerArmy, 'player', 1, random),
       ...spawnRandomArmy(enemyArmy, 'enemy', playerArmy.length + 1, random),
     ]
-    tiles = makeMap(random, biome, pawns)
+    tiles = makeMap(random, biome, pawns, isSymmetricSeed(seed))
   }
   const savedSetup = copySetup(setup)
   const initiative = shuffle(pawns, random)
