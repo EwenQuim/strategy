@@ -16,6 +16,9 @@ import (
 const codeAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 const tokenAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
 
+// Must stay in sync with SYMMETRIC_SEED_PREFIX in client/src/lib/engine/setup.ts.
+const symmetricSeedPrefix = "sym-"
+
 type Store interface {
 	Create(ctx context.Context, g game.Game) error
 	Game(ctx context.Context, code string) (game.Game, error)
@@ -56,7 +59,7 @@ func (s *Service) Create(ctx context.Context, name string) (PlayerCredentials, e
 		}
 		g := game.Game{
 			Code:        code,
-			Seed:        seed,
+			Seed:        symmetricSeedPrefix + seed,
 			NamePlayer:  name,
 			TokenPlayer: hash(token),
 			Status:      game.Waiting,
