@@ -2,10 +2,12 @@ import { useRef, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { possessiveArmyLabels, playerNames, type PlayerNames } from '../lib/game-mode'
+import { specialTexts } from '../i18n/units'
+import type { PlayerNames } from '../lib/game-mode'
+import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
-import { Battlefield } from './Battlefield'
+import { Battlefield, type Targeting } from './Battlefield'
 import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
@@ -18,11 +20,35 @@ import {
   targetingTiles,
   key,
   movementDestinations,
+  type GameState,
+  type Pawn,
   type Tile,
 } from '../lib/engine'
 
 function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: number | undefined) {
   return !!campaign && campaignLevel === campaign.levels.length
+}
+
+function resolveTargetLabel(
+  attacking: boolean,
+  phase: GameState['phase'],
+  pawn: Pawn | undefined,
+) {
+  if (attacking) return m.attack
+  if (phase === 'special' && pawn?.special.targetLabel)
+    return specialTexts[pawn.special.targetLabel]
+  return pawn ? specialTexts[pawn.special.name] : m.special
+}
+
+function resolveTargeting(
+  attacking: boolean,
+  usingSpecial: boolean,
+  pawn: Pawn | undefined,
+): Targeting {
+  if (attacking) return 'attack'
+  if (usingSpecial && pawn?.special.name === 'charge') return 'charge'
+  if (usingSpecial && pawn?.special.name === 'jump') return 'jump'
+  return 'special'
 }
 
 export function Game({
@@ -80,10 +106,8 @@ export function Game({
   const attacking = myTurn && state.phase === 'attack'
   const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
   const targets = targetingTiles(state)
-  const targetLabel = attacking
-    ? m.attack
-    : (state.phase === 'special' && pawn?.special.targetLabel) ||
-      (pawn?.special.name ?? m.special)
+  const targetLabel = resolveTargetLabel(attacking, state.phase, pawn)
+  const targeting = resolveTargeting(attacking, usingSpecial, pawn)
 
   const reach =
     myTurn && pawn.energy > 0 && state.phase === 'move'
@@ -146,6 +170,7 @@ export function Game({
             reach={reach}
             targets={targets}
             targetLabel={targetLabel}
+            targeting={targeting}
             preview={state.chargeDestination}
             effect={effect}
             effectId={effectId}

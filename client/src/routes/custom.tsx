@@ -7,6 +7,8 @@ import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../li
 import type { GameMode } from '../lib/game-mode'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
+import { unitNames } from '../i18n/units'
+import { biomeNames } from '../i18n/biomes'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
@@ -86,9 +88,9 @@ export const Route = createFileRoute('/custom')({
                   value={biome}
                   onChange={(event) => setBiome(event.target.value as Biome)}
                 >
-                  {Object.entries(BIOMES).map(([value, biome]) => (
+                  {Object.entries(BIOMES).map(([value]) => (
                     <option key={value} value={value}>
-                      {biome.name}
+                      {biomeNames[value as Biome]}
                     </option>
                   ))}
                 </select>
@@ -134,7 +136,7 @@ export const Route = createFileRoute('/custom')({
                     <th className="text-left font-medium" scope="row">
                       <span className="flex items-center gap-2 capitalize">
                         <PawnIcon kind={kind} />
-                        {kind}
+                        {unitNames[kind]}
                       </span>
                     </th>
                     {[player, enemyRoster].map((roster, side) => {
@@ -153,7 +155,7 @@ export const Route = createFileRoute('/custom')({
                             max={max}
                             step={1}
                             value={count}
-                            aria-label={labels[side] + ' ' + kind}
+                            aria-label={labels[side] + ' ' + unitNames[kind]}
                             disabled={side === 1 && enemy === null}
                             onChange={(event) => {
                               const value = Number(event.target.value)

@@ -30,9 +30,9 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
 
 export type PlayerNames = { player: string; enemy: string }
 
-export const playerNames: PlayerNames = { player: 'Player 1', enemy: 'Player 2' }
+const playerNames: PlayerNames = { player: 'Player 1', enemy: 'Player 2' }
 
-export function possessiveArmyLabels(mode: GameMode, names: PlayerNames = playerNames) {
+function possessiveArmyLabels(mode: GameMode, names: PlayerNames = playerNames) {
   if (mode === 'ai') return { player: 'Your', enemy: 'Enemy' }
   return { player: names.player + "'s", enemy: names.enemy + "'s" }
 }

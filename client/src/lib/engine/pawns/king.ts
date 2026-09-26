@@ -2,13 +2,12 @@ import { allyTargets, label, specialTargets } from '../combat.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const rally: SpecialAbility = {
-  name: 'Rally',
+  name: 'rally',
   cost: 1,
   targeted: false,
   oncePerRound: true,
-  noTargets: 'No allies to heal',
-  description:
-    'Restore 1 health to every adjacent ally, once per round. Activates immediately. Cannot heal yourself or exceed maximum health.',
+  noTargets: 'noAlliesToHeal',
+  description: 'rallyDescription',
   targets: (pawn, pawns) => allyTargets(pawn, pawns, true),
   candidates: (pawn, { pawns }) =>
     specialTargets(pawns, pawn).length ? [[{ type: 'act', action: 'special' }]] : [],

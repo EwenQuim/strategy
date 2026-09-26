@@ -1,10 +1,14 @@
 import { Link } from '@tanstack/react-router'
 import type { OnlineSession } from '../api/useGame'
 import type { Campaign } from '../lib/campaign'
-import { BIOMES, type Biome, type Pawn, type Side } from '../lib/engine'
+import type { Biome, Pawn, Side } from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { possessiveArmyLabels, type GameMode, type PlayerNames } from '../lib/game-mode'
+import { unitNames } from '../i18n/units'
+import { biomeNames } from '../i18n/biomes'
+import { alreadyActed } from '../i18n/battlefield'
+import type { GameMode, PlayerNames } from '../lib/game-mode'
+import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
 import { iconButtonClassName } from './styles'
 
@@ -70,7 +74,7 @@ export function GameHeader({
             >
               {campaign && campaignLevel
                 ? m.levelProgress(campaignLevel, campaign.levels.length)
-                : BIOMES[biome].name}
+                : biomeNames[biome]}
             </span>
           </span>
         </Link>
@@ -119,13 +123,13 @@ export function GameHeader({
               data-side={unit.side}
               data-acted={index < active}
               aria-current={index === active && !winner ? 'step' : undefined}
-              title={labels[unit.side] + ' ' + unit.kind + ' #' + unit.id}
+              title={labels[unit.side] + ' ' + unitNames[unit.kind] + ' #' + unit.id}
             >
               <PawnIcon kind={unit.kind} />
               <span>{unit.id.toString().padStart(2, '0')}</span>
               <span className="sr-only">
-                {labels[unit.side]} {unit.kind}
-                {index < active ? ', already acted' : ''}
+                {labels[unit.side]} {unitNames[unit.kind]}
+                {index < active ? `, ${alreadyActed}` : ''}
               </span>
             </li>
           ))}

@@ -1,8 +1,6 @@
 import { bendShape, lineShape, type BiomeDefinition } from './biome.ts'
 
 export const mountains: BiomeDefinition = {
-  name: 'Mountain Ranges',
-  description: 'mountain chains',
   ground: 'plain',
   features: [
     {

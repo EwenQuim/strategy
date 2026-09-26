@@ -3,13 +3,12 @@ import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 import { hexDist } from '../hex.ts'
 
 const protect: SpecialAbility = {
-  name: 'Protect',
+  name: 'protect',
   cost: 2,
   targeted: true,
-  prompt: 'Choose ally',
-  noTargets: 'No nearby allies',
-  description:
-    'Protect an ally within 2 tiles until your next turn. Take its next hit instead, without a second Escape roll. Ends if you move more than 2 tiles apart. Moving costs 2 energy for the first tile, then 1 per extra tile.',
+  prompt: 'chooseAlly',
+  noTargets: 'noNearbyAllies',
+  description: 'protectDescription',
   targets: (pawn, pawns) =>
     pawns.filter(
       (target) =>

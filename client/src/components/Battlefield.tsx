@@ -3,7 +3,6 @@ import * as m from '../i18n/game'
 import {
   key,
   walkingPaths,
-  TILE_FEATURES,
   protectorFor,
   inHellfire,
   type Axial,
@@ -11,6 +10,7 @@ import {
   type Pawn,
   type Tile,
 } from '../lib/engine'
+import { featureTexts } from '../i18n/biomes'
 import { Icon } from './Icon'
 import { tileAriaLabel, tileFill } from './battlefield-tile'
 import { BattlefieldEffects } from './BattlefieldEffects'
@@ -19,6 +19,8 @@ import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
+
+export type Targeting = 'attack' | 'charge' | 'jump' | 'special'
 
 interface BattlefieldProps {
   labels: PlayerNames
@@ -29,6 +31,7 @@ interface BattlefieldProps {
   reach: Map<string, number>
   targets: Set<string>
   targetLabel: string
+  targeting: Targeting
   preview: Axial | null
   effect: BattleEffect | null
   effectId: number
@@ -44,15 +47,17 @@ export function Battlefield({
   reach,
   targets,
   targetLabel,
+  targeting,
   preview,
   effect,
   effectId,
   onTileClick,
 }: BattlefieldProps) {
   const board = useRef<SVGSVGElement>(null)
+  const chargeTargeting = targeting === 'charge'
   const paths =
-    active && (reach.size || targetLabel === 'Charge to')
-      ? walkingPaths(tiles, pawns, active, targetLabel === 'Charge to' ? 2 : undefined)
+    active && (reach.size || chargeTargeting)
+      ? walkingPaths(tiles, pawns, active, chargeTargeting ? 2 : undefined)
       : new Map()
   useEffect(() => {
     if (
@@ -151,9 +156,9 @@ export function Battlefield({
         const cost = reach.get(tileKey)
         const canMove = cost !== undefined && cost > 0
         const interactive = !!target || canMove
-        const feature = tile.feature && TILE_FEATURES[tile.feature]
+        const feature = tile.feature && featureTexts[tile.feature]
         const damage =
-          target && targetLabel === 'Jump to'
+          target && targeting === 'jump'
             ? Number(tile.terrain === 'lava')
             : (paths.get(tileKey)?.damage ?? 0)
         const lethal = !!active && damage >= active.hp
@@ -177,7 +182,7 @@ export function Battlefield({
           damage,
           occupant,
           target,
-          targetLabel,
+          attack: targeting === 'attack',
           selected,
           previewed,
           canMove,

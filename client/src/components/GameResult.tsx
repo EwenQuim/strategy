@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import type { Campaign } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
+import { levelName } from '../i18n/campaign'
 import { type GameMode, type PlayerNames } from '../lib/game-mode'
 import type { BotDifficulty } from '../lib/engine/ai'
 import { Icon } from './Icon'
@@ -89,7 +90,7 @@ export function GameResult({
         </div>
         <span className="text-xs font-semibold text-muted tracking-[0.17em] uppercase">
           {campaign && campaignLevel
-            ? m.resultLevel(campaignLevel, campaign.levels[campaignLevel - 1].name)
+            ? m.resultLevel(campaignLevel, levelName(campaign.levels[campaignLevel - 1]))
             : m.battleOver}
         </span>
         <h1>{winnerLabel ?? (winner === 'player' ? m.battlefieldYours : m.crownFallen)}</h1>

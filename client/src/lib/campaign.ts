@@ -1,22 +1,16 @@
 import originalLevels from './campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
-import { mapFromRows, TILE_FEATURES, type Terrain, type TileFeature } from './engine/hex.ts'
+import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
-import {
-  ESCAPE_BONUS,
-  MAX_ESCAPE,
-  PAWN_CLASSES,
-  START_ENERGY,
-  type PawnKind,
-} from './engine/pawns/index.ts'
+import type { PawnKind } from './engine/pawns/index.ts'
 import type { Biome, FixedBattleSetup } from './engine/index.ts'
 
-export interface BriefingElement {
-  readonly name: string
-  readonly points: readonly string[]
-  readonly art?: IntroducedElement
-}
+export type IntroducedElement =
+  | PawnKind
+  | Exclude<Terrain, 'plain' | 'forest' | 'palm' | 'basalt'>
+  | TileFeature
+  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
 
 export interface CampaignLevel {
   id: number
@@ -24,7 +18,7 @@ export interface CampaignLevel {
   seed: string
   difficulty: BotDifficulty
   setup: FixedBattleSetup
-  newElements: readonly BriefingElement[]
+  newElements: readonly IntroducedElement[]
 }
 
 export interface Campaign {
@@ -33,133 +27,27 @@ export interface Campaign {
   levels: CampaignLevel[]
 }
 
-function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
-  const { maxHp, attack, special } = new PAWN_CLASSES[kind](0, 0, 0, 'player')
-  const range =
-    attack.minRange === attack.maxRange
-      ? String(attack.maxRange)
-      : attack.minRange + '-' + attack.maxRange
-  return {
-    name: kind[0].toUpperCase() + kind.slice(1),
-    art: kind,
-    points: [
-      maxHp + ' HP · ' + attack.damage + ' dmg · range ' + range,
-      special.name + ' (' + special.cost + ' energy): ' + specialPoints[0],
-      ...specialPoints.slice(1),
-    ],
-  }
-}
-
-export type IntroducedElement =
-  | PawnKind
-  | Exclude<Terrain, 'plain' | 'forest' | 'palm' | 'basalt'>
-  | TileFeature
-  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
-
-export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
-  king: [
-    { name: 'Goal', points: ['Kill the enemy king'] },
-    {
-      name: 'Energy',
-      points: [
-        START_ENERGY + ' per unit each round',
-        'Spend it to move, attack or use a special',
-        `Unused energy at end of turn → +${ESCAPE_BONUS}% dodge each, max ${MAX_ESCAPE}%`,
-      ],
-    },
-    unit('king', 'heal adjacent allies +1, once per round', 'Lose your king, lose the battle'),
-  ],
-  swordsman: [unit('swordsman', 'move up to 2, then hit adjacent for 2')],
-  archer: [unit('archer', '2 dmg, ignores Escape', 'Cannot shoot adjacent enemies')],
-  magician: [
-    unit(
-      'magician',
-      '1 dmg to every enemy on a line',
-      'Passes through everything, allies safe',
-    ),
-  ],
-  bulwark: [
-    unit(
-      'bulwark',
-      'takes the next hit for an ally within 2',
-      'Slow: first step costs 2 energy',
-    ),
-  ],
-  bomber: [
-    unit(
-      'bomber',
-      'any tile within 2, 1 dmg to it and its 6 neighbors',
-      'Hits allies and the bomber too',
-    ),
-  ],
-  ninja: [
-    unit(
-      'ninja',
-      'up to 3 tiles, over anything',
-      'Jump does not attack: keep 1 energy to strike',
-    ),
-  ],
-  lake: [
-    {
-      name: 'Lakes',
-      art: 'lake',
-      points: ['Block walking and Charge', 'Arrows and spells pass'],
-    },
-  ],
-  mountain: [
-    {
-      name: 'Mountains',
-      art: 'mountain',
-      points: ['Block walking and Charge', 'Arrows and spells pass'],
-    },
-  ],
-  sand: [
-    { name: 'Desert', art: 'sand', points: ['Open sand, no cover', 'Palms are decorative'] },
-  ],
-  lava: [
-    {
-      name: 'Lava',
-      art: 'lava',
-      points: [
-        '-1 HP per tile entered, even on Charge',
-        'Ignores Escape and Protect',
-        'Basalt is safe',
-      ],
-    },
-  ],
-  watchtower: [
-    {
-      name: TILE_FEATURES.watchtower.name,
-      art: 'watchtower',
-      points: ['Archer and Magician: +1 max range'],
-    },
-  ],
-  spring: [
-    { name: TILE_FEATURES.spring.name, art: 'spring', points: ['Stay until next turn: +1 HP'] },
-  ],
-  rune: [
-    {
-      name: TILE_FEATURES.rune.name,
-      art: 'rune',
-      points: ['First unit in: +2 energy this round', 'Single use'],
-    },
-  ],
-  hell: [
-    {
-      name: 'Hellfire',
-      art: 'hell',
-      points: [
-        'Hatched area: 1 dmg at round end',
-        'Ignores Escape and Protect',
-        'Both kings down = draw',
-      ],
-    },
-  ],
-}
+const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
+  'king',
+  'swordsman',
+  'archer',
+  'magician',
+  'bulwark',
+  'bomber',
+  'ninja',
+  'lake',
+  'mountain',
+  'sand',
+  'lava',
+  'watchtower',
+  'spring',
+  'rune',
+  'hell',
+]
 
 export function withBriefings<Level extends { setup: FixedBattleSetup }>(
   campaignsInReleaseOrder: readonly (readonly Level[])[],
-): (Level & { newElements: readonly BriefingElement[] })[][] {
+): (Level & { newElements: readonly IntroducedElement[] })[][] {
   const introduced = new Set<string>()
   return campaignsInReleaseOrder.map((levels) =>
     levels.map((level) => {
@@ -171,11 +59,11 @@ export function withBriefings<Level extends { setup: FixedBattleSetup }>(
           tile.feature ?? '',
         ]),
       ])
-      const fresh = (Object.keys(INTRODUCTIONS) as IntroducedElement[]).filter(
+      const fresh = INTRODUCED_ELEMENTS.filter(
         (element) => present.has(element) && !introduced.has(element),
       )
       for (const element of fresh) introduced.add(element)
-      return { ...level, newElements: fresh.flatMap((element) => INTRODUCTIONS[element]) }
+      return { ...level, newElements: fresh }
     }),
   )
 }

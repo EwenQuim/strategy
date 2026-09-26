@@ -1,8 +1,6 @@
 import { poolShapes, type BiomeDefinition } from './biome.ts'
 
 export const volcano: BiomeDefinition = {
-  name: 'Ember Caldera',
-  description: 'lava pools over dark basalt',
   ground: 'basalt',
   features: [{ terrain: 'lava', min: 3, max: 6, shapes: poolShapes }],
   theme: {

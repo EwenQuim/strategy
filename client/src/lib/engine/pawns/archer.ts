@@ -2,12 +2,11 @@ import { aimAt, attackTargets, label, pawnAt, specialTargets, strike } from '../
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const aimedShot: SpecialAbility = {
-  name: 'Aimed shot',
+  name: 'aimedShot',
   cost: 2,
   targeted: true,
-  noTargets: 'No enemies in range',
-  description:
-    'Deal 2 damage to an enemy 2 to 3 tiles away, ignoring Escape. Cannot shoot adjacent enemies.',
+  noTargets: 'noEnemiesInRange',
+  description: 'aimedShotDescription',
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
   perform: ({ pawn, pawns, log, random, tile }) => {

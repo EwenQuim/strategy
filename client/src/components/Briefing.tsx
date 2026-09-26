@@ -3,7 +3,8 @@ import { Icon, PawnIcon } from './Icon'
 import { hexPoints, terrainColors } from './hex-art'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
-import type { BriefingElement, CampaignLevel, IntroducedElement } from '../lib/campaign'
+import type { CampaignLevel, IntroducedElement } from '../lib/campaign'
+import { INTRODUCTIONS, type BriefingElement } from '../briefings'
 import {
   BIOMES,
   PAWN_CLASSES,
@@ -13,9 +14,11 @@ import {
 } from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
+import { levelName } from '../i18n/campaign'
 
 const isPawn = (art: IntroducedElement): art is PawnKind => art in PAWN_CLASSES
-const isFeature = (art: IntroducedElement): art is TileFeature => art in TILE_FEATURES
+const isFeature = (art: IntroducedElement): art is TileFeature =>
+  TILE_FEATURES.includes(art as TileFeature)
 
 function ElementArt({ art }: { art: IntroducedElement }) {
   return (
@@ -100,7 +103,7 @@ export function Briefing({ level }: { level: CampaignLevel }) {
             {m.levelNumber(String(level.id).padStart(2, '0'))}
           </span>
           <h2 className="mt-1 font-serif text-[30px] leading-tight" id="briefing-title">
-            {level.name}
+            {levelName(level)}
           </h2>
         </div>
         <button className={iconButtonClassName} type="submit" aria-label={common.closeDialog}>
@@ -108,7 +111,9 @@ export function Briefing({ level }: { level: CampaignLevel }) {
         </button>
       </form>
       <div className="min-h-0 flex-1 overflow-y-auto px-6">
-        <BriefingElements elements={level.newElements} />
+        <BriefingElements
+          elements={level.newElements.flatMap((element) => INTRODUCTIONS[element])}
+        />
       </div>
       <form method="dialog" className="shrink-0 px-6 pb-6">
         <button type="submit" className={primaryButtonClassName + ' min-h-12 w-full'}>

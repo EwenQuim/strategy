@@ -1,8 +1,6 @@
 import { poolShapes, type BiomeDefinition } from './biome.ts'
 
 export const desert: BiomeDefinition = {
-  name: 'Open Desert',
-  description: 'oases and rare decorative palms',
   ground: 'sand',
   scatter: { terrain: 'palm', chance: 0.04 },
   features: [{ terrain: 'lake', min: 1, max: 3, shapes: poolShapes }],

@@ -1,8 +1,6 @@
 import { poolShapes, type BiomeDefinition } from './biome.ts'
 
 export const verdant: BiomeDefinition = {
-  name: 'Verdant Vale',
-  description: 'lakes and forests',
   ground: 'plain',
   scatter: { terrain: 'forest', chance: 0.25 },
   features: [{ terrain: 'lake', min: 3, max: 6, shapes: poolShapes }],
