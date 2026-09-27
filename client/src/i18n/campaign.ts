@@ -91,8 +91,7 @@ const levelNames: Record<string, string> = {
     fr: 'Batterie divisée',
     de: 'Geteilte Batterie',
     es: 'Batería dividida',
-    it: 'Batteria 
-divisa',
+    it: 'Batteria divisa',
   }),
   'Dune Patrol': t({
     en: 'Dune Patrol',
