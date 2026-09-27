@@ -321,7 +321,7 @@ test('Wizard Curtain has four aligned casters and Hell has two connected double-
 test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {
   let completed = 0
   for (let level = 1; level <= 20; level++) {
-    for (const candidate = 1; candidate <= 20; candidate++)
+    for (let candidate = 1; candidate <= 20; candidate++)
       assert.equal(isLevelUnlocked(original, candidate, completed), candidate <= level)
     assert.equal(completeCampaignLevel(original, completed, level + 1), completed)
     completed = completeCampaignLevel(original, completed, level)
