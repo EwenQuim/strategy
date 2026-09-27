@@ -28,7 +28,7 @@ export const campaignNames: Record<
   }),
   'war-of-the-ring': t({
     en: 'War of the Ring',
-    fr: "La Guerre de l'Ombre",
+    fr: "La Guerre de l'anneau",
     de: 'Ringkrieg',
     es: 'Guerra del Anillo',
     it: "Guerra dell'Anello",
