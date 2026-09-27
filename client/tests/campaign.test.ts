@@ -319,21 +319,38 @@ test('Wizard Curtain has four aligned casters and Hell has two connected double-
   assert.equal(gates.setup.map[6][5], 'H')
 })
 
+const firstLevels = (count: number) => Array.from({ length: count }, (_, index) => index + 1)
+
 test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {
-  let completed = 0
+  let cleared: readonly number[] = []
   for (let level = 1; level <= 20; level++) {
     for (let candidate = 1; candidate <= 20; candidate++)
-      assert.equal(isLevelUnlocked(original, candidate, completed), candidate <= level)
-    assert.equal(completeCampaignLevel(original, completed, level + 1), completed)
-    completed = completeCampaignLevel(original, completed, level)
-    assert.equal(completed, level)
-    assert.equal(completeCampaignLevel(original, completed, 1), level)
-    assert.equal(completeCampaignLevel(original, completed, level), level)
-    assert.equal(parseCampaignProgress(String(completed), original.levels.length), completed)
+      assert.equal(isLevelUnlocked(original, candidate, cleared), candidate <= level)
+    assert.equal(completeCampaignLevel(original, cleared, level + 1), cleared)
+    cleared = completeCampaignLevel(original, cleared, level)
+    assert.deepEqual(cleared, firstLevels(level))
+    assert.equal(completeCampaignLevel(original, cleared, 1), cleared)
+    assert.equal(completeCampaignLevel(original, cleared, level), cleared)
+    assert.deepEqual(
+      parseCampaignProgress(JSON.stringify(cleared), original.levels.length),
+      cleared,
+    )
   }
   for (const level of [-1, 0, 1.5, 21, NaN, Infinity]) {
-    assert.equal(isLevelUnlocked(original, level, completed), false)
-    assert.equal(completeCampaignLevel(original, completed, level), completed)
+    assert.equal(isLevelUnlocked(original, level, cleared), false)
+    assert.equal(completeCampaignLevel(original, cleared, level), cleared)
+  }
+})
+
+test('Every level of a non-original campaign is open and can be cleared in any order', () => {
+  for (const pack of CAMPAIGNS.slice(1)) {
+    for (let level = 1; level <= pack.levels.length; level++)
+      assert.ok(isLevelUnlocked(pack, level, []))
+    assert.equal(isLevelUnlocked(pack, pack.levels.length + 1, []), false)
+    const cleared = completeCampaignLevel(pack, completeCampaignLevel(pack, [], 8), 3)
+    assert.deepEqual(cleared, [3, 8])
+    assert.equal(completeCampaignLevel(pack, cleared, 8), cleared)
+    assert.deepEqual(parseCampaignProgress(JSON.stringify(cleared), pack.levels.length), [3, 8])
   }
 })
 
@@ -351,13 +368,18 @@ test('Missing or corrupt local progress starts at level one instead of unlocking
     'Infinity',
     'NaN',
     '1e1',
+    '[0]',
+    '[21]',
+    '[1.5]',
+    '["1"]',
   ])
-    assert.equal(parseCampaignProgress(value, original.levels.length), 0)
-  assert.equal(parseCampaignProgress('0', original.levels.length), 0)
-  assert.equal(parseCampaignProgress('19', original.levels.length), 19)
-  assert.equal(parseCampaignProgress('20', original.levels.length), 20)
-  assert.equal(parseCampaignProgress('20', brutal.levels.length), 20)
-  assert.equal(parseCampaignProgress('21', brutal.levels.length), 0)
+    assert.deepEqual(parseCampaignProgress(value, original.levels.length), [])
+  assert.deepEqual(parseCampaignProgress('0', original.levels.length), [])
+  assert.deepEqual(parseCampaignProgress('19', original.levels.length), firstLevels(19))
+  assert.deepEqual(parseCampaignProgress('20', original.levels.length), firstLevels(20))
+  assert.deepEqual(parseCampaignProgress('20', brutal.levels.length), firstLevels(20))
+  assert.deepEqual(parseCampaignProgress('21', brutal.levels.length), [])
+  assert.deepEqual(parseCampaignProgress('[5,2,5]', brutal.levels.length), [2, 5])
 })
 
 test('The shattered experiment mixes defense, gaps, hazards and specials in ten encounters', () => {

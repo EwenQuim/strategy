@@ -126,30 +126,40 @@ export function campaignStorageKey(slug: string): string {
   return slug === 'original' ? CAMPAIGN_STORAGE_KEY : 'hexmate:campaign:' + slug
 }
 
-export function parseCampaignProgress(value: string | null, levels: number): number {
-  const completed = Number(value)
-  return value !== null &&
-    /^\d+$/.test(value) &&
-    Number.isInteger(completed) &&
-    completed >= 0 &&
-    completed <= levels
-    ? completed
-    : 0
+export function parseCampaignProgress(value: string | null, levels: number): number[] {
+  if (value !== null && /^\d+$/.test(value) && Number(value) <= levels)
+    return Array.from({ length: Number(value) }, (_, index) => index + 1)
+  let cleared: unknown
+  try {
+    cleared = JSON.parse(value ?? '')
+  } catch {
+    return []
+  }
+  return Array.isArray(cleared) &&
+    cleared.every((level) => Number.isInteger(level) && level >= 1 && level <= levels)
+    ? [...new Set<number>(cleared)].sort((a, b) => a - b)
+    : []
 }
 
-export function isLevelUnlocked(campaign: Campaign, level: number, completed: number): boolean {
+export function isLevelUnlocked(
+  campaign: Campaign,
+  level: number,
+  cleared: readonly number[],
+): boolean {
   return (
     Number.isInteger(level) &&
     level >= 1 &&
     level <= campaign.levels.length &&
-    level <= completed + 1
+    (campaign.slug !== 'original' || level <= cleared.length + 1)
   )
 }
 
 export function completeCampaignLevel(
   campaign: Campaign,
-  completed: number,
+  cleared: readonly number[],
   level: number,
-): number {
-  return isLevelUnlocked(campaign, level, completed) ? Math.max(completed, level) : completed
+): readonly number[] {
+  return isLevelUnlocked(campaign, level, cleared) && !cleared.includes(level)
+    ? [...cleared, level].sort((a, b) => a - b)
+    : cleared
 }

@@ -8,7 +8,11 @@ import { Icon } from '../components/Icon'
 import { LevelMiniature } from '../components/LevelMiniature'
 import { CAMPAIGNS, isCampaignUnlocked, isLevelUnlocked } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
-import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
+import {
+  readCampaignProgress,
+  readClearedLevels,
+  subscribeCampaignProgress,
+} from '../campaignProgress'
 
 const levelCardClassName =
   'flex size-full flex-col gap-1 overflow-hidden rounded-lg border border-line bg-(--biome-background) p-1.5 text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=completed]:border-[#89bba477] data-[status=ready]:border-gold disabled:text-muted [&:disabled>svg]:opacity-55 [&:not(:disabled):hover]:brightness-115'
@@ -23,9 +27,10 @@ export const Route = createFileRoute('/campaign/$campaign/')({
   component: function CampaignLevels() {
     const { campaign: slug } = Route.useParams()
     const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)!
-    const completed = useSyncExternalStore(subscribeCampaignProgress, () =>
-      readCampaignProgress(campaign.slug),
+    const clearedLevels = useSyncExternalStore(subscribeCampaignProgress, () =>
+      readClearedLevels(campaign.slug),
     )
+    const completed = clearedLevels.length
     return (
       <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
         <header className="flex items-center justify-between gap-3">
@@ -51,8 +56,8 @@ export const Route = createFileRoute('/campaign/$campaign/')({
           aria-label={common.campaignLevels}
         >
           {campaign.levels.map((level) => {
-            const unlocked = isLevelUnlocked(campaign, level.id, completed)
-            const cleared = level.id <= completed
+            const unlocked = isLevelUnlocked(campaign, level.id, clearedLevels)
+            const cleared = clearedLevels.includes(level.id)
             const status = m.levelStatus[cleared ? 'completed' : unlocked ? 'ready' : 'locked']
             const content = (
               <>
