@@ -9,6 +9,7 @@ import {
   Ninja,
   Archer,
   Bulwark,
+  Bomber,
   hexDist,
   type GameState,
   type Pawn,
@@ -156,6 +157,38 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     },
   )
 
+  test(level + ': a reckless unit still never walks into lava to die', () => {
+    const state = battle([
+      new Swordsman(1, 0, 0, 'enemy', 1),
+      new King(2, -6, 0, 'enemy'),
+      new Archer(3, 3, 0, 'player'),
+      new King(4, 6, 0, 'player'),
+    ])
+    state.tiles.set('1,0', { q: 1, r: 0, terrain: 'lava' })
+    state.tiles.set('1,-1', { q: 1, r: -1, terrain: 'lava' })
+    assert.ok(playTurn(state, level).pawns.some((p) => p.id === 1))
+  })
+
+  test(level + ': never bombs its own units when no enemy is caught', () => {
+    const state = battle([
+      new Bomber(1, 0, 0, 'enemy'),
+      new Swordsman(2, 2, 0, 'enemy', 1),
+      new King(3, -6, 0, 'enemy'),
+      new King(4, 6, 0, 'player'),
+    ])
+    assert.ok(playTurn(state, level).pawns.some((p) => p.id === 2))
+  })
+
+  test(level + ': takes a free kill instead of ending its turn', () => {
+    const state = battle([
+      new Swordsman(1, 0, 0, 'enemy'),
+      new King(2, -6, 0, 'enemy'),
+      new Archer(3, 1, 0, 'player', 1),
+      new King(4, 6, 0, 'player'),
+    ])
+    assert.ok(!playTurn(state, level).pawns.some((p) => p.id === 3))
+  })
+
   test(level + ': take a winning attack instead of healing or attacking a soldier', () => {
     const state = battle([
       new King(1, 0, 0, 'enemy'),
@@ -211,7 +244,8 @@ test('Analysis is deterministic, immutable, configurable and independent of the 
   for (const options of [
     { ...BOT_LEVELS.normal, depth: 0 },
     { ...BOT_LEVELS.normal, beamWidth: 0 },
-    { ...BOT_LEVELS.normal, caution: NaN },
+    { ...BOT_LEVELS.normal, riskAppetite: NaN },
+    { ...BOT_LEVELS.normal, latitude: 1000 },
   ])
     assert.throws(
       () => chooseBotActions(state, options as typeof BOT_LEVELS.normal),
