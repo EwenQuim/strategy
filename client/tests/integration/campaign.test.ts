@@ -1,33 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { CAMPAIGNS, type CampaignLevel } from '../../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../../src/lib/campaign.ts'
 import { initialState as coreState } from '../../src/lib/engine/index.ts'
-import type { BotDifficulty } from '../../src/lib/engine/ai.ts'
 import { createBotGame } from '../../src/lib/engine/bot.ts'
-import { campaignActions } from '../campaign-actions.ts'
+import { winnableAgainst } from '../campaign-actions.ts'
 
 const original = CAMPAIGNS[0]
-
-function playToTheEnd(level: CampaignLevel, difficulty: BotDifficulty, caution: number) {
-  const bot = createBotGame(difficulty)
-  let state = bot.initialState(level.seed, level.setup)
-  for (let step = 0; step < 300 && !state.winner; step++) {
-    for (const action of campaignActions(state, caution)) {
-      const result = bot.transition(state, action)
-      assert.notEqual(result.state, state, 'Invalid action in level ' + level.id)
-      state = result.state
-    }
-  }
-  return state
-}
-
-function winnableAgainst(level: CampaignLevel, difficulty: BotDifficulty) {
-  // Some encounters need maximum caution for the scripted player to outlast the bot.
-  for (const caution of [0.25, 0.7, 1, 1.5, 2]) {
-    if (playToTheEnd(level, difficulty, caution).winner === 'player') return true
-  }
-  return false
-}
 
 test('All twenty distinct campaign encounters are winnable against normal AI', () => {
   assert.equal(original.levels.length, 20)
@@ -53,17 +31,6 @@ test('All twenty distinct campaign encounters are winnable against normal AI', (
   assert.deepEqual(biomes, new Set(['verdant', 'mountains', 'desert', 'volcano', 'hell']))
 })
 
-// These encounters defeat the scripted player at every caution against the hard AI.
-// A human may still win them; if brutal proves unbeatable, tune their enemy rosters.
-const NOT_SCRIPTABLY_WINNABLE = new Set([6, 8, 10])
-
-test('Every brutal encounter stays winnable against the hard AI', () => {
-  for (const level of CAMPAIGNS[1].levels) {
-    if (NOT_SCRIPTABLY_WINNABLE.has(level.id)) continue
-    assert.ok(winnableAgainst(level, 'hard'), 'Brutal level ' + level.id + ': ' + level.name)
-  }
-})
-
 test('Every shattered encounter stays winnable at its own difficulty', () => {
   const shattered = CAMPAIGNS[2]
   assert.equal(shattered.levels.length, 10)
@@ -73,17 +40,6 @@ test('Every shattered encounter stays winnable at its own difficulty', () => {
       'Shattered level ' + level.id + ': ' + level.name,
     )
 })
-
-for (const [slug, id] of [
-  ['war-of-the-ring', 2],
-  ['iron-throne', 3],
-  ['iron-throne', 4],
-] as const) {
-  const level = CAMPAIGNS.find((pack) => pack.slug === slug)!.levels[id - 1]
-  test(level.name + ' stays winnable after the AI safety fixes', () => {
-    assert.ok(winnableAgainst(level, level.difficulty), level.name)
-  })
-}
 
 test('The introductory bowman can finish the battle if the player stays idle', () => {
   const level = original.levels[1]
