@@ -1,6 +1,6 @@
 import { allyTargets, label, specialTargets } from '../combat.ts'
 import { hexDist } from '../hex.ts'
-import { defaultAi, reachableMoves, type PawnAi } from '../pawn-ai.ts'
+import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const rally: SpecialAbility = {
@@ -39,7 +39,6 @@ const soldiers = (army: readonly Pawn[]) => army.filter((pawn) => pawn.kind !== 
 
 // Damage the king can absorb while keeping a margin is cheap; closer to death it is dear.
 const kingAi: PawnAi = {
-  moves: reachableMoves,
   value: (_king, health) => KING_SCORE.king + health * KING_SCORE.health,
   risk: (_king, { incoming, health, hellfireDamage }) => {
     const threat = incoming + hellfireDamage
