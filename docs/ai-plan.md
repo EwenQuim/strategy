@@ -98,7 +98,7 @@ One unit per commit, each checked by the campaign integration tests and simulate
 
 | Unit | Shipped |
 |---|---|
-| King | Graduated risk: 30 per incoming point while it keeps 2 health, 120 per point closer to death, lethal still forbidden. Commander: stays near allies, +4 per wounded adjacent ally so Rally is deliberate. Warrior when its side has twice the enemy soldiers or at most two enemy soldiers remain. |
+| King | Graduated risk: 30 per incoming point while it keeps 2 health, 120 per point closer to death, lethal still forbidden. Commander: stays near allies, +3 per wounded adjacent ally so healing is worth more than keeping an ally wounded. Warrior when its side has twice the enemy soldiers or at most two enemy soldiers remain. |
 | Archer | -10 per adjacent enemy: it cannot shoot at range 1. |
 | Magician | +1 per extra enemy on its best fireball line. A tie-breaker only: 2 or more tipped Original's Last Crown out of reach of the scripted player. |
 | Ninja | Caution floor of 0.7 whatever the temperament (1.0 tipped Last Crown), and +6 per adjacent ranged unit or king. |

@@ -32,7 +32,8 @@ const SAFE_DAMAGE = 30
 const DANGER_DAMAGE = 120
 const DANGER_MARGIN = 2
 const ALLY_DISTANCE = 0.5
-const RALLY_READY = 4
+// Staying beside a wounded ally must be worth less than healing it.
+const RALLY_READY = 3
 
 const soldiers = (army: readonly Pawn[]) => army.filter((pawn) => pawn.kind !== 'king').length
 
