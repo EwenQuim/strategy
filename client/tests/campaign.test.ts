@@ -321,7 +321,7 @@ test('Wizard Curtain has four aligned casters and Hell has two connected double-
 test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {
   let completed = 0
   for (let level = 1; level <= 20; level++) {
-    for (let candidate = 1; candidate <= 20; candidate++)
+    for (const candidate = 1; candidate <= 20; candidate++)
       assert.equal(isLevelUnlocked(original, candidate, completed), candidate <= level)
     assert.equal(completeCampaignLevel(original, completed, level + 1), completed)
     completed = completeCampaignLevel(original, completed, level)
@@ -374,6 +374,8 @@ test('The shattered experiment mixes defense, gaps, hazards and specials in ten 
     assert.deepEqual(Object.keys(level).sort(), ['difficulty', 'id', 'name', 'seed', 'setup'])
     assert.ok(level.setup.map.length <= 12 && level.setup.map.every((row) => row.length <= 8))
     shapes.add(level.setup.map.join('/'))
+  }
+  for (const level of shattered.levels) {
     for (const side of ['player', 'enemy'] as const)
       assert.equal(
         level.setup[side].filter((pawn) => pawn.kind === 'king').length,
