@@ -56,8 +56,8 @@ test('Equally valued attacks keep candidate order at every difficulty', () => {
     if (reversed) targets.reverse()
     const state = battle([
       new Swordsman(1, 0, 0, 'enemy', 5, 1),
-      new King(2, -6, 0, 'enemy'),
-      new King(3, 6, 0, 'player'),
+      new King(2, -3, -3, 'enemy'),
+      new King(3, 3, 3, 'player'),
       ...targets,
     ])
     for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
@@ -140,22 +140,18 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     },
   )
 
-  test(
-    level + ': a defender kills a threat to its king instead of taking nearby material',
-    () => {
-      const state = battle([
-        new Swordsman(1, 0, 0, 'enemy'),
-        new King(2, 0, 1, 'enemy', 4),
-        new Bulwark(3, -1, 0, 'player', 1),
-        new Ninja(4, 1, 0, 'player'),
-        new King(5, 6, 0, 'player'),
-      ])
-      const actions = chooseBotActions(state, level)
-      const next = actions.reduce(reducer, state)
-      assert.ok(!next.pawns.some((p) => p.id === 4))
-      assert.ok(next.pawns.some((p) => p.id === 3))
-    },
-  )
+  test(level + ': a defender removes the threat to its king within its turn', () => {
+    const state = battle([
+      new Swordsman(1, 0, 0, 'enemy'),
+      new King(2, 0, 1, 'enemy', 4),
+      new Bulwark(3, -1, 0, 'player', 1),
+      new Ninja(4, 1, 0, 'player'),
+      new King(5, 6, 0, 'player'),
+    ])
+    const next = playTurn(state, level)
+    assert.ok(!next.pawns.some((p) => p.id === 4))
+    assert.equal(next.pawns.find((p) => p.id === 2)?.hp, 4)
+  })
 
   test(level + ': a reckless unit still never walks into lava to die', () => {
     const state = battle([

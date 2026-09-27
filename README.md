@@ -19,11 +19,12 @@ The frontend lives in `client/`; every npm script runs there, and the `make` tar
 - `make typecheck`: strict TypeScript checks for the app, library, tooling, and tests.
 - `make lint`: typecheck, formatting validation, and Oxlint with no warnings allowed.
 - `make test`: run the Node.js built-in test runner; no browser or test framework required.
-- `make check`: run `npm run test:ci`: formatting, lint, typechecks, all unit tests, integration tests, and the production build.
+- `make check`: run `npm run test:ci`: formatting, lint, typechecks, all unit tests, and the production build.
+- `make test-integration`: run the AI battle suite (`npm run test:integration`): bot sweeps and campaign winnability against every bot difficulty.
 - `npm run bench:ai`: replay the largest battles and report the worst and average AI reply time.
 - `npm run test:pwa`: test the existing build in Chrome at a small portrait viewport, including offline play, safe upgrades, and failed downloads.
 
-`.githooks/pre-push` runs `npm run typecheck` and the fast unit suite (`npm test`) so pushing stays quick; the slow exhaustive bot sweeps live in `client/tests/integration` and run in CI, not on push. `npm run prepare` installs the hook locally. The full gate lives in CI: `npm run test:ci` plus a browser smoke job (`npm run test:pwa:smoke`, which skips the slow full-battle animation, local multiplayer, and campaign scenarios), run against a fresh locked install with a clean tracked diff and a four-minute job timeout. The slow browser scenarios remain available through `npm run test:pwa`.
+`.githooks/pre-push` runs `npm run typecheck` and the fast unit suite (`npm test`) so pushing stays quick; the slow exhaustive bot sweeps live in `client/tests/integration` and run in CI, not on push. `npm run prepare` installs the hook locally. CI has its own AI job for the bot sweeps (`npm run test:integration`, five-minute timeout), separate from the main check (`npm run test:ci`, four-minute timeout) so AI cost never delays the gameplay gate. A browser smoke job (`npm run test:pwa:smoke`, which skips the slow full-battle animation, local multiplayer, and campaign scenarios) runs against a fresh locked install with a clean tracked diff. The slow browser scenarios remain available through `npm run test:pwa`.
 
 The same checks gate pull requests and GitHub Pages deployment. The build includes a `404.html` fallback for seeded game URLs.
 
@@ -123,7 +124,7 @@ Level 1 starts unlocked; winning unlocks the next level. Existing saved progress
 
 Two more packs share the campaign selector once the Original campaign is finished. Brutal replays the same twenty encounters against the hard AI. Shattered Crown is a ten-level experiment that mixes asymmetric terrain defense (Narrow Gate, Broken Wall), gap-crossing ninja raids (Gap Walker), a lake moat around a contested watchtower (The Moat), special-tile races (Spring Shrine, Twin Runes), a mirrored hard-AI duel (Mirror of Sand), and lava or hellfire hazards (Lava Ford, Basalt Court, Crown of Ashes). Each level runs at its own difficulty, and the integration tests require a scripted player victory for every one of them.
 
-Two story packs are shown locked on the selector as a reward: War of the Ring (unlocked at 25 total victories) and Iron Throne (unlocked at 35). Their levels recreate famous fantasy battles under original names with large armies against the hard AI, plus an epic three-versus-nine canyon stand (Three Against the Horde) against the normal AI. Outside Original, every level of an unlocked pack can be played in any order.
+Two story packs are shown locked on the selector as a reward: War of the Ring (unlocked at 25 total victories) and Iron Throne (unlocked at 35). Their levels recreate famous fantasy battles under original names with large armies against the hard AI, plus an epic three-versus-eight canyon stand (Three Against the Horde) against the normal AI. Outside Original, every level of an unlocked pack can be played in any order.
 
 Completed levels are stored in localStorage under `hexmate:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 

@@ -94,11 +94,6 @@
         },
         {
           "kind": "swordsman",
-          "col": 3,
-          "row": 4
-        },
-        {
-          "kind": "swordsman",
           "col": 5,
           "row": 4
         }
@@ -161,7 +156,7 @@
         {
           "kind": "king",
           "col": 3,
-          "row": 3
+          "row": 1
         },
         {
           "kind": "archer",
@@ -196,6 +191,11 @@
         {
           "kind": "swordsman",
           "col": 5,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
           "row": 0
         }
       ]
@@ -745,11 +745,6 @@
         },
         {
           "kind": "bulwark",
-          "col": 2,
-          "row": 8
-        },
-        {
-          "kind": "bulwark",
           "col": 5,
           "row": 8
         },
@@ -762,11 +757,6 @@
           "kind": "swordsman",
           "col": 3,
           "row": 2
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 9
         },
         {
           "kind": "swordsman",

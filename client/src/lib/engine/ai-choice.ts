@@ -6,7 +6,7 @@ import type { BotOptions } from './ai.ts'
 export type Outcome = { state: GameState; weight: number }
 export type Option = { actions: Action[]; outcomes: Outcome[]; value: number }
 
-export const expected = (outcomes: Outcome[], value: (state: GameState) => number) =>
+const expected = (outcomes: Outcome[], value: (state: GameState) => number) =>
   outcomes.reduce((sum, outcome) => sum + outcome.weight * value(outcome.state), 0)
 
 export const hpOf = (state: GameState, id: number) =>

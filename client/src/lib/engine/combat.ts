@@ -1,41 +1,60 @@
-import { hexDist, key, neighbors, passable, type Axial, type Tile } from './hex.ts'
+import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
 import type { AttackProfile, Pawn } from './pawns/index.ts'
 import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
 export type BattleImpact = Axial & { damage: number }
 
-type WalkingPath = { path: Tile[]; damage: number }
+export type WalkRoute = {
+  key: string
+  tile: Tile | null
+  damage: number
+  steps: number
+  parent: WalkRoute | null
+}
+
+export function routePath(route: WalkRoute): Tile[] {
+  const path: Tile[] = []
+  for (let node = route; node.parent; node = node.parent) path.push(node.tile!)
+  return path.reverse()
+}
 
 export function walkingPaths(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
   maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1),
-): Map<string, WalkingPath> {
+  destination?: string,
+): Map<string, WalkRoute> {
   const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
   const start = key(pawn.q, pawn.r)
-  const paths = new Map<string, WalkingPath>([[start, { path: [], damage: 0 }]])
+  const root: WalkRoute = { key: start, tile: null, damage: 0, steps: 0, parent: null }
+  const paths = new Map([[start, root]])
   const leastDamage = new Map([[start, 0]])
-  let frontier = [{ position: pawn as Axial, path: [] as Tile[], damage: 0 }]
+  const grid = neighborKeys(tiles)
+  let frontier: WalkRoute[] = [root]
   for (let step = 1; step <= maxSteps && frontier.length; step++) {
-    const next: typeof frontier = []
+    const next: WalkRoute[] = []
     for (const current of frontier) {
-      for (const position of neighbors(current.position.q, current.position.r)) {
-        const k = key(position.q, position.r)
+      for (const k of grid.get(current.key) ?? []) {
         const tile = tiles.get(k)
         if (!tile || !passable(tile) || occupied.has(k)) continue
         const damage = current.damage + Number(tile.terrain === 'lava')
         if (damage >= (leastDamage.get(k) ?? Infinity)) continue
         leastDamage.set(k, damage)
-        const path = [...current.path, tile]
+        const node: WalkRoute = { key: k, tile, damage, steps: step, parent: current }
         const previous = paths.get(k)
-        if (!previous || path.length === previous.path.length || previous.damage >= pawn.hp)
-          paths.set(k, { path, damage })
-        if (damage < pawn.hp) next.push({ position: tile, path, damage })
+        if (!previous || step === previous.steps || previous.damage >= pawn.hp)
+          paths.set(k, node)
+        if (damage < pawn.hp) next.push(node)
       }
     }
     frontier = next
+    // A settled non-lethal route is final: later steps can only replace lethal ones.
+    if (destination) {
+      const settled = paths.get(destination)
+      if (settled && settled.damage < pawn.hp) break
+    }
   }
   return paths
 }
@@ -81,7 +100,7 @@ export function movementDestinations(
   return new Map(
     [...walkingPaths(tiles, pawns, pawn)].map(([tile, route]) => [
       tile,
-      pawn.moveEnergyCost(route.path.length),
+      pawn.moveEnergyCost(route.steps),
     ]),
   )
 }

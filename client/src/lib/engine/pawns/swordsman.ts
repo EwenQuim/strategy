@@ -6,6 +6,7 @@ import {
   enterTiles,
   label,
   pawnAt,
+  routePath,
   specialTargets,
   strike,
   walkingPaths,
@@ -23,7 +24,7 @@ export function chargeDestinations(
   return new Map(
     [...walkingPaths(tiles, pawns, pawn, 2)]
       .filter(([k]) => specialTargets(pawns, pawn, tiles.get(k)!).length > 0)
-      .map(([k, route]) => [k, route.path.length]),
+      .map(([k, route]) => [k, route.steps]),
   )
 }
 
@@ -64,8 +65,10 @@ const charge: SpecialAbility = {
       return null
     pawn.energy -= pawn.special.cost
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const route = walkingPaths(tiles, pawns, pawn, 2).get(key(destination.q, destination.r))!
-    const impacts = enterTiles(tiles, pawns, pawn, route.path, round, log)
+    const route = walkingPaths(tiles, pawns, pawn, 2, key(destination.q, destination.r)).get(
+      key(destination.q, destination.r),
+    )!
+    const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log)
     if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },

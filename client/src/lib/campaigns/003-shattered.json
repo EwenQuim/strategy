@@ -590,6 +590,11 @@
           "kind": "bomber",
           "col": 6,
           "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 0,
+          "row": 8
         }
       ],
       "enemy": [
