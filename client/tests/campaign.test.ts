@@ -63,7 +63,6 @@ test('The brutal pack replays the original encounters against the hard AI', () =
     original.levels.map((level) => ({
       name: level.name,
       seed: level.seed,
-
       setup: level.setup,
     })),
   )
@@ -122,8 +121,7 @@ test('Authored guardians cover their partners, including the wizard-flank deploy
     [16, 'player', 'magician'],
     [19, 'enemy', 'king'],
   ] as const) {
-    const level
- = original.levels[id - 1]
+    const level = original.levels[id - 1]
     const state = coreState(level.seed, level.setup)
     const ally = state.pawns.find((pawn) => pawn.side === side && pawn.kind === kind)!
     const guards = state.pawns.filter((pawn) => pawn.side === side && pawn.kind === 'bulwark')
@@ -167,8 +165,7 @@ test('All encounters have safe routes and later levels combine previously introd
       state.pawns.every((pawn) => state.tiles.get(key(pawn.q, pawn.r))!.terrain === 'basalt'),
     )
     assert.equal(
-      distFrom(safe, [s
-tate.pawns[0]]).size,
+      distFrom(safe, [state.pawns[0]]).size,
       safe.size,
       'Safe routes across level ' + level.id,
     )
@@ -234,7 +231,6 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
       14: ['spring'],
       15: ['rune'],
       17: ['hell'],
-
     },
   )
 })
@@ -288,7 +284,6 @@ test('Powder Lesson groups two bowmen above the swordsmen within one advanced bo
   )
   const fired = reducer(reducer(moved, { type: 'act', action: 'special' }), {
     type: 'specialAt',
-
     ...hexOf(3, 5),
   })
   for (const pawn of fired.pawns) {
@@ -333,8 +328,7 @@ test('Campaign progress unlocks exactly the next level, never regresses, and sto
     assert.equal(completed, level)
     assert.equal(completeCampaignLevel(original, completed, 1), level)
     assert.equal(completeCampaignLevel(original, completed, level), level)
-    assert.equal(parseCampaignProgr
-ess(String(completed), original.levels.length), completed)
+    assert.equal(parseCampaignProgress(String(completed), original.levels.length), completed)
   }
   for (const level of [-1, 0, 1.5, 21, NaN, Infinity]) {
     assert.equal(isLevelUnlocked(original, level, completed), false)
