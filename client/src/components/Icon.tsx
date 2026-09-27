@@ -13,6 +13,7 @@ const paths = {
   history: 'M3 11a9 9 0 1 1 2 7M3 4v7h7m2-5v6l4 2',
   hex: 'm12 2 9 5v10l-9 5-9-5V7l9-5Z',
   lock: 'M5 11h14v10H5V11Zm3 0V7a4 4 0 0 1 8 0v4',
+  check: 'm5 12 5 5L20 7',
 } as const
 
 export type IconName = keyof typeof paths
