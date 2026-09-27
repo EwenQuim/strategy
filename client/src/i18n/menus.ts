@@ -184,6 +184,25 @@ export const campaignCard = t({
   it: (name: string, completed: number, total: number) =>
     `Campagna ${name}, ${completed} / ${total} ${plural(completed, { one: 'completato', other: 'completati' })}`,
 })
+export const lockedCampaignCard = t({
+  en: (name: string, requirement: string) =>
+    `${name} campaign, locked until ${requirement} is completed`,
+  fr: (name: string, requirement: string) =>
+    `Campagne ${name}, verrouillée jusqu'à la fin de ${requirement}`,
+  de: (name: string, requirement: string) =>
+    `Kampagne ${name}, gesperrt bis ${requirement} abgeschlossen ist`,
+  es: (name: string, requirement: string) =>
+    `Campaña ${name}, bloqueada hasta completar ${requirement}`,
+  it: (name: string, requirement: string) =>
+    `Campagna ${name}, bloccata fino al completamento di ${requirement}`,
+})
+export const unlockAfter = t({
+  en: (requirement: string) => `Finish ${requirement} to unlock`,
+  fr: (requirement: string) => `Terminez ${requirement} pour débloquer`,
+  de: (requirement: string) => `Schließe ${requirement} ab zum Freischalten`,
+  es: (requirement: string) => `Completa ${requirement} para desbloquear`,
+  it: (requirement: string) => `Completa ${requirement} per sbloccare`,
+})
 export const levelStatus = t({
   en: { completed: 'Completed', ready: 'Ready', locked: 'Locked' },
   fr: { completed: 'Terminé', ready: 'Prêt', locked: 'Verrouillé' },

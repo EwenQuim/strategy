@@ -5,6 +5,7 @@ import {
   parseCampaignProgress,
   isLevelUnlocked,
   completeCampaignLevel,
+  isCampaignUnlocked,
   withBriefings,
 } from '../src/lib/campaign.ts'
 import {
@@ -409,4 +410,20 @@ test('The shattered pack ends with both full rosters on a hazard map', () => {
     )
   const final = coreState(shattered.levels[9].seed, shattered.levels[9].setup)
   assert.ok([...final.tiles.values()].some((tile) => tile.terrain === 'lava'))
+})
+
+test('Reward packs stay locked until the previous pack is fully completed', () => {
+  const [, , , ring, throne] = CAMPAIGNS
+  const progress = (completed: Record<string, number>) => (slug: string) => completed[slug] ?? 0
+  assert.ok(isCampaignUnlocked(original, progress({})))
+  assert.ok(isCampaignUnlocked(brutal, progress({})))
+  assert.equal(isCampaignUnlocked(ring, progress({ original: 20, brutal: 19 })), false)
+  assert.ok(isCampaignUnlocked(ring, progress({ brutal: 20 })))
+  assert.equal(
+    isCampaignUnlocked(throne, progress({ brutal: 20, 'war-of-the-ring': 7 })),
+    false,
+  )
+  assert.ok(isCampaignUnlocked(throne, progress({ 'war-of-the-ring': ring.levels.length })))
+  for (const pack of [ring, throne])
+    assert.ok(pack.levels.every((level) => !level.newElements.length))
 })

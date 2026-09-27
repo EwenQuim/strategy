@@ -75,6 +75,15 @@ test('Every shattered encounter stays winnable at its own difficulty', () => {
     )
 })
 
+test('Every reward pack encounter is winnable against the hard AI', () => {
+  for (const pack of CAMPAIGNS.slice(3))
+    for (const level of pack.levels)
+      assert.ok(
+        winnableAgainst(level, 'hard'),
+        pack.slug + ' level ' + level.id + ': ' + level.name,
+      )
+})
+
 test('The introductory bowman can finish the battle if the player stays idle', () => {
   const level = original.levels[1]
   const bot = createBotGame()

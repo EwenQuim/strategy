@@ -1,6 +1,8 @@
 import originalLevels from './campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
 import shatteredLevels from './campaigns/003-shattered.json' with { type: 'json' }
+import ringLevels from './campaigns/004-war-of-the-ring.json' with { type: 'json' }
+import throneLevels from './campaigns/005-iron-throne.json' with { type: 'json' }
 import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
@@ -26,6 +28,7 @@ export interface Campaign {
   slug: string
   name: string
   levels: CampaignLevel[]
+  unlockedBy?: string
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -73,6 +76,8 @@ const packs = [
   originalLevels as Omit<CampaignLevel, 'newElements'>[],
   brutalLevels as Omit<CampaignLevel, 'newElements'>[],
   shatteredLevels as Omit<CampaignLevel, 'newElements'>[],
+  ringLevels as Omit<CampaignLevel, 'newElements'>[],
+  throneLevels as Omit<CampaignLevel, 'newElements'>[],
 ]
 
 for (const levels of packs) {
@@ -89,7 +94,27 @@ export const CAMPAIGNS: Campaign[] = [
   { slug: 'original', name: 'Original', levels: briefedCampaigns[0] },
   { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[1] },
   { slug: 'shattered', name: 'Shattered Crown', levels: briefedCampaigns[2] },
+  {
+    slug: 'war-of-the-ring',
+    name: 'War of the Ring',
+    levels: briefedCampaigns[3],
+    unlockedBy: 'brutal',
+  },
+  {
+    slug: 'iron-throne',
+    name: 'Iron Throne',
+    levels: briefedCampaigns[4],
+    unlockedBy: 'war-of-the-ring',
+  },
 ]
+
+export function isCampaignUnlocked(
+  campaign: Campaign,
+  completedIn: (slug: string) => number,
+): boolean {
+  const requirement = CAMPAIGNS.find((pack) => pack.slug === campaign.unlockedBy)
+  return !requirement || completedIn(requirement.slug) === requirement.levels.length
+}
 
 // The original campaign keeps its legacy key so existing players keep their progress.
 export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'

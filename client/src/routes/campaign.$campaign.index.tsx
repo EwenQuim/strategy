@@ -6,7 +6,7 @@ import * as m from '../i18n/menus'
 import { campaignName, levelName } from '../i18n/campaign'
 import { Icon } from '../components/Icon'
 import { LevelMiniature } from '../components/LevelMiniature'
-import { CAMPAIGNS, isLevelUnlocked } from '../lib/campaign'
+import { CAMPAIGNS, isCampaignUnlocked, isLevelUnlocked } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
@@ -15,8 +15,10 @@ const levelCardClassName =
 
 export const Route = createFileRoute('/campaign/$campaign/')({
   beforeLoad: ({ params }) => {
-    if (!CAMPAIGNS.some((campaign) => campaign.slug === params.campaign))
-      throw redirect({ to: '/', replace: true })
+    const campaign = CAMPAIGNS.find((pack) => pack.slug === params.campaign)
+    if (!campaign) throw redirect({ to: '/', replace: true })
+    if (!isCampaignUnlocked(campaign, readCampaignProgress))
+      throw redirect({ to: '/campaign', replace: true })
   },
   component: function CampaignLevels() {
     const { campaign: slug } = Route.useParams()
