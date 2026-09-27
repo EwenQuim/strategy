@@ -15,6 +15,7 @@ import { markHellfire } from './hellfire.ts'
 import {
   canAttack,
   walkingPaths,
+  routePath,
   enterTiles,
   canUseSpecial,
   specialTargets,
@@ -191,10 +192,12 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     }
     case 'move': {
       if (state.phase !== 'move' || actor.energy <= 0) return null
-      const route = walkingPaths(tiles, pawns, actor).get(key(action.q, action.r))
-      if (!route?.path.length) return null
-      actor.energy -= actor.moveEnergyCost(route.path.length)
-      const impacts = enterTiles(tiles, pawns, actor, route.path, state.round, log)
+      const route = walkingPaths(tiles, pawns, actor, undefined, key(action.q, action.r)).get(
+        key(action.q, action.r),
+      )
+      if (!route?.steps) return null
+      actor.energy -= actor.moveEnergyCost(route.steps)
+      const impacts = enterTiles(tiles, pawns, actor, routePath(route), state.round, log)
       effect = {
         kind: 'move',
         from,

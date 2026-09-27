@@ -155,7 +155,7 @@ test('Holes block walking and landing, but permit detours, ranged attacks and ju
   const position = key(destination.q, destination.r)
   assert.equal(reducer(state, { type: 'move', ...hole }), state)
   assert.ok(!walkingPaths(state.tiles, state.pawns, pawn, 2).has(position))
-  assert.equal(walkingPaths(state.tiles, state.pawns, pawn).get(position)?.path.length, 3)
+  assert.equal(walkingPaths(state.tiles, state.pawns, pawn).get(position)?.steps, 3)
   const moved = reducer(state, { type: 'move', ...destination }).pawns[0]
   assert.deepEqual({ q: moved.q, r: moved.r }, destination)
   const ninja = new Ninja(1, pawn.q, pawn.r, 'player')

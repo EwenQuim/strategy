@@ -1,6 +1,6 @@
 import { activePawn, reducer, type GameState } from './engine.ts'
 import { inHellfire } from './hellfire.ts'
-import { canAttack, walkingPaths, protectorFor } from './combat.ts'
+import { canAttack, routePath, walkingPaths, protectorFor } from './combat.ts'
 import type { SidePlan } from './ai-plan.ts'
 import { distFrom, hexDist, key, passable, type Axial, type Tile } from './hex.ts'
 import {
@@ -52,8 +52,8 @@ function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCa
       .map(([position, route]) => ({
         from: state.tiles.get(position) ?? attacker,
         movementCost:
-          attacker.moveEnergyCost(route.path.length) -
-          route.path.filter((tile) => tile.feature === 'rune').length * 2,
+          attacker.moveEnergyCost(route.steps) -
+          routePath(route).filter((tile) => tile.feature === 'rune').length * 2,
       })),
     jumps: jumpDestinations(state.tiles, state.pawns, attacker).filter(
       (tile) => tile.terrain !== 'lava',
@@ -80,6 +80,19 @@ function maxDamage(attacker: Pawn, reach: Reach, target: Pawn): number {
   return damage
 }
 
+// Rune pickup is the only map mutation, and it always lands on a fresh copy, so a map's runes
+// never change after the state holding the map is built.
+const runesByMap = new WeakMap<Map<string, Tile>, Tile[]>()
+function runeTiles(tiles: Map<string, Tile>): Tile[] {
+  let runes = runesByMap.get(tiles)
+  if (!runes)
+    runesByMap.set(
+      tiles,
+      (runes = [...tiles.values()].filter((tile) => tile.feature === 'rune')),
+    )
+  return runes
+}
+
 function estimateIncomingDamage(
   state: GameState,
   side: Side,
@@ -89,11 +102,13 @@ function estimateIncomingDamage(
   const damageByTarget = new Map(targets.map((p) => [p.id, 0]))
   const smallestHitByTarget = new Map<number, number>()
   const lastAttackerTurn = new Map<number, number>()
-  const runes = [...state.tiles.values()].filter((tile) => tile.feature === 'rune')
-  const turnOffset = (id: number) =>
-    (state.order.indexOf(id) - state.active + state.order.length) % state.order.length
+  const runes = runeTiles(state.tiles)
+  const order = state.order
+  const turnOffset = new Map(
+    order.map((id, index) => [id, (index - state.active + order.length) % order.length]),
+  )
   for (const foe of state.pawns.filter((p) => p.side !== side)) {
-    const actsNextRound = state.order.indexOf(foe.id) < state.active
+    const actsNextRound = order.indexOf(foe.id) < state.active
     if (actsNextRound && foe.hp <= 1 && inHellfire(state.hellfire, foe)) continue
     const attacker = foe.clone()
     attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
@@ -101,7 +116,8 @@ function estimateIncomingDamage(
     const reach = reachOf(state, attacker, runes, cache)
     // A target that acts before this attacker can move away or strike first, so only attackers
     // acting before the target's next turn threaten it.
-    for (const target of targets.filter((t) => turnOffset(foe.id) < turnOffset(t.id))) {
+    for (const target of targets) {
+      if (turnOffset.get(foe.id)! >= turnOffset.get(target.id)!) continue
       const damage = maxDamage(attacker, reach, target)
       damageByTarget.set(target.id, damageByTarget.get(target.id)! + damage)
       if (damage > 0) {
@@ -111,7 +127,7 @@ function estimateIncomingDamage(
         )
         lastAttackerTurn.set(
           target.id,
-          Math.max(lastAttackerTurn.get(target.id) ?? 0, turnOffset(foe.id)),
+          Math.max(lastAttackerTurn.get(target.id) ?? 0, turnOffset.get(foe.id)!),
         )
       }
     }
@@ -121,7 +137,7 @@ function estimateIncomingDamage(
     if (
       guard &&
       damageByTarget.get(guard.id)! < guard.hp &&
-      turnOffset(guard.id) > (lastAttackerTurn.get(target.id) ?? -1)
+      turnOffset.get(guard.id)! > (lastAttackerTurn.get(target.id) ?? -1)
     ) {
       const hit = smallestHitByTarget.get(target.id) ?? 0
       damageByTarget.set(target.id, Math.max(0, damageByTarget.get(target.id)! - hit))
@@ -149,12 +165,13 @@ export function evaluatePosition(
         ? SCORE.victory
         : -SCORE.victory
   const danger = estimateIncomingDamage(settled, actor.side, cache)
+  const actedAt = new Map(settled.order.map((id, index) => [id, index]))
   let score = 0
   let survivingActor = actor
   for (const pawn of settled.pawns) {
     const allied = pawn.side === actor.side
     const hellfireDamage = Number(
-      settled.order.indexOf(pawn.id) < settled.active && inHellfire(settled.hellfire, pawn),
+      (actedAt.get(pawn.id) ?? -1) < settled.active && inHellfire(settled.hellfire, pawn),
     )
     const health = pawn.hp - hellfireDamage
     if (pawn.id === actor.id && health > 0) survivingActor = pawn

@@ -283,13 +283,13 @@ test('Walking prefers a safe equal-length path and can take a longer route aroun
     state.tiles.get('1,5')!.terrain = 'lava'
     const route = walkingPaths(state.tiles, state.pawns, state.pawns[0]).get('1,6')!
     assert.equal(route.damage, 0)
-    assert.equal(route.path.length, 2)
+    assert.equal(route.steps, 2)
     const next = reducer(state, { type: 'move', q: 1, r: 6 })
     assert.equal(next.pawns[0].hp, hp)
     if (hp === 1) {
       const around = walkingPaths(state.tiles, state.pawns, state.pawns[0]).get('2,5')!
       assert.equal(around.damage, 0)
-      assert.equal(around.path.length, 3)
+      assert.equal(around.steps, 3)
     }
   }
 })
