@@ -1,6 +1,6 @@
 import { activePawn, reducer, type Action, type GameState } from './engine.ts'
 import { canAttack, movementDestinations } from './combat.ts'
-import { key, neighbors } from './hex.ts'
+import { key, neighbors, passable } from './hex.ts'
 import type { Pawn } from './pawns/index.ts'
 
 export type TurnPlan = { actions: Action[]; state: GameState }
@@ -32,11 +32,12 @@ export function turnPlans(state: GameState): TurnPlan[] {
     const next = actions.reduce(reducer, current)
     return next === current ? null : next
   }
-  const keep = (current: GameState, actions: Action[]) => {
+  const keep = (current: GameState, actions: Action[], currentKey?: string) => {
     const [ended, plan] = over(current)
       ? [current, actions]
       : [apply(current, [END_TURN])!, [...actions, END_TURN]]
-    const position = positionKey(ended)
+    const position =
+      ended === current ? (currentKey ?? positionKey(current)) : positionKey(ended)
     if (!plans.has(position)) plans.set(position, { actions: plan, state: ended })
   }
   const moves = (current: GameState) => {
@@ -54,16 +55,21 @@ export function turnPlans(state: GameState): TurnPlan[] {
     attacks = 0,
     lastTarget?: number,
   ) {
-    const visit = [positionKey(current), acted, attacks, lastTarget].join('/')
+    const currentKey = positionKey(current)
+    const visit = [currentKey, acted, attacks, lastTarget].join('/')
     if (visited.has(visit)) return
     visited.add(visit)
-    keep(current, actions)
+    keep(current, actions, currentKey)
     if (over(current)) return
     const pawn = activePawn(current)!
-    if (acted)
-      for (const step of moves(current).filter((tile) =>
-        neighbors(pawn.q, pawn.r).some((n) => n.q === tile.q && n.r === tile.r),
-      )) {
+    // Stepping back after acting only reaches the adjacent hexes, so scanning them directly
+    // skips a full walking-range search per node. The tile order matches the search's.
+    if (acted && pawn.energy >= pawn.moveCost)
+      for (const step of neighbors(pawn.q, pawn.r)) {
+        const tile = current.tiles.get(key(step.q, step.r))
+        if (!tile || !passable(tile)) continue
+        if (current.pawns.some((p) => p.id !== pawn.id && p.q === step.q && p.r === step.r))
+          continue
         const moved = apply(current, [moveTo(step.q, step.r)])
         if (moved) keep(moved, [...actions, moveTo(step.q, step.r)])
       }
