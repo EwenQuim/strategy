@@ -127,7 +127,10 @@ The within-turn beam never simulated the opponent: replies were a static worst-c
 
 - **Turns, not actions.** `ai-turns.ts` enumerates a unit's whole turn: move or stay, special before attacks while energy lasts, then save energy or step back one hex after acting. Identical end positions are merged. On 1,846 real positions a turn has 21 variants at the median, 37 at p90, 125 at most.
 - **Minimax with alpha-beta** (`ai-search.ts`): each ply is one unit's turn in initiative order; the searching side maximizes, the other minimizes the same score. Turns are ranked by their leaf score for move ordering and a beam, the last ply stops as soon as a turn is good enough for a cutoff, and turns with escape rolls average their hit and escape outcomes. A unit plays its chosen turn up to the first attack or special, then decides again.
-- **Budget:** at most 1,500 scored positions per decision, a count rather than a clock so decisions stay deterministic.
+- **Budget:** once a decision has scored 1,500 positions it stops expanding and reuses the scores it already has, so a decision scores at most the budget plus one node's shortlist. A count rather than a clock keeps decisions deterministic.
+- **Shortlist:** a node scores every turn without a roll, then at most 200 turns overall, keeping the attacking turns that deal the most damage if every blow lands.
+- **Independent rolls:** a turn planned in the all-hit world is replayed with every roll at its own odds (three attacks at 20% escape all land 51.2% of the time), finishing every branch's turn and merging equal positions. Forced escape chances are restored after each roll unless a new round has reset them. Area specials keep one averaged roll per blast.
+- **Enumeration bounds:** equal intermediate positions are explored once, follow-up attacks consider the previous target and the two most valuable ones, and a plan spells out at most three attacks (the unit decides again after each blow). Positions are compared with their escape chances, special use, bonus energy and spring timer.
 - **Threat turn order:** an enemy only threatens a target if it acts before the target's next turn. Counting every enemy against every target flooded every searched line with a lethal-king penalty once minimax had advanced the enemy, so every move looked equally lost.
 - **Engine:** maps without runes are shared between states instead of copied on every action.
 - **Presets:** depth now counts unit turns: easy and normal 2, hard 3.
@@ -140,7 +143,7 @@ Measured against frozen opponents from before #63 (the scripted player and a kin
 | Original, scripted opponent wins | 27 / 40 | 19 / 40 |
 | Original, king rusher wins | 10 / 40 | 5 / 40 |
 
-Rebalanced for the stronger AI: Powder Lesson gains a player swordsman (Original and Brutal), Brutal's scripted exemptions become High Pass, Powder Lesson and Dune Patrol, and five story levels are retuned (Three Against the Horde is now three versus eight).
+Rebalanced for the stronger AI: Powder Lesson gains a player swordsman and Iron Caravan loses its back archer (Original and Brutal), Crown of Ashes gives the player a second bulwark, Brutal's scripted exemptions become High Pass, Powder Lesson, Dune Patrol and Last Crown, and five story levels are retuned (Three Against the Horde is now three versus eight). The campaign integration tests are split into parallel files to stay inside CI's time limit.
 
 ## Verification tools
 

@@ -745,11 +745,6 @@
         },
         {
           "kind": "archer",
-          "col": 2,
-          "row": 1
-        },
-        {
-          "kind": "archer",
           "col": 5,
           "row": 1
         },
