@@ -1,6 +1,7 @@
-import { aimAt, label, pawnAt, protectorFor, specialTargets } from '../combat.ts'
+import { aimAt, canAttack, label, pawnAt, protectorFor, specialTargets } from '../combat.ts'
+import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
-import { hexDist } from '../hex.ts'
+import { hexDist, key } from '../hex.ts'
 
 const protect: SpecialAbility = {
   name: 'protect',
@@ -29,6 +30,20 @@ const protect: SpecialAbility = {
   },
 }
 
+const bulwarkAi: PawnAi = {
+  ...defaultAi,
+  ruleSpecial: (_bulwark, state, foes, allies) => {
+    const threatened = allies
+      .filter(
+        (ally) =>
+          !protectorFor(state.pawns, ally) &&
+          foes.some((foe) => canAttack(foe, ally, state.tiles.get(key(foe.q, foe.r)))),
+      )
+      .sort((a, b) => Number(b.kind === 'king') - Number(a.kind === 'king') || a.hp - b.hp)[0]
+    return threatened ? aimAt(threatened) : null
+  },
+}
+
 export class Bulwark extends Pawn {
   static override readonly startsOnFrontRow = true
   static override readonly icon =
@@ -43,5 +58,8 @@ export class Bulwark extends Pawn {
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 1 }
   get special(): SpecialAbility {
     return protect
+  }
+  override get ai(): PawnAi {
+    return bulwarkAi
   }
 }
