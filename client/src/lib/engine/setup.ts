@@ -10,14 +10,7 @@ import {
   passable,
   type Tile,
 } from './hex.ts'
-import {
-  King,
-  PAWN_CLASSES,
-  RECRUIT_CLASSES,
-  Swordsman,
-  type Pawn,
-  type Side,
-} from './pawns/index.ts'
+import { King, PAWN_CLASSES, RECRUIT_CLASSES, type Pawn, type Side } from './pawns/index.ts'
 import { SeededRandom, seedState } from './random.ts'
 
 const SYMMETRIC_SEED_PREFIX = 'sym-'
@@ -174,14 +167,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
     const playerArmy = setup
       ? setup.player.map((kind) => PAWN_CLASSES[kind])
-      : [
-          Swordsman,
-          King,
-          ...Array.from(
-            { length: 3 },
-            () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
-          ),
-        ]
+      : [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
     const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
     const playerPawns = spawnRandomArmy(playerArmy, 'player', 1, random)
     const enemyPawns =
