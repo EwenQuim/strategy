@@ -185,23 +185,27 @@ export const campaignCard = t({
     `Campagna ${name}, ${completed} / ${total} ${plural(completed, { one: 'completato', other: 'completati' })}`,
 })
 export const lockedCampaignCard = t({
-  en: (name: string, requirement: string) =>
-    `${name} campaign, locked until ${requirement} is completed`,
-  fr: (name: string, requirement: string) =>
-    `Campagne ${name}, verrouillée jusqu'à la fin de ${requirement}`,
-  de: (name: string, requirement: string) =>
-    `Kampagne ${name}, gesperrt bis ${requirement} abgeschlossen ist`,
-  es: (name: string, requirement: string) =>
-    `Campaña ${name}, bloqueada hasta completar ${requirement}`,
-  it: (name: string, requirement: string) =>
-    `Campagna ${name}, bloccata fino al completamento di ${requirement}`,
+  en: (name: string, victories: number, required: number) =>
+    `${name} campaign, locked, ${victories} / ${required} victories to unlock`,
+  fr: (name: string, victories: number, required: number) =>
+    `Campagne ${name}, verrouillée, ${victories} / ${required} victoires pour débloquer`,
+  de: (name: string, victories: number, required: number) =>
+    `Kampagne ${name}, gesperrt, ${victories} / ${required} Siege zum Freischalten`,
+  es: (name: string, victories: number, required: number) =>
+    `Campaña ${name}, bloqueada, ${victories} / ${required} victorias para desbloquear`,
+  it: (name: string, victories: number, required: number) =>
+    `Campagna ${name}, bloccata, ${victories} / ${required} vittorie per sbloccare`,
 })
-export const unlockAfter = t({
-  en: (requirement: string) => `Finish ${requirement} to unlock`,
-  fr: (requirement: string) => `Terminez ${requirement} pour débloquer`,
-  de: (requirement: string) => `Schließe ${requirement} ab zum Freischalten`,
-  es: (requirement: string) => `Completa ${requirement} para desbloquear`,
-  it: (requirement: string) => `Completa ${requirement} per sbloccare`,
+export const victoriesToUnlock = t({
+  en: (victories: number, required: number) => `${victories} / ${required} victories to unlock`,
+  fr: (victories: number, required: number) =>
+    `${victories} / ${required} victoires pour débloquer`,
+  de: (victories: number, required: number) =>
+    `${victories} / ${required} Siege zum Freischalten`,
+  es: (victories: number, required: number) =>
+    `${victories} / ${required} victorias para desbloquear`,
+  it: (victories: number, required: number) =>
+    `${victories} / ${required} vittorie per sbloccare`,
 })
 export const levelStatus = t({
   en: { completed: 'Completed', ready: 'Ready', locked: 'Locked' },

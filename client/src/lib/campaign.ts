@@ -28,7 +28,7 @@ export interface Campaign {
   slug: string
   name: string
   levels: CampaignLevel[]
-  unlockedBy?: string
+  requiredVictories?: number
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -98,22 +98,25 @@ export const CAMPAIGNS: Campaign[] = [
     slug: 'war-of-the-ring',
     name: 'War of the Ring',
     levels: briefedCampaigns[3],
-    unlockedBy: 'brutal',
+    requiredVictories: 25,
   },
   {
     slug: 'iron-throne',
     name: 'Iron Throne',
     levels: briefedCampaigns[4],
-    unlockedBy: 'war-of-the-ring',
+    requiredVictories: 35,
   },
 ]
+
+export function totalVictories(completedIn: (slug: string) => number): number {
+  return CAMPAIGNS.reduce((sum, campaign) => sum + completedIn(campaign.slug), 0)
+}
 
 export function isCampaignUnlocked(
   campaign: Campaign,
   completedIn: (slug: string) => number,
 ): boolean {
-  const requirement = CAMPAIGNS.find((pack) => pack.slug === campaign.unlockedBy)
-  return !requirement || completedIn(requirement.slug) === requirement.levels.length
+  return totalVictories(completedIn) >= (campaign.requiredVictories ?? 0)
 }
 
 // The original campaign keeps its legacy key so existing players keep their progress.

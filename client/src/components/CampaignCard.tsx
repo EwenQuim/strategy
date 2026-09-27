@@ -4,7 +4,7 @@ import { Icon } from './Icon'
 import { LevelMiniature } from './LevelMiniature'
 import * as m from '../i18n/menus'
 import { campaignName } from '../i18n/campaign'
-import { CAMPAIGNS, isCampaignUnlocked, type Campaign } from '../lib/campaign'
+import { isCampaignUnlocked, totalVictories, type Campaign } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
@@ -12,23 +12,21 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
   const completed = useSyncExternalStore(subscribeCampaignProgress, () =>
     readCampaignProgress(campaign.slug),
   )
-  const unlocked = useSyncExternalStore(subscribeCampaignProgress, () =>
-    isCampaignUnlocked(campaign, readCampaignProgress),
+  const victories = useSyncExternalStore(subscribeCampaignProgress, () =>
+    totalVictories(readCampaignProgress),
   )
   const total = campaign.levels.length
   const done = completed === total
   const showcase = campaign.levels[Math.min(completed, total - 1)].setup
-  if (!unlocked) {
-    const requirement = campaignName(
-      CAMPAIGNS.find((pack) => pack.slug === campaign.unlockedBy)!,
-    )
+  if (!isCampaignUnlocked(campaign, readCampaignProgress)) {
+    const required = campaign.requiredVictories!
     return (
       <div
         className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl border border-line bg-(--biome-background) p-3 text-muted"
         style={BIOMES[showcase.biome].theme}
         data-testid="campaign-pack"
         data-locked
-        aria-label={m.lockedCampaignCard(campaignName(campaign), requirement)}
+        aria-label={m.lockedCampaignCard(campaignName(campaign), victories, required)}
       >
         <span className="flex min-h-0 flex-1 opacity-45 blur-[2px] grayscale-[40%]">
           <LevelMiniature setup={showcase} />
@@ -39,7 +37,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
         <span className="font-serif text-[24px] leading-none text-ink">
           {campaignName(campaign)}
         </span>
-        <span className="text-[11px]">{m.unlockAfter(requirement)}</span>
+        <span className="text-[11px]">{m.victoriesToUnlock(victories, required)}</span>
       </div>
     )
   }

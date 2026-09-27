@@ -412,18 +412,17 @@ test('The shattered pack ends with both full rosters on a hazard map', () => {
   assert.ok([...final.tiles.values()].some((tile) => tile.terrain === 'lava'))
 })
 
-test('Reward packs stay locked until the previous pack is fully completed', () => {
+test('Story packs unlock at 25 and 35 total victories across every campaign', () => {
   const [, , , ring, throne] = CAMPAIGNS
   const progress = (completed: Record<string, number>) => (slug: string) => completed[slug] ?? 0
   assert.ok(isCampaignUnlocked(original, progress({})))
   assert.ok(isCampaignUnlocked(brutal, progress({})))
-  assert.equal(isCampaignUnlocked(ring, progress({ original: 20, brutal: 19 })), false)
-  assert.ok(isCampaignUnlocked(ring, progress({ brutal: 20 })))
-  assert.equal(
-    isCampaignUnlocked(throne, progress({ brutal: 20, 'war-of-the-ring': 7 })),
-    false,
+  assert.equal(isCampaignUnlocked(ring, progress({ original: 20, shattered: 4 })), false)
+  assert.ok(isCampaignUnlocked(ring, progress({ original: 20, brutal: 3, shattered: 2 })))
+  assert.equal(isCampaignUnlocked(throne, progress({ original: 20, brutal: 14 })), false)
+  assert.ok(
+    isCampaignUnlocked(throne, progress({ original: 20, 'war-of-the-ring': 8, brutal: 7 })),
   )
-  assert.ok(isCampaignUnlocked(throne, progress({ 'war-of-the-ring': ring.levels.length })))
   for (const pack of [ring, throne])
     assert.ok(pack.levels.every((level) => !level.newElements.length))
 })

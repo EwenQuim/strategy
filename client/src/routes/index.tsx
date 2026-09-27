@@ -4,7 +4,7 @@ import * as m from '../i18n/menus'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
-import { CAMPAIGNS } from '../lib/campaign'
+import { CAMPAIGNS, totalVictories } from '../lib/campaign'
 import { useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
@@ -16,7 +16,7 @@ export const Route = createFileRoute('/')({
     )
     const done = completed === original.levels.length
     const allCompleted = useSyncExternalStore(subscribeCampaignProgress, () =>
-      CAMPAIGNS.reduce((sum, campaign) => sum + readCampaignProgress(campaign.slug), 0),
+      totalVictories(readCampaignProgress),
     )
     const allLevels = CAMPAIGNS.reduce((sum, campaign) => sum + campaign.levels.length, 0)
     const health = useHealth()
