@@ -15,11 +15,11 @@ export const customIntro = t({
   it: 'Questa battaglia usa i tuoi eserciti e il tuo bioma. Sconfiggi il re nemico per vincere.',
 })
 export const randomIntro = t({
-  en: 'Both sides get the same random lineup: a king, a swordsman and three recruits. Defeat the enemy king to win.',
-  fr: 'Les deux camps ont la même composition aléatoire : un roi, un épéiste et trois recrues. Battez le roi ennemi pour gagner.',
-  de: 'Beide Seiten erhalten dieselbe zufällige Aufstellung: einen König, einen Schwertkämpfer und drei Rekruten. Besiege den gegnerischen König, um zu gewinnen.',
-  es: 'Ambos bandos reciben la misma formación aleatoria: un rey, un espadachín y tres reclutas. Derrota al rey enemigo para ganar.',
-  it: 'Entrambe le parti ricevono la stessa formazione casuale: un re, uno spadaccino e tre reclute. Sconfiggi il re nemico per vincere.',
+  en: 'Both sides get the same random lineup: a king and five different recruits. Defeat the enemy king to win.',
+  fr: 'Les deux camps ont la même composition aléatoire : un roi et cinq recrues différentes. Battez le roi ennemi pour gagner.',
+  de: 'Beide Seiten erhalten dieselbe zufällige Aufstellung: einen König und fünf verschiedene Rekruten. Besiege den gegnerischen König, um zu gewinnen.',
+  es: 'Ambos bandos reciben la misma formación aleatoria: un rey y cinco reclutas diferentes. Derrota al rey enemigo para ganar.',
+  it: 'Entrambe le parti ricevono la stessa formazione casuale: un re e cinque reclute diverse. Sconfiggi il re nemico per vincere.',
 })
 export const aiDifficulty = t({
   en: (difficulty: string) => `AI difficulty: ${difficulty}.`,

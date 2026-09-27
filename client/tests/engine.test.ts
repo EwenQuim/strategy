@@ -241,7 +241,7 @@ test('Defeating the enemy king ends the game; restart clears the battle', () => 
   const restarted = reducer(victory, { type: 'restart' })
   assert.equal(restarted.winner, null)
   assert.equal(restarted.round, 1)
-  assert.equal(restarted.pawns.length, 10)
+  assert.equal(restarted.pawns.length, 12)
   assert.ok(restarted.pawns.every((p) => p.escapeChance === 0))
   assert.equal(initialState('test').tiles.size, MAP_WIDTH * MAP_HEIGHT)
   assert.deepEqual(restarted, initialState(state.seed))
@@ -823,8 +823,8 @@ test('Every seed places distinct pawns in their own three-row starting area', ()
     const opening = initialTransition(seed)
     assert.deepEqual(opening, initialTransition(seed))
     const state = opening.frames[0]?.state ?? opening.state
-    assert.equal(state.pawns.length, 10)
-    assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, 10)
+    assert.equal(state.pawns.length, 12)
+    assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, 12)
     for (const pawn of state.pawns) {
       const firstRow = pawn.side === 'enemy' ? 0 : MAP_HEIGHT - 3
       assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
@@ -867,33 +867,29 @@ test('Player and enemy movement stays silent while each enemy step still has a p
   assert.equal(result.frames.filter((f) => f.effect?.kind === 'move').length, 3)
 })
 
-test('Seeded armies mirror one King, a guaranteed swordsman, and three random recruits', () => {
+test('Seeded armies mirror one King and five different recruits', () => {
   const rosters = new Set<string>()
   const recruits = new Set<string>()
-  let duplicateRecruits = false
   for (let index = 0; index < 100; index++) {
     const opening = initialTransition('roster-' + index)
     const state = opening.frames[0]?.state ?? opening.state
     const player = state.pawns.filter((p) => p.side === 'player')
     const enemy = state.pawns.filter((p) => p.side === 'enemy')
-    assert.equal(player.length, 5)
-    assert.equal(enemy.length, 5)
+    assert.equal(player.length, 6)
+    assert.equal(enemy.length, 6)
     assert.equal(player.filter((p) => p.kind === 'king').length, 1)
-    assert.ok(player.some((p) => p.kind === 'swordsman'))
     assert.deepEqual(
       player.map((p) => p.kind),
       enemy.map((p) => p.kind),
     )
-    assert.ok(player[0] instanceof Swordsman)
-    assert.ok(player[1] instanceof King)
-    const randomRecruits = player.slice(2)
+    assert.ok(player[0] instanceof King)
+    const randomRecruits = player.slice(1)
     assert.ok(randomRecruits.every((p) => RECRUIT_CLASSES.some((Unit) => p instanceof Unit)))
+    assert.equal(new Set(randomRecruits.map((p) => p.kind)).size, 5)
     randomRecruits.forEach((p) => recruits.add(p.kind))
-    duplicateRecruits ||= new Set(randomRecruits.map((p) => p.kind)).size < 3
     rosters.add(player.map((p) => p.kind).join(','))
   }
   assert.ok(rosters.size > 1)
-  assert.ok(duplicateRecruits)
   assert.deepEqual([...recruits].sort(), [
     'archer',
     'bomber',

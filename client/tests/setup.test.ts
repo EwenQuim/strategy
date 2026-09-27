@@ -256,7 +256,7 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
         }),
       ),
     ),
-    3811068134,
+    2685748347,
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

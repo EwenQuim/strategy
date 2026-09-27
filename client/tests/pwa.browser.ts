@@ -196,6 +196,15 @@ async function fixture(t: TestContext) {
   }
 }
 
+async function dismissQuickPlayTutorial(page: Page) {
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  const tutorial = page.getByRole('dialog', { name: 'Quick play' })
+  if (await tutorial.isVisible()) {
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await tutorial.waitFor({ state: 'hidden' })
+  }
+}
+
 async function playTurn(page: Page) {
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   const current = await page.locator('[aria-current="step"]').getAttribute('title')
@@ -539,6 +548,7 @@ test(
     assert.equal(requests.has(route), false)
     await context.setOffline(true)
     assert.equal((await page.goto(origin + route))?.fromServiceWorker(), true)
+    await dismissQuickPlayTutorial(page)
     await playTurn(page)
     assert.equal(requests.has(route), false)
     const match = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
@@ -724,6 +734,7 @@ test(
       (await offline.goto(origin + base + 'game/pwa-failed-update'))?.fromServiceWorker(),
       true,
     )
+    await dismissQuickPlayTutorial(offline)
     await playTurn(offline)
     assert.equal(await releaseMarker(offline), undefined)
   },
@@ -778,6 +789,7 @@ test(
         Object.defineProperty(crypto, 'randomUUID', { value: () => seed })
       }, seed)
       await page.getByRole('link', { name: 'Quick play' }).click()
+      await dismissQuickPlayTutorial(page)
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
       assert.equal(await page.locator('[data-action="attack"]').isVisible(), true)
@@ -1272,6 +1284,32 @@ test('Briefings stay dismissed until route remount', { timeout: 60_000 }, async 
 })
 
 test(
+  'Quick play shows the rules tutorial to new players once',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.getByRole('link', { name: 'Quick play' }).click()
+    const tutorial = page.getByRole('dialog', { name: 'Quick play', includeHidden: true })
+    await tutorial.waitFor()
+    const text = await tutorial.innerText()
+    assert.match(text, /Both sides get the same random lineup/)
+    assert.match(text, /Kill the enemy king/)
+    assert.match(text, /Spend it to move, attack or use a special/)
+    assert.match(text, /You move first/)
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await tutorial.waitFor({ state: 'hidden' })
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    await page.getByRole('link', { name: 'Hexmate home' }).click()
+    await page.getByRole('link', { name: 'Quick play' }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.equal(await tutorial.count(), 0)
+    assert.deepEqual(errors, [])
+  },
+)
+
+test(
   'Local mode plays both armies offline on mobile, names the winner, and preserves mode for new games',
   { timeout: 90_000 },
   async (t) => {
@@ -1413,6 +1451,7 @@ test(
     }
     await page.getByRole('link', { name: 'Hexmate home' }).click()
     await page.getByRole('link', { name: 'Quick play' }).click()
+    await dismissQuickPlayTutorial(page)
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.equal(new URL(page.url()).searchParams.get('mode'), 'ai')
     assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)

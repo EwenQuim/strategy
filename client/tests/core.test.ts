@@ -151,7 +151,7 @@ test('Special previews and outcomes have a stable reference across all classes',
         return value instanceof Map ? [...value] : value
       }),
     ),
-    2394185203,
+    3101894995,
   )
 })
 
