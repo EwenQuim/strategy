@@ -148,12 +148,14 @@ export function evaluatePosition(
         : -SCORE.victory
   const danger = estimateIncomingDamage(settled, actor.side, cache)
   let score = 0
+  let survivingActor = actor
   for (const pawn of settled.pawns) {
     const allied = pawn.side === actor.side
     const hellfireDamage = Number(
       settled.order.indexOf(pawn.id) < settled.active && inHellfire(settled.hellfire, pawn),
     )
     const health = pawn.hp - hellfireDamage
+    if (pawn.id === actor.id && health > 0) survivingActor = pawn
     const value = health <= 0 ? 0 : pawn.ai.value(pawn, health)
     score += allied ? value : -value
     if (!allied) continue
@@ -167,11 +169,10 @@ export function evaluatePosition(
       caution: plan.caution,
     })
   }
-  const pawn = settled.pawns.find((p) => p.id === actor.id) ?? actor
-  const allies = settled.pawns.filter((p) => p.side === pawn.side && p.id !== pawn.id)
-  score += pawn.ai.goal(pawn, {
+  const allies = settled.pawns.filter((p) => p.side === actor.side && p.id !== actor.id)
+  score += survivingActor.ai.goal(survivingActor, {
     allies,
-    attackDistance: distance.get(key(pawn.q, pawn.r)),
+    attackDistance: distance.get(key(survivingActor.q, survivingActor.r)),
     aggression: plan.aggression,
   })
   return score
