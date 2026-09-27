@@ -111,11 +111,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Scegli casella',
   }),
   aimedShot: t({
-    en: 'Aimed shot',
-    fr: 'Tir visé',
-    de: 'Gezielter Schuss',
-    es: 'Disparo apuntado',
-    it: 'Tiro mirato',
+    en: 'Eagle eye',
+    fr: 'Œil de lynx',
+    de: 'Adlerauge',
+    es: 'Ojo de águila',
+    it: 'Occhio di lince',
   }),
   aimedShotDescription: t({
     en: 'Deal 2 damage to an enemy 2 to 3 tiles away, ignoring Escape. Cannot shoot adjacent enemies.',
