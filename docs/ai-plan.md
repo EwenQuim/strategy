@@ -143,7 +143,7 @@ Measured against frozen opponents from before #63 (the scripted player and a kin
 | Original, scripted opponent wins | 27 / 40 | 19 / 40 |
 | Original, king rusher wins | 10 / 40 | 5 / 40 |
 
-Rebalanced for the stronger AI: Powder Lesson gains a player swordsman and Iron Caravan loses its back archer (Original and Brutal), Crown of Ashes gives the player a second bulwark, Brutal's scripted exemptions become High Pass, Powder Lesson, Dune Patrol and Last Crown, and five story levels are retuned (Three Against the Horde is now three versus eight). The campaign integration tests are split into parallel files to stay inside CI's time limit.
+Rebalanced for the stronger AI: Powder Lesson gains a player swordsman and Iron Caravan loses its back archer (Original and Brutal), Crown of Ashes gives the player a second bulwark, Brutal's scripted exemptions become High Pass, Powder Lesson, Dune Patrol and Last Crown, and seven story levels are retuned (Three Against the Horde is now three versus eight; after exact roll odds, Whispering Ambush loses a swordsman and The Crimson Feast gains one). The campaign integration tests are split into parallel files to stay inside CI's time limit.
 
 ## Verification tools
 
