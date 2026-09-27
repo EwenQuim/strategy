@@ -205,11 +205,6 @@
           "row": 2
         },
         {
-          "kind": "archer",
-          "col": 4,
-          "row": 0
-        },
-        {
           "kind": "swordsman",
           "col": 4,
           "row": 1

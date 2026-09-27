@@ -297,11 +297,6 @@
         },
         {
           "kind": "swordsman",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
           "col": 2,
           "row": 1
         }
@@ -376,11 +371,6 @@
           "kind": "king",
           "col": 3,
           "row": 0
-        },
-        {
-          "kind": "swordsman",
-          "col": 1,
-          "row": 2
         },
         {
           "kind": "swordsman",

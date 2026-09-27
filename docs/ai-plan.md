@@ -119,7 +119,7 @@ Scripted player wins after step 5: easy 75%, normal 69%, hard 61%. Games are sho
 - Three Against the Horde: 3 v 10 on assault broke the line by round 4 once the horde arrived as a wave; balanced stances paused the horde for rounds at a time. Now 3 v 9 on assault: 3 to 5 attackers in the canyon every round, holding the line wins 9 of 10 simulated games.
 - Windy Hilltop swaps its sixth-ninja slot for an archer (it was won at every caution; a ninja made it lost at every caution).
 - Broken Company, Green Fire Bay and The Frozen Wall lose one attacker each (lost at every caution).
-- Bridge of Shadow is winnable again without changes.
+- After the Rally and Hellfire safety fixes, Bridge of Shadow, Green Fire Bay and The Frozen Wall fell from one scripted win to none at cautions 0.25, 0.7, 1, 1.5 and 2. Removing Bridge's rear archer at (4, 0), Bay's swordsman at (3, 2) and Wall's swordsman at (1, 2) restores one, two and two wins respectively. Their maps, difficulties and special-unit roles stay unchanged, and integration tests pin their winnability.
 
 ## Verification tools
 
