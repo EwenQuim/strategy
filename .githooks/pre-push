@@ -2,7 +2,7 @@
 set -eu
 
 # Fast guard: typecheck + the unit suite. Slow exhaustive sweeps live in
-# tests/integration and run in required CI via `npm run test:ci`.
+# tests/integration and run in CI's dedicated ai job, not here.
 npm --prefix client run typecheck
 npm --prefix client run test
 
