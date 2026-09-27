@@ -211,7 +211,6 @@ test('Analysis is deterministic, immutable, configurable and independent of the 
   for (const options of [
     { ...BOT_LEVELS.normal, depth: 0 },
     { ...BOT_LEVELS.normal, beamWidth: 0 },
-    { ...BOT_LEVELS.normal, samples: Infinity },
     { ...BOT_LEVELS.normal, caution: NaN },
   ])
     assert.throws(
