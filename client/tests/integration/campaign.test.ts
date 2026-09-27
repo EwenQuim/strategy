@@ -74,6 +74,17 @@ test('Every shattered encounter stays winnable at its own difficulty', () => {
     )
 })
 
+for (const [slug, id] of [
+  ['war-of-the-ring', 2],
+  ['iron-throne', 3],
+  ['iron-throne', 4],
+] as const) {
+  const level = CAMPAIGNS.find((pack) => pack.slug === slug)!.levels[id - 1]
+  test(level.name + ' stays winnable after the AI safety fixes', () => {
+    assert.ok(winnableAgainst(level, level.difficulty), level.name)
+  })
+}
+
 test('The introductory bowman can finish the battle if the player stays idle', () => {
   const level = original.levels[1]
   const bot = createBotGame()
