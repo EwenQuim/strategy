@@ -1,6 +1,6 @@
 import { t } from './locale'
 
-export const campaignNames: Record<'original' | 'brutal', string> = {
+export const campaignNames: Record<'original' | 'brutal' | 'shattered', string> = {
   original: t({
     en: 'Original',
     fr: 'Originale',
@@ -14,6 +14,13 @@ export const campaignNames: Record<'original' | 'brutal', string> = {
     de: 'Brutal',
     es: 'Brutal',
     it: 'Brutale',
+  }),
+  shattered: t({
+    en: 'Shattered Crown',
+    fr: 'Couronne brisée',
+    de: 'Zerbrochene Krone',
+    es: 'Corona rota',
+    it: 'Corona infranta',
   }),
 }
 
@@ -162,5 +169,75 @@ const levelNames: Record<string, string> = {
     de: 'Letzte Krone',
     es: 'Última corona',
     it: 'Ultima corona',
+  }),
+  'Narrow Gate': t({
+    en: 'Narrow Gate',
+    fr: 'Passe étroite',
+    de: 'Enge Pforte',
+    es: 'Puerta estrecha',
+    it: 'Porta stretta',
+  }),
+  'Gap Walker': t({
+    en: 'Gap Walker',
+    fr: 'Sauteur de gouffres',
+    de: 'Spaltengänger',
+    es: 'Saltador de simas',
+    it: 'Saltatore di voragini',
+  }),
+  'The Moat': t({
+    en: 'The Moat',
+    fr: 'Les douves',
+    de: 'Der Burggraben',
+    es: 'El foso',
+    it: 'Il fossato',
+  }),
+  'Spring Shrine': t({
+    en: 'Spring Shrine',
+    fr: 'Sanctuaire de la source',
+    de: 'Quellheiligtum',
+    es: 'Santuario del manantial',
+    it: 'Santuario della sorgente',
+  }),
+  'Mirror of Sand': t({
+    en: 'Mirror of Sand',
+    fr: 'Miroir de sable',
+    de: 'Sandspiegel',
+    es: 'Espejo de arena',
+    it: 'Specchio di sabbia',
+  }),
+  'Lava Ford': t({
+    en: 'Lava Ford',
+    fr: 'Gué de lave',
+    de: 'Lavafurt',
+    es: 'Vado de lava',
+    it: 'Guado di lava',
+  }),
+  'Basalt Court': t({
+    en: 'Basalt Court',
+    fr: 'Cour de basalte',
+    de: 'Basalthof',
+    es: 'Corte de basalto',
+    it: 'Corte di basalto',
+  }),
+  'Twin Runes': t({
+    en: 'Twin Runes',
+    fr: 'Runes jumelles',
+    de: 'Zwillingsrunen',
+    es: 'Runas gemelas',
+    it: 'Rune gemelle',
+  }),
+  'Broken Wall': t({
+    en: 'Broken Wall',
+    fr: 'Le mur brisé',
+    de: 'Gebrochene Mauer',
+    es: 'El muro roto',
+    it: 'Il muro spezzato',
+  }),
+  'Crown of Ashes': t({
+    en: 'Crown of Ashes',
+    fr: 'Couronne de cendres',
+    de: 'Aschenkrone',
+    es: 'Corona de cenizas',
+    it: 'Corona di ceneri',
   }),
 }

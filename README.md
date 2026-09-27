@@ -118,6 +118,8 @@ Volcanic encounters remain levels 9, 15, and 18. Features are introduced separat
 
 Level 1 starts unlocked; winning unlocks the next level. Existing saved progress is preserved. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
 
+Two more packs share the campaign selector once the Original campaign is finished. Brutal replays the same twenty encounters against the hard AI. Shattered Crown is a ten-level experiment that mixes asymmetric terrain defense (Narrow Gate, Broken Wall), gap-crossing ninja raids (Gap Walker), a lake moat around a contested watchtower (The Moat), special-tile races (Spring Shrine, Twin Runes), a mirrored hard-AI duel (Mirror of Sand), and lava or hellfire hazards (Lava Ford, Basalt Court, Crown of Ashes). Each level runs at its own difficulty, and the integration tests require a scripted player victory for every one of them.
+
 Completed levels are stored in localStorage under `hexmate:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 
 All 20 level definitions live in `client/src/lib/campaign-levels.json`. Each level explicitly includes its ID, name, seed, biome, full terrain map, and both armies as `{ kind, col, row }` entries, including both kings. Edit that single JSON file to design terrain lines and starting formations; campaign terrain and positions are never randomly generated at runtime. `client/src/lib/campaign.ts` imports those levels and contains the progression helpers.

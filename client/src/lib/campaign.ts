@@ -1,5 +1,6 @@
 import originalLevels from './campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
+import shatteredLevels from './campaigns/003-shattered.json' with { type: 'json' }
 import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
@@ -71,6 +72,7 @@ export function withBriefings<Level extends { setup: FixedBattleSetup }>(
 const packs = [
   originalLevels as Omit<CampaignLevel, 'newElements'>[],
   brutalLevels as Omit<CampaignLevel, 'newElements'>[],
+  shatteredLevels as Omit<CampaignLevel, 'newElements'>[],
 ]
 
 for (const levels of packs) {
@@ -86,6 +88,7 @@ const briefedCampaigns = withBriefings(packs)
 export const CAMPAIGNS: Campaign[] = [
   { slug: 'original', name: 'Original', levels: briefedCampaigns[0] },
   { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[1] },
+  { slug: 'shattered', name: 'Shattered Crown', levels: briefedCampaigns[2] },
 ]
 
 // The original campaign keeps its legacy key so existing players keep their progress.

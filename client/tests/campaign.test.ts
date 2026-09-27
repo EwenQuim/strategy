@@ -21,9 +21,11 @@ import {
 } from '../src/lib/engine/index.ts'
 import originalLevels from '../src/lib/campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from '../src/lib/campaigns/002-brutal.json' with { type: 'json' }
+import shatteredLevels from '../src/lib/campaigns/003-shattered.json' with { type: 'json' }
 
 const original = CAMPAIGNS[0]
 const brutal = CAMPAIGNS[1]
+const shattered = CAMPAIGNS[2]
 
 test('Every campaign level comes directly from one JSON with both complete armies', () => {
   assert.equal(original.levels.length, originalLevels.length)
@@ -355,4 +357,56 @@ test('Missing or corrupt local progress starts at level one instead of unlocking
   assert.equal(parseCampaignProgress('20', original.levels.length), 20)
   assert.equal(parseCampaignProgress('20', brutal.levels.length), 20)
   assert.equal(parseCampaignProgress('21', brutal.levels.length), 0)
+})
+
+test('The shattered experiment mixes defense, gaps, hazards and specials in ten encounters', () => {
+  assert.equal(shattered.slug, 'shattered')
+  assert.equal(shattered.name, 'Shattered Crown')
+  assert.equal(shattered.levels.length, 10)
+  assert.deepEqual(
+    shattered.levels.map((level) => level.id),
+    Array.from({ length: 10 }, (_, index) => index + 1),
+  )
+  assert.equal(new Set(shattered.levels.map((level) => level.seed)).size, 10)
+  assert.equal(new Set(shattered.levels.map((level) => level.name)).size, 10)
+  const shapes = new Set<string>()
+  for (const level of shatteredLevels) {
+    assert.deepEqual(Object.keys(level).sort(), ['difficulty', 'id', 'name', 'seed', 'setup'])
+    assert.ok(level.setup.map.length <= 12 && level.setup.map.every((row) => row.length <= 8))
+    shapes.add(level.setup.map.join('/'))
+  }
+  for (const level of shattered.levels) {
+    for (const side of ['player', 'enemy'] as const)
+      assert.equal(
+        level.setup[side].filter((pawn) => pawn.kind === 'king').length,
+        1,
+        'One king per side in level ' + level.id,
+      )
+    const state = coreState(level.seed, level.setup)
+    assert.deepEqual(state, coreState(level.seed, level.setup))
+    assert.ok(state.tiles.size < 96)
+    assert.ok(
+      state.pawns.every((pawn) => passable(state.tiles.get(key(pawn.q, pawn.r)))),
+      'Passable starting tiles in level ' + level.id,
+    )
+    assert.ok(
+      [...state.tiles.values()].filter((tile) => tile.feature).length <= 2,
+      'At most two specials in level ' + level.id,
+    )
+  }
+  assert.equal(shapes.size, 10)
+})
+
+test('The shattered pack reuses every introduced element without new briefings', () => {
+  for (const level of shattered.levels) assert.deepEqual(level.newElements, [])
+})
+
+test('The shattered pack ends with both full rosters on a hazard map', () => {
+  for (const side of ['player', 'enemy'] as const)
+    assert.deepEqual(
+      new Set(shattered.levels[9].setup[side].map((pawn) => pawn.kind)),
+      new Set(Object.keys(PAWN_CLASSES)),
+    )
+  const final = coreState(shattered.levels[9].seed, shattered.levels[9].setup)
+  assert.ok([...final.tiles.values()].some((tile) => tile.terrain === 'lava'))
 })

@@ -1,0 +1,634 @@
+[
+  {
+    "id": 1,
+    "name": "Narrow Gate",
+    "seed": "shattered-1",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "........",
+        "........",
+        "........",
+        "^^^^.^^^",
+        "^^^^.^^^",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 6
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Gap Walker",
+    "seed": "shattered-2",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "........",
+        "........",
+        "........",
+        "........",
+        "_..__.._",
+        ".__..__.",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "The Moat",
+    "seed": "shattered-3",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "........",
+        "........",
+        "........",
+        "........",
+        "..~~~...",
+        ".~~~W~~.",
+        "..~~~...",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Spring Shrine",
+    "seed": "shattered-4",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssRs",
+        "sHssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Mirror of Sand",
+    "seed": "shattered-5",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "ssssssss",
+        "s^ssss^s",
+        "ssssssss",
+        "sss_s_ss",
+        "sss__sss",
+        "sss__sss",
+        "ss_s_sss",
+        "ssssssss",
+        "s^ssss^s",
+        "ssssssss"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 7
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "name": "Lava Ford",
+    "seed": "shattered-6",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "volcano",
+      "map": [
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbllbbbb",
+        "bbllbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "name": "Basalt Court",
+    "seed": "shattered-7",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "hell",
+      "hellfireCount": 1,
+      "map": [
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbb__bbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "name": "Twin Runes",
+    "seed": "shattered-8",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "........",
+        "........",
+        "........",
+        "..R.^^..",
+        "...^^^^.",
+        "..H.^^..",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "ninja",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "name": "Broken Wall",
+    "seed": "shattered-9",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "hell",
+      "hellfireCount": 2,
+      "map": [
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bb^^.^^b",
+        "bb^..^bb",
+        "bbbbbbbb",
+        "bbb..bbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 6,
+          "row": 7
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "name": "Crown of Ashes",
+    "seed": "shattered-10",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "volcano",
+      "map": [
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bblbbbbb",
+        "bbbbbbbb",
+        "bbbbbblb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "bbbbbbbb"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 8
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "bomber",
+          "col": 6,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "bomber",
+          "col": 1,
+          "row": 0
+        }
+      ]
+    }
+  }
+]
