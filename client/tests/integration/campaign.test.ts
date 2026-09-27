@@ -4,9 +4,22 @@ import { CAMPAIGNS, type CampaignLevel } from '../../src/lib/campaign.ts'
 import { initialState as coreState } from '../../src/lib/engine/index.ts'
 import type { BotDifficulty } from '../../src/lib/engine/ai.ts'
 import { createBotGame } from '../../src/lib/engine/bot.ts'
-import { playToTheEnd } from '../campaign-actions.ts'
+import { campaignActions } from '../campaign-actions.ts'
 
 const original = CAMPAIGNS[0]
+
+function playToTheEnd(level: CampaignLevel, difficulty: BotDifficulty, caution: number) {
+  const bot = createBotGame(difficulty)
+  let state = bot.initialState(level.seed, level.setup)
+  for (let step = 0; step < 300 && !state.winner; step++) {
+    for (const action of campaignActions(state, caution)) {
+      const result = bot.transition(state, action)
+      assert.notEqual(result.state, state, 'Invalid action in level ' + level.id)
+      state = result.state
+    }
+  }
+  return state
+}
 
 function winnableAgainst(level: CampaignLevel, difficulty: BotDifficulty) {
   // Against the hard AI the scripted player sometimes needs maximum caution to outlast the bot.
