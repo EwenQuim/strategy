@@ -900,11 +900,14 @@ test('Seeded armies mirror one King and five different recruits', () => {
   assert.ok(rosters.size > 1)
   assert.deepEqual([...recruits].sort(), [
     'archer',
+    'berserker',
     'bomber',
     'bulwark',
+    'hoplite',
     'magician',
     'ninja',
     'swordsman',
+    'wolf',
   ])
 })
 

@@ -2,7 +2,13 @@ import { t } from './locale'
 import { storyLevelNames } from './story-levels'
 
 export const campaignNames: Record<
-  'original' | 'brutal' | 'shattered' | 'war-of-the-ring' | 'iron-throne',
+  | 'original'
+  | 'brutal'
+  | 'shattered'
+  | 'war-of-the-ring'
+  | 'iron-throne'
+  | 'hot-gates'
+  | 'ragnarok',
   string
 > = {
   original: t({
@@ -39,6 +45,20 @@ export const campaignNames: Record<
     de: 'Eiserner Thron',
     es: 'Trono de hierro',
     it: 'Trono di ferro',
+  }),
+  'hot-gates': t({
+    en: 'The Hot Gates',
+    fr: 'Les Portes de feu',
+    de: 'Die Feuerpforten',
+    es: 'Las Puertas de fuego',
+    it: 'Le Porte di fuoco',
+  }),
+  ragnarok: t({
+    en: 'Ragnarok',
+    fr: 'Ragnarok',
+    de: 'Ragnarök',
+    es: 'Ragnarok',
+    it: 'Ragnarok',
   }),
 }
 

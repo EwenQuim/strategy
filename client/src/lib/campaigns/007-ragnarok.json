@@ -1,0 +1,393 @@
+[
+  {
+    "id": 1,
+    "name": "Raids on the Coast",
+    "seed": "ragnarok-v1-1",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        "........",
+        "........",
+        "..f..f..",
+        "........",
+        "........",
+        "_......_",
+        "__....__",
+        "________"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "berserker",
+          "col": 2,
+          "row": 7
+        },
+        {
+          "kind": "berserker",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Wolf Pack",
+    "seed": "ragnarok-v1-2",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        ".f....f.",
+        "........",
+        "........",
+        "........",
+        ".f....f.",
+        "_......_",
+        "__....__",
+        "________"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "wolf",
+          "col": 2,
+          "row": 7
+        },
+        {
+          "kind": "wolf",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "wolf",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "wolf",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Hall of the Skalds",
+    "seed": "ragnarok-v1-3",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_......_",
+        "_^^..^^_",
+        "_^^..^^_",
+        "_^....^_",
+        "_^....^_",
+        "_^^..^^_",
+        "_^^..^^_",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 5
+        },
+        {
+          "kind": "berserker",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "berserker",
+          "col": 4,
+          "row": 4
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 5
+        },
+        {
+          "kind": "wolf",
+          "col": 5,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 6
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Fimbulwinter",
+    "seed": "ragnarok-v1-4",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_..~~.._",
+        "_..~~.._",
+        "__....__",
+        "_......_",
+        "_......_",
+        "_......_",
+        "__....__",
+        "___..___",
+        "________"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "berserker",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "wolf",
+          "col": 5,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 6
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 6
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "wolf",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "wolf",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Ragnarok",
+    "seed": "ragnarok-v1-5",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "hell",
+      "map": [
+        "_bbbbbb_",
+        "bbbbbbbb",
+        "bl....lb",
+        "b..bb..b",
+        "b..bb..b",
+        "bl....lb",
+        "bbbbbbbb",
+        "_blbbbl_",
+        "__bbbb__",
+        "________"
+      ],
+      "hellfireCount": 2,
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "berserker",
+          "col": 2,
+          "row": 6
+        },
+        {
+          "kind": "berserker",
+          "col": 4,
+          "row": 6
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 7
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 6
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        }
+      ]
+    }
+  }
+]

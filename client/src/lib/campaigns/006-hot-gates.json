@@ -1,0 +1,427 @@
+[
+  {
+    "id": 1,
+    "name": "The Agoge",
+    "seed": "sparta-v1-1",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "........",
+        "........",
+        "..ff....",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "hoplite",
+          "col": 4,
+          "row": 7
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "The Hot Gates",
+    "seed": "sparta-v1-2",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "________",
+        "_......_",
+        "^^....^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^....^^",
+        "_......_",
+        "________"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "hoplite",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "The Immortals",
+    "seed": "sparta-v1-3",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "________",
+        "_......_",
+        "^^....^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^....^^",
+        "_......_",
+        "________"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "hoplite",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Athenian Shores",
+    "seed": "sparta-v1-4",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "___..___",
+        "__....__",
+        "_..~~.._",
+        "_.~..~._",
+        "..~..~..",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 2,
+          "row": 7
+        },
+        {
+          "kind": "hoplite",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Plataea",
+    "seed": "sparta-v1-5",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "........",
+        "........",
+        "^^....^^",
+        "^^....^^",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........",
+        "........"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "hoplite",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "hoplite",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 6
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 0
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 1
+        }
+      ]
+    }
+  }
+]

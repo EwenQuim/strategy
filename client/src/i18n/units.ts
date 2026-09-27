@@ -51,6 +51,27 @@ export const unitNames: Record<PawnKind, string> = {
     es: 'Granadero',
     it: 'Granatiere',
   }),
+  hoplite: t({
+    en: 'Hoplite',
+    fr: 'Hoplite',
+    de: 'Hoplit',
+    es: 'Hoplita',
+    it: 'Oplita',
+  }),
+  wolf: t({
+    en: 'Wolf',
+    fr: 'Loup',
+    de: 'Wolf',
+    es: 'Lobo',
+    it: 'Lupo',
+  }),
+  berserker: t({
+    en: 'Berserker',
+    fr: 'Berserker',
+    de: 'Berserker',
+    es: 'Berserker',
+    it: 'Berserker',
+  }),
 }
 
 export const specialTexts: Record<SpecialTextKey, string> = {
@@ -221,5 +242,47 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     de: 'Springen zu',
     es: 'Saltar a',
     it: 'Saltare verso',
+  }),
+  phalanx: t({
+    en: 'Phalanx',
+    fr: 'Phalange',
+    de: 'Phalanx',
+    es: 'Falange',
+    it: 'Falange',
+  }),
+  phalanxDescription: t({
+    en: 'Shield an adjacent ally until your next turn. Take its next hit instead, without a second Escape roll. Cannot shield an already protected ally.',
+    fr: "Protégez un allié adjacent jusqu'à votre prochain tour. Encaissez son prochain coup à sa place, sans nouveau jet d'Esquive. Ne peut pas protéger un allié déjà protégé.",
+    de: 'Schütze einen angrenzenden Verbündeten bis zu deinem nächsten Zug. Nimm dessen nächsten Treffer an seiner Stelle, ohne zweite Ausweichen-Chance. Kann keinen bereits geschützten Verbündeten schützen.',
+    es: 'Protege a un aliado adyacente hasta tu próximo turno. Recibe su próximo golpe en su lugar, sin una segunda tirada de Esquiva. No puede proteger a un aliado ya protegido.',
+    it: 'Proteggi un alleato adiacente fino al tuo prossimo turno. Incassa il suo prossimo colpo al posto suo, senza un secondo tiro di Schivata. Non può proteggere un alleato già protetto.',
+  }),
+  cry: t({
+    en: 'Cry',
+    fr: 'Hurlement',
+    de: 'Heulen',
+    es: 'Aullido',
+    it: 'Urlo',
+  }),
+  cryDescription: t({
+    en: 'Give +1 energy to every ally within 2 tiles, once per round. Cannot boost yourself.',
+    fr: 'Donne +1 énergie à chaque allié à 2 cases ou moins, une fois par manche. Ne peut pas se booster.',
+    de: 'Gibt jedem Verbündeten innerhalb von 2 Feldern +1 Energie, einmal pro Runde. Kann sich nicht selbst verstärken.',
+    es: 'Da +1 de energía a cada aliado a 2 casillas o menos, una vez por ronda. No puede potenciarse a sí mismo.',
+    it: 'Dà +1 energia a ogni alleato entro 2 caselle, una volta per round. Non può potenziare se stesso.',
+  }),
+  fury: t({
+    en: 'Fury',
+    fr: 'Fureur',
+    de: 'Wut',
+    es: 'Furia',
+    it: 'Furia',
+  }),
+  furyDescription: t({
+    en: 'Spend all your energy to strike an adjacent enemy for 2 damage plus 1 per extra energy spent, ignoring Escape. The blow leaves you defenseless.',
+    fr: "Dépensez toute votre énergie pour frapper un ennemi adjacent pour 2 dégâts plus 1 par énergie dépensée en plus, en ignorant l'Esquive. Le coup vous laisse sans défense.",
+    de: 'Gib deine gesamte Energie aus, um einen angrenzenden Gegner für 2 Schaden plus 1 pro zusätzlicher Energie zu treffen, Ausweichen wird ignoriert. Der Schlag lässt dich wehrlos zurück.',
+    es: 'Gasta toda tu energía para golpear a un enemigo adyacente por 2 de daño más 1 por cada energía extra gastada, ignorando la Esquiva. El golpe te deja indefenso.',
+    it: 'Spendi tutta la tua energia per colpire un nemico adiacente per 2 danni più 1 per ogni energia extra spesa, ignorando la Schivata. Il colpo ti lascia indifeso.',
   }),
 }

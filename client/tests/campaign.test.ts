@@ -24,6 +24,10 @@ import originalLevels from '../src/lib/campaigns/001-original.json' with { type:
 import brutalLevels from '../src/lib/campaigns/002-brutal.json' with { type: 'json' }
 import shatteredLevels from '../src/lib/campaigns/003-shattered.json' with { type: 'json' }
 
+const CLASSIC_KINDS = Object.keys(PAWN_CLASSES).filter(
+  (kind) => !['hoplite', 'wolf', 'berserker'].includes(kind),
+)
+
 const original = CAMPAIGNS[0]
 const brutal = CAMPAIGNS[1]
 const shattered = CAMPAIGNS[2]
@@ -206,7 +210,7 @@ test('The campaign introduces units gradually and keeps the opening free of obst
   for (const side of ['player', 'enemy'] as const)
     assert.deepEqual(
       new Set(original.levels[19].setup[side].map((pawn) => pawn.kind)),
-      new Set(Object.keys(PAWN_CLASSES)),
+      new Set(CLASSIC_KINDS),
     )
 })
 
@@ -347,10 +351,15 @@ test('Every level of a non-original campaign is open and can be cleared in any o
     for (let level = 1; level <= pack.levels.length; level++)
       assert.ok(isLevelUnlocked(pack, level, []))
     assert.equal(isLevelUnlocked(pack, pack.levels.length + 1, []), false)
-    const cleared = completeCampaignLevel(pack, completeCampaignLevel(pack, [], 8), 3)
-    assert.deepEqual(cleared, [3, 8])
-    assert.equal(completeCampaignLevel(pack, cleared, 8), cleared)
-    assert.deepEqual(parseCampaignProgress(JSON.stringify(cleared), pack.levels.length), [3, 8])
+    const early = Math.min(3, pack.levels.length)
+    const late = Math.min(8, pack.levels.length)
+    const cleared = completeCampaignLevel(pack, completeCampaignLevel(pack, [], late), early)
+    assert.deepEqual(cleared, [early, late])
+    assert.equal(completeCampaignLevel(pack, cleared, late), cleared)
+    assert.deepEqual(parseCampaignProgress(JSON.stringify(cleared), pack.levels.length), [
+      early,
+      late,
+    ])
   }
 })
 
@@ -428,14 +437,14 @@ test('The shattered pack ends with both full rosters on a hazard map', () => {
   for (const side of ['player', 'enemy'] as const)
     assert.deepEqual(
       new Set(shattered.levels[9].setup[side].map((pawn) => pawn.kind)),
-      new Set(Object.keys(PAWN_CLASSES)),
+      new Set(CLASSIC_KINDS),
     )
   const final = coreState(shattered.levels[9].seed, shattered.levels[9].setup)
   assert.ok([...final.tiles.values()].some((tile) => tile.terrain === 'lava'))
 })
 
-test('Story packs unlock at 25 and 35 total victories across every campaign', () => {
-  const [, , , ring, throne] = CAMPAIGNS
+test('Story packs unlock at 25, 35, 45 and 55 total victories across every campaign', () => {
+  const [, , , ring, throne, sparta, ragnarok] = CAMPAIGNS
   const progress = (completed: Record<string, number>) => (slug: string) => completed[slug] ?? 0
   assert.ok(isCampaignUnlocked(original, progress({})))
   assert.ok(isCampaignUnlocked(brutal, progress({})))
@@ -445,6 +454,37 @@ test('Story packs unlock at 25 and 35 total victories across every campaign', ()
   assert.ok(
     isCampaignUnlocked(throne, progress({ original: 20, 'war-of-the-ring': 8, brutal: 7 })),
   )
-  for (const pack of [ring, throne])
-    assert.ok(pack.levels.every((level) => !level.newElements.length))
+  assert.equal(
+    isCampaignUnlocked(sparta, progress({ original: 20, brutal: 20, shattered: 4 })),
+    false,
+  )
+  assert.ok(
+    isCampaignUnlocked(
+      sparta,
+      progress({ original: 20, brutal: 20, 'war-of-the-ring': 3, 'iron-throne': 2 }),
+    ),
+  )
+  assert.equal(
+    isCampaignUnlocked(
+      ragnarok,
+      progress({ original: 20, brutal: 20, shattered: 10, 'war-of-the-ring': 4 }),
+    ),
+    false,
+  )
+  assert.ok(
+    isCampaignUnlocked(
+      ragnarok,
+      progress({
+        original: 20,
+        brutal: 20,
+        shattered: 10,
+        'war-of-the-ring': 3,
+        'hot-gates': 2,
+      }),
+    ),
+  )
+  // New pawn kinds debut in the packs that field them first.
+  assert.deepEqual(throne.levels[3].newElements, ['wolf'])
+  assert.deepEqual(sparta.levels[0].newElements, ['hoplite'])
+  assert.deepEqual(ragnarok.levels[0].newElements, ['berserker'])
 })
