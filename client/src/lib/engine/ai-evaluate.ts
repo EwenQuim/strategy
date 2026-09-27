@@ -99,7 +99,9 @@ function estimateIncomingDamage(
     attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
     if (attacker.energy <= 0) continue
     const reach = reachOf(state, attacker, runes, cache)
-    for (const target of targets) {
+    // A target that acts before this attacker can move away or strike first, so only attackers
+    // acting before the target's next turn threaten it.
+    for (const target of targets.filter((t) => turnOffset(foe.id) < turnOffset(t.id))) {
       const damage = maxDamage(attacker, reach, target)
       damageByTarget.set(target.id, damageByTarget.get(target.id)! + damage)
       if (damage > 0) {
