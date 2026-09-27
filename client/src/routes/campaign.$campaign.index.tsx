@@ -15,7 +15,7 @@ import {
 } from '../campaignProgress'
 
 const levelCardClassName =
-  'flex size-full flex-col gap-1 overflow-hidden rounded-lg border border-line bg-(--biome-background) p-1.5 text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=completed]:border-[#89bba477] data-[status=ready]:border-gold disabled:text-muted [&:disabled>svg]:opacity-55 [&:not(:disabled):hover]:brightness-115'
+  'relative flex size-full flex-col gap-1 overflow-hidden rounded-lg border border-line bg-(--biome-background) p-1.5 text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=completed]:border-2 data-[status=completed]:border-[#89bba4] data-[status=completed]:p-[5px] data-[status=ready]:border-gold disabled:text-muted [&:disabled>svg]:opacity-55 [&:not(:disabled):hover]:brightness-115'
 
 export const Route = createFileRoute('/campaign/$campaign/')({
   beforeLoad: ({ params }) => {
@@ -71,7 +71,15 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                   </strong>{' '}
                   {levelName(level)}
                 </span>
-                <small className="text-[8px] text-muted">{status}</small>
+                <small className={'text-[8px] ' + (cleared ? 'text-[#89bba4]' : 'text-muted')}>
+                  {status}
+                </small>
+                {cleared && (
+                  <Icon
+                    name="check"
+                    className="absolute top-1 right-1 size-[clamp(14px,4vw,22px)] rounded-full bg-[#89bba4] p-[3px] text-(--biome-background) [stroke-width:3]"
+                  />
+                )}
               </>
             )
             return (
