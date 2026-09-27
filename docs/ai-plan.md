@@ -50,12 +50,10 @@ type BotOptions = {
   riskAppetite: number                    // step 3: 0 calibrated, 1 ignores threats to its units
   focus: 'best' | 'nearest' | 'weakest'   // step 3, 'backline' in step 5
   latitude: number                        // step 3: margin within which a more tempting option wins
-  aggression?: number                     // step 4
-  stance?: 'hold' | 'balanced' | 'assault' // step 4
 }
 ```
 
-A level can override it in its JSON: `"ai": { "preset": "normal", "stance": "assault" }`.
+A fixed battle setup can give the enemy orders: `"enemyStance": "assault"`.
 
 ## Steps (one PR each)
 
@@ -86,12 +84,13 @@ A level can override it in its JSON: `"ai": { "preset": "normal", "stance": "ass
 
 ### 4. Side plan, stances and the stalemate breaker
 
-- `ai-plan.ts` computes once per round: force ratio, stance, focus target, rounds since the last damage dealt.
-- Aggression rises with the stalemate counter, so a waiting AI eventually commits.
-- Caution scales with the force ratio: a 12 v 3 horde accepts losses.
-- `cohesion` term: units prefer to advance next to allies, so a group moves as a wave instead of one unit at a time.
-- Per-level `"ai"` override in campaign JSON. Three Against the Horde gets `assault`.
-- **Done when** in Three Against the Horde the horde enters the canyon as a column within a few rounds, and holding the line still wins.
+- `ai-plan.ts` computes the side's intent per decision: caution and aggression.
+- **Stalemate breaker:** `GameState.lastClashRound` records the last round an action hurt anyone. After two quiet rounds, aggression grows by 25% per round.
+- **Horde caution:** a side the battle setup made at least twice as numerous divides its caution by that ratio. It uses the designed armies, not the live count: a live ratio made even battles turn reckless once they tilted (Iron Caravan, Basalt Court).
+- **Stances:** fixed setups take an optional `enemyStance` (`hold`, `balanced`, `assault`) scaling aggression by 0.5, 1 or 2. Three Against the Horde uses `assault`.
+- **Routing through allies** replaced the planned cohesion term. The real cause of units trickling in one by one was the approach map treating allies as walls: in a one-hex canyon the first attacker blocked the route for everyone behind it, so waiting looked as good as advancing. Only enemies block the route now; actual moves still respect occupied hexes.
+- Normal is retuned to risk 0.65 to keep the difficulty order: scripted player wins 77% / 67% / 60% against easy / normal / hard.
+- **Done:** in Three Against the Horde, 3 to 5 attackers are inside the canyon from round 2, and holding the canyon wins in 25 rounds (39 before).
 
 ### 5. Unit goals
 

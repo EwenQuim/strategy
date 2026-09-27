@@ -169,6 +169,36 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     assert.ok(playTurn(state, level).pawns.some((p) => p.id === 1))
   })
 
+  test(level + ': stalemate aggression never rewards a pointless Hellfire death', () => {
+    const state = battle(
+      [
+        new Ninja(1, 0, 0, 'enemy'),
+        new King(2, -3, 0, 'enemy'),
+        new Archer(3, 6, 0, 'player', undefined, 0),
+        new King(4, 8, 0, 'player'),
+      ],
+      [3, 1, 2, 4],
+    )
+    state.tiles.clear()
+    for (let q = -3; q <= 8; q++) state.tiles.set(q + ',0', { q, r: 0, terrain: 'plain' })
+    state.biome = 'hell'
+    state.hellfire = [
+      { q: 3, r: 0 },
+      { q: -3, r: 0 },
+    ]
+    state.active = 1
+    state.round = 10
+    state.lastClashRound = 0
+    let next = playTurn(state, level)
+    while (!next.winner && next.round === state.round) next = reducer(next, { type: 'endTurn' })
+    assert.ok(next.pawns.some((pawn) => pawn.id === 1))
+    assert.ok(
+      next.pawns
+        .filter((pawn) => pawn.side === 'player')
+        .every((pawn) => pawn.hp === pawn.maxHp),
+    )
+  })
+
   test(level + ': never bombs its own units when no enemy is caught', () => {
     const state = battle([
       new Bomber(1, 0, 0, 'enemy'),

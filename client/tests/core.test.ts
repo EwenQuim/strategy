@@ -148,6 +148,7 @@ test('Special previews and outcomes have a stable reference across all classes',
           assert.deepEqual(value, [])
           return undefined
         }
+        if (name === 'lastClashRound') return undefined
         return value instanceof Map ? [...value] : value
       }),
     ),

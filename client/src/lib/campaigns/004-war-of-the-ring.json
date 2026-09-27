@@ -887,6 +887,7 @@
         "___bbbb_",
         "____bbb_"
       ],
+      "enemyStance": "assault",
       "player": [
         {
           "kind": "king",
