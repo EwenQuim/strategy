@@ -52,7 +52,10 @@ export const Route = createFileRoute('/campaign/$campaign/')({
           {completed === campaign.levels.length && <span>{common.campaignComplete}</span>}
         </div>
         <ol
-          className="m-0 grid min-h-0 flex-1 list-none auto-rows-fr grid-cols-4 gap-2 p-0"
+          className={
+            'm-0 grid min-h-0 flex-1 list-none auto-rows-fr gap-2 p-0 ' +
+            (campaign.levels.length > 10 ? 'grid-cols-4' : 'grid-cols-2')
+          }
           aria-label={common.campaignLevels}
         >
           {campaign.levels.map((level) => {

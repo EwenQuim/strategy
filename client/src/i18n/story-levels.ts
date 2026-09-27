@@ -57,6 +57,13 @@ export const storyLevelNames: Record<string, string> = {
     es: 'La montaña de fuego',
     it: 'La montagna di fuoco',
   }),
+  'Three Against the Horde': t({
+    en: 'Three Against the Horde',
+    fr: 'Trois contre la horde',
+    de: 'Drei gegen die Horde',
+    es: 'Tres contra la horda',
+    it: "Tre contro l'orda",
+  }),
   'Whispering Ambush': t({
     en: 'Whispering Ambush',
     fr: 'Embuscade des murmures',

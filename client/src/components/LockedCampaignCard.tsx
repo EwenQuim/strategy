@@ -27,7 +27,7 @@ export function LockedCampaignCard({ campaign }: { campaign: Campaign }) {
       <span className="absolute inset-x-0 top-1/3 flex justify-center text-gold [&>svg]:size-10">
         <Icon name="lock" />
       </span>
-      <span className="font-serif text-[24px] leading-none text-ink">
+      <span className="font-serif text-[clamp(18px,5.2vw,24px)] leading-[1.05] text-balance text-ink">
         {campaignName(campaign)}
       </span>
       <span className="text-[11px]">{m.victoriesToUnlock(victories, required)}</span>

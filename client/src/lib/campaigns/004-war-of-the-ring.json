@@ -43,6 +43,16 @@
           "kind": "archer",
           "col": 2,
           "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 8
         }
       ],
       "enemy": [
@@ -70,6 +80,21 @@
           "kind": "ninja",
           "col": 5,
           "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
         }
       ]
     }
@@ -121,6 +146,16 @@
           "kind": "swordsman",
           "col": 4,
           "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 8
         }
       ],
       "enemy": [
@@ -153,6 +188,31 @@
           "kind": "archer",
           "col": 6,
           "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "bomber",
+          "col": 2,
+          "row": 0
         }
       ]
     }
@@ -203,6 +263,16 @@
           "kind": "swordsman",
           "col": 3,
           "row": 11
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 9
         }
       ],
       "enemy": [
@@ -230,6 +300,26 @@
           "kind": "archer",
           "col": 6,
           "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
         }
       ]
     }
@@ -285,6 +375,16 @@
           "kind": "swordsman",
           "col": 4,
           "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 9
         }
       ],
       "enemy": [
@@ -327,6 +427,16 @@
           "kind": "bulwark",
           "col": 4,
           "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 1
         }
       ]
     }
@@ -382,6 +492,16 @@
           "kind": "magician",
           "col": 4,
           "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
         }
       ],
       "enemy": [
@@ -418,6 +538,16 @@
         {
           "kind": "bulwark",
           "col": 4,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
           "row": 4
         }
       ]
@@ -484,6 +614,16 @@
           "kind": "ninja",
           "col": 0,
           "row": 8
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 10
         }
       ],
       "enemy": [
@@ -521,6 +661,21 @@
           "kind": "archer",
           "col": 5,
           "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 0,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 3
         }
       ]
     }
@@ -575,6 +730,21 @@
           "kind": "bulwark",
           "col": 3,
           "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 10
         }
       ],
       "enemy": [
@@ -622,6 +792,16 @@
           "kind": "ninja",
           "col": 4,
           "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 3
         }
       ]
     }
@@ -677,6 +857,113 @@
           "kind": "ninja",
           "col": 5,
           "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "name": "Three Against the Horde",
+    "seed": "ring-v1-9",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "volcano",
+      "map": [
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "_bbbbbb_",
+        "__b_____",
+        "___b____",
+        "___l____",
+        "____b___",
+        "____b___",
+        "_____b__",
+        "____bb__",
+        "___bbbb_",
+        "____bbb_"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 6,
+          "row": 10
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 0
         }
       ]
     }
