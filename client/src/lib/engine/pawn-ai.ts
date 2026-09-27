@@ -14,6 +14,7 @@ type UnitThreat = {
 
 type UnitSurroundings = {
   allies: readonly Pawn[]
+  foes: readonly Pawn[]
   attackDistance: number | undefined
   aggression: number
 }
