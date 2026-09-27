@@ -28,7 +28,8 @@ The same checks gate pull requests and GitHub Pages deployment. The build includ
 
 ## Online synchronization
 
-The game page opens one SSE connection at `/api/games/{code}/events` for both the waiting room and the battle. Moves still use the version-checked POST endpoint. Every connection sends the complete public game snapshot, including the action log, so reconnecting catches up without event replay or `Last-Event-ID` bookkeeping.
+The game page opens one SSE connection at `/api/games/{code}/events` for both the waiting
+ room and the battle. Moves still use the version-checked POST endpoint. Every connection sends the complete public game snapshot, including the action log, so reconnecting catches up without event replay or `Last-Event-ID` bookkeeping.
 
 The browser's native `EventSource` retries dropped connections after two seconds. The server sends a heartbeat every 15 seconds; a 45-second client watchdog replaces silently stalled streams. Returning online or foregrounding the tab reconnects immediately. Leaving the game or receiving its confirmed finished state closes the stream and its timers.
 
@@ -42,7 +43,8 @@ For local two-player testing, Docker exposes the same server on ports 8080 and 8
 
 Open the production site once online, then use your browser's Install app or Add to Home Screen command. The app caches its HTML, styles, icons, and every JavaScript chunk, so new seeded games also work offline. Development mode does not register a service worker.
 
-Updates are checked when the app opens, comes online, or returns to the foreground. A new build downloads in the background, but never reloads a running match. An "Update ready" notice appears once the full release is cached, including when reopening a page with an update already waiting. Finish your match, close all Hexmate browser tabs and app windows, then reopen to activate the update. Refreshing or just backgrounding the installed app is not enough while a client remains open. Old assets are removed only after activation; a failed download leaves the previous version usable offline.
+Updates are checked when the app opens, comes online, or returns to the foreground. A new build downloads in the background, but never reloads a running match. An "
+Update ready" notice appears once the full release is cached, including when reopening a page with an update already waiting. Finish your match, close all Hexmate browser tabs and app windows, then reopen to activate the update. Refreshing or just backgrounding the installed app is not enough while a client remains open. Old assets are removed only after activation; a failed download leaves the previous version usable offline.
 
 Battles still live in memory: reloading restarts the seeded battle. Offline support does not add saved matches.
 
@@ -88,7 +90,8 @@ Authored maps can have any number of rows and different row lengths. Use `_` for
 map: ['_...', '.....', '.._..', '.....', '_...']
 ```
 
-Terrain symbols are `.` plain, `f` forest, `^` mountain, `~` lake, and `s` sand. Pawn `col` and `row` are zero-based: column 0 is the left edge, row 0 is the top; odd rows are offset half a hex to the right. Each side must have exactly one king. Authored army sizes are limited by the available passable tiles, not a fixed deployment rectangle. Every starting tile must exist, be distinct, and be passable. Invalid maps and placements are rejected, never silently moved or regenerated.
+Terrain symbols are `.` plain, `f` forest, `^` mountain, `~` lake, and `s` sand. Pawn `col` and `row` are zero-based: column 0 is the left edge, row 0 is the top; odd rows are offset half a hex to the right. Each side must have exactly one king. Authored army sizes are limited by the available passable tiles, not a fi
+xed deployment rectangle. Every starting tile must exist, be distinct, and be passable. Invalid maps and placements are rejected, never silently moved or regenerated.
 
 Walking and Charge cannot cross absent tiles. Ranged attacks, spells, and Ninja jumps still use hex distance, so they can cross gaps; jumps must land on existing passable tiles. Keep walking routes connected unless isolated areas are intentional, and keep map sizes compact for readable tiles on portrait screens.
 
@@ -101,7 +104,8 @@ Random maps can also use the volcano biome, Ember Caldera: basalt ground with pa
 Generated maps have no special tiles 50% of the time, one 40%, and two 10%. These tiles are restricted to rows 6 and 7 (zero-based rows 5 and 6), never overlap hazards or starting units, and use distinct types:
 
 - Watchtower: +1 maximum basic-attack range for Archers and Magicians, without changing minimum range or specials.
-- Healing spring: +1 health, capped at maximum, at a unit's next activation after staying on it. Leaving cancels the pending healing.
+- Healing spring: +1 health, capped at maximum, at a unit's next activation after staying on it. Leaving can
+cels the pending healing.
 - Power rune: consumed on entry for +2 energy usable in the current round only. Normal energy capacity returns next round.
 
 Authored maps additionally accept `p` (decorative palm), `b` (basalt), `l` (lava), `W` (watchtower), `H` (healing spring), and `R` (power rune). Special symbols sit on plain ground and are limited to two tiles, but can appear anywhere in an authored map. Their ground color follows the biome.
@@ -114,9 +118,12 @@ Choose Campaign on the home screen to play 20 authored AI encounters. The openin
 
 Later encounters test combinations rather than just adding enemies: Twin Daggers threatens two flanks, Iron Caravan is a two-bomber ambush, Wizard Curtain places four aligned casters between your flanking squads, and Forked Gate offers a watchtower route or a healing-spring route. Caldera Run combines safe landings, enemy assassins, and contested energy. The final two battles bring all seven player classes together. Terrain never blocks ranged attacks or spells.
 
-Volcanic encounters remain levels 9, 15, and 18. Features are introduced separately, then reused: watchtowers first appear in 5, healing springs in 14, and power runes in 15. Later maps combine at most two features, all reachable without crossing lava. Difficulty comes from formations, terrain, and unit combinations; campaign AI stays on normal. Integration tests require a reproducible player victory for every encounter, trying aggressive and cautious hard-bot playstyles.
+Volcanic encounters remain levels 9, 15, and 18. Features are introduced separately, then reused: watchtowers first appear in 5, healing springs in 14, and power runes in 15. Later maps combine at most two features, all reachable without crossing lava. Difficulty comes from formations, terrain, and unit combinations; campaign AI stays on normal. Integration t
+ests require a reproducible player victory for every encounter, trying aggressive and cautious hard-bot playstyles.
 
 Level 1 starts unlocked; winning unlocks the next level. Existing saved progress is preserved. Completed levels can be replayed, and losing or leaving a battle does not reset progress.
+
+Two more packs share the campaign selector once the Original campaign is finished. Brutal replays the same twenty encounters against the hard AI. Shattered Crown is a ten-level experiment that mixes asymmetric terrain defense (Narrow Gate, Broken Wall), gap-crossing ninja raids (Gap Walker), a lake moat around a contested watchtower (The Moat), special-tile races (Spring Shrine, Twin Runes), a mirrored hard-AI duel (Mirror of Sand), and lava or hellfire hazards (Lava Ford, Basalt Court, Crown of Ashes). Each level runs at its own difficulty, and the integration tests require a scripted player victory for every one of them.
 
 Completed levels are stored in localStorage under `hexmate:campaign:v1`, so progress survives reloads and works offline on the same browser and device. Clearing site data removes that progress; there is no cloud sync or saved in-progress battle. If storage is blocked or full, a warning appears after victory and progress lasts for the current tab only.
 
@@ -129,7 +136,8 @@ The selector is at `/strategy/campaign` and battles at `/strategy/campaign/1` th
 - `client/src/lib/engine/`: deterministic game rules. `initialState(seed)` creates an untouched battle; `reducer(state, action)` applies an action for whichever side owns the active pawn. It never runs a bot or mutates its input. `transition` additionally returns effect snapshots before turn advancement or the victory screen.
 - `client/src/lib/bot.ts`: the optional single-player controller. It proposes ordinary actions and applies them through the same engine as human actions. The existing nearest-target and king-hunting strategies remain interchangeable.
 - `client/src/lib/playback.ts`: pure playback state and input locking.
-- `client/src/useGame.ts`, routes, and components: React, browser timers, reduced-motion preferences, and rendering.
+- `client/src/useGame.ts`, routes, and components: React, browser timer
+s, reduced-motion preferences, and rendering.
 
 The library is checked without DOM or Node globals and cannot import runtime packages or files outside `client/src/lib/`. Seeded randomness is stored in game state; the engine does not read clocks or global randomness.
 

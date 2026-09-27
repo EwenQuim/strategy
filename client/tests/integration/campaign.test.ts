@@ -42,7 +42,8 @@ test('All twenty distinct campaign encounters are winnable against normal AI', (
   for (const level of original.levels) {
     const core = coreState(level.seed, level.setup)
     assert.deepEqual(core, coreState(level.seed, level.setup))
-    assert.equal(core.pawns.length, level.setup.player.length + level.setup.enemy.length)
+    assert.equal(core.pawns.length, level.setup.player.length + level.setup.ene
+my.length)
     biomes.add(core.biome)
     const bot = createBotGame()
     assert.ok(winnableAgainst(level, 'normal'), 'Level ' + level.id + ': ' + level.name)
@@ -63,6 +64,16 @@ test('Every brutal encounter stays winnable against the hard AI', () => {
     if (NOT_SCRIPTABLY_WINNABLE.has(level.id)) continue
     assert.ok(winnableAgainst(level, 'hard'), 'Brutal level ' + level.id + ': ' + level.name)
   }
+})
+
+test('Every shattered encounter stays winnable at its own difficulty', () => {
+  const shattered = CAMPAIGNS[2]
+  assert.equal(shattered.levels.length, 10)
+  for (const level of shattered.levels)
+    assert.ok(
+      winnableAgainst(level, level.difficulty),
+      'Shattered level ' + level.id + ': ' + level.name,
+    )
 })
 
 test('The introductory bowman can finish the battle if the player stays idle', () => {
