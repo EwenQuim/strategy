@@ -32,8 +32,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
               {campaignName(campaign)}
             </h1>
           </div>
-          <Link to="/" className=
-{iconButtonClassName} aria-label={common.backToHome}>
+          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
             <Icon name="close" />
           </Link>
         </header>
@@ -79,8 +78,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                     preload={false}
                   >
                     {content}
-   
-               </Link>
+                  </Link>
                 ) : (
                   <button
                     className={levelCardClassName}

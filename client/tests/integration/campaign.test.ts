@@ -42,8 +42,7 @@ test('All twenty distinct campaign encounters are winnable against normal AI', (
   for (const level of original.levels) {
     const core = coreState(level.seed, level.setup)
     assert.deepEqual(core, coreState(level.seed, level.setup))
-    assert.equal(core.pawns.length, level.setup.player.length + level.setup.ene
-my.length)
+    assert.equal(core.pawns.length, level.setup.player.length + level.setup.enemy.length)
     biomes.add(core.biome)
     const bot = createBotGame()
     assert.ok(winnableAgainst(level, 'normal'), 'Level ' + level.id + ': ' + level.name)
