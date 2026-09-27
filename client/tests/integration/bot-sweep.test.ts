@@ -68,7 +68,7 @@ test('Class-specific candidates and threat estimates retain their reference deci
     }
   }
   assert.equal(decisions.length, 126)
-  assert.equal(seedState(JSON.stringify(decisions)), 4223582855)
+  assert.equal(seedState(JSON.stringify(decisions)), 4246225497)
 })
 
 test('All difficulty levels emit legal actions for every class and both sides', () => {

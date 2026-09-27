@@ -87,18 +87,8 @@
           "row": 1
         },
         {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 1
-        },
-        {
           "kind": "archer",
           "col": 2,
-          "row": 1
-        },
-        {
-          "kind": "archer",
-          "col": 5,
           "row": 1
         }
       ]
@@ -644,11 +634,6 @@
         },
         {
           "kind": "swordsman",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
           "col": 6,
           "row": 3
         },
@@ -939,11 +924,6 @@
         {
           "kind": "swordsman",
           "col": 4,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
           "row": 2
         }
       ]

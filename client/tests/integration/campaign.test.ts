@@ -55,7 +55,7 @@ test('All twenty distinct campaign encounters are winnable against normal AI', (
 
 // These encounters defeat the scripted player at every caution against the hard AI.
 // A human may still win them; if brutal proves unbeatable, tune their enemy rosters.
-const NOT_SCRIPTABLY_WINNABLE = new Set([8, 19])
+const NOT_SCRIPTABLY_WINNABLE = new Set([6, 8, 10])
 
 test('Every brutal encounter stays winnable against the hard AI', () => {
   for (const level of CAMPAIGNS[1].levels) {

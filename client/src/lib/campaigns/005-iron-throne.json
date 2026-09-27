@@ -161,7 +161,7 @@
         {
           "kind": "king",
           "col": 3,
-          "row": 3
+          "row": 1
         },
         {
           "kind": "archer",
@@ -745,11 +745,6 @@
         },
         {
           "kind": "bulwark",
-          "col": 2,
-          "row": 8
-        },
-        {
-          "kind": "bulwark",
           "col": 5,
           "row": 8
         },
@@ -762,11 +757,6 @@
           "kind": "swordsman",
           "col": 3,
           "row": 2
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 9
         },
         {
           "kind": "swordsman",
