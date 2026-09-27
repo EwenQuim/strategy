@@ -1,6 +1,8 @@
 import originalLevels from './campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
 import shatteredLevels from './campaigns/003-shattered.json' with { type: 'json' }
+import ringLevels from './campaigns/004-war-of-the-ring.json' with { type: 'json' }
+import throneLevels from './campaigns/005-iron-throne.json' with { type: 'json' }
 import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
@@ -26,6 +28,7 @@ export interface Campaign {
   slug: string
   name: string
   levels: CampaignLevel[]
+  requiredVictories?: number
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -73,6 +76,8 @@ const packs = [
   originalLevels as Omit<CampaignLevel, 'newElements'>[],
   brutalLevels as Omit<CampaignLevel, 'newElements'>[],
   shatteredLevels as Omit<CampaignLevel, 'newElements'>[],
+  ringLevels as Omit<CampaignLevel, 'newElements'>[],
+  throneLevels as Omit<CampaignLevel, 'newElements'>[],
 ]
 
 for (const levels of packs) {
@@ -89,7 +94,30 @@ export const CAMPAIGNS: Campaign[] = [
   { slug: 'original', name: 'Original', levels: briefedCampaigns[0] },
   { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[1] },
   { slug: 'shattered', name: 'Shattered Crown', levels: briefedCampaigns[2] },
+  {
+    slug: 'war-of-the-ring',
+    name: 'War of the Ring',
+    levels: briefedCampaigns[3],
+    requiredVictories: 25,
+  },
+  {
+    slug: 'iron-throne',
+    name: 'Iron Throne',
+    levels: briefedCampaigns[4],
+    requiredVictories: 35,
+  },
 ]
+
+export function totalVictories(completedIn: (slug: string) => number): number {
+  return CAMPAIGNS.reduce((sum, campaign) => sum + completedIn(campaign.slug), 0)
+}
+
+export function isCampaignUnlocked(
+  campaign: Campaign,
+  completedIn: (slug: string) => number,
+): boolean {
+  return totalVictories(completedIn) >= (campaign.requiredVictories ?? 0)
+}
 
 // The original campaign keeps its legacy key so existing players keep their progress.
 export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'
@@ -98,30 +126,40 @@ export function campaignStorageKey(slug: string): string {
   return slug === 'original' ? CAMPAIGN_STORAGE_KEY : 'hexmate:campaign:' + slug
 }
 
-export function parseCampaignProgress(value: string | null, levels: number): number {
-  const completed = Number(value)
-  return value !== null &&
-    /^\d+$/.test(value) &&
-    Number.isInteger(completed) &&
-    completed >= 0 &&
-    completed <= levels
-    ? completed
-    : 0
+export function parseCampaignProgress(value: string | null, levels: number): number[] {
+  if (value !== null && /^\d+$/.test(value) && Number(value) <= levels)
+    return Array.from({ length: Number(value) }, (_, index) => index + 1)
+  let cleared: unknown
+  try {
+    cleared = JSON.parse(value ?? '')
+  } catch {
+    return []
+  }
+  return Array.isArray(cleared) &&
+    cleared.every((level) => Number.isInteger(level) && level >= 1 && level <= levels)
+    ? [...new Set<number>(cleared)].sort((a, b) => a - b)
+    : []
 }
 
-export function isLevelUnlocked(campaign: Campaign, level: number, completed: number): boolean {
+export function isLevelUnlocked(
+  campaign: Campaign,
+  level: number,
+  cleared: readonly number[],
+): boolean {
   return (
     Number.isInteger(level) &&
     level >= 1 &&
     level <= campaign.levels.length &&
-    level <= completed + 1
+    (campaign.slug !== 'original' || level <= cleared.length + 1)
   )
 }
 
 export function completeCampaignLevel(
   campaign: Campaign,
-  completed: number,
+  cleared: readonly number[],
   level: number,
-): number {
-  return isLevelUnlocked(campaign, level, completed) ? Math.max(completed, level) : completed
+): readonly number[] {
+  return isLevelUnlocked(campaign, level, cleared) && !cleared.includes(level)
+    ? [...cleared, level].sort((a, b) => a - b)
+    : cleared
 }

@@ -1,0 +1,727 @@
+[
+  {
+    "id": 1,
+    "name": "Whispering Ambush",
+    "seed": "throne-v1-1",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        "ff....ff",
+        "fff..fff",
+        "ff....ff",
+        "f......f",
+        "ff....ff",
+        "fff..fff",
+        "ff....ff",
+        "_ffffff_",
+        "__ffff__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 0,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 7,
+          "row": 5
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 6
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 4
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "The Crimson Feast",
+    "seed": "throne-v1-2",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_......_",
+        "^^^..^^^",
+        "^......^",
+        "^......^",
+        "^......^",
+        "^......^",
+        "^......^",
+        "^^^..^^^",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 6
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 7
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 7
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 7
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 9
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Green Fire Bay",
+    "seed": "throne-v1-3",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "_......_",
+        "........",
+        "........",
+        "~......~",
+        "~~....~~",
+        "~~~..~~~",
+        "~~~..~~~",
+        "~~....~~",
+        "~......~",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "bomber",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "bomber",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 7
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "The Frozen Wall",
+    "seed": "throne-v1-4",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "........",
+        "........",
+        "_......_",
+        "_......_",
+        "........",
+        "^^^.^^^^",
+        "^^^.^^^^",
+        "_......_",
+        "_......_",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 4
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 4
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "The Last Shore",
+    "seed": "throne-v1-5",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "_......_",
+        "........",
+        ".^....^.",
+        "........",
+        "........",
+        "^......^",
+        "........",
+        "........",
+        ".~....~.",
+        "~~....~~",
+        "~~~..~~~",
+        "_~~..~~_"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 5
+        }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "name": "The Plunder Road",
+    "seed": "throne-v1-6",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "desert",
+      "map": [
+        "__ssss__",
+        "_ssssss_",
+        "ssppssss",
+        "ssssssss",
+        "sss~~sss",
+        "ssssssss",
+        "ssssssss",
+        "sss~~sss",
+        "ssssssss",
+        "ssssppss",
+        "_ssssss_",
+        "__ssss__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 8
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 8
+        },
+        {
+          "kind": "magician",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "name": "The Bastards' Field",
+    "seed": "throne-v1-7",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        "........",
+        "........",
+        "..f..f..",
+        "........",
+        "........",
+        "..f..f..",
+        "........",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 10
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 5
+        },
+        {
+          "kind": "bulwark",
+          "col": 6,
+          "row": 5
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "name": "The Long Night",
+    "seed": "throne-v1-8",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "hell",
+      "map": [
+        "_bbbbbb_",
+        "bbbbbbbb",
+        "bb^bb^bb",
+        "bbbbbbbb",
+        "lbbbbbbl",
+        "_bb^^bb_",
+        "_bbbbbb_",
+        "lbbbbbbl",
+        "bbbbbbbb",
+        "bb^bb^bb",
+        "bbbbbbbb",
+        "_bbbbbb_"
+      ],
+      "hellfireCount": 2,
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "ninja",
+          "col": 7,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 1
+        }
+      ]
+    }
+  }
+]

@@ -3,10 +3,10 @@ import {
   campaignStorageKey,
   completeCampaignLevel,
   parseCampaignProgress,
-  type Campaign,
 } from './lib/campaign'
 
-const sessionCompleted = new Map<string, number>()
+const NONE: readonly number[] = []
+const sessionCleared = new Map<string, readonly number[]>()
 const unsaved = new Set<string>()
 const listeners = new Set<() => void>()
 
@@ -23,32 +23,37 @@ export function campaignProgressSaved(slug: string): boolean {
   return !unsaved.has(slug)
 }
 
-export function readCampaignProgress(slug: string): number {
+export function readClearedLevels(slug: string): readonly number[] {
   const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)
-  if (!campaign) return 0
+  if (!campaign) return NONE
+  const known = sessionCleared.get(slug) ?? NONE
+  let stored: number[]
   try {
-    sessionCompleted.set(
-      slug,
-      Math.max(
-        sessionCompleted.get(slug) ?? 0,
-        parseCampaignProgress(
-          localStorage.getItem(campaignStorageKey(slug)),
-          campaign.levels.length,
-        ),
-      ),
+    stored = parseCampaignProgress(
+      localStorage.getItem(campaignStorageKey(slug)),
+      campaign.levels.length,
     )
   } catch {
-    return sessionCompleted.get(slug) ?? 0
+    return known
   }
-  return sessionCompleted.get(slug)!
+  const merged = [...new Set([...known, ...stored])].sort((a, b) => a - b)
+  // Keep the same array while nothing changed so useSyncExternalStore snapshots stay stable.
+  if (merged.length === known.length) return known
+  sessionCleared.set(slug, merged)
+  return merged
+}
+
+export function readCampaignProgress(slug: string): number {
+  return readClearedLevels(slug).length
 }
 
 export function recordCampaignVictory(slug: string, level: number): void {
-  const campaign: Campaign | undefined = CAMPAIGNS.find((pack) => pack.slug === slug)
+  const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)
   if (!campaign) return
-  sessionCompleted.set(slug, completeCampaignLevel(campaign, readCampaignProgress(slug), level))
+  const cleared = completeCampaignLevel(campaign, readClearedLevels(slug), level)
+  sessionCleared.set(slug, cleared)
   try {
-    localStorage.setItem(campaignStorageKey(slug), String(sessionCompleted.get(slug)))
+    localStorage.setItem(campaignStorageKey(slug), JSON.stringify(cleared))
     unsaved.delete(slug)
   } catch {
     unsaved.add(slug)

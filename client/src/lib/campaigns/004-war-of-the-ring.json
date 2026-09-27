@@ -1,0 +1,684 @@
+[
+  {
+    "id": 1,
+    "name": "Windy Hilltop",
+    "seed": "ring-v1-1",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_......_",
+        "........",
+        "..^..^..",
+        "_......_",
+        "__.^^.__",
+        "_......_",
+        "_.^..^._",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 7
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 7
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "ninja",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 5,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Bridge of Shadow",
+    "seed": "ring-v1-2",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "hell",
+      "map": [
+        "_bbbbbb_",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "_lbbbbl_",
+        "__lbbl__",
+        "___bb___",
+        "___bb___",
+        "__lbbl__",
+        "_lbbbbl_",
+        "bbbbbbbb",
+        "bbbbbbbb",
+        "_bbbbbb_"
+      ],
+      "hellfireCount": 1,
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Broken Company",
+    "seed": "ring-v1-3",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "_ffff.f_",
+        "ff....ff",
+        "f..ff..f",
+        "..f..f..",
+        "~..ff..~",
+        "~~....~~",
+        "_~.f..~_",
+        "..f..f..",
+        "f..ff..f",
+        "ff....ff",
+        "_f....f_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 11
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "The Gorge Keep",
+    "seed": "ring-v1-4",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "........",
+        "........",
+        "_......_",
+        "_......_",
+        "^^^..^^^",
+        "_^....^_",
+        "_......_",
+        "__....__",
+        "__.W..__",
+        "_^....^_",
+        "^^....^^",
+        "^^^..^^^"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 5
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 6
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 7
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "bomber",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "bomber",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Fallen River City",
+    "seed": "ring-v1-5",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "_......_",
+        "..^..^..",
+        "........",
+        ".^....^.",
+        "........",
+        "~~.~~.~~",
+        "........",
+        ".^....^.",
+        "........",
+        "..^..^..",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 6
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 4
+        },
+        {
+          "kind": "bomber",
+          "col": 3,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 4
+        }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "name": "Fields of the White City",
+    "seed": "ring-v1-6",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        "........",
+        "........",
+        "...ff...",
+        "........",
+        "........",
+        "...ff...",
+        "........",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 11
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 9
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 10
+        },
+        {
+          "kind": "ninja",
+          "col": 0,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 3
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "name": "The Dark Gate",
+    "seed": "ring-v1-7",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "volcano",
+      "map": [
+        "_bbbbbb_",
+        "bbbbbbbb",
+        "lbbbbbbl",
+        "llbbbbll",
+        "_lbbbbl_",
+        "_bbbbbb_",
+        "bbbbbbbb",
+        "bblbblbb",
+        "bbbbbbbb",
+        "_bbbbbb_",
+        "__bbbb__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 8
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 9
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 8
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 5,
+          "row": 3
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 6,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "archer",
+          "col": 5,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 4,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "name": "Mountain of Fire",
+    "seed": "ring-v1-8",
+    "difficulty": "hard",
+    "setup": {
+      "biome": "volcano",
+      "map": [
+        "_bbbbbb_",
+        "_llllbb_",
+        "_bbbbbb_",
+        "_bbllll_",
+        "_bbbbbb_",
+        "_llllbb_",
+        "_bbbbbb_",
+        "_bbllll_",
+        "_bbbbbb_",
+        "__bbbb__"
+      ],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 9
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 8
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 9
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 2,
+          "row": 2
+        },
+        {
+          "kind": "ninja",
+          "col": 5,
+          "row": 4
+        }
+      ]
+    }
+  }
+]

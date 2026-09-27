@@ -2,9 +2,10 @@ import { useSyncExternalStore } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Icon } from './Icon'
 import { LevelMiniature } from './LevelMiniature'
+import { LockedCampaignCard } from './LockedCampaignCard'
 import * as m from '../i18n/menus'
 import { campaignName } from '../i18n/campaign'
-import type { Campaign } from '../lib/campaign'
+import { isCampaignUnlocked, type Campaign } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
@@ -12,9 +13,13 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
   const completed = useSyncExternalStore(subscribeCampaignProgress, () =>
     readCampaignProgress(campaign.slug),
   )
+  const unlocked = useSyncExternalStore(subscribeCampaignProgress, () =>
+    isCampaignUnlocked(campaign, readCampaignProgress),
+  )
   const total = campaign.levels.length
   const done = completed === total
   const showcase = campaign.levels[Math.min(completed, total - 1)].setup
+  if (!unlocked) return <LockedCampaignCard campaign={campaign} />
   return (
     <Link
       to="/campaign/$campaign"

@@ -1,6 +1,10 @@
 import { t } from './locale'
+import { storyLevelNames } from './story-levels'
 
-export const campaignNames: Record<'original' | 'brutal' | 'shattered', string> = {
+export const campaignNames: Record<
+  'original' | 'brutal' | 'shattered' | 'war-of-the-ring' | 'iron-throne',
+  string
+> = {
   original: t({
     en: 'Original',
     fr: 'Originale',
@@ -21,6 +25,20 @@ export const campaignNames: Record<'original' | 'brutal' | 'shattered', string> 
     de: 'Zerbrochene Krone',
     es: 'Corona rota',
     it: 'Corona infranta',
+  }),
+  'war-of-the-ring': t({
+    en: 'War of the Ring',
+    fr: "La Guerre de l'anneau",
+    de: 'Ringkrieg',
+    es: 'Guerra del Anillo',
+    it: "Guerra dell'Anello",
+  }),
+  'iron-throne': t({
+    en: 'Iron Throne',
+    fr: "Le Trône d'acier",
+    de: 'Eiserner Thron',
+    es: 'Trono de hierro',
+    it: 'Trono di ferro',
   }),
 }
 
@@ -240,4 +258,5 @@ const levelNames: Record<string, string> = {
     es: 'Corona de cenizas',
     it: 'Corona di ceneri',
   }),
+  ...storyLevelNames,
 }
