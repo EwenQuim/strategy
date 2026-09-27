@@ -97,6 +97,22 @@ type Search = {
   leaf: (state: GameState) => number
 }
 
+// Per-decision search shape, reset on every chooseTacticalActions call and read by the analysis
+// harness in tests/analyze-ai.ts. Plain counters only, so they stay free in production.
+export const searchStats = {
+  decisions: 0,
+  plansEnumerated: 0,
+  shortlisted: 0,
+  beamExpansions: 0,
+  leafEvals: 0,
+  rootLeafEvals: 0,
+  deepLeafEvals: 0,
+  replyLeafEvals: 0,
+  cutoffs: 0,
+  budgetBreaks: 0,
+  maxDepth: 0,
+}
+
 // Once a decision has scored this many positions it stops expanding and reuses the scores it
 // already has. With the shortlist below, a decision scores at most the budget plus one node's
 // shortlist. A count, not a clock, keeps decisions deterministic.
@@ -134,7 +150,11 @@ function scoreTurn(state: GameState, plan: TurnPlan, search: Search): ScoredTurn
 function rankedTurns(state: GameState, search: Search): ScoredTurn[] {
   const side = activePawn(state)!.side
   const direction = side === search.side ? -1 : 1
-  return shortlist(state, turnPlans(withFoeEscape(state, side, () => 0)))
+  const enumerated = turnPlans(withFoeEscape(state, side, () => 0))
+  searchStats.plansEnumerated += enumerated.length
+  const kept = shortlist(state, enumerated)
+  searchStats.shortlisted += kept.length
+  return kept
     .map((plan) => scoreTurn(state, plan, search))
     .sort((a, b) => direction * (a.value - b.value))
 }
@@ -153,12 +173,22 @@ function lastReply(
   const plans = shortlist(state, turnPlans(withFoeEscape(state, side, () => 0))).sort(
     (a, b) => Number(b.actions.some(rolls)) - Number(a.actions.some(rolls)),
   )
+  searchStats.plansEnumerated += plans.length
+  searchStats.shortlisted += plans.length
   let best = maximizing ? -Infinity : Infinity
   for (const plan of plans) {
-    if (search.budget <= 0) break
+    if (search.budget <= 0) {
+      searchStats.budgetBreaks++
+      break
+    }
+    const before = searchStats.leafEvals
     const { value } = scoreTurn(state, plan, search)
+    searchStats.replyLeafEvals += searchStats.leafEvals - before
     best = maximizing ? Math.max(best, value) : Math.min(best, value)
-    if (maximizing ? best >= beta : best <= alpha) break
+    if (maximizing ? best >= beta : best <= alpha) {
+      searchStats.cutoffs++
+      break
+    }
   }
   return Number.isFinite(best) ? best : fallback
 }
@@ -174,13 +204,21 @@ function minimax(
   search: Search,
   fallback: number,
 ): number {
-  if (depth === 0 || state.winner || !activePawn(state) || search.budget <= 0) return fallback
+  if (search.budget <= 0) {
+    searchStats.budgetBreaks++
+    return fallback
+  }
+  if (depth === 0 || state.winner || !activePawn(state)) return fallback
+  searchStats.maxDepth = Math.max(searchStats.maxDepth, depth)
   const maximizing = activePawn(state)!.side === search.side
   if (depth === 1) return lastReply(state, alpha, beta, maximizing, search, fallback)
+  const beforeRanking = searchStats.leafEvals
   const turns = rankedTurns(state, search)
+  searchStats.deepLeafEvals += searchStats.leafEvals - beforeRanking
   if (!turns.length) return fallback
   let best = maximizing ? -Infinity : Infinity
   for (const turn of turns.slice(0, search.beamWidth)) {
+    searchStats.beamExpansions++
     const value =
       turn.outcomes.length === 1
         ? minimax(turn.outcomes[0].state, depth - 1, alpha, beta, search, turn.value)
@@ -194,7 +232,10 @@ function minimax(
       best = Math.min(best, value)
       beta = Math.min(beta, best)
     }
-    if (alpha >= beta) break
+    if (alpha >= beta) {
+      searchStats.cutoffs++
+      break
+    }
   }
   return best
 }
@@ -211,6 +252,19 @@ function untilFirstRoll(state: GameState, actions: Action[]): Action[] {
 }
 
 export function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
+  Object.assign(searchStats, {
+    decisions: 1,
+    plansEnumerated: 0,
+    shortlisted: 0,
+    beamExpansions: 0,
+    leafEvals: 0,
+    rootLeafEvals: 0,
+    deepLeafEvals: 0,
+    replyLeafEvals: 0,
+    cutoffs: 0,
+    budgetBreaks: 0,
+    maxDepth: 0,
+  })
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
   if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
@@ -224,13 +278,16 @@ export function chooseTacticalActions(state: GameState, options: BotOptions): Ac
     budget: POSITION_BUDGET,
     leaf: (next) => {
       search.budget--
+      searchStats.leafEvals++
       return evaluatePosition(next, pawn, plan, distance, reach)
     },
   }
   // A fixed random stream keeps the analysis from seeing the battle's future rolls, such as Hellfire.
   const analysis = { ...state, randomState: 0 }
   let floor = -Infinity
-  const valued = rankedTurns(analysis, search)
+  const ranked = rankedTurns(analysis, search)
+  searchStats.rootLeafEvals = searchStats.leafEvals
+  const valued = ranked
     .slice(0, options.beamWidth)
     .map((turn) => {
       const window = turn.outcomes.length === 1 ? floor : -Infinity
