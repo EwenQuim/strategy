@@ -297,7 +297,7 @@ function reduce(
     phase: winner ? 'over' : 'move',
     winner,
     chargeDestination: null,
-    log: [...state.log, ...log].slice(-40),
+    log: log.length ? [...state.log, ...log].slice(-40) : state.log,
     logCount: state.logCount + log.length,
   }
   if (effect) record?.(captureFrame(next, effect, fallen))
