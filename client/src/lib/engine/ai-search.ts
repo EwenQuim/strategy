@@ -3,7 +3,7 @@ import { canAttack } from './combat.ts'
 import { key } from './hex.ts'
 import type { Pawn, Side } from './pawns/index.ts'
 import type { BotOptions } from './ai.ts'
-import { distancesToAttack, evaluatePosition } from './ai-evaluate.ts'
+import { distancesToAttack, evaluatePosition, type ReachCache } from './ai-evaluate.ts'
 
 function generateCandidates(state: GameState): Action[][] {
   const pawn = activePawn(state)!
@@ -110,7 +110,9 @@ export function chooseTacticalActions(state: GameState, options: BotOptions): Ac
   if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
   const distance = distancesToAttack(state, pawn)
-  const score = (next: GameState) => evaluatePosition(next, pawn, options.caution, distance)
+  const reach: ReachCache = new Map()
+  const score = (next: GameState) =>
+    evaluatePosition(next, pawn, options.caution, distance, reach)
   // A fixed random stream keeps the analysis from seeing the battle's future rolls, such as Hellfire.
   const analysis = { ...state, randomState: 0 }
   const ranked = rankCandidates(analysis, score)

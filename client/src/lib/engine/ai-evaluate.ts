@@ -1,7 +1,7 @@
 import { activePawn, reducer, type GameState } from './engine.ts'
 import { inHellfire } from './hellfire.ts'
 import { canAttack, walkingPaths, protectorFor } from './combat.ts'
-import { distFrom, key, passable } from './hex.ts'
+import { distFrom, hexDist, key, passable, type Axial, type Tile } from './hex.ts'
 import {
   START_ENERGY,
   jumpDestinations,
@@ -17,11 +17,78 @@ function damageFromPosition(attacker: Pawn, position: ThreatPosition): number {
   return Math.max(base, attacker.special.threat?.(attacker, position) ?? 0)
 }
 
-function estimateIncomingDamage(state: GameState, side: Side): Map<number, number> {
+type Reach = {
+  positions: { from: Axial; movementCost: number }[]
+  jumps: Tile[]
+  damageAt: Map<string, number>
+}
+export type ReachCache = Map<string, Reach>
+
+// Only units and runes within walking or jumping range can change where an attacker reaches.
+function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCache): Reach {
+  const radius = Math.max(3, attacker.energy - attacker.moveCost + 1)
+  const nearby = (items: Axial[]) =>
+    items
+      .filter((item) => hexDist(attacker, item) <= radius)
+      .map((item) => key(item.q, item.r))
+      .join('|')
+  const { id, q, r, hp, energy, specialUsed } = attacker
+  const cacheKey = [
+    id,
+    q,
+    r,
+    hp,
+    energy,
+    specialUsed,
+    nearby(state.pawns),
+    nearby(runes),
+  ].join()
+  const cached = cache.get(cacheKey)
+  if (cached) return cached
+  const reach = {
+    positions: [...walkingPaths(state.tiles, state.pawns, attacker)]
+      .filter(([, route]) => route.damage < attacker.hp)
+      .map(([position, route]) => ({
+        from: state.tiles.get(position) ?? attacker,
+        movementCost:
+          attacker.moveEnergyCost(route.path.length) -
+          route.path.filter((tile) => tile.feature === 'rune').length * 2,
+      })),
+    jumps: jumpDestinations(state.tiles, state.pawns, attacker).filter(
+      (tile) => tile.terrain !== 'lava',
+    ),
+    damageAt: new Map<string, number>(),
+  }
+  cache.set(cacheKey, reach)
+  return reach
+}
+
+function maxDamage(attacker: Pawn, reach: Reach, target: Pawn): number {
+  const at = key(target.q, target.r)
+  const cached = reach.damageAt.get(at)
+  if (cached !== undefined) return cached
+  let damage = 0
+  for (const { from, movementCost } of reach.positions)
+    damage = Math.max(damage, damageFromPosition(attacker, { target, from, movementCost }))
+  if (reach.jumps.some((from) => canAttack(attacker, target, from)))
+    damage = Math.max(
+      damage,
+      (attacker.energy - attacker.special.cost) * attacker.attack.damage,
+    )
+  reach.damageAt.set(at, damage)
+  return damage
+}
+
+function estimateIncomingDamage(
+  state: GameState,
+  side: Side,
+  cache: ReachCache,
+): Map<number, number> {
   const targets = state.pawns.filter((p) => p.side === side)
   const damageByTarget = new Map(targets.map((p) => [p.id, 0]))
   const smallestHitByTarget = new Map<number, number>()
   const lastAttackerTurn = new Map<number, number>()
+  const runes = [...state.tiles.values()].filter((tile) => tile.feature === 'rune')
   const turnOffset = (id: number) =>
     (state.order.indexOf(id) - state.active + state.order.length) % state.order.length
   for (const foe of state.pawns.filter((p) => p.side !== side)) {
@@ -30,29 +97,11 @@ function estimateIncomingDamage(state: GameState, side: Side): Map<number, numbe
     const attacker = foe.clone()
     attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
     if (attacker.energy <= 0) continue
-    const moves = walkingPaths(state.tiles, state.pawns, attacker)
-    const jumps = jumpDestinations(state.tiles, state.pawns, attacker)
+    const reach = reachOf(state, attacker, runes, cache)
     for (const target of targets) {
-      let maxDamage = 0
-      for (const [position, route] of moves) {
-        if (route.damage >= attacker.hp) continue
-        const cost =
-          attacker.moveEnergyCost(route.path.length) -
-          route.path.filter((tile) => tile.feature === 'rune').length * 2
-        const from = state.tiles.get(position) ?? attacker
-        maxDamage = Math.max(
-          maxDamage,
-          damageFromPosition(attacker, { target, targets, from, movementCost: cost }),
-        )
-      }
-      if (jumps.some((from) => from.terrain !== 'lava' && canAttack(attacker, target, from))) {
-        maxDamage = Math.max(
-          maxDamage,
-          (attacker.energy - attacker.special.cost) * attacker.attack.damage,
-        )
-      }
-      damageByTarget.set(target.id, damageByTarget.get(target.id)! + maxDamage)
-      if (maxDamage > 0) {
+      const damage = maxDamage(attacker, reach, target)
+      damageByTarget.set(target.id, damageByTarget.get(target.id)! + damage)
+      if (damage > 0) {
         smallestHitByTarget.set(
           target.id,
           Math.min(smallestHitByTarget.get(target.id) ?? Infinity, attacker.attack.damage),
@@ -86,6 +135,7 @@ export function evaluatePosition(
   actor: Pawn,
   caution: number,
   distance: Map<string, number>,
+  cache: ReachCache,
 ): number {
   const sameTurn = activePawn(state)?.id === actor.id
   const settled = sameTurn ? reducer(state, { type: 'endTurn' }) : state
@@ -95,7 +145,7 @@ export function evaluatePosition(
       : settled.winner === actor.side
         ? SCORE.victory
         : -SCORE.victory
-  const danger = estimateIncomingDamage(settled, actor.side)
+  const danger = estimateIncomingDamage(settled, actor.side, cache)
   let score = 0
   for (const pawn of settled.pawns) {
     const allied = pawn.side === actor.side
