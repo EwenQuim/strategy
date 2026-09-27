@@ -39,9 +39,6 @@ const validBotOptions = (options: BotOptions | undefined): options is BotOptions
   Number.isInteger(options.beamWidth) &&
   options.beamWidth >= 1 &&
   options.beamWidth <= 32 &&
-  Number.isInteger(options.samples) &&
-  options.samples >= 1 &&
-  options.samples <= 16 &&
   Number.isFinite(options.caution) &&
   options.caution >= 0 &&
   options.caution <= 2

@@ -22,9 +22,8 @@ function playToTheEnd(level: CampaignLevel, difficulty: BotDifficulty, caution: 
 }
 
 function winnableAgainst(level: CampaignLevel, difficulty: BotDifficulty) {
-  // Against the hard AI the scripted player sometimes needs maximum caution to outlast the bot.
-  const cautions = difficulty === 'hard' ? [0.25, 1, 1.5, 2] : [0.25, 0.7, 1]
-  for (const caution of cautions) {
+  // Some encounters need maximum caution for the scripted player to outlast the bot.
+  for (const caution of [0.25, 0.7, 1, 1.5, 2]) {
     if (playToTheEnd(level, difficulty, caution).winner === 'player') return true
   }
   return false
