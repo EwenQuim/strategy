@@ -32,18 +32,18 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
       aria-label={m.campaignCard(campaignName(campaign), completed, total)}
     >
       <LevelMiniature setup={showcase} />
-      <span className="flex items-end justify-between gap-3">
-        <span className="font-serif text-[24px] leading-none">{campaignName(campaign)}</span>
-        <span className="flex items-center gap-1.5 text-[11px] text-muted [&>svg]:size-4 [&>svg]:text-gold">
-          {completed} / {total}
-          <Icon name={done ? 'crown' : 'arrow'} className={done ? 'fill-current' : undefined} />
-        </span>
+      <span className="font-serif text-[clamp(18px,5.2vw,24px)] leading-[1.05] text-balance">
+        {campaignName(campaign)}
       </span>
-      <span className="h-1 overflow-hidden rounded-full bg-[#ffffff14]">
-        <span
-          className="block h-full rounded-full bg-gold"
-          style={{ width: (completed / total) * 100 + '%' }}
-        />
+      <span className="flex items-center gap-2 text-[11px] whitespace-nowrap text-muted [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-gold">
+        <span className="h-1 flex-1 overflow-hidden rounded-full bg-[#ffffff14]">
+          <span
+            className="block h-full rounded-full bg-gold"
+            style={{ width: (completed / total) * 100 + '%' }}
+          />
+        </span>
+        {completed} / {total}
+        <Icon name={done ? 'crown' : 'arrow'} className={done ? 'fill-current' : undefined} />
       </span>
     </Link>
   )
