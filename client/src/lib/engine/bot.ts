@@ -8,7 +8,7 @@ import {
   type GameState,
   type Transition,
 } from './engine.ts'
-import { canAttack, specialTargets, protectorFor } from './combat.ts'
+import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import type { BattleSetup } from './setup.ts'
@@ -72,21 +72,8 @@ function ruleSpecial(
   specials: Pawn[],
   strategy: BotStrategy,
 ): Action[] | null {
-  if (pawn.kind === 'king' && specials.length) return [{ type: 'act', action: 'special' }]
-  if (pawn.kind === 'bulwark') {
-    const ally = specials
-      .filter(
-        (p) =>
-          !protectorFor(state.pawns, p) &&
-          foes.some((foe) => canAttack(foe, p, state.tiles.get(key(foe.q, foe.r)))),
-      )
-      .sort((a, b) => Number(b.kind === 'king') - Number(a.kind === 'king') || a.hp - b.hp)[0]
-    if (ally)
-      return [
-        { type: 'act', action: 'special' },
-        { type: 'specialAt', q: ally.q, r: ally.r },
-      ]
-  }
+  const own = pawn.ai.ruleSpecial?.(pawn, state, foes, specials)
+  if (own) return own
   if (pawn.special.areaTargets) {
     const area = pawn.special
       .candidates(pawn, state)

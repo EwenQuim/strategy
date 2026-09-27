@@ -17,14 +17,17 @@ Goal: an AI that reads the board accurately at every difficulty, whose behaviour
 
 ## Target architecture
 
+Engine subfolders may only import their own folder or top-level engine files, so the AI modules live at the engine root:
+
 ```
-engine/ai/
-  search.ts     candidate generation, beam search, expected escape outcomes, time budget
-  evaluate.ts   sums unit terms and side terms, no unit-kind checks
-  plan.ts       side plan computed once per round: stance, force ratio, focus target, stalemate counter
-  profiles.ts   difficulty presets and stances
-  guardrails.ts vetoes applied to the ranked options before a pick
-pawns/<unit>.ts special (what it can do) + ai (what it wants)
+engine/
+  ai.ts             public entry: difficulty presets and chooseTacticalActions
+  ai-search.ts      candidate generation, beam search, expected escape outcomes, time budget
+  ai-evaluate.ts    sums unit terms and side terms, no unit-kind checks
+  ai-plan.ts        side plan computed once per round: stance, force ratio, focus target, stalemate counter
+  ai-guardrails.ts  vetoes applied to the ranked options before a pick
+  pawn-ai.ts        PawnAi hooks and the default unit behaviour
+  pawns/<unit>.ts   special (what it can do) + ai (what it wants)
 ```
 
 Per-unit hooks, with defaults on `Pawn` so most units override one or two:
@@ -62,7 +65,7 @@ A level can override it in its JSON: `"ai": { "preset": "normal", "stance": "ass
 
 - Add `ai` to `Pawn` with defaults reproducing today's generic scoring.
 - Move the king special cases (`ai.ts:35`, `:161`, `:168`, `:180`) into `King.ai`, and the bulwark and king rules of the rule bot into their units.
-- Split `ai.ts` into the `engine/ai/` modules above.
+- Split `ai.ts` into `ai-search.ts`, `ai-evaluate.ts` and `pawn-ai.ts`.
 - **Done when** the 126-decision fingerprint in `bot-sweep.test.ts` and every campaign simulation are unchanged.
 
 ### 2. Free speed-ups, no behaviour change
@@ -79,14 +82,14 @@ A level can override it in its JSON: `"ai": { "preset": "normal", "stance": "ass
 - Every preset searches at depth 2 or 3. Easy stops being depth 1.
 - Introduce `AiProfile.temperament` and move `caution` into `riskAppetite`.
 - Pick among options within `latitude` of the best score, preferring the one that fits the temperament (more damage for a reckless AI, the preferred target for its focus), never a random one.
-- Implement `guardrails.ts` as vetoes on the ranked options, shared by all profiles.
+- Implement `ai-guardrails.ts` as vetoes on the ranked options, shared by all profiles.
 - Add a blunder test suite: one small board per guardrail, asserted at every difficulty (extends the existing "take a winning attack" tests in `ai.test.ts`).
 - Retune easy, normal and hard so the Original, Brutal and Shattered Crown integration tests still pass.
 - **Done when** the guardrail suite passes at every difficulty and simulated win rates rise from hard to easy without any guardrail firing in normal play logs.
 
 ### 4. Side plan, stances and the stalemate breaker
 
-- `plan.ts` computes once per round: force ratio, stance, focus target, rounds since the last damage dealt.
+- `ai-plan.ts` computes once per round: force ratio, stance, focus target, rounds since the last damage dealt.
 - Aggression rises with the stalemate counter, so a waiting AI eventually commits.
 - Caution scales with the force ratio: a 12 v 3 horde accepts losses.
 - `cohesion` term: units prefer to advance next to allies, so a group moves as a wave instead of one unit at a time.

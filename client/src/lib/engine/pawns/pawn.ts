@@ -2,6 +2,7 @@ import type { Axial, Tile } from '../hex.ts'
 import type { Action, BattleEffect, GameState } from '../engine.ts'
 import type { SeededRandom } from '../random.ts'
 import type { PawnKind } from './index.ts'
+import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 
 export type Side = 'player' | 'enemy'
 
@@ -87,6 +88,9 @@ export abstract class Pawn {
   abstract readonly kind: PawnKind
   abstract readonly attack: AttackProfile
   abstract get special(): SpecialAbility
+  get ai(): PawnAi {
+    return defaultAi
+  }
   bonusEnergy = 0
   springSince: number | null = null
 
