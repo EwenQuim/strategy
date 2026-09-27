@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { dialogClassName, iconButtonClassName, primaryButtonClassName } from './styles'
 import { Icon, PawnIcon } from './Icon'
 import { hexPoints, terrainColors } from './hex-art'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
+import { markTutorialSeen, readTutorialSeen } from '../tutorial'
 import type { CampaignLevel, IntroducedElement } from '../lib/campaign'
 import { INTRODUCTIONS, type BriefingElement } from '../briefings'
 import {
@@ -13,6 +15,7 @@ import {
   type TileFeature,
 } from '../lib/engine'
 import * as common from '../i18n/common'
+import * as h from '../i18n/help'
 import * as m from '../i18n/game'
 import { levelName } from '../i18n/campaign'
 
@@ -114,6 +117,48 @@ export function Briefing({ level }: { level: CampaignLevel }) {
         <BriefingElements
           elements={level.newElements.flatMap((element) => INTRODUCTIONS[element])}
         />
+      </div>
+      <form method="dialog" className="shrink-0 px-6 pb-6">
+        <button type="submit" className={primaryButtonClassName + ' min-h-12 w-full'}>
+          {m.go}
+        </button>
+      </form>
+    </dialog>
+  )
+}
+
+export function QuickPlayTutorial() {
+  const [seen] = useState(readTutorialSeen)
+  if (seen) return null
+  return (
+    <dialog
+      ref={showBriefing}
+      onClose={markTutorialSeen}
+      className={dialogClassName}
+      aria-labelledby="quick-play-tutorial-title"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) event.currentTarget.close()
+      }}
+    >
+      <form
+        method="dialog"
+        className="flex shrink-0 items-start justify-between gap-2.5 border-b border-line px-6 pt-6 pb-4 [&>button]:-mt-1 [&>button]:-mr-2 [&>button]:shrink-0"
+      >
+        <h2
+          className="mt-1 font-serif text-[30px] leading-tight"
+          id="quick-play-tutorial-title"
+        >
+          {common.quickPlay}
+        </h2>
+        <button className={iconButtonClassName} type="submit" aria-label={common.closeDialog}>
+          <Icon name="close" />
+        </button>
+      </form>
+      <div className="min-h-0 flex-1 overflow-y-auto px-6">
+        <p className="pt-5 text-[14px] leading-normal text-muted">
+          {h.randomIntro} {h.aiPlayers}. {h.turnOrder}.
+        </p>
+        <BriefingElements elements={INTRODUCTIONS.king} />
       </div>
       <form method="dialog" className="shrink-0 px-6 pb-6">
         <button type="submit" className={primaryButtonClassName + ' min-h-12 w-full'}>

@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { QuickPlayTutorial } from '../components/Briefing'
 import { Game } from '../components/Game'
 
 export const Route = createFileRoute('/game/$seed')({
@@ -9,6 +10,11 @@ export const Route = createFileRoute('/game/$seed')({
   component: function RandomBattle() {
     const { seed } = Route.useParams()
     const { mode, difficulty, setup } = Route.useSearch()
-    return <Game seed={seed} mode={mode} difficulty={difficulty} setup={setup} />
+    return (
+      <>
+        <Game seed={seed} mode={mode} difficulty={difficulty} setup={setup} />
+        {mode === 'ai' && !setup && <QuickPlayTutorial />}
+      </>
+    )
   },
 })
