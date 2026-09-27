@@ -35,13 +35,17 @@ type BotController = BotStrategy | BotDifficulty | BotOptions
 
 const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
   !!options &&
-  [1, 2, 3].includes(options.depth) &&
+  [2, 3].includes(options.depth) &&
   Number.isInteger(options.beamWidth) &&
   options.beamWidth >= 1 &&
   options.beamWidth <= 32 &&
-  Number.isFinite(options.caution) &&
-  options.caution >= 0 &&
-  options.caution <= 2
+  Number.isFinite(options.riskAppetite) &&
+  options.riskAppetite >= -1 &&
+  options.riskAppetite <= 1 &&
+  ['best', 'nearest', 'weakest'].includes(options.focus) &&
+  Number.isFinite(options.latitude) &&
+  options.latitude >= 0 &&
+  options.latitude <= 100
 
 export function chooseBotActions(
   state: GameState,

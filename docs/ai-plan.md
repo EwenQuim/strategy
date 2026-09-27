@@ -25,7 +25,7 @@ engine/
   ai-search.ts      candidate generation, beam search, expected escape outcomes, time budget
   ai-evaluate.ts    sums unit terms and side terms, no unit-kind checks
   ai-plan.ts        side plan computed once per round: stance, force ratio, focus target, stalemate counter
-  ai-guardrails.ts  vetoes applied to the ranked options before a pick
+  ai-choice.ts      temperament pick among near-best options, with structural guardrails
   pawn-ai.ts        PawnAi hooks and the default unit behaviour
   pawns/<unit>.ts   special (what it can do) + ai (what it wants)
 ```
@@ -41,19 +41,17 @@ interface PawnAi {
 }
 ```
 
-Profile (replaces `BotOptions`):
+Profile (`BotOptions`), grown step by step:
 
 ```ts
-type AiProfile = {
-  search: { depth: 2 | 3; beamWidth: number; timeBudgetMs: number }
-  temperament: {
-    riskAppetite: number   // 0 calibrated, higher accepts worse trades for damage
-    aggression: number     // weight of approaching and pressuring
-    focus: 'best' | 'nearest' | 'weakest' | 'backline'
-    coordination: number   // 0 each unit alone, 1 follows the side plan
-    latitude: number       // score margin within which a non-best option may be picked
-  }
-  stance?: 'hold' | 'balanced' | 'assault'
+type BotOptions = {
+  depth: 2 | 3
+  beamWidth: number
+  riskAppetite: number                    // step 3: 0 calibrated, 1 ignores threats to its units
+  focus: 'best' | 'nearest' | 'weakest'   // step 3, 'backline' in step 5
+  latitude: number                        // step 3: margin within which a more tempting option wins
+  aggression?: number                     // step 4
+  stance?: 'hold' | 'balanced' | 'assault' // step 4
 }
 ```
 
@@ -79,12 +77,12 @@ A level can override it in its JSON: `"ai": { "preset": "normal", "stance": "ass
 ### 3. Difficulty from temperament, with guardrails
 
 - Every preset searches at depth 2 or 3. Easy stops being depth 1.
-- Introduce `AiProfile.temperament` and move `caution` into `riskAppetite`.
-- Pick among options within `latitude` of the best score, preferring the one that fits the temperament (more damage for a reckless AI, the preferred target for its focus), never a random one.
-- Implement `ai-guardrails.ts` as vetoes on the ranked options, shared by all profiles.
-- Add a blunder test suite: one small board per guardrail, asserted at every difficulty (extends the existing "take a winning attack" tests in `ai.test.ts`).
-- Retune easy, normal and hard so the Original, Brutal and Shattered Crown integration tests still pass.
-- **Done when** the guardrail suite passes at every difficulty and simulated win rates rise from hard to easy without any guardrail firing in normal play logs.
+- `caution` becomes `riskAppetite` (caution = 1 - riskAppetite).
+- `ai-choice.ts` picks among options within `latitude` of the best value, preferring damage to the `focus` target, then more damage overall. Never random, and ties keep the best option.
+- Guardrails are structural rather than vetoes: a deviation must deal more damage than the best option (never idle, never a pointless sacrifice), and latitude (at most 100) stays far below the victory and lethal king scores. A veto layer was tried and never fired, so it was dropped.
+- Guardrail tests at every difficulty: lava suicide, bombing own units, skipping a free kill, next to the existing lethal-king, defender and winning-attack tests.
+- Presets: easy (risk 0.9, nearest, latitude 60), normal (risk 0.5, weakest, latitude 25), hard (risk 0, best, latitude 0). Scripted player wins over all 67 levels at two cautions: 75% / 66% / 60%. Temperament changes 2 to 3.5% of easy and normal decisions.
+- Skipping the search for idle units is dropped: step 2 already met the speed target.
 
 ### 4. Side plan, stances and the stalemate breaker
 

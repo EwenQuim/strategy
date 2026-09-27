@@ -4,6 +4,7 @@ import { key } from './hex.ts'
 import type { Pawn, Side } from './pawns/index.ts'
 import type { BotOptions } from './ai.ts'
 import { distancesToAttack, evaluatePosition, type ReachCache } from './ai-evaluate.ts'
+import { chooseOption, expected, hpOf, type Option, type Outcome } from './ai-choice.ts'
 
 function generateCandidates(state: GameState): Action[][] {
   const pawn = activePawn(state)!
@@ -24,8 +25,6 @@ function generateCandidates(state: GameState): Action[][] {
   ]
 }
 
-type Outcome = { state: GameState; weight: number }
-
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
   return {
     ...state,
@@ -37,8 +36,6 @@ function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => numb
     }),
   }
 }
-
-const hpOf = (state: GameState, id: number) => state.pawns.find((p) => p.id === id)?.hp ?? 0
 
 // Escape rolls are scored by their odds: a 20% escape keeps 80% of the hit's value.
 function expectedOutcomes(state: GameState, actions: Action[]): Outcome[] {
@@ -63,9 +60,6 @@ function expectedOutcomes(state: GameState, actions: Action[]): Outcome[] {
     { state: reset(dodge), weight: escape },
   ]
 }
-
-const expected = (outcomes: Outcome[], value: (state: GameState) => number) =>
-  outcomes.reduce((sum, outcome) => sum + outcome.weight * value(outcome.state), 0)
 
 function rankCandidates(state: GameState, score: (state: GameState) => number) {
   return generateCandidates(state)
@@ -112,21 +106,18 @@ export function chooseTacticalActions(state: GameState, options: BotOptions): Ac
   const distance = distancesToAttack(state, pawn)
   const reach: ReachCache = new Map()
   const score = (next: GameState) =>
-    evaluatePosition(next, pawn, options.caution, distance, reach)
+    evaluatePosition(next, pawn, 1 - options.riskAppetite, distance, reach)
   // A fixed random stream keeps the analysis from seeing the battle's future rolls, such as Hellfire.
   const analysis = { ...state, randomState: 0 }
-  const ranked = rankCandidates(analysis, score)
-  if (options.depth === 1) return ranked[0].actions
-  let best = ranked[0]
-  let bestScore = -Infinity
-  for (const candidate of ranked.slice(0, options.beamWidth)) {
-    const value = expected(candidate.outcomes, (next) =>
-      searchTurn(next, options.depth - 1, options.beamWidth, analysis, score),
-    )
-    if (value > bestScore) {
-      best = candidate
-      bestScore = value
-    }
-  }
-  return best.actions
+  const valued: Option[] = rankCandidates(analysis, score)
+    .slice(0, options.beamWidth)
+    .map(({ actions, outcomes }) => ({
+      actions,
+      outcomes,
+      value: expected(outcomes, (next) =>
+        searchTurn(next, options.depth - 1, options.beamWidth, analysis, score),
+      ),
+    }))
+    .sort((a, b) => b.value - a.value)
+  return chooseOption(analysis, pawn, valued, options).actions
 }
