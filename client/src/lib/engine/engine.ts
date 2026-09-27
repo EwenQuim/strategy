@@ -152,8 +152,19 @@ const effectFrom = ({ kind, ...rest }: SpecialResult, from: Axial): BattleEffect
   ...rest,
 })
 
+// Only picking up a rune changes the map, so maps without runes are shared between states.
+const holdsRune = new WeakMap<Map<string, Tile>, boolean>()
+function mapHoldsRune(tiles: Map<string, Tile>): boolean {
+  let rune = holdsRune.get(tiles)
+  if (rune === undefined) {
+    rune = [...tiles.values()].some((tile) => tile.feature === 'rune')
+    holdsRune.set(tiles, rune)
+  }
+  return rune
+}
+
 function executeAction(state: GameState, action: Action): ActionResult | null {
-  const tiles = new Map(state.tiles)
+  const tiles = mapHoldsRune(state.tiles) ? new Map(state.tiles) : state.tiles
   const participants = state.pawns.map((pawn) => pawn.clone())
   const pawns = [...participants]
   const actor = pawns.find((pawn) => pawn.id === state.order[state.active])!
