@@ -1,6 +1,7 @@
 import { hexDist, key, neighbors } from '../hex.ts'
 import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
 import type { Axial } from '../hex.ts'
+import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 function direction(from: Axial, to: Axial): string | null {
@@ -68,6 +69,22 @@ const fireball: SpecialAbility = {
   },
 }
 
+const LINED_UP_FOE = 1
+
+// A fireball burns every enemy on one line, so a magician likes enemies lined up before it.
+const magicianAi: PawnAi = {
+  ...defaultAi,
+  goal: (magician, surroundings) => {
+    const lines = new Map<string, number>()
+    for (const foe of surroundings.foes) {
+      const line = direction(magician, foe)
+      if (line) lines.set(line, (lines.get(line) ?? 0) + 1)
+    }
+    const linedUp = Math.max(0, ...lines.values()) - 1
+    return defaultAi.goal(magician, surroundings) + Math.max(0, linedUp) * LINED_UP_FOE
+  },
+}
+
 export class Magician extends Pawn {
   static override readonly icon =
     'M4 20 14.5 9.5M13 8l3 3M18 2.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9ZM9.5 4.5v2m-1-1h2M20 13.5v2m-1-1h2'
@@ -75,5 +92,8 @@ export class Magician extends Pawn {
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
   get special(): SpecialAbility {
     return fireball
+  }
+  override get ai(): PawnAi {
+    return magicianAi
   }
 }
