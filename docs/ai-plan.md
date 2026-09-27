@@ -107,16 +107,19 @@ One unit per commit, each checked by the campaign integration tests and simulate
 
 Scripted player wins after step 5: easy 75%, normal 69%, hard 61%. Games are shorter because kings fight and rally.
 
-### 6. Realistic danger
+### 6. Realistic danger (tried, dropped)
 
-- Each opposing unit can hit only one target next turn: assign its threat to its most likely target instead of counting it against every unit at once.
-- Keep the guard (bulwark protect) redirection.
-- **Done when** crowds stop freezing out of range in simulations, and the campaign integration tests pass.
+- Tried: each opposing unit threatens only its likeliest soldier victim, while vital units (the king) still count every threat.
+- Result: hard rose from 61% to 51% scripted player wins, and Original's Powder Lesson and Brutal's Iron Caravan fell out of reach. Keeping half the threat on other soldiers still broke Powder Lesson.
+- The shyness it targeted was the ally-blocked routing fixed in step 4, and games did not get shorter, so the conservative estimate stays.
 
 ### 7. Rebalance
 
-- Re-run every campaign and story level simulation with the final AI and retune rosters where a level fell outside its target (winnable, but not at every caution).
-- Revisit Bridge of Shadow and Three Against the Horde.
+- Every story level was re-simulated with the final AI. Target: winnable by the scripted player, but not at every caution.
+- Three Against the Horde: 3 v 10 on assault broke the line by round 4 once the horde arrived as a wave; balanced stances paused the horde for rounds at a time. Now 3 v 9 on assault: 3 to 5 attackers in the canyon every round, holding the line wins 9 of 10 simulated games.
+- Windy Hilltop swaps its sixth-ninja slot for an archer (it was won at every caution; a ninja made it lost at every caution).
+- Broken Company, Green Fire Bay and The Frozen Wall lose one attacker each (lost at every caution).
+- Bridge of Shadow is winnable again without changes.
 
 ## Verification tools
 
