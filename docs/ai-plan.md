@@ -70,12 +70,11 @@ A level can override it in its JSON: `"ai": { "preset": "normal", "stance": "ass
 
 ### 2. Free speed-ups, no behaviour change
 
-- Shortcut units with no enemy reachable this turn: step toward the nearest attack hex without a search.
-- Cache each opposing unit's reachable hexes per decision; recompute only for units whose paths the acting unit touches.
-- Quiet simulation for analysis: no battle log strings, and copy the map only when a rune is picked up.
-- Run the AI in a Web Worker so the UI never freezes, and add a time budget per decision.
-- Add `npm run bench:ai` (the timing script used so far) with the big story levels and Brutal 19 and 20.
+- Cache each opposing unit's reach per decision, keyed only by the units and runes within its walking or jumping range, so it survives the acting unit moving elsewhere.
+- Cache the best damage that reach can deal to each target position, and compute per-hex move costs once per unit instead of once per target.
+- Add `npm run bench:ai` with the big story levels and Brutal 19 and 20.
 - **Done when** decisions are identical and the worst reply on The Long Night is under 50 ms.
+- Deferred: a Web Worker (the AI runs inside a synchronous reducer and game states hold class instances, so it needs an async game loop and unit rehydration; not worth it at under 50 ms) and a quiet simulation mode (not needed for the target). Skipping the search for idle units moves to step 3 because it can change decisions.
 
 ### 3. Difficulty from temperament, with guardrails
 

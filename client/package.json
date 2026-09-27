@@ -16,6 +16,7 @@
     "test:integration": "node --test tests/integration/*.test.ts",
     "test:pwa": "node --test tests/*.browser.ts",
     "test:pwa:smoke": "node --test --test-skip-pattern='^(Local mode|Campaign)' tests/*.browser.ts",
+    "bench:ai": "node tests/bench-ai.ts",
     "test:ci": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:integration && npm run build",
     "prepare": "git config --local core.hooksPath .githooks"
   },

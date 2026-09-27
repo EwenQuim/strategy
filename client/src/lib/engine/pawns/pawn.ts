@@ -33,7 +33,6 @@ export type SpecialResult = Omit<BattleEffect, 'from'>
 
 export type ThreatPosition = {
   target: Pawn
-  targets: Pawn[]
   from: Axial
   movementCost: number
 }
