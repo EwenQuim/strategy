@@ -15,6 +15,7 @@ type UnitThreat = {
 type UnitSurroundings = {
   allies: readonly Pawn[]
   attackDistance: number | undefined
+  aggression: number
 }
 
 export interface PawnAi {
@@ -57,6 +58,6 @@ export const defaultAi: PawnAi = {
       (Math.min(health, expected) * UNIT_SCORE.health + (expected >= health ? value : 0))
     )
   },
-  goal: (_pawn, { attackDistance }) =>
-    -(attackDistance ?? UNREACHABLE_DISTANCE) * UNIT_SCORE.attackDistance,
+  goal: (_pawn, { attackDistance, aggression }) =>
+    -(attackDistance ?? UNREACHABLE_DISTANCE) * UNIT_SCORE.attackDistance * aggression,
 }

@@ -107,6 +107,8 @@ Generated maps have no special tiles 50% of the time, one 40%, and two 10%. Thes
 
 Authored maps additionally accept `p` (decorative palm), `b` (basalt), `l` (lava), `W` (watchtower), `H` (healing spring), and `R` (power rune). Special symbols sit on plain ground and are limited to two tiles, but can appear anywhere in an authored map. Their ground color follows the biome.
 
+Authored setups can also give the enemy army orders with `enemyStance`: `hold`, `balanced` (the default) or `assault`. The AI approaches half as eagerly while holding and twice as eagerly on assault.
+
 The same optional setup is accepted by bot `initialState(seed, setup)` / `initialTransition(seed, setup)`, `initialPlayback(seed, mode, setup)`, and `useGame(seed, mode, setup)`. Campaign routes pass their encounter directly and remount the game between levels. Custom setups are not encoded in the existing random-game URLs.
 
 ## Campaign

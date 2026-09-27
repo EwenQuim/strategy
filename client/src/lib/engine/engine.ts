@@ -44,6 +44,7 @@ export type GameState = {
   order: number[]
   active: number
   round: number
+  lastClashRound: number
   phase: Phase
   chargeDestination: Axial | null
   winner: Side | 'draw' | null
@@ -86,6 +87,7 @@ export function initialState(
     hellfire: [],
     active: -1,
     round: 1,
+    lastClashRound: 0,
     phase: 'move',
     chargeDestination: null,
     winner: null,
@@ -271,11 +273,13 @@ function reduce(
     const position = { q: pawn.q, r: pawn.r }
     effect = { kind: 'escape', from: position, to: position }
   }
+  const health = (army: Pawn[]) => army.reduce((sum, p) => sum + p.hp, 0)
   const next: GameState = {
     ...state,
     tiles,
     pawns,
     randomState,
+    lastClashRound: health(pawns) < health(state.pawns) ? state.round : state.lastClashRound,
     phase: winner ? 'over' : 'move',
     winner,
     chargeDestination: null,

@@ -1,6 +1,7 @@
 import { activePawn, reducer, type GameState } from './engine.ts'
 import { inHellfire } from './hellfire.ts'
 import { canAttack, walkingPaths, protectorFor } from './combat.ts'
+import type { SidePlan } from './ai-plan.ts'
 import { distFrom, hexDist, key, passable, type Axial, type Tile } from './hex.ts'
 import {
   START_ENERGY,
@@ -133,7 +134,7 @@ const SCORE = { victory: 1_000_000, hellfireDamage: 24 }
 export function evaluatePosition(
   state: GameState,
   actor: Pawn,
-  caution: number,
+  plan: SidePlan,
   distance: Map<string, number>,
   cache: ReachCache,
 ): number {
@@ -158,20 +159,29 @@ export function evaluatePosition(
     if (!allied) continue
     const incoming = danger.get(pawn.id) ?? 0
     score -= hellfireDamage * SCORE.hellfireDamage
-    score -= pawn.ai.risk(pawn, { incoming, health, hellfireDamage, value, caution })
+    score -= pawn.ai.risk(pawn, {
+      incoming,
+      health,
+      hellfireDamage,
+      value,
+      caution: plan.caution,
+    })
   }
   const pawn = settled.pawns.find((p) => p.id === actor.id) ?? actor
   const allies = settled.pawns.filter((p) => p.side === pawn.side && p.id !== pawn.id)
-  score += pawn.ai.goal(pawn, { allies, attackDistance: distance.get(key(pawn.q, pawn.r)) })
+  score += pawn.ai.goal(pawn, {
+    allies,
+    attackDistance: distance.get(key(pawn.q, pawn.r)),
+    aggression: plan.aggression,
+  })
   return score
 }
 
+// Allies make way over a few turns, so only enemies block the route toward attack range.
 export function distancesToAttack(state: GameState, pawn: Pawn): Map<string, number> {
-  const occupied = new Set(
-    state.pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)),
-  )
   const foes = state.pawns.filter((p) => p.side !== pawn.side)
-  const paths = new Map([...state.tiles].filter(([position]) => !occupied.has(position)))
+  const blocked = new Set(foes.map((foe) => key(foe.q, foe.r)))
+  const paths = new Map([...state.tiles].filter(([position]) => !blocked.has(position)))
   return distFrom(
     paths,
     [...paths.values()].filter(

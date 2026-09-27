@@ -50,6 +50,7 @@ function battle(): GameState {
     order: [1, 2, 3],
     active: 0,
     round: 1,
+    lastClashRound: 0,
     phase: 'move',
     chargeDestination: null,
     winner: null,
@@ -57,6 +58,13 @@ function battle(): GameState {
     logCount: 0,
   }
 }
+
+test('The last clash round follows combat damage, not plain moves', () => {
+  const state = battle()
+  assert.equal(coreReducer(state, { type: 'move', q: 0, r: -1 }).lastClashRound, 0)
+  const aimed = coreReducer(state, { type: 'act', action: 'attack' })
+  assert.equal(coreReducer(aimed, { type: 'attackAt', q: 1, r: 0 }).lastClashRound, state.round)
+})
 
 test('End turn converts all remaining energy to Escape for every class and advances once', () => {
   for (const Ctor of [King, ...RECRUIT_CLASSES]) {

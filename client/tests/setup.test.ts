@@ -250,8 +250,9 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
   assert.equal(
     seedState(
       JSON.stringify(
-        states.map(({ hellfire, ...state }) => {
+        states.map(({ hellfire, lastClashRound, ...state }) => {
           assert.deepEqual(hellfire, [])
+          assert.equal(lastClashRound, 0)
           return { ...state, tiles: [...state.tiles] }
         }),
       ),
