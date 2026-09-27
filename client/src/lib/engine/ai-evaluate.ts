@@ -169,9 +169,9 @@ export function evaluatePosition(
       caution: plan.caution,
     })
   }
-  const allies = settled.pawns.filter((p) => p.side === actor.side && p.id !== actor.id)
   score += survivingActor.ai.goal(survivingActor, {
-    allies,
+    allies: settled.pawns.filter((p) => p.side === actor.side && p.id !== actor.id),
+    foes: settled.pawns.filter((p) => p.side !== actor.side),
     attackDistance: distance.get(key(survivingActor.q, survivingActor.r)),
     aggression: plan.aggression,
   })

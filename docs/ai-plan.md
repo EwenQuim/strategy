@@ -48,7 +48,7 @@ type BotOptions = {
   depth: 2 | 3
   beamWidth: number
   riskAppetite: number                    // step 3: 0 calibrated, 1 ignores threats to its units
-  focus: 'best' | 'nearest' | 'weakest'   // step 3, 'backline' in step 5
+  focus: 'best' | 'nearest' | 'weakest'   // step 3
   latitude: number                        // step 3: margin within which a more tempting option wins
 }
 ```
@@ -94,17 +94,18 @@ A fixed battle setup can give the enemy orders: `"enemyStance": "assault"`.
 
 ### 5. Unit goals
 
-One unit per commit, each checked by simulation:
+One unit per commit, each checked by the campaign integration tests and simulated win rates. Unit goals now receive the enemy army as well as allies.
 
-| Unit | Goal |
+| Unit | Shipped |
 |---|---|
-| King | Commander: 1 to 2 hexes behind the front, next to injured allies so rally is deliberate. Warrior when clearly ahead or in the endgame. Risk grows sharply only near lethal damage. |
-| Bulwark | Stay next to the ally it protects, or hold a chokepoint. |
-| Archer | Keep 2 to 3 hexes from targets and avoid melee contact. |
-| Magician | Prefer hexes that line up several enemies. |
-| Bomber | Avoid clusters of its own side, aim at enemy clusters. |
-| Ninja | Hunt the back line (archers, magicians, king); never end a turn exposed at 1 HP. |
-| Swordsman | Default: close in and charge. |
+| King | Graduated risk: 30 per incoming point while it keeps 2 health, 120 per point closer to death, lethal still forbidden. Commander: stays near allies, +3 per wounded adjacent ally so healing is worth more than keeping an ally wounded. Warrior when its side has twice the enemy soldiers or at most two enemy soldiers remain. |
+| Archer | -10 per adjacent enemy: it cannot shoot at range 1. |
+| Magician | +1 per extra enemy on its best fireball line. A tie-breaker only: 2 or more tipped Original's Last Crown out of reach of the scripted player. |
+| Ninja | Caution floor of 0.7 whatever the temperament (1.0 tipped Last Crown), and +6 per adjacent ranged unit or king. |
+| Bulwark | Dropped. Any bonus for holding a protection, even 1 point, made Iron Caravan's guard formation unbreakable in Original and Brutal. |
+| Bomber, Swordsman | Default goal. Bombs already aim at enemy clusters through the special's candidates. |
+
+Scripted player wins after step 5: easy 75%, normal 69%, hard 61%. Games are shorter because kings fight and rally.
 
 ### 6. Realistic danger
 

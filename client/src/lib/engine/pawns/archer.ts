@@ -1,4 +1,6 @@
 import { aimAt, attackTargets, label, pawnAt, specialTargets, strike } from '../combat.ts'
+import { hexDist } from '../hex.ts'
+import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const aimedShot: SpecialAbility = {
@@ -31,11 +33,24 @@ const aimedShot: SpecialAbility = {
   },
 }
 
+const MELEE_CONTACT = 10
+
+// An archer cannot shoot an adjacent enemy, so it keeps its distance.
+const archerAi: PawnAi = {
+  ...defaultAi,
+  goal: (archer, surroundings) =>
+    defaultAi.goal(archer, surroundings) -
+    surroundings.foes.filter((foe) => hexDist(archer, foe) === 1).length * MELEE_CONTACT,
+}
+
 export class Archer extends Pawn {
   static override readonly icon = 'M5 3c14 0 14 18 0 18V3Zm0 9h16m-4-4 4 4-4 4'
   readonly kind = 'archer' as const
   readonly attack: AttackProfile = { damage: 1, minRange: 2, maxRange: 3, rangeBonus: 1 }
   get special(): SpecialAbility {
     return aimedShot
+  }
+  override get ai(): PawnAi {
+    return archerAi
   }
 }

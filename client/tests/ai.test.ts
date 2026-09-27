@@ -230,6 +230,61 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
   })
 }
 
+test('An archer steps out of melee contact before shooting', () => {
+  for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
+    const state = battle([
+      new Archer(1, 0, 0, 'enemy'),
+      new King(2, -6, 0, 'enemy'),
+      new Swordsman(3, 1, 0, 'player', 5, 0),
+      new King(4, 6, 0, 'player'),
+    ])
+    const next = playTurn(state, level)
+    const archer = next.pawns.find((p) => p.id === 1)!
+    assert.ok(
+      hexDist(
+        archer,
+        next.pawns.find((p) => p.id === 3)!,
+      ) >= 2,
+      level,
+    )
+  }
+})
+
+test('A safe commander king walks to a wounded ally and rallies', () => {
+  for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
+    const state = battle([
+      new King(1, 0, 0, 'enemy'),
+      new Swordsman(2, 2, 0, 'enemy', 2),
+      new Swordsman(3, 3, 1, 'enemy'),
+      new Archer(4, 4, 1, 'enemy'),
+      new King(5, -6, 6, 'player'),
+      new Swordsman(6, -6, 5, 'player'),
+      new Swordsman(7, -5, 5, 'player'),
+      new Swordsman(8, -4, 5, 'player'),
+    ])
+    const next = playTurn(state, level)
+    assert.ok(next.pawns.find((p) => p.id === 1)!.specialUsed, level)
+    assert.equal(next.pawns.find((p) => p.id === 2)!.hp, 3, level)
+  }
+})
+
+test('A safe commander heals the last missing health point instead of waiting', () => {
+  for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
+    const state = battle([
+      new King(1, 0, 0, 'enemy'),
+      new Swordsman(2, 1, 0, 'enemy', 4),
+      new Swordsman(3, 3, 1, 'enemy'),
+      new Archer(4, 4, 1, 'enemy'),
+      new King(5, -6, 6, 'player'),
+      new Swordsman(6, -6, 5, 'player'),
+      new Swordsman(7, -5, 5, 'player'),
+      new Swordsman(8, -4, 5, 'player'),
+    ])
+    const ally = playTurn(state, level).pawns.find((p) => p.id === 2)!
+    assert.equal(ally.hp, ally.maxHp, level)
+  }
+})
+
 test('King safety includes a move followed by Charge, and refreshed enemy energy', () => {
   for (const refreshed of [false, true]) {
     const state = battle(
