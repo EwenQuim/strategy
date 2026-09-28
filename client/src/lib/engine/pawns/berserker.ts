@@ -14,10 +14,11 @@ const fury: SpecialAbility = {
     pawns.filter((foe) => canAttack(pawn, foe, from) && hexDist(from, foe) === 1),
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
   threat: (pawn, { target, from, movementCost }) => {
-    if (hexDist(from, target) !== 1 || !canAttack(pawn, target, from)) return 0
+    if (pawn.specialUsed || hexDist(from, target) !== 1 || !canAttack(pawn, target, from))
+      return 0
     if (pawn.energy < movementCost + pawn.special.cost) return 0
     const boost = pawn.energy - movementCost - pawn.special.cost
-    return (pawn.attack.damage + boost) * 2
+    return pawn.attack.damage + boost
   },
   perform: ({ pawn, pawns, log, random, tile }) => {
     const target = pawns.find(
@@ -47,13 +48,15 @@ const fury: SpecialAbility = {
   },
 }
 
-const DESPERATION_REACH = 6
-// A berserker only grows more dangerous as it wounds, so it stays reckless in a corner.
+const DESPERATE_AGGRESSION = 2
+// Scaling aggression rather than adding a flat bonus keeps a wounded berserker from outscoring a healthy one.
 const berserkerAi: PawnAi = {
   ...defaultAi,
   goal: (berserker, surroundings) =>
-    defaultAi.goal(berserker, surroundings) +
-    (berserker.hp === 1 ? DESPERATION_REACH : 0) +
+    defaultAi.goal(berserker, {
+      ...surroundings,
+      aggression: surroundings.aggression * (berserker.hp === 1 ? DESPERATE_AGGRESSION : 1),
+    }) +
     surroundings.foes.filter((foe) => hexDist(berserker, foe) === 1).length * 2,
   risk: (berserker, threat) =>
     defaultAi.risk(berserker, { ...threat, caution: threat.caution * 0.5 }),

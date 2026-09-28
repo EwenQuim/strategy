@@ -10,7 +10,7 @@ import { Swordsman } from './swordsman.ts'
 import { Wolf } from './wolf.ts'
 
 export * from './pawn.ts'
-export { Archer, Berserker, Bomber, Bulwark, Hoplite, King, Magician, Ninja, Swordsman, Wolf }
+export { Archer, Bomber, Bulwark, King, Magician, Ninja, Swordsman }
 export { chargeDestinations } from './swordsman.ts'
 export { jumpDestinations } from './ninja.ts'
 
