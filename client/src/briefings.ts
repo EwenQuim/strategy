@@ -52,6 +52,9 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   bulwark: [unit('bulwark', b.protectBrief, b.bulwarkSlow)],
   bomber: [unit('bomber', b.bombBrief, b.bombFriendly)],
   ninja: [unit('ninja', b.jumpBrief, b.jumpNoAttack)],
+  hoplite: [unit('hoplite', b.phalanxBrief)],
+  wolf: [unit('wolf', b.cryBrief)],
+  berserker: [unit('berserker', b.furyBrief)],
   lake: [
     {
       name: b.lakes,

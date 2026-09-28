@@ -364,6 +364,11 @@
           "kind": "magician",
           "col": 4,
           "row": 9
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 9
         }
       ],
       "enemy": [
@@ -420,6 +425,11 @@
         {
           "kind": "archer",
           "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
           "row": 1
         }
       ]
@@ -725,6 +735,11 @@
           "kind": "archer",
           "col": 4,
           "row": 7
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 8
         }
       ],
       "enemy": [
@@ -924,6 +939,16 @@
         {
           "kind": "swordsman",
           "col": 0,
+          "row": 1
+        },
+        {
+          "kind": "wolf",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "kind": "wolf",
+          "col": 6,
           "row": 1
         }
       ]

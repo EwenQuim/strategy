@@ -62,6 +62,12 @@ export type SpecialTextKey =
   | 'jump'
   | 'jumpDescription'
   | 'jumpTo'
+  | 'phalanx'
+  | 'phalanxDescription'
+  | 'cry'
+  | 'cryDescription'
+  | 'fury'
+  | 'furyDescription'
 
 export interface SpecialAbility {
   readonly name: SpecialTextKey

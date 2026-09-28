@@ -160,6 +160,30 @@ export const jumpNoAttack = t({
   it: 'Il salto non attacca: tieni 1 energia per colpire',
 })
 
+export const phalanxBrief = t({
+  en: 'shields an adjacent ally from the next hit',
+  fr: 'protège un allié adjacent du prochain coup',
+  de: 'schirmt einen angrenzenden Verbündeten vom nächsten Treffer ab',
+  es: 'protege a un aliado adyacente del próximo golpe',
+  it: 'protegge un alleato adiacente dal prossimo colpo',
+})
+
+export const cryBrief = t({
+  en: '+1 energy to allies within 2, once per round',
+  fr: '+1 énergie aux alliés à 2 cases, une fois par manche',
+  de: '+1 Energie für Verbündete innerhalb von 2, einmal pro Runde',
+  es: '+1 de energía a aliados a 2 casillas, una vez por ronda',
+  it: '+1 energia agli alleati entro 2 caselle, una volta per round',
+})
+
+export const furyBrief = t({
+  en: 'spends all energy: 2 dmg +1 per extra energy, ignores Escape',
+  fr: "dépense toute l'énergie : 2 dégâts +1 par énergie en plus, ignore l'Esquive",
+  de: 'gibt alle Energie aus: 2 Schaden +1 pro zusätzlicher Energie, ignoriert Ausweichen',
+  es: 'gasta toda la energía: 2 de daño +1 por energía extra, ignora la Esquiva',
+  it: "spende tutta l'energia: 2 danni +1 per energia extra, ignora la Schivata",
+})
+
 export const lakes = t({
   en: 'Lakes',
   fr: 'Lacs',

@@ -3,6 +3,8 @@ import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
 import shatteredLevels from './campaigns/003-shattered.json' with { type: 'json' }
 import ringLevels from './campaigns/004-war-of-the-ring.json' with { type: 'json' }
 import throneLevels from './campaigns/005-iron-throne.json' with { type: 'json' }
+import spartaLevels from './campaigns/006-hot-gates.json' with { type: 'json' }
+import ragnarokLevels from './campaigns/007-ragnarok.json' with { type: 'json' }
 import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
@@ -39,6 +41,9 @@ const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
   'bulwark',
   'bomber',
   'ninja',
+  'hoplite',
+  'wolf',
+  'berserker',
   'lake',
   'mountain',
   'sand',
@@ -78,6 +83,8 @@ const packs = [
   shatteredLevels as Omit<CampaignLevel, 'newElements'>[],
   ringLevels as Omit<CampaignLevel, 'newElements'>[],
   throneLevels as Omit<CampaignLevel, 'newElements'>[],
+  spartaLevels as Omit<CampaignLevel, 'newElements'>[],
+  ragnarokLevels as Omit<CampaignLevel, 'newElements'>[],
 ]
 
 for (const levels of packs) {
@@ -105,6 +112,18 @@ export const CAMPAIGNS: Campaign[] = [
     name: 'Iron Throne',
     levels: briefedCampaigns[4],
     requiredVictories: 35,
+  },
+  {
+    slug: 'hot-gates',
+    name: 'Thermopylae',
+    levels: briefedCampaigns[5],
+    requiredVictories: 45,
+  },
+  {
+    slug: 'ragnarok',
+    name: 'Ragnarok',
+    levels: briefedCampaigns[6],
+    requiredVictories: 55,
   },
 ]
 
