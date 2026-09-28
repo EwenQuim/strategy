@@ -47,11 +47,11 @@ export const campaignNames: Record<
     it: 'Trono di ferro',
   }),
   'hot-gates': t({
-    en: 'The Hot Gates',
-    fr: 'Les Portes de feu',
-    de: 'Die Feuerpforten',
-    es: 'Las Puertas de fuego',
-    it: 'Le Porte di fuoco',
+    en: 'Thermopylae',
+    fr: 'Les Thermopyles',
+    de: 'Die Thermopylen',
+    es: 'Las Termópilas',
+    it: 'Le Termopili',
   }),
   ragnarok: t({
     en: 'Ragnarok',

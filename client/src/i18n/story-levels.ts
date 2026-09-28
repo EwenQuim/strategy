@@ -120,12 +120,12 @@ export const storyLevelNames: Record<string, string> = {
     es: 'La Agogué',
     it: "L'Agoge",
   }),
-  'The Hot Gates': t({
-    en: 'The Hot Gates',
-    fr: 'Les Portes de feu',
-    de: 'Die Feuerpforten',
-    es: 'Las Puertas de fuego',
-    it: 'Le Porte di fuoco',
+  Thermopylae: t({
+    en: 'Thermopylae',
+    fr: 'Les Thermopyles',
+    de: 'Die Thermopylen',
+    es: 'Las Termópilas',
+    it: 'Le Termopili',
   }),
   'The Immortals': t({
     en: 'The Immortals',

@@ -115,7 +115,7 @@ export const CAMPAIGNS: Campaign[] = [
   },
   {
     slug: 'hot-gates',
-    name: 'The Hot Gates',
+    name: 'Thermopylae',
     levels: briefedCampaigns[5],
     requiredVictories: 45,
   },

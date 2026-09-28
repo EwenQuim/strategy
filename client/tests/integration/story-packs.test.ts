@@ -7,7 +7,7 @@ import { winnableAgainst } from '../campaign-actions.ts'
 const sparta = CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!
 const ragnarok = CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!
 
-test('The Hot Gates and Ragnarok packs stay winnable level by level', () => {
+test('Thermopylae and Ragnarok packs stay winnable level by level', () => {
   for (const pack of [sparta, ragnarok]) {
     assert.equal(pack.levels.length, 5)
     assert.equal(new Set(pack.levels.map((level) => level.seed)).size, 5)
@@ -23,7 +23,7 @@ test('The Hot Gates and Ragnarok packs stay winnable level by level', () => {
   }
 })
 
-test('The Hot Gates pass funnels every horde through a two-tile corridor', () => {
+test('Thermopylae funnels every horde through a two-tile corridor', () => {
   for (const id of [2, 3]) {
     const level = sparta.levels[id - 1]
     const tiles = coreState(level.seed, level.setup).tiles
