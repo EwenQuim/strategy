@@ -1,6 +1,6 @@
 # Hexmate
 
-Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Router (file-based routing) + Tailwind v4.
+Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Router (file-based routing) + Tailwind v4 client in `client/`, Go server in `server/`.
 
 ## Constraints
 
@@ -20,3 +20,36 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 - Use Tailwind responsive and `motion-reduce:` variants, not hand-written CSS media queries or custom viewport aliases. Preserve existing width thresholds with `min-[900px]:`, `max-[601px]:`, and `max-[360px]:`; use arbitrary media variants for height and compound conditions. Test overlapping width/height conditions when changing responsive styles.
 - Reuse the theme colors (`text-ink`, `text-muted`, `text-gold`, `border-line`). Preserve safe-area insets, reduced-motion behavior, and the fixed game viewport.
 - Keep inline styles for runtime-computed values such as pawn coordinates. Browser tests should use roles/accessible names or stable data attributes, not Tailwind utility strings or obsolete CSS classes.
+
+## Commands
+
+Use the `Makefile` targets; it is the source of truth for setup, dev, format, lint, typecheck, and tests. Toolchain versions are pinned in `.github/workflows/ci.yml`. The pre-push hook (`.githooks/pre-push`) only runs fast checks; slow bot sweeps in `client/tests/integration` run in CI.
+
+## Boundaries
+
+- `client/src/lib/engine/`: deterministic game rules. `reducer(state, action)` applies an action for whichever side owns the active pawn; it never runs a bot or mutates its input.
+- `client/src/lib/engine/bot.ts`: the single-player controller. It proposes ordinary actions and applies them through the same engine as human actions.
+- `client/src/lib/playback.ts`: pure playback state and input locking.
+- `client/src/useGame.ts`, routes, and components: React, browser timers, reduced-motion preferences, and rendering.
+
+The library is checked without DOM or Node globals and cannot import runtime packages or files outside `client/src/lib/`. Seeded randomness is stored in game state; the engine does not read clocks or global randomness. Networking and serialization belong in adapters, not in the rules engine.
+
+## Authored battle setups
+
+`FixedBattleSetup` (a literal map plus both armies) and `validateSetup`, which decides what is accepted, live in `client/src/lib/engine/setup.ts`. Map symbols are the `terrainSymbols` and `featureSymbols` tables in `engine/hex.ts`, with `_` for absent tiles. Invalid maps and placements are rejected, never silently moved or regenerated. The seed only drives initiative and combat rolls, so the same actions replay deterministically.
+
+Walking and Charge cannot cross absent tiles; ranged attacks, spells, and Ninja jumps use hex distance and can. Terrain never blocks ranged attacks or spells. Keep maps compact for readable tiles on portrait screens.
+
+## Campaign
+
+Each campaign pack is one JSON file in `client/src/lib/campaigns/`, loaded by `client/src/lib/campaign.ts`, which also holds unlock rules and the localStorage keys. Terrain and positions are always authored, never generated at runtime. Integration tests require a reproducible player victory for every level, so run `make test-integration` after editing a level.
+
+## Online synchronization
+
+The game page opens one SSE stream per game for both the waiting room and the battle; moves use the version-checked POST endpoint. Every connection sends the full public snapshot, so reconnecting needs no event replay. Server heartbeats renew write deadlines and a client watchdog replaces stalled streams; reverse proxies must not buffer responses and need an idle timeout longer than the heartbeat.
+
+Subscribers are notified in-process after the storage write succeeds, so running several server instances would require cross-instance notifications. `make pvp` runs the server on two origins for local two-player testing.
+
+## Offline play
+
+Development mode does not register a service worker. A downloaded update never reloads a running match; it activates only once every Hexmate client is closed, and old assets are removed only after activation. Battles live in memory: reloading restarts the seeded battle.
