@@ -16,5 +16,3 @@ export const BOT_LEVELS = {
 } as const satisfies Record<string, BotOptions>
 
 export type BotDifficulty = keyof typeof BOT_LEVELS
-
-export { chooseTacticalActions } from './ai-search.ts'

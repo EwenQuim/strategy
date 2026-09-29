@@ -12,7 +12,8 @@ import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import type { BattleSetup } from './setup.ts'
-import { BOT_LEVELS, chooseTacticalActions, type BotDifficulty, type BotOptions } from './ai.ts'
+import { BOT_LEVELS, type BotDifficulty, type BotOptions } from './ai.ts'
+import { chooseAiActions } from './ai/decision.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
@@ -54,7 +55,7 @@ export function chooseBotActions(
   if (typeof strategy === 'string' || !('chooseTarget' in strategy)) {
     const options = typeof strategy === 'string' ? BOT_LEVELS[strategy] : strategy
     if (!validBotOptions(options)) throw new RangeError('Invalid bot options')
-    return chooseTacticalActions(state, options)
+    return chooseAiActions(state, options)
   }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []

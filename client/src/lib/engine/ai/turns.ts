@@ -1,7 +1,7 @@
-import { activePawn, reducer, type Action, type GameState } from './engine.ts'
-import { canAttack, movementDestinations } from './combat.ts'
-import { key, neighbors, passable } from './hex.ts'
-import type { Pawn } from './pawns/index.ts'
+import { activePawn, reducer, type Action, type GameState } from '../engine.ts'
+import { canAttack, movementDestinations } from '../combat.ts'
+import { key, neighbors, passable } from '../hex.ts'
+import type { Pawn } from '../pawns/index.ts'
 
 export type TurnPlan = { actions: Action[]; state: GameState }
 

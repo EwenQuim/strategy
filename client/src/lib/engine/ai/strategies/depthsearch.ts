@@ -1,10 +1,11 @@
-import { activePawn, reducer, type Action, type GameState } from './engine.ts'
-import type { Pawn, Side } from './pawns/index.ts'
-import type { BotOptions } from './ai.ts'
-import { distancesToAttack, evaluatePosition, type ReachCache } from './ai-evaluate.ts'
-import { sidePlan } from './ai-plan.ts'
-import { chooseOption, hpOf, type Outcome } from './ai-choice.ts'
-import { positionKey, turnPlans, type TurnPlan } from './ai-turns.ts'
+import { activePawn, reducer, type Action, type GameState } from '../../engine.ts'
+import type { Pawn, Side } from '../../pawns/index.ts'
+import type { BotOptions } from '../../ai.ts'
+import { distancesToAttack, evaluatePosition, type ReachCache } from '../evaluate.ts'
+import { sidePlan } from '../plan.ts'
+import { chooseOption, hpOf, type Outcome } from '../choice.ts'
+import { positionKey, turnPlans, type TurnPlan } from '../turns.ts'
+import type { AiStrategy } from '../decision.ts'
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
   return {
@@ -251,7 +252,7 @@ function untilFirstRoll(state: GameState, actions: Action[]): Action[] {
   return actions
 }
 
-export function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
+function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
   Object.assign(searchStats, {
     decisions: 1,
     plansEnumerated: 0,
@@ -299,4 +300,10 @@ export function chooseTacticalActions(state: GameState, options: BotOptions): Ac
     })
     .sort((a, b) => b.value - a.value)
   return untilFirstRoll(analysis, chooseOption(analysis, pawn, valued, options).actions)
+}
+
+// The depth search: budgeted beam minimax over the unit turns turns.ts enumerates.
+export const depthsearch: AiStrategy = {
+  id: 'depthsearch',
+  chooseActions: chooseTacticalActions,
 }

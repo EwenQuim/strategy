@@ -1,15 +1,15 @@
-import { activePawn, reducer, type GameState } from './engine.ts'
-import { inHellfire } from './hellfire.ts'
-import { canAttack, routePath, walkingPaths, protectorFor } from './combat.ts'
-import type { SidePlan } from './ai-plan.ts'
-import { distFrom, hexDist, key, passable, type Axial, type Tile } from './hex.ts'
+import { activePawn, reducer, type GameState } from '../engine.ts'
+import { inHellfire } from '../hellfire.ts'
+import { canAttack, routePath, walkingPaths, protectorFor } from '../combat.ts'
+import type { SidePlan } from './plan.ts'
+import { distFrom, hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
 import {
   START_ENERGY,
   jumpDestinations,
   type Pawn,
   type Side,
   type ThreatPosition,
-} from './pawns/index.ts'
+} from '../pawns/index.ts'
 
 function damageFromPosition(attacker: Pawn, position: ThreatPosition): number {
   const base = canAttack(attacker, position.target, position.from)

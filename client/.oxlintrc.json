@@ -92,6 +92,57 @@
           }
         ]
       }
+    },
+    {
+      "files": ["src/lib/engine/ai/*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*",
+                  "!./**",
+                  "!../engine.ts",
+                  "!../ai.ts",
+                  "!../combat.ts",
+                  "!../hex.ts",
+                  "!../hellfire.ts",
+                  "!../setup.ts",
+                  "!../pawns/index.ts"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/engine/ai/strategies/*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*",
+                  "!./**",
+                  "!../decision.ts",
+                  "!../turns.ts",
+                  "!../evaluate.ts",
+                  "!../plan.ts",
+                  "!../choice.ts",
+                  "!../../engine.ts",
+                  "!../../ai.ts",
+                  "!../../pawns/index.ts"
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

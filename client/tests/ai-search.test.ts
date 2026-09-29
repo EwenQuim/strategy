@@ -14,9 +14,9 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { turnOutcomes } from '../src/lib/engine/ai-search.ts'
+import { turnOutcomes } from '../src/lib/engine/ai/strategies/depthsearch.ts'
 import { chooseBotActions } from '../src/lib/engine/bot.ts'
-import { turnPlans } from '../src/lib/engine/ai-turns.ts'
+import { turnPlans } from '../src/lib/engine/ai/turns.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id), active = 0): GameState {
   const tiles: GameState['tiles'] = new Map()
