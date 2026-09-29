@@ -2,7 +2,7 @@ import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { specialTexts } from '../i18n/units'
+import { specialTexts, unitNames } from '../i18n/units'
 import type { PlayerNames } from '../lib/game-mode'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
@@ -186,6 +186,15 @@ export function Game({
             onTileClick={onTileClick}
           />
         </div>
+        {myTurn && (
+          <p
+            key={pawn.id}
+            data-testid="turn-banner"
+            className="turn-banner pointer-events-none absolute top-2 left-1/2 z-3 -translate-x-1/2 rounded-full border border-[#b6d2b566] bg-(--biome-panel) px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[#d9dfc9] shadow-[0_4px_16px_#10201840] motion-reduce:hidden"
+          >
+            {m.yourTurn} · {unitNames[pawn.kind]} {pawn.id.toString().padStart(2, '0')}
+          </p>
+        )}
         {state.winner && (
           <GameResult
             winner={state.winner}
