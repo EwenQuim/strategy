@@ -5,7 +5,7 @@ import type { BotDifficulty } from './engine/ai.ts'
 import type { GameMode } from './game-mode.ts'
 
 // Bump when the saved state shape changes; older records are then discarded.
-export const BATTLE_SNAPSHOT_VERSION = 2
+export const BATTLE_SNAPSHOT_VERSION = 3
 
 type SavedPawn = {
   kind: PawnKind

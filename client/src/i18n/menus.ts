@@ -221,3 +221,24 @@ export const levelCard = t({
   es: (id: number, name: string, status: string) => `Nivel ${id}: ${name}, ${status}`,
   it: (id: number, name: string, status: string) => `Livello ${id}: ${name}, ${status}`,
 })
+export const settings = t({
+  en: 'Settings',
+  fr: 'Paramètres',
+  de: 'Einstellungen',
+  es: 'Ajustes',
+  it: 'Impostazioni',
+})
+export const developerPreview = t({
+  en: 'Developer preview',
+  fr: 'Aperçu développeur',
+  de: 'Entwicklervorschau',
+  es: 'Vista previa para desarrolladores',
+  it: 'Anteprima sviluppatori',
+})
+export const developerPreviewHint = t({
+  en: 'Shows unfinished content, such as the Shattered Crown campaign.',
+  fr: 'Affiche le contenu en cours, comme la campagne Couronne brisée.',
+  de: 'Zeigt unfertige Inhalte, etwa die Kampagne Zerbrochene Krone.',
+  es: 'Muestra contenido sin terminar, como la campaña Corona rota.',
+  it: 'Mostra contenuti incompleti, come la campagna Corona infranta.',
+})

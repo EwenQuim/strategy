@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import type { Campaign } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
+import * as achievementTexts from '../i18n/achievements'
+import { ACHIEVEMENTS, type AchievementId } from '../lib/achievements'
 import { levelName } from '../i18n/campaign'
 import { type GameMode, type PlayerNames } from '../lib/game-mode'
 import type { BotDifficulty } from '../lib/engine/ai'
@@ -22,6 +24,7 @@ interface GameResultProps {
   campaign?: Campaign
   campaignLevel?: number
   progressSaved: boolean
+  achievements: readonly AchievementId[]
   onRestart: () => void
 }
 
@@ -36,6 +39,7 @@ export function GameResult({
   campaign,
   campaignLevel,
   progressSaved,
+  achievements,
   onRestart,
 }: GameResultProps) {
   const local = mode === 'local'
@@ -103,6 +107,31 @@ export function GameResult({
                 ? m.enemyKingFallen
                 : m.yourKingFallen}
         </p>
+        {achievements.length > 0 && (
+          <ul
+            className="mt-4 flex list-none flex-col gap-1.5 p-0 text-left"
+            aria-label={achievementTexts.justUnlocked}
+          >
+            {ACHIEVEMENTS.filter(({ id }) => achievements.includes(id)).map(({ id, logo }) => (
+              <li
+                key={id}
+                className="flex items-center gap-2.5 rounded-lg border border-gold/40 bg-gold/8 px-3 py-2"
+              >
+                <span className="text-[20px]" aria-hidden="true">
+                  {logo}
+                </span>
+                <span className="flex flex-col">
+                  <small className="text-[9px] tracking-[0.12em] text-muted uppercase">
+                    {achievementTexts.justUnlocked}
+                  </small>
+                  <strong className="font-serif text-[14px] font-normal text-gold">
+                    {achievementTexts.achievements[id].title}
+                  </strong>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
         {campaign && campaignLevel ? (
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
             {winner === 'player' ? (

@@ -1,6 +1,7 @@
 import { buttonClassName } from '../components/styles'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
+import * as achievements from '../i18n/achievements'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
@@ -158,6 +159,28 @@ export const Route = createFileRoute('/')({
               {m.online}
               <Icon name="arrow" />
             </Link>
+          </div>
+          <div className="mt-3 flex w-[min(100%,300px)] gap-3">
+            {(
+              [
+                ['/achievements', 'trophy', achievements.title],
+                ['/settings', 'gear', m.settings],
+              ] as const
+            ).map(([to, icon, label]) => (
+              <Link
+                key={to}
+                to={to}
+                className={
+                  buttonClassName +
+                  ' min-h-13 flex-1 justify-center border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
+                }
+                preload={false}
+                aria-label={label}
+                title={label}
+              >
+                <Icon name={icon} />
+              </Link>
+            ))}
           </div>
         </div>
         <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:text-[8px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">

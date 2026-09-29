@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './../src/routes/__root'
 import { Route as IndexRouteImport } from './../src/routes/index'
+import { Route as AchievementsRouteImport } from './../src/routes/achievements'
 import { Route as CampaignRouteImport } from './../src/routes/campaign'
 import { Route as CustomRouteImport } from './../src/routes/custom'
 import { Route as GameRouteImport } from './../src/routes/game'
+import { Route as SettingsRouteImport } from './../src/routes/settings'
 import { Route as CampaignIndexRouteImport } from './../src/routes/campaign.index'
 import { Route as GameIndexRouteImport } from './../src/routes/game.index'
 import { Route as GameSeedRouteImport } from './../src/routes/game.$seed'
@@ -24,6 +26,11 @@ import { Route as CampaignCampaignLevelRouteImport } from './../src/routes/campa
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AchievementsRoute = AchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignRoute = CampaignRouteImport.update({
@@ -39,6 +46,11 @@ const CustomRoute = CustomRouteImport.update({
 const GameRoute = GameRouteImport.update({
   id: '/game',
   path: '/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampaignIndexRoute = CampaignIndexRouteImport.update({
@@ -79,9 +91,11 @@ const CampaignCampaignLevelRoute = CampaignCampaignLevelRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/campaign': typeof CampaignRouteWithChildren
   '/custom': typeof CustomRoute
   '/game': typeof GameRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/game/$seed': typeof GameSeedRoute
   '/online/$code': typeof OnlineCodeRoute
   '/campaign/': typeof CampaignIndexRoute
@@ -92,7 +106,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/custom': typeof CustomRoute
+  '/settings': typeof SettingsRoute
   '/game/$seed': typeof GameSeedRoute
   '/online/$code': typeof OnlineCodeRoute
   '/campaign': typeof CampaignIndexRoute
@@ -104,9 +120,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/campaign': typeof CampaignRouteWithChildren
   '/custom': typeof CustomRoute
   '/game': typeof GameRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/game/$seed': typeof GameSeedRoute
   '/online/$code': typeof OnlineCodeRoute
   '/campaign/': typeof CampaignIndexRoute
@@ -119,9 +137,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/achievements'
     | '/campaign'
     | '/custom'
     | '/game'
+    | '/settings'
     | '/game/$seed'
     | '/online/$code'
     | '/campaign/'
@@ -132,7 +152,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/achievements'
     | '/custom'
+    | '/settings'
     | '/game/$seed'
     | '/online/$code'
     | '/campaign'
@@ -143,9 +165,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/achievements'
     | '/campaign'
     | '/custom'
     | '/game'
+    | '/settings'
     | '/game/$seed'
     | '/online/$code'
     | '/campaign/'
@@ -157,9 +181,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AchievementsRoute: typeof AchievementsRoute
   CampaignRoute: typeof CampaignRouteWithChildren
   CustomRoute: typeof CustomRoute
   GameRoute: typeof GameRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
   OnlineCodeRoute: typeof OnlineCodeRoute
   OnlineIndexRoute: typeof OnlineIndexRoute
 }
@@ -171,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/achievements': {
+      id: '/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AchievementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campaign': {
@@ -192,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/game'
       fullPath: '/game'
       preLoaderRoute: typeof GameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campaign/': {
@@ -276,9 +316,11 @@ const GameRouteWithChildren = GameRoute._addFileChildren(GameRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AchievementsRoute: AchievementsRoute,
   CampaignRoute: CampaignRouteWithChildren,
   CustomRoute: CustomRoute,
   GameRoute: GameRouteWithChildren,
+  SettingsRoute: SettingsRoute,
   OnlineCodeRoute: OnlineCodeRoute,
   OnlineIndexRoute: OnlineIndexRoute,
 }

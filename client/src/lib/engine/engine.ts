@@ -1,5 +1,5 @@
 import { key, type Axial, type Tile } from './hex.ts'
-import type { Pawn, Side, SpecialResult } from './pawns/index.ts'
+import type { Pawn, PawnKind, Side, SpecialResult } from './pawns/index.ts'
 import { SeededRandom } from './random.ts'
 import { prepareBattle, type BattleSetup } from './setup.ts'
 import type { Biome } from './biomes/index.ts'
@@ -33,6 +33,14 @@ export type Action =
 // A command still being aimed: an attack, or a special whose destination may already be chosen.
 export type Aim = { action: 'attack' } | { action: 'special'; destination?: Axial }
 
+type Unit = { kind: PawnKind; side: Side }
+
+// A hellfire blow has no striker.
+type Blow = {
+  by?: Unit & { id: number; hp: number; special: boolean; watchtower: boolean }
+  fallen: Unit[]
+}
+
 export type GameState = {
   seed: string
   readonly setup?: BattleSetup
@@ -48,6 +56,8 @@ export type GameState = {
   winner: Side | 'draw' | null
   log: string[]
   logCount: number
+  blows: Blow[]
+  escapes: Unit[]
 }
 
 export type BattleEffect = {
@@ -89,6 +99,8 @@ export function initialState(
     winner: null,
     log: ['The battle begins. Protect your crown.'],
     logCount: 1,
+    blows: [],
+    escapes: [],
   }
   return advanceTurn({ ...state, ...markHellfire(state) })
 }
@@ -256,6 +268,22 @@ function reduce(
     effect = { kind: 'escape', from: position, to: position }
   }
   const health = (army: Pawn[]) => army.reduce((sum, p) => sum + p.hp, 0)
+  const escapes = (result.effect?.impacts ?? []).flatMap((impact) => {
+    const dodger =
+      impact.damage === 0 && pawns.find((p) => p.q === impact.q && p.r === impact.r)
+    return dodger ? [{ kind: dodger.kind, side: dodger.side }] : []
+  })
+  const blow: Blow = {
+    by: {
+      id: actor.id,
+      kind: actor.kind,
+      side: actor.side,
+      hp: actor.hp,
+      special: action.type === 'special',
+      watchtower: state.tiles.get(key(pawn.q, pawn.r))?.feature === 'watchtower',
+    },
+    fallen: fallen.map(({ kind, side }) => ({ kind, side })),
+  }
   const next: GameState = {
     ...state,
     tiles,
@@ -265,6 +293,8 @@ function reduce(
     winner,
     log: log.length ? [...state.log, ...log].slice(-40) : state.log,
     logCount: state.logCount + log.length,
+    blows: fallen.length ? [...state.blows, blow] : state.blows,
+    escapes: escapes.length ? [...state.escapes, ...escapes] : state.escapes,
   }
   if (effect) record?.(captureFrame(next, effect, fallen))
   if (winner) return endBattle(next, winner)

@@ -6,20 +6,28 @@ import * as m from '../i18n/menus'
 import { campaignName, levelName } from '../i18n/campaign'
 import { Icon } from '../components/Icon'
 import { LevelMiniature } from '../components/LevelMiniature'
-import { CAMPAIGNS, isCampaignUnlocked, isLevelUnlocked } from '../lib/campaign'
+import {
+  CAMPAIGNS,
+  isCampaignUnlocked,
+  visibleCampaigns,
+  isLevelUnlocked,
+} from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import {
   readCampaignProgress,
   readClearedLevels,
   subscribeCampaignProgress,
 } from '../campaignProgress'
+import { readDeveloperPreview } from '../preferences'
 
 const levelCardClassName =
   'relative flex size-full flex-col gap-1 overflow-hidden rounded-lg border border-line bg-(--biome-background) p-1.5 text-center text-[clamp(9px,2.5vw,12px)] leading-[1.15] text-ink wrap-anywhere data-[status=completed]:border-2 data-[status=completed]:border-[#89bba4] data-[status=completed]:p-[5px] data-[status=ready]:border-gold disabled:text-muted [&:disabled>svg]:opacity-55 [&:not(:disabled):hover]:brightness-115'
 
 export const Route = createFileRoute('/campaign/$campaign/')({
   beforeLoad: ({ params }) => {
-    const campaign = CAMPAIGNS.find((pack) => pack.slug === params.campaign)
+    const campaign = visibleCampaigns(readDeveloperPreview()).find(
+      (pack) => pack.slug === params.campaign,
+    )
     if (!campaign) throw redirect({ to: '/', replace: true })
     if (!isCampaignUnlocked(campaign, readCampaignProgress))
       throw redirect({ to: '/campaign', replace: true })

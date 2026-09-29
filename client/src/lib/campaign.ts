@@ -31,6 +31,7 @@ export interface Campaign {
   name: string
   levels: CampaignLevel[]
   requiredVictories?: number
+  developerPreview?: boolean
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -100,7 +101,12 @@ const briefedCampaigns = withBriefings(packs)
 export const CAMPAIGNS: Campaign[] = [
   { slug: 'original', name: 'Original', levels: briefedCampaigns[0] },
   { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[1] },
-  { slug: 'shattered', name: 'Shattered Crown', levels: briefedCampaigns[2] },
+  {
+    slug: 'shattered',
+    name: 'Shattered Crown',
+    levels: briefedCampaigns[2],
+    developerPreview: true,
+  },
   {
     slug: 'war-of-the-ring',
     name: 'War of the Ring',
@@ -137,6 +143,9 @@ export function isCampaignUnlocked(
 ): boolean {
   return totalVictories(completedIn) >= (campaign.requiredVictories ?? 0)
 }
+
+export const visibleCampaigns = (developerPreview: boolean): Campaign[] =>
+  CAMPAIGNS.filter((campaign) => developerPreview || !campaign.developerPreview)
 
 // The original campaign keeps its legacy key so existing players keep their progress.
 export const CAMPAIGN_STORAGE_KEY = 'hexmate:campaign:v1'

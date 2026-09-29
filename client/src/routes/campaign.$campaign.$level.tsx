@@ -1,16 +1,19 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Briefing } from '../components/Briefing'
 import { Game } from '../components/Game'
-import { CAMPAIGNS, isCampaignUnlocked, isLevelUnlocked } from '../lib/campaign'
+import { isCampaignUnlocked, visibleCampaigns, isLevelUnlocked } from '../lib/campaign'
 import {
   readCampaignProgress,
   readClearedLevels,
   recordCampaignVictory,
 } from '../campaignProgress'
+import { readDeveloperPreview } from '../preferences'
 
 export const Route = createFileRoute('/campaign/$campaign/$level')({
   beforeLoad: ({ params }) => {
-    const campaign = CAMPAIGNS.find((pack) => pack.slug === params.campaign)
+    const campaign = visibleCampaigns(readDeveloperPreview()).find(
+      (pack) => pack.slug === params.campaign,
+    )
     if (!campaign) throw redirect({ to: '/', replace: true })
     if (!isCampaignUnlocked(campaign, readCampaignProgress))
       throw redirect({ to: '/campaign', replace: true })
