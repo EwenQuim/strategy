@@ -1,21 +1,15 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useEffect, useReducer } from 'react'
 import {
   initialPlayback,
   playbackReducer,
   frameDelay,
   type PlaybackAction,
 } from '../lib/playback.ts'
-import { isRecordedAction, replayBattle } from '../lib/battleRecord.ts'
-import {
-  battleRecordKey,
-  clearBattleActions,
-  readBattleActions,
-  saveBattleActions,
-} from '../battleSession.ts'
+import { readBattle, saveBattle } from '../battleSession.ts'
 import { useOnlineSync } from './onlineSync.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
-import type { Action, BattleSetup, Transition } from '../lib/engine/index.ts'
+import type { BattleSetup, Transition } from '../lib/engine/index.ts'
 import type { BotDifficulty } from '../lib/engine/ai.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
@@ -37,7 +31,6 @@ export function useGame({
   onVictory,
   online,
 }: GameOptions) {
-  const recordKey = battleRecordKey(mode, seed, difficulty)
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: PlaybackAction) => {
       const next = playbackReducer(playback, action, mode, difficulty)
@@ -47,19 +40,18 @@ export function useGame({
     },
     seed,
     (seed) => {
-      // Online battles resync from the server snapshot instead of a local record.
-      const actions = online ? null : readBattleActions(recordKey, setup)
-      if (!actions?.length) return initialPlayback(seed, mode, setup)
-      try {
-        return replayBattle(seed, mode, setup, difficulty, actions)
-      } catch {
-        // A record saved by an older client may no longer replay: start over.
-        return initialPlayback(seed, mode, setup)
-      }
+      // Online battles resync from the server snapshot instead of the saved one.
+      const saved = online ? null : readBattle(mode, seed, difficulty, setup)
+      return saved ? { state: saved, frames: [] } : initialPlayback(seed, mode, setup)
     },
   )
   const dispatchOnline = useOnlineSync(online, playback, mode, difficulty, dispatch)
   const frame = playback.frames[0]
+
+  // The current battle lives in one localStorage slot, overwritten on every state change.
+  useEffect(() => {
+    if (!online) saveBattle(mode, seed, difficulty, setup, playback.state)
+  }, [difficulty, mode, online, playback.state, seed, setup])
 
   useEffect(() => {
     if (!frame) return
@@ -71,38 +63,11 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  // The reducer drops actions while frames are still playing, so recording must
-  // know whether the current action will be applied; the ref stays current
-  // because user events only fire after the effect has run.
-  const live = useRef(playback)
-  useEffect(() => {
-    live.current = playback
-  })
-  const recorded = useRef<Action[] | null>(null)
-
-  const dispatchAction = useCallback(
-    (action: PlaybackAction) => {
-      if (online) return dispatchOnline(action)
-      if (!isRecordedAction(action) || live.current.frames.length) return dispatch(action)
-      if (action.type === 'restart') {
-        recorded.current = []
-        clearBattleActions(recordKey)
-      } else {
-        if (recorded.current === null)
-          recorded.current = readBattleActions(recordKey, setup) ?? []
-        recorded.current.push(action)
-        saveBattleActions(recordKey, setup, recorded.current)
-      }
-      dispatch(action)
-    },
-    [dispatchOnline, online, recordKey, setup],
-  )
-
   return {
     state: frame?.state ?? playback.state,
     effect: frame?.effect ?? null,
     effectId: playback.frames.length,
     playing: !!frame,
-    dispatch: online ? dispatchOnline : dispatchAction,
+    dispatch: online ? dispatchOnline : dispatch,
   }
 }

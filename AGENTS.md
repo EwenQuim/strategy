@@ -52,4 +52,4 @@ Subscribers are notified in-process after the storage write succeeds, so running
 
 ## Offline play
 
-Development mode does not register a service worker. A downloaded update never reloads a running match; it activates only once every Hexmate client is closed, and old assets are removed only after activation. Offline and campaign battles record their actions in `sessionStorage` (`client/src/battleSession.ts`) and replay them on reload, so refreshing resumes the battle; closing the tab discards it. Online battles resync from the server snapshot instead.
+Development mode does not register a service worker. A downloaded update never reloads a running match; it activates only once every Hexmate client is closed, and old assets are removed only after activation. Offline and campaign battles snapshot the current state to a single `localStorage` key (`client/src/battleSession.ts`) and restore it on reload, so refreshing resumes the battle and starting a different battle overwrites it. Online battles resync from the server snapshot instead.
