@@ -2,7 +2,7 @@ import {
   BATTLE_SNAPSHOT_VERSION,
   battleIdentity,
   restoreState,
-  sameBattle,
+  isSameBattle,
   snapshotState,
 } from './lib/battleSnapshot.ts'
 import type { BattleSetup, GameState } from './lib/engine/index.ts'
@@ -12,7 +12,7 @@ import type { GameMode } from './lib/game-mode.ts'
 // A single slot for the current battle: every save overwrites the previous game.
 const BATTLE_KEY = 'hexmate.battle'
 
-export function readBattle(
+export function readBattleFromLocalStorage(
   mode: GameMode,
   seed: string,
   difficulty: BotDifficulty,
@@ -23,14 +23,14 @@ export function readBattle(
     if (typeof saved !== 'object' || saved === null) return null
     const { version, identity, state } = saved as Record<string, unknown>
     if (version !== BATTLE_SNAPSHOT_VERSION) return null
-    if (!sameBattle(identity, battleIdentity(mode, seed, difficulty, setup))) return null
+    if (!isSameBattle(identity, battleIdentity(mode, seed, difficulty, setup))) return null
     return restoreState(state)
   } catch {
     return null
   }
 }
 
-export function saveBattle(
+export function saveBattleToLocalStorage(
   mode: GameMode,
   seed: string,
   difficulty: BotDifficulty,

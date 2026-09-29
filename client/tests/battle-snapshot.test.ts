@@ -5,7 +5,7 @@ import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import {
   battleIdentity,
   restoreState,
-  sameBattle,
+  isSameBattle,
   snapshotState,
 } from '../src/lib/battleSnapshot.ts'
 
@@ -58,14 +58,17 @@ test('restoreState rejects unreadable snapshots', () => {
   assert.equal(restoreState({ pawns: [{ kind: 'tank' }] }), null)
 })
 
-test('sameBattle only matches the identical game', () => {
+test('isSameBattle only matches the identical game', () => {
   const identity = battleIdentity('ai', 'seed', 'normal', undefined)
-  assert.ok(sameBattle(identity, identity))
-  assert.equal(sameBattle(battleIdentity('ai', 'other', 'normal', undefined), identity), false)
+  assert.ok(isSameBattle(identity, identity))
   assert.equal(
-    sameBattle(battleIdentity('local', 'seed', 'normal', undefined), identity),
+    isSameBattle(battleIdentity('ai', 'other', 'normal', undefined), identity),
     false,
   )
-  assert.equal(sameBattle(battleIdentity('ai', 'seed', 'hard', undefined), identity), false)
-  assert.equal(sameBattle(null, identity), false)
+  assert.equal(
+    isSameBattle(battleIdentity('local', 'seed', 'normal', undefined), identity),
+    false,
+  )
+  assert.equal(isSameBattle(battleIdentity('ai', 'seed', 'hard', undefined), identity), false)
+  assert.equal(isSameBattle(null, identity), false)
 })

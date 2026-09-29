@@ -36,7 +36,7 @@ export function battleIdentity(
   return { mode, seed, difficulty, setup: JSON.stringify(setup ?? null) }
 }
 
-export function sameBattle(saved: unknown, identity: BattleIdentity): boolean {
+export function isSameBattle(saved: unknown, identity: BattleIdentity): boolean {
   if (typeof saved !== 'object' || saved === null) return false
   const { mode, seed, difficulty, setup } = saved as Record<string, unknown>
   return (
