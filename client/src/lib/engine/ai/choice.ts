@@ -1,7 +1,7 @@
-import { hexDist } from './hex.ts'
-import type { Action, GameState } from './engine.ts'
-import type { Pawn } from './pawns/index.ts'
-import type { BotOptions } from './ai.ts'
+import { hexDist } from '../hex.ts'
+import type { Action, GameState } from '../engine.ts'
+import type { Pawn } from '../pawns/index.ts'
+import type { BotOptions } from '../ai.ts'
 
 export type Outcome = { state: GameState; weight: number }
 export type Option = { actions: Action[]; outcomes: Outcome[]; value: number }

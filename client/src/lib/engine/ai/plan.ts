@@ -1,7 +1,7 @@
-import type { GameState } from './engine.ts'
-import type { Side } from './pawns/index.ts'
-import type { EnemyStance } from './setup.ts'
-import type { BotOptions } from './ai.ts'
+import type { GameState } from '../engine.ts'
+import type { Side } from '../pawns/index.ts'
+import type { EnemyStance } from '../setup.ts'
+import type { BotOptions } from '../ai.ts'
 
 export type SidePlan = { caution: number; aggression: number }
 
