@@ -2,7 +2,7 @@ import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { specialTexts } from '../i18n/units'
+import { specialTexts, unitNames } from '../i18n/units'
 import type { PlayerNames } from '../lib/game-mode'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
@@ -13,6 +13,7 @@ import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
+import { PawnIcon } from './Icon'
 import {
   activePawn,
   BIOMES,
@@ -186,6 +187,29 @@ export function Game({
             onTileClick={onTileClick}
           />
         </div>
+        {myTurn && (
+          <div
+            key={pawn.id}
+            data-testid="turn-banner"
+            className="turn-banner pointer-events-none absolute top-4 left-1/2 z-3 flex -translate-x-1/2 items-center gap-3 rounded-[12px] border border-[#dcc48a59] bg-[linear-gradient(150deg,#2c4a3be6,#14291ff0)] py-2 pr-5 pl-2 whitespace-nowrap shadow-[0_10px_30px_#0a211b80,inset_0_1px_0_#f2df9e1f] backdrop-blur-[4px] max-[601px]:top-2 max-[601px]:gap-2.5 max-[601px]:py-1.5 max-[601px]:pr-4"
+          >
+            <span className="grid size-9 place-items-center rounded-full border border-[#dcc48a4a] bg-[radial-gradient(circle,#dcc48a1f,transparent_70%)] text-gold [&>svg]:size-5 max-[601px]:size-8 max-[601px]:[&>svg]:size-[18px]">
+              <PawnIcon kind={pawn.kind} />
+            </span>
+            <span className="grid gap-0.5">
+              <span className="font-label text-[8px] leading-none tracking-[0.29em] text-[#dcc48aa6] uppercase">
+                {m.yourTurn}
+              </span>
+              <span className="font-display text-[18px] leading-none text-ink max-[601px]:text-[16px]">
+                {unitNames[pawn.kind]}
+                <span className="font-label text-[10px] tracking-[0.05em] text-[#7f957e]">
+                  {' '}
+                  / {pawn.id.toString().padStart(2, '0')}
+                </span>
+              </span>
+            </span>
+          </div>
+        )}
         {state.winner && (
           <GameResult
             winner={state.winner}

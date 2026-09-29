@@ -105,8 +105,32 @@
   .battle-result-sparks {
     animation: battle-result-sparks 1100ms ease-out both;
   }
+  /* Not motion: important in this layer outranks the reduced-motion reset on body. */
+  .turn-guard {
+    animation: turn-guard 500ms step-end !important;
+  }
+  .turn-banner {
+    animation: turn-banner 1800ms ease-out both !important;
+  }
   .pawn-active-halo {
     animation: halo-breathe 3s ease-in-out infinite;
+  }
+}
+
+@keyframes turn-guard {
+  from {
+    pointer-events: none;
+  }
+}
+
+@keyframes turn-banner {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
   }
 }
 
