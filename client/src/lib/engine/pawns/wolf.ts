@@ -14,7 +14,7 @@ const cry: SpecialAbility = {
       (ally) => ally.side === pawn.side && ally.id !== pawn.id && hexDist(pawn, ally) <= 2,
     ),
   candidates: (pawn, { pawns }) =>
-    specialTargets(pawns, pawn).length ? [[{ type: 'act', action: 'special' }]] : [],
+    specialTargets(pawns, pawn).length ? [{ type: 'special' }] : [],
   perform: ({ pawn, pawns, log }) => {
     const allies = specialTargets(pawns, pawn)
     if (!allies.length) return null

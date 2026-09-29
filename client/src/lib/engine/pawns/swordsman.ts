@@ -1,6 +1,5 @@
 import {
   attackTargets,
-  aimAt,
   canAttack,
   canUseSpecial,
   enterTiles,
@@ -44,10 +43,11 @@ const charge: SpecialAbility = {
       const tile = tiles.get(position)!
       return pawns
         .filter((target) => canAttack(pawn, target, tile))
-        .map((target): Action[] => [
-          ...aimAt(tile),
-          { type: 'specialAt', q: target.q, r: target.r },
-        ])
+        .map((target): Action => ({
+          type: 'special',
+          target: { q: target.q, r: target.r },
+          destination: { q: tile.q, r: tile.r },
+        }))
     }),
   threat: (pawn, { target, from, movementCost }) => {
     if (!canAttack(pawn, target, from)) return 0

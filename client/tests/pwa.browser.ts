@@ -14,7 +14,9 @@ import {
   movementDestinations,
   specialTargets,
   type Action,
+  type Axial,
   type Biome,
+  type GameState,
 } from '../src/lib/engine/index.ts'
 import {
   initialState as botState,
@@ -203,6 +205,27 @@ async function dismissQuickPlayTutorial(page: Page) {
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
     await tutorial.waitFor({ state: 'hidden' })
   }
+}
+
+async function playInUi(page: Page, state: GameState, action: Action) {
+  const clickTile = (at: Axial) =>
+    page
+      .locator('[data-testid="hex-tile"]')
+      .nth([...state.tiles.values()].findIndex((tile) => tile.q === at.q && tile.r === at.r))
+      .click()
+  if (action.type === 'endTurn') return page.locator('[data-action="endTurn"]').click()
+  if (action.type === 'move') return clickTile(action)
+  if (action.type === 'attack') {
+    await page.locator('[data-action="attack"]').click()
+    return clickTile(action)
+  }
+  if (action.type === 'special') {
+    await page.locator('[data-action="special"]').click()
+    if (action.destination) await clickTile(action.destination)
+    if (action.target) await clickTile(action.target)
+    return
+  }
+  assert.fail('Unexpected action: ' + action.type)
 }
 
 async function playTurn(page: Page) {
@@ -1401,19 +1424,7 @@ test(
         )
         actionsBySide.add(pawn.side + '-' + action.type)
         const result = transition(state, action)
-        if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
-        else if (action.type === 'act')
-          await page
-            .locator(
-              action.action === 'attack' ? '[data-action="attack"]' : '[data-action="special"]',
-            )
-            .click()
-        else if ('q' in action) {
-          const tile = [...state.tiles.values()].findIndex(
-            (tile) => tile.q === action.q && tile.r === action.r,
-          )
-          await page.locator('[data-testid="hex-tile"]').nth(tile).click()
-        } else assert.fail('Unexpected action: ' + action.type)
+        await playInUi(page, state, action)
         const fallen = result.frames[0]?.state.pawns.filter((unit) => unit.hp <= 0) ?? []
         if (fallen.length) {
           const chips = page.locator('[data-fallen="true"]')
@@ -1478,7 +1489,7 @@ test(
     await playTurn(page)
     for (const side of ['player', 'enemy']) {
       assert.ok(actionsBySide.has(side + '-move'))
-      assert.ok(actionsBySide.has(side + '-attackAt'))
+      assert.ok(actionsBySide.has(side + '-attack'))
     }
     await page.getByRole('link', { name: 'Hexmate home' }).click()
     await page.getByRole('link', { name: 'Quick play' }).click()
@@ -1508,19 +1519,7 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
     const actions: Action[] = surrender ? [{ type: 'endTurn' }] : campaignActions(state)
     for (const action of actions) {
       const result = botTransition(state, action)
-      if (action.type === 'endTurn') await page.locator('[data-action="endTurn"]').click()
-      else if (action.type === 'act')
-        await page
-          .locator(
-            action.action === 'attack' ? '[data-action="attack"]' : '[data-action="special"]',
-          )
-          .click()
-      else if ('q' in action) {
-        const tile = [...state.tiles.values()].findIndex(
-          (tile) => tile.q === action.q && tile.r === action.r,
-        )
-        await page.locator('[data-testid="hex-tile"]').nth(tile).click()
-      } else assert.fail('Unexpected campaign action: ' + action.type)
+      await playInUi(page, state, action)
       state = result.state
       if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()
       else await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()

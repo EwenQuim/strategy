@@ -1,4 +1,4 @@
-import type { Action, Pawn, Side } from '../lib/engine'
+import type { Action, Aim, Pawn, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
 import * as m from '../i18n/game'
 import { specialTexts, unitNames } from '../i18n/units'
@@ -16,9 +16,10 @@ interface GameCommandDeckProps {
   usingSpecial: boolean
   hasFoes: boolean
   hasSpecialTargets: boolean
-  phase: 'move' | 'attack' | 'special' | 'charge' | 'over'
+  choosingTarget: boolean
   targetCount: number
   dispatch: (action: Action) => void
+  onAim: (aim: Aim | null) => void
 }
 
 export function GameCommandDeck({
@@ -30,9 +31,10 @@ export function GameCommandDeck({
   usingSpecial,
   hasFoes,
   hasSpecialTargets,
-  phase,
+  choosingTarget,
   targetCount,
   dispatch,
+  onAim,
 }: GameCommandDeckProps) {
   return (
     <footer
@@ -70,7 +72,7 @@ export function GameCommandDeck({
             attacking={attacking}
             usingSpecial={usingSpecial}
             hasFoes={hasFoes}
-            dispatch={dispatch}
+            onAim={onAim}
           />
           <SpecialButton
             pawn={pawn}
@@ -79,8 +81,9 @@ export function GameCommandDeck({
             usingSpecial={usingSpecial}
             hasSpecialTargets={hasSpecialTargets}
             targetCount={targetCount}
-            phase={phase}
+            choosingTarget={choosingTarget}
             dispatch={dispatch}
+            onAim={onAim}
           />
           <EndTurnButton pawn={pawn} myTurn={myTurn} dispatch={dispatch} />
         </div>
@@ -172,14 +175,14 @@ function AttackButton({
   attacking,
   usingSpecial,
   hasFoes,
-  dispatch,
+  onAim,
 }: {
   pawn?: Pawn
   myTurn: boolean
   attacking: boolean
   usingSpecial: boolean
   hasFoes: boolean
-  dispatch: (action: Action) => void
+  onAim: (aim: Aim | null) => void
 }) {
   return (
     <button
@@ -189,9 +192,7 @@ function AttackButton({
       }
       data-action="attack"
       disabled={!myTurn || usingSpecial || !pawn?.energy || (!attacking && !hasFoes)}
-      onClick={() =>
-        dispatch(attacking ? { type: 'cancelTargeting' } : { type: 'act', action: 'attack' })
-      }
+      onClick={() => onAim(attacking ? null : { action: 'attack' })}
       aria-pressed={attacking}
     >
       <Icon
@@ -215,8 +216,9 @@ function SpecialButton({
   usingSpecial,
   hasSpecialTargets,
   targetCount,
-  phase,
+  choosingTarget,
   dispatch,
+  onAim,
 }: {
   pawn?: Pawn
   myTurn: boolean
@@ -224,8 +226,9 @@ function SpecialButton({
   usingSpecial: boolean
   hasSpecialTargets: boolean
   targetCount: number
-  phase: 'move' | 'attack' | 'special' | 'charge' | 'over'
+  choosingTarget: boolean
   dispatch: (action: Action) => void
+  onAim: (aim: Aim | null) => void
 }) {
   return (
     <button
@@ -237,11 +240,11 @@ function SpecialButton({
       disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets}
       title={pawn ? specialTexts[pawn.special.description] : undefined}
       aria-pressed={usingSpecial}
-      onClick={() =>
-        dispatch(
-          usingSpecial ? { type: 'cancelTargeting' } : { type: 'act', action: 'special' },
-        )
-      }
+      onClick={() => {
+        if (usingSpecial) onAim(null)
+        else if (pawn?.special.targeted) onAim({ action: 'special' })
+        else dispatch({ type: 'special' })
+      }}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -254,7 +257,7 @@ function SpecialButton({
         {usingSpecial
           ? !targetCount
             ? m.noTargets
-            : phase === 'charge'
+            : choosingTarget
               ? m.chooseEnemy
               : pawn?.special.prompt
                 ? specialTexts[pawn.special.prompt]

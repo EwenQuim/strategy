@@ -49,7 +49,7 @@ func TestGamePersistsAcrossReopen(t *testing.T) {
 			t.Fatal(err)
 		}
 		if _, err := store.Append(ctx, code, 1, game.Action{
-			Side: game.Enemy, Action: game.EngineAction{Type: game.ActionAttackAt, Q: &q, R: &r}, Winner: &winner,
+			Side: game.Enemy, Action: game.EngineAction{Type: game.ActionAttack, Q: &q, R: &r}, Winner: &winner,
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -74,7 +74,7 @@ func TestGamePersistsAcrossReopen(t *testing.T) {
 	if g.Version != 2 || len(g.Actions) != 2 {
 		t.Fatalf("reopened version=%d actions=%d", g.Version, len(g.Actions))
 	}
-	if g.Actions[1].Action.Type != game.ActionAttackAt || *g.Actions[1].Action.Q != 2 {
+	if g.Actions[1].Action.Type != game.ActionAttack || *g.Actions[1].Action.Q != 2 {
 		t.Fatalf("action payload not round-tripped: %+v", g.Actions[1].Action)
 	}
 	if _, err := store.Game(ctx, "NOPE12"); !errors.Is(err, game.ErrNotFound) {

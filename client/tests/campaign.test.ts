@@ -287,10 +287,7 @@ test('Powder Lesson groups two bowmen above the swordsmen within one advanced bo
     { ...state, active: state.order.indexOf(bomber.id) },
     { type: 'move', ...hexOf(3, 7) },
   )
-  const fired = reducer(reducer(moved, { type: 'act', action: 'special' }), {
-    type: 'specialAt',
-    ...hexOf(3, 5),
-  })
+  const fired = reducer(moved, { type: 'special', target: hexOf(3, 5) })
   for (const pawn of fired.pawns) {
     const damaged = pawn.side === 'enemy' && pawn.kind !== 'king'
     assert.equal(pawn.hp, pawn.maxHp - Number(damaged))

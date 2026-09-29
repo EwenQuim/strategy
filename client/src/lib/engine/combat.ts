@@ -140,10 +140,7 @@ export const label = (pawn: Pawn) =>
 export const pawnAt = (pawns: Pawn[], at: Axial): Pawn | undefined =>
   pawns.find((p) => p.q === at.q && p.r === at.r)
 
-export const aimAt = ({ q, r }: Axial): Action[] => [
-  { type: 'act', action: 'special' },
-  { type: 'specialAt', q, r },
-]
+export const aimAt = ({ q, r }: Axial): Action => ({ type: 'special', target: { q, r } })
 
 export function strike(
   pawns: Pawn[],

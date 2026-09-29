@@ -1,28 +1,41 @@
-import { activePawn, reducer, targetingTiles, type Action, type GameState } from '../engine.ts'
+import {
+  activePawn,
+  reducer,
+  targetingTiles,
+  type Action,
+  type Aim,
+  type GameState,
+} from '../engine.ts'
 import { movementDestinations } from '../combat.ts'
+import type { Axial } from '../hex.ts'
 
-// Every action the reducer accepts in this state, one step at a time.
+// Every command the reducer accepts in this state.
 export function legalActions(state: GameState): Action[] {
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
-  const tileAt = (position: string) => state.tiles.get(position)!
-  const candidates: Action[] =
-    state.phase === 'move'
-      ? [
-          ...[...movementDestinations(state.tiles, state.pawns, pawn).keys()]
-            .map(tileAt)
-            .map(({ q, r }): Action => ({ type: 'move', q, r })),
-          { type: 'act', action: 'attack' },
-          { type: 'act', action: 'special' },
-        ]
-      : [
-          ...[...targetingTiles(state)].map(tileAt).map(({ q, r }): Action => ({
-            type: state.phase === 'attack' ? 'attackAt' : 'specialAt',
-            q,
-            r,
-          })),
-          { type: 'cancelTargeting' },
-        ]
-  candidates.push({ type: 'endTurn' })
+  const tileAt = (position: string): Axial => {
+    const { q, r } = state.tiles.get(position)!
+    return { q, r }
+  }
+  const aimed = (aim: Aim) => [...targetingTiles(state, aim)].map(tileAt)
+  const specials: Action[] = !pawn.special.targeted
+    ? [{ type: 'special' }]
+    : aimed({ action: 'special' }).flatMap((tile): Action[] =>
+        pawn.special.choosesDestination
+          ? aimed({ action: 'special', destination: tile }).map((target) => ({
+              type: 'special',
+              target,
+              destination: tile,
+            }))
+          : [{ type: 'special', target: tile }],
+      )
+  const candidates: Action[] = [
+    ...[...movementDestinations(state.tiles, state.pawns, pawn).keys()]
+      .map(tileAt)
+      .map((tile): Action => ({ type: 'move', ...tile })),
+    ...aimed({ action: 'attack' }).map((tile): Action => ({ type: 'attack', ...tile })),
+    ...specials,
+    { type: 'endTurn' },
+  ]
   return candidates.filter((action) => reducer(state, action) !== state)
 }

@@ -151,23 +151,22 @@ for (const side of ['player', 'enemy'] as const) {
       state.pawns[2].r = 5
       const target = state.pawns[2]
       const ranged = Unit === Archer || Unit === Magician
-      const attack = reducer(state, { type: 'act', action: 'attack' })
-      assert.equal(targetingTiles(attack).has(key(target.q, target.r)), ranged)
+      assert.equal(
+        targetingTiles(state, { action: 'attack' }).has(key(target.q, target.r)),
+        ranged,
+      )
       assert.equal(canAttack(pawn, target, state.tiles.get('0,5')), ranged)
-      const result = reducer(attack, { type: 'attackAt', q: target.q, r: target.r })
+      const result = reducer(state, { type: 'attack', q: target.q, r: target.r })
       assert.equal(result.pawns[2].hp, target.hp - (ranged ? pawn.attack.damage : 0))
       if (ranged) {
-        const special = reducer(state, { type: 'act', action: 'special' })
-        assert.equal(targetingTiles(special).has(key(target.q, target.r)), Unit === Magician)
+        const special = targetingTiles(state, { action: 'special' })
+        assert.equal(special.has(key(target.q, target.r)), Unit === Magician)
         const plain = { ...state, tiles: new Map(state.tiles) }
         plain.tiles.set('0,5', { q: 0, r: 5, terrain: 'plain' })
-        assert.deepEqual(
-          targetingTiles(special),
-          targetingTiles(reducer(plain, { type: 'act', action: 'special' })),
-        )
-        const cast = reducer(special, { type: 'specialAt', q: target.q, r: target.r })
+        assert.deepEqual(special, targetingTiles(plain, { action: 'special' }))
+        const cast = reducer(state, { type: 'special', target: { q: target.q, r: target.r } })
         if (Unit === Magician) assert.equal(cast.pawns[2].hp, target.hp - 1)
-        else assert.equal(cast, special)
+        else assert.equal(cast, state)
         const moved = reducer(state, { type: 'move', q: -1, r: 5 })
         assert.ok(!canAttack(moved.pawns[0], target, moved.tiles.get('-1,5')))
       }
@@ -189,8 +188,6 @@ for (const side of ['player', 'enemy'] as const) {
       next = nextActivation(next)
       assert.equal(next.pawns[0].hp, 3)
       assert.equal(next.logCount, next.log.length)
-      const targeting = reducer(next, { type: 'act', action: 'attack' })
-      assert.equal(reducer(targeting, { type: 'cancelTargeting' }).pawns[0].hp, 3)
       next = nextActivation(next)
       assert.equal(next.pawns[0].hp, 4)
       next = nextActivation(nextActivation(next))
@@ -271,7 +268,6 @@ for (const side of ['player', 'enemy'] as const) {
     state.active = 1
     const result = transition(state, { type: 'move', q: 1, r: 5 })
     assert.equal(result.state.winner, side === 'player' ? 'enemy' : 'player')
-    assert.equal(result.state.phase, 'over')
     assert.equal(result.state.round, 1)
     assert.equal(result.frames[0].state.winner, null)
   })
@@ -301,9 +297,11 @@ test('Charge triggers crossed runes and lava before striking; a lethal charge ca
     state.tiles.get('1,5')!.feature = 'rune'
     state.pawns[2].q = 3
     state.pawns[2].r = 5
-    let next = reducer(state, { type: 'act', action: 'special' })
-    next = reducer(next, { type: 'specialAt', q: 2, r: 5 })
-    next = reducer(next, { type: 'specialAt', q: 3, r: 5 })
+    const next = reducer(state, {
+      type: 'special',
+      target: { q: 3, r: 5 },
+      destination: { q: 2, r: 5 },
+    })
     assert.equal(next.pawns.find((pawn) => pawn.id === 3)!.hp, hp === 1 ? 7 : 5)
     assert.equal(next.tiles.get('1,5')!.feature, undefined)
     const actor = next.pawns.find((pawn) => pawn.id === 1)
@@ -319,15 +317,14 @@ test('Jump ignores crossed lava and runes but triggers its landing tile', () => 
   const state = corridor(new Ninja(1, 0, 5, 'player'))
   state.tiles.get('2,5')!.terrain = 'plain'
   state.tiles.get('2,5')!.feature = 'rune'
-  const targeting = reducer(state, { type: 'act', action: 'special' })
-  const crossed = reducer(targeting, { type: 'specialAt', q: 3, r: 5 })
+  const crossed = reducer(state, { type: 'special', target: { q: 3, r: 5 } })
   assert.equal(crossed.pawns[0].hp, 1)
   assert.equal(crossed.pawns[0].energy, 1)
   assert.equal(crossed.tiles.get('2,5')!.feature, 'rune')
-  const collected = reducer(targeting, { type: 'specialAt', q: 2, r: 5 })
+  const collected = reducer(state, { type: 'special', target: { q: 2, r: 5 } })
   assert.equal(collected.pawns[0].energy, 3)
   assert.equal(collected.tiles.get('2,5')!.feature, undefined)
-  const lethal = reducer(targeting, { type: 'specialAt', q: 1, r: 5 })
+  const lethal = reducer(state, { type: 'special', target: { q: 1, r: 5 } })
   assert.ok(!lethal.pawns.some((pawn) => pawn.id === 1))
   assert.equal(activePawn(lethal)?.id, 2)
 })

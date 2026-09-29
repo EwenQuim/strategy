@@ -47,19 +47,11 @@ function battle(side: Side = 'player'): GameState {
 
 function protect(state: GameState, id = 3): GameState {
   const ally = state.pawns.find((p) => p.id === id)!
-  return reducer(reducer(state, { type: 'act', action: 'special' }), {
-    type: 'specialAt',
-    q: ally.q,
-    r: ally.r,
-  })
+  return reducer(state, { type: 'special', target: { q: ally.q, r: ally.r } })
 }
 
 function attack(state: GameState, q = 1, r = 0) {
-  return transition(reducer(state, { type: 'act', action: 'attack' }), {
-    type: 'attackAt',
-    q,
-    r,
-  })
+  return transition(state, { type: 'attack', q, r })
 }
 
 test('Bulwarks pay 2 energy for the first tile and 1 for each extra tile, with identical previews and rules for both sides', () => {
@@ -97,7 +89,7 @@ test('Bulwarks pay 2 energy for the first tile and 1 for each extra tile, with i
   }
 })
 
-test('Protect targets allies within two tiles, costs two energy, and can be cancelled freely', () => {
+test('Protect targets allies within two tiles, costs two energy, and rejects any other tile', () => {
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(side)
     const original = structuredClone(state)
@@ -105,32 +97,25 @@ test('Protect targets allies within two tiles, costs two energy, and can be canc
       specialTargets(state.pawns, state.pawns[0]).map((p) => p.id),
       [2, 3],
     )
-    const preview = reducer(state, { type: 'act', action: 'special' })
-    assert.deepEqual(targetingTiles(preview), new Set(['0,1', '1,0']))
-    assert.deepEqual(reducer(preview, { type: 'cancelTargeting' }), state)
+    assert.deepEqual(targetingTiles(state, { action: 'special' }), new Set(['0,1', '1,0']))
     for (const [q, r] of [
       [0, 0],
       [1, 1],
       [4, 0],
       [99, 99],
     ]) {
-      assert.equal(reducer(preview, { type: 'specialAt', q, r }), preview)
+      assert.equal(reducer(state, { type: 'special', target: { q, r } }), state)
     }
-    assert.equal(reducer(state, { type: 'specialAt', q: 1, r: 0 }), state)
+    assert.equal(reducer(state, { type: 'special' }), state)
     const guarded = protect(state)
     assert.equal(guarded.pawns[0].protectingId, 3)
     assert.equal(guarded.pawns[0].energy, 1)
     assert.equal(guarded.randomState, state.randomState)
-    assert.equal(guarded.phase, 'move')
     assert.equal(protectorFor(guarded.pawns, guarded.pawns[2])?.id, 1)
-    assert.equal(reducer(guarded, { type: 'act', action: 'special' }), guarded)
+    assert.equal(reducer(guarded, { type: 'special', target: { q: 0, r: 1 } }), guarded)
     assert.deepEqual(structuredClone(state), original)
     state.pawns[0].energy = 2
-    const result = transition(reducer(state, { type: 'act', action: 'special' }), {
-      type: 'specialAt',
-      q: 1,
-      r: 0,
-    })
+    const result = transition(state, { type: 'special', target: { q: 1, r: 0 } })
     assert.equal(activePawn(result.state)?.id, 5)
     assert.equal(result.state.pawns[0].energy, 0)
     assert.equal(result.state.pawns[0].protectingId, 3)
@@ -166,11 +151,7 @@ test('Misses preserve Protect; Aimed shot bypasses ally Escape with no second ro
   assert.deepEqual(miss.frames[0].effect?.impacts, [{ q: 1, r: 0, damage: 0 }])
   state = miss.state
   state.pawns[4] = new Archer(5, 3, 0, 'enemy')
-  const shot = transition(reducer(state, { type: 'act', action: 'special' }), {
-    type: 'specialAt',
-    q: 1,
-    r: 0,
-  })
+  const shot = transition(state, { type: 'special', target: { q: 1, r: 0 } })
   assert.equal(shot.state.pawns[0].hp, 8)
   assert.equal(shot.state.pawns[2].hp, 1)
   assert.equal(shot.state.pawns[0].protectingId, null)
@@ -223,11 +204,7 @@ test('Area attacks combine direct and redirected hits at the Bulwark', () => {
         state.pawns[3],
         state.pawns[4],
       ]
-      const result = transition(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 1,
-        r: 0,
-      })
+      const result = transition(state, { type: 'special', target: { q: 1, r: 0 } })
       const tank = result.state.pawns.find((p) => p.id === 1)
       assert.equal(tank?.hp, hp > 2 ? hp - 2 : undefined)
       assert.equal(result.state.pawns.find((p) => p.id === 3)?.hp, 1)
@@ -263,10 +240,7 @@ test('Bots protect threatened allies and never try to walk with only one energy'
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(side)
     const actions = chooseBotActions(state)
-    assert.deepEqual(actions, [
-      { type: 'act', action: 'special' },
-      { type: 'specialAt', q: 0, r: 1 },
-    ])
+    assert.deepEqual(actions, [{ type: 'special', target: { q: 0, r: 1 } }])
     let guarded = state
     for (const action of actions) guarded = reducer(guarded, action)
     assert.equal(guarded.pawns[0].protectingId, 2)

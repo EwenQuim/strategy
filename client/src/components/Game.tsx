@@ -1,4 +1,4 @@
-import { useRef, useSyncExternalStore } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
@@ -20,6 +20,7 @@ import {
   targetingTiles,
   key,
   movementDestinations,
+  type Aim,
   type GameState,
   type Pawn,
   type Tile,
@@ -29,13 +30,9 @@ function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: numbe
   return !!campaign && campaignLevel === campaign.levels.length
 }
 
-function resolveTargetLabel(
-  attacking: boolean,
-  phase: GameState['phase'],
-  pawn: Pawn | undefined,
-) {
-  if (attacking) return m.attack
-  if (phase === 'special' && pawn?.special.targetLabel)
+function resolveTargetLabel(aim: Aim | null, pawn: Pawn | undefined) {
+  if (aim?.action === 'attack') return m.attack
+  if (aim?.action === 'special' && !aim.destination && pawn?.special.targetLabel)
     return specialTexts[pawn.special.targetLabel]
   return pawn ? specialTexts[pawn.special.name] : m.special
 }
@@ -103,22 +100,32 @@ export function Game({
     (isOnline ? pawn.side === viewerSide : local || pawn.side === 'player') &&
     !state.winner &&
     !playing
-  const attacking = myTurn && state.phase === 'attack'
-  const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
-  const targets = targetingTiles(state)
-  const targetLabel = resolveTargetLabel(attacking, state.phase, pawn)
+  // Aiming belongs to the state it started on: any new state, ours or not, drops it.
+  const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
+  const aim = myTurn && aiming?.state === state ? aiming.aim : null
+  const setAim = (next: Aim | null) => setAiming(next && { state, aim: next })
+  const attacking = aim?.action === 'attack'
+  const usingSpecial = aim?.action === 'special'
+  const destination = usingSpecial ? aim.destination : undefined
+  const targets = aim ? targetingTiles(state, aim) : new Set<string>()
+  const targetLabel = resolveTargetLabel(aim, pawn)
   const targeting = resolveTargeting(attacking, usingSpecial, pawn)
 
   const reach =
-    myTurn && pawn.energy > 0 && state.phase === 'move'
+    myTurn && pawn.energy > 0 && !aim
       ? movementDestinations(state.tiles, state.pawns, pawn)
       : new Map<string, number>()
 
   const onTileClick = (tile: Tile) => {
     if (!myTurn) return
-    if (targets.has(key(tile.q, tile.r)))
-      return dispatch({ type: attacking ? 'attackAt' : 'specialAt', q: tile.q, r: tile.r })
-    if (reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
+    const at = { q: tile.q, r: tile.r }
+    if (aim && targets.has(key(at.q, at.r))) {
+      if (aim.action === 'attack') return dispatch({ type: 'attack', ...at })
+      if (pawn.special.choosesDestination && !destination)
+        return setAim({ action: 'special', destination: at })
+      return dispatch({ type: 'special', target: at, destination })
+    }
+    if (reach.has(key(at.q, at.r))) dispatch({ type: 'move', ...at })
   }
 
   return (
@@ -171,7 +178,7 @@ export function Game({
             targets={targets}
             targetLabel={targetLabel}
             targeting={targeting}
-            preview={state.chargeDestination}
+            preview={destination ?? null}
             effect={effect}
             effectId={effectId}
             onTileClick={onTileClick}
@@ -203,9 +210,10 @@ export function Game({
         usingSpecial={usingSpecial}
         hasFoes={hasFoes}
         hasSpecialTargets={hasSpecialTargets}
-        phase={state.phase}
+        choosingTarget={!!destination}
         targetCount={targets.size}
         dispatch={dispatch}
+        onAim={setAim}
       />
 
       <GameHelpDialog

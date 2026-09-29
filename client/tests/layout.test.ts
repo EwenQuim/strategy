@@ -285,8 +285,7 @@ test('High Pass forces a walking detour while archers can fire across its mounta
   const mountain = hexOf(2, 6)
   assert.equal(state.tiles.get(key(mountain.q, mountain.r))!.terrain, 'mountain')
   assert.equal(reducer(state, { type: 'move', ...mountain }), state)
-  const targeting = reducer(state, { type: 'act', action: 'attack' })
-  const hit = reducer(targeting, { type: 'attackAt', q: enemy.q, r: enemy.r })
+  const hit = reducer(state, { type: 'attack', q: enemy.q, r: enemy.r })
   assert.equal(
     hit.pawns.find((pawn) => pawn.id === enemy.id)!.hp,
     enemy.hp - archer.attack.damage,

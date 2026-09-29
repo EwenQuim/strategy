@@ -60,11 +60,10 @@ for (const side of ['player', 'enemy'] as const) {
         state.tiles.get(key(q, r))!.terrain = 'mountain'
         state.tiles.get(key(q * 4, r * 4))!.terrain = 'lake'
         const original = structuredClone(state)
-        const preview = reducer(state, { type: 'act', action: 'special' })
-        assert.equal(targetingTiles(preview).size, 48)
-        assert.ok(targetingTiles(preview).has(key(q * 7, r * 7)))
-        assert.deepEqual(reducer(preview, { type: 'cancelTargeting' }), state)
-        const result = transition(preview, { type: 'specialAt', q, r })
+        const aimed = targetingTiles(state, { action: 'special' })
+        assert.equal(aimed.size, 48)
+        assert.ok(aimed.has(key(q * 7, r * 7)))
+        const result = transition(state, { type: 'special', target: { q, r } })
         assert.equal(result.state.pawns[0].energy, 1)
         assert.deepEqual(
           result.state.pawns.slice(3).map((pawn) => pawn.hp),
@@ -75,7 +74,7 @@ for (const side of ['player', 'enemy'] as const) {
           { q: q * 2, r: r * 2, damage: 1 },
           { q: q * 7, r: r * 7, damage: 1 },
         ])
-        assert.deepEqual(result, transition(preview, { type: 'specialAt', q, r }))
+        assert.deepEqual(result, transition(state, { type: 'special', target: { q, r } }))
         assert.deepEqual(structuredClone(state), original)
       }
     },
@@ -93,9 +92,8 @@ for (const side of ['player', 'enemy'] as const) {
           ...area.map((tile, index) => new Swordsman(4 + index, tile.q, tile.r, other)),
         )
         state.tiles.get('2,0')!.terrain = 'mountain'
-        const preview = reducer(state, { type: 'act', action: 'special' })
-        assert.equal(targetingTiles(preview).size, 19)
-        const result = transition(preview, { type: 'specialAt', ...center })
+        assert.equal(targetingTiles(state, { action: 'special' }).size, 19)
+        const result = transition(state, { type: 'special', target: center })
         assert.equal(result.state.pawns[0].energy, 1)
         assert.ok(result.state.pawns.slice(3).every((pawn) => pawn.hp === 4))
         assert.equal(result.frames[0].effect?.impacts?.length, area.length)
@@ -110,29 +108,30 @@ for (const side of ['player', 'enemy'] as const) {
     () => {
       for (const Unit of [Magician, Bomber]) {
         const state = battle(new Unit(1, 0, 0, side))
-        const preview = reducer(state, { type: 'act', action: 'special' })
         for (const tile of [
           { q: 99, r: 0 },
           Unit === Magician ? { q: 1, r: 1 } : { q: 3, r: 0 },
         ]) {
-          assert.equal(transition(preview, { type: 'specialAt', ...tile }).state, preview)
+          assert.equal(transition(state, { type: 'special', target: tile }).state, state)
         }
-        const result = transition(preview, { type: 'specialAt', q: 0, r: -2 })
+        const result = transition(state, { type: 'special', target: { q: 0, r: -2 } })
         assert.equal(result.state.pawns[0].energy, 1)
         assert.equal(result.state.randomState, state.randomState)
         assert.deepEqual(result.frames[0].effect?.impacts, [])
-        assert.equal(reducer(result.state, { type: 'act', action: 'special' }), result.state)
-        const exhausted = { ...preview, pawns: preview.pawns.map((pawn) => pawn.clone()) }
+        assert.equal(
+          reducer(result.state, { type: 'special', target: { q: 0, r: -1 } }),
+          result.state,
+        )
+        const exhausted = { ...state, pawns: state.pawns.map((pawn) => pawn.clone()) }
         exhausted.pawns[0].energy = 1
-        assert.equal(reducer(exhausted, { type: 'specialAt', q: 0, r: -1 }), exhausted)
-        assert.equal(targetingTiles(exhausted).size, 0)
+        assert.equal(
+          reducer(exhausted, { type: 'special', target: { q: 0, r: -1 } }),
+          exhausted,
+        )
+        assert.equal(targetingTiles(exhausted, { action: 'special' }).size, 0)
       }
       const state = battle(new Bomber(1, 0, 0, side))
-      const result = transition(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 0,
-        r: 0,
-      })
+      const result = transition(state, { type: 'special', target: { q: 0, r: 0 } })
       assert.equal(result.state.pawns[0].hp, 2)
     },
   )
@@ -148,18 +147,10 @@ for (const side of ['player', 'enemy'] as const) {
         specialTargets(state.pawns, state.pawns[0]).map((pawn) => pawn.id),
         [2],
       )
-      let next = reducer(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 2,
-        r: 0,
-      })
+      let next = reducer(state, { type: 'special', target: { q: 2, r: 0 } })
       assert.equal(protectorFor(next.pawns, next.pawns[1])?.id, 1)
       next = reducer(next, { type: 'endTurn' })
-      next = reducer(reducer(next, { type: 'act', action: 'attack' }), {
-        type: 'attackAt',
-        q: 2,
-        r: 0,
-      })
+      next = reducer(next, { type: 'attack', q: 2, r: 0 })
       assert.equal(next.pawns[0].hp, 8)
       assert.equal(next.pawns[1].hp, 7)
       assert.equal(next.pawns[0].protectingId, null)
@@ -177,7 +168,7 @@ test('Bots use long-range rays and bombs centered on empty tiles', () => {
       assert.equal(next.winner, 'player')
     }
     for (const candidate of state.pawns[0].special.candidates(state.pawns[0], state)) {
-      const result = candidate.reduce(reducer, state)
+      const result = reducer(state, candidate)
       assert.equal(result.pawns[0].energy, 1)
     }
   }
@@ -200,8 +191,7 @@ test('Bomb friendly fire hits allies, enemies and the caster, even if the caster
     const state = battle(new Bomber(1, 0, 0, side, 1))
     state.pawns.push(new Swordsman(4, 1, 0, side), new Swordsman(5, 0, 1, other))
     const original = structuredClone(state)
-    const preview = reducer(state, { type: 'act', action: 'special' })
-    const result = transition(preview, { type: 'specialAt', q: 0, r: 0 })
+    const result = transition(state, { type: 'special', target: { q: 0, r: 0 } })
     assert.equal(
       result.state.pawns.find((pawn) => pawn.id === 1),
       undefined,
@@ -215,7 +205,7 @@ test('Bomb friendly fire hits allies, enemies and the caster, even if the caster
       { q: 0, r: 1, damage: 1 },
     ])
     assert.deepEqual(structuredClone(state), original)
-    assert.deepEqual(transition(preview, { type: 'specialAt', q: 0, r: 0 }), result)
+    assert.deepEqual(transition(state, { type: 'special', target: { q: 0, r: 0 } }), result)
   }
 })
 
@@ -227,8 +217,7 @@ test('Bomb friendly fire respects Escape and killing your own king loses, includ
     state.pawns[1].hp = 1
     state.pawns[1].escapeChance = 60
     state.randomState = 0
-    const preview = reducer(state, { type: 'act', action: 'special' })
-    const missed = transition(preview, { type: 'specialAt', q: 1, r: 0 })
+    const missed = transition(state, { type: 'special', target: { q: 1, r: 0 } })
     assert.equal(missed.state.pawns[1].hp, 1)
     assert.equal(missed.state.winner, null)
     assert.ok(
@@ -243,11 +232,7 @@ test('Bomb friendly fire respects Escape and killing your own king loses, includ
         state.pawns[2].r = 0
         state.pawns[2].hp = 1
       }
-      const fired = reducer(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 1,
-        r: 0,
-      })
+      const fired = reducer(state, { type: 'special', target: { q: 1, r: 0 } })
       assert.equal(fired.winner, side === 'player' ? 'enemy' : 'player')
     }
   }
@@ -256,12 +241,11 @@ test('Bomb friendly fire respects Escape and killing your own king loses, includ
 test('Empty bombs keep a visible playback frame in local, online and AI games', () => {
   const state = battle(new Bomber(1, 0, 0, 'player'))
   for (const mode of ['local', 'online', 'ai'] as const) {
-    const preview = playbackReducer(
+    const result = playbackReducer(
       { state, frames: [] },
-      { type: 'act', action: 'special' },
+      { type: 'special', target: { q: 2, r: 0 } },
       mode,
     )
-    const result = playbackReducer(preview, { type: 'specialAt', q: 2, r: 0 }, mode)
     assert.equal(result.frames.length, 1)
     assert.equal(result.frames[0].effect?.kind, 'bomb')
     assert.deepEqual(result.frames[0].effect?.to, { q: 2, r: 0 })

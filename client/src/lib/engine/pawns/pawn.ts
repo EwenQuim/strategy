@@ -83,7 +83,7 @@ export interface SpecialAbility {
   tileTargets?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
   areaTargets?(pawns: readonly Pawn[], tile: Axial, pawn: Pawn): Pawn[]
   perform(context: SpecialContext): SpecialResult | null
-  candidates(pawn: Pawn, state: GameState): Action[][]
+  candidates(pawn: Pawn, state: GameState): Action[]
   threat?(pawn: Pawn, position: ThreatPosition): number
 }
 

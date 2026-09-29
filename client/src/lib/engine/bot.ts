@@ -59,7 +59,6 @@ export function chooseBotActions(
   }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
-  if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
   const foes = state.pawns.filter((p) => p.side !== pawn.side)
   const specials = specialTargets(state.pawns, pawn)
@@ -78,18 +77,18 @@ function ruleSpecial(
   strategy: BotStrategy,
 ): Action[] | null {
   const own = pawn.ai.ruleSpecial?.(pawn, state, foes, specials)
-  if (own) return own
+  if (own) return [own]
   if (pawn.special.areaTargets) {
     const area = pawn.special
       .candidates(pawn, state)
-      .map((actions) => {
-        const aim = actions.find((action) => action.type === 'specialAt')!
-        const targets = pawn.special.areaTargets!(state.pawns, aim, pawn)
+      .map((action) => {
+        const aim = action.type === 'special' && action.target
+        const targets = aim ? pawn.special.areaTargets!(state.pawns, aim, pawn) : []
         const score = targets.reduce(
           (total, target) => total + (target.side === pawn.side ? -1 : 1),
           0,
         )
-        return { actions, targets, score }
+        return { action, targets, score }
       })
       .filter(
         ({ targets, score }) =>
@@ -104,18 +103,14 @@ function ruleSpecial(
       (area.score > 1 ||
         !foes.some((foe) => canAttack(pawn, foe, state.tiles.get(key(pawn.q, pawn.r)))))
     )
-      return area.actions
+      return [area.action]
   }
   const strikeTargets =
     pawn.special.targeted && !pawn.special.areaTargets && !pawn.special.choosesDestination
       ? specials.filter((p) => p.side !== pawn.side)
       : []
   const special = strategy.chooseTarget(pawn, strikeTargets)
-  if (special)
-    return [
-      { type: 'act', action: 'special' },
-      { type: 'specialAt', q: special.q, r: special.r },
-    ]
+  if (special) return [{ type: 'special', target: { q: special.q, r: special.r } }]
   return null
 }
 
@@ -129,11 +124,7 @@ function ruleAttack(
     pawn,
     foes.filter((p) => canAttack(pawn, p, state.tiles.get(key(pawn.q, pawn.r)))),
   )
-  if (target)
-    return [
-      { type: 'act', action: 'attack' },
-      { type: 'attackAt', q: target.q, r: target.r },
-    ]
+  if (target) return [{ type: 'attack', q: target.q, r: target.r }]
 
   const chargeTiles = [...chargeDestinations(state.tiles, state.pawns, pawn).keys()].map((k) =>
     state.tiles.get(k)!,
@@ -145,9 +136,11 @@ function ruleAttack(
   if (!chargeTarget) return null
   const destination = chargeTiles.find((tile) => canAttack(pawn, chargeTarget, tile))!
   return [
-    { type: 'act', action: 'special' },
-    { type: 'specialAt', q: destination.q, r: destination.r },
-    { type: 'specialAt', q: chargeTarget.q, r: chargeTarget.r },
+    {
+      type: 'special',
+      target: { q: chargeTarget.q, r: chargeTarget.r },
+      destination: { q: destination.q, r: destination.r },
+    },
   ]
 }
 
@@ -181,10 +174,7 @@ function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
     )[0]
   const jumpDistance = jump ? (dist.get(key(jump.q, jump.r)) ?? Infinity) : Infinity
   if (jump && jumpDistance < here && (!step || jumpDistance + pawn.special.cost < here)) {
-    return [
-      { type: 'act', action: 'special' },
-      { type: 'specialAt', q: jump.q, r: jump.r },
-    ]
+    return [{ type: 'special', target: { q: jump.q, r: jump.r } }]
   }
   return step && pawn.energy >= pawn.moveCost
     ? [{ type: 'move', q: step.q, r: step.r }]
