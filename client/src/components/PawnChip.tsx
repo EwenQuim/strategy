@@ -1,6 +1,6 @@
 import { hexX, hexY } from './hex-art'
 import * as m from '../i18n/combat'
-import type { Pawn, Tile } from '../lib/engine'
+import { ESCAPE_BONUS, type Pawn, type Tile } from '../lib/engine'
 import { FeatureArt } from './features/FeatureArt'
 import { Icon, PawnIcon } from './Icon'
 
@@ -42,9 +42,17 @@ export function PawnChip({
             className="pawn-active-halo"
           />
         )}
-        {pawn.escapeChance > 0 && (
-          <circle r="25" fill="none" stroke="#b7e5de" strokeWidth="2" strokeDasharray="4 4" />
-        )}
+        {Array.from({ length: pawn.escapeChance / ESCAPE_BONUS }, (_, i) => (
+          <circle
+            key={i}
+            data-art="escape-ring"
+            r={25 + i * 3.5}
+            fill="none"
+            stroke="#8fd0f2"
+            strokeOpacity={0.9 - i * 0.2}
+            strokeWidth="1.5"
+          />
+        ))}
         {enemy ? (
           <path
             d="m0-23 20 11v24L0 23-20 12v-24Z"

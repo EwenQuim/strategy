@@ -105,8 +105,35 @@
   .battle-result-sparks {
     animation: battle-result-sparks 1100ms ease-out both;
   }
+  .turn-guard {
+    animation: turn-guard 500ms step-end;
+  }
+  .turn-banner {
+    animation: turn-banner 1400ms ease-out both;
+  }
   .pawn-active-halo {
     animation: halo-breathe 3s ease-in-out infinite;
+  }
+}
+
+@keyframes turn-guard {
+  from {
+    pointer-events: none;
+  }
+}
+
+@keyframes turn-banner {
+  0% {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+  15%,
+  70% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 0;
   }
 }
 

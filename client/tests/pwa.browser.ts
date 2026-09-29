@@ -1246,12 +1246,12 @@ test(
         if (kind === 'rune') {
           assert.equal(activePawn(state)?.id, pawn.id)
           assert.equal(
-            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
-            '5',
-          )
-          assert.equal(
             await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
             String(activePawn(state)!.energy),
+          )
+          assert.match(
+            (await page.getByTestId('unit-stats').textContent())!,
+            new RegExp(`Energy ${activePawn(state)!.energy}/3`),
           )
         }
         const round = state.round

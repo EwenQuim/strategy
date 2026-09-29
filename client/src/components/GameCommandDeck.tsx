@@ -94,13 +94,11 @@ export function GameCommandDeck({
 
 function StatMeter({
   name,
-  note,
   value,
   max,
   filledClass,
 }: {
   name: string
-  note?: string
   value: number
   max: number
   filledClass: string
@@ -108,8 +106,7 @@ function StatMeter({
   return (
     <div className="w-[60px] min-w-[60px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[49px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px]">
       <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
-        {name}
-        {note ? ' ' + note : ''}{' '}
+        {name}{' '}
         <b className="text-[9px] font-medium text-[#d9dfc9] max-[601px]:text-[8px]">
           {value}/{max}
         </b>
@@ -120,9 +117,9 @@ function StatMeter({
         aria-label={name}
         aria-valuenow={value}
         aria-valuemin={0}
-        aria-valuemax={max}
+        aria-valuemax={Math.max(value, max)}
       >
-        {Array.from({ length: max }, (_, i) => (
+        {Array.from({ length: Math.max(value, max) }, (_, i) => (
           <i
             key={i}
             data-filled={i < value}
@@ -150,21 +147,10 @@ function UnitStats({ pawn }: { pawn: Pawn }) {
       />
       <StatMeter
         name={m.energy}
-        note={pawn.bonusEnergy ? '+' + pawn.bonusEnergy : undefined}
         value={pawn.energy}
-        max={pawn.maxEnergy}
+        max={pawn.maxEnergy - pawn.bonusEnergy}
         filledClass="data-[filled=true]:bg-[#d4bb7b]"
       />
-      <div className="w-[60px] min-w-[43px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[41px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] max-[601px]:pl-2 max-[601px]:[&_svg]:hidden [@media(min-width:600px)_and_(max-height:480px)]:pl-2">
-        <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
-          {m.escape}
-        </span>
-        <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] max-[601px]:text-[17px]">
-          <Icon name="escape" />
-          {pawn.escapeChance}
-          <small>%</small>
-        </strong>
-      </div>
     </div>
   )
 }
@@ -285,7 +271,10 @@ function EndTurnButton({
 }) {
   return (
     <button
-      className={actionButtonClassName + ' border-[#bcc8a62e] bg-[#ffffff04] text-[#e6e7d4]'}
+      key={pawn?.id}
+      className={
+        actionButtonClassName + ' turn-guard border-[#bcc8a62e] bg-[#ffffff04] text-[#e6e7d4]'
+      }
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
