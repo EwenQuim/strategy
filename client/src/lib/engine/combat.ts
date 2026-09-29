@@ -107,11 +107,7 @@ export function movementDestinations(
 
 export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
   return pawns.find(
-    (p) =>
-      p.protectingId === target.id &&
-      p.side === target.side &&
-      p.id !== target.id &&
-      p.special.targets(p, [target]).length > 0,
+    (p) => p.protectingId === target.id && p.side === target.side && p.id !== target.id,
   )
 }
 

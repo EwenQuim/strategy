@@ -6,7 +6,7 @@ import type { Biome } from './biomes/index.ts'
 import {
   advanceTurn,
   captureFrame,
-  clearBrokenProtection,
+  clearFallenProtection,
   endBattle,
   finishTurn,
   winnerFrom,
@@ -259,7 +259,7 @@ function reduce(
   if (!result) return state
   const { tiles, pawns, actor, fallen, log, randomState } = result
   let { effect } = result
-  clearBrokenProtection(pawns)
+  clearFallenProtection(pawns)
   const winner = winnerFrom(pawns, actor.side)
   const turnEnded =
     !winner && (action.type === 'endTurn' || actor.energy === 0 || actor.hp <= 0)

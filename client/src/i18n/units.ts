@@ -202,11 +202,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Proteggere',
   }),
   protectDescription: t({
-    en: 'Protect an ally within 2 tiles until your next turn. Take its next hit instead, without a second Escape roll. Ends if you move more than 2 tiles apart. Moving costs 2 energy for the first tile, then 1 per extra tile.',
-    fr: "Protégez un allié à 2 cases ou moins jusqu'à votre prochain tour. Encaissez son prochain coup à sa place, sans nouveau jet d'Esquive. L'effet cesse si vous vous éloignez de plus de 2 cases. Se déplacer coûte 2 énergies pour la première case, puis 1 par case supplémentaire.",
-    de: 'Schütze einen Verbündeten innerhalb von 2 Feldern bis zu deinem nächsten Zug. Nimm dessen nächsten Treffer an seiner Stelle, ohne zweite Ausweichen-Chance. Endet, wenn ihr mehr als 2 Felder auseinandergeht. Bewegen kostet 2 Energie für das erste Feld, dann 1 pro zusätzlichem Feld.',
-    es: 'Protege a un aliado a 2 casillas o menos hasta tu próximo turno. Recibe su próximo golpe en su lugar, sin una segunda tirada de Esquiva. Termina si os separáis más de 2 casillas. Mover cuesta 2 de energía por la primera casilla y 1 por cada casilla extra.',
-    it: 'Proteggi un alleato entro 2 caselle fino al tuo prossimo turno. Incassa il suo prossimo colpo al posto suo, senza un secondo tiro di Schivata. Termina se vi allontanate più di 2 caselle. Muoversi costa 2 energia per la prima casella, poi 1 per ogni casella in più.',
+    en: 'Protect an ally within 2 tiles until your next turn. Take its next hit instead, without a second Escape roll, wherever it goes. Moving costs 2 energy for the first tile, then 1 per extra tile.',
+    fr: "Protégez un allié à 2 cases ou moins jusqu'à votre prochain tour. Encaissez son prochain coup à sa place, sans nouveau jet d'Esquive, où qu'il aille. Se déplacer coûte 2 énergies pour la première case, puis 1 par case supplémentaire.",
+    de: 'Schütze einen Verbündeten innerhalb von 2 Feldern bis zu deinem nächsten Zug. Nimm dessen nächsten Treffer an seiner Stelle, ohne zweite Ausweichen-Chance, egal wo er ist. Bewegen kostet 2 Energie für das erste Feld, dann 1 pro zusätzlichem Feld.',
+    es: 'Protege a un aliado a 2 casillas o menos hasta tu próximo turno. Recibe su próximo golpe en su lugar, sin una segunda tirada de Esquiva, vaya donde vaya. Mover cuesta 2 de energía por la primera casilla y 1 por cada casilla extra.',
+    it: 'Proteggi un alleato entro 2 caselle fino al tuo prossimo turno. Incassa il suo prossimo colpo al posto suo, senza un secondo tiro di Schivata, ovunque vada. Muoversi costa 2 energia per la prima casella, poi 1 per ogni casella in più.',
   }),
   chooseAlly: t({
     en: 'Choose ally',

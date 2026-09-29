@@ -177,17 +177,13 @@ test('Protect survives a round reset, but expires at the start of the Bulwark ne
   assert.fail('Expected a round where the Bulwark does not go first')
 })
 
-test('Separating from an ally ends Protect permanently, even if the ally returns', () => {
+test('Protect follows the ally at any distance until the Bulwark next turn', () => {
   let state = protect(battle())
   state.active = state.order.indexOf(3)
-  state = reducer(state, { type: 'move', q: 2, r: 0 })
-  assert.equal(state.pawns[0].protectingId, 3)
-  assert.equal(protectorFor(state.pawns, state.pawns[2])?.id, 1)
-  state = reducer(state, { type: 'move', q: 3, r: 0 })
-  assert.equal(state.pawns[0].protectingId, null)
-  state = reducer(state, { type: 'move', q: 2, r: 0 })
-  assert.equal(state.pawns[0].protectingId, null)
-  assert.equal(protectorFor(state.pawns, state.pawns[2]), undefined)
+  for (const q of [2, 3, 4]) {
+    state = reducer(state, { type: 'move', q, r: 0 })
+    assert.equal(protectorFor(state.pawns, state.pawns[2])?.id, 1)
+  }
 })
 
 test('Area attacks combine direct and redirected hits at the Bulwark', () => {

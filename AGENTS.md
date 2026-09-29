@@ -2,6 +2,10 @@
 
 Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Router (file-based routing) + Tailwind v4 client in `client/`, Go server in `server/`.
 
+## Design goals
+
+Every feature must make the game fun and strategic, never static or boring. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
+
 ## Constraints
 
 - Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.
