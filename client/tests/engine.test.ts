@@ -51,6 +51,8 @@ function battle(): GameState {
     active: 0,
     round: 1,
     lastClashRound: 0,
+    blows: [],
+    escapes: [],
     winner: null,
     log: [],
     logCount: 0,

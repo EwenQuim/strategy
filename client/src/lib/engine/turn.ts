@@ -45,7 +45,7 @@ export function advanceTurn(
 ): GameState {
   let { pawns, hellfire, randomState } = state
   const log = [...state.log]
-  let { order, round, logCount } = state
+  let { order, round, logCount, blows } = state
   let active = state.active + 1
   while (true) {
     if (active >= order.length) {
@@ -62,7 +62,11 @@ export function advanceTurn(
             }
             return { q: pawn.q, r: pawn.r, damage: 1 }
           })
-        const burned = { ...state, pawns, log, logCount }
+        const fallen = pawns
+          .filter((pawn) => pawn.hp <= 0)
+          .map(({ kind, side }) => ({ kind, side }))
+        if (fallen.length) blows = [...blows, { fallen }]
+        const burned = { ...state, pawns, log, logCount, blows }
         record?.(
           captureFrame(burned, {
             kind: 'hellfire',
@@ -119,6 +123,7 @@ export function advanceTurn(
     round,
     log: log.slice(-40),
     logCount,
+    blows,
   }
 }
 

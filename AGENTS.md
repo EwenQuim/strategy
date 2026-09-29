@@ -45,6 +45,12 @@ Walking and Charge cannot cross absent tiles; ranged attacks, spells, and Ninja 
 
 Each campaign pack is one JSON file in `client/src/lib/campaigns/`, loaded by `client/src/lib/campaign.ts`, which also holds unlock rules and the localStorage keys. Terrain and positions are always authored, never generated at runtime. Integration tests require a reproducible player victory for every level, so run `make test-integration` after editing a level.
 
+Campaigns flagged `developerPreview` are listed and reachable only while the Developer preview setting is on.
+
+## Achievements
+
+Rules live in `client/src/lib/achievements.ts` and read the battle history the engine keeps in `GameState` (`blows`, `escapes`), so they work the same for replayed, restored and online battles. Only the viewer's victories count, never local two-player games. Achievements are badges: they may unlock cosmetics later, never gameplay advantages.
+
 ## Online synchronization
 
 The game page opens one SSE stream per game for both the waiting room and the battle; moves use the version-checked POST endpoint. Every connection sends the full public snapshot, so reconnecting needs no event replay. Server heartbeats renew write deadlines and a client watchdog replaces stalled streams; reverse proxies must not buffer responses and need an idle timeout longer than the heartbeat.

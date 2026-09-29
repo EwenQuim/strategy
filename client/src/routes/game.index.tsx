@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { symmetricSeed } from '../lib/engine'
 import { usesSymmetricField } from '../lib/game-mode'
-import { readSymmetricPreference } from '../customPreferences'
+import { readSymmetricPreference } from '../preferences'
 
 export const Route = createFileRoute('/game/')({
   beforeLoad: ({ search }) => {

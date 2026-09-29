@@ -7,6 +7,7 @@ import type { PlayerNames } from '../lib/game-mode'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
+import { useFreshAchievements } from '../achievementProgress'
 import { Battlefield, type Targeting } from './Battlefield'
 import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
@@ -80,6 +81,7 @@ export function Game({
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
+  const freshAchievements = useFreshAchievements(state, mode, viewerSide)
   const winnerLabel =
     state.winner === 'draw'
       ? m.draw
@@ -196,6 +198,7 @@ export function Game({
             campaign={campaign}
             campaignLevel={campaignLevel}
             progressSaved={progressSaved}
+            achievements={freshAchievements}
             onRestart={() => dispatch({ type: 'restart' })}
           />
         )}

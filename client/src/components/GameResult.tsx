@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import type { Campaign } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
+import * as achievementTexts from '../i18n/achievements'
+import { ACHIEVEMENTS, type AchievementId } from '../lib/achievements'
 import { levelName } from '../i18n/campaign'
 import { type GameMode, type PlayerNames } from '../lib/game-mode'
 import type { BotDifficulty } from '../lib/engine/ai'
@@ -22,6 +24,7 @@ interface GameResultProps {
   campaign?: Campaign
   campaignLevel?: number
   progressSaved: boolean
+  achievements: readonly AchievementId[]
   onRestart: () => void
 }
 
@@ -36,6 +39,7 @@ export function GameResult({
   campaign,
   campaignLevel,
   progressSaved,
+  achievements,
   onRestart,
 }: GameResultProps) {
   const local = mode === 'local'
@@ -103,6 +107,29 @@ export function GameResult({
                 ? m.enemyKingFallen
                 : m.yourKingFallen}
         </p>
+        {achievements.length > 0 && (
+          <div className="mt-3 [@media(max-height:650px)]:mt-2">
+            <small className="text-[9px] tracking-[0.12em] text-muted uppercase">
+              {achievementTexts.justUnlocked}
+            </small>
+            <ul
+              className="mt-1 flex list-none flex-wrap justify-center gap-1.5 p-0"
+              aria-label={achievementTexts.justUnlocked}
+            >
+              {ACHIEVEMENTS.filter(({ id }) => achievements.includes(id)).map(
+                ({ id, logo }) => (
+                  <li
+                    key={id}
+                    className="rounded-full border border-gold/40 bg-gold/8 px-2.5 py-0.5 font-serif text-[12px] text-gold"
+                  >
+                    <span aria-hidden="true">{logo} </span>
+                    {achievementTexts.achievements[id].title}
+                  </li>
+                ),
+              )}
+            </ul>
+          </div>
+        )}
         {campaign && campaignLevel ? (
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
             {winner === 'player' ? (

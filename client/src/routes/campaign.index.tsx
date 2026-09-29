@@ -4,8 +4,9 @@ import { Icon } from '../components/Icon'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { CampaignCard } from '../components/CampaignCard'
-import { CAMPAIGNS } from '../lib/campaign'
+import { CAMPAIGNS, visibleCampaigns } from '../lib/campaign'
 import { readCampaignProgress } from '../campaignProgress'
+import { readDeveloperPreview } from '../preferences'
 
 export const Route = createFileRoute('/campaign/')({
   beforeLoad: () => {
@@ -31,7 +32,7 @@ export const Route = createFileRoute('/campaign/')({
           className="m-0 grid min-h-0 flex-1 list-none auto-rows-fr grid-cols-2 gap-3 p-0 min-[601px]:content-center min-[601px]:auto-rows-[minmax(0,340px)]"
           aria-label={m.campaigns}
         >
-          {CAMPAIGNS.map((campaign) => (
+          {visibleCampaigns(readDeveloperPreview()).map((campaign) => (
             <li key={campaign.slug}>
               <CampaignCard campaign={campaign} />
             </li>
