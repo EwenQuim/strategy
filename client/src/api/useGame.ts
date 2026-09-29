@@ -5,6 +5,7 @@ import {
   frameDelay,
   type PlaybackAction,
 } from '../lib/playback.ts'
+import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
 import { useOnlineSync } from './onlineSync.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
@@ -38,10 +39,19 @@ export function useGame({
       return next
     },
     seed,
-    (seed) => initialPlayback(seed, mode, setup),
+    (seed) => {
+      // Online battles resync from the server snapshot instead of the saved one.
+      const saved = online ? null : readBattleFromLocalStorage(mode, seed, difficulty, setup)
+      return saved ? { state: saved, frames: [] } : initialPlayback(seed, mode, setup)
+    },
   )
   const dispatchOnline = useOnlineSync(online, playback, mode, difficulty, dispatch)
   const frame = playback.frames[0]
+
+  // The current battle lives in one localStorage slot, overwritten on every state change.
+  useEffect(() => {
+    if (!online) saveBattleToLocalStorage(mode, seed, difficulty, setup, playback.state)
+  }, [difficulty, mode, online, playback.state, seed, setup])
 
   useEffect(() => {
     if (!frame) return
