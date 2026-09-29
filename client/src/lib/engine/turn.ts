@@ -77,7 +77,7 @@ export function advanceTurn(
           }),
         )
         pawns = pawns.filter((pawn) => pawn.hp > 0)
-        clearBrokenProtection(pawns)
+        clearFallenProtection(pawns)
         const winner = pawns.some((pawn) => pawn.kind === 'king')
           ? winnerFrom(pawns, 'player')
           : 'draw'
@@ -127,12 +127,9 @@ export function advanceTurn(
   }
 }
 
-export function clearBrokenProtection(pawns: Pawn[]): void {
+export function clearFallenProtection(pawns: Pawn[]): void {
   for (const protector of pawns) {
-    if (protector.protectingId === null) continue
-    const ally = pawns.find((pawn) => pawn.id === protector.protectingId)
-    if (!ally || !protector.special.targets(protector, [ally]).length)
-      protector.protectingId = null
+    if (!pawns.some((pawn) => pawn.id === protector.protectingId)) protector.protectingId = null
   }
 }
 

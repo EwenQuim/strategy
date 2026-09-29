@@ -7,149 +7,155 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
   en: {
     cleanHands: {
       title: 'Clean Hands, Dead King',
-      description: 'Kill the enemy King without killing anyone else.',
+      description: 'Win having killed only the enemy King.',
     },
     reaper: {
       title: "Reaper's Overtime",
-      description: 'Kill 9 or more enemies before their King falls.',
+      description: 'Kill 9+ enemies, then finish off their King.',
     },
     ninjaRegicide: {
       title: 'Nobody Saw That',
-      description: 'Finish the enemy King with a Ninja.',
+      description: 'Kill the enemy King with a Ninja.',
     },
     nobodyLeftBehind: {
       title: 'Nobody Left Behind',
-      description: 'Beat 5+ enemies without losing a single unit.',
+      description: 'Win against 5+ enemies without losing any unit.',
     },
     doneRight: {
       title: 'If You Want It Done Right',
-      description: 'Your King lands the killing blow on theirs.',
+      description: 'Kill the enemy King with your own King.',
     },
-    partyOfOne: { title: 'Party of One', description: 'Win with only your King still alive.' },
-    thread: { title: 'Hanging by a Thread', description: 'Win with your King at 1 health.' },
+    partyOfOne: {
+      title: 'Party of One',
+      description: 'Win with your King as your last survivor.',
+    },
+    thread: {
+      title: 'Hanging by a Thread',
+      description: 'Win with your King down to 1 health.',
+    },
     glassCannon: {
       title: 'Glass Cannon',
-      description: 'One Ninja kills three enemies in a single battle.',
+      description: 'Kill 3 enemies with the same Ninja, then win.',
     },
     rageQuit: {
       title: 'Rage Quit',
-      description: 'A Berserker at 1 health lands a killing blow.',
+      description: 'Kill an enemy with a Berserker at 1 health.',
     },
     chainReaction: {
       title: 'Chain Reaction',
-      description: 'Kill three enemies with one Fireball or Bomb.',
+      description: 'Kill 3 enemies with a single Fireball or Bomb.',
     },
     floorIsLava: {
       title: 'Floor Is Lava',
-      description: 'Win with your King standing on lava.',
+      description: 'Win while your King stands on lava.',
     },
     towerCamper: {
       title: 'Tower Camper',
-      description: 'Kill a unit with Eagle eye from a watchtower.',
+      description: 'Kill an enemy with Eagle eye from a watchtower.',
     },
     untouchable: {
       title: "Can't Touch This",
-      description: 'Your King dodges three attacks in one battle.',
+      description: 'Win after your King dodges 3 attacks.',
     },
-    speedrun: { title: 'Speedrun Any%', description: 'Win before round 4 starts.' },
+    speedrun: { title: 'Speedrun Any%', description: 'Win within the first 3 rounds.' },
     dogs: {
       title: 'Who Let the Dogs Out',
-      description: 'Win with only Wolves beside your King.',
+      description: 'Win with an army of only Wolves and your King.',
     },
   },
   fr: {
     cleanHands: {
       title: 'Mains propres, roi mort',
-      description: 'Tuer le roi ennemi sans tuer personne d’autre.',
+      description: 'Gagner en ne tuant que le roi ennemi.',
     },
     reaper: {
       title: 'Heures sup’ de la Faucheuse',
-      description: 'Tuer 9 ennemis ou plus avant la chute du roi.',
+      description: 'Tuer 9 ennemis ou plus, puis achever leur roi.',
     },
     ninjaRegicide: {
       title: 'Pas vu, pas pris',
-      description: 'Achever le roi ennemi avec un ninja.',
+      description: 'Porter le coup fatal au roi ennemi avec un ninja.',
     },
     nobodyLeftBehind: {
       title: 'Personne ne reste derrière',
-      description: 'Battre 5+ ennemis sans perdre une seule unité.',
+      description: 'Gagner contre 5+ ennemis sans perdre aucune unité.',
     },
     doneRight: {
       title: 'On n’est jamais mieux servi…',
-      description: 'Votre roi porte le coup fatal au leur.',
+      description: 'Tuer le roi ennemi avec votre propre roi.',
     },
     partyOfOne: {
       title: 'Seul contre tous',
-      description: 'Gagner avec seulement votre roi en vie.',
+      description: 'Gagner avec votre roi comme seul survivant.',
     },
     thread: { title: 'Ne tenir qu’à un fil', description: 'Gagner avec votre roi à 1 PV.' },
     glassCannon: {
       title: 'Canon de verre',
-      description: 'Un seul ninja tue trois ennemis en une bataille.',
+      description: 'Tuer 3 ennemis avec le même ninja, puis gagner.',
     },
-    rageQuit: { title: 'Rage quit', description: 'Un berserker à 1 PV porte un coup fatal.' },
+    rageQuit: { title: 'Rage quit', description: 'Tuer un ennemi avec un berserker à 1 PV.' },
     chainReaction: {
       title: 'Réaction en chaîne',
-      description: 'Tuer trois ennemis d’une boule de feu ou bombe.',
+      description: 'Tuer 3 ennemis d’une seule boule de feu ou bombe.',
     },
     floorIsLava: {
       title: 'Le sol est de la lave',
-      description: 'Gagner avec votre roi sur la lave.',
+      description: 'Gagner pendant que votre roi est sur la lave.',
     },
     towerCamper: {
       title: 'Campeur de tour',
-      description: 'Tuer une unité avec Œil de lynx depuis une tour.',
+      description: 'Tuer un ennemi avec Œil de lynx depuis une tour.',
     },
     untouchable: {
       title: 'Intouchable',
-      description: 'Votre roi esquive trois attaques en une bataille.',
+      description: 'Gagner après que votre roi a esquivé 3 attaques.',
     },
-    speedrun: { title: 'Speedrun Any%', description: 'Gagner avant le début du tour 4.' },
+    speedrun: { title: 'Speedrun Any%', description: 'Gagner dans les 3 premières manches.' },
     dogs: {
       title: 'Qui a lâché les chiens ?',
-      description: 'Gagner avec seulement des loups et votre roi.',
+      description: 'Gagner avec uniquement des loups et votre roi.',
     },
   },
   de: {
     cleanHands: {
       title: 'Saubere Hände, toter König',
-      description: 'Töte den feindlichen König, sonst niemanden.',
+      description: 'Gewinne und töte dabei nur den feindlichen König.',
     },
     reaper: {
       title: 'Überstunden für den Sensenmann',
-      description: 'Töte 9 oder mehr Feinde, bevor ihr König fällt.',
+      description: 'Töte 9+ Feinde und erledige dann ihren König.',
     },
     ninjaRegicide: {
       title: 'Keiner hat’s gesehen',
-      description: 'Erledige den feindlichen König mit einem Ninja.',
+      description: 'Versetze dem feindlichen König mit einem Ninja den Todesstoß.',
     },
     nobodyLeftBehind: {
       title: 'Keiner bleibt zurück',
-      description: 'Besiege 5+ Feinde, ohne eine Einheit zu verlieren.',
+      description: 'Gewinne gegen 5+ Feinde, ohne eine Einheit zu verlieren.',
     },
     doneRight: {
       title: 'Chefsache',
-      description: 'Dein König versetzt ihrem den Todesstoß.',
+      description: 'Töte den feindlichen König mit deinem eigenen König.',
     },
     partyOfOne: {
       title: 'Einsamer Sieger',
-      description: 'Gewinne, wenn nur dein König überlebt.',
+      description: 'Gewinne mit deinem König als letztem Überlebenden.',
     },
     thread: {
       title: 'Am seidenen Faden',
-      description: 'Gewinne mit deinem König bei 1 Leben.',
+      description: 'Gewinne, während dein König nur 1 Leben hat.',
     },
     glassCannon: {
       title: 'Glaskanone',
-      description: 'Ein Ninja tötet drei Feinde in einer Schlacht.',
+      description: 'Töte 3 Feinde mit demselben Ninja und gewinne.',
     },
     rageQuit: {
       title: 'Rage Quit',
-      description: 'Ein Berserker mit 1 Leben landet einen Todesstoß.',
+      description: 'Töte einen Feind mit einem Berserker bei 1 Leben.',
     },
     chainReaction: {
       title: 'Kettenreaktion',
-      description: 'Töte drei Feinde mit einem Feuerball oder einer Bombe.',
+      description: 'Töte 3 Feinde mit einem Feuerball oder einer Bombe.',
     },
     floorIsLava: {
       title: 'Der Boden ist Lava',
@@ -157,133 +163,132 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     },
     towerCamper: {
       title: 'Turmcamper',
-      description: 'Töte eine Einheit mit Adlerauge von einem Wachturm.',
+      description: 'Töte einen Feind mit Adlerauge von einem Wachturm.',
     },
     untouchable: {
       title: 'Unberührbar',
-      description: 'Dein König weicht drei Angriffen in einer Schlacht aus.',
+      description: 'Gewinne, nachdem dein König 3 Angriffen ausgewichen ist.',
     },
-    speedrun: { title: 'Speedrun Any%', description: 'Gewinne vor Beginn der Runde 4.' },
+    speedrun: { title: 'Speedrun Any%', description: 'Gewinne innerhalb der ersten 3 Runden.' },
     dogs: {
       title: 'Lasst die Hunde los',
-      description: 'Gewinne nur mit Wölfen neben deinem König.',
+      description: 'Gewinne mit einer Armee nur aus Wölfen und deinem König.',
     },
   },
   es: {
     cleanHands: {
       title: 'Manos limpias, rey muerto',
-      description: 'Mata al rey enemigo sin matar a nadie más.',
+      description: 'Gana matando solo al rey enemigo.',
     },
     reaper: {
       title: 'Horas extra de la Parca',
-      description: 'Mata 9 o más enemigos antes de que caiga su rey.',
+      description: 'Mata a 9+ enemigos y luego remata a su rey.',
     },
     ninjaRegicide: {
       title: 'Nadie vio nada',
-      description: 'Remata al rey enemigo con un ninja.',
+      description: 'Da el golpe final al rey enemigo con un ninja.',
     },
     nobodyLeftBehind: {
       title: 'Nadie se queda atrás',
-      description: 'Vence a 5+ enemigos sin perder ninguna unidad.',
+      description: 'Gana contra 5+ enemigos sin perder ninguna unidad.',
     },
     doneRight: {
       title: 'Si quieres algo bien hecho…',
-      description: 'Tu rey da el golpe final al suyo.',
+      description: 'Mata al rey enemigo con tu propio rey.',
     },
-    partyOfOne: { title: 'Fiesta de uno', description: 'Gana con solo tu rey con vida.' },
+    partyOfOne: {
+      title: 'Fiesta de uno',
+      description: 'Gana con tu rey como único superviviente.',
+    },
     thread: { title: 'Pendiendo de un hilo', description: 'Gana con tu rey a 1 de vida.' },
     glassCannon: {
       title: 'Cañón de cristal',
-      description: 'Un ninja mata a tres enemigos en una batalla.',
+      description: 'Mata a 3 enemigos con el mismo ninja y gana.',
     },
     rageQuit: {
       title: 'Rage quit',
-      description: 'Un berserker con 1 de vida da un golpe mortal.',
+      description: 'Mata a un enemigo con un berserker a 1 de vida.',
     },
     chainReaction: {
       title: 'Reacción en cadena',
-      description: 'Mata a tres enemigos con una bola de fuego o bomba.',
+      description: 'Mata a 3 enemigos con una sola bola de fuego o bomba.',
     },
-    floorIsLava: { title: 'El suelo es lava', description: 'Gana con tu rey sobre la lava.' },
+    floorIsLava: {
+      title: 'El suelo es lava',
+      description: 'Gana mientras tu rey está sobre la lava.',
+    },
     towerCamper: {
       title: 'Campero de torre',
-      description: 'Mata a una unidad con Ojo de águila desde una torre.',
+      description: 'Mata a un enemigo con Ojo de águila desde una torre.',
     },
     untouchable: {
       title: 'Intocable',
-      description: 'Tu rey esquiva tres ataques en una batalla.',
+      description: 'Gana después de que tu rey esquive 3 ataques.',
     },
-    speedrun: { title: 'Speedrun Any%', description: 'Gana antes de que empiece la ronda 4.' },
+    speedrun: { title: 'Speedrun Any%', description: 'Gana en las 3 primeras rondas.' },
     dogs: {
       title: '¿Quién soltó a los perros?',
-      description: 'Gana solo con lobos junto a tu rey.',
+      description: 'Gana con un ejército de solo lobos y tu rey.',
     },
   },
   it: {
     cleanHands: {
       title: 'Mani pulite, re morto',
-      description: 'Uccidi il re nemico senza uccidere nessun altro.',
+      description: 'Vinci uccidendo solo il re nemico.',
     },
     reaper: {
       title: 'Straordinari per la Morte',
-      description: 'Uccidi 9 o più nemici prima che cada il re.',
+      description: 'Uccidi 9+ nemici, poi finisci il loro re.',
     },
     ninjaRegicide: {
       title: 'Nessuno ha visto',
-      description: 'Finisci il re nemico con un ninja.',
+      description: 'Dai il colpo di grazia al re nemico con un ninja.',
     },
     nobodyLeftBehind: {
       title: 'Nessuno resta indietro',
-      description: 'Batti 5+ nemici senza perdere nessuna unità.',
+      description: 'Vinci contro 5+ nemici senza perdere nessuna unità.',
     },
     doneRight: {
       title: 'Chi fa da sé fa per tre',
-      description: 'Il tuo re dà il colpo di grazia al loro.',
+      description: 'Uccidi il re nemico con il tuo stesso re.',
     },
     partyOfOne: {
       title: 'Festa per uno',
-      description: 'Vinci con solo il tuo re ancora vivo.',
+      description: 'Vinci con il tuo re come unico superstite.',
     },
     thread: { title: 'Appeso a un filo', description: 'Vinci con il tuo re a 1 di vita.' },
     glassCannon: {
       title: 'Cannone di vetro',
-      description: 'Un ninja uccide tre nemici in una battaglia.',
+      description: 'Uccidi 3 nemici con lo stesso ninja e vinci.',
     },
     rageQuit: {
       title: 'Rage quit',
-      description: 'Un berserker a 1 di vita dà un colpo mortale.',
+      description: 'Uccidi un nemico con un berserker a 1 di vita.',
     },
     chainReaction: {
       title: 'Reazione a catena',
-      description: 'Uccidi tre nemici con una palla di fuoco o bomba.',
+      description: 'Uccidi 3 nemici con una sola palla di fuoco o bomba.',
     },
     floorIsLava: {
       title: 'Il pavimento è lava',
-      description: 'Vinci con il tuo re sulla lava.',
+      description: 'Vinci mentre il tuo re è sulla lava.',
     },
     towerCamper: {
       title: 'Camperone in torre',
-      description: 'Uccidi un’unità con Occhio di lince da una torre.',
+      description: 'Uccidi un nemico con Occhio di lince da una torre.',
     },
     untouchable: {
       title: 'Intoccabile',
-      description: 'Il tuo re schiva tre attacchi in una battaglia.',
+      description: 'Vinci dopo che il tuo re ha schivato 3 attacchi.',
     },
-    speedrun: { title: 'Speedrun Any%', description: 'Vinci prima dell’inizio del turno 4.' },
+    speedrun: { title: 'Speedrun Any%', description: 'Vinci entro i primi 3 round.' },
     dogs: {
       title: 'Chi ha liberato i cani?',
-      description: 'Vinci solo con lupi accanto al tuo re.',
+      description: 'Vinci con un esercito di soli lupi e il tuo re.',
     },
   },
 })
 
-export const title = t({
-  en: 'Achievements',
-  fr: 'Succès',
-  de: 'Erfolge',
-  es: 'Logros',
-  it: 'Obiettivi',
-})
 export const unlockedCount = t({
   en: (unlocked: number, total: number) => `${unlocked} / ${total} unlocked`,
   fr: (unlocked: number, total: number) => `${unlocked} / ${total} débloqués`,
@@ -304,11 +309,4 @@ export const justUnlocked = t({
   de: 'Erfolg freigeschaltet',
   es: 'Logro desbloqueado',
   it: 'Obiettivo sbloccato',
-})
-export const countedModes = t({
-  en: 'Earned by winning against the AI, in campaigns or online.',
-  fr: "Obtenus en gagnant contre l'IA, en campagne ou en ligne.",
-  de: 'Durch Siege gegen die KI, in Kampagnen oder online.',
-  es: 'Se consiguen ganando contra la IA, en campañas o en línea.',
-  it: "Si ottengono vincendo contro l'IA, in campagna o online.",
 })

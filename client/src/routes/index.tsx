@@ -1,7 +1,6 @@
 import { buttonClassName } from '../components/styles'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
-import * as achievements from '../i18n/achievements'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Icon } from '../components/Icon'
@@ -163,7 +162,7 @@ export const Route = createFileRoute('/')({
           <div className="mt-3 flex w-[min(100%,300px)] gap-3">
             {(
               [
-                ['/achievements', 'trophy', achievements.title],
+                ['/achievements', 'trophy', m.achievements],
                 ['/settings', 'gear', m.settings],
               ] as const
             ).map(([to, icon, label]) => (

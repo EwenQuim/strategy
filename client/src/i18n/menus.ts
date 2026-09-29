@@ -242,3 +242,17 @@ export const developerPreviewHint = t({
   es: 'Muestra contenido sin terminar, como la campaña Corona rota.',
   it: 'Mostra contenuti incompleti, come la campagna Corona infranta.',
 })
+export const achievements = t({
+  en: 'Achievements',
+  fr: 'Succès',
+  de: 'Erfolge',
+  es: 'Logros',
+  it: 'Obiettivi',
+})
+export const achievementsEarnedIn = t({
+  en: 'Earned by winning against the AI, in campaigns or online.',
+  fr: "Obtenus en gagnant contre l'IA, en campagne ou en ligne.",
+  de: 'Durch Siege gegen die KI, in Kampagnen oder online.',
+  es: 'Se consiguen ganando contra la IA, en campañas o en línea.',
+  it: "Si ottengono vincendo contro l'IA, in campagna o online.",
+})
