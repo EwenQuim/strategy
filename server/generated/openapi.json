@@ -20,11 +20,25 @@
         ],
         "type": "object"
       },
+      "Axial": {
+        "properties": {
+          "q": {
+            "type": "integer"
+          },
+          "r": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "q",
+          "r"
+        ],
+        "type": "object"
+      },
       "EngineAction": {
         "properties": {
-          "action": {
-            "nullable": true,
-            "type": "string"
+          "destination": {
+            "$ref": "#/components/schemas/Axial"
           },
           "q": {
             "nullable": true,
@@ -33,6 +47,9 @@
           "r": {
             "nullable": true,
             "type": "integer"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Axial"
           },
           "type": {
             "type": "string"

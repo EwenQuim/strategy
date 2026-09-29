@@ -62,8 +62,7 @@ test('Equally valued attacks keep candidate order at every difficulty', () => {
     ])
     for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
       assert.deepEqual(chooseBotActions(state, level), [
-        { type: 'act', action: 'attack' },
-        { type: 'attackAt', q: targets[0].q, r: targets[0].r },
+        { type: 'attack', q: targets[0].q, r: targets[0].r },
       ])
     }
   }
@@ -304,10 +303,7 @@ test('AI uses Aimed shot rather than gambling on an escaping king', () => {
     new King(2, -6, 0, 'enemy'),
     new King(3, 2, 0, 'player', 2, 3, 60),
   ])
-  assert.deepEqual(chooseBotActions(state), [
-    { type: 'act', action: 'special' },
-    { type: 'specialAt', q: 2, r: 0 },
-  ])
+  assert.deepEqual(chooseBotActions(state), [{ type: 'special', target: { q: 2, r: 0 } }])
 })
 
 test('Analysis is deterministic, immutable, configurable and independent of the real Escape stream', () => {

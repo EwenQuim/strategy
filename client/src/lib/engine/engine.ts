@@ -23,16 +23,15 @@ import {
   type BattleImpact,
 } from './combat.ts'
 
-type Phase = 'move' | 'attack' | 'special' | 'charge' | 'over'
-
 export type Action =
   | { type: 'move'; q: number; r: number }
-  | { type: 'act'; action: 'attack' | 'special' }
-  | { type: 'attackAt'; q: number; r: number }
-  | { type: 'specialAt'; q: number; r: number }
-  | { type: 'cancelTargeting' }
+  | { type: 'attack'; q: number; r: number }
+  | { type: 'special'; target?: Axial; destination?: Axial }
   | { type: 'endTurn' }
   | { type: 'restart' }
+
+// A command still being aimed: an attack, or a special whose destination may already be chosen.
+export type Aim = { action: 'attack' } | { action: 'special'; destination?: Axial }
 
 export type GameState = {
   seed: string
@@ -46,8 +45,6 @@ export type GameState = {
   active: number
   round: number
   lastClashRound: number
-  phase: Phase
-  chargeDestination: Axial | null
   winner: Side | 'draw' | null
   log: string[]
   logCount: number
@@ -89,8 +86,6 @@ export function initialState(
     active: -1,
     round: 1,
     lastClashRound: 0,
-    phase: 'move',
-    chargeDestination: null,
     winner: null,
     log: ['The battle begins. Protect your crown.'],
     logCount: 1,
@@ -118,23 +113,22 @@ export function specialTargetingTiles(
   )
 }
 
-export function targetingTiles(state: GameState): Set<string> {
+export function targetingTiles(state: GameState, aim: Aim): Set<string> {
   const pawn = activePawn(state)
   if (!pawn || state.winner) return new Set()
-  if (state.phase === 'attack')
+  if (aim.action === 'attack')
     return new Set(
       state.pawns
         .filter((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
         .map((target) => key(target.q, target.r)),
     )
-  if (state.phase === 'special') return specialTargetingTiles(pawn, state.tiles, state.pawns)
-  if (state.phase === 'charge')
+  if (aim.destination)
     return new Set(
-      specialTargets(state.pawns, pawn, state.chargeDestination ?? pawn).map((target) =>
+      specialTargets(state.pawns, pawn, aim.destination).map((target) =>
         key(target.q, target.r),
       ),
     )
-  return new Set()
+  return specialTargetingTiles(pawn, state.tiles, state.pawns)
 }
 
 type ActionResult = {
@@ -183,15 +177,8 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   let effect: BattleEffect | null = null
 
   switch (action.type) {
-    case 'act': {
-      if (action.action !== 'special') return null
-      const result = actor.special.perform(context)
-      if (!result) return null
-      effect = effectFrom(result, from)
-      break
-    }
     case 'move': {
-      if (state.phase !== 'move' || actor.energy <= 0) return null
+      if (actor.energy <= 0) return null
       const route = walkingPaths(tiles, pawns, actor, undefined, key(action.q, action.r)).get(
         key(action.q, action.r),
       )
@@ -206,8 +193,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       }
       break
     }
-    case 'attackAt': {
-      if (state.phase !== 'attack') return null
+    case 'attack': {
       const target = pawns.find((pawn) => pawn.q === action.q && pawn.r === action.r)
       if (!target) return null
       const impacts = performAttack(tiles, pawns, actor, target, log, random)
@@ -215,12 +201,18 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       effect = { kind: 'attack', from, to: { q: target.q, r: target.r }, impacts }
       break
     }
-    case 'specialAt': {
-      if (state.phase !== 'special' && state.phase !== 'charge') return null
-      const result = actor.special.perform({
+    case 'special': {
+      const { special } = actor
+      if (
+        !canUseSpecial(actor) ||
+        special.targeted !== !!action.target ||
+        !!special.choosesDestination !== !!action.destination
+      )
+        return null
+      const result = special.perform({
         ...context,
-        tile: { q: action.q, r: action.r },
-        destination: state.chargeDestination ?? undefined,
+        tile: action.target,
+        destination: action.destination,
       })
       if (!result) return null
       effect = effectFrom(result, from)
@@ -251,30 +243,6 @@ function reduce(
   const pawn = activePawn(state)
   if (!pawn || state.winner) return state
 
-  switch (action.type) {
-    case 'cancelTargeting':
-      return state.phase === 'move'
-        ? state
-        : { ...state, phase: 'move', chargeDestination: null }
-    case 'act':
-      if (state.phase !== 'move' || pawn.energy <= 0) return state
-      if (action.action === 'attack') return { ...state, phase: 'attack' }
-      if (action.action === 'special' && pawn.special.targeted)
-        return canUseSpecial(pawn) ? { ...state, phase: 'special' } : state
-      break
-    case 'specialAt':
-      if (state.phase === 'special' && pawn.special.choosesDestination) {
-        if (
-          !pawn.special
-            .tileTargets?.(pawn, state.tiles, state.pawns)
-            .has(key(action.q, action.r))
-        )
-          return state
-        return { ...state, phase: 'charge', chargeDestination: { q: action.q, r: action.r } }
-      }
-      break
-  }
-
   const result = executeAction(state, action)
   if (!result) return state
   const { tiles, pawns, actor, fallen, log, randomState } = result
@@ -294,9 +262,7 @@ function reduce(
     pawns,
     randomState,
     lastClashRound: health(pawns) < health(state.pawns) ? state.round : state.lastClashRound,
-    phase: winner ? 'over' : 'move',
     winner,
-    chargeDestination: null,
     log: log.length ? [...state.log, ...log].slice(-40) : state.log,
     logCount: state.logCount + log.length,
   }

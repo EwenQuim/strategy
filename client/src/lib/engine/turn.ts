@@ -34,7 +34,6 @@ export function endBattle(
   return {
     ...state,
     winner,
-    phase: 'over',
     log: [...state.log, message].slice(-40),
     logCount: state.logCount + 1,
   }
@@ -146,7 +145,6 @@ export function captureFrame(
       order: [...state.order],
       log: [...state.log],
       winner: null,
-      phase: 'move',
     },
     effect,
   }

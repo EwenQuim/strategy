@@ -20,7 +20,7 @@ export interface PawnAi {
   value(pawn: Pawn, health: number): number
   risk(pawn: Pawn, threat: UnitThreat): number
   goal(pawn: Pawn, surroundings: UnitSurroundings): number
-  ruleSpecial?(pawn: Pawn, state: GameState, foes: Pawn[], specials: Pawn[]): Action[] | null
+  ruleSpecial?(pawn: Pawn, state: GameState, foes: Pawn[], specials: Pawn[]): Action | null
 }
 
 const UNIT_SCORE = { unit: 12, attackDamage: 3, health: 4, attackDistance: 8 }

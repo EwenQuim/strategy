@@ -171,8 +171,7 @@ test('A killed final initiative entry or a final actor dying on lava still resol
     state.active = 2
     state.order.push(99)
     state.tiles.get('1,0')!.terrain = diesOnLava ? 'lava' : 'basalt'
-    state.phase = diesOnLava ? 'move' : 'attack'
-    const result = transition(state, { type: diesOnLava ? 'move' : 'attackAt', q: 1, r: 0 })
+    const result = transition(state, { type: diesOnLava ? 'move' : 'attack', q: 1, r: 0 })
     assert.equal(result.state.round, 2)
     assert.deepEqual(result.state.order, diesOnLava ? [1, 2] : [1, 2, 3])
     assert.equal(activePawn(result.state)?.id, 1)
@@ -197,7 +196,6 @@ test('Either king can lose to a blast; simultaneous deaths are a terminal draw w
     state.active = 1
     const result = transition(state, { type: 'endTurn' })
     assert.equal(result.state.winner, winner)
-    assert.equal(result.state.phase, 'over')
     assert.equal(result.state.round, 1)
     assert.equal(result.state.randomState, state.randomState)
     assert.deepEqual(
@@ -290,10 +288,7 @@ test('AI leaves already-doomed enemies to Hellfire instead of wasting its last a
   state.order = [4, 3, 2, 1, 5]
   state.active = 3
   const actions = chooseBotActions(state, 'normal')
-  assert.deepEqual(actions, [
-    { type: 'act', action: 'attack' },
-    { type: 'attackAt', q: -1, r: 0 },
-  ])
+  assert.deepEqual(actions, [{ type: 'attack', q: -1, r: 0 }])
   const next = finishRound(actions.reduce(reducer, state))
   assert.ok(!next.pawns.some((pawn) => pawn.id === 3 || pawn.id === 4))
 })

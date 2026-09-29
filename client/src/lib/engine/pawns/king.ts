@@ -12,7 +12,7 @@ const rally: SpecialAbility = {
   description: 'rallyDescription',
   targets: (pawn, pawns) => allyTargets(pawn, pawns, true),
   candidates: (pawn, { pawns }) =>
-    specialTargets(pawns, pawn).length ? [[{ type: 'act', action: 'special' }]] : [],
+    specialTargets(pawns, pawn).length ? [{ type: 'special' }] : [],
   perform: ({ pawn, pawns, log }) => {
     const allies = specialTargets(pawns, pawn)
     if (!allies.length) return null
@@ -61,7 +61,7 @@ const kingAi: PawnAi = {
     )
   },
   ruleSpecial: (_king, _state, _foes, specials) =>
-    specials.length ? [{ type: 'act', action: 'special' }] : null,
+    specials.length ? { type: 'special' } : null,
 }
 
 export class King extends Pawn {

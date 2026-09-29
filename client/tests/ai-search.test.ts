@@ -47,10 +47,7 @@ function allHitWorld(state: GameState): GameState {
   }
 }
 
-const strike = (target: Pawn): Action[] => [
-  { type: 'act', action: 'attack' },
-  { type: 'attackAt', q: target.q, r: target.r },
-]
+const strike = (target: Pawn): Action[] => [{ type: 'attack', q: target.q, r: target.r }]
 
 test('Each escape roll keeps its own odds across a multi-attack turn', () => {
   const king = new King(2, 1, 0, 'player', 6, 3, 20)
@@ -130,9 +127,7 @@ test('A rune-boosted attacker facing many targets plans and decides quickly', ()
   const started = performance.now()
   const plans = turnPlans(state)
   assert.ok(performance.now() - started < 1000, 'Enumeration took too long')
-  assert.ok(
-    plans.every((plan) => plan.actions.filter((a) => a.type === 'attackAt').length <= 3),
-  )
+  assert.ok(plans.every((plan) => plan.actions.filter((a) => a.type === 'attack').length <= 3))
   const actions = chooseBotActions(state, 'hard')
   assert.notEqual(actions.reduce(reducer, state), state)
 })

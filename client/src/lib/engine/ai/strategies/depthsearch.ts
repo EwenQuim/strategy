@@ -19,7 +19,8 @@ function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => numb
   }
 }
 
-const rolls = (action: Action) => action.type === 'attackAt' || action.type === 'specialAt'
+const rolls = (action: Action) =>
+  action.type === 'attack' || (action.type === 'special' && !!action.target)
 const END_TURN: Action = { type: 'endTurn' }
 
 // Forcing escapes only lasts for the roll: the real chances come back unless a new round began and
@@ -242,14 +243,9 @@ function minimax(
 }
 
 // Plays the chosen turn up to its first attack or special, then decides again with the result.
-function untilFirstRoll(state: GameState, actions: Action[]): Action[] {
-  let current = state
-  for (const [index, action] of actions.entries()) {
-    current = reducer(current, action)
-    if ((action.type === 'attackAt' || action.type === 'specialAt') && current.phase === 'move')
-      return actions.slice(0, index + 1)
-  }
-  return actions
+function untilFirstRoll(actions: Action[]): Action[] {
+  const roll = actions.findIndex(rolls)
+  return roll < 0 ? actions : actions.slice(0, roll + 1)
 }
 
 function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
@@ -268,7 +264,6 @@ function chooseTacticalActions(state: GameState, options: BotOptions): Action[] 
   })
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
-  if (state.phase !== 'move') return [{ type: 'cancelTargeting' }]
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
   const distance = distancesToAttack(state, pawn)
   const reach: ReachCache = new Map()
@@ -299,7 +294,7 @@ function chooseTacticalActions(state: GameState, options: BotOptions): Action[] 
       return { ...turn, value }
     })
     .sort((a, b) => b.value - a.value)
-  return untilFirstRoll(analysis, chooseOption(analysis, pawn, valued, options).actions)
+  return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
 }
 
 // The depth search: budgeted beam minimax over the unit turns turns.ts enumerates.

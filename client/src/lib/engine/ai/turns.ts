@@ -75,8 +75,8 @@ export function turnPlans(state: GameState): TurnPlan[] {
       }
     if (lastTarget === undefined)
       for (const special of pawn.special.candidates(pawn, current)) {
-        const next = apply(current, special)
-        if (next) act(next, [...actions, ...special], true, attacks)
+        const next = apply(current, [special])
+        if (next) act(next, [...actions, special], true, attacks)
       }
     const here = current.tiles.get(key(pawn.q, pawn.r))
     const targets = current.pawns
@@ -89,12 +89,9 @@ export function turnPlans(state: GameState): TurnPlan[] {
           ? targets
           : targets.filter((foe, index) => foe.id === lastTarget || index < FOLLOW_UP_TARGETS)
     for (const foe of considered) {
-      const strike: Action[] = [
-        { type: 'act', action: 'attack' },
-        { type: 'attackAt', q: foe.q, r: foe.r },
-      ]
-      const next = apply(current, strike)
-      if (next) act(next, [...actions, ...strike], true, attacks + 1, foe.id)
+      const strike: Action = { type: 'attack', q: foe.q, r: foe.r }
+      const next = apply(current, [strike])
+      if (next) act(next, [...actions, strike], true, attacks + 1, foe.id)
     }
   }
 

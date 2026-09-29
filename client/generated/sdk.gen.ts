@@ -129,13 +129,18 @@ import type {
 
 import { client } from '../src/api/client.ts';
 import type { ErrorType } from '../src/api/client.ts';
+export interface Axial {
+  q: number;
+  r: number;
+}
+
 export interface EngineAction {
-  /** @nullable */
-  action?: string | null;
+  destination?: Axial;
   /** @nullable */
   q?: number | null;
   /** @nullable */
   r?: number | null;
+  target?: Axial;
   type: string;
 }
 

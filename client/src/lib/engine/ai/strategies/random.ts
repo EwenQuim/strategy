@@ -3,9 +3,9 @@ import { SeededRandom, seedState } from '../../random.ts'
 import { legalActions } from '../options.ts'
 import type { AiStrategy } from '../decision.ts'
 
-// Plays the whole turn from one seeded stream: drawing each step from its own state would repeat
-// the same pick whenever cancelling a target returns to an identical state. The battle's stream
-// only moves on rolls, so the round and the unit keep quiet turns from all drawing alike.
+// Plays the whole turn from one seeded stream: the battle's stream only moves on rolls, so seeding
+// each step from its state would repeat the same draw after every move. The round and the unit
+// keep quiet turns from all drawing alike.
 function chooseRandomActions(state: GameState): Action[] {
   const id = activePawn(state)?.id
   const random = new SeededRandom(seedState(`${state.randomState}:${state.round}:${id}`))

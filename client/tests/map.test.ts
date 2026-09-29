@@ -230,9 +230,8 @@ test('Lakes block walking and Charge for both sides, and cannot be Ninja landing
             (t) => t.terrain === 'lake',
           ),
         )
-        const targeting = reducer(state, { type: 'act', action: 'special' })
-        assert.ok(!targetingTiles(targeting).has('2,0'))
-        assert.equal(reducer(targeting, { type: 'specialAt', q: 2, r: 0 }), targeting)
+        assert.ok(!targetingTiles(state, { action: 'special' }).has('2,0'))
+        assert.equal(reducer(state, { type: 'special', target: { q: 2, r: 0 } }), state)
       }
       let next = state
       for (const action of chooseBotActions(state)) {
@@ -252,13 +251,13 @@ test('Arrows, Aimed shot, magic, and Fireball cross lakes for both sides', () =>
       state.pawns[0] = new Unit(1, 1, 0, side)
       state.pawns[2].q = 3
       for (const action of ['attack', 'special'] as const) {
-        const targeting = reducer(state, { type: 'act', action })
-        assert.ok(targetingTiles(targeting).has('3,0'))
-        const next = reducer(targeting, {
-          type: action === 'attack' ? 'attackAt' : 'specialAt',
-          q: 3,
-          r: 0,
-        })
+        assert.ok(targetingTiles(state, { action }).has('3,0'))
+        const next = reducer(
+          state,
+          action === 'attack'
+            ? { type: 'attack', q: 3, r: 0 }
+            : { type: 'special', target: { q: 3, r: 0 } },
+        )
         assert.equal(next.pawns[2].hp, 7 - (Unit === Archer && action === 'special' ? 2 : 1))
         assert.equal(state.pawns[2].hp, 7)
         assert.equal(next.tiles.get('2,0')?.terrain, 'lake')

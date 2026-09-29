@@ -8,46 +8,43 @@ import (
 type ActionType string
 
 const (
-	ActionMove            ActionType = "move"
-	ActionAct             ActionType = "act"
-	ActionAttackAt        ActionType = "attackAt"
-	ActionSpecialAt       ActionType = "specialAt"
-	ActionCancelTargeting ActionType = "cancelTargeting"
-	ActionEndTurn         ActionType = "endTurn"
+	ActionMove    ActionType = "move"
+	ActionAttack  ActionType = "attack"
+	ActionSpecial ActionType = "special"
+	ActionEndTurn ActionType = "endTurn"
 
 	// restart exists in the engine but a shared online game must never reset.
 	ActionRestart ActionType = "restart"
 )
 
-type AttackKind string
-
-const (
-	AttackKindAttack  AttackKind = "attack"
-	AttackKindSpecial AttackKind = "special"
-)
+type Axial struct {
+	Q int `json:"q"`
+	R int `json:"r"`
+}
 
 // EngineAction is the wire form of the client engine's action union: every
 // variant is a flat JSON object tagged by "type".
 type EngineAction struct {
-	Type   ActionType  `json:"type"`
-	Action *AttackKind `json:"action,omitempty"`
-	Q      *int        `json:"q,omitempty"`
-	R      *int        `json:"r,omitempty"`
+	Type        ActionType `json:"type"`
+	Q           *int       `json:"q,omitempty"`
+	R           *int       `json:"r,omitempty"`
+	Target      *Axial     `json:"target,omitempty"`
+	Destination *Axial     `json:"destination,omitempty"`
 }
 
 var ErrInvalidAction = errors.New("invalid action")
 
 func (a EngineAction) Validate() error {
 	switch a.Type {
-	case ActionMove, ActionAttackAt, ActionSpecialAt:
+	case ActionMove, ActionAttack:
 		if a.Q == nil || a.R == nil {
 			return fmt.Errorf("%w: %s requires q and r", ErrInvalidAction, a.Type)
 		}
-	case ActionAct:
-		if a.Action == nil || (*a.Action != AttackKindAttack && *a.Action != AttackKindSpecial) {
-			return fmt.Errorf("%w: act requires action attack or special", ErrInvalidAction)
+	case ActionSpecial:
+		if a.Destination != nil && a.Target == nil {
+			return fmt.Errorf("%w: special with a destination requires a target", ErrInvalidAction)
 		}
-	case ActionCancelTargeting, ActionEndTurn:
+	case ActionEndTurn:
 	default:
 		return fmt.Errorf("%w: unsupported action type %q", ErrInvalidAction, a.Type)
 	}

@@ -37,52 +37,21 @@ function duel(side: Side): GameState {
   }
 }
 
-test('Actions rejected by the targeting phase leave state and playback untouched', () => {
+test('Invalid commands leave state and playback untouched', () => {
   for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark]) {
-    for (const [phase, actions] of [
-      [
-        'move',
-        [
-          { type: 'attackAt', q: 2, r: 0 },
-          { type: 'specialAt', q: 2, r: 0 },
-        ],
-      ],
-      [
-        'attack',
-        [
-          { type: 'move', q: 1, r: 0 },
-          { type: 'specialAt', q: 2, r: 0 },
-        ],
-      ],
-      [
-        'special',
-        [
-          { type: 'move', q: 1, r: 0 },
-          { type: 'attackAt', q: 2, r: 0 },
-        ],
-      ],
-      [
-        'charge',
-        [
-          { type: 'move', q: 1, r: 0 },
-          { type: 'attackAt', q: 2, r: 0 },
-        ],
-      ],
+    const state = duel('player')
+    state.pawns[0] = new Unit(1, 0, 0, 'player')
+    const original = structuredClone(state)
+    for (const action of [
+      { type: 'move', q: 9, r: 9 },
+      { type: 'attack', q: 3, r: 0 },
+      { type: 'special', target: { q: 3, r: 0 }, destination: { q: 3, r: 0 } },
     ] as const) {
-      const state = { ...duel('player'), phase }
-      state.pawns[0] = new Unit(1, 0, 0, 'player')
-      const original = structuredClone(state)
-      for (const action of actions) {
-        const result = transition(state, action)
-        assert.equal(result.state, state)
-        assert.deepEqual(result.frames, [])
-      }
-      if (phase !== 'move') {
-        for (const action of ['attack', 'special'] as const)
-          assert.equal(reducer(state, { type: 'act', action }), state)
-      }
-      assert.deepEqual(structuredClone(state), original)
+      const result = transition(state, action)
+      assert.equal(result.state, state)
+      assert.deepEqual(result.frames, [])
     }
+    assert.deepEqual(structuredClone(state), original)
   }
 })
 
@@ -112,35 +81,34 @@ test('Special previews and outcomes have a stable reference across all classes',
           state.tiles.get('1,0')!.feature = 'rune'
           state.tiles.get('1,1')!.feature = 'spring'
           state.pawns[3].protectingId = 3
-          for (const action of ['attack', 'special'] as const) {
-            const preview = transition(state, { type: 'act', action })
-            results.push(preview, [...targetingTiles(preview.state)])
-            for (const q of [-1, 0, 1, 2, 3, 4]) {
-              for (const r of [0, 1]) {
-                const selected = transition(preview.state, {
-                  type: action === 'attack' ? 'attackAt' : 'specialAt',
-                  q,
-                  r,
-                })
-                results.push(selected, [...targetingTiles(selected.state)])
-                if (selected.state.phase === 'charge') {
-                  for (const target of state.pawns)
-                    results.push(
-                      transition(selected.state, {
-                        type: 'specialAt',
-                        q: target.q,
-                        r: target.r,
-                      }),
-                    )
-                }
-              }
+          results.push(
+            [...targetingTiles(state, { action: 'attack' })],
+            [...targetingTiles(state, { action: 'special' })],
+            transition(state, { type: 'special' }),
+          )
+          for (const q of [-1, 0, 1, 2, 3, 4]) {
+            for (const r of [0, 1]) {
+              const destination = { q, r }
+              results.push(
+                transition(state, { type: 'attack', q, r }),
+                transition(state, { type: 'special', target: destination }),
+                [...targetingTiles(state, { action: 'special', destination })],
+              )
+              for (const target of state.pawns)
+                results.push(
+                  transition(state, {
+                    type: 'special',
+                    target: { q: target.q, r: target.r },
+                    destination,
+                  }),
+                )
             }
           }
         }
       }
     }
   }
-  assert.equal(results.length, 7552)
+  assert.equal(results.length, 12528)
   assert.equal(
     seedState(
       JSON.stringify(results, (name, value) => {
@@ -152,7 +120,7 @@ test('Special previews and outcomes have a stable reference across all classes',
         return value instanceof Map ? [...value] : value
       }),
     ),
-    1222128607,
+    975788797,
   )
 })
 
@@ -160,8 +128,8 @@ test('Rally cannot be invoked by a targeted action even with wounded allies', ()
   const state = duel('player')
   state.pawns[0] = new King(1, 0, 0, 'player')
   state.pawns[1] = new Swordsman(2, 0, 1, 'player', 1)
-  assert.equal(reducer(state, { type: 'specialAt', q: 0, r: 1 }), state)
-  assert.equal(reducer(state, { type: 'act', action: 'special' }).pawns[1].hp, 2)
+  assert.equal(reducer(state, { type: 'special', target: { q: 0, r: 1 } }), state)
+  assert.equal(reducer(state, { type: 'special' }).pawns[1].hp, 2)
 })
 
 test('Core initialization leaves both armies untouched and permits either side to start', () => {
@@ -184,8 +152,7 @@ test('Both sides use the same actions; ending a turn never makes the opponent pl
     const original = structuredClone(state)
     const moved = reducer(state, { type: 'move', q: 1, r: 0 })
     assert.equal(moved.pawns[0].energy, 2)
-    const targeted = reducer(moved, { type: 'act', action: 'attack' })
-    const struck = reducer(targeted, { type: 'attackAt', q: 2, r: 0 })
+    const struck = reducer(moved, { type: 'attack', q: 2, r: 0 })
     assert.equal(struck.pawns[2].hp, 5)
     assert.equal(struck.pawns[0].energy, 1)
     const next = reducer(struck, { type: 'endTurn' })
@@ -206,10 +173,8 @@ test('A final-energy kill wins for either side before advancing or resetting the
     state.pawns[2].hp = 1
     state.order = [2, 3, 1]
     state.active = 2
-    state.phase = 'attack'
-    const result = transition(state, { type: 'attackAt', q: 2, r: 0 })
+    const result = transition(state, { type: 'attack', q: 2, r: 0 })
     assert.equal(result.state.winner, side)
-    assert.equal(result.state.phase, 'over')
     assert.equal(result.state.round, 1)
     assert.equal(result.frames.length, 1)
     assert.equal(result.frames[0].state.winner, null)
@@ -290,8 +255,7 @@ test('Combat frames report actual hits and misses for either side without changi
         state.pawns[2].q = Unit === Archer ? 2 : 1
         state.pawns[2].escapeChance = escapeChance
         state.randomState = 0
-        state.phase = 'attack'
-        const action = { type: 'attackAt', q: state.pawns[2].q, r: 0 } as const
+        const action = { type: 'attack', q: state.pawns[2].q, r: 0 } as const
         const result = transition(state, action)
         const damage = escapeChance ? 0 : state.pawns[0].attack.damage
         assert.deepEqual(result.frames[0].effect?.impacts, [{ q: action.q, r: 0, damage }])
@@ -299,7 +263,7 @@ test('Combat frames report actual hits and misses for either side without changi
         assert.deepEqual(result.state, reducer(state, action))
         assert.deepEqual(result, transition(state, action))
         assert.equal(state.pawns[2].hp, 7)
-        assert.deepEqual(transition(state, { type: 'attackAt', q: 99, r: 99 }).frames, [])
+        assert.deepEqual(transition(state, { type: 'attack', q: 99, r: 99 }).frames, [])
       }
     }
   }
@@ -312,8 +276,7 @@ test('Fireball reports each hit and dodge, including a killed target, without hi
   state.pawns[2].escapeChance = 60
   state.pawns.push(new Archer(4, 2, 0, 'enemy', 1), new Archer(5, 1, 1, 'player'))
   state.randomState = 0
-  state.phase = 'special'
-  const result = transition(state, { type: 'specialAt', q: 1, r: 0 })
+  const result = transition(state, { type: 'special', target: { q: 1, r: 0 } })
   assert.equal(result.frames[0].effect?.kind, 'fireball')
   assert.deepEqual(result.frames[0].effect?.impacts, [
     { q: 1, r: 0, damage: 0 },
@@ -331,8 +294,7 @@ test('Player attack playback precedes enemy responses and shows lethal damage be
     state.pawns[0].energy = 1
     state.pawns[2].q = 1
     state.pawns[2].hp = lethal ? 1 : 7
-    state.phase = 'attack'
-    const result = game.transition(state, { type: 'attackAt', q: 1, r: 0 })
+    const result = game.transition(state, { type: 'attack', q: 1, r: 0 })
     assert.equal(activePawn(result.frames[0].state)?.side, 'player')
     assert.equal(result.frames[0].state.winner, null)
     assert.deepEqual(result.frames[0].effect?.impacts, [{ q: 1, r: 0, damage: 2 }])
@@ -376,8 +338,7 @@ test('Both local players can move, attack and win with locked combat playback', 
     let playback = { state: duel(side), frames: [] } as ReturnType<typeof initialPlayback>
     for (const action of [
       { type: 'move', q: 1, r: 0 },
-      { type: 'act', action: 'attack' },
-      { type: 'attackAt', q: 2, r: 0 },
+      { type: 'attack', q: 2, r: 0 },
       { type: 'endTurn' },
     ] as const) {
       const expected = transition(playback.state, action)
@@ -397,10 +358,9 @@ test('Both local players can move, attack and win with locked combat playback', 
     state.pawns[0].q = 1
     state.pawns[0].energy = 1
     state.pawns[2].hp = 1
-    state.phase = 'attack'
     const result = playbackReducer(
       { state, frames: [] },
-      { type: 'attackAt', q: 2, r: 0 },
+      { type: 'attack', q: 2, r: 0 },
       'local',
     )
     assert.equal(result.state.winner, side)

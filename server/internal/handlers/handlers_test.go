@@ -197,8 +197,9 @@ func TestPlayActionValidation(t *testing.T) {
 		{"restart", map[string]any{"type": "restart"}},
 		{"no target", map[string]any{"type": "move"}},
 		{"half a target", map[string]any{"type": "move", "q": 1}},
-		{"act", map[string]any{"type": "act"}},
-		{"bad act kind", map[string]any{"type": "act", "action": "rally"}},
+		{"legacy act", map[string]any{"type": "act", "action": "attack"}},
+		{"attack without target", map[string]any{"type": "attack"}},
+		{"special destination without target", map[string]any{"type": "special", "destination": map[string]int{"q": 1, "r": 0}}},
 	}
 	for _, tc := range invalid {
 		body := map[string]any{"token": creator.Token, "version": 0, "action": tc.action, "winner": nil}
