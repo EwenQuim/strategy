@@ -112,7 +112,7 @@ export function GameHeader({
       </div>
       <div className="m-auto flex min-h-[46px] max-w-[1040px] items-center gap-3 border-t border-line min-[900px]:min-h-[48px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[38px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
         <ol
-          className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
+          className="relative m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
           aria-label={m.turnOrder}
         >
           {turnOrder.map(({ unit, index }) => (
