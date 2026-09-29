@@ -110,7 +110,7 @@
     animation: turn-guard 500ms step-end !important;
   }
   .turn-banner {
-    animation: turn-banner 1400ms ease-out both;
+    animation: turn-banner 1800ms ease-out both !important;
   }
   .pawn-active-halo {
     animation: halo-breathe 3s ease-in-out infinite;
@@ -124,17 +124,13 @@
 }
 
 @keyframes turn-banner {
-  0% {
-    opacity: 0;
-    translate: 0 -6px;
-  }
-  15%,
-  70% {
-    opacity: 1;
-    translate: 0 0;
-  }
+  0%,
   100% {
     opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
   }
 }
 
