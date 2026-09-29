@@ -1,4 +1,5 @@
 import {
+  BATTLE_SNAPSHOT_VERSION,
   battleIdentity,
   restoreState,
   sameBattle,
@@ -20,7 +21,8 @@ export function readBattle(
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(BATTLE_KEY) ?? 'null')
     if (typeof saved !== 'object' || saved === null) return null
-    const { identity, state } = saved as { identity?: unknown; state?: unknown }
+    const { version, identity, state } = saved as Record<string, unknown>
+    if (version !== BATTLE_SNAPSHOT_VERSION) return null
     if (!sameBattle(identity, battleIdentity(mode, seed, difficulty, setup))) return null
     return restoreState(state)
   } catch {
@@ -39,6 +41,7 @@ export function saveBattle(
     localStorage.setItem(
       BATTLE_KEY,
       JSON.stringify({
+        version: BATTLE_SNAPSHOT_VERSION,
         identity: battleIdentity(mode, seed, difficulty, setup),
         state: snapshotState(state),
       }),
