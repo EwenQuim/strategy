@@ -445,13 +445,18 @@ test(
     assert.equal(await moves.count(), 0)
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    await page
-      .getByRole('button', { name: /^Move to .*2 energy$/ })
-      .first()
-      .click()
+    // Reloading resumes the recorded battle instead of resetting it.
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
       '1',
+    )
+    assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
+    assert.match(
+      (await page
+        .locator('[data-testid="hex-tile"]')
+        .nth(tileIndex)
+        .getAttribute('aria-label'))!,
+      /protected by Bulwark/,
     )
     assert.equal(await moves.count(), 0)
     assert.equal(await page.locator('[data-action="special"]').isDisabled(), true)
@@ -483,6 +488,27 @@ test(
     assert.deepEqual(errors, [])
   },
 )
+
+test('Reloading resumes an in-progress battle instead of resetting it', async (t) => {
+  const { page, origin } = await fixture(t)
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  const board = () =>
+    page
+      .locator('[data-testid="hex-tile"]')
+      .evaluateAll((tiles) => tiles.map((tile) => tile.getAttribute('aria-label')))
+  await page.goto(origin + base + 'game/reload-resume?mode=local')
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  const opening = await board()
+  await playTurn(page)
+  const played = await board()
+  assert.notDeepEqual(played, opening)
+  await page.reload()
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  assert.deepEqual(await board(), played)
+  await playTurn(page)
+  assert.deepEqual(errors, [])
+})
 
 test(
   'PWA installs every asset, plays a new route offline, and defers an online update until tabs close',
@@ -1245,7 +1271,12 @@ test(
       )
       await page.reload()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      if (kind !== 'lava') assert.equal(await destination.getAttribute('data-feature'), kind)
+      if (kind !== 'lava')
+        // Reloading resumes the recorded battle, so a consumed rune stays consumed.
+        assert.equal(
+          await destination.getAttribute('data-feature'),
+          kind === 'rune' ? null : kind,
+        )
     }
     await page.getByRole('button', { name: 'How to play' }).click()
     assert.match(await page.locator('dialog').innerText(), /Stay until next turn: \+1 HP/)
