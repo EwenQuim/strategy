@@ -108,29 +108,27 @@ export function GameResult({
                 : m.yourKingFallen}
         </p>
         {achievements.length > 0 && (
-          <ul
-            className="mt-4 flex list-none flex-col gap-1.5 p-0 text-left"
-            aria-label={achievementTexts.justUnlocked}
-          >
-            {ACHIEVEMENTS.filter(({ id }) => achievements.includes(id)).map(({ id, logo }) => (
-              <li
-                key={id}
-                className="flex items-center gap-2.5 rounded-lg border border-gold/40 bg-gold/8 px-3 py-2"
-              >
-                <span className="text-[20px]" aria-hidden="true">
-                  {logo}
-                </span>
-                <span className="flex flex-col">
-                  <small className="text-[9px] tracking-[0.12em] text-muted uppercase">
-                    {achievementTexts.justUnlocked}
-                  </small>
-                  <strong className="font-serif text-[14px] font-normal text-gold">
+          <div className="mt-3 [@media(max-height:650px)]:mt-2">
+            <small className="text-[9px] tracking-[0.12em] text-muted uppercase">
+              {achievementTexts.justUnlocked}
+            </small>
+            <ul
+              className="mt-1 flex list-none flex-wrap justify-center gap-1.5 p-0"
+              aria-label={achievementTexts.justUnlocked}
+            >
+              {ACHIEVEMENTS.filter(({ id }) => achievements.includes(id)).map(
+                ({ id, logo }) => (
+                  <li
+                    key={id}
+                    className="rounded-full border border-gold/40 bg-gold/8 px-2.5 py-0.5 font-serif text-[12px] text-gold"
+                  >
+                    <span aria-hidden="true">{logo} </span>
                     {achievementTexts.achievements[id].title}
-                  </strong>
-                </span>
-              </li>
-            ))}
-          </ul>
+                  </li>
+                ),
+              )}
+            </ul>
+          </div>
         )}
         {campaign && campaignLevel ? (
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
