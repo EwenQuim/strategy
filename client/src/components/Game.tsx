@@ -13,6 +13,7 @@ import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
+import { PawnIcon } from './Icon'
 import {
   activePawn,
   BIOMES,
@@ -190,8 +191,9 @@ export function Game({
           <p
             key={pawn.id}
             data-testid="turn-banner"
-            className="turn-banner pointer-events-none absolute top-2 left-1/2 z-3 -translate-x-1/2 rounded-full border border-[#b6d2b566] bg-(--biome-panel) px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[#d9dfc9] shadow-[0_4px_16px_#10201840] motion-reduce:hidden"
+            className="turn-banner pointer-events-none absolute top-4 left-1/2 z-3 flex -translate-x-1/2 items-center gap-2.5 rounded-full border-2 border-[#f2df9e] bg-[#17362bf2] px-5 py-2 font-display text-[18px] whitespace-nowrap text-[#f2df9e] shadow-[0_8px_28px_#0a211b99] max-[601px]:top-2 max-[601px]:px-4 max-[601px]:py-1.5 max-[601px]:text-[15px] [&>svg]:size-6 max-[601px]:[&>svg]:size-5"
           >
+            <PawnIcon kind={pawn.kind} />
             {m.yourTurn} · {unitNames[pawn.kind]} {pawn.id.toString().padStart(2, '0')}
           </p>
         )}
