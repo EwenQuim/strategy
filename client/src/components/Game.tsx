@@ -188,14 +188,27 @@ export function Game({
           />
         </div>
         {myTurn && (
-          <p
+          <div
             key={pawn.id}
             data-testid="turn-banner"
-            className="turn-banner pointer-events-none absolute top-4 left-1/2 z-3 flex -translate-x-1/2 items-center gap-2.5 rounded-full border-2 border-[#f2df9e] bg-[#17362bf2] px-5 py-2 font-display text-[18px] whitespace-nowrap text-[#f2df9e] shadow-[0_8px_28px_#0a211b99] max-[601px]:top-2 max-[601px]:px-4 max-[601px]:py-1.5 max-[601px]:text-[15px] [&>svg]:size-6 max-[601px]:[&>svg]:size-5"
+            className="turn-banner pointer-events-none absolute top-4 left-1/2 z-3 flex -translate-x-1/2 items-center gap-3 rounded-[12px] border border-[#dcc48a59] bg-[linear-gradient(150deg,#2c4a3be6,#14291ff0)] py-2 pr-5 pl-2 whitespace-nowrap shadow-[0_10px_30px_#0a211b80,inset_0_1px_0_#f2df9e1f] backdrop-blur-[4px] max-[601px]:top-2 max-[601px]:gap-2.5 max-[601px]:py-1.5 max-[601px]:pr-4"
           >
-            <PawnIcon kind={pawn.kind} />
-            {m.yourTurn} · {unitNames[pawn.kind]} {pawn.id.toString().padStart(2, '0')}
-          </p>
+            <span className="grid size-9 place-items-center rounded-full border border-[#dcc48a4a] bg-[radial-gradient(circle,#dcc48a1f,transparent_70%)] text-gold [&>svg]:size-5 max-[601px]:size-8 max-[601px]:[&>svg]:size-[18px]">
+              <PawnIcon kind={pawn.kind} />
+            </span>
+            <span className="grid gap-0.5">
+              <span className="font-label text-[8px] leading-none tracking-[0.29em] text-[#dcc48aa6] uppercase">
+                {m.yourTurn}
+              </span>
+              <span className="font-display text-[18px] leading-none text-ink max-[601px]:text-[16px]">
+                {unitNames[pawn.kind]}
+                <span className="font-label text-[10px] tracking-[0.05em] text-[#7f957e]">
+                  {' '}
+                  / {pawn.id.toString().padStart(2, '0')}
+                </span>
+              </span>
+            </span>
+          </div>
         )}
         {state.winner && (
           <GameResult
