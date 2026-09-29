@@ -105,8 +105,9 @@
   .battle-result-sparks {
     animation: battle-result-sparks 1100ms ease-out both;
   }
+  /* Not motion: important in this layer outranks the reduced-motion reset on body. */
   .turn-guard {
-    animation: turn-guard 500ms step-end;
+    animation: turn-guard 500ms step-end !important;
   }
   .turn-banner {
     animation: turn-banner 1400ms ease-out both;

@@ -1114,6 +1114,12 @@ test(
         { animation: 'none', pointerEvents: 'none' },
       )
       await endTurn.click()
+      assert.equal(
+        await page
+          .locator('[data-action="endTurn"]')
+          .evaluate((button) => getComputedStyle(button).pointerEvents),
+        'none',
+      )
       await endTurn.waitFor()
       await endTurn.click()
       await page.getByTestId('hellfire-effect').first().waitFor()
@@ -1509,6 +1515,9 @@ test(
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   const level = CAMPAIGNS[0].levels[id - 1]
   let state = botState(level.seed, level.setup)
+  await page.addStyleTag({
+    content: '@layer base { .turn-guard { animation: none !important } }',
+  })
   await page.getByRole('button', { name: 'Go !', exact: true }).click()
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   assert.equal(
