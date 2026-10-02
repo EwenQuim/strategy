@@ -256,3 +256,19 @@ export const achievementsEarnedIn = t({
   es: 'Se consiguen ganando contra la IA, en campañas o en línea.',
   it: "Si ottengono vincendo contro l'IA, in campagna o online.",
 })
+
+export const lockedAchievementCampaignCard = t({
+  en: (name: string) => `${name} campaign, locked, earn achievements to unlock`,
+  fr: (name: string) => `Campagne ${name}, verrouillée, gagnez des succès pour débloquer`,
+  de: (name: string) => `${name}-Kampagne, gesperrt, erreiche Erfolge zum Freischalten`,
+  es: (name: string) => `Campaña ${name}, bloqueada, gana logros para desbloquear`,
+  it: (name: string) => `Campagna ${name}, bloccata, ottieni obiettivi per sbloccare`,
+})
+
+export const achievementsToUnlock = t({
+  en: 'Earn achievements to unlock',
+  fr: 'Gagnez des succès pour débloquer',
+  de: 'Erringe Erfolge zum Freischalten',
+  es: 'Gana logros para desbloquear',
+  it: 'Ottieni obiettivi per sbloccare',
+})

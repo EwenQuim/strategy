@@ -8,13 +8,14 @@ import { campaignName } from '../i18n/campaign'
 import { isCampaignUnlocked, type Campaign } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
+import { readUnlockedAchievements } from '../achievementProgress'
 
 export function CampaignCard({ campaign }: { campaign: Campaign }) {
   const completed = useSyncExternalStore(subscribeCampaignProgress, () =>
     readCampaignProgress(campaign.slug),
   )
   const unlocked = useSyncExternalStore(subscribeCampaignProgress, () =>
-    isCampaignUnlocked(campaign, readCampaignProgress),
+    isCampaignUnlocked(campaign, readCampaignProgress, readUnlockedAchievements()),
   )
   const total = campaign.levels.length
   const done = completed === total

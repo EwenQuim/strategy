@@ -19,11 +19,13 @@ import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
+import type { Cosmetic } from '../cosmetics'
 
 export type Targeting = 'attack' | 'charge' | 'jump' | 'special'
 
 interface BattlefieldProps {
   labels: PlayerNames
+  skin?: Cosmetic
   tiles: Map<string, Tile>
   pawns: Pawn[]
   hellfire: readonly Axial[]
@@ -40,6 +42,7 @@ interface BattlefieldProps {
 
 export function Battlefield({
   labels,
+  skin,
   tiles,
   pawns,
   hellfire,
@@ -121,8 +124,8 @@ export function Battlefield({
           <polygon points={hexPoints} />
         </clipPath>
         <linearGradient id="player-chip" x2="0" y2="1">
-          <stop stopColor="#407265" />
-          <stop offset="1" stopColor="#193e35" />
+          <stop stopColor={skin?.base[0] ?? '#407265'} />
+          <stop offset="1" stopColor={skin?.base[1] ?? '#193e35'} />
         </linearGradient>
         <linearGradient id="enemy-chip" x2="0" y2="1">
           <stop stopColor="#a35f4d" />
@@ -276,6 +279,7 @@ export function Battlefield({
         <PawnChip
           key={pawn.id}
           pawn={pawn}
+          skin={pawn.side === 'player' ? skin : undefined}
           feature={tiles.get(key(pawn.q, pawn.r))?.feature}
           active={active?.id === pawn.id}
           protectedAlly={!!protectorFor(pawns, pawn)}

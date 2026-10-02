@@ -344,7 +344,9 @@ test('Campaign progress unlocks exactly the next level, never regresses, and sto
 })
 
 test('Every level of a non-original campaign is open and can be cleared in any order', () => {
-  for (const pack of CAMPAIGNS.slice(1)) {
+  // The Gauntlet gates its levels on achievements and is covered by its own test.
+  const openPacks = CAMPAIGNS.slice(1).filter((pack) => !pack.achievementGated)
+  for (const pack of openPacks) {
     for (let level = 1; level <= pack.levels.length; level++)
       assert.ok(isLevelUnlocked(pack, level, []))
     assert.equal(isLevelUnlocked(pack, pack.levels.length + 1, []), false)
