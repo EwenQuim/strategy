@@ -55,7 +55,7 @@ func (h *Handlers) gameEvents(w http.ResponseWriter, r *http.Request) {
 		case <-r.Context().Done():
 			return
 		case <-heartbeat.C:
-			if err := write("event: heartbeat\ndata: {}\n\n"); err != nil {
+			if err := write(fmt.Sprintf("event: heartbeat\ndata: {\"version\":%d}\n\n", g.Version)); err != nil {
 				return
 			}
 		case <-updates:
