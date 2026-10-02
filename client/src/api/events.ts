@@ -8,19 +8,21 @@ export function watchOnlineGame(code: string, onGame: (data: string) => void) {
     watchdog = setTimeout(connect, 45_000)
   }
 
+  function onHeartbeat(event: Event) {
+    watch()
+    // A suspended tab can miss snapshots: if the server moved on without
+    // this stream delivering the update, reconnect to pull a fresh snapshot.
+    const beat = JSON.parse((event as MessageEvent<string>).data) as { version?: number }
+    if (typeof beat.version === 'number' && beat.version !== version) connect()
+  }
+
   function connect() {
     source?.close()
     version = -1
     source = new EventSource('/api/games/' + encodeURIComponent(code) + '/events')
     watch()
     source.onopen = watch
-    source.addEventListener('heartbeat', (event) => {
-      watch()
-      // A suspended tab can miss snapshots: if the server moved on without
-      // this stream delivering the update, reconnect to pull a fresh snapshot.
-      const beat = JSON.parse((event as MessageEvent<string>).data) as { version?: number }
-      if (typeof beat.version === 'number' && beat.version !== version) connect()
-    })
+    source.addEventListener('heartbeat', onHeartbeat)
     source.onmessage = (event) => {
       watch()
       version = (JSON.parse(event.data) as { version?: number }).version ?? version
