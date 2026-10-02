@@ -22,6 +22,7 @@ type PawnPlacement = {
   readonly kind: Pawn['kind']
   readonly col: number
   readonly row: number
+  readonly hp?: number
 }
 
 const ENEMY_STANCES = ['hold', 'balanced', 'assault'] as const
@@ -109,7 +110,7 @@ function spawnPlacedArmy(army: readonly PawnPlacement[], side: Side, firstId: nu
   return army.map((unit, index) => {
     const { q, r } = hexOf(unit.col, unit.row)
     const Unit = PAWN_CLASSES[unit.kind]
-    return new Unit(firstId + index, q, r, side)
+    return new Unit(firstId + index, q, r, side, unit.hp)
   })
 }
 

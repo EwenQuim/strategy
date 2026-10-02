@@ -1,5 +1,6 @@
 import { t } from './locale'
 import { storyLevelNames } from './story-levels'
+import { gauntletLevelNames } from './gauntlet-levels'
 
 export const campaignNames: Record<
   | 'original'
@@ -8,7 +9,8 @@ export const campaignNames: Record<
   | 'war-of-the-ring'
   | 'iron-throne'
   | 'hot-gates'
-  | 'ragnarok',
+  | 'ragnarok'
+  | 'gauntlet',
   string
 > = {
   original: t({
@@ -59,6 +61,13 @@ export const campaignNames: Record<
     de: 'Ragnarök',
     es: 'Ragnarok',
     it: 'Ragnarok',
+  }),
+  gauntlet: t({
+    en: 'Gauntlet',
+    fr: 'Le Gantelet',
+    de: 'Der eiserne Handschuh',
+    es: 'El Guantelete',
+    it: 'Il Guanto',
   }),
 }
 
@@ -279,4 +288,5 @@ const levelNames: Record<string, string> = {
     it: 'Corona di ceneri',
   }),
   ...storyLevelNames,
+  ...gauntletLevelNames,
 }

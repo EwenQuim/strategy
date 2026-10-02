@@ -18,6 +18,7 @@ import {
   readClearedLevels,
   subscribeCampaignProgress,
 } from '../campaignProgress'
+import { readUnlockedAchievements } from '../achievementProgress'
 import { readDeveloperPreview } from '../preferences'
 
 const levelCardClassName =
@@ -29,7 +30,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
       (pack) => pack.slug === params.campaign,
     )
     if (!campaign) throw redirect({ to: '/', replace: true })
-    if (!isCampaignUnlocked(campaign, readCampaignProgress))
+    if (!isCampaignUnlocked(campaign, readCampaignProgress, readUnlockedAchievements()))
       throw redirect({ to: '/campaign', replace: true })
   },
   component: function CampaignLevels() {
@@ -37,6 +38,9 @@ export const Route = createFileRoute('/campaign/$campaign/')({
     const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)!
     const clearedLevels = useSyncExternalStore(subscribeCampaignProgress, () =>
       readClearedLevels(campaign.slug),
+    )
+    const earned = useSyncExternalStore(subscribeCampaignProgress, () =>
+      readUnlockedAchievements(),
     )
     const completed = clearedLevels.length
     return (
@@ -67,7 +71,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
           aria-label={common.campaignLevels}
         >
           {campaign.levels.map((level) => {
-            const unlocked = isLevelUnlocked(campaign, level.id, clearedLevels)
+            const unlocked = isLevelUnlocked(campaign, level.id, clearedLevels, earned)
             const cleared = clearedLevels.includes(level.id)
             const status = m.levelStatus[cleared ? 'completed' : unlocked ? 'ready' : 'locked']
             const content = (

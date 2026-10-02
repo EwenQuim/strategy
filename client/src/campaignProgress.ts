@@ -4,6 +4,7 @@ import {
   completeCampaignLevel,
   parseCampaignProgress,
 } from './lib/campaign'
+import { readUnlockedAchievements } from './achievementProgress'
 
 const NONE: readonly number[] = []
 const sessionCleared = new Map<string, readonly number[]>()
@@ -50,7 +51,12 @@ export function readCampaignProgress(slug: string): number {
 export function recordCampaignVictory(slug: string, level: number): void {
   const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)
   if (!campaign) return
-  const cleared = completeCampaignLevel(campaign, readClearedLevels(slug), level)
+  const cleared = completeCampaignLevel(
+    campaign,
+    readClearedLevels(slug),
+    level,
+    readUnlockedAchievements(),
+  )
   sessionCleared.set(slug, cleared)
   try {
     localStorage.setItem(campaignStorageKey(slug), JSON.stringify(cleared))
