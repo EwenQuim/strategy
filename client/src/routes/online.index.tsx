@@ -1,4 +1,10 @@
-import { buttonClassName, iconButtonClassName } from '../components/styles'
+import {
+  buttonClassName,
+  menuCardClassName,
+  menuInputClassName,
+  menuPrimaryButtonClassName,
+} from '../components/styles'
+import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -20,9 +26,8 @@ import {
 } from '../onlineSession.ts'
 import type { StoredGame } from '../lib/online.ts'
 
-const inputClassName =
-  'w-full min-w-0 min-h-13 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]'
-const onlineButtonClassName = buttonClassName + ' min-h-13 justify-center border-line'
+const onlineButtonClassName =
+  buttonClassName + ' min-h-13 justify-center gap-3 rounded-xl border-line'
 
 export const Route = createFileRoute('/online/')({
   beforeLoad: async () => {
@@ -63,15 +68,9 @@ export const Route = createFileRoute('/online/')({
     }
 
     return (
-      <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&:disabled]:opacity-50">
-        <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{m.title}</h1>
-          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
-            <Icon name="close" />
-          </Link>
-        </header>
+      <MenuLayout title={m.title}>
         <form
-          className="grid gap-3"
+          className={menuCardClassName + ' grid w-full max-w-[600px] gap-3 self-center p-4'}
           onSubmit={(event) => {
             event.preventDefault()
             if (!trimmedName || busy) return
@@ -85,7 +84,7 @@ export const Route = createFileRoute('/online/')({
           <label htmlFor="online-name" className="grid gap-1.5 text-[12px] text-muted">
             {m.yourName}
             <input
-              className={inputClassName}
+              className={menuInputClassName}
               id="online-name"
               value={name}
               maxLength={20}
@@ -97,17 +96,14 @@ export const Route = createFileRoute('/online/')({
           <button
             type="submit"
             disabled={!trimmedName || busy}
-            className={
-              onlineButtonClassName +
-              ' gap-3 border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-            }
+            className={menuPrimaryButtonClassName}
           >
             {m.createGame}
             <Icon name="arrow" />
           </button>
         </form>
         <form
-          className="grid gap-3"
+          className={menuCardClassName + ' grid w-full max-w-[600px] gap-3 self-center p-4'}
           onSubmit={(event) => {
             event.preventDefault()
             if (!trimmedName || joinCode.length !== 6 || busy) return
@@ -121,7 +117,9 @@ export const Route = createFileRoute('/online/')({
           <label htmlFor="online-code" className="grid gap-1.5 text-[12px] text-muted">
             {m.gameCode}
             <input
-              className={inputClassName + ' text-center font-mono tracking-[0.3em] uppercase'}
+              className={
+                menuInputClassName + ' text-center font-mono tracking-[0.3em] uppercase'
+              }
               id="online-code"
               value={code}
               placeholder="AB3F9K"
@@ -150,7 +148,7 @@ export const Route = createFileRoute('/online/')({
         )}
         {games.length > 0 && (
           <section
-            className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto"
+            className="grid w-full max-w-[600px] content-start gap-2 self-center"
             aria-label={m.resumeGame}
           >
             <h2 className="text-[12px] font-semibold tracking-[0.17em] text-muted uppercase">
@@ -171,7 +169,7 @@ export const Route = createFileRoute('/online/')({
                   preload={false}
                 >
                   <span className="font-mono tracking-[0.2em]">{game.code}</span>
-                  <span className="text-[11px] text-muted">
+                  <span className="min-w-0 text-[11px] text-muted wrap-anywhere">
                     {!doc
                       ? missing
                         ? m.notFound
@@ -188,7 +186,7 @@ export const Route = createFileRoute('/online/')({
           </section>
         )}
         <p className="mt-auto text-[11px] leading-[1.5] text-muted">{m.lobbyNote}</p>
-      </main>
+      </MenuLayout>
     )
   },
 })

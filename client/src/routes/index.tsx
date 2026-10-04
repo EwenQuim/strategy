@@ -1,12 +1,16 @@
-import { buttonClassName } from '../components/styles'
-import * as common from '../i18n/common'
-import * as m from '../i18n/menus'
 import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { MenuLayout } from '../components/MenuLayout'
 import { Icon } from '../components/Icon'
+import { LevelMiniature } from '../components/LevelMiniature'
+import { menuCardClassName, menuPrimaryButtonClassName } from '../components/styles'
 import { CAMPAIGNS, totalVictories } from '../lib/campaign'
+import { BIOMES } from '../lib/engine'
 import { useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
+import * as common from '../i18n/common'
+import * as m from '../i18n/menus'
+import * as n from '../i18n/navigation'
 
 export const Route = createFileRoute('/')({
   component: function Landing() {
@@ -19,174 +23,125 @@ export const Route = createFileRoute('/')({
       totalVictories(readCampaignProgress),
     )
     const allLevels = CAMPAIGNS.reduce((sum, campaign) => sum + campaign.levels.length, 0)
+    const showcase = original.levels[Math.min(completed, original.levels.length - 1)].setup
     const health = useHealth()
     const online = health.isSuccess
     return (
-      <main className="[background:radial-gradient(ellipse_at_50%_38%,#465c3880,transparent_60%),#182c22] flex min-h-dvh flex-col">
-        <header className="m-auto flex w-full max-w-7xl items-center justify-between px-9 py-6 max-[601px]:px-[23px] max-[601px]:py-5 [@media(max-height:650px)]:py-3">
-          <span className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]">
-            <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
-              <Icon name="crown" />
-            </span>
-            Hexmate
-          </span>
-        </header>
-        <div className="flex flex-1 flex-col items-center px-5 pt-[5px] pb-9 text-center [@media(max-height:650px)]:pb-4">
-          <div
-            className="relative h-[260px] w-[340px] max-w-[90vw] max-[601px]:h-[235px] max-[601px]:w-[285px] [@media(height<=800px)]:hidden"
-            aria-hidden="true"
+      <MenuLayout title="Hexmate" backTo={null}>
+        <div
+          className="my-auto grid w-full max-w-[440px] grid-cols-2 gap-2 self-center"
+          role="group"
+          aria-label={m.chooseMode}
+        >
+          <Link
+            to={done ? '/campaign' : '/campaign/$campaign'}
+            params={done ? undefined : { campaign: original.slug }}
+            className="group relative col-span-2 flex min-h-[88px] items-center justify-between gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-[radial-gradient(ellipse_at_top_right,#a3b87a40,transparent_70%),linear-gradient(135deg,#2d4938,#192e28)] p-3 shadow-[0_8px_24px_#0003] hover:border-gold/60"
+            preload={false}
+            aria-label={m.campaign}
           >
-            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[290px] max-[601px]:size-[250px]" />
-            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-1/2 rounded-full border border-[#d7c18212] size-[370px] max-[601px]:size-[310px]" />
-            <svg
-              viewBox="0 0 360 260"
-              className="absolute inset-0 size-full drop-shadow-[0_20px_15px_#08190f55]"
-            >
-              <defs>
-                <linearGradient id="hero-tile" x2="0" y2="1">
-                  <stop stopColor="#8f9f73" />
-                  <stop offset="1" stopColor="#516d4d" />
-                </linearGradient>
-              </defs>
-              {[
-                [180, 73],
-                [118, 109],
-                [242, 109],
-                [56, 145],
-                [180, 145],
-                [304, 145],
-                [118, 181],
-                [242, 181],
-                [180, 217],
-              ].map(([x, y], i) => (
-                <g key={i} transform={'translate(' + x + ' ' + y + ')'}>
-                  <path d="m0-32 55 32v9L0 41-55 9V0Z" fill="#2d4634" />
-                  <path
-                    d="m0-32 55 32L0 32-55 0Z"
-                    fill="url(#hero-tile)"
-                    stroke="#c5cc96"
-                    strokeOpacity=".25"
-                  />
-                  {i !== 4 && (
-                    <path
-                      d="m-5-3 5-13 5 13M0-16v19"
-                      stroke="#c3ce94"
-                      strokeOpacity=".4"
-                      fill="none"
-                    />
-                  )}
-                </g>
-              ))}
-            </svg>
-            <div className="absolute top-20 left-1/2 grid h-[78px] w-[74px] -translate-x-1/2 place-items-center rounded-[12px_12px_30px_30px] border-2 border-[#d7c182] bg-[linear-gradient(145deg,#4e7460,#204732)] text-[#ecd290] shadow-[0_8px_0_#153621,0_13px_20px_#102d2066] [&>svg]:size-[45px] max-[601px]:top-[78px] max-[601px]:h-[68px] max-[601px]:w-16 max-[601px]:[&>svg]:size-[38px]">
-              <Icon name="crown" />
-            </div>
-          </div>
-          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-[32px]">
-            Hexmate.
-          </h1>
-          <div
-            className="mt-[27px] flex w-[min(100%,300px)] flex-col gap-3 [@media(max-height:650px)]:mt-[18px]"
-            role="group"
-            aria-label={m.chooseMode}
-          >
-            <Link
-              to={done ? '/campaign' : '/campaign/$campaign'}
-              params={done ? undefined : { campaign: original.slug }}
-              className={
-                buttonClassName +
-                ' min-h-13 justify-between gap-3 border-[#e5d19a] bg-[#d8c38a] px-[18px] text-[#24392a] hover:bg-[#ecdaa3]'
-              }
-              preload={false}
-            >
-              {done ? m.campaigns : m.campaign}
-              <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
-                {done
-                  ? allCompleted + ' / ' + allLevels
-                  : completed + ' / ' + original.levels.length}
-                <Icon name="crown" className={done ? 'fill-current' : undefined} />
+            <span className="relative z-1 flex min-w-0 flex-col gap-2">
+              <span className="flex items-center gap-2 text-gold">
+                <Icon name="crown" className="size-4" />
+                <span className="text-lg font-bold tracking-tight">{m.campaign}</span>
               </span>
-            </Link>
-            <Link
-              to="/game"
-              search={{ mode: 'ai' }}
-              className={
-                buttonClassName +
-                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
-              }
-              preload={false}
-              title={m.quickPlayHint}
-            >
-              {common.quickPlay}
-              <Icon name="arrow" />
-            </Link>
-            <Link
-              to="/custom"
-              className={
-                buttonClassName +
-                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
-              }
-              preload={false}
-            >
-              {common.customPlay}
-              <Icon name="hex" />
-            </Link>
-            <Link
-              to="/game"
-              search={{ mode: 'local' }}
-              className={
-                buttonClassName +
-                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c]'
-              }
-              preload={false}
-              title={m.twoPlayersHint}
-            >
-              {m.twoPlayers}
-              <Icon name="arrow" />
-            </Link>
-            <Link
-              to="/online"
-              className={
-                buttonClassName +
-                ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c] data-[enabled=false]:pointer-events-none data-[enabled=false]:opacity-35 data-[enabled=false]:hover:shadow-[0_6px_24px_#07180f30]'
-              }
-              preload={false}
-              data-enabled={online}
-              aria-disabled={!online}
-              title={online ? m.onlineHint : m.serverDown}
-            >
-              {m.online}
-              <Icon name="arrow" />
-            </Link>
-          </div>
-          <div className="mt-3 flex w-[min(100%,300px)] gap-3">
-            {(
-              [
-                ['/achievements', 'trophy', m.achievements],
-                ['/settings', 'gear', m.settings],
-              ] as const
-            ).map(([to, icon, label]) => (
-              <Link
-                key={to}
-                to={to}
-                className={
-                  buttonClassName +
-                  ' min-h-13 flex-1 justify-center border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
-                }
-                preload={false}
-                aria-label={label}
-                title={label}
+              <span className="text-xs text-muted">
+                {m.levelsCompleted(
+                  done ? allCompleted : completed,
+                  done ? allLevels : original.levels.length,
+                )}
+              </span>
+              <span
+                className="h-1.5 w-28 overflow-hidden rounded-full bg-black/20"
+                aria-hidden="true"
               >
-                <Icon name={icon} />
-              </Link>
-            ))}
-          </div>
+                <span
+                  className="block h-full rounded-full bg-gold"
+                  style={{
+                    width:
+                      (done ? allCompleted / allLevels : completed / original.levels.length) *
+                        100 +
+                      '%',
+                  }}
+                />
+              </span>
+            </span>
+            <span
+              className="pointer-events-none flex h-20 w-20 shrink-0 -rotate-12 opacity-80"
+              style={BIOMES[showcase.biome].theme}
+            >
+              <LevelMiniature setup={showcase} />
+            </span>
+            <Icon name="arrow" className="absolute right-4 bottom-3 size-4 text-gold" />
+          </Link>
+          <Link
+            to="/game"
+            search={{ mode: 'ai' }}
+            className={menuPrimaryButtonClassName + ' col-span-2 justify-between px-4'}
+            preload={false}
+            title={m.quickPlayHint}
+            aria-label={common.quickPlay}
+          >
+            <span className="flex items-center gap-3">
+              <Icon name="sword" className="size-5" />
+              {common.quickPlay}
+            </span>
+            <Icon name="arrow" />
+          </Link>
+          <Link
+            to="/custom"
+            className={
+              menuCardClassName +
+              ' flex min-h-[72px] flex-col items-start justify-between gap-2 p-3 text-[13px] font-semibold hover:border-gold/30 hover:bg-white/5'
+            }
+            preload={false}
+          >
+            <Icon name="hex" className="size-5 text-gold" />
+            {common.customPlay}
+          </Link>
+          <Link
+            to="/game"
+            search={{ mode: 'local' }}
+            className={
+              menuCardClassName +
+              ' flex min-h-[72px] flex-col items-start justify-between gap-2 p-3 text-[13px] font-semibold hover:border-gold/30 hover:bg-white/5'
+            }
+            preload={false}
+            title={m.twoPlayersHint}
+          >
+            <Icon name="shield" className="size-5 text-gold" />
+            {m.twoPlayers}
+          </Link>
+          <Link
+            to="/online"
+            className={
+              menuCardClassName +
+              ' col-span-2 flex min-h-11 items-center justify-between gap-3 px-3 py-2 text-sm font-semibold hover:border-gold/30 data-[enabled=false]:opacity-55'
+            }
+            preload={false}
+            data-enabled={online}
+            aria-disabled={!online}
+            aria-label={m.online}
+            tabIndex={online ? undefined : -1}
+            onClick={(event) => {
+              if (!online) event.preventDefault()
+            }}
+            title={online ? m.onlineHint : m.serverDown}
+          >
+            <span className="flex items-center gap-3">
+              <Icon name="hex" className="size-5 text-gold" />
+              {m.online}
+            </span>
+            {online ? (
+              <Icon name="arrow" className="size-4" />
+            ) : (
+              <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">
+                {n.offline}
+              </span>
+            )}
+          </Link>
         </div>
-        <footer className="m-auto flex w-full max-w-7xl justify-between gap-[15px] border-t border-line px-9 py-5 text-[9px] tracking-[0.05em] text-[#9caf92] [&>span:first-child]:text-[8px] [&>span:first-child]:tracking-[0.17em] max-[601px]:px-[23px] max-[601px]:py-[18px] max-[601px]:text-[8px] max-[601px]:[&>span:last-child]:hidden [@media(max-height:650px)]:py-3">
-          <span title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</span>
-          <span>{m.madeBy}</span>
-        </footer>
-      </main>
+      </MenuLayout>
     )
   },
 })
