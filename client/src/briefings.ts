@@ -14,6 +14,8 @@ export interface BriefingElement {
   readonly name: string
   readonly points: readonly string[]
   readonly art?: IntroducedElement
+  readonly stats?: { hp: number; damage: number; range: string }
+  readonly special?: { name: string; cost: number; description: string }
 }
 
 function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
@@ -25,11 +27,13 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
   return {
     name: unitNames[kind],
     art: kind,
-    points: [
-      b.statLine(maxHp, attack.damage, range),
-      b.specialLine(specialTexts[special.name], special.cost, specialPoints[0]),
-      ...specialPoints.slice(1),
-    ],
+    stats: { hp: maxHp, damage: attack.damage, range },
+    special: {
+      name: specialTexts[special.name],
+      cost: special.cost,
+      description: specialPoints[0],
+    },
+    points: specialPoints.slice(1),
   }
 }
 
