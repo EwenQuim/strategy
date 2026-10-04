@@ -48,26 +48,6 @@ export const unusedEnergy = t({
     `Energia non spesa a fine turno → +${bonus} % di schivata per punto, max ${max} %`,
 })
 
-export const statLine = t({
-  en: (hp: number, damage: number, range: string) =>
-    `${hp} HP · ${damage} dmg · range ${range}`,
-  fr: (hp: number, damage: number, range: string) =>
-    `${hp} PV · ${damage} dégâts · portée ${range}`,
-  de: (hp: number, damage: number, range: string) =>
-    `${hp} LP · ${damage} Schaden · Reichweite ${range}`,
-  es: (hp: number, damage: number, range: string) =>
-    `${hp} PV · ${damage} de daño · alcance ${range}`,
-  it: (hp: number, damage: number, range: string) =>
-    `${hp} PV · ${damage} danni · gittata ${range}`,
-})
-export const specialLine = t({
-  en: (name: string, cost: number, point: string) => `${name} (${cost} energy): ${point}`,
-  fr: (name: string, cost: number, point: string) => `${name} (${cost} énergie) : ${point}`,
-  de: (name: string, cost: number, point: string) => `${name} (${cost} Energie): ${point}`,
-  es: (name: string, cost: number, point: string) => `${name} (${cost} de energía): ${point}`,
-  it: (name: string, cost: number, point: string) => `${name} (${cost} di energia): ${point}`,
-})
-
 export const rallyBrief = t({
   en: 'heal adjacent allies +1, once per round',
   fr: 'soigne les alliés adjacents de +1, une fois par manche',

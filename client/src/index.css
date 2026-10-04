@@ -108,6 +108,15 @@
   .pawn-active-halo {
     animation: halo-breathe 3s ease-in-out infinite;
   }
+  .briefing-card {
+    animation: briefing-card-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .briefing-art-icon {
+    animation: briefing-icon-float 3.5s ease-in-out infinite;
+  }
+  .briefing-art-glow {
+    animation: briefing-glow-pulse 3s ease-in-out infinite;
+  }
 }
 
 @keyframes battle-travel {
@@ -298,5 +307,38 @@
   50% {
     stroke-opacity: 0.45;
     fill-opacity: 0.07;
+  }
+}
+
+@keyframes briefing-card-enter {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes briefing-icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes briefing-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.88);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.05);
   }
 }
