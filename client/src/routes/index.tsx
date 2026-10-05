@@ -2,10 +2,8 @@ import { useSyncExternalStore } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { MenuLayout } from '../components/MenuLayout'
 import { Icon } from '../components/Icon'
-import { LevelMiniature } from '../components/LevelMiniature'
 import { menuCardClassName, menuPrimaryButtonClassName } from '../components/styles'
 import { CAMPAIGNS, totalVictories } from '../lib/campaign'
-import { BIOMES } from '../lib/engine'
 import { useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 import * as common from '../i18n/common'
@@ -27,7 +25,6 @@ export const Route = createFileRoute('/')({
       totalVictories(readCampaignProgress),
     )
     const allLevels = CAMPAIGNS.reduce((sum, campaign) => sum + campaign.levels.length, 0)
-    const showcase = original.levels[Math.min(completed, original.levels.length - 1)].setup
     const health = useHealth()
     const online = health.isSuccess
     return (
@@ -40,11 +37,11 @@ export const Route = createFileRoute('/')({
           <Link
             to={done ? '/campaign' : '/campaign/$campaign'}
             params={done ? undefined : { campaign: original.slug }}
-            className="group relative col-span-2 flex min-h-0 items-end justify-between gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-[radial-gradient(ellipse_at_top_right,#a3b87a40,transparent_70%),linear-gradient(135deg,#2d4938,#192e28)] p-3 shadow-[0_8px_24px_#0003] hover:border-gold/60"
+            className="col-span-2 flex min-h-0 items-center justify-between gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-[radial-gradient(ellipse_at_top_right,#a3b87a40,transparent_70%),linear-gradient(135deg,#2d4938,#192e28)] p-3 shadow-[0_8px_24px_#0003] hover:border-gold/60"
             preload={false}
             aria-label={m.campaign}
           >
-            <span className="relative z-1 flex min-w-0 flex-col gap-2">
+            <span className="flex min-w-0 flex-col gap-2">
               <span className="flex items-center gap-2 text-gold">
                 <Icon name="crown" className="size-4" />
                 <span className="text-lg font-bold tracking-tight">{m.campaign}</span>
@@ -70,13 +67,7 @@ export const Route = createFileRoute('/')({
                 />
               </span>
             </span>
-            <span
-              className="pointer-events-none absolute inset-x-4 top-3 bottom-[76px] flex opacity-80"
-              style={BIOMES[showcase.biome].theme}
-            >
-              <LevelMiniature setup={showcase} />
-            </span>
-            <Icon name="arrow" className="absolute right-4 bottom-3 size-4 text-gold" />
+            <Icon name="arrow" className="size-4 shrink-0 text-gold" />
           </Link>
           <Link
             to="/game"

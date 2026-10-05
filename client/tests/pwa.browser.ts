@@ -986,6 +986,11 @@ test(
     const buildLabel = await readBuildLabel(page)
     const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
     assert.equal(
+      await modes.first().locator('svg polygon').count(),
+      0,
+      'The home campaign button must not contain a map preview',
+    )
+    assert.equal(
       new URL((await modes.nth(2).getAttribute('href'))!, page.url()).searchParams.get('mode'),
       'local',
     )
