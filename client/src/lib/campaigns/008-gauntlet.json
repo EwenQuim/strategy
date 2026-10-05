@@ -1,0 +1,574 @@
+[
+  {
+    "id": 1,
+    "name": "Blitzkrieg",
+    "seed": "gauntlet-v1-1",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": ["__..__", "_...._", "......", "......", "_...._", "__..__"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Reaper's Field",
+    "seed": "gauntlet-v1-2",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": ["_...._", "......", "......", "......", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 5
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Shadow of the King",
+    "seed": "gauntlet-v1-3",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "mountains",
+      "map": ["_...._", "^.^^._", "......", "..^^._", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "ninja",
+          "col": 4,
+          "row": 5
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Full Company",
+    "seed": "gauntlet-v1-4",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": ["_...._", "......", "......", "......", "......", "_...._", "__..__"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 6
+        },
+        {
+          "kind": "swordsman",
+          "col": 1,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 5
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 5
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 1,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Your Own Hands",
+    "seed": "gauntlet-v1-5",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "desert",
+      "map": ["__...._", "_..s.._", "...s...", "..s....", "_....__", "__..___"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 5,
+          "row": 0
+        },
+        {
+          "kind": "ninja",
+          "col": 3,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "name": "Last Stand",
+    "seed": "gauntlet-v1-6",
+    "difficulty": "easy",
+    "setup": {
+      "biome": "mountains",
+      "map": ["_...._", "^...^.", "......", "^...^.", "_...._", "_^..^_"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 5
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "name": "One Health",
+    "seed": "gauntlet-v1-7",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "volcano",
+      "map": ["__bb__", "_b..b_", "b....b", "..bl..", "_b..b_", "__bb__"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 5,
+          "hp": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 2,
+          "row": 4
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "name": "Edge of the Blade",
+    "seed": "gauntlet-v1-8",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": ["_...._", "..ff..", "......", "..ff..", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "ninja",
+          "col": 4,
+          "row": 4
+        },
+        {
+          "kind": "ninja",
+          "col": 1,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "name": "Red Mist",
+    "seed": "gauntlet-v1-9",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "desert",
+      "map": ["_...._", ".s..s.", "......", ".s..s.", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "berserker",
+          "col": 3,
+          "row": 4,
+          "hp": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 1,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "name": "Powder Keg",
+    "seed": "gauntlet-v1-10",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "volcano",
+      "map": ["__b.._", "_b....", "..blb.", "_b....", "..b...", "_...b_"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "bomber",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "magician",
+          "col": 1,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "name": "Caldera Crossing",
+    "seed": "gauntlet-v1-11",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "volcano",
+      "map": ["__bbbb__", "_b....b_", "bb.ll.bb", "_b....b_", "__b..b__", "__b__b__"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "name": "Eagle Watch",
+    "seed": "gauntlet-v1-12",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": ["_..W..", "......", "......", "......", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "archer",
+          "col": 4,
+          "row": 5
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 13,
+    "name": "Dance of Dodges",
+    "seed": "gauntlet-v1-13",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "mountains",
+      "map": ["__....", "_^..^.", "......", "_^..^.", "......", "__..__"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 5
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 4,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": 14,
+    "name": "Sprint Orders",
+    "seed": "gauntlet-v1-14",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "desert",
+      "map": ["_...._", "......", "......", "......", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "wolf",
+          "col": 1,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": 15,
+    "name": "The Howling Pack",
+    "seed": "gauntlet-v1-15",
+    "difficulty": "normal",
+    "setup": {
+      "biome": "verdant",
+      "map": ["_...._", "..f...", "......", "...f..", "......", "_...._"],
+      "player": [
+        {
+          "kind": "king",
+          "col": 2,
+          "row": 5
+        },
+        {
+          "kind": "wolf",
+          "col": 3,
+          "row": 4
+        },
+        {
+          "kind": "wolf",
+          "col": 1,
+          "row": 4
+        },
+        {
+          "kind": "wolf",
+          "col": 2,
+          "row": 4
+        }
+      ],
+      "enemy": [
+        {
+          "kind": "king",
+          "col": 3,
+          "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "bulwark",
+          "col": 4,
+          "row": 0
+        }
+      ]
+    }
+  }
+]

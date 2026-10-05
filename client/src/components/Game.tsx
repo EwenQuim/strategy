@@ -8,6 +8,7 @@ import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
+import { cosmeticOf, readCosmeticPreference } from '../cosmetics'
 import { Battlefield, type Targeting } from './Battlefield'
 import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
@@ -68,6 +69,7 @@ export function Game({
   const local = mode === 'local'
   const isOnline = mode === 'online'
   const viewerSide = online?.side
+  const skin = cosmeticOf(readCosmeticPreference())
   const names = players ?? playerNames
   const labels = possessiveArmyLabels(mode, names)
   const { state, dispatch, effect, effectId, playing } = useGame({
@@ -172,6 +174,7 @@ export function Game({
         <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] max-[601px]:px-[3px]">
           <Battlefield
             labels={labels}
+            skin={skin}
             tiles={state.tiles}
             pawns={state.pawns}
             hellfire={state.hellfire}

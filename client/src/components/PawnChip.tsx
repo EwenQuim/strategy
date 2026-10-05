@@ -3,17 +3,20 @@ import * as m from '../i18n/combat'
 import type { Pawn, Tile } from '../lib/engine'
 import { FeatureArt } from './features/FeatureArt'
 import { Icon, PawnIcon } from './Icon'
+import type { Cosmetic } from '../cosmetics'
 
 export function PawnChip({
   pawn,
   active,
   protectedAlly,
   feature,
+  skin,
 }: {
   pawn: Pawn
   active: boolean
   protectedAlly: boolean
   feature?: Tile['feature']
+  skin?: Cosmetic
 }) {
   const enemy = pawn.side === 'enemy'
   return (
@@ -53,10 +56,18 @@ export function PawnChip({
             strokeWidth="1.5"
           />
         ) : (
-          <circle r="22" fill="url(#player-chip)" stroke="#b2ceaa" strokeWidth="1.5" />
+          <circle
+            r="22"
+            fill="url(#player-chip)"
+            stroke={skin?.rim ?? '#b2ceaa'}
+            strokeWidth="1.5"
+          />
         )}
         <circle r="17.5" fill="none" stroke="#f5e5bf" strokeOpacity=".15" />
-        <g transform="translate(-12 -15)" color={pawn.kind === 'king' ? '#f0d38e' : '#f1e8d2'}>
+        <g
+          transform="translate(-12 -15)"
+          color={skin ? skin.ink : pawn.kind === 'king' ? '#f0d38e' : '#f1e8d2'}
+        >
           <PawnIcon kind={pawn.kind} />
         </g>
         <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill="#e9e5ce">

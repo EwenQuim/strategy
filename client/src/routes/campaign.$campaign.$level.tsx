@@ -7,6 +7,7 @@ import {
   readClearedLevels,
   recordCampaignVictory,
 } from '../campaignProgress'
+import { readUnlockedAchievements } from '../achievementProgress'
 import { readDeveloperPreview } from '../preferences'
 
 export const Route = createFileRoute('/campaign/$campaign/$level')({
@@ -15,10 +16,17 @@ export const Route = createFileRoute('/campaign/$campaign/$level')({
       (pack) => pack.slug === params.campaign,
     )
     if (!campaign) throw redirect({ to: '/', replace: true })
-    if (!isCampaignUnlocked(campaign, readCampaignProgress))
+    if (!isCampaignUnlocked(campaign, readCampaignProgress, readUnlockedAchievements()))
       throw redirect({ to: '/campaign', replace: true })
     const id = Number(params.level)
-    if (!isLevelUnlocked(campaign, id, readClearedLevels(campaign.slug)))
+    if (
+      !isLevelUnlocked(
+        campaign,
+        id,
+        readClearedLevels(campaign.slug),
+        readUnlockedAchievements(),
+      )
+    )
       throw redirect({
         to: '/campaign/$campaign',
         params: { campaign: campaign.slug },

@@ -19,7 +19,11 @@ export function LockedCampaignCard({ campaign }: { campaign: Campaign }) {
       style={BIOMES[teaser.biome].theme}
       data-testid="campaign-pack"
       data-locked
-      aria-label={m.lockedCampaignCard(campaignName(campaign), victories, required)}
+      aria-label={
+        campaign.achievementGated
+          ? m.lockedAchievementCampaignCard(campaignName(campaign))
+          : m.lockedCampaignCard(campaignName(campaign), victories, required)
+      }
     >
       <span className="flex min-h-0 flex-1 opacity-45 blur-[2px] grayscale-[40%]">
         <LevelMiniature setup={teaser} />
@@ -30,7 +34,11 @@ export function LockedCampaignCard({ campaign }: { campaign: Campaign }) {
       <span className="font-serif text-[clamp(18px,5.2vw,24px)] leading-[1.05] text-balance text-ink">
         {campaignName(campaign)}
       </span>
-      <span className="text-[11px]">{m.victoriesToUnlock(victories, required)}</span>
+      <span className="text-[11px]">
+        {campaign.achievementGated
+          ? m.achievementsToUnlock
+          : m.victoriesToUnlock(victories, required)}
+      </span>
     </div>
   )
 }
