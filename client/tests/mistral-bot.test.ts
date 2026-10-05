@@ -4,8 +4,7 @@ import { activePawn, initialState, reducer, type GameState } from '../src/lib/en
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { chooseAiActions } from '../src/lib/engine/ai/decision.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionFromReply, battlePrompt } from '../src/lib/engine/ai/strategies/mistral.ts'
-import { mistralChooseAction } from '../src/api/mistralBot.ts'
+import { actionFromReply, battlePrompt, mistralChooseAction } from '../src/api/mistralBot.ts'
 
 function enemyTurn(seed: string): GameState {
   let state = initialState(seed)
