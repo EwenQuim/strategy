@@ -2,6 +2,12 @@ import { Bulwark, King, PAWN_CLASSES, Swordsman, type PawnKind } from '../lib/en
 
 const paths = {
   shield: Bulwark.icon,
+  users:
+    'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  globe:
+    'M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM2 12h20M12 2a18 18 0 0 1 0 20 18 18 0 0 1 0-20Z',
+  sliders:
+    'M3 6h3m4 0h11M3 18h11m4 0h3M10 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM18 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
   crown: King.icon,
   sword: Swordsman.icon,
   escape: 'M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M5 16h5a3 3 0 1 1-3 3',

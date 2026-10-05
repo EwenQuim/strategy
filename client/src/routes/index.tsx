@@ -12,6 +12,10 @@ import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import * as n from '../i18n/navigation'
 
+const multiplayerCardClassName =
+  menuCardClassName +
+  ' flex min-h-[72px] flex-col items-start justify-between gap-2 p-3 text-[13px] font-semibold hover:border-gold/30 hover:bg-white/5'
+
 export const Route = createFileRoute('/')({
   component: function Landing() {
     const original = CAMPAIGNS[0]
@@ -27,16 +31,16 @@ export const Route = createFileRoute('/')({
     const health = useHealth()
     const online = health.isSuccess
     return (
-      <MenuLayout title="Hexmate" backTo={null}>
+      <MenuLayout title="Hexmate" backTo={null} scroll={false}>
         <div
-          className="my-auto grid w-full max-w-[440px] grid-cols-2 gap-2 self-center"
+          className="grid min-h-0 w-full max-w-[440px] flex-1 grid-cols-2 grid-rows-[minmax(104px,1fr)_52px_80px_44px] gap-2 self-center"
           role="group"
           aria-label={m.chooseMode}
         >
           <Link
             to={done ? '/campaign' : '/campaign/$campaign'}
             params={done ? undefined : { campaign: original.slug }}
-            className="group relative col-span-2 flex min-h-[88px] items-center justify-between gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-[radial-gradient(ellipse_at_top_right,#a3b87a40,transparent_70%),linear-gradient(135deg,#2d4938,#192e28)] p-3 shadow-[0_8px_24px_#0003] hover:border-gold/60"
+            className="group relative col-span-2 flex min-h-0 items-end justify-between gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-[radial-gradient(ellipse_at_top_right,#a3b87a40,transparent_70%),linear-gradient(135deg,#2d4938,#192e28)] p-3 shadow-[0_8px_24px_#0003] hover:border-gold/60"
             preload={false}
             aria-label={m.campaign}
           >
@@ -67,7 +71,7 @@ export const Route = createFileRoute('/')({
               </span>
             </span>
             <span
-              className="pointer-events-none flex h-20 w-20 shrink-0 -rotate-12 opacity-80"
+              className="pointer-events-none absolute inset-x-4 top-3 bottom-[76px] flex opacity-80"
               style={BIOMES[showcase.biome].theme}
             >
               <LevelMiniature setup={showcase} />
@@ -89,35 +93,18 @@ export const Route = createFileRoute('/')({
             <Icon name="arrow" />
           </Link>
           <Link
-            to="/custom"
-            className={
-              menuCardClassName +
-              ' flex min-h-[72px] flex-col items-start justify-between gap-2 p-3 text-[13px] font-semibold hover:border-gold/30 hover:bg-white/5'
-            }
-            preload={false}
-          >
-            <Icon name="hex" className="size-5 text-gold" />
-            {common.customPlay}
-          </Link>
-          <Link
             to="/game"
             search={{ mode: 'local' }}
-            className={
-              menuCardClassName +
-              ' flex min-h-[72px] flex-col items-start justify-between gap-2 p-3 text-[13px] font-semibold hover:border-gold/30 hover:bg-white/5'
-            }
+            className={multiplayerCardClassName}
             preload={false}
             title={m.twoPlayersHint}
           >
-            <Icon name="shield" className="size-5 text-gold" />
+            <Icon name="users" className="size-5 text-gold" />
             {m.twoPlayers}
           </Link>
           <Link
             to="/online"
-            className={
-              menuCardClassName +
-              ' col-span-2 flex min-h-11 items-center justify-between gap-3 px-3 py-2 text-sm font-semibold hover:border-gold/30 data-[enabled=false]:opacity-55'
-            }
+            className={multiplayerCardClassName + ' data-[enabled=false]:opacity-55'}
             preload={false}
             data-enabled={online}
             aria-disabled={!online}
@@ -128,17 +115,29 @@ export const Route = createFileRoute('/')({
             }}
             title={online ? m.onlineHint : m.serverDown}
           >
-            <span className="flex items-center gap-3">
-              <Icon name="hex" className="size-5 text-gold" />
-              {m.online}
+            <span className="flex w-full items-center justify-between gap-2">
+              <Icon name="globe" className="size-5 shrink-0 text-gold" />
+              {!online && (
+                <span className="rounded-full border border-line px-1.5 py-0.5 text-[10px] text-muted">
+                  {n.offline}
+                </span>
+              )}
             </span>
-            {online ? (
-              <Icon name="arrow" className="size-4" />
-            ) : (
-              <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">
-                {n.offline}
-              </span>
-            )}
+            {m.online}
+          </Link>
+          <Link
+            to="/custom"
+            className={
+              menuCardClassName +
+              ' col-span-2 flex min-h-11 items-center justify-between gap-3 px-3 py-2 text-sm font-semibold hover:border-gold/30 hover:bg-white/5'
+            }
+            preload={false}
+          >
+            <span className="flex items-center gap-3">
+              <Icon name="sliders" className="size-5 text-gold" />
+              {common.customPlay}
+            </span>
+            <Icon name="arrow" className="size-4 text-muted" />
           </Link>
         </div>
       </MenuLayout>

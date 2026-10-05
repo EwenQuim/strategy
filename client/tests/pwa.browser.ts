@@ -985,6 +985,18 @@ test(
     const { context, page, origin } = await fixture(t)
     const buildLabel = await readBuildLabel(page)
     const modes = page.getByRole('group', { name: 'Choose game mode' }).getByRole('link')
+    assert.equal(
+      new URL((await modes.nth(2).getAttribute('href'))!, page.url()).searchParams.get('mode'),
+      'local',
+    )
+    assert.equal(
+      new URL((await modes.nth(3).getAttribute('href'))!, page.url()).pathname,
+      base + 'online',
+    )
+    assert.equal(
+      new URL((await modes.nth(4).getAttribute('href'))!, page.url()).pathname,
+      base + 'custom',
+    )
     for (const viewport of [
       { width: 280, height: 480 },
       { width: 320, height: 568 },
@@ -998,6 +1010,29 @@ test(
           const { left, right, top, bottom, width, height } = link.getBoundingClientRect()
           return { left, right, top, bottom, width, height }
         }),
+      )
+      const headerBottom = await page
+        .locator('main > header')
+        .evaluate((header) => header.getBoundingClientRect().bottom)
+      assert.ok(
+        boxes[0].top >= headerBottom && boxes[0].top - headerBottom <= 8,
+        'No empty band above the home controls',
+      )
+      assert.equal(boxes[2].top, boxes[3].top, 'Local and online play share a row')
+      assert.equal(boxes[2].width, boxes[3].width)
+      assert.equal(boxes[2].bottom, boxes[3].bottom)
+      assert.equal(
+        boxes[4].width,
+        boxes[0].width,
+        'Custom play is a separate full-width action',
+      )
+      assert.ok(boxes[4].top > boxes[3].bottom)
+      const navigationTop = await page
+        .getByRole('navigation', { name: 'Main navigation' })
+        .evaluate((navigation) => navigation.getBoundingClientRect().top)
+      assert.ok(
+        navigationTop >= boxes[4].bottom && navigationTop - boxes[4].bottom <= 16,
+        'Use the available home height without an empty band above navigation',
       )
       for (const [index, box] of boxes.entries()) {
         assert.ok(box.height >= 44)
