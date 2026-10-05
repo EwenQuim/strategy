@@ -14,19 +14,20 @@ import {
 // reducer accepts are played — and any failure falls back to the strategy's own synchronous
 // local search, so a battle can never stall.
 
-const MODEL = 'mistral-small-latest'
+// Z.ai GLM 5.3, hosted by Mistral: a reasoning model, markedly stronger at
+// positional planning than mistral-small at the cost of slower replies.
+const MODEL = 'zai-glm-5-3'
 const API_KEY_STORAGE = 'hexmate.mistralApiKey'
 
+// The key is BYOK only: the player pastes it in Settings and it lives in localStorage.
+// It is never read from the environment, so no key can end up inlined in a build.
 export function readMistralApiKey(): string | undefined {
   try {
-    const stored = localStorage.getItem(API_KEY_STORAGE)
-    if (stored) return stored
+    return localStorage.getItem(API_KEY_STORAGE) ?? undefined
   } catch {
-    // localStorage unavailable: fall back to the build-time key
+    // localStorage unavailable: no key, and the local fallback AI takes over
   }
-  // Cast: the tests type-check this file without vite/client, where import.meta has no env.
-  const env = (import.meta as { env?: { VITE_MISTRAL_API_KEY?: string } }).env
-  return env?.VITE_MISTRAL_API_KEY ?? undefined
+  return undefined
 }
 
 export function saveMistralApiKey(key: string): void {
@@ -159,7 +160,10 @@ export async function mistralChooseAction(
     const result = await chatComplete(client, {
       model: MODEL,
       temperature: 0.4,
-      maxTokens: 512,
+      // GLM always reasons, and its thinking shares the completion budget: without a
+      // generous budget and a low effort the reply is pure truncated thinking.
+      maxTokens: 16384,
+      reasoningEffort: 'low',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: battlePrompt(state) },
