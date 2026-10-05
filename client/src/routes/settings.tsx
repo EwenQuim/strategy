@@ -21,10 +21,15 @@ export const Route = createFileRoute('/settings')({
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
     return (
       <MenuLayout title={m.settings}>
-        <label className={menuCardClassName + ' flex cursor-pointer items-start gap-3 p-3'}>
+        <label
+          className={
+            menuCardClassName +
+            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
+          }
+        >
           <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <strong className="text-sm">{m.developerPreview}</strong>
-            <small id="developer-preview-hint" className="text-xs leading-relaxed text-muted">
+            <strong className="text-base">{m.developerPreview}</strong>
+            <small id="developer-preview-hint" className="text-sm leading-relaxed text-muted">
               {m.developerPreviewHint}
             </small>
           </span>
@@ -41,10 +46,15 @@ export const Route = createFileRoute('/settings')({
             }}
           />
         </label>
-        <label className={menuCardClassName + ' flex cursor-pointer items-start gap-3 p-3'}>
+        <label
+          className={
+            menuCardClassName +
+            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
+          }
+        >
           <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <strong className="text-sm">{m.haptics}</strong>
-            <small id="haptics-hint" className="text-xs leading-relaxed text-muted">
+            <strong className="text-base">{m.haptics}</strong>
+            <small id="haptics-hint" className="text-sm leading-relaxed text-muted">
               {m.hapticsHint}
             </small>
           </span>
@@ -83,7 +93,7 @@ export const Route = createFileRoute('/settings')({
             />
           </>
         )}
-        <div className="mt-auto py-3 text-center text-[11px] leading-relaxed text-muted">
+        <div className="mt-auto py-3 text-center text-xs leading-relaxed text-muted">
           <p title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</p>
           <p>{m.madeBy}</p>
         </div>

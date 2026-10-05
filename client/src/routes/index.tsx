@@ -9,9 +9,12 @@ import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProg
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 
-const homeButtonClassName =
+const homeControlClassName =
   buttonClassName +
-  ' min-h-13 justify-between gap-3 border-line bg-[#ffffff04] px-[18px] text-ink hover:bg-[#ffffff0c] [@media(max-height:650px)]:min-h-12'
+  ' min-h-[clamp(56px,7.5dvh,68px)] shrink-0 justify-between gap-3 px-5 py-3 text-[16px] [@media(max-height:650px)]:min-h-12 [@media(max-height:650px)]:py-2 [@media(max-height:650px)]:text-sm'
+
+const homeButtonClassName =
+  homeControlClassName + ' border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
 
 export const Route = createFileRoute('/')({
   component: function Landing() {
@@ -31,13 +34,13 @@ export const Route = createFileRoute('/')({
         <MenuBackground />
         <div
           data-testid="menu-content"
-          className="flex min-h-0 flex-1 flex-col items-center justify-center px-[max(20px,env(safe-area-inset-left))] pr-[max(20px,env(safe-area-inset-right))] pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]"
+          className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto overscroll-contain [@media(max-height:440px)]:justify-start px-[max(20px,env(safe-area-inset-left))] pr-[max(20px,env(safe-area-inset-right))] pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]"
         >
-          <h1 className="font-display text-[clamp(36px,5vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-[32px]">
+          <h1 className="shrink-0 font-display text-[clamp(48px,14vw,64px)] leading-[1.12] font-normal tracking-[-0.04em] [@media(max-height:650px)]:text-[40px]">
             Hexmate.
           </h1>
           <div
-            className="mt-[27px] flex w-full max-w-[300px] flex-col gap-3 [@media(max-height:650px)]:mt-[18px] [@media(max-height:650px)]:gap-2"
+            className="mt-7 flex w-full max-w-[360px] shrink-0 flex-col gap-3 [@media(max-height:650px)]:mt-[18px] [@media(max-height:650px)]:gap-2"
             role="group"
             aria-label={m.chooseMode}
           >
@@ -45,13 +48,13 @@ export const Route = createFileRoute('/')({
               to={done ? '/campaign' : '/campaign/$campaign'}
               params={done ? undefined : { campaign: original.slug }}
               className={
-                buttonClassName +
-                ' min-h-13 justify-between gap-3 border-[#e5d19a] bg-[#d8c38a] px-[18px] text-[#24392a] hover:bg-[#ecdaa3] [@media(max-height:650px)]:min-h-12'
+                homeControlClassName +
+                ' border-[#e5d19a] bg-[#d8c38a] text-[#24392a] hover:bg-[#ecdaa3]'
               }
               preload={false}
             >
               {done ? m.campaigns : m.campaign}
-              <span className="flex items-center gap-2 text-[10px] tracking-[0.08em] [&>svg]:size-4">
+              <span className="flex items-center gap-2 text-xs tabular-nums tracking-[0.04em] [&>svg]:size-4">
                 {done
                   ? allCompleted + ' / ' + allLevels
                   : completed + ' / ' + original.levels.length}
@@ -98,7 +101,7 @@ export const Route = createFileRoute('/')({
               <Icon name="arrow" />
             </Link>
           </div>
-          <div className="mt-3 flex w-full max-w-[300px] gap-3">
+          <div className="mt-3 flex w-full max-w-[360px] shrink-0 gap-3">
             {(
               [
                 ['/achievements', 'trophy', m.achievements],
@@ -110,7 +113,7 @@ export const Route = createFileRoute('/')({
                 to={to}
                 className={
                   buttonClassName +
-                  ' min-h-13 flex-1 justify-center border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c] [@media(max-height:650px)]:min-h-11'
+                  ' min-h-14 flex-1 justify-center border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c] [@media(max-height:650px)]:min-h-11'
                 }
                 preload={false}
                 aria-label={label}

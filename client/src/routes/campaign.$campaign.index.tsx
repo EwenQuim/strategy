@@ -21,7 +21,7 @@ import {
 import { readDeveloperPreview } from '../preferences'
 
 const levelCardClassName =
-  'relative flex h-full min-h-11 flex-col gap-1 overflow-hidden rounded-xl border border-line bg-(--biome-background) p-1.5 text-center text-[11px] leading-snug text-ink wrap-anywhere shadow-[0_6px_16px_#0002] data-[status=completed]:border-[#89bba4] data-[status=ready]:border-gold/60 disabled:text-muted disabled:opacity-100 [&:disabled>svg]:opacity-35 [&:not(:disabled):hover]:brightness-115'
+  'relative flex h-full min-h-11 flex-col gap-1 overflow-hidden rounded-xl border border-line bg-(--biome-background) p-1.5 min-[900px]:gap-2 min-[900px]:p-3 [@media(max-height:650px)]:gap-1 [@media(max-height:650px)]:p-1.5 text-center text-[11px] leading-snug text-ink wrap-anywhere shadow-[0_6px_16px_#0002] data-[status=completed]:border-[#89bba4] data-[status=ready]:border-gold/60 disabled:text-muted disabled:opacity-100 [&:disabled>svg]:opacity-35 [&:not(:disabled):hover]:brightness-115'
 
 export const Route = createFileRoute('/campaign/$campaign/')({
   beforeLoad: ({ params }) => {
@@ -43,12 +43,13 @@ export const Route = createFileRoute('/campaign/$campaign/')({
       <MenuLayout
         title={campaignName(campaign)}
         scroll={false}
+        wide
         backTo={
           readCampaignProgress('original') === CAMPAIGNS[0].levels.length ? '/campaign' : '/'
         }
       >
         <div
-          className="flex shrink-0 items-center justify-between gap-2 px-1 text-[11px] text-muted"
+          className="flex shrink-0 items-center justify-between gap-2 px-1 text-xs min-[900px]:text-sm text-muted"
           data-testid="campaign-progress"
           role="status"
         >
@@ -57,8 +58,10 @@ export const Route = createFileRoute('/campaign/$campaign/')({
         </div>
         <ol
           className={
-            'm-0 grid min-h-0 flex-1 list-none auto-rows-fr gap-2 p-0 ' +
-            (campaign.levels.length > 10 ? 'grid-cols-4' : 'grid-cols-2')
+            'm-0 grid min-h-0 flex-1 list-none auto-rows-fr gap-2 p-0 min-[900px]:gap-4 ' +
+            (campaign.levels.length > 10
+              ? 'grid-cols-4 min-[900px]:grid-cols-5 [@media(min-width:601px)_and_(max-height:480px)]:grid-cols-5'
+              : 'grid-cols-2 min-[900px]:grid-cols-3')
           }
           aria-label={common.campaignLevels}
         >
@@ -70,15 +73,18 @@ export const Route = createFileRoute('/campaign/$campaign/')({
               <>
                 <LevelMiniature setup={level.setup} />
                 <span className="flex shrink-0 items-center justify-between gap-1">
-                  <strong className="text-base leading-none font-bold text-gold">
+                  <strong className="text-base min-[900px]:text-xl [@media(max-height:650px)]:text-base leading-none font-bold text-gold">
                     {level.id.toString().padStart(2, '0')}
                   </strong>
                   <Icon
                     name={cleared ? 'check' : unlocked ? 'arrow' : 'lock'}
-                    className={'size-3 shrink-0 ' + (cleared ? 'text-[#89bba4]' : 'text-muted')}
+                    className={
+                      'size-3 min-[900px]:size-4 shrink-0 ' +
+                      (cleared ? 'text-[#89bba4]' : 'text-muted')
+                    }
                   />
                 </span>
-                <span className="hidden shrink-0 text-[11px] font-semibold min-[601px]:block [@media(max-height:650px)]:hidden">
+                <span className="hidden shrink-0 text-[11px] min-[900px]:text-sm font-semibold min-[601px]:block [@media(max-height:650px)]:hidden">
                   {levelName(level)}
                 </span>
               </>
@@ -113,7 +119,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
             )
           })}
         </ol>
-        <p className="shrink-0 text-center text-[10px] text-muted">{common.savedOnDevice}</p>
+        <p className="shrink-0 text-center text-xs text-muted">{common.savedOnDevice}</p>
       </MenuLayout>
     )
   },

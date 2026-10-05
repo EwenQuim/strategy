@@ -70,7 +70,10 @@ export const Route = createFileRoute('/online/')({
     return (
       <MenuLayout title={m.title}>
         <form
-          className={menuCardClassName + ' grid w-full max-w-[600px] gap-3 self-center p-4'}
+          className={
+            menuCardClassName +
+            ' grid w-full max-w-[600px] gap-3 self-center p-4 min-[900px]:gap-4 min-[900px]:p-6'
+          }
           onSubmit={(event) => {
             event.preventDefault()
             if (!trimmedName || busy) return
@@ -81,7 +84,7 @@ export const Route = createFileRoute('/online/')({
             })
           }}
         >
-          <label htmlFor="online-name" className="grid gap-1.5 text-[12px] text-muted">
+          <label htmlFor="online-name" className="grid gap-1.5 text-sm text-muted">
             {m.yourName}
             <input
               className={menuInputClassName}
@@ -103,7 +106,10 @@ export const Route = createFileRoute('/online/')({
           </button>
         </form>
         <form
-          className={menuCardClassName + ' grid w-full max-w-[600px] gap-3 self-center p-4'}
+          className={
+            menuCardClassName +
+            ' grid w-full max-w-[600px] gap-3 self-center p-4 min-[900px]:gap-4 min-[900px]:p-6'
+          }
           onSubmit={(event) => {
             event.preventDefault()
             if (!trimmedName || joinCode.length !== 6 || busy) return
@@ -114,7 +120,7 @@ export const Route = createFileRoute('/online/')({
             })
           }}
         >
-          <label htmlFor="online-code" className="grid gap-1.5 text-[12px] text-muted">
+          <label htmlFor="online-code" className="grid gap-1.5 text-sm text-muted">
             {m.gameCode}
             <input
               className={
@@ -142,7 +148,7 @@ export const Route = createFileRoute('/online/')({
           </button>
         </form>
         {error && (
-          <p role="alert" className="text-[12px] text-[#e0a586]">
+          <p role="alert" className="text-sm text-[#e0a586]">
             {error}
           </p>
         )}
@@ -151,7 +157,7 @@ export const Route = createFileRoute('/online/')({
             className="grid w-full max-w-[600px] content-start gap-2 self-center"
             aria-label={m.resumeGame}
           >
-            <h2 className="text-[12px] font-semibold tracking-[0.17em] text-muted uppercase">
+            <h2 className="text-sm font-semibold tracking-[0.17em] text-muted uppercase">
               {m.yourGames}
             </h2>
             {games.map((game, index) => {
@@ -169,7 +175,7 @@ export const Route = createFileRoute('/online/')({
                   preload={false}
                 >
                   <span className="font-mono tracking-[0.2em]">{game.code}</span>
-                  <span className="min-w-0 text-[11px] text-muted wrap-anywhere">
+                  <span className="min-w-0 text-xs text-muted wrap-anywhere">
                     {!doc
                       ? missing
                         ? m.notFound
@@ -185,7 +191,7 @@ export const Route = createFileRoute('/online/')({
             })}
           </section>
         )}
-        <p className="mt-auto text-[11px] leading-[1.5] text-muted">{m.lobbyNote}</p>
+        <p className="mt-auto text-xs leading-[1.5] text-muted">{m.lobbyNote}</p>
       </MenuLayout>
     )
   },

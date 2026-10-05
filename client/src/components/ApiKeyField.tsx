@@ -1,3 +1,5 @@
+import { menuCardClassName, menuInputClassName } from './styles'
+
 export function ApiKeyField({
   label,
   hint,
@@ -10,13 +12,13 @@ export function ApiKeyField({
   onChange: (value: string) => void
 }) {
   return (
-    <label className="flex flex-col gap-2 rounded-lg border border-line p-4">
-      <span className="flex flex-col gap-1">
-        <strong className="text-[14px]">{label}</strong>
-        <small className="text-[12px] text-muted">{hint}</small>
+    <label className={menuCardClassName + ' flex flex-col gap-3 p-4 min-[900px]:p-6'}>
+      <span className="flex flex-col gap-1.5">
+        <strong className="text-base">{label}</strong>
+        <small className="text-sm leading-relaxed text-muted">{hint}</small>
       </span>
       <input
-        className="min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+        className={menuInputClassName}
         type="password"
         autoComplete="off"
         spellCheck={false}

@@ -18,18 +18,21 @@ export const Route = createFileRoute('/campaign/')({
   },
   component: function Campaigns() {
     return (
-      <MenuLayout title={m.campaigns}>
+      <MenuLayout title={m.campaigns} wide>
         <ol
-          className="m-0 grid list-none auto-rows-fr grid-cols-2 gap-3 p-0 min-[601px]:grid-cols-3"
+          className="m-0 grid list-none auto-rows-fr grid-cols-2 gap-3 p-0 min-[601px]:grid-cols-3 min-[900px]:gap-5"
           aria-label={m.campaigns}
         >
           {visibleCampaigns(readDeveloperPreview()).map((campaign) => (
-            <li key={campaign.slug} className="h-[164px] min-[601px]:h-[190px]">
+            <li
+              key={campaign.slug}
+              className="h-[180px] min-[601px]:h-[220px] min-[900px]:h-[280px]"
+            >
               <CampaignCard campaign={campaign} />
             </li>
           ))}
         </ol>
-        <p className="text-center text-[10px] text-muted">{common.savedOnDevice}</p>
+        <p className="text-center text-xs text-muted">{common.savedOnDevice}</p>
       </MenuLayout>
     )
   },

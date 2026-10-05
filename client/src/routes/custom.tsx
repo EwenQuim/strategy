@@ -62,10 +62,13 @@ export const Route = createFileRoute('/custom')({
           }}
         >
           <div
-            className={menuCardClassName + ' min-h-0 overflow-y-auto overscroll-contain p-3'}
+            className={
+              menuCardClassName +
+              ' min-h-0 overflow-y-auto overscroll-contain p-3 min-[900px]:p-5'
+            }
           >
             <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5 text-[12px] text-muted">
+              <div className="grid gap-1.5 text-sm text-muted">
                 <label htmlFor="custom-mode">{m.mode}</label>
                 <select
                   className={menuInputClassName}
@@ -78,7 +81,7 @@ export const Route = createFileRoute('/custom')({
                 </select>
               </div>
               {strategy === 'depthsearch' && (
-                <div className="grid gap-1.5 text-[12px] text-muted">
+                <div className="grid gap-1.5 text-sm text-muted">
                   <label htmlFor="custom-difficulty">
                     {m.difficulty}
                     {mode === 'local' && m.aiOnly}
@@ -98,7 +101,7 @@ export const Route = createFileRoute('/custom')({
                   </select>
                 </div>
               )}
-              <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
+              <div className="grid gap-1.5 text-sm text-muted col-span-full">
                 <label htmlFor="custom-biome">{m.biome}</label>
                 <select
                   className={menuInputClassName}
@@ -114,13 +117,13 @@ export const Route = createFileRoute('/custom')({
                 </select>
               </div>
               {developerPreview && (
-                <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
+                <div className="grid gap-1.5 text-sm text-muted col-span-full">
                   <label htmlFor="custom-strategy">
                     {m.aiStrategy}
                     {mode === 'local' && m.aiOnly}
                   </label>
                   <select
-                    className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                    className={menuInputClassName}
                     id="custom-strategy"
                     value={strategy}
                     disabled={mode === 'local'}
@@ -133,7 +136,7 @@ export const Route = createFileRoute('/custom')({
                 </div>
               )}
             </div>
-            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
+            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
@@ -142,7 +145,7 @@ export const Route = createFileRoute('/custom')({
               />
               {m.mirrorRoster}
             </label>
-            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
+            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
@@ -154,9 +157,9 @@ export const Route = createFileRoute('/custom')({
               />
               {m.symmetricMap}
             </label>
-            <table className="w-full border-separate border-spacing-2 text-[13px] [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
+            <table className="w-full border-separate border-spacing-2 text-[13px] min-[900px]:text-base [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
               <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
-              <thead className="text-[11px] text-muted">
+              <thead className="text-xs text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="col">
                     {m.unit}
@@ -223,7 +226,7 @@ export const Route = createFileRoute('/custom')({
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="text-[11px] text-muted">
+              <tfoot className="text-xs text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="row">
                     {m.total}
@@ -233,9 +236,7 @@ export const Route = createFileRoute('/custom')({
                 </tr>
               </tfoot>
             </table>
-            <p className="text-[11px] leading-[1.5] text-muted">
-              {m.rosterLimits(MAP_WIDTH * 3)}
-            </p>
+            <p className="text-xs leading-[1.5] text-muted">{m.rosterLimits(MAP_WIDTH * 3)}</p>
           </div>
           <button type="submit" className={menuPrimaryButtonClassName + ' mt-auto shrink-0'}>
             {m.startBattle}

@@ -296,7 +296,11 @@ test(
       { width: 320, height: 568 },
       { width: 390, height: 844 },
       { width: 601, height: 480 },
+      { width: 899, height: 650 },
+      { width: 900, height: 650 },
+      { width: 900, height: 651 },
       { width: 1280, height: 900 },
+      { width: 1440, height: 900 },
     ]) {
       await page.setViewportSize(viewport)
       for (const path of ['', 'custom', 'campaign', 'achievements', 'settings']) {
@@ -341,6 +345,29 @@ test(
             true,
             'Every level must remain visible and tappable',
           )
+        if (path === 'campaign' && viewport.width >= 900) {
+          const levels = page.getByTestId('campaign-level')
+          const first = await levels.first().boundingBox()
+          const fifth = await levels.nth(4).boundingBox()
+          assert.ok(first && fifth && first.y === fifth.y)
+          if (viewport.height >= 900) {
+            assert.ok(first.width >= 190 && first.height >= 160)
+            assert.equal(
+              await levels
+                .first()
+                .locator('span')
+                .last()
+                .evaluate((label) => getComputedStyle(label).fontSize),
+              '14px',
+            )
+          }
+        }
+        if (path === 'custom') {
+          const start = await page
+            .getByRole('button', { name: 'Start battle', exact: true })
+            .boundingBox()
+          assert.ok(start && start.y >= 0 && start.y + start.height <= viewport.height)
+        }
       }
     }
     await page.setViewportSize({ width: 320, height: 568 })
@@ -368,6 +395,10 @@ test(
     await page.getByRole('link', { name: /^Campaigns/ }).click()
     await page.getByRole('heading', { name: 'Campaigns', exact: true }).waitFor()
     assert.equal(await page.getByTestId('campaign-pack').count(), CAMPAIGNS.length)
+    await page.setViewportSize({ width: 1440, height: 900 })
+    const desktopPack = await page.getByTestId('campaign-pack').first().boundingBox()
+    assert.ok(desktopPack && desktopPack.width >= 320 && desktopPack.height >= 260)
+    await page.setViewportSize({ width: 320, height: 568 })
     const lastPack = page.getByTestId('campaign-pack').last()
     await lastPack.scrollIntoViewIfNeeded()
     assert.equal(
@@ -1005,6 +1036,12 @@ test(
       assert.equal(achievements.y, settings.y)
       assert.ok(achievements.y > boxes[4].bottom)
       assert.ok(settings.y + settings.height <= viewport.height)
+      assert.equal(
+        await modes.first().evaluate((link) => getComputedStyle(link).fontSize),
+        viewport.height <= 650 ? '14px' : '16px',
+      )
+      assert.equal(boxes[0].width, Math.min(360, viewport.width - 40))
+      if (viewport.height > 650) assert.ok(boxes[0].height >= 56)
       for (const [index, box] of boxes.entries()) {
         assert.equal(box.left, boxes[0].left)
         assert.equal(box.width, boxes[0].width)
@@ -1021,6 +1058,18 @@ test(
           )
       }
     }
+    await page.setViewportSize({ width: 844, height: 390 })
+    const menu = page.getByTestId('menu-content')
+    assert.ok(
+      (await page.getByRole('heading', { name: 'Hexmate.', exact: true }).boundingBox())!.y >=
+        0,
+    )
+    await page.getByRole('link', { name: 'Settings', exact: true }).scrollIntoViewIfNeeded()
+    assert.ok(await menu.evaluate((element) => element.scrollTop > 0))
+    const settingsInLandscape = await page
+      .getByRole('link', { name: 'Settings', exact: true })
+      .boundingBox()
+    assert.ok(settingsInLandscape && settingsInLandscape.y + settingsInLandscape.height <= 390)
     await page.setViewportSize({ width: 320, height: 568 })
     const backgrounds = new Set<string>()
     const panels = new Set<string>()
