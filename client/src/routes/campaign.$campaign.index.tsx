@@ -42,7 +42,6 @@ export const Route = createFileRoute('/campaign/$campaign/')({
     return (
       <MenuLayout
         title={campaignName(campaign)}
-        section="campaign"
         scroll={false}
         backTo={
           readCampaignProgress('original') === CAMPAIGNS[0].levels.length ? '/campaign' : '/'

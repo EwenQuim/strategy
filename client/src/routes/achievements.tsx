@@ -11,7 +11,7 @@ export const Route = createFileRoute('/achievements')({
   component: function Achievements() {
     const unlocked = readUnlockedAchievements()
     return (
-      <MenuLayout title={menus.achievements} section="achievements">
+      <MenuLayout title={menus.achievements}>
         <div className="flex items-center gap-4 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/10 to-transparent p-4">
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gold/10 text-gold">
             <Icon name="trophy" className="size-6" />

@@ -118,7 +118,7 @@ test(
     await page.getByRole('heading', { name: 'Waiting for an opponent' }).waitFor()
     await connected
     assert.equal(streams.size, 1)
-    await page.getByRole('navigation', { name: 'Main navigation' }).waitFor()
+    assert.equal(await page.getByRole('navigation').count(), 0)
     assert.equal(
       await page
         .getByTestId('menu-content')

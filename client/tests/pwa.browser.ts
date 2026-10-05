@@ -271,12 +271,9 @@ async function playTurn(page: Page) {
 }
 
 async function readBuildLabel(page: Page) {
-  await page
-    .getByRole('navigation')
-    .getByRole('link', { name: 'Settings', exact: true })
-    .click()
+  await page.getByRole('link', { name: 'Settings', exact: true }).click()
   const label = await page.getByTitle('Git commit used for this build').textContent()
-  await page.getByRole('navigation').getByRole('link', { name: 'Play', exact: true }).click()
+  await page.getByRole('link', { name: 'Back to home', exact: true }).click()
   return label
 }
 
@@ -287,7 +284,7 @@ function releaseMarker(page: Page) {
 }
 
 test(
-  'Menus keep navigation visible and use contextual back links',
+  'Menus fit mobile screens and use back links without a navbar',
   { timeout: 60_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
@@ -304,76 +301,62 @@ test(
       await page.setViewportSize(viewport)
       for (const path of ['', 'custom', 'campaign', 'achievements', 'settings']) {
         await page.goto(origin + base + path)
-        const nav = page.getByRole('navigation', { name: 'Main navigation' })
-        await nav.waitFor()
-        assert.equal(await nav.getByRole('link').count(), 4)
-        assert.equal(await nav.locator('[aria-current="page"]').count(), 1)
+        const content = page.getByTestId('menu-content')
+        await content.waitFor()
+        assert.equal(await page.getByRole('navigation').count(), 0)
         assert.equal(
-          await nav.evaluate((navigation) => {
-            const box = navigation.getBoundingClientRect()
-            return (
-              box.top >= 0 &&
-              box.bottom <= innerHeight &&
-              box.left >= 0 &&
-              box.right <= innerWidth &&
+          await page.evaluate(
+            () =>
               document.documentElement.scrollWidth <= innerWidth &&
-              document.documentElement.scrollHeight <= innerHeight &&
-              [...navigation.querySelectorAll('a')].every(
-                (link) =>
-                  link.getBoundingClientRect().height >= 44 &&
-                  link.scrollWidth <= link.clientWidth,
-              )
-            )
-          }),
+              document.documentElement.scrollHeight <= innerHeight,
+          ),
           true,
           path + ' at ' + JSON.stringify(viewport),
         )
         assert.equal(
-          await page
-            .getByTestId('menu-content')
-            .evaluate((content) => content.scrollWidth <= content.clientWidth),
+          await content.evaluate((element) => element.scrollWidth <= element.clientWidth),
           true,
           path,
         )
-        if (path === '' || path === 'campaign') {
+        if (path === '' || path === 'campaign')
           assert.equal(
-            await page
-              .getByTestId('menu-content')
-              .evaluate((content) => content.scrollHeight <= content.clientHeight),
+            await content.evaluate((element) => element.scrollHeight <= element.clientHeight),
             true,
             path + ' must fit without scrolling',
           )
-          if (path === 'campaign') {
-            assert.equal(
-              await page.getByTestId('campaign-level').evaluateAll((levels) =>
-                levels.every((level) => {
-                  const box = level.getBoundingClientRect()
-                  return (
-                    box.width >= 44 &&
-                    box.height >= 44 &&
-                    level.scrollHeight <= level.clientHeight &&
-                    box.top >= 0 &&
-                    box.bottom <= innerHeight
-                  )
-                }),
-              ),
-              true,
-              'Every level must remain visible and tappable',
-            )
-          }
-        }
+        if (path === 'campaign')
+          assert.equal(
+            await page.getByTestId('campaign-level').evaluateAll((levels) =>
+              levels.every((level) => {
+                const box = level.getBoundingClientRect()
+                return (
+                  box.width >= 44 &&
+                  box.height >= 44 &&
+                  level.scrollHeight <= level.clientHeight &&
+                  box.top >= 0 &&
+                  box.bottom <= innerHeight
+                )
+              }),
+            ),
+            true,
+            'Every level must remain visible and tappable',
+          )
       }
     }
     await page.setViewportSize({ width: 320, height: 568 })
     await page.goto(origin + base)
+    await page.getByRole('heading', { name: 'Hexmate.', exact: true }).waitFor()
     const online = page.getByRole('link', { name: 'Online', exact: true })
     assert.equal(await online.getAttribute('aria-disabled'), 'true')
     assert.equal(await online.getAttribute('tabindex'), '-1')
     await online.click({ force: true })
     assert.equal(new URL(page.url()).pathname, base)
-    await page.getByRole('navigation').getByRole('link', { name: 'Campaigns' }).click()
+    await page.getByRole('link', { name: /^Campaign/ }).click()
     await page.getByRole('link', { name: 'Back to home' }).click()
-    await page.getByRole('navigation').getByRole('link', { name: 'Settings' }).click()
+    await page.getByRole('link', { name: 'Achievements', exact: true }).click()
+    await page.getByRole('heading', { name: 'Achievements', exact: true }).waitFor()
+    await page.getByRole('link', { name: 'Back to home' }).click()
+    await page.getByRole('link', { name: 'Settings', exact: true }).click()
     await page.getByRole('switch', { name: 'Developer preview', exact: true }).check()
     await page.reload()
     assert.equal(
@@ -381,7 +364,8 @@ test(
       true,
     )
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
-    await page.getByRole('navigation').getByRole('link', { name: 'Campaigns' }).click()
+    await page.getByRole('link', { name: 'Back to home' }).click()
+    await page.getByRole('link', { name: /^Campaigns/ }).click()
     await page.getByRole('heading', { name: 'Campaigns', exact: true }).waitFor()
     assert.equal(await page.getByTestId('campaign-pack').count(), CAMPAIGNS.length)
     const lastPack = page.getByTestId('campaign-pack').last()
@@ -396,9 +380,12 @@ test(
     await page.getByRole('link', { name: /^Original campaign/ }).click()
     await page.getByRole('link', { name: 'Back to campaigns' }).click()
     await page.getByRole('heading', { name: 'Campaigns', exact: true }).waitFor()
-    await page.getByRole('navigation').getByRole('link', { name: 'Settings' }).click()
+    await page.getByRole('link', { name: 'Back to home' }).click()
+    await page.getByRole('link', { name: 'Settings', exact: true }).click()
     await page.getByRole('switch', { name: 'Developer preview', exact: true }).uncheck()
-    await page.getByRole('navigation').getByRole('link', { name: 'Campaigns' }).click()
+    await page.getByRole('link', { name: 'Back to home' }).click()
+    await page.getByRole('link', { name: /^Campaigns/ }).click()
+    await page.getByRole('heading', { name: 'Campaigns', exact: true }).waitFor()
     assert.equal(
       await page.getByTestId('campaign-pack').count(),
       CAMPAIGNS.filter((pack) => !pack.developerPreview).length,
@@ -408,7 +395,8 @@ test(
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
     assert.equal(await page.getByRole('navigation', { name: 'Main navigation' }).count(), 0)
     await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
-    await page.getByRole('navigation', { name: 'Main navigation' }).waitFor()
+    await page.getByTestId('menu-content').waitFor()
+    assert.equal(await page.getByRole('navigation').count(), 0)
     assert.deepEqual(errors, [])
   },
 )
@@ -427,21 +415,11 @@ test('Menu labels and controls fit all supported languages', { timeout: 60_000 }
       const page = await context.newPage()
       for (const path of ['', 'settings', 'achievements', 'custom', 'campaign']) {
         await page.goto(origin + base + path)
-        const nav = page.getByRole('navigation')
-        await nav.getByRole('link').first().waitFor()
+        const content = page.getByTestId('menu-content')
+        await content.waitFor()
+        assert.equal(await page.getByRole('navigation').count(), 0)
         assert.equal(
-          await nav.evaluate((navigation) =>
-            [...navigation.querySelectorAll('a')].every(
-              (link) => link.scrollWidth <= link.clientWidth,
-            ),
-          ),
-          true,
-          locale + '/' + path,
-        )
-        assert.equal(
-          await page
-            .getByTestId('menu-content')
-            .evaluate((content) => content.scrollWidth <= content.clientWidth),
+          await content.evaluate((element) => element.scrollWidth <= element.clientWidth),
           true,
           locale + '/' + path,
         )
@@ -991,16 +969,16 @@ test(
       'The home campaign button must not contain a map preview',
     )
     assert.equal(
-      new URL((await modes.nth(2).getAttribute('href'))!, page.url()).searchParams.get('mode'),
+      new URL((await modes.nth(2).getAttribute('href'))!, page.url()).pathname,
+      base + 'custom',
+    )
+    assert.equal(
+      new URL((await modes.nth(3).getAttribute('href'))!, page.url()).searchParams.get('mode'),
       'local',
     )
     assert.equal(
-      new URL((await modes.nth(3).getAttribute('href'))!, page.url()).pathname,
-      base + 'online',
-    )
-    assert.equal(
       new URL((await modes.nth(4).getAttribute('href'))!, page.url()).pathname,
-      base + 'custom',
+      base + 'online',
     )
     for (const viewport of [
       { width: 280, height: 480 },
@@ -1016,30 +994,21 @@ test(
           return { left, right, top, bottom, width, height }
         }),
       )
-      const headerBottom = await page
-        .locator('main > header')
-        .evaluate((header) => header.getBoundingClientRect().bottom)
-      assert.ok(
-        boxes[0].top >= headerBottom && boxes[0].top - headerBottom <= 8,
-        'No empty band above the home controls',
-      )
-      assert.equal(boxes[2].top, boxes[3].top, 'Local and online play share a row')
-      assert.equal(boxes[2].width, boxes[3].width)
-      assert.equal(boxes[2].bottom, boxes[3].bottom)
-      assert.equal(
-        boxes[4].width,
-        boxes[0].width,
-        'Custom play is a separate full-width action',
-      )
-      assert.ok(boxes[4].top > boxes[3].bottom)
-      const navigationTop = await page
-        .getByRole('navigation', { name: 'Main navigation' })
-        .evaluate((navigation) => navigation.getBoundingClientRect().top)
-      assert.ok(
-        navigationTop >= boxes[4].bottom && navigationTop - boxes[4].bottom <= 16,
-        'Use the available home height without an empty band above navigation',
-      )
+      assert.equal(await page.getByRole('navigation').count(), 0)
+      const achievements = await page
+        .getByRole('link', { name: 'Achievements', exact: true })
+        .boundingBox()
+      const settings = await page
+        .getByRole('link', { name: 'Settings', exact: true })
+        .boundingBox()
+      assert.ok(achievements && settings)
+      assert.equal(achievements.y, settings.y)
+      assert.ok(achievements.y > boxes[4].bottom)
+      assert.ok(settings.y + settings.height <= viewport.height)
       for (const [index, box] of boxes.entries()) {
+        assert.equal(box.left, boxes[0].left)
+        assert.equal(box.width, boxes[0].width)
+        if (index > 0) assert.ok(box.top > boxes[index - 1].bottom)
         assert.ok(box.height >= 44)
         assert.ok(box.left >= 0 && box.right <= viewport.width)
         assert.ok(box.top >= 0 && box.bottom <= viewport.height)

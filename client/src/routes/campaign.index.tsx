@@ -18,7 +18,7 @@ export const Route = createFileRoute('/campaign/')({
   },
   component: function Campaigns() {
     return (
-      <MenuLayout title={m.campaigns} section="campaign">
+      <MenuLayout title={m.campaigns}>
         <ol
           className="m-0 grid list-none auto-rows-fr grid-cols-2 gap-3 p-0 min-[601px]:grid-cols-3"
           aria-label={m.campaigns}

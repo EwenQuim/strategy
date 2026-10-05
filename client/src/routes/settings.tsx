@@ -20,7 +20,7 @@ export const Route = createFileRoute('/settings')({
     const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
     return (
-      <MenuLayout title={m.settings} section="settings">
+      <MenuLayout title={m.settings}>
         <label className={menuCardClassName + ' flex cursor-pointer items-start gap-3 p-3'}>
           <span className="flex min-w-0 flex-1 flex-col gap-1.5">
             <strong className="text-sm">{m.developerPreview}</strong>
