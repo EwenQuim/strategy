@@ -9,10 +9,16 @@ export const Route = createFileRoute('/game/$seed')({
   remountDeps: ({ params, search }) => [params.seed, search],
   component: function RandomBattle() {
     const { seed } = Route.useParams()
-    const { mode, difficulty, setup } = Route.useSearch()
+    const { mode, difficulty, strategy, setup } = Route.useSearch()
     return (
       <>
-        <Game seed={seed} mode={mode} difficulty={difficulty} setup={setup} />
+        <Game
+          seed={seed}
+          mode={mode}
+          difficulty={difficulty}
+          strategy={strategy}
+          setup={setup}
+        />
         {mode === 'ai' && !setup && <QuickPlayTutorial />}
       </>
     )

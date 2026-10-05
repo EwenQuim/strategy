@@ -7,7 +7,7 @@ import spartaLevels from './campaigns/006-hot-gates.json' with { type: 'json' }
 import ragnarokLevels from './campaigns/007-ragnarok.json' with { type: 'json' }
 import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
-import { isBotLevel, type BotDifficulty } from './engine/ai.ts'
+import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 import type { PawnKind } from './engine/pawns/index.ts'
 import type { Biome, FixedBattleSetup } from './engine/index.ts'
 
@@ -90,7 +90,7 @@ const packs = [
 
 for (const levels of packs) {
   levels.forEach((level, index) => {
-    if (level.id !== index + 1 || !level.name || !level.seed || !isBotLevel(level.difficulty))
+    if (level.id !== index + 1 || !level.name || !level.seed || !BOT_LEVELS[level.difficulty])
       throw new Error('Campaign level ' + (index + 1) + ' is malformed')
     validateSetup(level.setup, mapFromRows(level.setup.map))
   })

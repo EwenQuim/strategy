@@ -102,11 +102,25 @@ export const aiOnly = t({
   it: ' (solo IA)',
 })
 export const difficulties = t<Record<BotDifficulty, string>>({
-  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard', mistral: 'Mistral AI' },
-  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile', mistral: 'IA Mistral' },
-  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer', mistral: 'Mistral KI' },
-  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil', mistral: 'IA Mistral' },
-  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile', mistral: 'IA Mistral' },
+  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard' },
+  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile' },
+  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' },
+  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil' },
+  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile' },
+})
+export const aiStrategy = t({
+  en: 'AI strategy',
+  fr: 'Stratégie IA',
+  de: 'KI-Strategie',
+  es: 'Estrategia IA',
+  it: 'Strategia IA',
+})
+export const aiStrategies = t<Record<'depthsearch' | 'mistral', string>>({
+  en: { depthsearch: 'Hexmate AI', mistral: 'Mistral AI' },
+  fr: { depthsearch: 'IA Hexmate', mistral: 'IA Mistral' },
+  de: { depthsearch: 'Hexmate KI', mistral: 'Mistral KI' },
+  es: { depthsearch: 'IA Hexmate', mistral: 'IA Mistral' },
+  it: { depthsearch: 'IA Hexmate', mistral: 'IA Mistral' },
 })
 export const mistralApiKey = t({
   en: 'Mistral API key',

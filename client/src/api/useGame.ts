@@ -13,7 +13,8 @@ import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import type { BotDifficulty } from '../lib/engine/ai.ts'
+import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai.ts'
+import type { AiStrategyId } from '../lib/engine/ai/decision.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -22,6 +23,7 @@ export interface GameOptions {
   mode: GameMode
   setup?: BattleSetup
   difficulty?: BotDifficulty
+  strategy?: AiStrategyId
   onVictory?: () => void
   online?: OnlineSession
 }
@@ -31,12 +33,13 @@ export function useGame({
   mode,
   setup,
   difficulty = 'normal',
+  strategy = 'depthsearch',
   onVictory,
   online,
 }: GameOptions) {
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: PlaybackAction) => {
-      const next = playbackReducer(playback, action, mode, difficulty)
+      const next = playbackReducer(playback, action, mode, difficulty, strategy)
       // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
       if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
       return next
@@ -69,13 +72,13 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  // The 'mistral' difficulty has no synchronous bot: while the enemy is to act, this effect asks
+  // The 'mistral' strategy has no synchronous bot: while the enemy is to act, this effect asks
   // the adapter for one action and plays it through the same reducer as human actions.
   useEffect(() => {
-    if (mode !== 'ai' || difficulty !== 'mistral' || online || playing || state.winner) return
+    if (mode !== 'ai' || strategy !== 'mistral' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void mistralChooseAction(state)
+    void mistralChooseAction(state, BOT_LEVELS[difficulty])
       .then((action) => {
         if (!cancelled) dispatch(action)
       })
@@ -85,7 +88,7 @@ export function useGame({
     return () => {
       cancelled = true
     }
-  }, [difficulty, dispatch, mode, online, playing, state])
+  }, [difficulty, dispatch, mode, online, playing, state, strategy])
 
   return {
     state,

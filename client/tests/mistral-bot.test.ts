@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { activePawn, initialState, reducer, type GameState } from '../src/lib/engine/index.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+import { chooseAiActions } from '../src/lib/engine/ai/decision.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionFromReply, battlePrompt, mistralChooseAction } from '../src/api/mistralBot.ts'
+import { actionFromReply, battlePrompt } from '../src/lib/engine/ai/strategies/mistral.ts'
+import { mistralChooseAction } from '../src/api/mistralBot.ts'
 
 function enemyTurn(seed: string): GameState {
   let state = initialState(seed)
@@ -37,8 +40,16 @@ test('A model reply is accepted only when the engine accepts the action', () => 
   assert.equal(actionFromReply('{"type":"move","q":99,"r":99}', state), null)
 })
 
+test('Without the adapter the mistral strategy falls back to the local search', () => {
+  const state = enemyTurn('mistral-sync')
+  const actions = chooseAiActions(state, BOT_LEVELS.normal, 'mistral')
+  assert.ok(actions.length > 0)
+  for (const action of actions)
+    assert.notEqual(reducer(state, action), state, `illegal ${JSON.stringify(action)}`)
+})
+
 test('Without an API key the adapter falls back to a legal local action', async () => {
   const state = enemyTurn('mistral-fallback')
-  const action = await mistralChooseAction(state)
+  const action = await mistralChooseAction(state, BOT_LEVELS.normal)
   assert.notEqual(reducer(state, action), state)
 })

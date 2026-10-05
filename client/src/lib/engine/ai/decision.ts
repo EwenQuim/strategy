@@ -1,6 +1,7 @@
 import type { Action, GameState } from '../engine.ts'
 import type { BotOptions } from '../ai.ts'
 import { depthsearch } from './strategies/depthsearch.ts'
+import { mistral } from './strategies/mistral.ts'
 import { random } from './strategies/random.ts'
 
 // A thinking system: it proposes the actions for one decision of the side it plays, under the
@@ -15,12 +16,17 @@ export interface AiStrategy {
 
 // Adding a strategy is a new file in strategies/ plus one import and one entry here; the key
 // union keeps every call site of chooseAiActions checked against the registered names.
-const STRATEGIES = { depthsearch, random } as const satisfies Record<string, AiStrategy>
+export const STRATEGIES = { depthsearch, random, mistral } as const satisfies Record<
+  string,
+  AiStrategy
+>
+
+export type AiStrategyId = keyof typeof STRATEGIES
 
 export function chooseAiActions(
   state: GameState,
   options: BotOptions,
-  strategy: keyof typeof STRATEGIES = 'depthsearch',
+  strategy: AiStrategyId = 'depthsearch',
 ): Action[] {
   return STRATEGIES[strategy].chooseActions(state, options)
 }

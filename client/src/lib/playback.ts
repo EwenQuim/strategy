@@ -1,5 +1,6 @@
 import { initialTransition, createBotGame } from './engine/bot.ts'
 import type { BotDifficulty } from './engine/ai.ts'
+import type { AiStrategyId } from './engine/ai/decision.ts'
 import { activePawn, isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, Transition } from './engine/index.ts'
@@ -26,16 +27,18 @@ export function playbackReducer(
   action: PlaybackAction,
   mode: GameMode = 'ai',
   difficulty: BotDifficulty = 'normal',
+  strategy: AiStrategyId = 'depthsearch',
 ): Transition {
   if (action.type === 'playbackFinish') return { ...playback, frames: [] }
   if (action.type === 'playbackNext') return { ...playback, frames: playback.frames.slice(1) }
   if (action.type === 'resync')
     return { state: replay(playback.state.seed, action.actions), frames: [] }
   if (playback.frames.length) return playback
-  if (mode === 'ai' && difficulty === 'mistral') {
+  if (mode === 'ai' && strategy === 'mistral') {
     const result = applyAction(playback.state, action)
-    // The Mistral adapter plays the enemy one action at a time, so enemy moves animate like a
-    // local player's; the player's own actions keep only their impact frames, as in bot games.
+    // The Mistral strategy is driven action by action by the async adapter, so enemy moves
+    // animate like a local player's; the player's own actions keep only their impact frames,
+    // as in bot games.
     const enemy = activePawn(playback.state)?.side === 'enemy'
     return { ...result, frames: enemy ? result.frames : result.frames.filter(isImpactFrame) }
   }
@@ -46,7 +49,7 @@ export function playbackReducer(
       frames: result.frames.filter(isImpactFrame),
     }
   }
-  return createBotGame(difficulty).transition(playback.state, action)
+  return createBotGame(difficulty, strategy).transition(playback.state, action)
 }
 
 export function replay(seed: string, actions: OnlineAction[]) {

@@ -1,4 +1,5 @@
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
+import { STRATEGIES, type AiStrategyId } from './engine/ai/decision.ts'
 import { validateSetup } from './engine/setup.ts'
 import type { BattleSetup } from './engine/index.ts'
 
@@ -7,6 +8,7 @@ export type GameMode = 'ai' | 'local' | 'online'
 export type GameSearch = {
   mode: GameMode
   difficulty?: BotDifficulty
+  strategy?: AiStrategyId
   setup?: Extract<BattleSetup, { map?: undefined }>
 }
 
@@ -14,11 +16,10 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   const result: GameSearch = {
     mode: search.mode === 'local' ? 'local' : search.mode === 'online' ? 'online' : 'ai',
   }
-  if (
-    typeof search.difficulty === 'string' &&
-    (search.difficulty === 'mistral' || Object.hasOwn(BOT_LEVELS, search.difficulty))
-  )
+  if (typeof search.difficulty === 'string' && Object.hasOwn(BOT_LEVELS, search.difficulty))
     result.difficulty = search.difficulty as BotDifficulty
+  if (typeof search.strategy === 'string' && Object.hasOwn(STRATEGIES, search.strategy))
+    result.strategy = search.strategy as AiStrategyId
   if (search.setup && typeof search.setup === 'object' && !('map' in search.setup)) {
     const setup = search.setup as NonNullable<GameSearch['setup']>
     try {

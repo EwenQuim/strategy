@@ -57,6 +57,7 @@ export function Game({
   campaign,
   campaignLevel,
   difficulty = 'normal',
+  strategy = 'depthsearch',
   onVictory,
   online,
   players,
@@ -76,6 +77,7 @@ export function Game({
     mode,
     setup,
     difficulty,
+    strategy,
     onVictory,
     online,
   })

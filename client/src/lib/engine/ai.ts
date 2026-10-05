@@ -15,9 +15,4 @@ export const BOT_LEVELS = {
   hard: { depth: 3, beamWidth: 8, riskAppetite: 0, focus: 'best', latitude: 0 },
 } as const satisfies Record<string, BotOptions>
 
-// 'mistral' has no entry in BOT_LEVELS: those battles are driven action by action by the async
-// adapter in src/api/mistralBot.ts, never by the synchronous bot.
-export type BotDifficulty = keyof typeof BOT_LEVELS | 'mistral'
-
-export const isBotLevel = (difficulty: BotDifficulty): difficulty is keyof typeof BOT_LEVELS =>
-  difficulty !== 'mistral'
+export type BotDifficulty = keyof typeof BOT_LEVELS
