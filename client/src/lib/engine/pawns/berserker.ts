@@ -64,6 +64,7 @@ const berserkerAi: PawnAi = {
 
 export class Berserker extends Pawn {
   static override readonly startsOnFrontRow = true
+  static override readonly accent = '#b54a4a'
   static override readonly icon =
     'M12 3c2 4 2 5 4 5m-4-5C10 7 10 8 8 8m4-5v18m-4-4h8m-6-4h4M5 17c2-1 4-1 7-1s5 0 7 1'
   readonly kind = 'berserker' as const

@@ -23,21 +23,8 @@ const isPawn = (art: IntroducedElement): art is PawnKind => art in PAWN_CLASSES
 const isFeature = (art: IntroducedElement): art is TileFeature =>
   TILE_FEATURES.includes(art as TileFeature)
 
-const PAWN_ACCENT: Record<PawnKind, string> = {
-  king: '#f0d38e',
-  swordsman: '#7a9bb5',
-  archer: '#6a9a5b',
-  magician: '#9b7bb5',
-  ninja: '#5a6578',
-  bulwark: '#b59a6b',
-  bomber: '#c97b4a',
-  hoplite: '#4a8a8a',
-  wolf: '#8a9a8a',
-  berserker: '#b54a4a',
-}
-
 function ElementArt({ art, index }: { art: IntroducedElement; index: number }) {
-  const accent = isPawn(art) ? PAWN_ACCENT[art] : 'var(--tile-base, #7d8963)'
+  const accent = isPawn(art) ? PAWN_CLASSES[art].accent : 'var(--tile-base, #7d8963)'
   const delay = index * 120 + 'ms'
 
   return (

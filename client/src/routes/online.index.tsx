@@ -1,7 +1,7 @@
 import { buttonClassName, iconButtonClassName } from '../components/styles'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
 import {
@@ -37,14 +37,10 @@ export const Route = createFileRoute('/online/')({
     const [name, setName] = useState(readPlayerName())
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
-    const [games, setGames] = useState<StoredGame[]>([])
+    const [games] = useState<StoredGame[]>(readStoredGames)
     const createGame = useCreateOnlineGame()
     const joinGame = useJoinOnlineGame()
     const busy = createGame.isPending || joinGame.isPending
-
-    useEffect(() => {
-      setGames(readStoredGames())
-    }, [])
 
     const docs = useQueries({
       queries: games.map((game) => onlineGameQueryOptions(game.code)),

@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import * as m from '../i18n/game'
 import {
   key,
@@ -53,30 +52,12 @@ export function Battlefield({
   effectId,
   onTileClick,
 }: BattlefieldProps) {
-  const board = useRef<SVGSVGElement>(null)
   const chargeTargeting = targeting === 'charge'
   const paths =
     active && (reach.size || chargeTargeting)
       ? walkingPaths(tiles, pawns, active, chargeTargeting ? 2 : undefined)
       : new Map()
-  useEffect(() => {
-    if (
-      !effect?.impacts?.some((hit) => hit.damage > 0) ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )
-      return
-    const animation = board.current?.animate(
-      [
-        { transform: 'translate(0, 0)' },
-        { transform: 'translate(-4px, 2px)' },
-        { transform: 'translate(3px, -2px)' },
-        { transform: 'translate(-2px, 1px)' },
-        { transform: 'translate(0, 0)' },
-      ],
-      { duration: 260, easing: 'ease-out' },
-    )
-    return () => animation?.cancel()
-  }, [effect, effectId])
+  const shake = !!effect?.impacts?.some((hit) => hit.damage > 0)
   const allTiles = [...tiles.values()]
   const xs = allTiles.map((t) => hexX(t.q, t.r))
   const ys = allTiles.map((t) => hexY(t.r))
@@ -89,10 +70,17 @@ export function Battlefield({
 
   return (
     <svg
-      ref={board}
       viewBox={viewBox}
       preserveAspectRatio="xMidYMid meet"
-      className="block size-full max-w-[860px] touch-manipulation select-none drop-shadow-[0_18px_20px_#0a211b60]"
+      className={
+        'block size-full max-w-[860px] touch-manipulation select-none drop-shadow-[0_18px_20px_#0a211b60] motion-reduce:animate-none' +
+        // Alternating keyframe names restart the shake on consecutive hits.
+        (shake
+          ? effectId % 2
+            ? ' battlefield-shake'
+            : ' battlefield-shake battlefield-shake--alt'
+          : '')
+      }
       data-testid="battlefield"
       role="group"
       aria-label={m.battlefieldHint}

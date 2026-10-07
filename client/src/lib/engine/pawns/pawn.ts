@@ -90,6 +90,7 @@ export interface SpecialAbility {
 export abstract class Pawn {
   static readonly startsOnFrontRow: boolean = false
   static readonly icon: string
+  static readonly accent: string
   abstract readonly kind: PawnKind
   abstract readonly attack: AttackProfile
   abstract get special(): SpecialAbility

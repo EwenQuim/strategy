@@ -64,6 +64,7 @@ const ninjaAi: PawnAi = {
 }
 
 export class Ninja extends Pawn {
+  static override readonly accent = '#5a6578'
   static override readonly icon =
     'M4 9a8 8 0 0 1 16 0v6a8 8 0 0 1-16 0V9Zm0 0h16M4 15h16M7 12h2m6 0h2M4 9 1 5m3 4L1 12'
   readonly kind = 'ninja' as const
