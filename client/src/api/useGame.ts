@@ -6,8 +6,6 @@ import {
   type PlaybackAction,
 } from '../lib/playback.ts'
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
-import { unlockAchievements } from '../achievementProgress.ts'
-import { earnedAchievements } from '../lib/achievements.ts'
 import { useOnlineSync } from './onlineSync.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
@@ -36,12 +34,7 @@ export function useGame({
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: PlaybackAction) => {
       const next = playbackReducer(playback, action, mode, difficulty)
-      // Side effects ride the dispatch funnel instead of effects. Reducers can re-run
-      // (StrictMode double calls), but saving and unlocking are idempotent, and saving
-      // before playback ends keeps a victory if the tab closes mid-animation.
-      if (!online) saveBattleToLocalStorage(mode, seed, difficulty, setup, next.state)
-      if (mode !== 'local')
-        unlockAchievements(earnedAchievements(next.state, online?.side ?? 'player'))
+      // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
       if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
       return next
     },
@@ -54,6 +47,11 @@ export function useGame({
   )
   const dispatchOnline = useOnlineSync(online, playback, mode, difficulty, dispatch)
   const frame = playback.frames[0]
+
+  // The current battle lives in one localStorage slot, overwritten on every state change.
+  useEffect(() => {
+    if (!online) saveBattleToLocalStorage(mode, seed, difficulty, setup, playback.state)
+  }, [difficulty, mode, online, playback.state, seed, setup])
 
   useEffect(() => {
     if (!frame) return

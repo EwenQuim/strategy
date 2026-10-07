@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ACHIEVEMENTS, earnedAchievements, type AchievementId } from './lib/achievements'
 import type { GameState, Side } from './lib/engine/index.ts'
 import type { GameMode } from './lib/game-mode.ts'
@@ -16,8 +16,7 @@ export function readUnlockedAchievements(): AchievementId[] {
   }
 }
 
-// Called from useGame's dispatch funnel so this module's hook stays render-pure.
-export function unlockAchievements(earned: readonly AchievementId[]): void {
+function unlockAchievements(earned: readonly AchievementId[]): void {
   if (!earned.length) return
   try {
     localStorage.setItem(
@@ -41,5 +40,6 @@ export function useFreshAchievements(
     () => (mode === 'local' ? [] : earnedAchievements(state, viewerSide)),
     [mode, state, viewerSide],
   )
+  useEffect(() => unlockAchievements(earned), [earned])
   return earned.filter((id) => !known.includes(id))
 }
