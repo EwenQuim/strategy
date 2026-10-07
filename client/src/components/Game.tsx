@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
-import { hapticHit, hapticKill, hapticMiss, hapticHellfire, hapticMove } from '../haptics'
+import { hapticMove } from '../haptics'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/units'
@@ -79,21 +79,6 @@ export function Game({
     onVictory,
     online,
   })
-  const lastEffectRef = useRef(effect)
-  const lastPawnCountRef = useRef(state.pawns.length)
-  useEffect(() => {
-    // Kills are read from the pawn count: the log is capped at 40 entries, so its length cannot track new entries.
-    const killed = state.pawns.length < lastPawnCountRef.current
-    lastPawnCountRef.current = state.pawns.length
-    if (!effect || effect === lastEffectRef.current) return
-    lastEffectRef.current = effect
-    if (effect.kind === 'hellfire') return hapticHellfire()
-    if (killed) return hapticKill()
-    if (effect.impacts?.length) {
-      return effect.impacts.some((impact) => impact.damage > 0) ? hapticHit() : hapticMiss()
-    }
-    if (effect.kind === 'move') hapticMove()
-  }, [effect, state.pawns.length])
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
