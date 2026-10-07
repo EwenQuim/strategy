@@ -23,7 +23,7 @@ function hapticKill(): void {
 
 /** An attack missed or the target escaped. */
 function hapticMiss(): void {
-  vibrate(6)
+  vibrate(15)
 }
 
 /** Hellfire or area damage tick. */
@@ -33,7 +33,7 @@ function hapticHellfire(): void {
 
 /** A unit moved (light feedback). */
 export function hapticMove(): void {
-  vibrate(4)
+  vibrate(10)
 }
 
 /**
