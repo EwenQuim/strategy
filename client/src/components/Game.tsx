@@ -1,5 +1,6 @@
-import { useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
+import { hapticHit, hapticKill, hapticMiss, hapticHellfire, hapticMove } from '../haptics'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/units'
@@ -78,6 +79,22 @@ export function Game({
     onVictory,
     online,
   })
+  const lastEffectRef = useRef(effect)
+  const lastLogRef = useRef(state.log)
+  useEffect(() => {
+    if (effect === lastEffectRef.current) return
+    lastEffectRef.current = effect
+    if (!effect) return
+    const newEntries = state.log.slice(lastLogRef.current.length)
+    lastLogRef.current = state.log
+    if (effect.kind === 'hellfire') return hapticHellfire()
+    if (effect.impacts?.length) {
+      if (newEntries.some((entry) => entry.includes('has fallen'))) return hapticKill()
+      if (effect.impacts.some((impact) => impact.damage > 0)) return hapticHit()
+      return hapticMiss()
+    }
+    if (effect.kind === 'move') hapticMove()
+  }, [effect, state.log])
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
