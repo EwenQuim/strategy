@@ -80,21 +80,20 @@ export function Game({
     online,
   })
   const lastEffectRef = useRef(effect)
-  const lastLogRef = useRef(state.log)
+  const lastPawnCountRef = useRef(state.pawns.length)
   useEffect(() => {
-    if (effect === lastEffectRef.current) return
+    // Kills are read from the pawn count: the log is capped at 40 entries, so its length cannot track new entries.
+    const killed = state.pawns.length < lastPawnCountRef.current
+    lastPawnCountRef.current = state.pawns.length
+    if (!effect || effect === lastEffectRef.current) return
     lastEffectRef.current = effect
-    if (!effect) return
-    const newEntries = state.log.slice(lastLogRef.current.length)
-    lastLogRef.current = state.log
     if (effect.kind === 'hellfire') return hapticHellfire()
+    if (killed) return hapticKill()
     if (effect.impacts?.length) {
-      if (newEntries.some((entry) => entry.includes('has fallen'))) return hapticKill()
-      if (effect.impacts.some((impact) => impact.damage > 0)) return hapticHit()
-      return hapticMiss()
+      return effect.impacts.some((impact) => impact.damage > 0) ? hapticHit() : hapticMiss()
     }
     if (effect.kind === 'move') hapticMove()
-  }, [effect, state.log])
+  }, [effect, state.pawns.length])
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
@@ -144,7 +143,11 @@ export function Game({
         return setAim({ action: 'special', destination: at })
       return dispatch({ type: 'special', target: at, destination })
     }
-    if (reach.has(key(at.q, at.r))) dispatch({ type: 'move', ...at })
+    // Own moves produce no effect frame in any mode, so they buzz at dispatch; bot moves buzz from their frames.
+    if (reach.has(key(at.q, at.r))) {
+      hapticMove()
+      dispatch({ type: 'move', ...at })
+    }
   }
 
   return (
