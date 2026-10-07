@@ -16,6 +16,24 @@ export function saveSymmetricPreference(symmetric: boolean): void {
   }
 }
 
+const HAPTICS_KEY = 'hexmate.haptics'
+
+export function readHapticsEnabled(): boolean {
+  try {
+    return localStorage.getItem(HAPTICS_KEY) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+export function saveHapticsEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(HAPTICS_KEY, String(enabled))
+  } catch {
+    // localStorage unavailable: the preference only lasts until the page is left
+  }
+}
+
 const DEVELOPER_PREVIEW_KEY = 'hexmate.developerPreview'
 
 export function readDeveloperPreview(): boolean {

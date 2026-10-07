@@ -6,6 +6,7 @@ import {
   type PlaybackAction,
 } from '../lib/playback.ts'
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
+import { hapticForFrame } from '../haptics.ts'
 import { useOnlineSync } from './onlineSync.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
@@ -55,6 +56,7 @@ export function useGame({
 
   useEffect(() => {
     if (!frame) return
+    hapticForFrame(frame)
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timer = window.setTimeout(
       () => dispatch({ type: 'playbackNext' }),

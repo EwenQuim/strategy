@@ -242,6 +242,20 @@ export const developerPreviewHint = t({
   es: 'Muestra contenido sin terminar, como la campaña Corona rota.',
   it: 'Mostra contenuti incompleti, come la campagna Corona infranta.',
 })
+export const haptics = t({
+  en: 'Haptic feedback',
+  fr: 'Retour haptique',
+  de: 'Haptisches Feedback',
+  es: 'Retroalimentación háptica',
+  it: 'Feedback aptico',
+})
+export const hapticsHint = t({
+  en: 'Vibrate on hits, kills and other combat events.',
+  fr: 'Vibre lors des coups, éliminations et autres événements de combat.',
+  de: 'Vibriert bei Treffern, Kills und anderen Kampfereignissen.',
+  es: 'Vibra al impactar, eliminar y otros eventos de combate.',
+  it: 'Vibra ai colpi, uccisioni e altri eventi di combattimento.',
+})
 export const achievements = t({
   en: 'Achievements',
   fr: 'Succès',

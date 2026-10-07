@@ -1,5 +1,6 @@
 import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
+import { hapticMove } from '../haptics'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/units'
@@ -127,7 +128,11 @@ export function Game({
         return setAim({ action: 'special', destination: at })
       return dispatch({ type: 'special', target: at, destination })
     }
-    if (reach.has(key(at.q, at.r))) dispatch({ type: 'move', ...at })
+    // Own moves produce no effect frame in any mode, so they buzz at dispatch; bot moves buzz from their frames.
+    if (reach.has(key(at.q, at.r))) {
+      hapticMove()
+      dispatch({ type: 'move', ...at })
+    }
   }
 
   return (
