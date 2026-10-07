@@ -31,7 +31,10 @@ export default defineConfig({
       autoCodeSplitting: true,
       generatedRouteTree: './generated/routeTree.gen.ts',
     }),
-    react({ compiler: { panicThreshold: 'all_errors' }, exclude: [/generated\//] }),
+    react({
+      compiler: true,
+      exclude: [/generated\//],
+    }),
     pwa(),
   ],
 })

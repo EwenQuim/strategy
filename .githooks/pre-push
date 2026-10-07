@@ -1,8 +1,10 @@
 #!/bin/sh
 set -eu
 
-# Fast guard: typecheck + the unit suite. Slow exhaustive sweeps live in
-# tests/integration and run in CI's dedicated ai job, not here.
+# Fast guard: format + lint + typecheck + the unit suite.
+# Slow exhaustive sweeps live in tests/integration and run in CI's dedicated ai job, not here.
+npm --prefix client run format:check
+npm --prefix client run lint
 npm --prefix client run typecheck
 npm --prefix client run test
 
