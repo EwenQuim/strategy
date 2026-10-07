@@ -49,6 +49,7 @@ const bomb: SpecialAbility = {
 }
 
 export class Bomber extends Pawn {
+  static override readonly accent = '#c97b4a'
   static override readonly icon =
     'M10 20a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM13.3 8.1l1.6-1.6 2.3 2.3-1.6 1.6M16 7.4c.2-2.4 1.6-3.6 3.6-3.4M19.6 4l1-2.2M19.6 4l2.2-1M19.6 4 22 4.6M19.6 4l.4 2.2M6.8 12.8a3.3 3.3 0 0 1 2.7-2.6'
   readonly kind = 'bomber' as const

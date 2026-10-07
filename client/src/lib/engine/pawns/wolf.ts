@@ -32,6 +32,7 @@ const cry: SpecialAbility = {
 
 export class Wolf extends Pawn {
   static override readonly startsOnFrontRow = true
+  static override readonly accent = '#8a9a8a'
   static override readonly icon = 'M5 4l4 3h6l4-3v5l-3 5-4 7-4-7-3-5V4Zm4 7h.01m6 0h.01'
   readonly kind = 'wolf' as const
   get maxHp(): number {

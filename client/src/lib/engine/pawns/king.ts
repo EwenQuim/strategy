@@ -65,6 +65,7 @@ const kingAi: PawnAi = {
 }
 
 export class King extends Pawn {
+  static override readonly accent = '#f0d38e'
   static override readonly icon = 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12'
   readonly kind = 'king' as const
   get maxHp(): number {

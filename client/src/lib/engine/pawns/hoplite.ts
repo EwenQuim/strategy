@@ -46,6 +46,7 @@ const hopliteAi: PawnAi = {
 
 export class Hoplite extends Pawn {
   static override readonly startsOnFrontRow = true
+  static override readonly accent = '#4a8a8a'
   static override readonly icon =
     'M12 3a8 8 0 0 1 8 8v10H4V11a8 8 0 0 1 8-8Zm-3 8h1.5m3.5 0h1.5M12 3V1M8.5 3.5 7 1.5m8.5 2L17 1.5'
   readonly kind = 'hoplite' as const
