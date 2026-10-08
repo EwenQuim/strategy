@@ -1,17 +1,25 @@
-import type { Action, Aim, Pawn, Side } from '../lib/engine'
+import type { Action, Aim, Pawn, RangeKind, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
 import * as m from '../i18n/game'
+import { attackSummary } from '../i18n/battlefield'
 import { specialTexts, unitNames } from '../i18n/units'
 import { Icon, PawnIcon } from './Icon'
+import { usePreviewButton, type PreviewProps } from './usePreviewButton'
+import { UnitStats } from './UnitStats'
 
 const actionButtonClassName =
-  'grid min-h-16 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:hover]:border-[#bcc8a670] [&:enabled:hover]:bg-[#ffffff0c] max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
+  'grid min-h-16 select-none [-webkit-touch-callout:none] aria-disabled:cursor-help aria-disabled:not-aria-pressed:opacity-38 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:not([aria-disabled=true]):hover]:border-[#bcc8a670] [&:enabled:not([aria-disabled=true]):hover]:bg-[#ffffff0c] max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
 
 interface GameCommandDeckProps {
   pawn?: Pawn
+  active?: Pawn
   winner: Side | 'draw' | null
   winnerLabel: string | null
   myTurn: boolean
+  commanding: boolean
+  previewed: RangeKind | null
+  onPreview: (range: RangeKind) => void
+  onPeek: (range: RangeKind | null) => void
   attacking: boolean
   usingSpecial: boolean
   hasFoes: boolean
@@ -24,9 +32,14 @@ interface GameCommandDeckProps {
 
 export function GameCommandDeck({
   pawn,
+  active,
   winner,
   winnerLabel,
   myTurn,
+  commanding,
+  previewed,
+  onPreview,
+  onPeek,
   attacking,
   usingSpecial,
   hasFoes,
@@ -68,122 +81,55 @@ export function GameCommandDeck({
         <div className="grid grid-cols-3 gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
           <AttackButton
             pawn={pawn}
-            myTurn={myTurn}
+            commanding={commanding}
+            previewed={previewed === 'attack'}
             attacking={attacking}
             usingSpecial={usingSpecial}
             hasFoes={hasFoes}
             onAim={onAim}
+            onPreview={onPreview}
+            onPeek={onPeek}
           />
           <SpecialButton
             pawn={pawn}
-            myTurn={myTurn}
+            commanding={commanding}
+            previewed={previewed === 'special'}
             attacking={attacking}
             usingSpecial={usingSpecial}
             hasSpecialTargets={hasSpecialTargets}
             targetCount={targetCount}
             choosingTarget={choosingTarget}
-            dispatch={dispatch}
             onAim={onAim}
+            onPreview={onPreview}
+            onPeek={onPeek}
           />
-          <EndTurnButton pawn={pawn} myTurn={myTurn} dispatch={dispatch} />
+          <EndTurnButton pawn={active} myTurn={myTurn} dispatch={dispatch} />
         </div>
       </div>
     </footer>
   )
 }
 
-function StatMeter({
-  name,
-  note,
-  value,
-  max,
-  filledClass,
-}: {
-  name: string
-  note?: string
-  value: number
-  max: number
-  filledClass: string
-}) {
-  return (
-    <div className="w-[60px] min-w-[60px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[49px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px]">
-      <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
-        {name}
-        {note ? ' ' + note : ''}{' '}
-        <b className="text-[9px] font-medium text-[#d9dfc9] max-[601px]:text-[8px]">
-          {value}/{max}
-        </b>
-      </span>
-      <div
-        className="mt-[7px] flex w-full gap-[3px]"
-        role="meter"
-        aria-label={name}
-        aria-valuenow={value}
-        aria-valuemin={0}
-        aria-valuemax={max}
-      >
-        {Array.from({ length: max }, (_, i) => (
-          <i
-            key={i}
-            data-filled={i < value}
-            className={
-              'h-[5px] min-w-0 flex-1 rounded-[1px] bg-[#34483a] max-[601px]:h-1 ' + filledClass
-            }
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function UnitStats({ pawn }: { pawn: Pawn }) {
-  return (
-    <div
-      className="flex items-center gap-[18px] min-[900px]:gap-7 max-[601px]:gap-2.5 max-[360px]:gap-2 [@media(min-width:600px)_and_(max-height:480px)]:gap-2.5"
-      data-testid="unit-stats"
-    >
-      <StatMeter
-        name={m.health}
-        value={pawn.hp}
-        max={pawn.maxHp}
-        filledClass="data-[filled=true]:bg-[#b7c9a0]"
-      />
-      <StatMeter
-        name={m.energy}
-        note={pawn.bonusEnergy ? '+' + pawn.bonusEnergy : undefined}
-        value={pawn.energy}
-        max={pawn.maxEnergy}
-        filledClass="data-[filled=true]:bg-[#d4bb7b]"
-      />
-      <div className="w-[60px] min-w-[43px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[41px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] max-[601px]:pl-2 max-[601px]:[&_svg]:hidden [@media(min-width:600px)_and_(max-height:480px)]:pl-2">
-        <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
-          {m.escape}
-        </span>
-        <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] max-[601px]:text-[17px]">
-          <Icon name="escape" />
-          {pawn.escapeChance}
-          <small>%</small>
-        </strong>
-      </div>
-    </div>
-  )
-}
-
 function AttackButton({
   pawn,
-  myTurn,
   attacking,
   usingSpecial,
   hasFoes,
   onAim,
+  ...preview
 }: {
   pawn?: Pawn
-  myTurn: boolean
   attacking: boolean
   usingSpecial: boolean
   hasFoes: boolean
   onAim: (aim: Aim | null) => void
-}) {
+} & PreviewProps) {
+  const buttonProps = usePreviewButton(
+    'attack',
+    !preview.commanding || usingSpecial || !pawn?.energy || (!attacking && !hasFoes),
+    () => onAim(attacking ? null : { action: 'attack' }),
+    preview,
+  )
   return (
     <button
       className={
@@ -191,9 +137,8 @@ function AttackButton({
         ' border-[#d69e803d] bg-[#b8795809] text-[#e3b096] aria-pressed:border-[#e0a586] aria-pressed:bg-[#ab695333]'
       }
       data-action="attack"
-      disabled={!myTurn || usingSpecial || !pawn?.energy || (!attacking && !hasFoes)}
-      onClick={() => onAim(attacking ? null : { action: 'attack' })}
-      aria-pressed={attacking}
+      {...buttonProps}
+      aria-pressed={attacking || preview.previewed}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -203,33 +148,46 @@ function AttackButton({
         {attacking ? m.cancel : m.attack}
       </span>
       <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
-        {attacking ? m.chooseEnemy : m.energyCost(1)}
+        {attacking
+          ? m.chooseEnemy
+          : preview.commanding || !pawn
+            ? m.energyCost(1)
+            : attackSummary(pawn.attack.damage, attackSpan(pawn))}
       </small>
     </button>
   )
 }
 
+function attackSpan({ attack }: Pawn) {
+  return attack.minRange === attack.maxRange
+    ? String(attack.maxRange)
+    : attack.minRange + '-' + attack.maxRange
+}
+
 function SpecialButton({
   pawn,
-  myTurn,
   attacking,
   usingSpecial,
   hasSpecialTargets,
   targetCount,
   choosingTarget,
-  dispatch,
   onAim,
+  ...preview
 }: {
   pawn?: Pawn
-  myTurn: boolean
   attacking: boolean
   usingSpecial: boolean
   hasSpecialTargets: boolean
   targetCount: number
   choosingTarget: boolean
-  dispatch: (action: Action) => void
   onAim: (aim: Aim | null) => void
-}) {
+} & PreviewProps) {
+  const buttonProps = usePreviewButton(
+    'special',
+    !preview.commanding || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
+    () => onAim(usingSpecial ? null : { action: 'special' }),
+    preview,
+  )
   return (
     <button
       className={
@@ -237,14 +195,9 @@ function SpecialButton({
         ' border-[#bcc8a62e] bg-[#ffffff04] text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
       }
       data-action="special"
-      disabled={!myTurn || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets}
+      {...buttonProps}
       title={pawn ? specialTexts[pawn.special.description] : undefined}
-      aria-pressed={usingSpecial}
-      onClick={() => {
-        if (usingSpecial) onAim(null)
-        else if (pawn?.special.targeted) onAim({ action: 'special' })
-        else dispatch({ type: 'special' })
-      }}
+      aria-pressed={usingSpecial || preview.previewed}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -262,13 +215,15 @@ function SpecialButton({
               : pawn?.special.prompt
                 ? specialTexts[pawn.special.prompt]
                 : m.chooseEnemy
-          : pawn?.special.oncePerRound && pawn.specialUsed
-            ? m.usedThisRound
-            : !hasSpecialTargets
-              ? pawn?.special.noTargets
-                ? specialTexts[pawn.special.noTargets]
-                : m.noTargets
-              : m.energyCost(pawn?.special.cost ?? 2)}
+          : !preview.commanding
+            ? m.energyCost(pawn?.special.cost ?? 2)
+            : pawn?.special.oncePerRound && pawn.specialUsed
+              ? m.usedThisRound
+              : !hasSpecialTargets
+                ? pawn?.special.noTargets
+                  ? specialTexts[pawn.special.noTargets]
+                  : m.noTargets
+                : m.energyCost(pawn?.special.cost ?? 2)}
       </small>
     </button>
   )

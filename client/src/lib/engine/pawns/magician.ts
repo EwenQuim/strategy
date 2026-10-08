@@ -19,6 +19,7 @@ const fireball: SpecialAbility = {
   targetLabel: 'fireballToward',
   prompt: 'chooseDirection',
   description: 'fireballDescription',
+  reaches: (pawn, tile) => direction(pawn, tile) !== null,
   targets: (pawn, pawns, from = pawn) =>
     pawns.filter((target) => target.side !== pawn.side && direction(from, target)),
   areaTargets: (pawns, tile, pawn) =>

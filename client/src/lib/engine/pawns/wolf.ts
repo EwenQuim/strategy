@@ -8,7 +8,9 @@ const cry: SpecialAbility = {
   targeted: false,
   oncePerRound: true,
   noTargets: 'noNearbyAllies',
+  prompt: 'chooseAlly',
   description: 'cryDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2,
   targets: (pawn, pawns) =>
     pawns.filter(
       (ally) => ally.side === pawn.side && ally.id !== pawn.id && hexDist(pawn, ally) <= 2,

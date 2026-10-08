@@ -9,7 +9,9 @@ const rally: SpecialAbility = {
   targeted: false,
   oncePerRound: true,
   noTargets: 'noAlliesToHeal',
+  prompt: 'chooseAlly',
   description: 'rallyDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: (pawn, pawns) => allyTargets(pawn, pawns, true),
   candidates: (pawn, { pawns }) =>
     specialTargets(pawns, pawn).length ? [{ type: 'special' }] : [],

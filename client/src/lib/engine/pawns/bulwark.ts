@@ -10,6 +10,7 @@ const protect: SpecialAbility = {
   prompt: 'chooseAlly',
   noTargets: 'noNearbyAllies',
   description: 'protectDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2,
   targets: (pawn, pawns) =>
     pawns.filter(
       (target) =>

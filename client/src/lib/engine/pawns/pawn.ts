@@ -80,6 +80,7 @@ export interface SpecialAbility {
   readonly prompt?: SpecialTextKey
   readonly noTargets?: SpecialTextKey
   targets(pawn: Pawn, pawns: readonly Pawn[], from?: Axial): Pawn[]
+  reaches(pawn: Pawn, tile: Tile, tiles: Map<string, Tile>): boolean
   tileTargets?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
   areaTargets?(pawns: readonly Pawn[], tile: Axial, pawn: Pawn): Pawn[]
   perform(context: SpecialContext): SpecialResult | null

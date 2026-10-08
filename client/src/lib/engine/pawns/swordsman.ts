@@ -10,7 +10,7 @@ import {
   strike,
   walkingPaths,
 } from '../combat.ts'
-import { key, type Tile } from '../hex.ts'
+import { hexDist, key, type Tile } from '../hex.ts'
 import type { Action } from '../engine.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -36,6 +36,8 @@ const charge: SpecialAbility = {
   targetLabel: 'chargeTo',
   prompt: 'chooseTile',
   description: 'chargeDescription',
+  // ponytail: walk 2 then strike as the crow flies, ignores blocked paths; use walkingPaths if it misleads
+  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2 + pawn.attack.maxRange,
   targets: attackTargets,
   tileTargets: (pawn, tiles, pawns) => new Set(chargeDestinations(tiles, pawns, pawn).keys()),
   candidates: (pawn, { tiles, pawns }) =>

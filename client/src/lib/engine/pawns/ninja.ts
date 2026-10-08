@@ -19,6 +19,7 @@ const jump: SpecialAbility = {
   targetLabel: 'jumpTo',
   prompt: 'chooseTile',
   description: 'jumpDescription',
+  reaches: (pawn, tile) => passable(tile) && hexDist(pawn, tile) <= 3,
   targets: () => [],
   candidates: (pawn, { tiles, pawns }) => jumpDestinations(tiles, pawns, pawn).map(aimAt),
   tileTargets: (pawn, tiles, pawns) =>

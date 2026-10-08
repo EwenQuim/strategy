@@ -10,6 +10,7 @@ const fury: SpecialAbility = {
   oncePerRound: true,
   noTargets: 'noEnemiesWithinReach',
   description: 'furyDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: (pawn, pawns, from = pawn) =>
     pawns.filter((foe) => canAttack(pawn, foe, from) && hexDist(from, foe) === 1),
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),

@@ -7,6 +7,7 @@ import {
   type Axial,
   type BattleEffect,
   type Pawn,
+  type RangeKind,
   type Tile,
 } from '../lib/engine'
 import { featureTexts } from '../i18n/biomes'
@@ -32,9 +33,13 @@ interface BattlefieldProps {
   targetLabel: string
   targeting: Targeting
   preview: Axial | null
+  range: Set<string>
+  rangeKind: RangeKind
+  threats: Set<string>
   effect: BattleEffect | null
   effectId: number
   onTileClick: (tile: Tile) => void
+  onInspect: (tile: Tile) => void
 }
 
 export function Battlefield({
@@ -48,9 +53,13 @@ export function Battlefield({
   targetLabel,
   targeting,
   preview,
+  range,
+  rangeKind,
+  threats,
   effect,
   effectId,
   onTileClick,
+  onInspect,
 }: BattlefieldProps) {
   const chargeTargeting = targeting === 'charge'
   const paths =
@@ -94,6 +103,9 @@ export function Battlefield({
             strokeWidth="1.5"
             opacity=".6"
           />
+        </pattern>
+        <pattern id="threat-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+          <circle cx="3.5" cy="3.5" r="1.1" fill="#ff8a6e" opacity=".75" />
         </pattern>
         <linearGradient id="lava-melt" x1="0" y1="0" x2=".8" y2="1">
           <stop stopColor="#815c51" />
@@ -150,6 +162,8 @@ export function Battlefield({
             ? Number(tile.terrain === 'lava')
             : (paths.get(tileKey)?.damage ?? 0)
         const lethal = !!active && damage >= active.hp
+        const inRange = range.has(tileKey)
+        const threatened = threats.has(tileKey)
         const actionLabel = tileAriaLabel({
           tile,
           occupant,
@@ -164,6 +178,8 @@ export function Battlefield({
           lethal,
           canMove,
           cost,
+          inRange,
+          threatened,
         })
         const fill = tileFill({
           interactive,
@@ -175,6 +191,7 @@ export function Battlefield({
           previewed,
           canMove,
           terrain: tile.terrain,
+          range: inRange ? rangeKind : undefined,
         })
         return (
           <g
@@ -189,7 +206,7 @@ export function Battlefield({
             role={interactive ? 'button' : 'img'}
             tabIndex={interactive ? 0 : undefined}
             aria-label={actionLabel}
-            onClick={interactive ? () => onTileClick(tile) : undefined}
+            onClick={() => (interactive ? onTileClick(tile) : onInspect(tile))}
             onKeyDown={
               interactive
                 ? (event) => {
@@ -227,6 +244,14 @@ export function Battlefield({
               <g className="pointer-events-none" aria-hidden="true">
                 <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
               </g>
+            )}
+            {threatened && (
+              <polygon
+                points={hexPoints}
+                fill="url(#threat-hatch)"
+                className="pointer-events-none"
+                aria-hidden="true"
+              />
             )}
             {canMove && !occupant && (
               <g className="pointer-events-none">

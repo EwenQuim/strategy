@@ -1,4 +1,4 @@
-import type { Pawn, Tile } from '../lib/engine'
+import type { Pawn, RangeKind, Tile } from '../lib/engine'
 import type { PlayerNames } from '../lib/game-mode'
 import { energyCost } from '../i18n/game'
 import * as bf from '../i18n/battlefield'
@@ -20,6 +20,8 @@ export function tileAriaLabel({
   lethal,
   canMove,
   cost,
+  inRange,
+  threatened,
 }: {
   tile: Tile
   occupant?: Pawn
@@ -34,6 +36,8 @@ export function tileAriaLabel({
   lethal: boolean
   canMove: boolean
   cost?: number
+  inRange: boolean
+  threatened: boolean
 }): string {
   const label =
     (occupant
@@ -49,7 +53,10 @@ export function tileAriaLabel({
         ', ' +
         bf.tilePosition(tile.q + Math.floor(tile.r / 2) + 1, tile.r + 1)) +
     (feature ? ', ' + feature.name + '. ' + feature.description : '')
-  const warning = warned ? ', ' + bf.hellfireWarning(impactCenter) : ''
+  const warning =
+    (inRange ? ', ' + bf.inRange : '') +
+    (threatened ? ', ' + bf.threatened : '') +
+    (warned ? ', ' + bf.hellfireWarning(impactCenter) : '')
   return (
     (target
       ? targetLabel + ' ' + label + (damage ? ', ' + bf.lavaDamage(damage, lethal) : '')
@@ -73,6 +80,7 @@ export function tileFill({
   previewed,
   canMove,
   terrain,
+  range,
 }: {
   interactive: boolean
   damage: number
@@ -83,9 +91,11 @@ export function tileFill({
   previewed: boolean
   canMove: boolean
   terrain: Tile['terrain']
+  range?: RangeKind
 }): string {
   if (interactive && damage > 0 && !occupant) return '#94716d'
   if (target) return attack ? '#b98370' : '#b79dce'
   if (selected || previewed) return 'var(--selected-tint, #c9b77f)'
+  if (range) return range === 'attack' ? '#b98370' : '#b79dce'
   return canMove ? 'var(--move-tint)' : terrainColors[terrain]
 }
