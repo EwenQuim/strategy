@@ -183,7 +183,7 @@ test('All encounters have safe routes and later levels combine previously introd
   })
 })
 
-test('The campaign introduces units gradually and keeps the opening free of obstacles', () => {
+test('The campaign outgrows the tutorial and fields every unit within four levels', () => {
   const firstAppearance: Record<string, number> = {}
   for (const level of original.levels) {
     for (const pawn of [...level.setup.player, ...level.setup.enemy]) {
@@ -194,14 +194,14 @@ test('The campaign introduces units gradually and keeps the opening free of obst
   assert.deepEqual(firstAppearance, {
     king: 1,
     swordsman: 1,
-    archer: 2,
-    magician: 4,
-    bulwark: 7,
-    bomber: 8,
-    ninja: 10,
+    archer: 1,
+    magician: 1,
+    bulwark: 2,
+    bomber: 3,
+    ninja: 4,
   })
-  assert.equal(original.levels[0].setup.player.length, 2)
-  assert.equal(original.levels[0].setup.enemy.length, 1)
+  for (const side of ['player', 'enemy'] as const)
+    assert.ok(original.levels[0].setup[side].length >= tutorial.levels[0].setup[side].length)
   for (const level of original.levels.slice(0, 2)) {
     assert.ok(level.setup.map.every((row) => /^[.f_]+$/.test(row)))
     assert.ok(level.newElements.length <= (level.id === 1 ? 4 : 2))
@@ -223,14 +223,13 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
         .map((level) => [level.id, level.newElements]),
     ),
     {
-      3: ['lake'],
-      4: ['magician'],
+      1: ['magician'],
+      2: ['bulwark'],
+      3: ['bomber', 'lake'],
+      4: ['ninja'],
       5: ['watchtower'],
       6: ['mountain'],
-      7: ['bulwark'],
-      8: ['bomber'],
       9: ['sand'],
-      10: ['ninja'],
       13: ['lava'],
       14: ['spring'],
       15: ['rune'],

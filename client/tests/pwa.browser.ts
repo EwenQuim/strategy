@@ -426,7 +426,7 @@ test(
     )
     await page.getByRole('link', { name: /^Original campaign/ }).click()
     await page.getByRole('link', { name: /^Level 1:/ }).click()
-    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
     assert.equal(await page.getByRole('navigation', { name: 'Main navigation' }).count(), 0)
     await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
     await page.getByTestId('menu-content').waitFor()
@@ -1660,7 +1660,10 @@ test(
     )) {
       await page.goto(origin + base + 'campaign/original/' + level.id)
       await briefing.waitFor()
-      assert.equal(await briefing.getByRole('navigation').count(), 0)
+      assert.equal(
+        await briefing.getByRole('navigation').count(),
+        Number(level.newElements.length > 1),
+      )
       assert.equal(await briefing.getByRole('heading', { level: 3 }).count(), 1)
       assert.equal(
         await briefing.evaluate(
