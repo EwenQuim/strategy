@@ -1,6 +1,6 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 import { createBotGame } from '../src/lib/engine/bot.ts'
-import { campaignActions } from './campaign-actions.ts'
+import { campaignActions } from '../tests/campaign-actions.ts'
 
 const LEVELS = [
   ['iron-throne', 8],
