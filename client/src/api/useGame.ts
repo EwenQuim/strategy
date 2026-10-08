@@ -8,13 +8,23 @@ import {
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
 import { hapticForFrame } from '../haptics.ts'
 import { useOnlineSync } from './onlineSync.ts'
+import { jevChooseAction } from './jevBot.ts'
 import { mistralChooseAction } from './mistralBot.ts'
 import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
-import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai.ts'
+import type { Action, BattleSetup, Transition } from '../lib/engine/index.ts'
+import { BOT_LEVELS, type BotDifficulty, type BotOptions } from '../lib/engine/ai.ts'
 import type { AiStrategyId } from '../lib/engine/ai/decision.ts'
+
+// Adapter-driven strategies have no synchronous bot: their adapter thinks one enemy action
+// at a time. Adding one is a new entry here plus an adapterDriven strategy file.
+const ASYNC_BOTS: Partial<
+  Record<AiStrategyId, (state: Transition['state'], options: BotOptions) => Promise<Action>>
+> = {
+  mistral: mistralChooseAction,
+  jev: jevChooseAction,
+}
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -72,13 +82,15 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  // The 'mistral' strategy has no synchronous bot: while the enemy is to act, this effect asks
-  // the adapter for one action and plays it through the same reducer as human actions.
+  // Adapter-driven strategies have no synchronous bot: while the enemy is to act, this
+  // effect asks the adapter for one action and plays it through the same reducer as human
+  // actions.
   useEffect(() => {
-    if (mode !== 'ai' || strategy !== 'mistral' || online || playing || state.winner) return
+    const asyncBot = ASYNC_BOTS[strategy]
+    if (mode !== 'ai' || !asyncBot || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void mistralChooseAction(state, BOT_LEVELS[difficulty])
+    void asyncBot(state, BOT_LEVELS[difficulty])
       .then((action) => {
         if (!cancelled) dispatch(action)
       })

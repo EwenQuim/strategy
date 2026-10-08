@@ -124,6 +124,7 @@ export const Route = createFileRoute('/custom')({
                   >
                     <option value="depthsearch">{m.aiStrategies.depthsearch}</option>
                     <option value="mistral">{m.aiStrategies.mistral}</option>
+                    <option value="jev">{m.aiStrategies.jev}</option>
                   </select>
                 </div>
               )}

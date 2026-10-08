@@ -1,6 +1,6 @@
 import { initialTransition, createBotGame } from './engine/bot.ts'
 import type { BotDifficulty } from './engine/ai.ts'
-import type { AiStrategyId } from './engine/ai/decision.ts'
+import { STRATEGIES, type AiStrategyId } from './engine/ai/decision.ts'
 import { activePawn, isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, Transition } from './engine/index.ts'
@@ -34,11 +34,11 @@ export function playbackReducer(
   if (action.type === 'resync')
     return { state: replay(playback.state.seed, action.actions), frames: [] }
   if (playback.frames.length) return playback
-  if (mode === 'ai' && strategy === 'mistral') {
+  if (mode === 'ai' && STRATEGIES[strategy].adapterDriven) {
     const result = applyAction(playback.state, action)
-    // The Mistral strategy is driven action by action by the async adapter, so enemy moves
-    // animate like a local player's; the player's own actions keep only their impact frames,
-    // as in bot games.
+    // Adapter-driven strategies are played action by action by their async adapter, so
+    // enemy moves animate like a local player's; the player's own actions keep only their
+    // impact frames, as in bot games.
     const enemy = activePawn(playback.state)?.side === 'enemy'
     return { ...result, frames: enemy ? result.frames : result.frames.filter(isImpactFrame) }
   }

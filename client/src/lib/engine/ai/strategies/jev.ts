@@ -1,11 +1,11 @@
 import { depthsearch } from './depthsearch.ts'
 import type { AiStrategy } from '../decision.ts'
 
-// The Mistral strategy thinks through a large language model. The whole bot — prompt, API call,
-// reply parsing, key handling — lives in one file outside the pure engine: src/api/mistralBot.ts.
+// The Jev strategy thinks through TypeSafe's decision model. The whole bot — key, option
+// list, API call, answer mapping — lives in one file outside the pure engine: src/api/jevBot.ts.
 // Synchronous callers (benchmarks, analysis, the in-engine bot) get the local search.
-export const mistral: AiStrategy = {
-  id: 'mistral',
+export const jev: AiStrategy = {
+  id: 'jev',
   adapterDriven: true,
   chooseActions: (state, options) => depthsearch.chooseActions(state, options),
 }
