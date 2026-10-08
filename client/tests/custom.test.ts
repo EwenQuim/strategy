@@ -73,20 +73,21 @@ test('Custom search accepts more Bulwarks than one front row', () => {
 test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', () => {
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
-    const bot = createBotGame(difficulty)
+    const config = { name: 'depthsearch', difficulty } as const
+    const bot = createBotGame(config)
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
       const expected = bot.transition(playback.state, { type: 'endTurn' })
-      playback = playbackReducer(playback, { type: 'endTurn' }, 'ai', difficulty)
+      playback = playbackReducer(playback, { type: 'endTurn' }, 'ai', config)
       assert.deepEqual(playback, expected)
-      playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai', difficulty)
+      playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai', config)
     }
     outcomes.add(JSON.stringify(playback.state))
-    assert.deepEqual(playbackReducer(playback, { type: 'restart' }, 'ai', difficulty), opening)
+    assert.deepEqual(playbackReducer(playback, { type: 'restart' }, 'ai', config), opening)
     const local = initialPlayback('custom-difficulty-10', 'local', setup)
     const expected = transition(local.state, { type: 'endTurn' })
-    assert.deepEqual(playbackReducer(local, { type: 'endTurn' }, 'local', difficulty), {
+    assert.deepEqual(playbackReducer(local, { type: 'endTurn' }, 'local', config), {
       state: expected.state,
       frames: [],
     })

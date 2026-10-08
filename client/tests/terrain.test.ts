@@ -330,7 +330,12 @@ test('Jump ignores crossed lava and runes but triggers its landing tile', () => 
 })
 
 test('Bots can use tower range and evaluate lethal lava moves without crashing or choosing suicide', () => {
-  for (const strategy of ['easy', 'normal', 'hard', nearestTarget] as const) {
+  for (const strategy of [
+    { name: 'depthsearch', difficulty: 'easy' },
+    { name: 'depthsearch', difficulty: 'normal' },
+    { name: 'depthsearch', difficulty: 'hard' },
+    nearestTarget,
+  ] as const) {
     const state = battle(new Archer(1, 0, 5, 'enemy', 3, 1))
     state.tiles.get('0,5')!.feature = 'watchtower'
     state.pawns[2].q = 4

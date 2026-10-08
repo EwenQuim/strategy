@@ -90,6 +90,8 @@ export class Magician extends Pawn {
   static override readonly accent = '#9b7bb5'
   static override readonly icon =
     'M4 20 14.5 9.5M13 8l3 3M18 2.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9ZM9.5 4.5v2m-1-1h2M20 13.5v2m-1-1h2'
+  static override readonly aiInstructions =
+    'ranged, 1 damage at distance 1-2. Fireball (2): pick a direction; 1 damage to every enemy along the line to the board edge, through terrain and units.'
   readonly kind = 'magician' as const
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
   get special(): SpecialAbility {

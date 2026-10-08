@@ -3,9 +3,14 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
+import type { AiStrategyId } from '../lib/engine/ai/decision'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
-import { readSymmetricPreference, saveSymmetricPreference } from '../preferences'
+import {
+  readDeveloperPreview,
+  readSymmetricPreference,
+  saveSymmetricPreference,
+} from '../preferences'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { unitNames } from '../i18n/units'
@@ -18,8 +23,10 @@ export const Route = createFileRoute('/custom')({
     const navigate = Route.useNavigate()
     const [mode, setMode] = useState<GameMode>('ai')
     const [difficulty, setDifficulty] = useState<BotDifficulty>('normal')
+    const [strategy, setStrategy] = useState<AiStrategyId>('depthsearch')
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
+    const [developerPreview] = useState(readDeveloperPreview)
     const [player, setPlayer] = useState<Pawn['kind'][]>([
       'king',
       'swordsman',
@@ -45,7 +52,13 @@ export const Route = createFileRoute('/custom')({
             event.preventDefault()
             void navigate({
               to: '/game',
-              search: { mode, difficulty, setup: { biome, player, enemy: enemyRoster } },
+              search: {
+                mode,
+                // Remote strategies have no difficulty dial, so the link carries only the
+                // param the chosen strategy uses.
+                ...(strategy === 'depthsearch' ? { difficulty } : { strategy }),
+                setup: { biome, player, enemy: enemyRoster },
+              },
             })
           }}
         >
@@ -63,25 +76,27 @@ export const Route = createFileRoute('/custom')({
                   <option value="local">{m.twoPlayers}</option>
                 </select>
               </div>
-              <div className="grid gap-1.5 text-[12px] text-muted">
-                <label htmlFor="custom-difficulty">
-                  {m.difficulty}
-                  {mode === 'local' && m.aiOnly}
-                </label>
-                <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
-                  id="custom-difficulty"
-                  value={difficulty}
-                  disabled={mode === 'local'}
-                  onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
-                >
-                  {Object.keys(BOT_LEVELS).map((level) => (
-                    <option key={level} value={level}>
-                      {m.difficulties[level as BotDifficulty]}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {strategy === 'depthsearch' && (
+                <div className="grid gap-1.5 text-[12px] text-muted">
+                  <label htmlFor="custom-difficulty">
+                    {m.difficulty}
+                    {mode === 'local' && m.aiOnly}
+                  </label>
+                  <select
+                    className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                    id="custom-difficulty"
+                    value={difficulty}
+                    disabled={mode === 'local'}
+                    onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
+                  >
+                    {Object.keys(BOT_LEVELS).map((level) => (
+                      <option key={level} value={level}>
+                        {m.difficulties[level as BotDifficulty]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
                 <label htmlFor="custom-biome">{m.biome}</label>
                 <select
@@ -97,6 +112,25 @@ export const Route = createFileRoute('/custom')({
                   ))}
                 </select>
               </div>
+              {developerPreview && (
+                <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
+                  <label htmlFor="custom-strategy">
+                    {m.aiStrategy}
+                    {mode === 'local' && m.aiOnly}
+                  </label>
+                  <select
+                    className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                    id="custom-strategy"
+                    value={strategy}
+                    disabled={mode === 'local'}
+                    onChange={(event) => setStrategy(event.target.value as AiStrategyId)}
+                  >
+                    <option value="depthsearch">{m.aiStrategies.depthsearch}</option>
+                    <option value="mistral">{m.aiStrategies.mistral}</option>
+                    <option value="jev">{m.aiStrategies.jev}</option>
+                  </select>
+                </div>
+              )}
             </div>
             <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
               <input

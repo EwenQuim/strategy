@@ -3,7 +3,6 @@ import { usePlayAction } from '../../generated/sdk.gen.ts'
 import { playbackReducer, type PlaybackAction } from '../lib/playback.ts'
 import type { OnlineAction } from '../lib/online.ts'
 import type { GameMode } from '../lib/game-mode.ts'
-import type { BotDifficulty } from '../lib/engine/ai.ts'
 import type { Transition } from '../lib/engine/index.ts'
 import { fetchOnlineGame, useOnlineGame } from './online.ts'
 import type { OnlineSession } from './useGame.ts'
@@ -12,7 +11,6 @@ export function useOnlineSync(
   online: OnlineSession | undefined,
   playback: Transition,
   mode: GameMode,
-  difficulty: BotDifficulty,
   dispatch: (action: PlaybackAction) => void,
 ) {
   const appliedActions = useRef(0)
@@ -57,7 +55,7 @@ export function useOnlineSync(
         dispatch(action)
         return
       }
-      const winner = playbackReducer(playback, action, mode, difficulty).state.winner
+      const winner = playbackReducer(playback, action, mode).state.winner
       dispatch(action)
       void (async () => {
         try {
@@ -76,6 +74,6 @@ export function useOnlineSync(
         }
       })()
     },
-    [difficulty, dispatch, mode, online, playback, playAction, resync],
+    [dispatch, mode, online, playback, playAction, resync],
   )
 }

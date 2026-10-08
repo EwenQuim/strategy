@@ -108,6 +108,48 @@ export const difficulties = t<Record<BotDifficulty, string>>({
   es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil' },
   it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile' },
 })
+export const aiStrategy = t({
+  en: 'AI strategy',
+  fr: 'Stratégie IA',
+  de: 'KI-Strategie',
+  es: 'Estrategia IA',
+  it: 'Strategia IA',
+})
+export const aiStrategies = t<Record<'depthsearch' | 'random' | 'mistral' | 'jev', string>>({
+  en: { depthsearch: 'Hexmate AI', random: 'Random AI', mistral: 'Mistral AI', jev: 'Jev AI' },
+  fr: { depthsearch: 'IA Hexmate', random: 'Aléatoire', mistral: 'IA Mistral', jev: 'IA Jev' },
+  de: { depthsearch: 'Hexmate KI', random: 'Zufall', mistral: 'Mistral KI', jev: 'Jev KI' },
+  es: { depthsearch: 'IA Hexmate', random: 'Aleatoria', mistral: 'IA Mistral', jev: 'IA Jev' },
+  it: { depthsearch: 'IA Hexmate', random: 'Casuale', mistral: 'IA Mistral', jev: 'IA Jev' },
+})
+export const mistralApiKey = t({
+  en: 'Mistral API key',
+  fr: 'Clé API Mistral',
+  de: 'Mistral API-Schlüssel',
+  es: 'Clave de API de Mistral',
+  it: 'Chiave API Mistral',
+})
+export const mistralApiKeyHint = t({
+  en: 'Powers the experimental Mistral AI strategy in custom battles. Stored only in this browser.',
+  fr: 'Alimente la stratégie expérimentale IA Mistral dans les batailles personnalisées. Stockée uniquement dans ce navigateur.',
+  de: 'Versorgt die experimentelle Mistral-KI-Strategie in eigenen Kämpfen. Nur in diesem Browser gespeichert.',
+  es: 'Alimenta la estrategia experimental IA de Mistral en batallas personalizadas. Se guarda solo en este navegador.',
+  it: 'Alimenta la strategia sperimentale IA Mistral nelle battaglie personalizzate. Salvata solo in questo browser.',
+})
+export const jevApiKey = t({
+  en: 'Jev API key',
+  fr: 'Clé API Jev',
+  de: 'Jev API-Schlüssel',
+  es: 'Clave de API de Jev',
+  it: 'Chiave API Jev',
+})
+export const jevApiKeyHint = t({
+  en: 'Powers the experimental Jev AI strategy in custom battles. Stored only in this browser.',
+  fr: 'Alimente la stratégie expérimentale IA Jev dans les batailles personnalisées. Stockée uniquement dans ce navigateur.',
+  de: 'Versorgt die experimentelle Jev-KI-Strategie in eigenen Kämpfen. Nur in diesem Browser gespeichert.',
+  es: 'Alimenta la estrategia experimental IA de Jev en batallas personalizadas. Se guarda solo en este navegador.',
+  it: 'Alimenta la strategia sperimentale IA Jev nelle battaglie personalizzate. Salvata solo in questo browser.',
+})
 export const biome = t({ en: 'Biome', fr: 'Biome', de: 'Biom', es: 'Bioma', it: 'Bioma' })
 export const mirrorRoster = t({
   en: 'Mirror player roster',

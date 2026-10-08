@@ -26,7 +26,7 @@ const fingerprint = (state: GameState) =>
 function playBotTurns(seed: string, turns: number): GameState {
   let playback = initialPlayback(seed, 'ai')
   for (let i = 0; i < turns; i++) {
-    playback = { ...playbackReducer(playback, { type: 'endTurn' }, 'ai', 'normal'), frames: [] }
+    playback = { ...playbackReducer(playback, { type: 'endTurn' }, 'ai'), frames: [] }
   }
   return playback.state
 }
@@ -59,16 +59,37 @@ test('restoreState rejects unreadable snapshots', () => {
 })
 
 test('isSameBattle only matches the identical game', () => {
-  const identity = battleIdentity('ai', 'seed', 'normal', undefined)
+  const identity = battleIdentity(
+    'ai',
+    'seed',
+    { name: 'depthsearch', difficulty: 'normal' },
+    undefined,
+  )
   assert.ok(isSameBattle(identity, identity))
   assert.equal(
-    isSameBattle(battleIdentity('ai', 'other', 'normal', undefined), identity),
+    isSameBattle(
+      battleIdentity('ai', 'other', { name: 'depthsearch', difficulty: 'normal' }, undefined),
+      identity,
+    ),
     false,
   )
   assert.equal(
-    isSameBattle(battleIdentity('local', 'seed', 'normal', undefined), identity),
+    isSameBattle(
+      battleIdentity('local', 'seed', { name: 'depthsearch', difficulty: 'normal' }, undefined),
+      identity,
+    ),
     false,
   )
-  assert.equal(isSameBattle(battleIdentity('ai', 'seed', 'hard', undefined), identity), false)
+  assert.equal(
+    isSameBattle(
+      battleIdentity('ai', 'seed', { name: 'depthsearch', difficulty: 'hard' }, undefined),
+      identity,
+    ),
+    false,
+  )
+  assert.equal(
+    isSameBattle(battleIdentity('ai', 'seed', { name: 'mistral' }, undefined), identity),
+    false,
+  )
   assert.equal(isSameBattle(null, identity), false)
 })

@@ -37,6 +37,8 @@ export class Wolf extends Pawn {
   static override readonly accent = '#8a9a8a'
   static override readonly icon = 'M5 4l4 3h6l4-3v5l-3 5-4 7-4-7-3-5V4Zm4 7h.01m6 0h.01'
   readonly kind = 'wolf' as const
+  static override readonly aiInstructions =
+    'melee, 2 damage. Cry (2): +1 energy to every ally within 2 tiles, once per round.'
   get maxHp(): number {
     return 3
   }

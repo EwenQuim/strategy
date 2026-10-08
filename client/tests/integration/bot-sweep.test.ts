@@ -27,7 +27,7 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of chooseBotActions(state, level)) {
+    for (const action of chooseBotActions(state, { name: 'depthsearch', difficulty: level })) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next

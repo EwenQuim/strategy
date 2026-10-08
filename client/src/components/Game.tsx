@@ -5,6 +5,7 @@ import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/units'
 import type { PlayerNames } from '../lib/game-mode'
+import { DEFAULT_BOT_CONFIG } from '../lib/engine/ai/decision'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
@@ -68,7 +69,7 @@ export function Game({
   setup,
   campaign,
   campaignLevel,
-  difficulty = 'normal',
+  bot = DEFAULT_BOT_CONFIG,
   onVictory,
   online,
   players,
@@ -87,7 +88,7 @@ export function Game({
     seed,
     mode,
     setup,
-    difficulty,
+    bot,
     onVictory,
     online,
   })
@@ -220,7 +221,7 @@ export function Game({
             viewerSide={viewerSide}
             winnerLabel={winnerLabel}
             mode={mode}
-            difficulty={difficulty}
+            bot={bot}
             setup={setup}
             names={names}
             campaign={campaign}
@@ -255,7 +256,7 @@ export function Game({
       <GameHelpDialog
         dialogRef={dialog}
         mode={mode}
-        difficulty={difficulty}
+        bot={bot}
         setup={setup}
         biome={state.biome}
         campaignLevel={campaignLevel}

@@ -12,8 +12,13 @@ import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import type { BattleSetup } from './setup.ts'
-import { BOT_LEVELS, type BotDifficulty, type BotOptions } from './ai.ts'
-import { chooseAiActions } from './ai/decision.ts'
+import type { BotOptions } from './ai.ts'
+import {
+  botOptions,
+  chooseAiActions,
+  DEFAULT_BOT_CONFIG,
+  type BotConfig,
+} from './ai/decision.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
@@ -32,7 +37,9 @@ export const huntTheKing: BotStrategy = {
     ) ?? nearestTarget.chooseTarget(attacker, targets),
 }
 
-type BotController = BotStrategy | BotDifficulty | BotOptions
+// Who thinks for the enemy army: a registered config, raw search options for analysis
+// tools, or a rule-based target picker for scripted tests and campaigns.
+type BotController = BotStrategy | BotConfig | BotOptions
 
 const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
   !!options &&
@@ -50,12 +57,13 @@ const validBotOptions = (options: BotOptions | undefined): options is BotOptions
 
 export function chooseBotActions(
   state: GameState,
-  strategy: BotController = 'normal',
+  controller: BotController = DEFAULT_BOT_CONFIG,
 ): Action[] {
-  if (typeof strategy === 'string' || !('chooseTarget' in strategy)) {
-    const options = typeof strategy === 'string' ? BOT_LEVELS[strategy] : strategy
-    if (!validBotOptions(options)) throw new RangeError('Invalid bot options')
-    return chooseAiActions(state, options)
+  if (!('chooseTarget' in controller)) {
+    if ('name' in controller)
+      return chooseAiActions(state, botOptions(controller), controller.name)
+    if (!validBotOptions(controller)) throw new RangeError('Invalid bot options')
+    return chooseAiActions(state, controller, 'depthsearch')
   }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
@@ -63,8 +71,8 @@ export function chooseBotActions(
   const foes = state.pawns.filter((p) => p.side !== pawn.side)
   const specials = specialTargets(state.pawns, pawn)
   return (
-    ruleSpecial(state, pawn, foes, specials, strategy) ??
-    ruleAttack(state, pawn, foes, strategy) ??
+    ruleSpecial(state, pawn, foes, specials, controller) ??
+    ruleAttack(state, pawn, foes, controller) ??
     ruleApproach(state, pawn, foes)
   )
 }
@@ -181,7 +189,7 @@ function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
     : [{ type: 'endTurn' }]
 }
 
-export function createBotGame(strategy: BotController = 'normal') {
+export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
   function playBots(state: GameState): Transition {
     const frames: BattleFrame[] = []
     while (!state.winner && activePawn(state)?.side === 'enemy') {
@@ -189,7 +197,7 @@ export function createBotGame(strategy: BotController = 'normal') {
       const round = state.round
       frames.push({ state: { ...state, order: [...state.order] }, effect: null })
       do {
-        for (const action of chooseBotActions(state, strategy)) {
+        for (const action of chooseBotActions(state, controller)) {
           const result = applyAction(state, action)
           if (result.state === state) throw new Error('Bot selected an invalid action')
           state = result.state

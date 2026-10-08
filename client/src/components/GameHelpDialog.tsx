@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 import type { BattleSetup, Biome } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
-import type { BotDifficulty } from '../lib/engine/ai'
+import type { BotConfig } from '../lib/engine/ai/decision'
 import { INTRODUCTIONS } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
@@ -14,7 +14,7 @@ import { dialogClassName, iconButtonClassName } from './styles'
 interface GameHelpDialogProps {
   dialogRef: RefObject<HTMLDialogElement | null>
   mode: GameMode
-  difficulty: BotDifficulty
+  bot: BotConfig
   setup?: BattleSetup
   biome: Biome
   campaignLevel?: number
@@ -23,7 +23,7 @@ interface GameHelpDialogProps {
 export function GameHelpDialog({
   dialogRef,
   mode,
-  difficulty,
+  bot,
   setup,
   biome,
   campaignLevel,
@@ -55,7 +55,10 @@ export function GameHelpDialog({
           {campaignLevel ? m.campaignIntro : setup ? m.customIntro : m.randomIntro}
           {setup &&
             mode !== 'local' &&
-            ' ' + m.aiDifficulty(menus.difficulties[difficulty])}{' '}
+            ' ' +
+              (bot.name === 'depthsearch'
+                ? m.aiDifficulty(menus.difficulties[bot.difficulty])
+                : m.aiStrategy(menus.aiStrategies[bot.name]))}{' '}
           {mode === 'local'
             ? m.localPlayers
             : mode === 'online'

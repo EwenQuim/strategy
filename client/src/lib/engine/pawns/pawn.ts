@@ -92,6 +92,9 @@ export abstract class Pawn {
   static readonly startsOnFrontRow: boolean = false
   static readonly icon: string
   static readonly accent: string
+  // One line describing what this pawn class does, for remote AI prompts. Kept in English
+  // on purpose: model-facing prompt text, not UI. Every subclass declares it.
+  static readonly aiInstructions: string
   abstract readonly kind: PawnKind
   abstract readonly attack: AttackProfile
   abstract get special(): SpecialAbility
