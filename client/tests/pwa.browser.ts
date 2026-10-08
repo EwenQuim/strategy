@@ -1746,8 +1746,8 @@ test(
     const stroke = await face.evaluate((element) => getComputedStyle(element).stroke)
     await move.hover()
     assert.equal(
-      await face.evaluate((element) => getComputedStyle(element).filter),
-      'brightness(1.2)',
+      await face.evaluate((element) => getComputedStyle(element).fill),
+      'rgb(241, 219, 156)',
     )
     await move.focus()
     assert.equal(

@@ -9,7 +9,13 @@
 //
 // Usage:
 //   node scripts/bench-web.ts [--json] [--no-build]
+//   BROWSER=firefox node scripts/bench-web.ts
 //   THROTTLE=6 SEED=perfprobe1 DIFFICULTY=normal TURNS=5 node scripts/bench-web.ts
+//
+// BROWSER picks the engine: chrome (default, needs a CDP-capable Chrome) or
+// firefox. Firefox has no CDP, so idle paints are counted with MozAfterPaint
+// window events instead of a trace, and CPU throttling is Chrome-only
+// (Firefox runs unthrottled; compare its numbers against Chrome at THROTTLE=1).
 //
 // The idle paint budget fails the run when anything animates without
 // compositing on a static screen: the active-pawn halo once repainted the whole
@@ -18,10 +24,11 @@
 
 import { spawn, type ChildProcess } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
-import { chromium, type CDPSession, type Page } from 'playwright-core'
+import { chromium, firefox, type CDPSession, type Page } from 'playwright-core'
 
 const PORT = 4199
 const BASE = `http://127.0.0.1:${PORT}/strategy/`
+const BROWSER = (process.env.BROWSER ?? 'chrome') as 'chrome' | 'firefox'
 const SEED = process.env.SEED ?? 'perfprobe1'
 const DIFFICULTY = process.env.DIFFICULTY ?? 'normal'
 const THROTTLE = Number(process.env.THROTTLE ?? 6)
@@ -41,11 +48,16 @@ type FrameStats = {
   over22: number
 }
 
-type IdleStats = FrameStats & { paints: number; rasterTasks: number; layoutTrees: number }
+type IdleStats = FrameStats & {
+  paints: number
+  rasterTasks?: number
+  layoutTrees?: number
+}
 
 type BotTurn = { wallMs: number; taskTotalMs: number; worstTaskMs: number }
 
 type Report = {
+  browser: string
   throttle: number
   seed: string
   difficulty: string
@@ -120,42 +132,63 @@ async function trace<Measured>(
 const countEvents = (events: TraceEvent[], name: string) =>
   events.filter((event) => event.name === name).length
 
-async function measureIdle(page: Page, cdp: CDPSession): Promise<IdleStats> {
-  const { result, events } = await trace(cdp, () =>
-    page.evaluate(
-      (windowMs) =>
-        new Promise<FrameStats>((resolve) => {
-          const deltas: number[] = []
-          let last = performance.now()
-          const start = last
-          const tick = (now: number) => {
-            deltas.push(now - last)
-            last = now
-            if (now - start < windowMs) requestAnimationFrame(tick)
-            else {
-              deltas.sort((a, b) => a - b)
-              const percentile = (p: number) =>
-                deltas[Math.min(deltas.length - 1, Math.floor(deltas.length * p))]
-              resolve({
-                frames: deltas.length,
-                meanMs: deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length,
-                p95Ms: percentile(0.95),
-                maxMs: deltas[deltas.length - 1],
-                over22: deltas.filter((delta) => delta > 22).length,
-              })
-            }
-          }
-          requestAnimationFrame(tick)
-        }),
-      IDLE_WINDOW_MS,
-    ),
-  )
+const frameStats = (deltas: number[]): FrameStats => {
+  const sorted = [...deltas].sort((a, b) => a - b)
+  const percentile = (p: number) =>
+    sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))]
   return {
-    ...result,
+    frames: sorted.length,
+    meanMs: deltas.reduce((sum, delta) => sum + delta, 0) / sorted.length,
+    p95Ms: percentile(0.95),
+    maxMs: sorted[sorted.length - 1],
+    over22: deltas.filter((delta) => delta > 22).length,
+  }
+}
+
+// Samples frame deltas for IDLE_WINDOW_MS. MozAfterPaint is Gecko-only and
+// reaches content pages only with the dom.send_after_paint_to_content pref
+// set at launch; Chrome paints are counted from the CDP trace instead, so the
+// page counter stays at zero there.
+async function sampleIdle(page: Page): Promise<{ deltas: number[]; paints: number }> {
+  return page.evaluate(
+    (windowMs) =>
+      new Promise<{ deltas: number[]; paints: number }>((resolve) => {
+        const deltas: number[] = []
+        let paints = 0
+        let last = performance.now()
+        const start = last
+        const onPaint = () => {
+          paints++
+        }
+        window.addEventListener('MozAfterPaint', onPaint)
+        const tick = (now: number) => {
+          deltas.push(now - last)
+          last = now
+          if (now - start < windowMs) requestAnimationFrame(tick)
+          else {
+            window.removeEventListener('MozAfterPaint', onPaint)
+            resolve({ deltas, paints })
+          }
+        }
+        requestAnimationFrame(tick)
+      }),
+    IDLE_WINDOW_MS,
+  )
+}
+
+async function measureIdle(page: Page, cdp: CDPSession): Promise<IdleStats> {
+  const { result, events } = await trace(cdp, () => sampleIdle(page))
+  return {
+    ...frameStats(result.deltas),
     paints: countEvents(events, 'Paint'),
     rasterTasks: countEvents(events, 'RasterTask'),
     layoutTrees: countEvents(events, 'UpdateLayoutTree'),
   }
+}
+
+async function measureIdleFirefox(page: Page): Promise<IdleStats> {
+  const sample = await sampleIdle(page)
+  return { ...frameStats(sample.deltas), paints: sample.paints }
 }
 
 type LongTaskWindow = Window & { __longTasks?: number[] }
@@ -191,7 +224,13 @@ async function measureBotTurn(page: Page): Promise<BotTurn | null> {
 }
 
 async function runBenchmarks(): Promise<Report> {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true })
+  const browser =
+    BROWSER === 'firefox'
+      ? await firefox.launch({
+          headless: true,
+          firefoxUserPrefs: { 'dom.send_after_paint_to_content': true },
+        })
+      : await chromium.launch({ channel: 'chrome', headless: true })
   try {
     const context = await browser.newContext({
       viewport: { width: 412, height: 915 },
@@ -200,8 +239,8 @@ async function runBenchmarks(): Promise<Report> {
       hasTouch: true,
     })
     const page = await context.newPage()
-    const cdp = await context.newCDPSession(page)
-    await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLE })
+    const cdp = BROWSER === 'firefox' ? null : await context.newCDPSession(page)
+    if (cdp) await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLE })
 
     const loadedAt = Date.now()
     await page.goto(`${BASE}game/${SEED}?mode=ai&difficulty=${DIFFICULTY}`, {
@@ -215,7 +254,7 @@ async function runBenchmarks(): Promise<Report> {
     const loadMs = Date.now() - loadedAt
 
     await page.waitForTimeout(400)
-    const idle = await measureIdle(page, cdp)
+    const idle = cdp ? await measureIdle(page, cdp) : await measureIdleFirefox(page)
     const moveTapTasksMs = await measureMoveTap(page)
     const botTurns: BotTurn[] = []
     for (let turn = 0; turn < TURNS; turn++) {
@@ -225,7 +264,8 @@ async function runBenchmarks(): Promise<Report> {
       await page.waitForTimeout(200)
     }
     return {
-      throttle: THROTTLE,
+      browser: BROWSER,
+      throttle: cdp ? THROTTLE : 1,
       seed: SEED,
       difficulty: DIFFICULTY,
       loadMs,
@@ -242,15 +282,17 @@ const round = (value: number) => Math.round(value)
 
 function printReport(report: Report) {
   console.log(
-    `\nbench-web  seed=${report.seed}  difficulty=${report.difficulty}  throttle=${report.throttle}x`,
+    `\nbench-web  browser=${report.browser}  seed=${report.seed}  difficulty=${report.difficulty}  throttle=${report.throttle}x`,
   )
   console.log(`load until first player turn: ${report.loadMs} ms`)
   console.log(
     `idle ${IDLE_WINDOW_MS}ms: ${report.idle.frames} frames, mean ${round(report.idle.meanMs)}ms, p95 ${round(report.idle.p95Ms)}ms, >22ms ${report.idle.over22}`,
   )
-  console.log(
-    `idle paints ${report.idle.paints}, raster tasks ${report.idle.rasterTasks}, layout trees ${report.idle.layoutTrees} (budget: ${IDLE_PAINT_BUDGET} paints)`,
-  )
+  const detail =
+    report.idle.rasterTasks === undefined || report.idle.layoutTrees === undefined
+      ? `${report.idle.paints} MozAfterPaint events`
+      : `${report.idle.paints} paints, raster tasks ${report.idle.rasterTasks}, layout trees ${report.idle.layoutTrees}`
+  console.log(`idle ${detail} (budget: ${IDLE_PAINT_BUDGET} paints)`)
   console.log(
     `move tap long tasks: ${report.moveTapTasksMs.map(round).join(' + ') || 'none'} ms`,
   )

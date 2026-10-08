@@ -107,6 +107,8 @@
   }
   .pawn-active-halo {
     animation: halo-breathe 3s ease-in-out infinite;
+    /* Hint the compositor so the breathing halo never repaints the board SVG. */
+    will-change: opacity;
   }
   .briefing-card {
     animation: briefing-card-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;

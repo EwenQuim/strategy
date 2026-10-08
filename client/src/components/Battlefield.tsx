@@ -205,8 +205,8 @@ export function Battlefield({
             <polygon
               data-testid="tile-face"
               className={
-                'transition-[fill,filter] duration-200 ease-[ease] group-focus-visible/tile:fill-[#f1db9c] group-focus-visible/tile:brightness-120' +
-                (interactive ? ' group-hover/tile:brightness-120' : '')
+                'transition-[fill] duration-200 ease-[ease] group-focus-visible/tile:fill-[#f1db9c]' +
+                (interactive ? ' group-hover/tile:fill-[#f1db9c]' : '')
               }
               points={hexPoints}
               fill={fill}
