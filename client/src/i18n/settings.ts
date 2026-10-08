@@ -28,10 +28,3 @@ export const deleteAllDataCancel = t({
   es: 'Conservar mis datos',
   it: 'Mantieni i miei dati',
 })
-export const deleteAllDataDone = t({
-  en: 'All data has been deleted from this device.',
-  fr: 'Toutes les données ont été supprimées de cet appareil.',
-  de: 'Alle Daten wurden von diesem Gerät gelöscht.',
-  es: 'Se han borrado todos los datos de este dispositivo.',
-  it: 'Tutti i dati sono stati eliminati da questo dispositivo.',
-})

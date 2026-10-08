@@ -27,7 +27,6 @@ export const Route = createFileRoute('/settings')({
     const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
     const deleteDialog = useRef<HTMLDialogElement>(null)
-    const [dataDeleted, setDataDeleted] = useState(false)
     return (
       <MenuLayout title={m.settings}>
         <label
@@ -104,20 +103,16 @@ export const Route = createFileRoute('/settings')({
         )}
         <div className={menuCardClassName + ' flex flex-col gap-3 p-4 min-[900px]:p-6'}>
           <strong className="text-base">{s.deleteAllData}</strong>
-          {dataDeleted ? (
-            <p className="text-sm text-muted">{s.deleteAllDataDone}</p>
-          ) : (
-            <button
-              type="button"
-              className={
-                buttonClassName +
-                ' justify-center gap-2 border-red-400/50 bg-red-500/15 px-4 text-red-200 hover:bg-red-500/25 active:translate-y-px'
-              }
-              onClick={() => deleteDialog.current?.showModal()}
-            >
-              {s.deleteAllData}
-            </button>
-          )}
+          <button
+            type="button"
+            className={
+              buttonClassName +
+              ' justify-center gap-2 border-red-400/50 bg-red-500/15 px-4 text-red-200 hover:bg-red-500/25 active:translate-y-px'
+            }
+            onClick={() => deleteDialog.current?.showModal()}
+          >
+            {s.deleteAllData}
+          </button>
         </div>
         <dialog
           ref={deleteDialog}
@@ -140,12 +135,7 @@ export const Route = createFileRoute('/settings')({
               }
               onClick={() => {
                 clearAllData()
-                setDeveloperPreview(readDeveloperPreview())
-                setHapticsEnabled(readHapticsEnabled())
-                setMistralKey('')
-                setJevKey('')
-                setDataDeleted(true)
-                deleteDialog.current?.close()
+                location.reload()
               }}
             >
               {s.deleteAllDataConfirm}
