@@ -3,7 +3,7 @@
 NPM := npm --prefix client
 GO := go -C server
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-web
 
 onboarding: installdeps
 
@@ -44,6 +44,12 @@ test:
 
 test-integration:
 	$(NPM) run test:integration
+
+bench-ai:
+	$(NPM) run bench:ai
+
+bench-web:
+	$(NPM) run bench:web
 
 build:
 	$(NPM) run build
