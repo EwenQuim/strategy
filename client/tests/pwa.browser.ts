@@ -223,7 +223,6 @@ async function playInUi(page: Page, state: GameState, action: Action) {
     await page.locator('[data-action="special"]').click()
     if (action.destination) await clickTile(action.destination)
     if (action.target) await clickTile(action.target)
-    else await page.locator('[data-testid="hex-tile"][role="button"]').first().click()
     return
   }
   assert.fail('Unexpected action: ' + action.type)
