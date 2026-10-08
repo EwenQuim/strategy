@@ -57,13 +57,6 @@ export const home = t({
   es: 'Inicio de Hexmate',
   it: 'Home di Hexmate',
 })
-export const levelProgress = t({
-  en: (level: number, total: number) => `Level ${level} / ${total}`,
-  fr: (level: number, total: number) => `Niveau ${level} / ${total}`,
-  de: (level: number, total: number) => `Level ${level} / ${total}`,
-  es: (level: number, total: number) => `Nivel ${level} / ${total}`,
-  it: (level: number, total: number) => `Livello ${level} / ${total}`,
-})
 export const yourTurn = t({
   en: 'Your turn',
   fr: 'À vous',

@@ -5,7 +5,7 @@ import { initialState as coreState } from '../../src/lib/engine/index.ts'
 import { createBotGame } from '../../src/lib/engine/bot.ts'
 import { winnableAgainst } from '../campaign-actions.ts'
 
-const original = CAMPAIGNS[0]
+const original = CAMPAIGNS[1]
 
 test('All twenty distinct campaign encounters are winnable against normal AI', () => {
   assert.equal(original.levels.length, 20)
@@ -38,4 +38,9 @@ test('The introductory bowman can finish the battle if the player stays idle', (
   for (let step = 0; step < 40 && !state.winner; step++)
     state = bot.transition(state, { type: 'endTurn' }).state
   assert.equal(state.winner, 'enemy')
+})
+
+test('The tutorial is winnable against its own AI', () => {
+  const [level] = CAMPAIGNS[0].levels
+  assert.ok(winnableAgainst(level, level.difficulty))
 })

@@ -1,4 +1,4 @@
-import { useId, useState, type CSSProperties } from 'react'
+import { useId, useRef, useState, type CSSProperties } from 'react'
 import { iconButtonClassName, primaryButtonClassName } from './styles'
 import { Icon } from './Icon'
 import { ElementArt } from './BriefingElements'
@@ -30,6 +30,7 @@ function BriefingPopup({
   onClose?: () => void
 }) {
   const [page, setPage] = useState(0)
+  const swipeStart = useRef<{ x: number; y: number } | null>(null)
   const id = useId()
   const element = elements[page]
   const accent = (element.art && ELEMENT_ACCENTS[element.art]) || 'var(--gold)'
@@ -79,7 +80,19 @@ function BriefingPopup({
         </form>
       </header>
       <div
-        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        className="flex min-h-0 flex-1 touch-pan-y flex-col overflow-hidden"
+        onTouchStart={(event) => {
+          const touch = event.touches[0]
+          swipeStart.current = { x: touch.clientX, y: touch.clientY }
+        }}
+        onTouchEnd={(event) => {
+          const start = swipeStart.current
+          if (!start) return
+          const touch = event.changedTouches[0]
+          const dx = touch.clientX - start.x
+          if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(touch.clientY - start.y)) return
+          setPage(Math.min(Math.max(page - Math.sign(dx), 0), elements.length - 1))
+        }}
         aria-live="polite"
         aria-atomic="true"
       >

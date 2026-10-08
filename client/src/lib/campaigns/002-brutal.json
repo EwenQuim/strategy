@@ -17,6 +17,16 @@
           "kind": "swordsman",
           "col": 3,
           "row": 4
+        },
+        {
+          "kind": "archer",
+          "col": 3,
+          "row": 5
+        },
+        {
+          "kind": "magician",
+          "col": 2,
+          "row": 4
         }
       ],
       "enemy": [
@@ -24,6 +34,16 @@
           "kind": "king",
           "col": 2,
           "row": 0
+        },
+        {
+          "kind": "swordsman",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "kind": "swordsman",
+          "col": 3,
+          "row": 1
         }
       ]
     }
@@ -51,6 +71,11 @@
           "kind": "archer",
           "col": 4,
           "row": 5
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 5
         }
       ],
       "enemy": [
@@ -60,9 +85,14 @@
           "row": 2
         },
         {
-          "kind": "archer",
+          "kind": "swordsman",
           "col": 1,
           "row": 2
+        },
+        {
+          "kind": "swordsman",
+          "col": 4,
+          "row": 1
         }
       ]
     }
@@ -103,6 +133,16 @@
           "kind": "archer",
           "col": 5,
           "row": 9
+        },
+        {
+          "kind": "bomber",
+          "col": 4,
+          "row": 10
+        },
+        {
+          "kind": "magician",
+          "col": 4,
+          "row": 9
         }
       ],
       "enemy": [
@@ -120,6 +160,16 @@
           "kind": "archer",
           "col": 5,
           "row": 3
+        },
+        {
+          "kind": "bulwark",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 2,
+          "row": 2
         }
       ]
     }
@@ -157,13 +207,18 @@
           "row": 8
         },
         {
+          "kind": "magician",
+          "col": 5,
+          "row": 9
+        },
+        {
           "kind": "archer",
           "col": 6,
           "row": 11
         },
         {
-          "kind": "magician",
-          "col": 5,
+          "kind": "ninja",
+          "col": 4,
           "row": 9
         }
       ],
@@ -174,13 +229,23 @@
           "row": 1
         },
         {
+          "kind": "magician",
+          "col": 2,
+          "row": 2
+        },
+        {
           "kind": "swordsman",
           "col": 2,
           "row": 3
         },
         {
-          "kind": "magician",
-          "col": 2,
+          "kind": "bulwark",
+          "col": 3,
+          "row": 1
+        },
+        {
+          "kind": "archer",
+          "col": 5,
           "row": 2
         }
       ]
@@ -227,6 +292,11 @@
           "kind": "magician",
           "col": 5,
           "row": 10
+        },
+        {
+          "kind": "bomber",
+          "col": 4,
+          "row": 9
         }
       ],
       "enemy": [
@@ -237,12 +307,17 @@
         },
         {
           "kind": "archer",
+          "col": 6,
+          "row": 2
+        },
+        {
+          "kind": "archer",
           "col": 3,
           "row": 3
         },
         {
-          "kind": "archer",
-          "col": 6,
+          "kind": "swordsman",
+          "col": 4,
           "row": 2
         }
       ]
@@ -276,19 +351,24 @@
           "row": 10
         },
         {
-          "kind": "swordsman",
-          "col": 3,
+          "kind": "archer",
+          "col": 2,
           "row": 7
         },
         {
-          "kind": "archer",
-          "col": 2,
+          "kind": "swordsman",
+          "col": 3,
           "row": 7
         },
         {
           "kind": "magician",
           "col": 4,
           "row": 8
+        },
+        {
+          "kind": "ninja",
+          "col": 5,
+          "row": 9
         }
       ],
       "enemy": [
@@ -298,14 +378,24 @@
           "row": 1
         },
         {
+          "kind": "archer",
+          "col": 2,
+          "row": 4
+        },
+        {
           "kind": "swordsman",
           "col": 3,
           "row": 4
         },
         {
-          "kind": "archer",
-          "col": 2,
-          "row": 4
+          "kind": "bulwark",
+          "col": 4,
+          "row": 1
+        },
+        {
+          "kind": "magician",
+          "col": 5,
+          "row": 2
         }
       ]
     }

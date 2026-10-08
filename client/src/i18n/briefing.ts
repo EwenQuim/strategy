@@ -7,6 +7,27 @@ export const goal = t({
   es: 'Objetivo',
   it: 'Obiettivo',
 })
+export const turnOrder = t({
+  en: 'Turn order',
+  fr: 'Ordre des tours',
+  de: 'Zugreihenfolge',
+  es: 'Orden de turnos',
+  it: 'Ordine dei turni',
+})
+export const unitByUnit = t({
+  en: 'Units act one at a time, both armies mixed, not one player after the other',
+  fr: "Les unités jouent une par une, armées mêlées, et non un joueur après l'autre",
+  de: 'Einheiten ziehen einzeln, beide Armeen gemischt, nicht Spieler nach Spieler',
+  es: 'Las unidades actúan de una en una, ambos ejércitos mezclados, no jugador tras jugador',
+  it: "Le unità agiscono una alla volta, eserciti mescolati, non un giocatore dopo l'altro",
+})
+export const fixedOrder = t({
+  en: 'The order is set once and repeats every round: the top bar shows who is next',
+  fr: "L'ordre est fixé une fois et se répète à chaque manche : la barre du haut montre qui suit",
+  de: 'Die Reihenfolge steht einmal fest und wiederholt sich jede Runde: die obere Leiste zeigt, wer folgt',
+  es: 'El orden se fija una vez y se repite cada ronda: la barra superior muestra quién sigue',
+  it: "L'ordine è fissato una volta e si ripete ogni round: la barra in alto mostra chi segue",
+})
 export const energy = t({
   en: 'Energy',
   fr: 'Énergie',

@@ -1,3 +1,4 @@
+import tutorialLevels from './campaigns/000-tutorial.json' with { type: 'json' }
 import originalLevels from './campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
 import shatteredLevels from './campaigns/003-shattered.json' with { type: 'json' }
@@ -79,6 +80,7 @@ export function withBriefings<Level extends { setup: FixedBattleSetup }>(
 }
 
 const packs = [
+  tutorialLevels as Omit<CampaignLevel, 'newElements'>[],
   originalLevels as Omit<CampaignLevel, 'newElements'>[],
   brutalLevels as Omit<CampaignLevel, 'newElements'>[],
   shatteredLevels as Omit<CampaignLevel, 'newElements'>[],
@@ -99,39 +101,42 @@ for (const levels of packs) {
 const briefedCampaigns = withBriefings(packs)
 
 export const CAMPAIGNS: Campaign[] = [
-  { slug: 'original', name: 'Original', levels: briefedCampaigns[0] },
-  { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[1] },
+  { slug: 'tutorial', name: 'Tutorial', levels: briefedCampaigns[0] },
+  { slug: 'original', name: 'Original', levels: briefedCampaigns[1] },
+  { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[2], requiredVictories: 10 },
   {
     slug: 'shattered',
     name: 'Shattered Crown',
-    levels: briefedCampaigns[2],
+    levels: briefedCampaigns[3],
     developerPreview: true,
   },
   {
     slug: 'war-of-the-ring',
     name: 'War of the Ring',
-    levels: briefedCampaigns[3],
+    levels: briefedCampaigns[4],
     requiredVictories: 25,
   },
   {
     slug: 'iron-throne',
     name: 'Iron Throne',
-    levels: briefedCampaigns[4],
+    levels: briefedCampaigns[5],
     requiredVictories: 35,
   },
   {
     slug: 'hot-gates',
     name: 'Thermopylae',
-    levels: briefedCampaigns[5],
+    levels: briefedCampaigns[6],
     requiredVictories: 45,
   },
   {
     slug: 'ragnarok',
     name: 'Ragnarok',
-    levels: briefedCampaigns[6],
+    levels: briefedCampaigns[7],
     requiredVictories: 55,
   },
 ]
+
+export const TUTORIAL = CAMPAIGNS[0]
 
 export function totalVictories(completedIn: (slug: string) => number): number {
   return CAMPAIGNS.reduce((sum, campaign) => sum + completedIn(campaign.slug), 0)
@@ -169,16 +174,17 @@ export function parseCampaignProgress(value: string | null, levels: number): num
     : []
 }
 
+const levelExists = (campaign: Campaign, level: number) =>
+  Number.isInteger(level) && level >= 1 && level <= campaign.levels.length
+
 export function isLevelUnlocked(
   campaign: Campaign,
   level: number,
   cleared: readonly number[],
+  developerPreview: boolean,
 ): boolean {
   return (
-    Number.isInteger(level) &&
-    level >= 1 &&
-    level <= campaign.levels.length &&
-    (campaign.slug !== 'original' || level <= cleared.length + 1)
+    levelExists(campaign, level) && (developerPreview || level <= Math.max(0, ...cleared) + 1)
   )
 }
 
@@ -187,7 +193,7 @@ export function completeCampaignLevel(
   cleared: readonly number[],
   level: number,
 ): readonly number[] {
-  return isLevelUnlocked(campaign, level, cleared) && !cleared.includes(level)
+  return levelExists(campaign, level) && !cleared.includes(level)
     ? [...cleared, level].sort((a, b) => a - b)
     : cleared
 }

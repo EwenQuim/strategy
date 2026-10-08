@@ -6,11 +6,14 @@ import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
+import { campaignName } from '../i18n/campaign'
 import { alreadyActed, inspect, threatZone } from '../i18n/battlefield'
 import type { GameMode, PlayerNames } from '../lib/game-mode'
 import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
-import { iconButtonClassName } from './styles'
+
+const headerButtonClassName =
+  'grid size-9 place-items-center rounded-xl border border-line bg-white/5 text-muted hover:bg-[#ffffff09] hover:text-ink [&>svg]:size-[19px]'
 
 interface GameHeaderProps {
   biome: Biome
@@ -72,19 +75,19 @@ export function GameHeader({
           <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-white/5 text-gold">
             <Icon name="arrow" className="size-[18px] rotate-180" />
           </span>
-          <span>
-            Hexmate
+          <span className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate">{campaign ? campaignName(campaign) : 'Hexmate'}</span>
             <span
-              className="mt-[5px] block font-label text-[7px] leading-[normal] tracking-[0.29em] text-muted"
+              className="shrink-0 text-xs font-semibold tabular-nums text-muted"
               data-testid="battle-subtitle"
             >
               {campaign && campaignLevel
-                ? m.levelProgress(campaignLevel, campaign.levels.length)
+                ? campaignLevel + ' / ' + campaign.levels.length
                 : biomeNames[biome]}
             </span>
           </span>
         </Link>
-        <div className="flex gap-0">
+        <div className="flex shrink-0 items-center gap-1.5">
           {(local || isOnline) && pawn && !winner && (
             <span
               className="mr-2.5 self-center text-[10px] text-[#d69b81] data-[side=player]:text-[#b6d2b5]"
@@ -107,10 +110,7 @@ export function GameHeader({
             </span>
           )}
           <button
-            className={
-              iconButtonClassName +
-              ' rounded-xl border-line bg-white/5 aria-pressed:text-[#ff8a6e]'
-            }
+            className={headerButtonClassName + ' aria-pressed:text-[#ff8a6e]'}
             onClick={onToggleThreats}
             aria-pressed={threatsShown}
             aria-label={threatZone}
@@ -119,7 +119,7 @@ export function GameHeader({
             <Icon name="target" />
           </button>
           <button
-            className={iconButtonClassName + ' rounded-xl border-line bg-white/5'}
+            className={headerButtonClassName}
             onClick={onHelp}
             aria-label={m.howToPlay}
             title={m.howToPlay}
@@ -128,7 +128,7 @@ export function GameHeader({
           </button>
         </div>
       </div>
-      <div className="m-auto flex min-h-[46px] max-w-[1040px] items-center gap-3 border-t border-line min-[900px]:min-h-[48px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[38px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
+      <div className="m-auto flex min-h-[46px] max-w-[1040px] items-center gap-3 border-t py-1 border-line min-[900px]:min-h-[48px] max-[601px]:gap-2 [@media(max-height:650px)]:min-h-[38px] [@media(min-width:600px)_and_(max-height:480px)]:hidden">
         <ol
           className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
           aria-label={m.turnOrder}
