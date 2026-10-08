@@ -1,4 +1,3 @@
-import { BOT_LEVELS, type BotOptions } from '../lib/engine/ai.ts'
 import { legalActions } from '../lib/engine/ai/options.ts'
 import {
   activePawn,
@@ -94,12 +93,9 @@ export function actionFromChoice(choice: unknown, state: GameState): Action | nu
   return acceptedAction(action, state)
 }
 
-export async function jevChooseAction(
-  state: GameState,
-  options: BotOptions = BOT_LEVELS.normal,
-): Promise<Action> {
+export async function jevChooseAction(state: GameState): Promise<Action> {
   const apiKey = readJevApiKey()
-  if (!apiKey || !activePawn(state)) return fallbackAction(state, options, 'jev')
+  if (!apiKey || !activePawn(state)) return fallbackAction(state, 'jev')
   try {
     const response = await fetch(ENDPOINT, {
       method: 'POST',
@@ -118,14 +114,11 @@ export async function jevChooseAction(
         },
       }),
     })
-    if (!response.ok) return fallbackAction(state, options, 'jev')
+    if (!response.ok) return fallbackAction(state, 'jev')
     const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
-    return (
-      actionFromChoice(data.answers?.move?.choice, state) ??
-      fallbackAction(state, options, 'jev')
-    )
+    return actionFromChoice(data.answers?.move?.choice, state) ?? fallbackAction(state, 'jev')
   } catch {
     // Network, quota or parsing failure: the local AI keeps the battle moving.
-    return fallbackAction(state, options, 'jev')
+    return fallbackAction(state, 'jev')
   }
 }

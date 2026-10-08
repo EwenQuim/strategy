@@ -63,6 +63,6 @@ test('Without the adapter the mistral strategy falls back to the local search', 
 
 test('Without an API key the adapter falls back to a legal local action', async () => {
   const state = enemyTurn('mistral-fallback')
-  const action = await mistralChooseAction(state, BOT_LEVELS.normal)
+  const action = await mistralChooseAction(state)
   assert.notEqual(reducer(state, action), state)
 })

@@ -1,5 +1,5 @@
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
-import { STRATEGIES, type AiStrategyId } from './engine/ai/decision.ts'
+import { STRATEGIES, type AiStrategyId, type BotConfig } from './engine/ai/decision.ts'
 import { validateSetup } from './engine/setup.ts'
 import type { BattleSetup } from './engine/index.ts'
 
@@ -30,6 +30,17 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
     }
   }
   return result
+}
+
+// The URL keeps its two plain params (?difficulty=hard, ?strategy=mistral) for shareable
+// links; the app folds them into one bot description at the route boundary.
+export function botFromSearch(search: GameSearch): BotConfig {
+  if (search.strategy && search.strategy !== 'depthsearch') return { name: search.strategy }
+  return { name: 'depthsearch', difficulty: search.difficulty ?? 'normal' }
+}
+
+export function searchFromBot(bot: BotConfig): Pick<GameSearch, 'difficulty' | 'strategy'> {
+  return bot.name === 'depthsearch' ? { difficulty: bot.difficulty } : { strategy: bot.name }
 }
 
 const isQuickLocalGame = (search: GameSearch): boolean =>

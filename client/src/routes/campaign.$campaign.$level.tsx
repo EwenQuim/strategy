@@ -35,7 +35,7 @@ export const Route = createFileRoute('/campaign/$campaign/$level')({
           seed={level.seed}
           mode="ai"
           setup={level.setup}
-          difficulty={level.difficulty}
+          bot={{ name: 'depthsearch', difficulty: level.difficulty }}
           campaign={campaign}
           campaignLevel={level.id}
           onVictory={() => recordCampaignVictory(campaign.slug, level.id)}

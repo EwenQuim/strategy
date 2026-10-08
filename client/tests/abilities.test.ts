@@ -162,7 +162,12 @@ test('Bots use long-range rays and bombs centered on empty tiles', () => {
   for (const Unit of [Magician, Bomber]) {
     const state = battle(new Unit(1, 0, 0, 'player'))
     state.pawns[2] = new King(3, Unit === Magician ? 7 : 3, 0, 'enemy', 1)
-    for (const level of ['easy', 'normal', 'hard', nearestTarget] as const) {
+    for (const level of [
+      { name: 'depthsearch', difficulty: 'easy' },
+      { name: 'depthsearch', difficulty: 'normal' },
+      { name: 'depthsearch', difficulty: 'hard' },
+      nearestTarget,
+    ] as const) {
       const actions = chooseBotActions(state, level)
       const next = actions.reduce(reducer, state)
       assert.equal(next.winner, 'player')
@@ -259,7 +264,12 @@ test('Bots avoid bombing their own king and do not target ally-only groups', () 
   const state = battle(new Bomber(1, 0, 0, 'player'))
   state.pawns[1] = new King(2, 2, 0, 'player', 1)
   state.pawns[2] = new King(3, 3, 0, 'enemy', 1)
-  for (const strategy of ['easy', 'normal', 'hard', nearestTarget] as const) {
+  for (const strategy of [
+    { name: 'depthsearch', difficulty: 'easy' },
+    { name: 'depthsearch', difficulty: 'normal' },
+    { name: 'depthsearch', difficulty: 'hard' },
+    nearestTarget,
+  ] as const) {
     const next = chooseBotActions(state, strategy).reduce(reducer, state)
     assert.equal(next.pawns.find((pawn) => pawn.id === 2)?.hp, 1)
     assert.notEqual(next.winner, 'enemy')

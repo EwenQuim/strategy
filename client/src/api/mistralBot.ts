@@ -1,4 +1,3 @@
-import { BOT_LEVELS, type BotOptions } from '../lib/engine/ai.ts'
 import { legalActions } from '../lib/engine/ai/options.ts'
 import { activePawn, type Action, type GameState } from '../lib/engine/index.ts'
 import {
@@ -64,12 +63,9 @@ export function actionFromReply(reply: string, state: GameState): Action | null 
   return acceptedAction(parsed as Action, state)
 }
 
-export async function mistralChooseAction(
-  state: GameState,
-  options: BotOptions = BOT_LEVELS.normal,
-): Promise<Action> {
+export async function mistralChooseAction(state: GameState): Promise<Action> {
   const apiKey = readMistralApiKey()
-  if (!apiKey || !activePawn(state)) return fallbackAction(state, options, 'mistral')
+  if (!apiKey || !activePawn(state)) return fallbackAction(state, 'mistral')
   try {
     // Imported lazily so the SDK stays in its own chunk, loaded only for Mistral battles.
     const { MistralCore } = await import('@mistralai/mistralai/core.js')
@@ -87,16 +83,16 @@ export async function mistralChooseAction(
         { role: 'user', content: battlePrompt(state) },
       ],
     })
-    if (!result.ok) return fallbackAction(state, options, 'mistral')
+    if (!result.ok) return fallbackAction(state, 'mistral')
     const content = result.value.choices[0]?.message?.content
     const reply =
       typeof content === 'string'
         ? content
         : content?.map((chunk) => (chunk.type === 'text' ? chunk.text : '')).join('')
-    if (!reply) return fallbackAction(state, options, 'mistral')
-    return actionFromReply(reply, state) ?? fallbackAction(state, options, 'mistral')
+    if (!reply) return fallbackAction(state, 'mistral')
+    return actionFromReply(reply, state) ?? fallbackAction(state, 'mistral')
   } catch {
     // Network, quota or parsing failure: the local AI keeps the battle moving.
-    return fallbackAction(state, options, 'mistral')
+    return fallbackAction(state, 'mistral')
   }
 }

@@ -1,5 +1,5 @@
 import type { Action, GameState } from '../engine.ts'
-import type { BotOptions } from '../ai.ts'
+import { BOT_LEVELS, type BotDifficulty, type BotOptions } from '../ai.ts'
 import { depthsearch } from './strategies/depthsearch.ts'
 import { jev } from './strategies/jev.ts'
 import { mistral } from './strategies/mistral.ts'
@@ -26,6 +26,19 @@ export const STRATEGIES = { depthsearch, random, mistral, jev } as const satisfi
 >
 
 export type AiStrategyId = keyof typeof STRATEGIES
+
+// The whole description of the engine's opponent: which thinking system plays, plus its
+// difficulty when it has one. Remote strategies have no difficulty dial — their synchronous
+// fallback plays at normal.
+export type BotConfig =
+  | { name: 'depthsearch'; difficulty: BotDifficulty }
+  | { name: Exclude<AiStrategyId, 'depthsearch'> }
+
+export const DEFAULT_BOT_CONFIG: BotConfig = { name: 'depthsearch', difficulty: 'normal' }
+
+export function botOptions(config: BotConfig): BotOptions {
+  return config.name === 'depthsearch' ? BOT_LEVELS[config.difficulty] : BOT_LEVELS.normal
+}
 
 export function chooseAiActions(
   state: GameState,

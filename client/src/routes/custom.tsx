@@ -54,8 +54,9 @@ export const Route = createFileRoute('/custom')({
               to: '/game',
               search: {
                 mode,
-                difficulty,
-                ...(strategy !== 'depthsearch' ? { strategy } : {}),
+                // Remote strategies have no difficulty dial, so the link carries only the
+                // param the chosen strategy uses.
+                ...(strategy === 'depthsearch' ? { difficulty } : { strategy }),
                 setup: { biome, player, enemy: enemyRoster },
               },
             })
@@ -75,25 +76,27 @@ export const Route = createFileRoute('/custom')({
                   <option value="local">{m.twoPlayers}</option>
                 </select>
               </div>
-              <div className="grid gap-1.5 text-[12px] text-muted">
-                <label htmlFor="custom-difficulty">
-                  {m.difficulty}
-                  {mode === 'local' && m.aiOnly}
-                </label>
-                <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
-                  id="custom-difficulty"
-                  value={difficulty}
-                  disabled={mode === 'local'}
-                  onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
-                >
-                  {Object.keys(BOT_LEVELS).map((level) => (
-                    <option key={level} value={level}>
-                      {m.difficulties[level as BotDifficulty]}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {strategy === 'depthsearch' && (
+                <div className="grid gap-1.5 text-[12px] text-muted">
+                  <label htmlFor="custom-difficulty">
+                    {m.difficulty}
+                    {mode === 'local' && m.aiOnly}
+                  </label>
+                  <select
+                    className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                    id="custom-difficulty"
+                    value={difficulty}
+                    disabled={mode === 'local'}
+                    onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
+                  >
+                    {Object.keys(BOT_LEVELS).map((level) => (
+                      <option key={level} value={level}>
+                        {m.difficulties[level as BotDifficulty]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
                 <label htmlFor="custom-biome">{m.biome}</label>
                 <select

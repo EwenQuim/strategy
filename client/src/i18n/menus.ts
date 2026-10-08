@@ -115,12 +115,12 @@ export const aiStrategy = t({
   es: 'Estrategia IA',
   it: 'Strategia IA',
 })
-export const aiStrategies = t<Record<'depthsearch' | 'mistral' | 'jev', string>>({
-  en: { depthsearch: 'Hexmate AI', mistral: 'Mistral AI', jev: 'Jev AI' },
-  fr: { depthsearch: 'IA Hexmate', mistral: 'IA Mistral', jev: 'IA Jev' },
-  de: { depthsearch: 'Hexmate KI', mistral: 'Mistral KI', jev: 'Jev KI' },
-  es: { depthsearch: 'IA Hexmate', mistral: 'IA Mistral', jev: 'IA Jev' },
-  it: { depthsearch: 'IA Hexmate', mistral: 'IA Mistral', jev: 'IA Jev' },
+export const aiStrategies = t<Record<'depthsearch' | 'random' | 'mistral' | 'jev', string>>({
+  en: { depthsearch: 'Hexmate AI', random: 'Random AI', mistral: 'Mistral AI', jev: 'Jev AI' },
+  fr: { depthsearch: 'IA Hexmate', random: 'Aléatoire', mistral: 'IA Mistral', jev: 'IA Jev' },
+  de: { depthsearch: 'Hexmate KI', random: 'Zufall', mistral: 'Mistral KI', jev: 'Jev KI' },
+  es: { depthsearch: 'IA Hexmate', random: 'Aleatoria', mistral: 'IA Mistral', jev: 'IA Jev' },
+  it: { depthsearch: 'IA Hexmate', random: 'Casuale', mistral: 'IA Mistral', jev: 'IA Jev' },
 })
 export const mistralApiKey = t({
   en: 'Mistral API key',

@@ -14,13 +14,12 @@ import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { Action, BattleSetup, Transition } from '../lib/engine/index.ts'
-import { BOT_LEVELS, type BotDifficulty, type BotOptions } from '../lib/engine/ai.ts'
-import type { AiStrategyId } from '../lib/engine/ai/decision.ts'
+import { DEFAULT_BOT_CONFIG, type BotConfig } from '../lib/engine/ai/decision.ts'
 
 // Adapter-driven strategies have no synchronous bot: their adapter thinks one enemy action
 // at a time. Adding one is a new entry here plus an adapterDriven strategy file.
 const ASYNC_BOTS: Partial<
-  Record<AiStrategyId, (state: Transition['state'], options: BotOptions) => Promise<Action>>
+  Record<BotConfig['name'], (state: Transition['state']) => Promise<Action>>
 > = {
   mistral: mistralChooseAction,
   jev: jevChooseAction,
@@ -32,8 +31,7 @@ export interface GameOptions {
   seed: string
   mode: GameMode
   setup?: BattleSetup
-  difficulty?: BotDifficulty
-  strategy?: AiStrategyId
+  bot?: BotConfig
   onVictory?: () => void
   online?: OnlineSession
 }
@@ -42,14 +40,13 @@ export function useGame({
   seed,
   mode,
   setup,
-  difficulty = 'normal',
-  strategy = 'depthsearch',
+  bot = DEFAULT_BOT_CONFIG,
   onVictory,
   online,
 }: GameOptions) {
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: PlaybackAction) => {
-      const next = playbackReducer(playback, action, mode, difficulty, strategy)
+      const next = playbackReducer(playback, action, mode, bot)
       // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
       if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
       return next
@@ -57,19 +54,19 @@ export function useGame({
     seed,
     (seed) => {
       // Online battles resync from the server snapshot instead of the saved one.
-      const saved = online ? null : readBattleFromLocalStorage(mode, seed, difficulty, setup)
+      const saved = online ? null : readBattleFromLocalStorage(mode, seed, bot, setup)
       return saved ? { state: saved, frames: [] } : initialPlayback(seed, mode, setup)
     },
   )
-  const dispatchOnline = useOnlineSync(online, playback, mode, difficulty, dispatch)
+  const dispatchOnline = useOnlineSync(online, playback, mode, dispatch)
   const frame = playback.frames[0]
   const state = frame?.state ?? playback.state
   const playing = !!frame
 
   // The current battle lives in one localStorage slot, overwritten on every state change.
   useEffect(() => {
-    if (!online) saveBattleToLocalStorage(mode, seed, difficulty, setup, playback.state)
-  }, [difficulty, mode, online, playback.state, seed, setup])
+    if (!online) saveBattleToLocalStorage(mode, seed, bot, setup, playback.state)
+  }, [bot, mode, online, playback.state, seed, setup])
 
   useEffect(() => {
     if (!frame) return
@@ -85,12 +82,12 @@ export function useGame({
   // Adapter-driven strategies have no synchronous bot: while the enemy is to act, this
   // effect asks the adapter for one action and plays it through the same reducer as human
   // actions.
+  const asyncBot = ASYNC_BOTS[bot.name]
   useEffect(() => {
-    const asyncBot = ASYNC_BOTS[strategy]
     if (mode !== 'ai' || !asyncBot || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void asyncBot(state, BOT_LEVELS[difficulty])
+    void asyncBot(state)
       .then((action) => {
         if (!cancelled) dispatch(action)
       })
@@ -100,7 +97,7 @@ export function useGame({
     return () => {
       cancelled = true
     }
-  }, [difficulty, dispatch, mode, online, playing, state, strategy])
+  }, [asyncBot, dispatch, mode, online, playing, state])
 
   return {
     state,

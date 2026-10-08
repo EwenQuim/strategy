@@ -13,7 +13,7 @@ export function campaignActions(state: GameState, caution = 0.25): Action[] {
 }
 
 function playToTheEnd(level: CampaignLevel, difficulty: BotDifficulty, caution: number) {
-  const bot = createBotGame(difficulty)
+  const bot = createBotGame({ name: 'depthsearch', difficulty })
   let state = bot.initialState(level.seed, level.setup)
   for (let step = 0; step < 300 && !state.winner; step++) {
     for (const action of campaignActions(state, caution)) {

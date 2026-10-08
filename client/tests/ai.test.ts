@@ -40,7 +40,7 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of chooseBotActions(state, level)) {
+    for (const action of chooseBotActions(state, { name: 'depthsearch', difficulty: level })) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next
@@ -61,7 +61,7 @@ test('Equally valued attacks keep candidate order at every difficulty', () => {
       ...targets,
     ])
     for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
-      assert.deepEqual(chooseBotActions(state, level), [
+      assert.deepEqual(chooseBotActions(state, { name: 'depthsearch', difficulty: level }), [
         { type: 'attack', q: targets[0].q, r: targets[0].r },
       ])
     }

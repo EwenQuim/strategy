@@ -34,7 +34,7 @@ function replay(
     const enemy = pawn.side === 'enemy'
     const started = performance.now()
     const actions = enemy
-      ? chooseBotActions(state, difficulty)
+      ? chooseBotActions(state, { name: 'depthsearch', difficulty })
       : campaignActions(state, caution)
     const ms = performance.now() - started
     if (searchStats.decisions > 0)

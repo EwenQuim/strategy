@@ -1,6 +1,5 @@
 import { initialTransition, createBotGame } from './engine/bot.ts'
-import type { BotDifficulty } from './engine/ai.ts'
-import { STRATEGIES, type AiStrategyId } from './engine/ai/decision.ts'
+import { DEFAULT_BOT_CONFIG, STRATEGIES, type BotConfig } from './engine/ai/decision.ts'
 import { activePawn, isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, Transition } from './engine/index.ts'
@@ -26,15 +25,14 @@ export function playbackReducer(
   playback: Transition,
   action: PlaybackAction,
   mode: GameMode = 'ai',
-  difficulty: BotDifficulty = 'normal',
-  strategy: AiStrategyId = 'depthsearch',
+  bot: BotConfig = DEFAULT_BOT_CONFIG,
 ): Transition {
   if (action.type === 'playbackFinish') return { ...playback, frames: [] }
   if (action.type === 'playbackNext') return { ...playback, frames: playback.frames.slice(1) }
   if (action.type === 'resync')
     return { state: replay(playback.state.seed, action.actions), frames: [] }
   if (playback.frames.length) return playback
-  if (mode === 'ai' && STRATEGIES[strategy].adapterDriven) {
+  if (mode === 'ai' && STRATEGIES[bot.name].adapterDriven) {
     const result = applyAction(playback.state, action)
     // Adapter-driven strategies are played action by action by their async adapter, so
     // enemy moves animate like a local player's; the player's own actions keep only their
@@ -49,7 +47,7 @@ export function playbackReducer(
       frames: result.frames.filter(isImpactFrame),
     }
   }
-  return createBotGame(difficulty, strategy).transition(playback.state, action)
+  return createBotGame(bot).transition(playback.state, action)
 }
 
 export function replay(seed: string, actions: OnlineAction[]) {

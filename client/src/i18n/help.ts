@@ -28,6 +28,13 @@ export const aiDifficulty = t({
   es: (difficulty: string) => `Dificultad de la IA: ${difficulty}.`,
   it: (difficulty: string) => `Difficoltà dell'IA: ${difficulty}.`,
 })
+export const aiStrategy = t({
+  en: (name: string) => `AI strategy: ${name}.`,
+  fr: (name: string) => `Stratégie IA : ${name}.`,
+  de: (name: string) => `KI-Strategie: ${name}.`,
+  es: (name: string) => `Estrategia IA: ${name}.`,
+  it: (name: string) => `Strategia IA: ${name}.`,
+})
 
 export const localPlayers = t({
   en: 'Player 1 commands green units, Player 2 red units',

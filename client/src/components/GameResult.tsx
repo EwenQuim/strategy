@@ -5,8 +5,8 @@ import * as m from '../i18n/game'
 import * as achievementTexts from '../i18n/achievements'
 import { ACHIEVEMENTS, type AchievementId } from '../lib/achievements'
 import { levelName } from '../i18n/campaign'
-import { type GameMode, type PlayerNames } from '../lib/game-mode'
-import type { BotDifficulty } from '../lib/engine/ai'
+import { type GameMode, type PlayerNames, searchFromBot } from '../lib/game-mode'
+import type { BotConfig } from '../lib/engine/ai/decision'
 import { Icon } from './Icon'
 import { panelClassName, primaryButtonClassName } from './styles'
 
@@ -18,7 +18,7 @@ interface GameResultProps {
   viewerSide?: Side
   winnerLabel: string | null
   mode: GameMode
-  difficulty: BotDifficulty
+  bot: BotConfig
   setup?: BattleSetup
   names: PlayerNames
   campaign?: Campaign
@@ -33,7 +33,7 @@ export function GameResult({
   viewerSide = 'player',
   winnerLabel,
   mode,
-  difficulty,
+  bot,
   setup,
   names,
   campaign,
@@ -178,7 +178,7 @@ export function GameResult({
             to="/game"
             search={{
               mode,
-              difficulty,
+              ...searchFromBot(bot),
               setup: setup?.map === undefined ? setup : undefined,
             }}
             className={resultButtonClassName}

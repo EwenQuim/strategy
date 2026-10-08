@@ -1,4 +1,4 @@
-import { type BotOptions } from '../lib/engine/ai.ts'
+import { BOT_LEVELS } from '../lib/engine/ai.ts'
 import { chooseAiActions, type AiStrategyId } from '../lib/engine/ai/decision.ts'
 import {
   activePawn,
@@ -85,13 +85,9 @@ export function acceptedAction(action: Action, state: GameState): Action | null 
 }
 
 // Any failure (no key, network, quota, illegal proposal) degrades to the strategy's own
-// synchronous local search, so a battle can never stall.
-export function fallbackAction(
-  state: GameState,
-  options: BotOptions,
-  strategy: AiStrategyId,
-): Action {
-  return chooseAiActions(state, options, strategy)[0] ?? { type: 'endTurn' }
+// synchronous local search at normal difficulty, so a battle can never stall.
+export function fallbackAction(state: GameState, strategy: AiStrategyId): Action {
+  return chooseAiActions(state, BOT_LEVELS.normal, strategy)[0] ?? { type: 'endTurn' }
 }
 
 // BYOK key storage: the player pastes a key in Settings and it lives in localStorage.
