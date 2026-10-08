@@ -8,6 +8,8 @@ import {
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
 import { hapticForFrame } from '../haptics.ts'
 import { useOnlineSync } from './onlineSync.ts'
+import { mistralChooseAction } from './mistralBot.ts'
+import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
@@ -48,6 +50,8 @@ export function useGame({
   )
   const dispatchOnline = useOnlineSync(online, playback, mode, difficulty, dispatch)
   const frame = playback.frames[0]
+  const state = frame?.state ?? playback.state
+  const playing = !!frame
 
   // The current battle lives in one localStorage slot, overwritten on every state change.
   useEffect(() => {
@@ -65,11 +69,29 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
+  // The 'mistral' difficulty has no synchronous bot: while the enemy is to act, this effect asks
+  // the adapter for one action and plays it through the same reducer as human actions.
+  useEffect(() => {
+    if (mode !== 'ai' || difficulty !== 'mistral' || online || playing || state.winner) return
+    if (activePawn(state)?.side !== 'enemy') return
+    let cancelled = false
+    void mistralChooseAction(state)
+      .then((action) => {
+        if (!cancelled) dispatch(action)
+      })
+      .catch(() => {
+        if (!cancelled) dispatch({ type: 'endTurn' })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [difficulty, dispatch, mode, online, playing, state])
+
   return {
-    state: frame?.state ?? playback.state,
+    state,
     effect: frame?.effect ?? null,
     effectId: playback.frames.length,
-    playing: !!frame,
+    playing,
     dispatch: online ? dispatchOnline : dispatch,
   }
 }

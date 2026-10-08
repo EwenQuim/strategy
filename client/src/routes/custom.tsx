@@ -5,7 +5,11 @@ import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
-import { readSymmetricPreference, saveSymmetricPreference } from '../preferences'
+import {
+  readDeveloperPreview,
+  readSymmetricPreference,
+  saveSymmetricPreference,
+} from '../preferences'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { unitNames } from '../i18n/units'
@@ -20,6 +24,7 @@ export const Route = createFileRoute('/custom')({
     const [difficulty, setDifficulty] = useState<BotDifficulty>('normal')
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
+    const [developerPreview] = useState(readDeveloperPreview)
     const [player, setPlayer] = useState<Pawn['kind'][]>([
       'king',
       'swordsman',
@@ -75,11 +80,13 @@ export const Route = createFileRoute('/custom')({
                   disabled={mode === 'local'}
                   onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
                 >
-                  {Object.keys(BOT_LEVELS).map((level) => (
-                    <option key={level} value={level}>
-                      {m.difficulties[level as BotDifficulty]}
-                    </option>
-                  ))}
+                  {[...Object.keys(BOT_LEVELS), ...(developerPreview ? ['mistral'] : [])].map(
+                    (level) => (
+                      <option key={level} value={level}>
+                        {m.difficulties[level as BotDifficulty]}
+                      </option>
+                    ),
+                  )}
                 </select>
               </div>
               <div className="grid gap-1.5 text-[12px] text-muted col-span-full">

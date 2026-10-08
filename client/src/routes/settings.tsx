@@ -10,11 +10,13 @@ import {
   readHapticsEnabled,
   saveHapticsEnabled,
 } from '../preferences'
+import { readMistralApiKey, saveMistralApiKey } from '../api/mistralBot'
 
 export const Route = createFileRoute('/settings')({
   component: function Settings() {
     const [developerPreview, setDeveloperPreview] = useState(readDeveloperPreview)
     const [hapticsEnabled, setHapticsEnabled] = useState(readHapticsEnabled)
+    const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     return (
       <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
         <header className="flex items-center justify-between gap-3">
@@ -55,6 +57,26 @@ export const Route = createFileRoute('/settings')({
             }}
           />
         </label>
+        {developerPreview && (
+          <label className="flex flex-col gap-2 rounded-lg border border-line p-4">
+            <span className="flex flex-col gap-1">
+              <strong className="text-[14px]">{m.mistralApiKey}</strong>
+              <small className="text-[12px] text-muted">{m.mistralApiKeyHint}</small>
+            </span>
+            <input
+              className="min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+              type="password"
+              autoComplete="off"
+              spellCheck={false}
+              value={mistralKey}
+              aria-label={m.mistralApiKey}
+              onChange={(event) => {
+                setMistralKey(event.target.value.trim())
+                saveMistralApiKey(event.target.value.trim())
+              }}
+            />
+          </label>
+        )}
       </main>
     )
   },

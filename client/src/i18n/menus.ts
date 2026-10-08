@@ -102,11 +102,25 @@ export const aiOnly = t({
   it: ' (solo IA)',
 })
 export const difficulties = t<Record<BotDifficulty, string>>({
-  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard' },
-  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile' },
-  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' },
-  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil' },
-  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile' },
+  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard', mistral: 'Mistral AI' },
+  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile', mistral: 'IA Mistral' },
+  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer', mistral: 'Mistral KI' },
+  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil', mistral: 'IA Mistral' },
+  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile', mistral: 'IA Mistral' },
+})
+export const mistralApiKey = t({
+  en: 'Mistral API key',
+  fr: 'Clé API Mistral',
+  de: 'Mistral API-Schlüssel',
+  es: 'Clave de API de Mistral',
+  it: 'Chiave API Mistral',
+})
+export const mistralApiKeyHint = t({
+  en: 'Powers the experimental Mistral AI difficulty in custom battles. Stored only in this browser.',
+  fr: 'Alimente la difficulté expérimentale IA Mistral dans les batailles personnalisées. Stockée uniquement dans ce navigateur.',
+  de: 'Versorgt den experimentellen Mistral-KI-Schwierigkeitsgrad in eigenen Kämpfen. Nur in diesem Browser gespeichert.',
+  es: 'Alimenta la dificultad experimental IA de Mistral en batallas personalizadas. Se guarda solo en este navegador.',
+  it: 'Alimenta la difficoltà sperimentale IA Mistral nelle battaglie personalizzate. Salvata solo in questo browser.',
 })
 export const biome = t({ en: 'Biome', fr: 'Biome', de: 'Biom', es: 'Bioma', it: 'Bioma' })
 export const mirrorRoster = t({

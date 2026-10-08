@@ -53,6 +53,8 @@ export function chooseBotActions(
   strategy: BotController = 'normal',
 ): Action[] {
   if (typeof strategy === 'string' || !('chooseTarget' in strategy)) {
+    if (strategy === 'mistral')
+      throw new RangeError('Mistral battles are driven by the async adapter, not the bot')
     const options = typeof strategy === 'string' ? BOT_LEVELS[strategy] : strategy
     if (!validBotOptions(options)) throw new RangeError('Invalid bot options')
     return chooseAiActions(state, options)
