@@ -33,14 +33,7 @@ export function PawnChip({
       >
         <ellipse cy="17" rx="23" ry="9" fill="#10281e" opacity=".5" />
         {active && (
-          <circle
-            r="28"
-            fill="#ead695"
-            fillOpacity=".18"
-            stroke="#f2df9e"
-            strokeWidth="1.5"
-            className="pawn-active-halo"
-          />
+          <circle r="28" fill="#ead695" fillOpacity=".18" stroke="#f2df9e" strokeWidth="1.5" />
         )}
         {pawn.escapeChance > 0 && (
           <circle r="25" fill="none" stroke="#b7e5de" strokeWidth="2" strokeDasharray="4 4" />

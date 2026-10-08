@@ -222,7 +222,7 @@ export function Battlefield({
             <polygon
               data-testid="tile-face"
               className={
-                'transition-[fill,filter] duration-200 ease-[ease] group-focus-visible/tile:fill-[#f1db9c] group-focus-visible/tile:brightness-120' +
+                'group-focus-visible/tile:fill-[#f1db9c] group-focus-visible/tile:brightness-120' +
                 (interactive ? ' group-hover/tile:brightness-120' : '')
               }
               points={hexPoints}

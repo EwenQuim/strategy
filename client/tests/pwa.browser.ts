@@ -2213,19 +2213,10 @@ test(
       await chip.evaluate((element) => getComputedStyle(element).transitionProperty),
       'none',
     )
-    const halo = page.locator('.pawn-active-halo')
-    assert.equal(
-      await halo.evaluate((element) => getComputedStyle(element).animationName),
-      'none',
-    )
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     assert.equal(
       await chip.evaluate((element) => getComputedStyle(element).transitionDuration),
       '0.35s',
-    )
-    assert.equal(
-      await halo.evaluate((element) => getComputedStyle(element).animationName),
-      'halo-breathe',
     )
   },
 )
