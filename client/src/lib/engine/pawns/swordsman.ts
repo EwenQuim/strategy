@@ -36,7 +36,6 @@ const charge: SpecialAbility = {
   targetLabel: 'chargeTo',
   prompt: 'chooseTile',
   description: 'chargeDescription',
-  // ponytail: walk 2 then strike as the crow flies, ignores blocked paths; use walkingPaths if it misleads
   reaches: (pawn, tile) => hexDist(pawn, tile) <= 2 + pawn.attack.maxRange,
   targets: attackTargets,
   tileTargets: (pawn, tiles, pawns) => new Set(chargeDestinations(tiles, pawns, pawn).keys()),

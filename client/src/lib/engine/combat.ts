@@ -236,7 +236,6 @@ export function rangeTiles(pawn: Pawn, tiles: Map<string, Tile>, kind: RangeKind
   )
 }
 
-// ponytail: plain attacks from full energy only, specials and allies moving out of the way are ignored
 export function threatenedTiles(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
