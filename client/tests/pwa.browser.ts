@@ -1187,7 +1187,7 @@ test(
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
     await context.setOffline(true)
     for (const id of [5, 13, 14, 15, 18]) {
-      const level = CAMPAIGNS[0].levels[id - 1]
+      const level = CAMPAIGNS[1].levels[id - 1]
       await page.goto(origin + base + 'campaign/original/' + id)
       if (level.newElements.length > 0)
         await page.getByRole('button', { name: 'Go !', exact: true }).click()
@@ -1310,7 +1310,7 @@ test(
       )
     }
 
-    const level = CAMPAIGNS[0].levels[16]
+    const level = CAMPAIGNS[1].levels[16]
     await page.goto(origin + base + 'campaign/original/17')
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
@@ -1596,7 +1596,7 @@ test(
       )
       assert.equal(
         await briefing
-          .getByRole('heading', { name: CAMPAIGNS[0].levels[0].name, exact: true })
+          .getByRole('heading', { name: CAMPAIGNS[1].levels[0].name, exact: true })
           .count(),
         0,
       )
@@ -1652,7 +1652,7 @@ test(
       await briefing.waitFor({ state: 'hidden' })
     }
     await page.setViewportSize({ width: 320, height: 568 })
-    for (const level of CAMPAIGNS[0].levels.filter(
+    for (const level of CAMPAIGNS[1].levels.filter(
       (level) => level.id > 1 && level.newElements.length > 0,
     )) {
       await page.goto(origin + base + 'campaign/original/' + level.id)
@@ -1947,7 +1947,7 @@ test(
 )
 
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
-  const level = CAMPAIGNS[0].levels[id - 1]
+  const level = CAMPAIGNS[1].levels[id - 1]
   let state = botState(level.seed, level.setup)
   await page.getByRole('button', { name: 'Go !', exact: true }).click()
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()

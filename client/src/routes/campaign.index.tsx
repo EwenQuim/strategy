@@ -3,18 +3,13 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { CampaignCard } from '../components/CampaignCard'
-import { CAMPAIGNS, visibleCampaigns } from '../lib/campaign'
+import { totalVictories, visibleCampaigns } from '../lib/campaign'
 import { readCampaignProgress } from '../campaignProgress'
 import { readDeveloperPreview } from '../preferences'
 
 export const Route = createFileRoute('/campaign/')({
   beforeLoad: () => {
-    if (readCampaignProgress('original') < CAMPAIGNS[0].levels.length)
-      throw redirect({
-        to: '/campaign/$campaign',
-        params: { campaign: 'original' },
-        replace: true,
-      })
+    if (totalVictories(readCampaignProgress) === 0) throw redirect({ to: '/', replace: true })
   },
   component: function Campaigns() {
     return (

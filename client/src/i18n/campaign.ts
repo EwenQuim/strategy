@@ -2,6 +2,7 @@ import { t } from './locale'
 import { storyLevelNames } from './story-levels'
 
 export const campaignNames: Record<
+  | 'tutorial'
   | 'original'
   | 'brutal'
   | 'shattered'
@@ -11,6 +12,13 @@ export const campaignNames: Record<
   | 'ragnarok',
   string
 > = {
+  tutorial: t({
+    en: 'Tutorial',
+    fr: 'Tutoriel',
+    de: 'Tutorial',
+    es: 'Tutorial',
+    it: 'Tutorial',
+  }),
   original: t({
     en: 'Original',
     fr: 'Originale',
@@ -68,6 +76,13 @@ export const campaignName = (campaign: { slug: string }) =>
 export const levelName = (level: { name: string }) => levelNames[level.name] ?? level.name
 
 const levelNames: Record<string, string> = {
+  'First Steps': t({
+    en: 'First Steps',
+    fr: 'Premiers pas',
+    de: 'Erste Schritte',
+    es: 'Primeros pasos',
+    it: 'Primi passi',
+  }),
   'First Watch': t({
     en: 'First Watch',
     fr: 'Première garde',

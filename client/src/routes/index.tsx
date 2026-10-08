@@ -3,11 +3,12 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { MenuBackground } from '../components/MenuBackground'
 import { Icon } from '../components/Icon'
 import { buttonClassName } from '../components/styles'
-import { CAMPAIGNS, totalVictories } from '../lib/campaign'
+import { CAMPAIGNS, TUTORIAL, totalVictories } from '../lib/campaign'
 import { useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
+import { campaignName } from '../i18n/campaign'
 
 const homeControlClassName =
   buttonClassName +
@@ -18,14 +19,10 @@ const homeButtonClassName =
 
 export const Route = createFileRoute('/')({
   component: function Landing() {
-    const original = CAMPAIGNS[0]
-    const completed = useSyncExternalStore(subscribeCampaignProgress, () =>
-      readCampaignProgress(original.slug),
-    )
-    const done = completed === original.levels.length
     const allCompleted = useSyncExternalStore(subscribeCampaignProgress, () =>
       totalVictories(readCampaignProgress),
     )
+    const started = allCompleted > 0
     const allLevels = CAMPAIGNS.reduce((sum, campaign) => sum + campaign.levels.length, 0)
     const health = useHealth()
     const online = health.isSuccess
@@ -45,20 +42,18 @@ export const Route = createFileRoute('/')({
             aria-label={m.chooseMode}
           >
             <Link
-              to={done ? '/campaign' : '/campaign/$campaign'}
-              params={done ? undefined : { campaign: original.slug }}
+              to={started ? '/campaign' : '/campaign/$campaign/$level'}
+              params={started ? undefined : { campaign: TUTORIAL.slug, level: '1' }}
               className={
                 homeControlClassName +
                 ' border-[#e5d19a] bg-[#d8c38a] text-[#24392a] hover:bg-[#ecdaa3]'
               }
               preload={false}
             >
-              {done ? m.campaigns : m.campaign}
+              {started ? m.campaign : campaignName(TUTORIAL)}
               <span className="flex items-center gap-2 text-xs tabular-nums tracking-[0.04em] [&>svg]:size-4">
-                {done
-                  ? allCompleted + ' / ' + allLevels
-                  : completed + ' / ' + original.levels.length}
-                <Icon name="crown" className={done ? 'fill-current' : undefined} />
+                {started && allCompleted + ' / ' + allLevels}
+                <Icon name={started ? 'crown' : 'arrow'} />
               </span>
             </Link>
             <Link

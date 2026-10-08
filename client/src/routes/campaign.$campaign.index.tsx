@@ -8,6 +8,7 @@ import { Icon } from '../components/Icon'
 import { LevelMiniature } from '../components/LevelMiniature'
 import {
   CAMPAIGNS,
+  TUTORIAL,
   isCampaignUnlocked,
   visibleCampaigns,
   isLevelUnlocked,
@@ -29,7 +30,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
       (pack) => pack.slug === params.campaign,
     )
     if (!campaign) throw redirect({ to: '/', replace: true })
-    if (!isCampaignUnlocked(campaign, readCampaignProgress))
+    if (!isCampaignUnlocked(campaign, readCampaignProgress) || campaign === TUTORIAL)
       throw redirect({ to: '/campaign', replace: true })
   },
   component: function CampaignLevels() {
@@ -39,15 +40,9 @@ export const Route = createFileRoute('/campaign/$campaign/')({
       readClearedLevels(campaign.slug),
     )
     const completed = clearedLevels.length
+    const developerPreview = readDeveloperPreview()
     return (
-      <MenuLayout
-        title={campaignName(campaign)}
-        scroll={false}
-        wide
-        backTo={
-          readCampaignProgress('original') === CAMPAIGNS[0].levels.length ? '/campaign' : '/'
-        }
-      >
+      <MenuLayout title={campaignName(campaign)} scroll={false} wide backTo="/campaign">
         <div
           className="flex shrink-0 items-center justify-between gap-2 px-1 text-xs min-[900px]:text-sm text-muted"
           data-testid="campaign-progress"
@@ -66,7 +61,12 @@ export const Route = createFileRoute('/campaign/$campaign/')({
           aria-label={common.campaignLevels}
         >
           {campaign.levels.map((level) => {
-            const unlocked = isLevelUnlocked(campaign, level.id, clearedLevels)
+            const unlocked = isLevelUnlocked(
+              campaign,
+              level.id,
+              clearedLevels,
+              developerPreview,
+            )
             const cleared = clearedLevels.includes(level.id)
             const status = m.levelStatus[cleared ? 'completed' : unlocked ? 'ready' : 'locked']
             const content = (

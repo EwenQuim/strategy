@@ -4,7 +4,7 @@ import { CAMPAIGNS } from '../../src/lib/campaign.ts'
 import { winnableAgainst } from '../campaign-actions.ts'
 
 test('Every shattered encounter stays winnable at its own difficulty', () => {
-  const shattered = CAMPAIGNS[2]
+  const shattered = CAMPAIGNS[3]
   assert.equal(shattered.levels.length, 10)
   for (const level of shattered.levels)
     assert.ok(

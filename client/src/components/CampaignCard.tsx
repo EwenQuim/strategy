@@ -5,7 +5,7 @@ import { LevelMiniature } from './LevelMiniature'
 import { LockedCampaignCard } from './LockedCampaignCard'
 import * as m from '../i18n/menus'
 import { campaignName } from '../i18n/campaign'
-import { isCampaignUnlocked, type Campaign } from '../lib/campaign'
+import { isCampaignUnlocked, TUTORIAL, type Campaign } from '../lib/campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 
@@ -22,8 +22,8 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
   if (!unlocked) return <LockedCampaignCard campaign={campaign} />
   return (
     <Link
-      to="/campaign/$campaign"
-      params={{ campaign: campaign.slug }}
+      to={campaign === TUTORIAL ? '/campaign/$campaign/$level' : '/campaign/$campaign'}
+      params={{ campaign: campaign.slug, level: '1' }}
       className="flex h-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-[radial-gradient(ellipse_at_top,#ffffff18,transparent_70%)] bg-(--biome-background) p-3 min-[900px]:gap-3 min-[900px]:p-5 text-ink shadow-[0_8px_28px_#0003] hover:border-gold/40 hover:brightness-110 data-[done=true]:border-[#89bba477]"
       style={BIOMES[showcase.biome].theme}
       data-done={done}

@@ -11,14 +11,15 @@ import { readDeveloperPreview } from '../preferences'
 
 export const Route = createFileRoute('/campaign/$campaign/$level')({
   beforeLoad: ({ params }) => {
-    const campaign = visibleCampaigns(readDeveloperPreview()).find(
+    const developerPreview = readDeveloperPreview()
+    const campaign = visibleCampaigns(developerPreview).find(
       (pack) => pack.slug === params.campaign,
     )
     if (!campaign) throw redirect({ to: '/', replace: true })
     if (!isCampaignUnlocked(campaign, readCampaignProgress))
       throw redirect({ to: '/campaign', replace: true })
     const id = Number(params.level)
-    if (!isLevelUnlocked(campaign, id, readClearedLevels(campaign.slug)))
+    if (!isLevelUnlocked(campaign, id, readClearedLevels(campaign.slug), developerPreview))
       throw redirect({
         to: '/campaign/$campaign',
         params: { campaign: campaign.slug },

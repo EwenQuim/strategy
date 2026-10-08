@@ -175,7 +175,7 @@ test('Holes block walking and landing, but permit detours, ranged attacks and ju
 })
 
 test('Campaign maps and character placements are explicit and independent of the seed', () => {
-  for (const level of CAMPAIGNS[0].levels) {
+  for (const level of CAMPAIGNS[1].levels) {
     const original = structuredClone(level.setup)
     const first = initialState(level.seed, level.setup)
     const differentSeed = initialState(level.seed + '-different', level.setup)
@@ -271,7 +271,7 @@ test('Invalid terrain, missing positions, blocked spawns, and overlaps are rejec
 })
 
 test('High Pass forces a walking detour while archers can fire across its mountain lines', () => {
-  const level = CAMPAIGNS[0].levels[5]
+  const level = CAMPAIGNS[1].levels[5]
   assert.equal(level.name, 'High Pass')
   const state = initialState(level.seed, level.setup)
   const archer = state.pawns.find((pawn) => pawn.side === 'player' && pawn.kind === 'archer')!

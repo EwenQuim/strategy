@@ -38,7 +38,7 @@ export function winnableAgainst(level: CampaignLevel, difficulty: BotDifficulty)
 const NOT_SCRIPTABLY_WINNABLE = new Set([6, 8, 10, 12, 20])
 
 export function assertBrutalWinnable(ids: readonly number[]) {
-  for (const level of CAMPAIGNS[1].levels) {
+  for (const level of CAMPAIGNS[2].levels) {
     if (!ids.includes(level.id) || NOT_SCRIPTABLY_WINNABLE.has(level.id)) continue
     assert.ok(winnableAgainst(level, 'hard'), 'Brutal level ' + level.id + ': ' + level.name)
   }

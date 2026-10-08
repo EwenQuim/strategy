@@ -50,6 +50,8 @@ Walking and Charge cannot cross absent tiles; ranged attacks, spells, and Ninja 
 
 Each campaign pack is one JSON file in `client/src/lib/campaigns/`, loaded by `client/src/lib/campaign.ts`, which also holds unlock rules and the localStorage keys. Terrain and positions are always authored, never generated at runtime. Integration tests require a reproducible player victory for every level, so run `make test-integration` after editing a level.
 
+The one-level tutorial pack comes first: until any campaign victory, the home button plays it directly and the campaign list stays hidden. Levels unlock one by one in every pack; the Developer preview setting opens them all.
+
 Campaigns flagged `developerPreview` are listed and reachable only while the Developer preview setting is on.
 
 ## Achievements

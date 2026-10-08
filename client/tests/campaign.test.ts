@@ -28,9 +28,10 @@ const CLASSIC_KINDS = Object.keys(PAWN_CLASSES).filter(
   (kind) => !['hoplite', 'wolf', 'berserker'].includes(kind),
 )
 
-const original = CAMPAIGNS[0]
-const brutal = CAMPAIGNS[1]
-const shattered = CAMPAIGNS[2]
+const tutorial = CAMPAIGNS[0]
+const original = CAMPAIGNS[1]
+const brutal = CAMPAIGNS[2]
+const shattered = CAMPAIGNS[3]
 
 test('Every campaign level comes directly from one JSON with both complete armies', () => {
   assert.equal(original.levels.length, originalLevels.length)
@@ -222,8 +223,6 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
         .map((level) => [level.id, level.newElements]),
     ),
     {
-      1: ['king', 'swordsman'],
-      2: ['archer'],
       3: ['lake'],
       4: ['magician'],
       5: ['watchtower'],
@@ -238,6 +237,19 @@ test('Briefings introduce each unit, terrain, feature and Hellfire on its first 
       17: ['hell'],
     },
   )
+})
+
+test('The tutorial pits a king, swordsman and archer against the same army', () => {
+  assert.equal(tutorial.slug, 'tutorial')
+  assert.equal(tutorial.levels.length, 1)
+  const [level] = tutorial.levels
+  for (const side of ['player', 'enemy'] as const)
+    assert.deepEqual(level.setup[side].map((pawn) => pawn.kind).sort(), [
+      'archer',
+      'king',
+      'swordsman',
+    ])
+  assert.deepEqual(level.newElements, ['king', 'swordsman', 'archer'])
 })
 
 test('Later campaigns only introduce elements that earlier campaigns never showed', () => {
@@ -322,12 +334,11 @@ test('Wizard Curtain has four aligned casters and Hell has two connected double-
 
 const firstLevels = (count: number) => Array.from({ length: count }, (_, index) => index + 1)
 
-test('Campaign progress unlocks exactly the next level, never regresses, and stops at twenty', () => {
+test('Original progress unlocks exactly the next level, never regresses, and stops at twenty', () => {
   let cleared: readonly number[] = []
   for (let level = 1; level <= 20; level++) {
     for (let candidate = 1; candidate <= 20; candidate++)
-      assert.equal(isLevelUnlocked(original, candidate, cleared), candidate <= level)
-    assert.equal(completeCampaignLevel(original, cleared, level + 1), cleared)
+      assert.equal(isLevelUnlocked(original, candidate, cleared, false), candidate <= level)
     cleared = completeCampaignLevel(original, cleared, level)
     assert.deepEqual(cleared, firstLevels(level))
     assert.equal(completeCampaignLevel(original, cleared, 1), cleared)
@@ -338,25 +349,26 @@ test('Campaign progress unlocks exactly the next level, never regresses, and sto
     )
   }
   for (const level of [-1, 0, 1.5, 21, NaN, Infinity]) {
-    assert.equal(isLevelUnlocked(original, level, cleared), false)
+    assert.equal(isLevelUnlocked(original, level, cleared, false), false)
+    assert.equal(isLevelUnlocked(original, level, cleared, true), false)
     assert.equal(completeCampaignLevel(original, cleared, level), cleared)
   }
 })
 
-test('Every level of a non-original campaign is open and can be cleared in any order', () => {
-  for (const pack of CAMPAIGNS.slice(1)) {
-    for (let level = 1; level <= pack.levels.length; level++)
-      assert.ok(isLevelUnlocked(pack, level, []))
-    assert.equal(isLevelUnlocked(pack, pack.levels.length + 1, []), false)
-    const early = Math.min(3, pack.levels.length)
-    const late = Math.min(8, pack.levels.length)
+test('Every campaign unlocks levels one by one unless developer preview opens them all', () => {
+  for (const pack of CAMPAIGNS) {
+    const last = pack.levels.length
+    assert.ok(isLevelUnlocked(pack, 1, [], false))
+    assert.equal(isLevelUnlocked(pack, 2, [], false), false)
+    for (let level = 1; level <= last; level++)
+      assert.ok(isLevelUnlocked(pack, level, [], true))
+    assert.equal(isLevelUnlocked(pack, last + 1, [], true), false)
+    const early = Math.min(3, last)
+    const late = Math.min(8, last)
     const cleared = completeCampaignLevel(pack, completeCampaignLevel(pack, [], late), early)
-    assert.deepEqual(cleared, [early, late])
+    assert.deepEqual(cleared, [...new Set([early, late])])
+    assert.equal(isLevelUnlocked(pack, late + 1, cleared, false), late < last)
     assert.equal(completeCampaignLevel(pack, cleared, late), cleared)
-    assert.deepEqual(parseCampaignProgress(JSON.stringify(cleared), pack.levels.length), [
-      early,
-      late,
-    ])
   }
 })
 
@@ -441,10 +453,12 @@ test('The shattered pack ends with both full rosters on a hazard map', () => {
 })
 
 test('Story packs unlock at 25, 35, 45 and 55 total victories across every campaign', () => {
-  const [, , , ring, throne, sparta, ragnarok] = CAMPAIGNS
+  const [, , , , ring, throne, sparta, ragnarok] = CAMPAIGNS
   const progress = (completed: Record<string, number>) => (slug: string) => completed[slug] ?? 0
+  assert.ok(isCampaignUnlocked(tutorial, progress({})))
   assert.ok(isCampaignUnlocked(original, progress({})))
-  assert.ok(isCampaignUnlocked(brutal, progress({})))
+  assert.equal(isCampaignUnlocked(brutal, progress({ tutorial: 1, original: 8 })), false)
+  assert.ok(isCampaignUnlocked(brutal, progress({ tutorial: 1, original: 9 })))
   assert.equal(isCampaignUnlocked(ring, progress({ original: 20, shattered: 4 })), false)
   assert.ok(isCampaignUnlocked(ring, progress({ original: 20, brutal: 3, shattered: 2 })))
   assert.equal(isCampaignUnlocked(throne, progress({ original: 20, brutal: 14 })), false)
