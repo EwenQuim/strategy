@@ -66,11 +66,11 @@ export function GameHeader({
         <Link
           to={campaign ? '/campaign/$campaign' : isOnline ? '/online' : '/'}
           params={campaign ? { campaign: campaign.slug } : undefined}
-          className="flex items-center gap-2.5 font-display text-[23px] leading-none tracking-[0.15em] min-[900px]:text-[26px]"
+          className="flex min-h-11 min-w-0 items-center gap-2.5 text-base leading-none font-bold tracking-tight"
           aria-label={campaign ? common.campaignLevels : isOnline ? m.onlineLobby : m.home}
         >
-          <span className="grid h-10 w-[34px] place-items-center rounded-[4px_4px_15px_15px] border border-[#dcc48a4a] bg-[linear-gradient(150deg,#dcc48a12,transparent)] text-gold [&>svg]:size-[22px]">
-            <Icon name="crown" />
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-white/5 text-gold">
+            <Icon name="arrow" className="size-[18px] rotate-180" />
           </span>
           <span>
             Hexmate
@@ -107,7 +107,10 @@ export function GameHeader({
             </span>
           )}
           <button
-            className={iconButtonClassName + ' aria-pressed:text-[#ff8a6e]'}
+            className={
+              iconButtonClassName +
+              ' rounded-xl border-line bg-white/5 aria-pressed:text-[#ff8a6e]'
+            }
             onClick={onToggleThreats}
             aria-pressed={threatsShown}
             aria-label={threatZone}
@@ -116,7 +119,7 @@ export function GameHeader({
             <Icon name="target" />
           </button>
           <button
-            className={iconButtonClassName}
+            className={iconButtonClassName + ' rounded-xl border-line bg-white/5'}
             onClick={onHelp}
             aria-label={m.howToPlay}
             title={m.howToPlay}

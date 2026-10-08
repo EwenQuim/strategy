@@ -118,10 +118,18 @@ test(
     await page.getByRole('heading', { name: 'Waiting for an opponent' }).waitFor()
     await connected
     assert.equal(streams.size, 1)
+    assert.equal(await page.getByRole('navigation').count(), 0)
+    assert.equal(
+      await page
+        .getByTestId('menu-content')
+        .evaluate((content) => content.scrollWidth <= content.clientWidth),
+      true,
+    )
     game.status = 'active'
     game.nameEnemy = 'Bob'
     broadcast()
     await page.getByTestId('game-header').waitFor()
+    assert.equal(await page.getByRole('navigation', { name: 'Main navigation' }).count(), 0)
     assert.equal(connections, 1, 'The route and game must share one stream')
 
     const waitForState = async () => {

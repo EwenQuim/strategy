@@ -1,6 +1,5 @@
-import { iconButtonClassName } from '../components/styles'
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { Icon } from '../components/Icon'
+import { MenuLayout } from '../components/MenuLayout'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { CampaignCard } from '../components/CampaignCard'
@@ -19,27 +18,22 @@ export const Route = createFileRoute('/campaign/')({
   },
   component: function Campaigns() {
     return (
-      <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
-        <header className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="font-serif text-[32px] leading-[normal]">{m.campaigns}</h1>
-          </div>
-          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
-            <Icon name="close" />
-          </Link>
-        </header>
+      <MenuLayout title={m.campaigns} wide>
         <ol
-          className="m-0 grid min-h-0 flex-1 list-none auto-rows-fr grid-cols-2 gap-3 p-0 min-[601px]:content-center min-[601px]:auto-rows-[minmax(0,340px)]"
+          className="m-0 grid list-none auto-rows-fr grid-cols-2 gap-3 p-0 min-[601px]:grid-cols-3 min-[900px]:gap-5"
           aria-label={m.campaigns}
         >
           {visibleCampaigns(readDeveloperPreview()).map((campaign) => (
-            <li key={campaign.slug}>
+            <li
+              key={campaign.slug}
+              className="h-[180px] min-[601px]:h-[220px] min-[900px]:h-[280px]"
+            >
               <CampaignCard campaign={campaign} />
             </li>
           ))}
         </ol>
-        <p className="text-center text-[10px] text-muted">{common.savedOnDevice}</p>
-      </main>
+        <p className="text-center text-xs text-muted">{common.savedOnDevice}</p>
+      </MenuLayout>
     )
   },
 })

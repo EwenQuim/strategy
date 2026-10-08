@@ -7,7 +7,7 @@ import * as common from '../i18n/common'
 import * as game from '../i18n/game'
 import * as m from '../i18n/help'
 import * as menus from '../i18n/menus'
-import { BriefingElements } from './Briefing'
+import { BriefingElements } from './BriefingElements'
 import { Icon } from './Icon'
 import { dialogClassName, iconButtonClassName } from './styles'
 

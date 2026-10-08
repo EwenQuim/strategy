@@ -1,9 +1,8 @@
-import { iconButtonClassName } from '../components/styles'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import * as common from '../i18n/common'
+import { MenuLayout } from '../components/MenuLayout'
+import { menuCardClassName } from '../components/styles'
 import * as m from '../i18n/menus'
-import { Icon } from '../components/Icon'
 import { ApiKeyField } from '../components/ApiKeyField'
 import {
   readDeveloperPreview,
@@ -21,22 +20,25 @@ export const Route = createFileRoute('/settings')({
     const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
     return (
-      <main className="m-auto flex h-dvh max-w-[800px] flex-col gap-3 pt-[max(16px,env(safe-area-inset-top))] pr-[max(12px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))]">
-        <header className="flex items-center justify-between gap-3">
-          <h1 className="font-serif text-[32px] leading-[normal]">{m.settings}</h1>
-          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
-            <Icon name="close" />
-          </Link>
-        </header>
-        <label className="flex items-center justify-between gap-4 rounded-lg border border-line p-4">
-          <span className="flex flex-col gap-1">
-            <strong className="text-[14px]">{m.developerPreview}</strong>
-            <small className="text-[12px] text-muted">{m.developerPreviewHint}</small>
+      <MenuLayout title={m.settings}>
+        <label
+          className={
+            menuCardClassName +
+            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
+          }
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <strong className="text-base">{m.developerPreview}</strong>
+            <small id="developer-preview-hint" className="text-sm leading-relaxed text-muted">
+              {m.developerPreviewHint}
+            </small>
           </span>
           <input
             type="checkbox"
             role="switch"
-            className="size-[18px] shrink-0 accent-gold"
+            aria-label={m.developerPreview}
+            aria-describedby="developer-preview-hint"
+            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
             checked={developerPreview}
             onChange={(event) => {
               setDeveloperPreview(event.target.checked)
@@ -44,15 +46,24 @@ export const Route = createFileRoute('/settings')({
             }}
           />
         </label>
-        <label className="flex items-center justify-between gap-4 rounded-lg border border-line p-4">
-          <span className="flex flex-col gap-1">
-            <strong className="text-[14px]">{m.haptics}</strong>
-            <small className="text-[12px] text-muted">{m.hapticsHint}</small>
+        <label
+          className={
+            menuCardClassName +
+            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
+          }
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <strong className="text-base">{m.haptics}</strong>
+            <small id="haptics-hint" className="text-sm leading-relaxed text-muted">
+              {m.hapticsHint}
+            </small>
           </span>
           <input
             type="checkbox"
             role="switch"
-            className="size-[18px] shrink-0 accent-gold"
+            aria-label={m.haptics}
+            aria-describedby="haptics-hint"
+            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
             checked={hapticsEnabled}
             onChange={(event) => {
               setHapticsEnabled(event.target.checked)
@@ -82,7 +93,11 @@ export const Route = createFileRoute('/settings')({
             />
           </>
         )}
-      </main>
+        <div className="mt-auto py-3 text-center text-xs leading-relaxed text-muted">
+          <p title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</p>
+          <p>{m.madeBy}</p>
+        </div>
+      </MenuLayout>
     )
   },
 })

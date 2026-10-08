@@ -10,10 +10,15 @@ import {
 } from './lib/engine/index.ts'
 import type { IntroducedElement } from './lib/campaign.ts'
 
+export const ELEMENT_ACCENTS: Partial<Record<IntroducedElement, string>> = Object.fromEntries(
+  Object.entries(PAWN_CLASSES).map(([kind, pawnClass]) => [kind, pawnClass.accent]),
+)
+
 export interface BriefingElement {
   readonly name: string
   readonly points: readonly string[]
   readonly art?: IntroducedElement
+  readonly icon?: 'crown' | 'energy'
   readonly stats?: { hp: number; damage: number; range: string }
   readonly special?: { name: string; cost: number; description: string }
 }
@@ -39,9 +44,10 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
 
 export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
   king: [
-    { name: b.goal, points: [b.killEnemyKing] },
+    { name: b.goal, icon: 'crown', points: [b.killEnemyKing] },
     {
       name: b.energy,
+      icon: 'energy',
       points: [
         b.energyPerRound(START_ENERGY),
         b.spendEnergy,

@@ -1,10 +1,16 @@
-import { buttonClassName } from '../components/styles'
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { menuCardClassName, menuPrimaryButtonClassName } from '../components/styles'
+import { MenuLayout } from '../components/MenuLayout'
+import { Icon } from '../components/Icon'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { ApiError, health, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
 import { readStoredGames } from '../onlineSession.ts'
+
+const statusClassName =
+  menuCardClassName +
+  ' my-auto grid w-full max-w-[420px] justify-items-center gap-5 self-center p-6 text-center'
 
 export const Route = createFileRoute('/online/$code')({
   beforeLoad: async ({ params }) => {
@@ -22,94 +28,65 @@ export const Route = createFileRoute('/online/$code')({
 
     if (!stored) {
       return (
-        <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
-          <div className="grid gap-4">
-            <h1 className="font-serif text-[28px]">{m.notAPlayer}</h1>
-            <p className="text-[12px] text-muted">{m.joinFromLobby}</p>
-            <Link
-              to="/online"
-              className={
-                buttonClassName +
-                ' min-h-13 justify-center border-line bg-[#ffffff04] px-[25px] text-ink hover:bg-[#ffffff0c]'
-              }
-              preload={false}
-            >
-              {common.backToLobby}
-            </Link>
+        <MenuLayout title={m.onlineGame} backTo="/online">
+          <div className={statusClassName}>
+            <Icon name="lock" className="size-10 text-gold" />
+            <h2 className="text-2xl font-bold tracking-tight">{m.notAPlayer}</h2>
+            <p className="text-sm leading-relaxed text-muted">{m.joinFromLobby}</p>
           </div>
-        </main>
+        </MenuLayout>
       )
     }
 
     if (game.isError) {
       const status = game.error instanceof ApiError ? game.error.status : 0
       return (
-        <main className="grid min-h-dvh place-items-center bg-[#182c22] p-6 text-center">
-          <div className="grid gap-4">
-            <h1 className="font-serif text-[28px]">
+        <MenuLayout title={m.onlineGame} backTo="/online">
+          <div className={statusClassName}>
+            <Icon name="hex" className="size-10 text-gold" />
+            <h2 className="text-2xl font-bold tracking-tight">
               {status === 404 ? m.gameGone : common.serverUnreachable}
-            </h1>
-            <Link
-              to="/online"
-              className={
-                buttonClassName +
-                ' min-h-13 justify-center border-line bg-[#ffffff04] px-[25px] text-ink hover:bg-[#ffffff0c]'
-              }
-              preload={false}
-            >
-              {common.backToLobby}
-            </Link>
+            </h2>
           </div>
-        </main>
+        </MenuLayout>
       )
     }
 
     const doc = game.data
     if (!doc || doc.status === 'waiting') {
       return (
-        <main className="grid min-h-dvh place-items-center bg-[#182c22] px-5 py-8 text-center">
-          <div className="grid w-full max-w-[340px] justify-items-center gap-5">
-            <span className="text-[9px] font-semibold tracking-[0.17em] text-muted uppercase">
-              {m.onlineGame}
+        <MenuLayout title={m.onlineGame} backTo="/online">
+          <div className={statusClassName}>
+            <span className="grid size-20 place-items-center rounded-3xl border border-gold/20 bg-[radial-gradient(circle,#dcc48a20,transparent)] text-gold">
+              <Icon name="hex" className="size-10" />
             </span>
-            <h1 className="font-serif text-[30px] leading-[normal]">{m.waitingTitle}</h1>
+            <h2 className="text-2xl leading-tight font-bold tracking-tight">
+              {m.waitingTitle}
+            </h2>
             {!doc ? (
-              <p className="text-[12px] text-muted">{m.loading}</p>
+              <p className="text-sm text-muted">{m.loading}</p>
             ) : (
               <>
-                <p className="text-[12px] leading-[1.6] text-muted">
+                <p className="text-sm leading-relaxed text-muted">
                   {m.shareCode(doc.namePlayer, doc.nameEnemy || undefined)}
                 </p>
                 <div
-                  className="rounded-2xl border border-[#dcc48a59] bg-[#20362bee] px-8 py-5 font-mono text-[34px] tracking-[0.25em] text-gold"
+                  className="w-full rounded-2xl border border-gold/25 bg-black/20 px-3 py-5 font-mono text-[30px] tracking-[0.2em] text-gold"
                   data-testid="game-code"
                 >
                   {code}
                 </div>
                 <button
                   type="button"
-                  className={
-                    buttonClassName +
-                    ' min-h-11 justify-center border-line bg-[#ffffff04] px-4 text-[12px] hover:bg-[#ffffff0c]'
-                  }
+                  className={menuPrimaryButtonClassName + ' w-full'}
                   onClick={() => void navigator.clipboard?.writeText(code)}
                 >
                   {m.copyCode}
                 </button>
               </>
             )}
-            <Link
-              to="/online"
-              className={
-                buttonClassName +
-                ' min-h-13 justify-center border-line bg-[#ffffff04] px-[25px] text-ink hover:bg-[#ffffff0c]'
-              }
-              preload={false}
-            >
-              {common.backToLobby}
-            </Link>
           </div>
-        </main>
+        </MenuLayout>
       )
     }
 

@@ -304,13 +304,6 @@ export const newGame = t({
   it: 'Nuova partita',
 })
 
-export const levelNumber = t({
-  en: (level: string) => `Level ${level}`,
-  fr: (level: string) => `Niveau ${level}`,
-  de: (level: string) => `Level ${level}`,
-  es: (level: string) => `Nivel ${level}`,
-  it: (level: string) => `Livello ${level}`,
-})
 export const go = t({
   en: 'Go !',
   fr: 'En avant !',

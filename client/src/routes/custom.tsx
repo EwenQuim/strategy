@@ -1,5 +1,10 @@
-import { buttonClassName, iconButtonClassName } from '../components/styles'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import {
+  menuCardClassName,
+  menuInputClassName,
+  menuPrimaryButtonClassName,
+} from '../components/styles'
+import { MenuLayout } from '../components/MenuLayout'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
@@ -39,15 +44,9 @@ export const Route = createFileRoute('/custom')({
     const labels = mode === 'local' ? m.localSides : m.aiSides
 
     return (
-      <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&_select:focus-visible]:outline-2 [&_select:focus-visible]:outline-offset-1 [&_select:focus-visible]:outline-gold [&_:disabled]:opacity-50">
-        <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{common.customPlay}</h1>
-          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
-            <Icon name="close" />
-          </Link>
-        </header>
+      <MenuLayout title={common.customPlay} scroll={false}>
         <form
-          className="flex min-h-0 flex-1 flex-col gap-3"
+          className="flex min-h-0 w-full max-w-[600px] flex-1 flex-col gap-3 self-center"
           onSubmit={(event) => {
             event.preventDefault()
             void navigate({
@@ -62,12 +61,17 @@ export const Route = createFileRoute('/custom')({
             })
           }}
         >
-          <div className="min-h-0 overflow-y-auto p-1">
+          <div
+            className={
+              menuCardClassName +
+              ' min-h-0 overflow-y-auto overscroll-contain p-3 min-[900px]:p-5'
+            }
+          >
             <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5 text-[12px] text-muted">
+              <div className="grid gap-1.5 text-sm text-muted">
                 <label htmlFor="custom-mode">{m.mode}</label>
                 <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                  className={menuInputClassName}
                   id="custom-mode"
                   value={mode}
                   onChange={(event) => setMode(event.target.value as GameMode)}
@@ -77,13 +81,13 @@ export const Route = createFileRoute('/custom')({
                 </select>
               </div>
               {strategy === 'depthsearch' && (
-                <div className="grid gap-1.5 text-[12px] text-muted">
+                <div className="grid gap-1.5 text-sm text-muted">
                   <label htmlFor="custom-difficulty">
                     {m.difficulty}
                     {mode === 'local' && m.aiOnly}
                   </label>
                   <select
-                    className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                    className={menuInputClassName}
                     id="custom-difficulty"
                     value={difficulty}
                     disabled={mode === 'local'}
@@ -97,10 +101,10 @@ export const Route = createFileRoute('/custom')({
                   </select>
                 </div>
               )}
-              <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
+              <div className="grid gap-1.5 text-sm text-muted col-span-full">
                 <label htmlFor="custom-biome">{m.biome}</label>
                 <select
-                  className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                  className={menuInputClassName}
                   id="custom-biome"
                   value={biome}
                   onChange={(event) => setBiome(event.target.value as Biome)}
@@ -113,13 +117,13 @@ export const Route = createFileRoute('/custom')({
                 </select>
               </div>
               {developerPreview && (
-                <div className="grid gap-1.5 text-[12px] text-muted col-span-full">
+                <div className="grid gap-1.5 text-sm text-muted col-span-full">
                   <label htmlFor="custom-strategy">
                     {m.aiStrategy}
                     {mode === 'local' && m.aiOnly}
                   </label>
                   <select
-                    className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]"
+                    className={menuInputClassName}
                     id="custom-strategy"
                     value={strategy}
                     disabled={mode === 'local'}
@@ -132,7 +136,7 @@ export const Route = createFileRoute('/custom')({
                 </div>
               )}
             </div>
-            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
+            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
@@ -141,7 +145,7 @@ export const Route = createFileRoute('/custom')({
               />
               {m.mirrorRoster}
             </label>
-            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[12px]">
+            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
               <input
                 className="size-[18px] accent-gold"
                 type="checkbox"
@@ -153,9 +157,9 @@ export const Route = createFileRoute('/custom')({
               />
               {m.symmetricMap}
             </label>
-            <table className="w-full border-separate border-spacing-2 text-[13px] [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
+            <table className="w-full border-separate border-spacing-2 text-[13px] min-[900px]:text-base [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
               <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
-              <thead className="text-[11px] text-muted">
+              <thead className="text-xs text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="col">
                     {m.unit}
@@ -196,7 +200,7 @@ export const Route = createFileRoute('/custom')({
                       return (
                         <td className="w-1/4 text-center" key={side}>
                           <input
-                            className="w-full min-w-0 min-h-11 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark] text-center"
+                            className={menuInputClassName + ' text-center'}
                             type="number"
                             inputMode="numeric"
                             min={0}
@@ -222,7 +226,7 @@ export const Route = createFileRoute('/custom')({
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="text-[11px] text-muted">
+              <tfoot className="text-xs text-muted">
                 <tr>
                   <th className="text-left font-medium" scope="row">
                     {m.total}
@@ -232,22 +236,14 @@ export const Route = createFileRoute('/custom')({
                 </tr>
               </tfoot>
             </table>
-            <p className="text-[11px] leading-[1.5] text-muted">
-              {m.rosterLimits(MAP_WIDTH * 3)}
-            </p>
+            <p className="text-xs leading-[1.5] text-muted">{m.rosterLimits(MAP_WIDTH * 3)}</p>
           </div>
-          <button
-            type="submit"
-            className={
-              buttonClassName +
-              ' min-h-13 justify-center gap-[30px] border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3] mt-auto shrink-0'
-            }
-          >
+          <button type="submit" className={menuPrimaryButtonClassName + ' mt-auto shrink-0'}>
             {m.startBattle}
             <Icon name="arrow" />
           </button>
         </form>
-      </main>
+      </MenuLayout>
     )
   },
 })
