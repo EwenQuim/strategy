@@ -31,6 +31,8 @@ Every feature must make the game fun and strategic, never static or boring. Batt
 
 Use the `Makefile` targets; it is the source of truth for setup, dev, format, lint, typecheck, and tests. Toolchain versions are pinned in `.github/workflows/ci.yml`. The pre-push hook (`.githooks/pre-push`) only runs fast checks; slow bot sweeps in `client/tests/integration` run in CI.
 
+Tests encode gameplay. Editing an existing test to make a change pass is a red flag: it may hide an unintended gameplay change, so flag it and get the change confirmed instead of adjusting the test silently.
+
 ## Boundaries
 
 - `client/src/lib/engine/`: deterministic game rules. `reducer(state, action)` applies an action for whichever side owns the active pawn; it never runs a bot or mutates its input.
