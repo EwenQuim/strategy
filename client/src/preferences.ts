@@ -34,6 +34,14 @@ export function saveHapticsEnabled(enabled: boolean): void {
   }
 }
 
+export function clearAllData(): void {
+  try {
+    localStorage.clear()
+  } catch {
+    // localStorage unavailable: nothing persisted, nothing to clear
+  }
+}
+
 const DEVELOPER_PREVIEW_KEY = 'hexmate.developerPreview'
 
 export function readDeveloperPreview(): boolean {
