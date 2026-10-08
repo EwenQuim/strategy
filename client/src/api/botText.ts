@@ -2,6 +2,7 @@ import { type BotOptions } from '../lib/engine/ai.ts'
 import { chooseAiActions, type AiStrategyId } from '../lib/engine/ai/decision.ts'
 import {
   activePawn,
+  PAWN_CLASSES,
   reducer,
   type Action,
   type GameState,
@@ -11,28 +12,6 @@ import {
 // Provider-agnostic pieces shared by every remote bot adapter (Mistral, Jev, ...): the
 // position as text, BYOK key storage, action descriptions and the engine-as-judge rule.
 // Each provider keeps its own file for the key, the prompt shape and the API call.
-
-// One line per pawn class, kept in English on purpose: this is model-facing prompt text, not UI.
-const UNIT_GUIDE: Record<PawnKind, string> = {
-  king: 'melee, 2 damage. Rally (1): heal 1 hp of every adjacent ally, once per round.',
-  swordsman:
-    'melee, 2 damage. Charge (2): pick a tile up to 2 steps away, then an adjacent enemy; move there and strike for 2.',
-  archer:
-    'ranged, 1 damage at distance 2-3, never adjacent. Eagle eye (2): 2 damage at distance 2-3 that cannot be escaped.',
-  magician:
-    'ranged, 1 damage at distance 1-2. Fireball (2): pick a direction; 1 damage to every enemy along the line to the board edge, through terrain and units.',
-  ninja:
-    'melee, 5 damage. Jump (2): teleport up to 3 tiles over anything to empty passable ground.',
-  bulwark:
-    'melee, 1 damage; its own moves cost 2 energy for the first tile. Protect (2): shield an ally within 2 tiles and take its next hit, wherever it goes.',
-  bomber:
-    'ranged, 1 damage at distance 1-2. Bomb (2): any tile within 2; 1 damage to every unit on it and its six neighbours, allies and self included.',
-  hoplite:
-    '1 damage at distance 1-2. Phalanx (1): shield an adjacent ally and take its next hit.',
-  wolf: 'melee, 2 damage. Cry (2): +1 energy to every ally within 2 tiles, once per round.',
-  berserker:
-    'melee, 2 damage. Fury (1): spend all remaining energy to strike an adjacent enemy for 2 plus 1 per extra energy, ignoring Escape.',
-}
 
 // The shared rule summary every remote bot needs to judge a position.
 export const RULES_TEXT = `Rules: the active unit acts alone with its remaining energy (moving costs 1 per step, attacking 1, specials their listed price; the turn ends when energy runs out). Terrain never blocks ranged attacks. Mountains and lakes cannot be walked through; lava hurts units standing on it and empowers attacks from it; watchtowers extend ranged attacks by 1; springs heal 1 hp per round; runes give +2 energy when picked up. Units may Escape (dodge) a hit; some attacks ignore Escape.`
@@ -57,7 +36,7 @@ export function positionText(state: GameState): string {
   const army = (side: 'player' | 'enemy') =>
     state.pawns
       .filter((unit) => unit.side === side)
-      .map((unit) => `- ${describeUnit(unit)} — ${UNIT_GUIDE[unit.kind]}`)
+      .map((unit) => `- ${describeUnit(unit)} — ${PAWN_CLASSES[unit.kind].aiInstructions}`)
       .join('\n')
   const terrain = [...state.tiles.values()]
     .filter((tile) => tile.terrain !== 'plain' || tile.feature)

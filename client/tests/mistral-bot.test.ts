@@ -1,10 +1,24 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { activePawn, initialState, reducer, type GameState } from '../src/lib/engine/index.ts'
+import {
+  activePawn,
+  initialState,
+  PAWN_CLASSES,
+  reducer,
+  type GameState,
+} from '../src/lib/engine/index.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { chooseAiActions } from '../src/lib/engine/ai/decision.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
 import { actionFromReply, battlePrompt, mistralChooseAction } from '../src/api/mistralBot.ts'
+
+test('Every pawn class carries its remote AI instructions', () => {
+  for (const [kind, Unit] of Object.entries(PAWN_CLASSES))
+    assert.ok(
+      Unit.aiInstructions.length > 0,
+      `${kind} has no aiInstructions for remote AI prompts`,
+    )
+})
 
 function enemyTurn(seed: string): GameState {
   let state = initialState(seed)

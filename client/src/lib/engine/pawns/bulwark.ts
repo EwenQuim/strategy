@@ -49,6 +49,8 @@ export class Bulwark extends Pawn {
   static override readonly accent = '#b59a6b'
   static override readonly icon =
     'M12 3 4 6v6c0 5 8 8.5 8 8.5s8-3.5 8-8.5V6l-8-3ZM8 10l4 3 4-3M8 14l4 3 4-3'
+  static override readonly aiInstructions =
+    'melee, 1 damage; its own moves cost 2 energy for the first tile. Protect (2): shield an ally within 2 tiles and take its next hit, wherever it goes.'
   readonly kind = 'bulwark' as const
   get maxHp(): number {
     return 10

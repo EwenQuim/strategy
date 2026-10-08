@@ -68,6 +68,8 @@ export class King extends Pawn {
   static override readonly accent = '#f0d38e'
   static override readonly icon = 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12'
   readonly kind = 'king' as const
+  static override readonly aiInstructions =
+    'melee, 2 damage. Rally (1): heal 1 hp of every adjacent ally, once per round.'
   get maxHp(): number {
     return 7
   }

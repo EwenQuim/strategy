@@ -47,6 +47,8 @@ export class Archer extends Pawn {
   static override readonly accent = '#6a9a5b'
   static override readonly icon = 'M5 3c14 0 14 18 0 18V3Zm0 9h16m-4-4 4 4-4 4'
   readonly kind = 'archer' as const
+  static override readonly aiInstructions =
+    'ranged, 1 damage at distance 2-3, never adjacent. Eagle eye (2): 2 damage at distance 2-3 that cannot be escaped.'
   readonly attack: AttackProfile = { damage: 1, minRange: 2, maxRange: 3, rangeBonus: 1 }
   get special(): SpecialAbility {
     return aimedShot
