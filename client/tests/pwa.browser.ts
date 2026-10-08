@@ -151,6 +151,9 @@ async function fixture(t: TestContext) {
     return (await cache.keys()).map((request) => new URL(request.url).pathname)
   }, cacheName)
   for (const asset of assets) assert.ok(cached.includes(asset), 'Not cached: ' + asset)
+  // Opening the probe backgrounds the app page, and CI Chrome then throttles its animation
+  // frames, so every Playwright stability check before a click waits about two seconds.
+  await page.bringToFront()
 
   function releaseB() {
     const html = files.get(base + 'index.html')!.toString()
