@@ -1953,7 +1953,7 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   assert.equal(
     await page.locator('[data-testid="battle-subtitle"]').textContent(),
-    'Level ' + id + ' / 20',
+    id + ' / 20',
   )
   for (let step = 0; step < 200 && !state.winner; step++) {
     const actions: Action[] = surrender ? [{ type: 'endTurn' }] : campaignActions(state)
@@ -2078,7 +2078,7 @@ test(
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
-        'Level ' + (level + 1) + ' / 20',
+        level + 1 + ' / 20',
       )
       await page.goto(origin + base + 'campaign')
     }
