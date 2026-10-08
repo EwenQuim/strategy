@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { parseGameSearch, usesSymmetricField } from '../src/lib/game-mode.ts'
 import { createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+import { finish } from '../src/lib/engine/ai/thinking.ts'
 import { initialState, transition } from '../src/lib/engine/engine.ts'
 import { MAP_WIDTH } from '../src/lib/engine/hex.ts'
 import {
@@ -79,7 +80,14 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
       const expected = bot.transition(playback.state, { type: 'endTurn' })
-      playback = playbackReducer(playback, { type: 'endTurn' }, 'ai', config)
+      const player = playbackReducer(playback, { type: 'endTurn' }, 'ai', config)
+      const result = finish(bot.botPhase(player.state))
+      playback = playbackReducer(
+        player,
+        { type: 'botPhase', from: player.state, result },
+        'ai',
+        config,
+      )
       assert.deepEqual(playback, expected)
       playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai', config)
     }

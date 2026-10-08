@@ -23,9 +23,10 @@ export function positionKey(state: GameState): string {
 // Follow-up attacks keep hitting the previous target or one of the two most valuable, and a plan
 // spells out at most three attacks: the unit decides again after each blow, so a rune-boosted unit
 // with many targets still attacks with all its energy without exploding into thousands of plans.
-export function turnPlans(state: GameState): TurnPlan[] {
+// Plans stream out as they are found, so a caller that only needs the first good one stops early.
+export function* turnPlanStream(state: GameState): Generator<TurnPlan> {
   const id = activePawn(state)!.id
-  const plans = new Map<string, TurnPlan>()
+  const plans = new Set<string>()
   const visited = new Set<string>()
   const over = (current: GameState) => !!current.winner || activePawn(current)?.id !== id
   const apply = (current: GameState, actions: Action[]) => {
@@ -38,7 +39,9 @@ export function turnPlans(state: GameState): TurnPlan[] {
       : [apply(current, [END_TURN])!, [...actions, END_TURN]]
     const position =
       ended === current ? (currentKey ?? positionKey(current)) : positionKey(ended)
-    if (!plans.has(position)) plans.set(position, { actions: plan, state: ended })
+    if (plans.has(position)) return []
+    plans.add(position)
+    return [{ actions: plan, state: ended }]
   }
   const moves = (current: GameState) => {
     const pawn = activePawn(current)!
@@ -48,18 +51,18 @@ export function turnPlans(state: GameState): TurnPlan[] {
   }
   const worth = (foe: Pawn) => foe.ai.value(foe, foe.hp)
 
-  function act(
+  function* act(
     current: GameState,
     actions: Action[],
     acted: boolean,
     attacks = 0,
     lastTarget?: number,
-  ) {
+  ): Generator<TurnPlan> {
     const currentKey = positionKey(current)
     const visit = [currentKey, acted, attacks, lastTarget].join('/')
     if (visited.has(visit)) return
     visited.add(visit)
-    keep(current, actions, currentKey)
+    yield* keep(current, actions, currentKey)
     if (over(current)) return
     const pawn = activePawn(current)!
     // Stepping back after acting only reaches the adjacent hexes, so scanning them directly
@@ -71,12 +74,12 @@ export function turnPlans(state: GameState): TurnPlan[] {
         if (current.pawns.some((p) => p.id !== pawn.id && p.q === step.q && p.r === step.r))
           continue
         const moved = apply(current, [moveTo(step.q, step.r)])
-        if (moved) keep(moved, [...actions, moveTo(step.q, step.r)])
+        if (moved) yield* keep(moved, [...actions, moveTo(step.q, step.r)])
       }
     if (lastTarget === undefined)
       for (const special of pawn.special.candidates(pawn, current)) {
         const next = apply(current, [special])
-        if (next) act(next, [...actions, special], true, attacks)
+        if (next) yield* act(next, [...actions, special], true, attacks)
       }
     const here = current.tiles.get(key(pawn.q, pawn.r))
     const targets = current.pawns
@@ -91,14 +94,15 @@ export function turnPlans(state: GameState): TurnPlan[] {
     for (const foe of considered) {
       const strike: Action = { type: 'attack', q: foe.q, r: foe.r }
       const next = apply(current, [strike])
-      if (next) act(next, [...actions, strike], true, attacks + 1, foe.id)
+      if (next) yield* act(next, [...actions, strike], true, attacks + 1, foe.id)
     }
   }
 
-  act(state, [], false)
+  yield* act(state, [], false)
   for (const tile of moves(state)) {
     const moved = apply(state, [moveTo(tile.q, tile.r)])
-    if (moved) act(moved, [moveTo(tile.q, tile.r)], false)
+    if (moved) yield* act(moved, [moveTo(tile.q, tile.r)], false)
   }
-  return [...plans.values()]
 }
+
+export const turnPlans = (state: GameState): TurnPlan[] => [...turnPlanStream(state)]

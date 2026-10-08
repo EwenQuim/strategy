@@ -4,8 +4,9 @@ import type { BotOptions } from '../../ai.ts'
 import { distancesToAttack, evaluatePosition, type ReachCache } from '../evaluate.ts'
 import { sidePlan } from '../plan.ts'
 import { chooseOption, hpOf, type Outcome } from '../choice.ts'
-import { positionKey, turnPlans, type TurnPlan } from '../turns.ts'
+import { positionKey, turnPlanStream, type TurnPlan } from '../turns.ts'
 import type { AiStrategy } from '../decision.ts'
+import { finish, mapPausing, type Thinking } from '../thinking.ts'
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
   return {
@@ -92,6 +93,25 @@ type ScoredTurn = { actions: Action[]; outcomes: Scored[]; value: number }
 const expectedScores = (outcomes: Scored[], value: (outcome: Scored) => number) =>
   outcomes.reduce((sum, outcome) => sum + outcome.weight * value(outcome), 0)
 
+// Star1 pruning: the lighter outcomes are searched exactly, then the heaviest one only has to show
+// on which side of the window the average lands, so it searches with the window scaled to its weight.
+function* chanceValue(
+  outcomes: Scored[],
+  alpha: number,
+  beta: number,
+  value: (outcome: Scored, alpha: number, beta: number) => Thinking<number>,
+): Thinking<number> {
+  const heaviest = outcomes.reduce((best, outcome) =>
+    outcome.weight > best.weight ? outcome : best,
+  )
+  let known = 0
+  for (const outcome of outcomes)
+    if (outcome !== heaviest)
+      known += outcome.weight * (yield* value(outcome, -Infinity, Infinity))
+  const scale = (bound: number) => (bound - known) / heaviest.weight
+  return known + heaviest.weight * (yield* value(heaviest, scale(alpha), scale(beta)))
+}
+
 type Search = {
   side: Side
   beamWidth: number
@@ -101,7 +121,7 @@ type Search = {
 
 // Per-decision search shape, reset on every chooseTacticalActions call and read by the analysis
 // harness in tests/analyze-ai.ts. Plain counters only, so they stay free in production.
-export const searchStats = {
+const freshStats = () => ({
   decisions: 0,
   plansEnumerated: 0,
   shortlisted: 0,
@@ -113,7 +133,8 @@ export const searchStats = {
   cutoffs: 0,
   budgetBreaks: 0,
   maxDepth: 0,
-}
+})
+export const searchStats = freshStats()
 
 // Once a decision has scored this many positions it stops expanding and reuses the scores it
 // already has. With the shortlist below, a decision scores at most the budget plus one node's
@@ -149,36 +170,43 @@ function scoreTurn(state: GameState, plan: TurnPlan, search: Search): ScoredTurn
 }
 
 // Turns are enumerated as if every attack lands, then valued over their roll outcomes.
-function rankedTurns(state: GameState, search: Search): ScoredTurn[] {
+function* rankedTurns(state: GameState, search: Search): Thinking<ScoredTurn[]> {
   const side = activePawn(state)!.side
   const direction = side === search.side ? -1 : 1
-  const enumerated = turnPlans(withFoeEscape(state, side, () => 0))
+  const all = turnPlanStream(withFoeEscape(state, side, () => 0))
+  const enumerated = yield* mapPausing(all, (plan) => plan)
   searchStats.plansEnumerated += enumerated.length
   const kept = shortlist(state, enumerated)
   searchStats.shortlisted += kept.length
-  return kept
-    .map((plan) => scoreTurn(state, plan, search))
-    .sort((a, b) => direction * (a.value - b.value))
+  const scored = yield* mapPausing(kept, (plan) => scoreTurn(state, plan, search))
+  return scored.sort((a, b) => direction * (a.value - b.value))
 }
 
-// On the last ply only the best turn matters, so turns with an attack or special go first and the
-// scan stops as soon as one is good enough for a cutoff or the budget runs out.
-function lastReply(
+// On the last ply only the best turn matters: attacking turns are scored as they are found, quiet
+// ones last, and enumeration stops with the scan at a cutoff, a spent budget or SHORTLIST turns.
+function* repliesWorthScoring(state: GameState): Generator<TurnPlan> {
+  const quiet: TurnPlan[] = []
+  for (const plan of turnPlanStream(state))
+    if (plan.actions.some(rolls)) yield plan
+    else quiet.push(plan)
+  yield* quiet
+}
+
+function* lastReply(
   state: GameState,
   alpha: number,
   beta: number,
   maximizing: boolean,
   search: Search,
   fallback: number,
-): number {
+): Thinking<number> {
   const side = activePawn(state)!.side
-  const plans = shortlist(state, turnPlans(withFoeEscape(state, side, () => 0))).sort(
-    (a, b) => Number(b.actions.some(rolls)) - Number(a.actions.some(rolls)),
-  )
-  searchStats.plansEnumerated += plans.length
-  searchStats.shortlisted += plans.length
   let best = maximizing ? -Infinity : Infinity
-  for (const plan of plans) {
+  let scored = 0
+  for (const plan of repliesWorthScoring(withFoeEscape(state, side, () => 0))) {
+    searchStats.plansEnumerated++
+    searchStats.shortlisted++
+    if (++scored > SHORTLIST) break
     if (search.budget <= 0) {
       searchStats.budgetBreaks++
       break
@@ -186,6 +214,7 @@ function lastReply(
     const before = searchStats.leafEvals
     const { value } = scoreTurn(state, plan, search)
     searchStats.replyLeafEvals += searchStats.leafEvals - before
+    yield
     best = maximizing ? Math.max(best, value) : Math.min(best, value)
     if (maximizing ? best >= beta : best <= alpha) {
       searchStats.cutoffs++
@@ -196,16 +225,16 @@ function lastReply(
 }
 
 // Minimax over unit turns: the searching side maximizes, the other minimizes, with alpha-beta
-// cutoffs. Turns with several roll outcomes average them, so they search with a full window. A
-// spent budget returns the score this position already received.
-function minimax(
+// cutoffs, averaging the roll outcomes of each turn. A spent budget returns the score this
+// position already received.
+function* minimax(
   state: GameState,
   depth: number,
   alpha: number,
   beta: number,
   search: Search,
   fallback: number,
-): number {
+): Thinking<number> {
   if (search.budget <= 0) {
     searchStats.budgetBreaks++
     return fallback
@@ -213,20 +242,17 @@ function minimax(
   if (depth === 0 || state.winner || !activePawn(state)) return fallback
   searchStats.maxDepth = Math.max(searchStats.maxDepth, depth)
   const maximizing = activePawn(state)!.side === search.side
-  if (depth === 1) return lastReply(state, alpha, beta, maximizing, search, fallback)
+  if (depth === 1) return yield* lastReply(state, alpha, beta, maximizing, search, fallback)
   const beforeRanking = searchStats.leafEvals
-  const turns = rankedTurns(state, search)
+  const turns = yield* rankedTurns(state, search)
   searchStats.deepLeafEvals += searchStats.leafEvals - beforeRanking
   if (!turns.length) return fallback
   let best = maximizing ? -Infinity : Infinity
   for (const turn of turns.slice(0, search.beamWidth)) {
     searchStats.beamExpansions++
-    const value =
-      turn.outcomes.length === 1
-        ? minimax(turn.outcomes[0].state, depth - 1, alpha, beta, search, turn.value)
-        : expectedScores(turn.outcomes, (outcome) =>
-            minimax(outcome.state, depth - 1, -Infinity, Infinity, search, outcome.score),
-          )
+    const value = yield* chanceValue(turn.outcomes, alpha, beta, (outcome, low, high) =>
+      minimax(outcome.state, depth - 1, low, high, search, outcome.score),
+    )
     if (maximizing) {
       best = Math.max(best, value)
       alpha = Math.max(alpha, best)
@@ -248,20 +274,10 @@ function untilFirstRoll(actions: Action[]): Action[] {
   return roll < 0 ? actions : actions.slice(0, roll + 1)
 }
 
-function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
-  Object.assign(searchStats, {
-    decisions: 1,
-    plansEnumerated: 0,
-    shortlisted: 0,
-    beamExpansions: 0,
-    leafEvals: 0,
-    rootLeafEvals: 0,
-    deepLeafEvals: 0,
-    replyLeafEvals: 0,
-    cutoffs: 0,
-    budgetBreaks: 0,
-    maxDepth: 0,
-  })
+// Yields after each enumerated or scored turn, so a caller can let the page breathe while the bot
+// thinks.
+function* thinkTacticalActions(state: GameState, options: BotOptions): Thinking<Action[]> {
+  Object.assign(searchStats, freshStats(), { decisions: 1 })
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
@@ -281,24 +297,23 @@ function chooseTacticalActions(state: GameState, options: BotOptions): Action[] 
   // A fixed random stream keeps the analysis from seeing the battle's future rolls, such as Hellfire.
   const analysis = { ...state, randomState: 0 }
   let floor = -Infinity
-  const ranked = rankedTurns(analysis, search)
+  const ranked = yield* rankedTurns(analysis, search)
   searchStats.rootLeafEvals = searchStats.leafEvals
-  const valued = ranked
-    .slice(0, options.beamWidth)
-    .map((turn) => {
-      const window = turn.outcomes.length === 1 ? floor : -Infinity
-      const value = expectedScores(turn.outcomes, (outcome) =>
-        minimax(outcome.state, options.depth - 1, window, Infinity, search, outcome.score),
-      )
-      floor = Math.max(floor, value - options.latitude)
-      return { ...turn, value }
-    })
-    .sort((a, b) => b.value - a.value)
+  const valued: ScoredTurn[] = []
+  for (const turn of ranked.slice(0, options.beamWidth)) {
+    const value = yield* chanceValue(turn.outcomes, floor, Infinity, (outcome, low, high) =>
+      minimax(outcome.state, options.depth - 1, low, high, search, outcome.score),
+    )
+    floor = Math.max(floor, value - options.latitude)
+    valued.push({ ...turn, value })
+  }
+  valued.sort((a, b) => b.value - a.value)
   return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
 }
 
 // The depth search: budgeted beam minimax over the unit turns turns.ts enumerates.
 export const depthsearch: AiStrategy = {
   id: 'depthsearch',
-  chooseActions: chooseTacticalActions,
+  chooseActions: (state, options) => finish(thinkTacticalActions(state, options)),
+  think: thinkTacticalActions,
 }

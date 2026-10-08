@@ -18,6 +18,7 @@ import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
 import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'
+import { finish } from '../src/lib/engine/ai/thinking.ts'
 
 const encounter = {
   biome: 'desert',
@@ -167,8 +168,20 @@ test('Authored encounters replay and restart identically through AI and local pl
     for (let step = 0; step < 300 && !playback.state.winner; step++) {
       for (const action of chooseBotActions(playback.state, nearestTarget)) {
         const before = structuredClone(playback)
-        const result = playbackReducer(playback, action, mode)
-        assert.deepEqual(result, playbackReducer(playback, action, mode))
+        const played = playbackReducer(playback, action, mode)
+        assert.deepEqual(played, playbackReducer(playback, action, mode))
+        const botsToAct = mode === 'ai' && activePawn(played.state)?.side === 'enemy'
+        const result = botsToAct
+          ? playbackReducer(
+              played,
+              {
+                type: 'botPhase',
+                from: played.state,
+                result: finish(bot.botPhase(played.state)),
+              },
+              mode,
+            )
+          : played
         assert.deepEqual(structuredClone(playback), before)
         assert.deepEqual(result.state.setup, encounter)
         if (result.frames.length)

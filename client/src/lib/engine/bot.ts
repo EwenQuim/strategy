@@ -15,10 +15,11 @@ import type { BattleSetup } from './setup.ts'
 import type { BotOptions } from './ai.ts'
 import {
   botOptions,
-  chooseAiActions,
   DEFAULT_BOT_CONFIG,
+  thinkAiActions,
   type BotConfig,
 } from './ai/decision.ts'
+import { finish, type Thinking } from './ai/thinking.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
@@ -55,16 +56,19 @@ const validBotOptions = (options: BotOptions | undefined): options is BotOptions
   options.latitude >= 0 &&
   options.latitude <= 100
 
+function* thinkBotActions(state: GameState, controller: BotController): Thinking<Action[]> {
+  if ('chooseTarget' in controller) return chooseBotActions(state, controller)
+  if ('name' in controller)
+    return yield* thinkAiActions(state, botOptions(controller), controller.name)
+  if (!validBotOptions(controller)) throw new RangeError('Invalid bot options')
+  return yield* thinkAiActions(state, controller, 'depthsearch')
+}
+
 export function chooseBotActions(
   state: GameState,
   controller: BotController = DEFAULT_BOT_CONFIG,
 ): Action[] {
-  if (!('chooseTarget' in controller)) {
-    if ('name' in controller)
-      return chooseAiActions(state, botOptions(controller), controller.name)
-    if (!validBotOptions(controller)) throw new RangeError('Invalid bot options')
-    return chooseAiActions(state, controller, 'depthsearch')
-  }
+  if (!('chooseTarget' in controller)) return finish(thinkBotActions(state, controller))
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
   if (pawn.energy <= 0) return [{ type: 'endTurn' }]
@@ -190,14 +194,15 @@ function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
 }
 
 export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
-  function playBots(state: GameState): Transition {
+  // Every enemy turn until the player is to act again, pausing while the bots think.
+  function* botPhase(state: GameState): Thinking<Transition> {
     const frames: BattleFrame[] = []
     while (!state.winner && activePawn(state)?.side === 'enemy') {
       const id = activePawn(state)!.id
       const round = state.round
       frames.push({ state: { ...state, order: [...state.order] }, effect: null })
       do {
-        for (const action of chooseBotActions(state, controller)) {
+        for (const action of yield* thinkBotActions(state, controller)) {
           const result = applyAction(state, action)
           if (result.state === state) throw new Error('Bot selected an invalid action')
           state = result.state
@@ -212,20 +217,25 @@ export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
     const state = createState(seed, setup, 'player')
     return { state, frames: [] }
   }
-  const transition = (state: GameState, action: Action): Transition => {
+  // The player's action alone, leaving the enemy's reply to botPhase.
+  const playerTransition = (state: GameState, action: Action): Transition => {
     if (action.type === 'restart') return initialTransition(state.seed, state.setup)
     if (activePawn(state)?.side === 'enemy') return { state, frames: [] }
     const player = applyAction(state, action)
-    const bots = playBots(player.state)
-    return {
-      state: bots.state,
-      frames: [...player.frames.filter(isImpactFrame), ...bots.frames],
-    }
+    return { state: player.state, frames: player.frames.filter(isImpactFrame) }
+  }
+  const transition = (state: GameState, action: Action): Transition => {
+    const player = playerTransition(state, action)
+    if (action.type === 'restart' || player.state === state) return player
+    const bots = finish(botPhase(player.state))
+    return { state: bots.state, frames: [...player.frames, ...bots.frames] }
   }
   return {
     initialState: (seed: string, setup?: BattleSetup) => initialTransition(seed, setup).state,
     reducer: (state: GameState, action: Action) => transition(state, action).state,
     initialTransition,
+    playerTransition,
+    botPhase,
     transition,
   }
 }
