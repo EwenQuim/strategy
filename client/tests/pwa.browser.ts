@@ -303,7 +303,7 @@ test(
       { width: 1440, height: 900 },
     ]) {
       await page.setViewportSize(viewport)
-      for (const path of ['', 'custom', 'campaign', 'achievements', 'settings']) {
+      for (const path of ['', 'custom', 'campaign/original', 'achievements', 'settings']) {
         await page.goto(origin + base + path)
         const content = page.getByTestId('menu-content')
         await content.waitFor()
@@ -322,13 +322,13 @@ test(
           true,
           path,
         )
-        if (path === '' || path === 'campaign')
+        if (path === '' || path === 'campaign/original')
           assert.equal(
             await content.evaluate((element) => element.scrollHeight <= element.clientHeight),
             true,
             path + ' must fit without scrolling',
           )
-        if (path === 'campaign')
+        if (path === 'campaign/original')
           assert.equal(
             await page.getByTestId('campaign-level').evaluateAll((levels) =>
               levels.every((level) => {
@@ -345,7 +345,7 @@ test(
             true,
             'Every level must remain visible and tappable',
           )
-        if (path === 'campaign' && viewport.width >= 900) {
+        if (path === 'campaign/original' && viewport.width >= 900) {
           const levels = page.getByTestId('campaign-level')
           const first = await levels.first().boundingBox()
           const fifth = await levels.nth(4).boundingBox()
@@ -378,8 +378,11 @@ test(
     assert.equal(await online.getAttribute('tabindex'), '-1')
     await online.click({ force: true })
     assert.equal(new URL(page.url()).pathname, base)
-    await page.getByRole('link', { name: /^Campaign/ }).click()
-    await page.getByRole('link', { name: 'Back to home' }).click()
+    await page.getByRole('link', { name: /^Tutorial/ }).click()
+    await page.getByRole('heading', { name: 'Goal', exact: true }).waitFor()
+    await page.keyboard.press('Escape')
+    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
+    await page.getByRole('heading', { name: 'Hexmate.', exact: true }).waitFor()
     await page.getByRole('link', { name: 'Achievements', exact: true }).click()
     await page.getByRole('heading', { name: 'Achievements', exact: true }).waitFor()
     await page.getByRole('link', { name: 'Back to home' }).click()
@@ -392,7 +395,7 @@ test(
     )
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
     await page.getByRole('link', { name: 'Back to home' }).click()
-    await page.getByRole('link', { name: /^Campaigns/ }).click()
+    await page.getByRole('link', { name: /^Campaign/ }).click()
     await page.getByRole('heading', { name: 'Campaigns', exact: true }).waitFor()
     assert.equal(await page.getByTestId('campaign-pack').count(), CAMPAIGNS.length)
     await page.setViewportSize({ width: 1440, height: 900 })
@@ -415,7 +418,7 @@ test(
     await page.getByRole('link', { name: 'Settings', exact: true }).click()
     await page.getByRole('switch', { name: 'Developer preview', exact: true }).uncheck()
     await page.getByRole('link', { name: 'Back to home' }).click()
-    await page.getByRole('link', { name: /^Campaigns/ }).click()
+    await page.getByRole('link', { name: /^Campaign/ }).click()
     await page.getByRole('heading', { name: 'Campaigns', exact: true }).waitFor()
     assert.equal(
       await page.getByTestId('campaign-pack').count(),
@@ -423,7 +426,7 @@ test(
     )
     await page.getByRole('link', { name: /^Original campaign/ }).click()
     await page.getByRole('link', { name: /^Level 1:/ }).click()
-    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.equal(await page.getByRole('navigation', { name: 'Main navigation' }).count(), 0)
     await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
     await page.getByTestId('menu-content').waitFor()
@@ -1588,7 +1591,7 @@ test(
       { width: 1280, height: 900 },
     ]) {
       await page.setViewportSize(viewport)
-      await page.goto(origin + base + 'campaign/original/1')
+      await page.goto(origin + base + 'campaign/tutorial/1')
       await briefing.waitFor()
       assert.equal(
         await briefing.getByRole('button', { name: 'Previous', exact: true }).isDisabled(),
@@ -1596,11 +1599,11 @@ test(
       )
       assert.equal(
         await briefing
-          .getByRole('heading', { name: CAMPAIGNS[1].levels[0].name, exact: true })
+          .getByRole('heading', { name: CAMPAIGNS[0].levels[0].name, exact: true })
           .count(),
         0,
       )
-      for (const name of ['Goal', 'Energy', 'King', 'Swordsman']) {
+      for (const name of ['Goal', 'Turn order', 'Energy', 'King', 'Swordsman', 'Archer']) {
         await briefing.getByRole('heading', { name, exact: true }).waitFor()
         assert.equal(
           await briefing
@@ -1637,7 +1640,7 @@ test(
           await briefing.evaluate((dialog) => dialog.getAnimations({ subtree: true }).length),
           0,
         )
-        if (name !== 'Swordsman')
+        if (name !== 'Archer')
           await briefing.getByRole('button', { name: 'Next', exact: true }).click()
       }
       assert.equal(
@@ -1645,7 +1648,7 @@ test(
         true,
       )
       await briefing.getByRole('button', { name: 'Previous', exact: true }).click()
-      await briefing.getByRole('heading', { name: 'King', exact: true }).waitFor()
+      await briefing.getByRole('heading', { name: 'Swordsman', exact: true }).waitFor()
       await briefing.getByRole('button', { name: 'Discover: Goal', exact: true }).click()
       await briefing.getByRole('heading', { name: 'Goal', exact: true }).waitFor()
       await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
@@ -1698,7 +1701,7 @@ test(
       })
       try {
         const page = await context.newPage()
-        await page.goto(origin + base + 'campaign/original/1')
+        await page.goto(origin + base + 'campaign/tutorial/1')
         const briefing = page.getByRole('dialog')
         await briefing.waitFor()
         const pages = briefing
@@ -1706,7 +1709,7 @@ test(
           .getByRole('button')
           .filter({ has: page.locator('span') })
         await pages.first().waitFor()
-        assert.equal(await pages.count(), 4, locale)
+        assert.equal(await pages.count(), 6, locale)
         for (const control of await pages.all()) {
           await control.click()
           const region = briefing.getByRole('region')
@@ -1727,7 +1730,7 @@ test(
         await page.keyboard.press('Escape')
         await briefing.waitFor({ state: 'hidden' })
         await page.emulateMedia({ reducedMotion: 'no-preference' })
-        await page.goto(origin + base + 'campaign/original/1')
+        await page.goto(origin + base + 'campaign/tutorial/1')
         await briefing.waitFor()
         assert.ok(
           (await briefing.evaluate(
@@ -1745,7 +1748,8 @@ test('Briefings stay dismissed until route remount', { timeout: 60_000 }, async 
   const { page, origin } = await fixture(t)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.goto(origin + base + 'campaign/original/1')
+  await page.evaluate((key) => localStorage.setItem(key, '2'), CAMPAIGN_STORAGE_KEY)
+  await page.goto(origin + base + 'campaign/original/3')
   const briefing = page.getByRole('dialog', {
     name: 'Battle briefing',
     exact: true,
@@ -1758,7 +1762,7 @@ test('Briefings stay dismissed until route remount', { timeout: 60_000 }, async 
   assert.equal(await briefing.getAttribute('open'), null)
   await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
   await briefing.waitFor({ state: 'detached' })
-  await page.getByRole('link', { name: /^Level 1:/ }).click()
+  await page.getByRole('link', { name: /^Level 3:/ }).click()
   await briefing.waitFor()
   await page.getByRole('button', { name: 'Close dialog', exact: true }).click()
   await briefing.waitFor({ state: 'hidden' })
@@ -1781,6 +1785,8 @@ test(
     assert.match(text, /Both sides get the same random lineup/)
     assert.match(text, /Kill the enemy king/)
     assert.match(text, /You move first/)
+    await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
+    assert.match(await tutorial.innerText(), /Units act one at a time/)
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
     assert.match(await tutorial.innerText(), /Spend it to move, attack or use a special/)
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
@@ -1949,7 +1955,8 @@ test(
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   const level = CAMPAIGNS[1].levels[id - 1]
   let state = botState(level.seed, level.setup)
-  await page.getByRole('button', { name: 'Go !', exact: true }).click()
+  if (level.newElements.length)
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   assert.equal(
     await page.locator('[data-testid="battle-subtitle"]').textContent(),
@@ -2049,7 +2056,7 @@ test(
         key: CAMPAIGN_STORAGE_KEY,
         value,
       })
-      await page.goto(origin + base + 'campaign')
+      await page.goto(origin + base + 'campaign/original')
       await page.locator('ol[aria-label="Campaign levels"]').waitFor()
       assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 1)
     }
@@ -2059,7 +2066,7 @@ test(
         ({ key, completed }) => localStorage.setItem(key, String(completed)),
         { key: CAMPAIGN_STORAGE_KEY, completed: level - 1 },
       )
-      await page.goto(origin + base + 'campaign')
+      await page.goto(origin + base + 'campaign/original')
       await page.locator('ol[aria-label="Campaign levels"]').waitFor()
       await page.evaluate((method) => {
         Storage.prototype[method] = () => {
@@ -2074,7 +2081,8 @@ test(
           /Progress could not be saved/,
         )
       await page.getByRole('link', { name: 'Next level' }).click()
-      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      if (CAMPAIGNS[1].levels[level].newElements.length)
+        await page.getByRole('button', { name: 'Go !', exact: true }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
