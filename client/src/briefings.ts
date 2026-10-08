@@ -18,7 +18,7 @@ export interface BriefingElement {
   readonly name: string
   readonly points: readonly string[]
   readonly art?: IntroducedElement
-  readonly icon?: 'crown' | 'energy'
+  readonly icon?: 'crown' | 'energy' | 'history'
   readonly stats?: { hp: number; damage: number; range: string }
   readonly special?: { name: string; cost: number; description: string }
 }
@@ -45,6 +45,7 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
 export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
   king: [
     { name: b.goal, icon: 'crown', points: [b.killEnemyKing] },
+    { name: b.turnOrder, icon: 'history', points: [b.unitByUnit, b.fixedOrder] },
     {
       name: b.energy,
       icon: 'energy',
