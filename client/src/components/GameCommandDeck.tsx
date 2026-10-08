@@ -99,6 +99,7 @@ export function GameCommandDeck({
             hasSpecialTargets={hasSpecialTargets}
             targetCount={targetCount}
             choosingTarget={choosingTarget}
+            dispatch={dispatch}
             onAim={onAim}
             onPreview={onPreview}
             onPeek={onPeek}
@@ -171,6 +172,7 @@ function SpecialButton({
   hasSpecialTargets,
   targetCount,
   choosingTarget,
+  dispatch,
   onAim,
   ...preview
 }: {
@@ -180,12 +182,17 @@ function SpecialButton({
   hasSpecialTargets: boolean
   targetCount: number
   choosingTarget: boolean
+  dispatch: (action: Action) => void
   onAim: (aim: Aim | null) => void
 } & PreviewProps) {
   const buttonProps = usePreviewButton(
     'special',
     !preview.commanding || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
-    () => onAim(usingSpecial ? null : { action: 'special' }),
+    () => {
+      if (usingSpecial) onAim(null)
+      else if (pawn?.special.targeted) onAim({ action: 'special' })
+      else dispatch({ type: 'special' })
+    },
     preview,
   )
   return (

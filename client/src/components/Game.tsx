@@ -140,7 +140,6 @@ export function Game({
     const at = { q: tile.q, r: tile.r }
     if (aim && targets.has(key(at.q, at.r))) {
       if (aim.action === 'attack') return dispatch({ type: 'attack', ...at })
-      if (!pawn.special.targeted) return dispatch({ type: 'special' })
       if (pawn.special.choosesDestination && !destination)
         return setAim({ action: 'special', destination: at })
       return dispatch({ type: 'special', target: at, destination })
