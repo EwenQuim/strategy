@@ -223,6 +223,7 @@ async function playInUi(page: Page, state: GameState, action: Action) {
     await page.locator('[data-action="special"]').click()
     if (action.destination) await clickTile(action.destination)
     if (action.target) await clickTile(action.target)
+    else await page.locator('[data-testid="hex-tile"][role="button"]').first().click()
     return
   }
   assert.fail('Unexpected action: ' + action.type)
@@ -482,7 +483,10 @@ test(
       /protected by Bulwark/,
     )
     assert.equal(await moves.count(), 0)
-    assert.equal(await page.locator('[data-action="special"]').isDisabled(), true)
+    assert.equal(
+      await page.locator('[data-action="special"]').getAttribute('aria-disabled'),
+      'true',
+    )
     assert.equal(
       await page.evaluate(() => {
         const root = document.documentElement
@@ -842,7 +846,10 @@ test(
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
       assert.equal(await page.locator('[data-action="attack"]').isVisible(), true)
-      assert.equal(await page.locator('[data-action="attack"]').isDisabled(), true)
+      assert.equal(
+        await page.locator('[data-action="attack"]').getAttribute('aria-disabled'),
+        'true',
+      )
       assert.equal(await page.locator('[data-action]').count(), 3)
       assert.equal(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),

@@ -1,5 +1,5 @@
 import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
-import type { AttackProfile, Pawn } from './pawns/index.ts'
+import type { AttackProfile, Pawn, Side } from './pawns/index.ts'
 import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
@@ -111,15 +111,15 @@ export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
   )
 }
 
-export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
-  const distance = hexDist(from, target)
+export function inAttackRange(pawn: Pawn, at: Axial, from: Axial = pawn): boolean {
+  const distance = hexDist(from, at)
   const bonus =
     'feature' in from && from.feature === 'watchtower' ? (pawn.attack.rangeBonus ?? 0) : 0
-  return (
-    pawn.side !== target.side &&
-    distance >= pawn.attack.minRange &&
-    distance <= pawn.attack.maxRange + bonus
-  )
+  return distance >= pawn.attack.minRange && distance <= pawn.attack.maxRange + bonus
+}
+
+export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
+  return pawn.side !== target.side && inAttackRange(pawn, target, from)
 }
 
 export function canUseSpecial(pawn: Pawn): boolean {
@@ -220,3 +220,37 @@ export const allyTargets = (pawn: Pawn, pawns: readonly Pawn[], woundedOnly = fa
       hexDist(pawn, p) === 1 &&
       (!woundedOnly || p.hp < p.maxHp),
   )
+
+export type RangeKind = 'attack' | 'special'
+
+export function rangeTiles(pawn: Pawn, tiles: Map<string, Tile>, kind: RangeKind): Set<string> {
+  const from = tiles.get(key(pawn.q, pawn.r))
+  return new Set(
+    [...tiles.values()]
+      .filter((tile) =>
+        kind === 'attack'
+          ? inAttackRange(pawn, tile, from)
+          : pawn.special.reaches(pawn, tile, tiles),
+      )
+      .map((tile) => key(tile.q, tile.r)),
+  )
+}
+
+export function threatenedTiles(
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+  side: Side,
+): Set<string> {
+  const threatened = new Set<string>()
+  for (const pawn of pawns) {
+    if (pawn.side !== side || pawn.hp <= 0) continue
+    const steps = Math.max(0, pawn.maxEnergy - pawn.moveCost)
+    for (const route of walkingPaths(tiles, pawns, pawn, steps).values()) {
+      if (route.damage >= pawn.hp) continue
+      const from = route.tile ?? tiles.get(route.key)
+      for (const tile of tiles.values())
+        if (inAttackRange(pawn, tile, from)) threatened.add(key(tile.q, tile.r))
+    }
+  }
+  return threatened
+}

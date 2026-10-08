@@ -10,6 +10,7 @@ const phalanx: SpecialAbility = {
   prompt: 'chooseAlly',
   noTargets: 'noNearbyAllies',
   description: 'phalanxDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: (pawn, pawns) =>
     pawns.filter(
       (target) =>

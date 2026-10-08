@@ -1,5 +1,13 @@
-import { aimAt, attackTargets, label, pawnAt, specialTargets, strike } from '../combat.ts'
-import { hexDist } from '../hex.ts'
+import {
+  aimAt,
+  attackTargets,
+  inAttackRange,
+  label,
+  pawnAt,
+  specialTargets,
+  strike,
+} from '../combat.ts'
+import { hexDist, key } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -9,6 +17,7 @@ const aimedShot: SpecialAbility = {
   targeted: true,
   noTargets: 'noEnemiesInRange',
   description: 'aimedShotDescription',
+  reaches: (pawn, tile, tiles) => inAttackRange(pawn, tile, tiles.get(key(pawn.q, pawn.r))),
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
   perform: ({ pawn, pawns, log, random, tile }) => {

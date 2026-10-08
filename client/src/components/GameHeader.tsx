@@ -6,7 +6,7 @@ import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
-import { alreadyActed } from '../i18n/battlefield'
+import { alreadyActed, inspect, threatZone } from '../i18n/battlefield'
 import type { GameMode, PlayerNames } from '../lib/game-mode'
 import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
@@ -25,7 +25,10 @@ interface GameHeaderProps {
   active: number
   campaign?: Campaign
   campaignLevel?: number
+  threatsShown: boolean
   onHelp: () => void
+  onToggleThreats: () => void
+  onInspect: (id: number) => void
 }
 
 export function GameHeader({
@@ -41,7 +44,10 @@ export function GameHeader({
   active,
   campaign,
   campaignLevel,
+  threatsShown,
   onHelp,
+  onToggleThreats,
+  onInspect,
 }: GameHeaderProps) {
   const local = mode === 'local'
   const isOnline = mode === 'online'
@@ -101,6 +107,15 @@ export function GameHeader({
             </span>
           )}
           <button
+            className={iconButtonClassName + ' aria-pressed:text-[#ff8a6e]'}
+            onClick={onToggleThreats}
+            aria-pressed={threatsShown}
+            aria-label={threatZone}
+            title={threatZone}
+          >
+            <Icon name="target" />
+          </button>
+          <button
             className={iconButtonClassName}
             onClick={onHelp}
             aria-label={m.howToPlay}
@@ -118,7 +133,7 @@ export function GameHeader({
           {turnOrder.map(({ unit, index }) => (
             <li
               key={unit.id}
-              className="flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[11px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
+              className="relative flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[11px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
               data-testid="initiative-unit"
               data-side={unit.side}
               data-acted={index < active}
@@ -131,6 +146,11 @@ export function GameHeader({
                 {labels[unit.side]} {unitNames[unit.kind]}
                 {index < active ? `, ${alreadyActed}` : ''}
               </span>
+              <button
+                className="absolute inset-0 rounded-[inherit]"
+                onClick={() => onInspect(unit.id)}
+                aria-label={inspect(unitNames[unit.kind] + ' #' + unit.id)}
+              />
             </li>
           ))}
         </ol>

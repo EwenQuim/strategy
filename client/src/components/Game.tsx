@@ -14,6 +14,7 @@ import { GameHeader } from './GameHeader'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
+import { useInspection } from './useInspection'
 import {
   activePawn,
   BIOMES,
@@ -30,6 +31,17 @@ import {
 
 function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: number | undefined) {
   return !!campaign && campaignLevel === campaign.levels.length
+}
+
+function resolveWinnerLabel(
+  winner: GameState['winner'],
+  campaignComplete: boolean,
+  versus: boolean,
+  names: PlayerNames,
+) {
+  if (winner === 'draw') return m.draw
+  if (campaignComplete && winner === 'player') return common.campaignComplete
+  return winner && versus ? m.wins(names[winner]) : null
 }
 
 function resolveTargetLabel(aim: Aim | null, pawn: Pawn | undefined) {
@@ -83,14 +95,12 @@ export function Game({
     campaignProgressSaved(campaign?.slug ?? ''),
   )
   const freshAchievements = useFreshAchievements(state, mode, viewerSide)
-  const winnerLabel =
-    state.winner === 'draw'
-      ? m.draw
-      : isCampaignComplete(campaign, campaignLevel) && state.winner === 'player'
-        ? common.campaignComplete
-        : state.winner && (local || isOnline)
-          ? m.wins(names[state.winner])
-          : null
+  const winnerLabel = resolveWinnerLabel(
+    state.winner,
+    isCampaignComplete(campaign, campaignLevel),
+    local || isOnline,
+    names,
+  )
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
   const hasSpecialTargets =
@@ -106,16 +116,21 @@ export function Game({
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
   const aim = myTurn && aiming?.state === state ? aiming.aim : null
-  const setAim = (next: Aim | null) => setAiming(next && { state, aim: next })
+  const insight = useInspection(state, viewerSide, local)
+  const { inspected } = insight
+  const setAim = (next: Aim | null) => {
+    insight.close()
+    setAiming(next && { state, aim: next })
+  }
   const attacking = aim?.action === 'attack'
   const usingSpecial = aim?.action === 'special'
   const destination = usingSpecial ? aim.destination : undefined
-  const targets = aim ? targetingTiles(state, aim) : new Set<string>()
+  const targets = aim && !inspected ? targetingTiles(state, aim) : new Set<string>()
   const targetLabel = resolveTargetLabel(aim, pawn)
   const targeting = resolveTargeting(attacking, usingSpecial, pawn)
 
   const reach =
-    myTurn && pawn.energy > 0 && !aim
+    myTurn && pawn.energy > 0 && !aim && !inspected
       ? movementDestinations(state.tiles, state.pawns, pawn)
       : new Map<string, number>()
 
@@ -124,6 +139,7 @@ export function Game({
     const at = { q: tile.q, r: tile.r }
     if (aim && targets.has(key(at.q, at.r))) {
       if (aim.action === 'attack') return dispatch({ type: 'attack', ...at })
+      if (!pawn.special.targeted) return dispatch({ type: 'special' })
       if (pawn.special.choosesDestination && !destination)
         return setAim({ action: 'special', destination: at })
       return dispatch({ type: 'special', target: at, destination })
@@ -167,7 +183,10 @@ export function Game({
         active={state.active}
         campaign={campaign}
         campaignLevel={campaignLevel}
+        threatsShown={insight.threatsShown}
         onHelp={() => dialog.current?.showModal()}
+        onToggleThreats={insight.toggleThreats}
+        onInspect={insight.inspect}
       />
 
       <section
@@ -185,10 +204,14 @@ export function Game({
             targets={targets}
             targetLabel={targetLabel}
             targeting={targeting}
-            preview={destination ?? null}
+            preview={inspected ?? destination ?? null}
+            range={insight.range}
+            rangeKind={insight.rangeKind}
+            threats={insight.threats}
             effect={effect}
             effectId={effectId}
             onTileClick={onTileClick}
+            onInspect={insight.inspectAt}
           />
         </div>
         {state.winner && (
@@ -210,10 +233,15 @@ export function Game({
       </section>
 
       <GameCommandDeck
-        pawn={pawn}
+        pawn={insight.shown}
+        active={pawn}
         winner={state.winner}
         winnerLabel={winnerLabel}
         myTurn={myTurn}
+        commanding={myTurn && !inspected}
+        previewed={insight.previewed}
+        onPreview={insight.preview}
+        onPeek={insight.peek}
         attacking={attacking}
         usingSpecial={usingSpecial}
         hasFoes={hasFoes}

@@ -16,6 +16,7 @@ const bomb: SpecialAbility = {
   targetLabel: 'bomb',
   prompt: 'chooseTile',
   description: 'bombDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2,
   targets: (pawn, pawns, from = pawn) =>
     pawns.filter((target) => target.side !== pawn.side && hexDist(from, target) <= 3),
   areaTargets: (pawns, tile) => pawns.filter((target) => hexDist(tile, target) <= 1),
