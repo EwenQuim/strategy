@@ -100,10 +100,13 @@
     animation: battle-result-defeat 700ms ease-out both;
   }
   .battle-result-glow {
-    animation: battle-result-glow 1100ms ease-out both;
+    animation: battle-result-glow 1600ms ease-out both;
   }
   .battle-result-sparks {
-    animation: battle-result-sparks 1100ms ease-out both;
+    animation: battle-result-sparks 1600ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both;
+  }
+  .achievement-toast {
+    animation: achievement-toast 5s ease-out both;
   }
   .briefing-card {
     animation: briefing-card-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -288,21 +291,38 @@
     opacity: 1;
   }
   to {
-    opacity: 0;
+    opacity: 0.6;
   }
 }
 
 @keyframes battle-result-sparks {
   from {
     opacity: 0;
-    transform: scale(0.5) rotate(-12deg);
+    transform: scale(0.6) rotate(-12deg);
   }
-  25% {
+  20% {
     opacity: 1;
   }
   to {
     opacity: 0;
-    transform: scale(1.4) rotate(12deg);
+    transform: scale(1.25) rotate(12deg);
+  }
+}
+
+@keyframes achievement-toast {
+  from {
+    opacity: 0;
+    transform: translateY(-120%);
+  }
+  8%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-40%);
+    visibility: hidden;
   }
 }
 

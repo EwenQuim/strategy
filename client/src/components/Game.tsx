@@ -12,6 +12,7 @@ import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignPro
 import { useFreshAchievements } from '../achievementProgress'
 import { Battlefield, type Targeting } from './Battlefield'
 import { GameHeader } from './GameHeader'
+import { AchievementToast } from './AchievementToast'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
@@ -226,9 +227,11 @@ export function Game({
             campaign={campaign}
             campaignLevel={campaignLevel}
             progressSaved={progressSaved}
-            achievements={freshAchievements}
             onRestart={() => dispatch({ type: 'restart' })}
           />
+        )}
+        {state.winner && freshAchievements.length > 0 && (
+          <AchievementToast achievements={freshAchievements} />
         )}
       </section>
 
