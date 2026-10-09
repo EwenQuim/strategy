@@ -2,13 +2,11 @@ import { Link } from '@tanstack/react-router'
 import type { Campaign } from '../lib/campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
-import * as achievementTexts from '../i18n/achievements'
-import { ACHIEVEMENTS, type AchievementId } from '../lib/achievements'
 import { levelName } from '../i18n/campaign'
 import { type GameMode, type PlayerNames, searchFromBot } from '../lib/game-mode'
 import type { BotConfig } from '../lib/engine/ai/decision'
 import { Icon } from './Icon'
-import { panelClassName, primaryButtonClassName } from './styles'
+import { primaryButtonClassName } from './styles'
 
 const resultButtonClassName =
   primaryButtonClassName + ' mt-5 min-h-12 [@media(max-height:650px)]:mt-3'
@@ -24,7 +22,6 @@ interface GameResultProps {
   campaign?: Campaign
   campaignLevel?: number
   progressSaved: boolean
-  achievements: readonly AchievementId[]
   onRestart: () => void
 }
 
@@ -39,7 +36,6 @@ export function GameResult({
   campaign,
   campaignLevel,
   progressSaved,
-  achievements,
   onRestart,
 }: GameResultProps) {
   const local = mode === 'local'
@@ -49,7 +45,7 @@ export function GameResult({
 
   return (
     <div
-      className="battle-result-enter group/result absolute inset-0 isolate grid place-items-center overflow-hidden bg-black/35 p-4 backdrop-blur-[5px] motion-reduce:animate-none"
+      className="battle-result-enter group/result absolute inset-0 isolate grid place-items-center overflow-hidden bg-black/55 p-4 backdrop-blur-[3px] motion-reduce:animate-none"
       data-testid="battle-result"
       data-outcome={outcome}
       role="status"
@@ -60,11 +56,11 @@ export function GameResult({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-1 overflow-hidden motion-reduce:hidden"
         >
-          <div className="battle-result-glow absolute inset-0 bg-[radial-gradient(ellipse,#bd635866,transparent_70%)] group-data-[outcome=victory]/result:bg-[radial-gradient(ellipse,#f6d78999,transparent_70%)]" />
+          <div className="battle-result-glow absolute inset-0 m-auto size-[min(720px,170vmin)] rounded-full bg-[radial-gradient(closest-side,#d0675add,#bd635866_55%,transparent)] group-data-[outcome=victory]/result:bg-[radial-gradient(closest-side,#f6d789cc,#f6d78933_55%,transparent)]" />
           {outcome === 'victory' && (
             <svg
               viewBox="-160 -160 320 320"
-              className="battle-result-sparks size-full fill-gold stroke-gold"
+              className="battle-result-sparks absolute inset-0 m-auto size-[min(640px,160vmin)] fill-gold stroke-gold"
             >
               {Array.from({ length: 12 }, (_, index) => (
                 <g key={index} transform={'rotate(' + index * 30 + ')'}>
@@ -83,13 +79,11 @@ export function GameResult({
             : outcome === 'defeat'
               ? 'battle-result-defeat '
               : '') +
-          'motion-reduce:animate-none ' +
-          panelClassName +
-          ' max-w-[390px] p-7 text-center [&_h1]:mt-2 [&_h1]:mb-3 [&_h1]:font-serif [&_h1]:text-[32px] [&_h1]:leading-tight [&_p]:text-[14px] [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[25px]'
+          'w-full max-w-[300px] rounded-2xl border border-gold/45 bg-[var(--biome-panel,#20362b)] bg-[image:linear-gradient(#ffffff14,transparent_45%)] px-6 py-6 text-center text-ink shadow-[0_0_0_1px_#0008,0_25px_90px_#000c] motion-reduce:animate-none [&_h1]:mt-1.5 [&_h1]:mb-2 [&_h1]:font-serif [&_h1]:text-[26px] [&_h1]:leading-tight [&_p]:text-[14px] [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[22px]'
         }
         data-testid="result-card"
       >
-        <div className="mx-auto mb-4 grid size-13 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-[#d59d81] [&>svg]:size-[29px] [@media(max-height:650px)]:hidden">
+        <div className="mx-auto mb-3 grid size-11 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-[#d59d81] [&>svg]:size-[24px] [@media(max-height:650px)]:hidden">
           <Icon name="crown" />
         </div>
         <span className="text-xs font-semibold text-muted tracking-[0.17em] uppercase">
@@ -107,29 +101,6 @@ export function GameResult({
                 ? m.enemyKingFallen
                 : m.yourKingFallen}
         </p>
-        {achievements.length > 0 && (
-          <div className="mt-3 [@media(max-height:650px)]:mt-2">
-            <small className="text-[9px] tracking-[0.12em] text-muted uppercase">
-              {achievementTexts.justUnlocked}
-            </small>
-            <ul
-              className="mt-1 flex list-none flex-wrap justify-center gap-1.5 p-0"
-              aria-label={achievementTexts.justUnlocked}
-            >
-              {ACHIEVEMENTS.filter(({ id }) => achievements.includes(id)).map(
-                ({ id, logo }) => (
-                  <li
-                    key={id}
-                    className="rounded-full border border-gold/40 bg-gold/8 px-2.5 py-0.5 font-serif text-[12px] text-gold"
-                  >
-                    <span aria-hidden="true">{logo} </span>
-                    {achievementTexts.achievements[id].title}
-                  </li>
-                ),
-              )}
-            </ul>
-          </div>
-        )}
         {campaign && campaignLevel ? (
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
             {winner === 'player' ? (

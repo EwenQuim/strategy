@@ -8,7 +8,7 @@ export const primaryButtonClassName =
   buttonClassName +
   ' justify-center gap-[30px] border-transparent bg-gold px-[25px] text-[15px] text-[var(--biome-panel,#20362b)] hover:brightness-110'
 
-export const panelClassName =
+const panelClassName =
   'rounded-2xl border border-[#d1cf9b40] bg-[var(--biome-panel,#20362b)] text-ink shadow-[0_25px_90px_#0000008c]'
 
 export const menuCardClassName =
