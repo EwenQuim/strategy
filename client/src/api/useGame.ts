@@ -13,16 +13,18 @@ import { mistralChooseAction } from './mistralBot.ts'
 import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
-import type { Action, BattleSetup, Transition } from '../lib/engine/index.ts'
-import { DEFAULT_BOT_CONFIG, type BotConfig } from '../lib/engine/ai/decision.ts'
+import type { BattleSetup, Transition } from '../lib/engine/index.ts'
+import {
+  botOptions,
+  DEFAULT_BOT_CONFIG,
+  STRATEGIES,
+  type AiStrategy,
+  type BotConfig,
+} from '../lib/engine/ai/decision.ts'
 
-// Adapter-driven strategies have no synchronous bot: their adapter thinks one enemy action
-// at a time. Adding one is a new entry here plus an adapterDriven strategy file.
-const ASYNC_BOTS: Partial<
-  Record<BotConfig['name'], (state: Transition['state']) => Promise<Action>>
-> = {
-  mistral: mistralChooseAction,
-  jev: jevChooseAction,
+const REMOTE_BOTS: Partial<Record<BotConfig['name'], AiStrategy>> = {
+  mistral: async (state) => [await mistralChooseAction(state)],
+  jev: async (state) => [await jevChooseAction(state)],
 }
 
 export type OnlineSession = { code: string; token: string; side: Side }
@@ -46,7 +48,7 @@ export function useGame({
 }: GameOptions) {
   const [playback, dispatch] = useReducer(
     (playback: Transition, action: PlaybackAction) => {
-      const next = playbackReducer(playback, action, mode, bot)
+      const next = playbackReducer(playback, action, mode)
       // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
       if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
       return next
@@ -79,25 +81,21 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  // Adapter-driven strategies have no synchronous bot: while the enemy is to act, this
-  // effect asks the adapter for one action and plays it through the same reducer as human
-  // actions.
-  const asyncBot = ASYNC_BOTS[bot.name]
+  const strategy = REMOTE_BOTS[bot.name] ?? STRATEGIES[bot.name]
+  const options = botOptions(bot)
   useEffect(() => {
-    if (mode !== 'ai' || !asyncBot || online || playing || state.winner) return
+    if (mode !== 'ai' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void asyncBot(state)
-      .then((action) => {
-        if (!cancelled) dispatch(action)
-      })
-      .catch(() => {
-        if (!cancelled) dispatch({ type: 'endTurn' })
+    void strategy(state, options)
+      .catch(() => [])
+      .then((actions) => {
+        if (!cancelled) dispatch({ type: 'botActions', actions })
       })
     return () => {
       cancelled = true
     }
-  }, [asyncBot, dispatch, mode, online, playing, state])
+  }, [dispatch, mode, online, options, playing, state, strategy])
 
   return {
     state,

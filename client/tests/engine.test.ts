@@ -26,7 +26,7 @@ import {
   reducer as coreReducer,
   transition as coreTransition,
 } from '../src/lib/engine/index.ts'
-import { createBotGame } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { huntTheKing, nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
@@ -67,14 +67,14 @@ test('The last clash round follows combat damage, not plain moves', () => {
   assert.equal(coreReducer(state, { type: 'attack', q: 1, r: 0 }).lastClashRound, state.round)
 })
 
-test('End turn banks all remaining energy as adrenaline for every class and advances once', () => {
+test('End turn banks all remaining energy as adrenaline for every class and advances once', async () => {
   for (const Ctor of [King, ...RECRUIT_CLASSES]) {
     for (const energy of [0, 1, 2, 3]) {
       const state = battle()
       state.pawns[0] = new Ctor(1, 0, 0, 'player', undefined, energy)
       state.pawns[2].q = 5
       state.pawns[2].r = 5
-      const next = reducer(state, { type: 'endTurn' })
+      const next = await reducer(state, { type: 'endTurn' })
       assert.equal(next.pawns[0].adrenaline, energy)
       assert.equal(next.pawns[0].escapeChance, 0)
       assert.equal(next.pawns[0].energy, 0)
@@ -89,11 +89,11 @@ test('End turn banks all remaining energy as adrenaline for every class and adva
   }
 })
 
-test('End turn Guard banks Escape only beside an enemy, capped at 60%, and always consumes energy', () => {
+test('End turn Guard banks Escape only beside an enemy, capped at 60%, and always consumes energy', async () => {
   const alone = battle()
   alone.pawns[2].q = 5
   alone.pawns[2].r = 5
-  const unengaged = reducer(alone, { type: 'endTurn' })
+  const unengaged = await reducer(alone, { type: 'endTurn' })
   assert.equal(unengaged.pawns[0].escapeChance, 0)
   assert.equal(unengaged.pawns[0].adrenaline, 3)
   assert.equal(unengaged.pawns[0].energy, 0)
@@ -102,7 +102,7 @@ test('End turn Guard banks Escape only beside an enemy, capped at 60%, and alway
   for (const chance of [0, 20, 40, 50, 60]) {
     const state = battle()
     state.pawns[0].escapeChance = chance
-    const next = reducer(state, { type: 'endTurn' })
+    const next = await reducer(state, { type: 'endTurn' })
     assert.equal(next.pawns[0].escapeChance, 60)
     assert.equal(next.pawns[0].energy, 0)
     assert.equal(next.pawns[0].adrenaline, 3)
@@ -111,14 +111,14 @@ test('End turn Guard banks Escape only beside an enemy, capped at 60%, and alway
   }
 })
 
-test('End turn cannot act for an enemy or after game over', () => {
+test('End turn cannot act for an enemy or after game over', async () => {
   const over = { ...battle(), winner: 'enemy' as const }
-  assert.equal(reducer(over, { type: 'endTurn' }), over)
+  assert.equal(await reducer(over, { type: 'endTurn' }), over)
   const enemy = { ...battle(), active: 2 }
-  assert.equal(reducer(enemy, { type: 'endTurn' }), enemy)
+  assert.equal(await reducer(enemy, { type: 'endTurn' }), enemy)
 })
 
-test('End-turn Guard protects the outgoing swordsman and a dodge spends the whole bank', () => {
+test('End-turn Guard protects the outgoing swordsman and a dodge spends the whole bank', async () => {
   for (const energy of [1, 2, 3]) {
     for (let randomState = 0; randomState < 20; randomState++) {
       const state = battle()
@@ -127,7 +127,7 @@ test('End-turn Guard protects the outgoing swordsman and a dodge spends the whol
       state.randomState = randomState
       const random = new SeededRandom(randomState)
       const escaped = random.next() * 100 < energy * 20
-      const next = reducer(state, { type: 'endTurn' })
+      const next = await reducer(state, { type: 'endTurn' })
       assert.equal(next.pawns[0].hp, escaped ? 5 : 3)
       assert.equal(next.pawns[0].escapeChance, escaped ? 0 : energy * 20)
       assert.equal(next.pawns[0].adrenaline, energy)
@@ -137,7 +137,7 @@ test('End-turn Guard protects the outgoing swordsman and a dodge spends the whol
   }
 })
 
-test('Pawn classes can extend turn-end behavior and the UI preview uses the same rule', () => {
+test('Pawn classes can extend turn-end behavior and the UI preview uses the same rule', async () => {
   class CautiousSwordsman extends Swordsman {
     override endTurnEscape(pawns: readonly Pawn[]): number {
       return Math.min(super.endTurnEscape(pawns), 40)
@@ -150,14 +150,14 @@ test('Pawn classes can extend turn-end behavior and the UI preview uses the same
   const state = battle()
   state.pawns[0] = new CautiousSwordsman(1, 0, 0, 'player', 3)
   assert.equal(state.pawns[0].endTurnEscape(state.pawns), 40)
-  const next = reducer(state, { type: 'endTurn' })
+  const next = await reducer(state, { type: 'endTurn' })
   assert.equal(next.pawns[0].escapeChance, 40)
   assert.equal(next.pawns[0].hp, 4)
   assert.equal(next.pawns[0].energy, 0)
   assert.equal(state.pawns[0].hp, 3)
 
   state.pawns[0].energy = 1
-  const exhausted = reducer(state, { type: 'move', q: 0, r: 1 })
+  const exhausted = await reducer(state, { type: 'move', q: 0, r: 1 })
   assert.equal(exhausted.pawns[0].hp, 4)
   assert.equal(exhausted.pawns[0].escapeChance, 0)
   assert.equal(activePawn(exhausted)?.id, 2)
@@ -165,7 +165,7 @@ test('Pawn classes can extend turn-end behavior and the UI preview uses the same
   state.order = [1, 4, 2, 3]
   state.pawns.push(new CautiousSwordsman(4, 5, 5, 'enemy', 3))
   for (const tile of state.tiles.values()) tile.terrain = 'mountain'
-  const enemy = reducer(state, { type: 'endTurn' }).pawns.find((p) => p.id === 4)!
+  const enemy = (await reducer(state, { type: 'endTurn' })).pawns.find((p) => p.id === 4)!
   assert.equal(enemy.escapeChance, 0)
   assert.equal(enemy.adrenaline, 3)
   assert.equal(enemy.energy, 0)
@@ -173,14 +173,14 @@ test('Pawn classes can extend turn-end behavior and the UI preview uses the same
 })
 
 for (const chance of [0, 20, 40, 60]) {
-  test('Incoming attacks respect the ' + chance + '% Escape threshold', () => {
+  test('Incoming attacks respect the ' + chance + '% Escape threshold', async () => {
     for (let randomState = 0; randomState < 50; randomState++) {
       const random = new SeededRandom(randomState)
       const roll = random.next()
       const state = battle()
       state.randomState = randomState
       state.pawns[2].escapeChance = chance
-      const next = reducer(state, { type: 'attack', q: 1, r: 0 })
+      const next = await reducer(state, { type: 'attack', q: 1, r: 0 })
       assert.equal(next.pawns[2].hp, roll * 100 < chance ? 7 : 5)
       assert.equal(next.pawns[0].energy, 2)
       assert.equal(next.randomState, chance > 0 ? random.state : randomState)
@@ -190,13 +190,13 @@ for (const chance of [0, 20, 40, 60]) {
   })
 }
 
-test('Enemy attacks use Escape too', () => {
+test('Enemy attacks use Escape too', async () => {
   const state = battle()
   state.pawns[0].energy = 0
   state.randomState = 7
   state.pawns[0].escapeChance = 20
   state.order = [1, 3, 2]
-  const next = reducer(state, { type: 'endTurn' })
+  const next = await reducer(state, { type: 'endTurn' })
   assert.equal(next.pawns[0].hp, 5)
   assert.ok(next.log.some((line) => line.includes('escapes the attack')))
 })
@@ -215,16 +215,16 @@ test('A new round restores energy and resets Escape for every unit', () => {
   assert.ok(state.pawns.every((p) => p.escapeChance === 60 && p.energy === 1))
 })
 
-test('Movement spends its path cost', () => {
+test('Movement spends its path cost', async () => {
   const state = battle()
-  assert.equal(reducer(state, { type: 'move', q: 0, r: 0 }), state)
-  const moved = reducer(state, { type: 'move', q: 0, r: 2 })
+  assert.equal(await reducer(state, { type: 'move', q: 0, r: 0 }), state)
+  const moved = await reducer(state, { type: 'move', q: 0, r: 2 })
   assert.equal(moved.pawns[0].energy, 1)
   assert.equal(moved.pawns[0].r, 2)
   assert.equal(state.pawns[0].r, 0)
 })
 
-test('Movement rejects mountains, occupied tiles, and out-of-range destinations', () => {
+test('Movement rejects mountains, occupied tiles, and out-of-range destinations', async () => {
   const state = battle()
   state.tiles.set('0,1', { q: 0, r: 1, terrain: 'mountain' })
   for (const [q, r] of [
@@ -232,17 +232,17 @@ test('Movement rejects mountains, occupied tiles, and out-of-range destinations'
     [1, 0],
     [5, 0],
   ]) {
-    assert.equal(reducer(state, { type: 'move', q, r }), state)
+    assert.equal(await reducer(state, { type: 'move', q, r }), state)
   }
 })
 
-test('Defeating the enemy king ends the game; restart clears the battle', () => {
+test('Defeating the enemy king ends the game; restart clears the battle', async () => {
   const state = battle()
   state.pawns[2].hp = 1
-  const victory = reducer(state, { type: 'attack', q: 1, r: 0 })
+  const victory = await reducer(state, { type: 'attack', q: 1, r: 0 })
   assert.equal(victory.winner, 'player')
-  assert.equal(reducer(victory, { type: 'endTurn' }), victory)
-  const restarted = reducer(victory, { type: 'restart' })
+  assert.equal(await reducer(victory, { type: 'endTurn' }), victory)
+  const restarted = await reducer(victory, { type: 'restart' })
   assert.equal(restarted.winner, null)
   assert.equal(restarted.round, 1)
   assert.equal(restarted.pawns.length, 12)
@@ -251,14 +251,14 @@ test('Defeating the enemy king ends the game; restart clears the battle', () => 
   assert.deepEqual(restarted, initialState(state.seed))
 })
 
-test('A lethal final enemy turn ends the current round without starting another', () => {
+test('A lethal final enemy turn ends the current round without starting another', async () => {
   const state = battle()
   state.pawns[0].q = -5
   state.pawns[1].q = 0
   state.pawns[1].hp = 1
   state.order = [2, 1, 3]
   state.active = 1
-  const next = reducer(state, { type: 'endTurn' })
+  const next = await reducer(state, { type: 'endTurn' })
   assert.equal(next.winner, 'enemy')
   assert.equal(next.round, 1)
   assert.ok(!next.log.some((line) => line.includes('Energy restored')))
@@ -275,33 +275,33 @@ test('Enemy targeting strategies are interchangeable without mutating candidates
   assert.equal(huntTheKing.chooseTarget(attacker, []), undefined)
 })
 
-test('The reducer uses the supplied enemy strategy', () => {
+test('The reducer uses the supplied enemy strategy', async () => {
   const state = battle()
   state.pawns[0].energy = 0
   state.pawns[1].q = 0
   state.pawns[1].r = 1
   state.order = [1, 3, 2]
-  const nearest = createBotGame(nearestTarget).reducer(state, { type: 'endTurn' })
-  const hunting = createBotGame(huntTheKing).reducer(state, { type: 'endTurn' })
+  const nearest = await createBotGame(nearestTarget).reducer(state, { type: 'endTurn' })
+  const hunting = await createBotGame(huntTheKing).reducer(state, { type: 'endTurn' })
   assert.equal(nearest.pawns[0].hp, 3)
   assert.equal(nearest.pawns[1].hp, 7)
   assert.equal(hunting.pawns[0].hp, 5)
   assert.equal(hunting.pawns[1].hp, 5)
 })
 
-test('Identical seeds and decisions replay identically, including repeated reducer calls', () => {
+test('Identical seeds and decisions replay identically, including repeated reducer calls', async () => {
   let first = initialState('shared-vale')
   let replay = initialState('shared-vale')
   assert.deepEqual(first, replay)
   for (let turn = 0; turn < 60; turn++) {
     const action = { type: 'endTurn' as const }
-    const next = reducer(first, action)
-    assert.deepEqual(next, reducer(first, action))
-    replay = reducer(replay, action)
+    const next = await reducer(first, action)
+    assert.deepEqual(next, await reducer(first, action))
+    replay = await reducer(replay, action)
     assert.deepEqual(next, replay)
     first = next
   }
-  assert.deepEqual(reducer(first, { type: 'restart' }), initialState('shared-vale'))
+  assert.deepEqual(await reducer(first, { type: 'restart' }), initialState('shared-vale'))
 })
 
 test('Different seeds vary terrain and turn order without depending on global random state', (t) => {
@@ -310,12 +310,12 @@ test('Different seeds vary terrain and turn order without depending on global ra
   })
   const maps = new Set<string>()
   const orders = new Set(
-    ['alpha', 'bravo', 'charlie', 'delta'].map((seed) => {
+    ['alpha', 'bravo', 'charlie', 'delta'].map(async (seed) => {
       const state = initialState(seed)
       assert.equal(state.seed, seed)
       maps.add(JSON.stringify([...state.tiles.values()]))
-      const next = reducer(state, { type: 'endTurn' })
-      assert.deepEqual(next, reducer(state, { type: 'endTurn' }))
+      const next = await reducer(state, { type: 'endTurn' })
+      assert.deepEqual(next, await reducer(state, { type: 'endTurn' }))
       return state.order.map((id) => state.pawns.findIndex((pawn) => pawn.id === id)).join(',')
     }),
   )
@@ -323,9 +323,9 @@ test('Different seeds vary terrain and turn order without depending on global ra
   assert.ok(maps.size > 1)
 })
 
-test('Invalid actions never advance the random stream', () => {
+test('Invalid actions never advance the random stream', async () => {
   const state = battle()
-  assert.equal(reducer(state, { type: 'move', q: 500, r: 500 }), state)
+  assert.equal(await reducer(state, { type: 'move', q: 500, r: 500 }), state)
 })
 
 test('Seed hashing and the PRNG stream have a stable reference sequence', () => {
@@ -353,11 +353,11 @@ test('The mobile board is 8 columns by 12 rows with passable spawn tiles', () =>
   assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
 })
 
-test('A confirmed attack spends exactly one energy, including the final energy before switching units', () => {
+test('A confirmed attack spends exactly one energy, including the final energy before switching units', async () => {
   for (const energy of [1, 2, 3]) {
     const state = battle()
     state.pawns[0].energy = energy
-    const next = reducer(state, { type: 'attack', q: 1, r: 0 })
+    const next = await reducer(state, { type: 'attack', q: 1, r: 0 })
     assert.equal(next.pawns[0].energy, energy - 1)
     assert.equal(next.pawns[2].hp, 5)
     assert.equal(activePawn(next)?.id, energy === 1 ? 2 : 1)
@@ -365,19 +365,19 @@ test('A confirmed attack spends exactly one energy, including the final energy b
   }
 })
 
-test('Notification IDs advance for repeated attacks even when the log is full', () => {
+test('Notification IDs advance for repeated attacks even when the log is full', async () => {
   let state = battle()
   state.pawns[0].energy = 60
   state.pawns[2].hp = 200
   for (let index = 1; index <= 45; index++) {
     assert.equal(state.logCount, index - 1)
-    state = reducer(state, { type: 'attack', q: 1, r: 0 })
+    state = await reducer(state, { type: 'attack', q: 1, r: 0 })
     assert.equal(state.logCount, index)
     assert.equal(state.log.length, Math.min(index, 40))
   }
   assert.equal(new Set(state.log).size, 1)
   state.order = [1, 3, 2]
-  state = reducer(state, { type: 'endTurn' })
+  state = await reducer(state, { type: 'endTurn' })
   assert.equal(state.logCount, 48)
   assert.equal(state.log.length, 40)
 })
@@ -415,7 +415,7 @@ test('Every class has its proposed health, damage, range, and independently clon
   }
 })
 
-test('Rally immediately heals every wounded adjacent ally for one energy, once per round', () => {
+test('Rally immediately heals every wounded adjacent ally for one energy, once per round', async () => {
   const state = battle()
   state.pawns[0] = new King(1, 0, 0, 'player', 4)
   state.pawns[1] = new Swordsman(2, 0, 1, 'player', 4)
@@ -425,7 +425,7 @@ test('Rally immediately heals every wounded adjacent ally for one energy, once p
     new Swordsman(6, 0, -1, 'player'),
     new Archer(7, -3, 0, 'player', 1),
   )
-  const healed = reducer(state, { type: 'special' })
+  const healed = await reducer(state, { type: 'special' })
   assert.deepEqual(
     healed.pawns.map((p) => p.hp),
     [4, 5, 7, 2, 3, 5, 1],
@@ -438,18 +438,18 @@ test('Rally immediately heals every wounded adjacent ally for one energy, once p
   assert.equal(healed.pawns[0].specialUsed, true)
   assert.equal(healed.randomState, state.randomState)
   assert.equal(healed.logCount, 4)
-  assert.equal(reducer(healed, { type: 'special' }), healed)
-  assert.equal(reducer(healed, { type: 'special', target: { q: 0, r: 1 } }), healed)
+  assert.equal(await reducer(healed, { type: 'special' }), healed)
+  assert.equal(await reducer(healed, { type: 'special', target: { q: 0, r: 1 } }), healed)
   healed.order = [3, 2, 1]
   healed.active = 2
   healed.pawns[2].q = 5
   healed.pawns[2].r = 5
-  const nextRound = reducer(healed, { type: 'endTurn' })
+  const nextRound = await reducer(healed, { type: 'endTurn' })
   assert.equal(nextRound.round, 2)
   assert.equal(nextRound.pawns.find((p) => p.id === 1)!.specialUsed, false)
 
   state.pawns[0].energy = 1
-  const exhausted = reducer(state, { type: 'special' })
+  const exhausted = await reducer(state, { type: 'special' })
   assert.deepEqual(
     exhausted.pawns.map((p) => p.hp),
     [4, 5, 7, 2, 3, 5, 1],
@@ -459,37 +459,40 @@ test('Rally immediately heals every wounded adjacent ally for one energy, once p
   assert.equal(activePawn(exhausted)?.id, 2)
 })
 
-test('Rally does not spend energy without wounded adjacent allies or when unavailable', () => {
+test('Rally does not spend energy without wounded adjacent allies or when unavailable', async () => {
   const state = battle()
   state.pawns[0] = new King(1, 0, 0, 'player', 4)
   state.pawns[1] = new Swordsman(2, 0, 1, 'player')
-  assert.equal(reducer(state, { type: 'special' }), state)
+  assert.equal(await reducer(state, { type: 'special' }), state)
   state.pawns[1].hp = 3
   const over = { ...state, winner: 'enemy' as const }
-  assert.equal(reducer(over, { type: 'special' }), over)
+  assert.equal(await reducer(over, { type: 'special' }), over)
   state.pawns[0].energy = 0
-  assert.equal(reducer(state, { type: 'special' }), state)
+  assert.equal(await reducer(state, { type: 'special' }), state)
   state.pawns[0].energy = 3
   state.pawns[0].specialUsed = true
-  assert.equal(reducer(state, { type: 'special' }), state)
+  assert.equal(await reducer(state, { type: 'special' }), state)
 })
 
-test('Charge aims a destination then a target, and moves and strikes atomically for two energy', () => {
+test('Charge aims a destination then a target, and moves and strikes atomically for two energy', async () => {
   const state = battle()
   state.pawns[2].q = 3
   const destination = { q: 2, r: 0 }
   assert.ok(targetingTiles(state, { action: 'special' }).has('2,0'))
   assert.ok(targetingTiles(state, { action: 'special', destination }).has('3,0'))
-  const charged = reducer(state, { type: 'special', target: { q: 3, r: 0 }, destination })
+  const charged = await reducer(state, { type: 'special', target: { q: 3, r: 0 }, destination })
   assert.equal(charged.pawns[0].q, 2)
   assert.equal(charged.pawns[0].energy, 1)
   assert.equal(charged.pawns[2].hp, 5)
   assert.equal(state.pawns[0].q, 0)
-  assert.equal(reducer(state, { type: 'special', target: { q: -3, r: 0 }, destination }), state)
-  assert.equal(reducer(state, { type: 'special', target: { q: 3, r: 0 } }), state)
+  assert.equal(
+    await reducer(state, { type: 'special', target: { q: -3, r: 0 }, destination }),
+    state,
+  )
+  assert.equal(await reducer(state, { type: 'special', target: { q: 3, r: 0 } }), state)
 })
 
-test('Charge rejects blocked paths, occupied destinations, and insufficient energy', () => {
+test('Charge rejects blocked paths, occupied destinations, and insufficient energy', async () => {
   const state = battle()
   state.pawns[2].q = 3
   for (const tile of state.tiles.values()) tile.terrain = 'mountain'
@@ -501,25 +504,29 @@ test('Charge rejects blocked paths, occupied destinations, and insufficient ener
   assert.equal(chargeDestinations(state.tiles, state.pawns, state.pawns[0]).size, 0)
   state.pawns[0].energy = 1
   assert.equal(
-    reducer(state, { type: 'special', target: { q: 3, r: 0 }, destination: { q: 2, r: 0 } }),
+    await reducer(state, {
+      type: 'special',
+      target: { q: 3, r: 0 },
+      destination: { q: 2, r: 0 },
+    }),
     state,
   )
 })
 
-test('Aimed shot respects the archer dead zone and bypasses Escape without consuming randomness', () => {
+test('Aimed shot respects the archer dead zone and bypasses Escape without consuming randomness', async () => {
   const state = battle()
   state.pawns[0] = new Archer(1, 0, 0, 'player')
   state.pawns[2].escapeChance = 60
-  assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
+  assert.equal(await reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
   state.pawns[2].q = 2
-  const shot = reducer(state, { type: 'special', target: { q: 2, r: 0 } })
+  const shot = await reducer(state, { type: 'special', target: { q: 2, r: 0 } })
   assert.equal(shot.pawns[2].hp, 5)
   assert.equal(shot.pawns[0].energy, 1)
   assert.equal(shot.randomState, state.randomState)
   assert.equal(state.pawns[2].hp, 7)
 })
 
-test('Bomb hits nearby units including allies and handles multiple kills and victory', () => {
+test('Bomb hits nearby units including allies and handles multiple kills and victory', async () => {
   const state = battle()
   state.pawns[0] = new Bomber(1, 0, 0, 'player')
   state.pawns[2].hp = 1
@@ -530,7 +537,7 @@ test('Bomb hits nearby units including allies and handles multiple kills and vic
     new Archer(7, 5, 5, 'enemy'),
   )
   const bomb = { type: 'special', target: { q: 1, r: 0 } } as const
-  const fired = reducer(state, bomb)
+  const fired = await reducer(state, bomb)
   assert.equal(fired.pawns[0].energy, 1)
   assert.deepEqual(
     fired.pawns.map((p) => p.id),
@@ -541,17 +548,17 @@ test('Bomb hits nearby units including allies and handles multiple kills and vic
   assert.equal(fired.pawns.find((p) => p.id === 6)!.hp, 4)
   assert.equal(fired.pawns.find((p) => p.id === 7)!.hp, 3)
   assert.equal(fired.winner, 'player')
-  const frame = transition(state, bomb).frames[0]
+  const frame = (await transition(state, bomb)).frames[0]
   assert.deepEqual(
     frame.state.pawns.filter((pawn) => pawn.hp <= 0).map((pawn) => pawn.id),
     [3, 4],
   )
   assert.equal(frame.state.winner, null)
-  assert.deepEqual(fired, reducer(state, bomb))
+  assert.deepEqual(fired, await reducer(state, bomb))
   assert.equal(state.pawns.length, 7)
 })
 
-test('Fireball Escape rolls share the seeded stream independently for every affected enemy', () => {
+test('Fireball Escape rolls share the seeded stream independently for every affected enemy', async () => {
   const state = battle()
   state.pawns[0] = new Magician(1, 0, 0, 'player')
   state.pawns[2].escapeChance = 60
@@ -559,13 +566,13 @@ test('Fireball Escape rolls share the seeded stream independently for every affe
   const random = new SeededRandom(state.randomState)
   const kingHp = random.next() < 0.6 ? 7 : 6
   const archerHp = random.next() < 0.4 ? 3 : 2
-  const fired = reducer(state, { type: 'special', target: { q: 1, r: 0 } })
+  const fired = await reducer(state, { type: 'special', target: { q: 1, r: 0 } })
   assert.equal(fired.pawns[2].hp, kingHp)
   assert.equal(fired.pawns[3].hp, archerHp)
   assert.equal(fired.randomState, random.state)
 })
 
-test('Illegal attack targets do not spend energy or advance randomness', () => {
+test('Illegal attack targets do not spend energy or advance randomness', async () => {
   const state = battle()
   for (const [q, r] of [
     [0, 0],
@@ -573,17 +580,17 @@ test('Illegal attack targets do not spend energy or advance randomness', () => {
     [0, 1],
     [99, 99],
   ])
-    assert.equal(reducer(state, { type: 'attack', q, r }), state)
+    assert.equal(await reducer(state, { type: 'attack', q, r }), state)
   state.pawns[2].q = 2
-  assert.equal(reducer(state, { type: 'attack', q: 2, r: 0 }), state)
+  assert.equal(await reducer(state, { type: 'attack', q: 2, r: 0 }), state)
 })
 
-test('Enemy units spend the same full energy budget as the player', () => {
+test('Enemy units spend the same full energy budget as the player', async () => {
   const state = battle()
   state.pawns[0].energy = 0
   state.pawns[2].energy = 3
   state.order = [1, 3, 2]
-  const next = reducer(state, { type: 'endTurn' })
+  const next = await reducer(state, { type: 'endTurn' })
   assert.equal(
     next.pawns.some((p) => p.id === 1),
     false,
@@ -592,30 +599,30 @@ test('Enemy units spend the same full energy budget as the player', () => {
   assert.equal(state.pawns[0].hp, 5)
 })
 
-test('Enemy archers retreat out of melee before shooting and can use Aimed shot', () => {
+test('Enemy archers retreat out of melee before shooting and can use Aimed shot', async () => {
   const state = battle()
   state.pawns[0].energy = 0
   state.pawns[2] = new Archer(3, 1, 0, 'enemy')
   state.pawns.push(new King(4, 5, 5, 'enemy'))
   state.order = [1, 3, 2, 4]
-  const retreat = reducer(state, { type: 'endTurn' })
+  const retreat = await reducer(state, { type: 'endTurn' })
   assert.equal(retreat.pawns[0].hp, 3)
   assert.equal(retreat.pawns[2].energy, 0)
   assert.ok(canAttack(retreat.pawns[2], retreat.pawns[0]))
   state.pawns[2].q = 2
   state.pawns[2].energy = 2
   state.pawns[0].escapeChance = 60
-  const aimed = reducer(state, { type: 'endTurn' })
+  const aimed = await reducer(state, { type: 'endTurn' })
   assert.equal(aimed.pawns[0].hp, 3)
   assert.equal(aimed.randomState, state.randomState)
   assert.ok(aimed.log.some((line) => line.includes('aimedShot')))
 })
 
-test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
+test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', async () => {
   const king = battle()
   king.order = [1, 3, 2]
   king.pawns.push(new Swordsman(4, 1, 1, 'enemy', 3), new Archer(5, 2, 0, 'enemy', 1))
-  const rallied = reducer(king, { type: 'endTurn' })
+  const rallied = await reducer(king, { type: 'endTurn' })
   assert.equal(rallied.pawns[3].hp, 4)
   assert.equal(rallied.pawns[4].hp, 2)
   assert.equal(rallied.pawns[2].specialUsed, true)
@@ -629,7 +636,7 @@ test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
       state.pawns[1].q = -1
       state.pawns[1].r = 0
     }
-    const next = reducer(state, { type: 'endTurn' })
+    const next = await reducer(state, { type: 'endTurn' })
     assert.equal(next.pawns[0].hp, Ctor === Swordsman ? 3 : 4)
     assert.equal(next.pawns[2].energy, 0)
     assert.ok(
@@ -638,7 +645,7 @@ test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', () => {
   }
 })
 
-test('Enemy playback records each action in order without changing seeded results', () => {
+test('Enemy playback records each action in order without changing seeded results', async () => {
   for (const strategy of [nearestTarget, huntTheKing]) {
     const engine = createBotGame(strategy)
     for (const seed of ['alpha', 'bravo', 'animation-review']) {
@@ -647,9 +654,9 @@ test('Enemy playback records each action in order without changing seeded result
       assert.deepEqual(opening, engine.initialTransition(seed))
       let state = opening.state
       for (let turn = 0; turn < 30 && !state.winner; turn++) {
-        const result = engine.transition(state, { type: 'endTurn' })
-        assert.deepEqual(result.state, engine.reducer(state, { type: 'endTurn' }))
-        assert.deepEqual(result, engine.transition(state, { type: 'endTurn' }))
+        const result = await engine.transition(state, { type: 'endTurn' })
+        assert.deepEqual(result.state, await engine.reducer(state, { type: 'endTurn' }))
+        assert.deepEqual(result, await engine.transition(state, { type: 'endTurn' }))
         for (let i = 0; i < result.frames.length; i++) {
           const frame = result.frames[i]
           assert.equal(activePawn(frame.state)?.side, 'enemy')
@@ -671,22 +678,22 @@ test('Enemy playback records each action in order without changing seeded result
   }
 })
 
-test('Playback snapshots keep intermediate health, logs, and dead target coordinates', () => {
+test('Playback snapshots keep intermediate health, logs, and dead target coordinates', async () => {
   const state = battle()
   state.pawns[0].energy = 0
   state.order = [1, 3, 2]
   state.pawns[2].energy = 3
-  const result = transition(state, { type: 'endTurn' })
-  assert.equal(result.frames.length, 4)
+  const result = await transition(state, { type: 'endTurn' })
+  assert.equal(result.frames.length, 6)
   assert.deepEqual(
     result.frames.map((frame) => frame.state.pawns.find((p) => p.id === 1)?.hp),
-    [5, 3, 1, -1],
+    [5, 3, 3, 1, 1, -1],
   )
   assert.deepEqual(
     result.frames.map((frame) => frame.state.logCount),
-    [0, 1, 2, 4],
+    [0, 1, 1, 2, 2, 4],
   )
-  assert.deepEqual(result.frames[3].effect, {
+  assert.deepEqual(result.frames[5].effect, {
     kind: 'attack',
     from: { q: 1, r: 0 },
     to: { q: 0, r: 0 },
@@ -700,11 +707,11 @@ test('Playback snapshots keep intermediate health, logs, and dead target coordin
   assert.equal(state.pawns[0].hp, 5)
 })
 
-test('Enemy moves, Escape, and all specials have board effects', () => {
+test('Enemy moves, Escape, and all specials have board effects', async () => {
   const move = battle()
   move.order = [1, 3, 2]
   move.pawns[2].q = 5
-  const moved = transition(move, { type: 'endTurn' })
+  const moved = await transition(move, { type: 'endTurn' })
   assert.equal(moved.frames[1].effect?.kind, 'move')
   assert.notDeepEqual(moved.frames[1].effect?.from, moved.frames[1].effect?.to)
 
@@ -731,7 +738,7 @@ test('Enemy moves, Escape, and all specials have board effects', () => {
       state.pawns[1].q = -1
       state.pawns[1].r = 0
     }
-    const result = transition(state, { type: 'endTurn' })
+    const result = await transition(state, { type: 'endTurn' })
     assert.equal(
       result.frames[1].effect?.kind,
       Ctor === King ? 'rally' : Ctor === Magician ? 'fireball' : 'attack',
@@ -742,13 +749,13 @@ test('Enemy moves, Escape, and all specials have board effects', () => {
   }
 })
 
-test('Playback locks actions, reveals the killing blow before defeat, and can skip animation', () => {
+test('Playback locks actions, reveals the killing blow before defeat, and can skip animation', async () => {
   const state = battle()
   state.pawns[0].q = -5
   state.pawns[1].q = 0
   state.pawns[1].hp = 1
   state.order = [1, 3, 2]
-  const result = transition(state, { type: 'endTurn' })
+  const result = await transition(state, { type: 'endTurn' })
   assert.equal(result.state.winner, 'enemy')
   let playback = result
   for (const frame of result.frames) {
@@ -767,7 +774,7 @@ test('Playback locks actions, reveals the killing blow before defeat, and can sk
   )
 })
 
-test('Enemies bank leftover energy as adrenaline in one end-turn action', () => {
+test('Enemies bank leftover energy as adrenaline in one end-turn action', async () => {
   for (const energy of [1, 2, 3]) {
     const state = battle()
     state.order = [1, 3, 2]
@@ -775,7 +782,7 @@ test('Enemies bank leftover energy as adrenaline in one end-turn action', () => 
     state.pawns[2].r = 5
     state.pawns[2].energy = energy
     for (const tile of state.tiles.values()) tile.terrain = 'mountain'
-    const result = transition(state, { type: 'endTurn' })
+    const result = await transition(state, { type: 'endTurn' })
     const enemy = result.state.pawns.find((p) => p.id === 3)!
     assert.equal(enemy.energy, 0)
     assert.equal(enemy.adrenaline, energy)
@@ -813,25 +820,25 @@ test('Every seed places distinct pawns in their own three-row starting area', ()
   assert.equal(rowsBySide.enemy.size, 3)
 })
 
-test('Player and enemy movement stays silent while each enemy step still has a playback frame', () => {
+test('Player and enemy movement stays silent while each enemy step still has a playback frame', async () => {
   const state = battle()
-  const moved = reducer(state, { type: 'move', q: 0, r: 1 })
+  const moved = await reducer(state, { type: 'move', q: 0, r: 1 })
   assert.deepEqual(moved.log, state.log)
   assert.equal(moved.logCount, state.logCount)
   state.pawns[0].energy = 0
   state.pawns[2].q = 5
   state.pawns[2].energy = 3
   state.order = [1, 3, 2]
-  const result = transition(state, { type: 'endTurn' })
+  const result = await transition(state, { type: 'endTurn' })
   assert.deepEqual(result.state.log, [])
-  assert.equal(result.frames.length, 4)
+  assert.equal(result.frames.length, 6)
   assert.deepEqual(
     result.frames.map((f) => activePawn(f.state)?.energy),
-    [3, 2, 1, 0],
+    [3, 2, 2, 1, 1, 0],
   )
   assert.deepEqual(
     result.frames.map((f) => f.state.logCount),
-    [0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
   )
   assert.equal(result.frames.filter((f) => f.effect?.kind === 'move').length, 3)
 })
@@ -874,7 +881,7 @@ test('Seeded armies mirror one King and five different recruits', () => {
   ])
 })
 
-test('Jump crosses blocked paths, targets only empty passable tiles within three hexes, and costs two energy', () => {
+test('Jump crosses blocked paths, targets only empty passable tiles within three hexes, and costs two energy', async () => {
   const state = battle()
   state.pawns[0] = new Ninja(1, 0, 0, 'player')
   state.pawns[2].q = 4
@@ -894,24 +901,24 @@ test('Jump crosses blocked paths, targets only empty passable tiles within three
     [0, 4],
     [99, 99],
   ]) {
-    assert.equal(reducer(state, { type: 'special', target: { q, r } }), state)
+    assert.equal(await reducer(state, { type: 'special', target: { q, r } }), state)
   }
-  assert.equal(reducer(state, { type: 'special' }), state)
-  const jumped = reducer(state, { type: 'special', target: { q: 3, r: 0 } })
+  assert.equal(await reducer(state, { type: 'special' }), state)
+  const jumped = await reducer(state, { type: 'special', target: { q: 3, r: 0 } })
   assert.equal(jumped.pawns[0].q, 3)
   assert.equal(jumped.pawns[0].energy, 1)
   assert.equal(jumped.randomState, state.randomState)
   assert.deepEqual(jumped.log, state.log)
   assert.equal(jumped.logCount, 0)
   assert.deepEqual(structuredClone(state), original)
-  const attacked = reducer(jumped, { type: 'attack', q: 4, r: 0 })
+  const attacked = await reducer(jumped, { type: 'attack', q: 4, r: 0 })
   assert.equal(attacked.pawns[2].hp, 2)
   assert.equal(attacked.pawns[0].energy, 0)
   assert.equal(activePawn(attacked)?.id, 2)
   assert.equal(attacked.winner, null)
 })
 
-test('Jump includes one to three hexes, requires two energy, and ends the turn when exhausted', () => {
+test('Jump includes one to three hexes, requires two energy, and ends the turn when exhausted', async () => {
   const state = battle()
   state.pawns[0] = new Ninja(1, 0, 0, 'player')
   for (const energy of [0, 1, 2, 3]) {
@@ -919,14 +926,14 @@ test('Jump includes one to three hexes, requires two energy, and ends the turn w
     const destinations = jumpDestinations(state.tiles, state.pawns, state.pawns[0])
     if (energy < 2) {
       assert.deepEqual(destinations, [])
-      assert.equal(reducer(state, { type: 'special', target: { q: 0, r: 1 } }), state)
+      assert.equal(await reducer(state, { type: 'special', target: { q: 0, r: 1 } }), state)
       continue
     }
     assert.deepEqual(
       new Set(destinations.map((t) => hexDist(state.pawns[0], t))),
       new Set([1, 2, 3]),
     )
-    const next = reducer(state, { type: 'special', target: { q: 0, r: 1 } })
+    const next = await reducer(state, { type: 'special', target: { q: 0, r: 1 } })
     assert.equal(next.pawns[0].energy, energy - 2)
     assert.equal(next.pawns[0].r, 1)
     assert.equal(next.pawns[0].escapeChance, 0)
@@ -936,7 +943,7 @@ test('Jump includes one to three hexes, requires two energy, and ends the turn w
   assert.deepEqual(jumpDestinations(state.tiles, state.pawns, state.pawns[1]), [])
 })
 
-test('Ninja attacks cost one energy and respect Escape; one incoming hit kills a Ninja', () => {
+test('Ninja attacks cost one energy and respect Escape; one incoming hit kills a Ninja', async () => {
   for (let randomState = 0; randomState < 20; randomState++) {
     const state = battle()
     state.pawns[0] = new Ninja(1, 0, 0, 'player')
@@ -944,7 +951,7 @@ test('Ninja attacks cost one energy and respect Escape; one incoming hit kills a
     state.randomState = randomState
     const random = new SeededRandom(randomState)
     const escaped = random.next() < 0.6
-    const attacked = reducer(state, { type: 'attack', q: 1, r: 0 })
+    const attacked = await reducer(state, { type: 'attack', q: 1, r: 0 })
     assert.equal(attacked.pawns[2].hp, escaped ? 7 : 2)
     assert.equal(attacked.pawns[0].energy, 2)
     assert.equal(attacked.randomState, random.state)
@@ -952,12 +959,12 @@ test('Ninja attacks cost one energy and respect Escape; one incoming hit kills a
   const state = battle()
   state.pawns[0] = new Ninja(1, 0, 0, 'player', undefined, 0)
   state.order = [1, 3, 2]
-  const struck = reducer(state, { type: 'endTurn' })
+  const struck = await reducer(state, { type: 'endTurn' })
   assert.ok(!struck.pawns.some((p) => p.id === 1))
   assert.equal(state.pawns[0].hp, 1)
 })
 
-test('Enemy Ninja jumps over a blocked path then attacks, with deterministic ordered playback', () => {
+test('Enemy Ninja jumps over a blocked path then attacks, with deterministic ordered playback', async () => {
   const state = battle()
   state.pawns[0].q = -5
   state.pawns[0].r = -5
@@ -967,16 +974,16 @@ test('Enemy Ninja jumps over a blocked path then attacks, with deterministic ord
   state.order = [1, 3, 2, 4]
   for (const tile of state.tiles.values()) tile.terrain = 'mountain'
   for (const k of ['-5,-5', '0,0', '1,0', '4,0', '5,5']) state.tiles.get(k)!.terrain = 'plain'
-  const result = transition(state, { type: 'endTurn' })
-  assert.deepEqual(result, transition(state, { type: 'endTurn' }))
-  assert.deepEqual(result.state, reducer(state, { type: 'endTurn' }))
+  const result = await transition(state, { type: 'endTurn' })
+  assert.deepEqual(result, await transition(state, { type: 'endTurn' }))
+  assert.deepEqual(result.state, await reducer(state, { type: 'endTurn' }))
   assert.deepEqual(
     result.frames.map((frame) => frame.effect?.kind),
-    [undefined, 'move', 'attack'],
+    [undefined, 'move', undefined, 'attack'],
   )
   assert.deepEqual(
     result.frames.map((frame) => activePawn(frame.state)?.energy),
-    [3, 1, 0],
+    [3, 1, 1, 0],
   )
   assert.deepEqual(result.frames[1].effect, {
     kind: 'move',

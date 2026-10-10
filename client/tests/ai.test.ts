@@ -14,7 +14,8 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
@@ -32,7 +33,7 @@ function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
   }
 }
 
-function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState {
+async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Promise<GameState> {
   const id = activePawn(state)!.id
   const round = state.round
   for (
@@ -40,7 +41,10 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of chooseBotActions(state, { name: 'depthsearch', difficulty: level })) {
+    for (const action of await chooseBotActions(state, {
+      name: 'depthsearch',
+      difficulty: level,
+    })) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next
@@ -50,7 +54,7 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
   return state
 }
 
-test('Equally valued attacks keep candidate order at every difficulty', () => {
+test('Equally valued attacks keep candidate order at every difficulty', async () => {
   for (const reversed of [false, true]) {
     const targets = [new Archer(4, 1, 0, 'player', 1, 0), new Archer(5, 0, 1, 'player', 1, 0)]
     if (reversed) targets.reverse()
@@ -61,14 +65,15 @@ test('Equally valued attacks keep candidate order at every difficulty', () => {
       ...targets,
     ])
     for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
-      assert.deepEqual(chooseBotActions(state, { name: 'depthsearch', difficulty: level }), [
-        { type: 'attack', q: targets[0].q, r: targets[0].r },
-      ])
+      assert.deepEqual(
+        await chooseBotActions(state, { name: 'depthsearch', difficulty: level }),
+        [{ type: 'attack', q: targets[0].q, r: targets[0].r }],
+      )
     }
   }
 })
 
-test('AI battles start with an untouched human turn and restart with the same order', () => {
+test('AI battles start with an untouched human turn and restart with the same order', async () => {
   for (let seed = 0; seed < 30; seed++) {
     const game = createBotGame()
     const opening = game.initialTransition('initiative-' + seed)
@@ -79,7 +84,9 @@ test('AI battles start with an untouched human turn and restart with the same or
     assert.deepEqual(opening.frames, [])
     assert.ok(opening.state.pawns.every((p) => p.energy === p.maxEnergy && p.hp === p.maxHp))
     assert.deepEqual(
-      game.transition(game.reducer(opening.state, { type: 'endTurn' }), { type: 'restart' }),
+      await game.transition(await game.reducer(opening.state, { type: 'endTurn' }), {
+        type: 'restart',
+      }),
       opening,
     )
   }
@@ -118,7 +125,7 @@ test('Round order is fixed, skips deaths before and after the active unit, and u
 for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
   test(
     level + ': the king retreats from a lethal Ninja instead of attacking bait or Rallying',
-    () => {
+    async () => {
       const state = battle([
         new King(1, 0, 0, 'enemy', 4),
         new Swordsman(2, 0, -1, 'enemy', 3),
@@ -126,7 +133,7 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
         new Ninja(4, 2, 0, 'player'),
         new King(5, 6, 0, 'player'),
       ])
-      const next = playTurn(state, level)
+      const next = await playTurn(state, level)
       const king = next.pawns.find((p) => p.id === 1)!
       assert.ok(
         hexDist(
@@ -139,7 +146,7 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     },
   )
 
-  test(level + ': a defender removes the threat to its king within its turn', () => {
+  test(level + ': a defender removes the threat to its king within its turn', async () => {
     const state = battle([
       new Swordsman(1, 0, 0, 'enemy'),
       new King(2, 0, 1, 'enemy', 4),
@@ -147,12 +154,12 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
       new Ninja(4, 1, 0, 'player'),
       new King(5, 6, 0, 'player'),
     ])
-    const next = playTurn(state, level)
+    const next = await playTurn(state, level)
     assert.ok(!next.pawns.some((p) => p.id === 4))
     assert.equal(next.pawns.find((p) => p.id === 2)?.hp, 4)
   })
 
-  test(level + ': a reckless unit still never walks into lava to die', () => {
+  test(level + ': a reckless unit still never walks into lava to die', async () => {
     const state = battle([
       new Swordsman(1, 0, 0, 'enemy', 1),
       new King(2, -6, 0, 'enemy'),
@@ -161,10 +168,10 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     ])
     state.tiles.set('1,0', { q: 1, r: 0, terrain: 'lava' })
     state.tiles.set('1,-1', { q: 1, r: -1, terrain: 'lava' })
-    assert.ok(playTurn(state, level).pawns.some((p) => p.id === 1))
+    assert.ok((await playTurn(state, level)).pawns.some((p) => p.id === 1))
   })
 
-  test(level + ': stalemate aggression never rewards a pointless Hellfire death', () => {
+  test(level + ': stalemate aggression never rewards a pointless Hellfire death', async () => {
     const state = battle(
       [
         new Ninja(1, 0, 0, 'enemy'),
@@ -184,7 +191,7 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     state.active = 1
     state.round = 10
     state.lastClashRound = 0
-    let next = playTurn(state, level)
+    let next = await playTurn(state, level)
     while (!next.winner && next.round === state.round) next = reducer(next, { type: 'endTurn' })
     assert.ok(next.pawns.some((pawn) => pawn.id === 1))
     assert.ok(
@@ -194,38 +201,41 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     )
   })
 
-  test(level + ': never bombs its own units when no enemy is caught', () => {
+  test(level + ': never bombs its own units when no enemy is caught', async () => {
     const state = battle([
       new Bomber(1, 0, 0, 'enemy'),
       new Swordsman(2, 2, 0, 'enemy', 1),
       new King(3, -6, 0, 'enemy'),
       new King(4, 6, 0, 'player'),
     ])
-    assert.ok(playTurn(state, level).pawns.some((p) => p.id === 2))
+    assert.ok((await playTurn(state, level)).pawns.some((p) => p.id === 2))
   })
 
-  test(level + ': takes a free kill instead of ending its turn', () => {
+  test(level + ': takes a free kill instead of ending its turn', async () => {
     const state = battle([
       new Swordsman(1, 0, 0, 'enemy'),
       new King(2, -6, 0, 'enemy'),
       new Archer(3, 1, 0, 'player', 1),
       new King(4, 6, 0, 'player'),
     ])
-    assert.ok(!playTurn(state, level).pawns.some((p) => p.id === 3))
+    assert.ok(!(await playTurn(state, level)).pawns.some((p) => p.id === 3))
   })
 
-  test(level + ': take a winning attack instead of healing or attacking a soldier', () => {
-    const state = battle([
-      new King(1, 0, 0, 'enemy'),
-      new Swordsman(2, 0, -1, 'enemy', 3),
-      new Swordsman(3, 1, 0, 'player', 1),
-      new King(4, 0, 1, 'player', 2),
-    ])
-    assert.equal(playTurn(state, level).winner, 'enemy')
-  })
+  test(
+    level + ': take a winning attack instead of healing or attacking a soldier',
+    async () => {
+      const state = battle([
+        new King(1, 0, 0, 'enemy'),
+        new Swordsman(2, 0, -1, 'enemy', 3),
+        new Swordsman(3, 1, 0, 'player', 1),
+        new King(4, 0, 1, 'player', 2),
+      ])
+      assert.equal((await playTurn(state, level)).winner, 'enemy')
+    },
+  )
 }
 
-test('An archer steps out of melee contact before shooting', () => {
+test('An archer steps out of melee contact before shooting', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = battle([
       new Archer(1, 0, 0, 'enemy'),
@@ -233,7 +243,7 @@ test('An archer steps out of melee contact before shooting', () => {
       new Swordsman(3, 1, 0, 'player', 5, 0),
       new King(4, 6, 0, 'player'),
     ])
-    const next = playTurn(state, level)
+    const next = await playTurn(state, level)
     const archer = next.pawns.find((p) => p.id === 1)!
     assert.ok(
       hexDist(
@@ -245,7 +255,7 @@ test('An archer steps out of melee contact before shooting', () => {
   }
 })
 
-test('A safe commander king walks to a wounded ally and rallies', () => {
+test('A safe commander king walks to a wounded ally and rallies', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = battle([
       new King(1, 0, 0, 'enemy'),
@@ -257,13 +267,13 @@ test('A safe commander king walks to a wounded ally and rallies', () => {
       new Swordsman(7, -5, 5, 'player'),
       new Swordsman(8, -4, 5, 'player'),
     ])
-    const next = playTurn(state, level)
+    const next = await playTurn(state, level)
     assert.ok(next.pawns.find((p) => p.id === 1)!.specialUsed, level)
     assert.equal(next.pawns.find((p) => p.id === 2)!.hp, 3, level)
   }
 })
 
-test('A safe commander heals the last missing health point instead of waiting', () => {
+test('A safe commander heals the last missing health point instead of waiting', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = battle([
       new King(1, 0, 0, 'enemy'),
@@ -275,12 +285,12 @@ test('A safe commander heals the last missing health point instead of waiting', 
       new Swordsman(7, -5, 5, 'player'),
       new Swordsman(8, -4, 5, 'player'),
     ])
-    const ally = playTurn(state, level).pawns.find((p) => p.id === 2)!
+    const ally = (await playTurn(state, level)).pawns.find((p) => p.id === 2)!
     assert.equal(ally.hp, ally.maxHp, level)
   }
 })
 
-test('King safety includes a move followed by Charge, and refreshed enemy energy', () => {
+test('King safety includes a move followed by Charge, and refreshed enemy energy', async () => {
   for (const refreshed of [false, true]) {
     const state = battle(
       [
@@ -292,49 +302,49 @@ test('King safety includes a move followed by Charge, and refreshed enemy energy
       refreshed ? [3, 1, 2, 4] : [1, 3, 2, 4],
     )
     state.active = state.order.indexOf(1)
-    const next = playTurn(state, 'easy')
+    const next = await playTurn(state, 'easy')
     assert.ok(hexDist(next.pawns[0], next.pawns[2]) > 4)
   }
 })
 
-test('AI uses Aimed shot rather than gambling on an escaping king', () => {
+test('AI uses Aimed shot rather than gambling on an escaping king', async () => {
   const state = battle([
     new Archer(1, 0, 0, 'enemy'),
     new King(2, -6, 0, 'enemy'),
     new King(3, 2, 0, 'player', 2, 3, 60),
   ])
-  assert.deepEqual(chooseBotActions(state), [{ type: 'special', target: { q: 2, r: 0 } }])
+  assert.deepEqual(await chooseBotActions(state), [{ type: 'special', target: { q: 2, r: 0 } }])
 })
 
-test('Analysis is deterministic, immutable, configurable and independent of the real Escape stream', () => {
+test('Analysis is deterministic, immutable, configurable and independent of the real Escape stream', async () => {
   const state = battle([
     new Archer(1, 0, 0, 'enemy'),
     new King(2, -6, 0, 'enemy'),
     new King(3, 2, 0, 'player', 4, 3, 60),
   ])
   const original = structuredClone(state)
-  const actions = chooseBotActions(state)
+  const actions = await chooseBotActions(state)
   for (let randomState = 0; randomState < 10; randomState++)
-    assert.deepEqual(chooseBotActions({ ...state, randomState }), actions)
+    assert.deepEqual(await chooseBotActions({ ...state, randomState }), actions)
   assert.deepEqual(structuredClone(state), original)
-  assert.deepEqual(chooseBotActions(state, { ...BOT_LEVELS.normal }), actions)
+  assert.deepEqual(await chooseBotActions(state, { ...BOT_LEVELS.normal }), actions)
   for (const options of [
     { ...BOT_LEVELS.normal, depth: 0 },
     { ...BOT_LEVELS.normal, beamWidth: 0 },
     { ...BOT_LEVELS.normal, riskAppetite: NaN },
     { ...BOT_LEVELS.normal, latitude: 1000 },
   ])
-    assert.throws(
-      () => chooseBotActions(state, options as typeof BOT_LEVELS.normal),
+    await assert.rejects(
+      chooseBotActions(state, options as typeof BOT_LEVELS.normal),
       /Invalid bot options/,
     )
 })
 
-test('Hard lookahead can move then deliver a winning blow', () => {
+test('Hard lookahead can move then deliver a winning blow', async () => {
   const state = battle([
     new Archer(1, 0, 0, 'enemy'),
     new King(2, -6, 0, 'enemy'),
     new King(3, 1, 0, 'player', 2),
   ])
-  assert.equal(playTurn(state, 'hard').winner, 'enemy')
+  assert.equal((await playTurn(state, 'hard')).winner, 'enemy')
 })

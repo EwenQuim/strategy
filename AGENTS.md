@@ -37,7 +37,7 @@ Tests encode gameplay. Editing an existing test to make a change pass is a red f
 ## Boundaries
 
 - `client/src/lib/engine/`: deterministic game rules. `reducer(state, action)` applies an action for whichever side owns the active pawn; it never runs a bot or mutates its input.
-- `client/src/lib/engine/bot.ts`: the single-player controller. It proposes ordinary actions and applies them through the same engine as human actions.
+- `client/src/lib/engine/bot.ts`: the single-player controller. It only proposes ordinary actions; `useGame` plays them through the playback reducer like human actions.
 - `client/src/lib/playback.ts`: pure playback state and input locking.
 - `client/src/useGame.ts`, routes, and components: React, browser timers, reduced-motion preferences, and rendering.
 

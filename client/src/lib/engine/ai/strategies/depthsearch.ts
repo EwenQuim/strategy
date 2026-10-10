@@ -5,7 +5,6 @@ import { distancesToAttack, evaluatePosition, type ReachCache } from '../evaluat
 import { sidePlan } from '../plan.ts'
 import { chooseOption, hpOf, type Outcome } from '../choice.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../turns.ts'
-import type { AiStrategy } from '../decision.ts'
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
   return {
@@ -99,7 +98,7 @@ type Search = {
   leaf: (state: GameState) => number
 }
 
-// Per-decision search shape, reset on every chooseTacticalActions call and read by the analysis
+// Per-decision search shape, reset on every depthsearch call and read by the analysis
 // harness in tests/analyze-ai.ts. Plain counters only, so they stay free in production.
 export const searchStats = {
   decisions: 0,
@@ -248,7 +247,7 @@ function untilFirstRoll(actions: Action[]): Action[] {
   return roll < 0 ? actions : actions.slice(0, roll + 1)
 }
 
-function chooseTacticalActions(state: GameState, options: BotOptions): Action[] {
+export async function depthsearch(state: GameState, options: BotOptions): Promise<Action[]> {
   Object.assign(searchStats, {
     decisions: 1,
     plansEnumerated: 0,
@@ -295,10 +294,4 @@ function chooseTacticalActions(state: GameState, options: BotOptions): Action[] 
     })
     .sort((a, b) => b.value - a.value)
   return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
-}
-
-// The depth search: budgeted beam minimax over the unit turns turns.ts enumerates.
-export const depthsearch: AiStrategy = {
-  id: 'depthsearch',
-  chooseActions: chooseTacticalActions,
 }

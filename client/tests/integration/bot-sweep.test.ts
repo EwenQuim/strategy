@@ -19,7 +19,7 @@ import { seedState } from '../../src/lib/engine/random.ts'
 import { chooseBotActions } from '../../src/lib/engine/bot.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
 
-function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState {
+async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Promise<GameState> {
   const id = activePawn(state)!.id
   const round = state.round
   for (
@@ -27,7 +27,10 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of chooseBotActions(state, { name: 'depthsearch', difficulty: level })) {
+    for (const action of await chooseBotActions(state, {
+      name: 'depthsearch',
+      difficulty: level,
+    })) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next
@@ -37,7 +40,7 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
   return state
 }
 
-test('Class-specific candidates and threat estimates retain their reference decisions', () => {
+test('Class-specific candidates and threat estimates retain their reference decisions', async () => {
   const decisions = []
   for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark, Bomber]) {
     for (const side of ['player', 'enemy'] as const) {
@@ -63,7 +66,7 @@ test('Class-specific candidates and threat estimates retain their reference deci
         }
         state.pawns[5].protectingId = 4
         for (const options of Object.values(BOT_LEVELS))
-          decisions.push(chooseBotActions(state, options))
+          decisions.push(await chooseBotActions(state, options))
       }
     }
   }
@@ -71,25 +74,25 @@ test('Class-specific candidates and threat estimates retain their reference deci
   assert.equal(seedState(JSON.stringify(decisions)), 2026016917)
 })
 
-test('All difficulty levels emit legal actions for every class and both sides', () => {
+test('All difficulty levels emit legal actions for every class and both sides', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = initialState('all-classes', {
       biome: 'desert',
       player: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark', 'bomber'],
       enemy: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark', 'bomber'],
     })
-    for (const [active] of state.order.entries()) playTurn({ ...state, active }, level)
+    for (const [active] of state.order.entries()) await playTurn({ ...state, active }, level)
   }
 })
 
-test('The bot proposes ordinary actions for either side without mutating the rules state', () => {
+test('The bot proposes ordinary actions for either side without mutating the rules state', async () => {
   const sides = new Set<Side>()
   for (const seed of ['alpha', 'bravo', 'charlie']) {
     let state = initialState(seed)
     for (let turn = 0; turn < 200 && !state.winner; turn++) {
       sides.add(activePawn(state)!.side)
       const before = structuredClone(state)
-      const actions = chooseBotActions(state)
+      const actions = await chooseBotActions(state)
       assert.ok(actions.length)
       assert.deepEqual(structuredClone(state), before)
       for (const action of actions) {
