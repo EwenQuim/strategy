@@ -2,7 +2,7 @@ import { initialTransition, createBotGame } from './engine/bot.ts'
 import { DEFAULT_BOT_CONFIG, STRATEGIES, type BotConfig } from './engine/ai/decision.ts'
 import { activePawn, isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
-import type { Action, BattleSetup, Transition } from './engine/index.ts'
+import type { Action, BattleSetup, GameState, Transition } from './engine/index.ts'
 import type { GameMode } from './game-mode.ts'
 import type { OnlineAction } from './online.ts'
 
@@ -20,6 +20,8 @@ export type PlaybackAction =
   | { type: 'playbackNext' }
   | { type: 'playbackFinish' }
   | { type: 'resync'; actions: OnlineAction[] }
+  // The enemy's reply, thought out from `from` while the player's action played.
+  | { type: 'botPhase'; from: GameState; result: Transition }
 
 export function playbackReducer(
   playback: Transition,
@@ -31,6 +33,10 @@ export function playbackReducer(
   if (action.type === 'playbackNext') return { ...playback, frames: playback.frames.slice(1) }
   if (action.type === 'resync')
     return { state: replay(playback.state.seed, action.actions), frames: [] }
+  if (action.type === 'botPhase')
+    return action.from === playback.state
+      ? { state: action.result.state, frames: [...playback.frames, ...action.result.frames] }
+      : playback
   if (playback.frames.length) return playback
   if (mode === 'ai' && STRATEGIES[bot.name].adapterDriven) {
     const result = applyAction(playback.state, action)
@@ -47,7 +53,7 @@ export function playbackReducer(
       frames: result.frames.filter(isImpactFrame),
     }
   }
-  return createBotGame(bot).transition(playback.state, action)
+  return createBotGame(bot).playerTransition(playback.state, action)
 }
 
 export function replay(seed: string, actions: OnlineAction[]) {

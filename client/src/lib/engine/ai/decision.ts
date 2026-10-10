@@ -1,5 +1,6 @@
 import type { Action, GameState } from '../engine.ts'
 import { BOT_LEVELS, type BotDifficulty, type BotOptions } from '../ai.ts'
+import type { Thinking } from './thinking.ts'
 import { depthsearch } from './strategies/depthsearch.ts'
 import { jev } from './strategies/jev.ts'
 import { mistral } from './strategies/mistral.ts'
@@ -16,6 +17,8 @@ export interface AiStrategy {
   // the strategy's chooseActions is then only the synchronous fallback.
   readonly adapterDriven?: boolean
   chooseActions(state: GameState, options: BotOptions): Action[]
+  // The same decision, pausing between search steps.
+  think?(state: GameState, options: BotOptions): Thinking<Action[]>
 }
 
 // Adding a strategy is a new file in strategies/ plus one import and one entry here; the key
@@ -46,4 +49,15 @@ export function chooseAiActions(
   strategy: AiStrategyId = 'depthsearch',
 ): Action[] {
   return STRATEGIES[strategy].chooseActions(state, options)
+}
+
+export function* thinkAiActions(
+  state: GameState,
+  options: BotOptions,
+  strategy: AiStrategyId,
+): Thinking<Action[]> {
+  const chosen: AiStrategy = STRATEGIES[strategy]
+  return chosen.think
+    ? yield* chosen.think(state, options)
+    : chosen.chooseActions(state, options)
 }

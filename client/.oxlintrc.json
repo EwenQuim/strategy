@@ -130,6 +130,7 @@
                   "*",
                   "!./**",
                   "!../decision.ts",
+                  "!../thinking.ts",
                   "!../turns.ts",
                   "!../evaluate.ts",
                   "!../plan.ts",

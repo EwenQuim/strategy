@@ -15,6 +15,8 @@ import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { Action, BattleSetup, Transition } from '../lib/engine/index.ts'
 import { DEFAULT_BOT_CONFIG, type BotConfig } from '../lib/engine/ai/decision.ts'
+import type { Thinking } from '../lib/engine/ai/thinking.ts'
+import { createBotGame } from '../lib/engine/bot.ts'
 
 // Adapter-driven strategies have no synchronous bot: their adapter thinks one enemy action
 // at a time. Adding one is a new entry here plus an adapterDriven strategy file.
@@ -23,6 +25,31 @@ const ASYNC_BOTS: Partial<
 > = {
   mistral: mistralChooseAction,
   jev: jevChooseAction,
+}
+
+// A new task lets the page paint and answer input, which a resolved promise would not: microtasks
+// run before the next paint. A message, unlike a nested timer, is not clamped to 4 ms.
+const nextTask = () =>
+  new Promise<void>((resolve) => {
+    const channel = new MessageChannel()
+    channel.port1.onmessage = () => resolve()
+    channel.port2.postMessage(null)
+  })
+
+// Runs the thinking in slices short enough to never block the page as a long task.
+async function thinkInSlices<T>(
+  thinking: Thinking<T>,
+  cancelled: () => boolean,
+): Promise<T | undefined> {
+  let sliceStart = performance.now()
+  for (;;) {
+    const step = thinking.next()
+    if (step.done) return step.value
+    if (performance.now() - sliceStart < 12) continue
+    await nextTask()
+    if (cancelled()) return undefined
+    sliceStart = performance.now()
+  }
 }
 
 export type OnlineSession = { code: string; token: string; side: Side }
@@ -79,10 +106,31 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
+  const asyncBot = ASYNC_BOTS[bot.name]
+
+  // Other bots think from the settled state while the player's action still animates, and their
+  // turns queue behind those frames. Callers rebuild the bot config on every render, so the
+  // effect follows its values.
+  const botName = bot.name
+  const difficulty = bot.name === 'depthsearch' ? bot.difficulty : 'normal'
+  useEffect(() => {
+    if (mode !== 'ai' || asyncBot || online) return
+    const from = playback.state
+    if (from.winner || activePawn(from)?.side !== 'enemy') return
+    const config: BotConfig =
+      botName === 'depthsearch' ? { name: botName, difficulty } : { name: botName }
+    let cancelled = false
+    void thinkInSlices(createBotGame(config).botPhase(from), () => cancelled).then((result) => {
+      if (result && !cancelled) dispatch({ type: 'botPhase', from, result })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [asyncBot, botName, difficulty, mode, online, playback.state])
+
   // Adapter-driven strategies have no synchronous bot: while the enemy is to act, this
   // effect asks the adapter for one action and plays it through the same reducer as human
   // actions.
-  const asyncBot = ASYNC_BOTS[bot.name]
   useEffect(() => {
     if (mode !== 'ai' || !asyncBot || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return

@@ -50,7 +50,8 @@ export function useOnlineSync(
         !online ||
         action.type === 'playbackNext' ||
         action.type === 'playbackFinish' ||
-        action.type === 'resync'
+        action.type === 'resync' ||
+        action.type === 'botPhase'
       ) {
         dispatch(action)
         return
