@@ -54,7 +54,7 @@ const dash: SpecialAbility = {
   tileTargets: (pawn, tiles, pawns) =>
     new Set(dashDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
   candidates: (pawn, { tiles, pawns }) => dashDestinations(tiles, pawns, pawn).map(aimAt),
-  perform: ({ pawn, tiles, pawns, tile, round, log }) => {
+  perform: ({ pawn, tiles, pawns, tile, round, log, spawn }) => {
     if (!tile) return null
     const path = dashDestinations(tiles, pawns, pawn).some(
       (dest) => dest.q === tile.q && dest.r === tile.r,
@@ -62,9 +62,9 @@ const dash: SpecialAbility = {
       ? dashPath(pawn, tiles, tile)
       : null
     if (!path) return null
-    pawn.energy -= pawn.special.cost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
+    const impacts = enterTiles(tiles, pawns, pawn, path, round, log, spawn)
     return {
       kind: 'move',
       to: { q: tile.q, r: tile.r },
@@ -84,6 +84,10 @@ export class Lancer extends Pawn {
     return 3
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2 }
+  // Momentum: every banked energy point adds 1 damage to the lancer's basic attacks.
+  override adrenalineDamage(): number {
+    return this.adrenaline
+  }
   get special(): SpecialAbility {
     return dash
   }

@@ -224,14 +224,14 @@ function SpecialButton({
                 ? specialTexts[pawn.special.prompt]
                 : m.chooseEnemy
           : !preview.commanding
-            ? m.energyCost(pawn?.special.cost ?? 2)
+            ? m.energyCost(pawn?.specialCost ?? 2)
             : pawn?.special.oncePerRound && pawn.specialUsed
               ? m.usedThisRound
               : !hasSpecialTargets
                 ? pawn?.special.noTargets
                   ? specialTexts[pawn.special.noTargets]
                   : m.noTargets
-                : m.energyCost(pawn?.special.cost ?? 2)}
+                : m.energyCost(pawn?.specialCost ?? 2)}
       </small>
     </button>
   )
@@ -252,7 +252,7 @@ function EndTurnButton({
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
-      title={m.endTurnHint(pawn?.endTurnEscapeChance ?? 0)}
+      title={m.endTurnHint(pawn?.energy ?? 0)}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -262,7 +262,7 @@ function EndTurnButton({
         {m.endTurn}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-        {m.escapeGain(pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0)}
+        {m.adrenalineGain(pawn?.energy ?? 0)}
       </small>
     </button>
   )

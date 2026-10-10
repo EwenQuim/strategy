@@ -1,11 +1,12 @@
 import type { SeededRandom } from './random.ts'
 import { BIOMES, type Biome } from './biomes/index.ts'
 import type { MapFeature, Shape } from './biomes/biome.ts'
+import { placeRareFeature } from './rareFeature.ts'
 
 export type Axial = { q: number; r: number }
 export type Terrain =
   'plain' | 'forest' | 'mountain' | 'lake' | 'sand' | 'palm' | 'basalt' | 'lava'
-export type TileFeature = 'watchtower' | 'spring' | 'rune'
+export type TileFeature = 'watchtower' | 'spring' | 'rune' | 'portal' | 'den'
 export type Tile = { q: number; r: number; terrain: Terrain; feature?: TileFeature }
 
 export const MAP_WIDTH = 8
@@ -65,13 +66,22 @@ export function mirrorAxial({ q, r }: Axial): Axial {
 }
 
 export function passable(tile: Tile | undefined): boolean {
-  return !!tile && tile.terrain !== 'mountain' && tile.terrain !== 'lake'
+  return (
+    !!tile && tile.terrain !== 'mountain' && tile.terrain !== 'lake' && tile.feature !== 'den'
+  )
 }
 
 const roll = (min: number, max: number, random: SeededRandom) =>
   min + Math.floor(random.next() * (max - min + 1))
 
-export const TILE_FEATURES: readonly TileFeature[] = ['watchtower', 'spring', 'rune']
+export const TILE_FEATURES: readonly TileFeature[] = [
+  'watchtower',
+  'spring',
+  'rune',
+  'portal',
+  'den',
+]
+const PLACEABLE_FEATURES: readonly TileFeature[] = ['watchtower', 'spring', 'rune']
 
 function orient(shape: Shape, random: SeededRandom): Shape {
   const rotations = Math.floor(random.next() * 6)
@@ -181,44 +191,23 @@ function placeFeature(
   }
 }
 
-const terrainSymbols: Record<string, Terrain> = {
-  '.': 'plain',
-  f: 'forest',
-  '^': 'mountain',
-  '~': 'lake',
-  s: 'sand',
-  p: 'palm',
-  b: 'basalt',
-  l: 'lava',
-}
+// The two portal tiles of a map are twins: entering one continues on the other. Tiles maps are
+// shared between states, so the pairing is built once per map.
+const portalPairs = new WeakMap<Map<string, Tile>, Map<string, string>>()
 
-const featureSymbols: Record<string, TileFeature> = { W: 'watchtower', H: 'spring', R: 'rune' }
-
-export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
-  if (!Array.isArray(rows) || !rows.length) throw new Error('Map must contain at least one row')
-  const tiles = new Map<string, Tile>()
-  for (let row = 0; row < rows.length; row++) {
-    const line = rows[row]
-    if (typeof line !== 'string') throw new Error('Map row ' + row + ' must be a string')
-    for (let col = 0; col < line.length; col++) {
-      const symbol = line[col]
-      if (symbol === '_') continue
-      const feature = Object.hasOwn(featureSymbols, symbol) ? featureSymbols[symbol] : undefined
-      if (!feature && !Object.hasOwn(terrainSymbols, symbol))
-        throw new Error('Unknown map terrain: ' + symbol)
-      const { q, r } = hexOf(col, row)
-      tiles.set(key(q, r), {
-        q,
-        r,
-        terrain: feature ? 'plain' : terrainSymbols[symbol],
-        ...(feature ? { feature } : {}),
-      })
-    }
+export function portalTwin(tiles: Map<string, Tile>, at: string): string | undefined {
+  let twins = portalPairs.get(tiles)
+  if (!twins) {
+    const gates = [...tiles.values()].filter((tile) => tile.feature === 'portal')
+    twins = new Map(
+      gates.flatMap((tile, index) => {
+        const other = gates[1 - index]
+        return other ? [[key(tile.q, tile.r), key(other.q, other.r)]] : []
+      }),
+    )
+    portalPairs.set(tiles, twins)
   }
-  if (!tiles.size) throw new Error('Map must contain at least one tile')
-  const features = [...tiles.values()].filter((tile) => tile.feature)
-  if (features.length > 2) throw new Error('Map features must be limited to two tiles')
-  return tiles
+  return twins.get(at)
 }
 
 export function makeMap(
@@ -227,7 +216,7 @@ export function makeMap(
   protectedTiles: Axial[] = [],
   symmetric = false,
 ): Map<string, Tile> {
-  const { ground, scatter, features: terrainFeatures } = BIOMES[biome]
+  const { ground, scatter, features: terrainFeatures, rareFeature } = BIOMES[biome]
   const tiles = new Map<string, Tile>()
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))
   if (symmetric)
@@ -258,7 +247,7 @@ export function makeMap(
       tile.terrain !== 'lava' &&
       !reserved.has(key(tile.q, tile.r)),
   )
-  const features = [...TILE_FEATURES]
+  const features = [...PLACEABLE_FEATURES]
   for (let i = 0; i < count && candidates.length; i++) {
     const [tile] = candidates.splice(Math.floor(random.next() * candidates.length), 1)
     const [feature] = features.splice(Math.floor(random.next() * features.length), 1)
@@ -270,6 +259,8 @@ export function makeMap(
       candidates.splice(candidates.indexOf(mirrorTile), 1)
     }
   }
+  if (rareFeature && random.next() < rareFeature.chance)
+    placeRareFeature(tiles, reserved, rareFeature.feature, random, symmetric)
   return tiles
 }
 

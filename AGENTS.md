@@ -11,7 +11,7 @@ Every feature must make the game fun and strategic, never static or boring. Batt
 - Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.
 - Prioritize space for the grid: keep top information and bottom actions compact, remove redundant instructions, and show battle history as transient overlays rather than permanent panels.
 - Game logic is plain TypeScript in `client/src/lib/engine/` (hex math, pawn classes, reducer), pure and framework-free. Routes only render it.
-- Each pawn type lives in its own file in `client/src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`; every non-king class is recruitable. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
+- Each pawn type lives in its own file in `client/src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`; every class except the king and the spawn-only units filtered out of `RECRUIT_CLASSES` is recruitable. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
 - Each biome lives in its own file in `client/src/lib/engine/biomes/` (terrain generation, theme CSS variables). Register it in `BIOMES` in `biomes/index.ts`; the game screen applies `theme` as inline CSS variables, and display names come from `i18n/biomes.ts`.
 - Each AI strategy lives in its own file in `client/src/lib/engine/ai/strategies/` implementing `AiStrategy`; register it in `STRATEGIES` in `ai/decision.ts`, the only place strategies are linked.
 - Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
@@ -45,7 +45,7 @@ The library is checked without DOM or Node globals and cannot import runtime pac
 
 ## Authored battle setups
 
-`FixedBattleSetup` (a literal map plus both armies) and `validateSetup`, which decides what is accepted, live in `client/src/lib/engine/setup.ts`. Map symbols are the `terrainSymbols` and `featureSymbols` tables in `engine/hex.ts`, with `_` for absent tiles. Invalid maps and placements are rejected, never silently moved or regenerated. The seed only drives initiative and combat rolls, so the same actions replay deterministically.
+`FixedBattleSetup` (a literal map plus both armies) and `validateSetup`, which decides what is accepted, live in `client/src/lib/engine/setup.ts`. Map symbols are the `terrainSymbols` and `featureSymbols` tables in `engine/mapRows.ts`, with `_` for absent tiles. Invalid maps and placements are rejected, never silently moved or regenerated. The seed only drives initiative and combat rolls, so the same actions replay deterministically.
 
 Walking and Charge cannot cross absent tiles; ranged attacks, spells, and Ninja jumps use hex distance and can. Terrain never blocks ranged attacks or spells. Keep maps compact for readable tiles on portrait screens.
 

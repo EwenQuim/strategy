@@ -1,14 +1,9 @@
 import * as b from './i18n/briefing.ts'
+import * as f from './i18n/briefingFeatures.ts'
 import { unitNames } from './i18n/units.ts'
 import { specialTexts } from './i18n/specialTexts.ts'
 import { featureTexts } from './i18n/biomes.ts'
-import {
-  ESCAPE_BONUS,
-  MAX_ESCAPE,
-  PAWN_CLASSES,
-  START_ENERGY,
-  type PawnKind,
-} from './lib/engine/index.ts'
+import { PAWN_CLASSES, START_ENERGY, type PawnKind } from './lib/engine/index.ts'
 import type { IntroducedElement } from './lib/campaign.ts'
 
 export const ELEMENT_ACCENTS: Partial<Record<IntroducedElement, string>> = Object.fromEntries(
@@ -50,11 +45,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.energy,
       icon: 'energy',
-      points: [
-        b.energyPerRound(START_ENERGY),
-        b.spendEnergy,
-        b.unusedEnergy(ESCAPE_BONUS, MAX_ESCAPE),
-      ],
+      points: [b.energyPerRound(START_ENERGY), b.spendEnergy, f.adrenalineBrief],
     },
     unit('king', b.rallyBrief, b.loseKing),
   ],
@@ -67,6 +58,23 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   hoplite: [unit('hoplite', b.phalanxBrief)],
   wolf: [unit('wolf', b.cryBrief)],
   berserker: [unit('berserker', b.furyBrief)],
+  necromancer: [unit('necromancer', b.necromancerBrief)],
+  beast: [unit('beast', b.beastBrief)],
+  skeleton: [unit('skeleton', b.skeletonBrief)],
+  portal: [
+    {
+      name: featureTexts.portal.name,
+      art: 'portal',
+      points: [f.portalCrossing, f.portalCost],
+    },
+  ],
+  den: [
+    {
+      name: featureTexts.den.name,
+      art: 'den',
+      points: [f.denBlocked, f.denWake],
+    },
+  ],
   lancer: [unit('lancer', b.lancerBrief)],
   lake: [
     {

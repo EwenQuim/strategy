@@ -15,12 +15,13 @@ export function BattlefieldEffects({
       {effect && (
         <g
           key={effectId}
-          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
+          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=summon]:text-[#c9b7e5] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
           data-kind={effect.kind}
           aria-hidden="true"
         >
           {effect.kind !== 'escape' &&
             effect.kind !== 'rally' &&
+            effect.kind !== 'summon' &&
             effect.kind !== 'hellfire' && (
               <line
                 x1={hexX(effect.from.q, effect.from.r)}
@@ -75,7 +76,13 @@ export function BattlefieldEffects({
               }
             >
               <circle
-                r={effect.kind === 'fireball' || effect.kind === 'rally' ? 66 : 29}
+                r={
+                  effect.kind === 'fireball' ||
+                  effect.kind === 'rally' ||
+                  effect.kind === 'summon'
+                    ? 66
+                    : 29
+                }
                 className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box]"
               />
             </g>

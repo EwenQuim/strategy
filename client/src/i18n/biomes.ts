@@ -42,6 +42,13 @@ export const biomeNames: Record<Biome, string> = {
     it: 'Cratere di braci',
   }),
   hell: t({ en: 'Hell', fr: 'Enfer', de: 'Hölle', es: 'Infierno', it: 'Inferno' }),
+  magic: t({
+    en: 'Magic World',
+    fr: 'Monde magique',
+    de: 'Magische Welt',
+    es: 'Mundo mágico',
+    it: 'Mondo magico',
+  }),
 }
 
 export const featureTexts: Record<TileFeature, { name: string; description: string }> = {
@@ -75,6 +82,38 @@ export const featureTexts: Record<TileFeature, { name: string; description: stri
       de: 'Heile 1 Leben bei deiner nächsten Aktivierung, nachdem du hier geblieben bist.',
       es: 'Recupera 1 de vida en tu próxima activación tras quedarte aquí.',
       it: 'Recupera 1 vita alla tua prossima attivazione dopo essere rimasto qui.',
+    }),
+  },
+  portal: {
+    name: t({
+      en: 'Portal',
+      fr: 'Portail',
+      de: 'Portal',
+      es: 'Portal',
+      it: 'Portale',
+    }),
+    description: t({
+      en: 'Step in and continue from the twin portal; the crossing counts as one tile.',
+      fr: 'Entrez et ressortez par le portail jumeau ; la traversée compte pour une case.',
+      de: 'Tritt ein und fahre vom Zwillingsportal fort; der Übergang zählt als ein Feld.',
+      es: 'Entra y continúa desde el portal gemelo; el cruce cuenta como una casilla.',
+      it: "Entra e prosegui dal portale gemello; l'attraversamento conta come una casella.",
+    }),
+  },
+  den: {
+    name: t({
+      en: 'Sleeping beast',
+      fr: 'Bête endormie',
+      de: 'Schlafende Bestie',
+      es: 'Bestia dormida',
+      it: 'Bestia addormentata',
+    }),
+    description: t({
+      en: 'Blocked ground. The first side to move beside it wakes the beast on their side.',
+      fr: "Terrain bloqué. Le premier camp à s'en approcher réveille la bête pour son compte.",
+      de: 'Blockiertes Gelände. Wer sich zuerst daneben bewegt, erweckt die Bestie auf seine Seite.',
+      es: 'Terreno bloqueado. El primer bando que se mueva a su lado despierta a la bestia para sí.',
+      it: 'Terreno bloccato. Il primo schieramento che si muove accanto la sveglia per sé.',
     }),
   },
   rune: {

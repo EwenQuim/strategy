@@ -69,7 +69,9 @@ test('Random special tiles follow 50/40/10 odds, are distinct, and stay in the c
   const kinds = new Set<string>()
   for (let index = 0; index < 4000; index++) {
     const state = initialState('features-' + index)
-    const features = [...state.tiles.values()].filter((tile) => tile.feature)
+    const features = [...state.tiles.values()].filter(
+      (tile) => tile.feature && tile.feature !== 'den',
+    )
     assert.ok(features.length <= 2)
     counts[features.length]++
     assert.equal(new Set(features.map((tile) => tile.feature)).size, features.length)
@@ -99,7 +101,7 @@ test('Deserts have small lakes and rare decorative palms; volcanoes and Hell hav
       )
       assert.equal(
         all.some((tile) => tile.terrain === 'lake'),
-        biome === 'desert' || biome === 'verdant',
+        biome === 'desert' || biome === 'verdant' || biome === 'magic',
       )
       for (const tile of all.filter((tile) => tile.terrain === 'palm')) {
         assert.equal(biome, 'desert')

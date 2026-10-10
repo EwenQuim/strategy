@@ -106,7 +106,7 @@ export function Game({
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
   const hasSpecialTargets =
-    !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
+    !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns, state).size > 0
   const hasFoes =
     !!pawn &&
     state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))

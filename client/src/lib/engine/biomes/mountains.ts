@@ -13,6 +13,7 @@ export const mountains: BiomeDefinition = {
       ],
     },
   ],
+  rareFeature: { feature: 'den', chance: 0.5 },
   theme: {
     '--biome-background': '#263b4c',
     '--biome-glow': '#9db9d078',

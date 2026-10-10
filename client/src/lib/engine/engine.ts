@@ -1,5 +1,6 @@
 import { key, type Axial, type Tile } from './hex.ts'
-import type { Pawn, PawnKind, Side, SpecialResult } from './pawns/index.ts'
+import { PAWN_CLASSES } from './pawns/index.ts'
+import type { Pawn, PawnSpawner, Side, SpecialResult, Unit } from './pawns/index.ts'
 import { SeededRandom } from './random.ts'
 import { prepareBattle, type BattleSetup } from './setup.ts'
 import type { Biome } from './biomes/index.ts'
@@ -13,12 +14,10 @@ import {
 } from './turn.ts'
 import { markHellfire } from './hellfire.ts'
 import {
-  canAttack,
   walkingPaths,
   routePath,
   enterTiles,
   canUseSpecial,
-  specialTargets,
   performAttack,
   type BattleImpact,
 } from './combat.ts'
@@ -29,11 +28,6 @@ export type Action =
   | { type: 'special'; target?: Axial; destination?: Axial }
   | { type: 'endTurn' }
   | { type: 'restart' }
-
-// A command still being aimed: an attack, or a special whose destination may already be chosen.
-export type Aim = { action: 'attack' } | { action: 'special'; destination?: Axial }
-
-type Unit = { kind: PawnKind; side: Side }
 
 // A hellfire blow has no striker.
 type Blow = {
@@ -61,7 +55,16 @@ export type GameState = {
 }
 
 export type BattleEffect = {
-  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'escape' | 'protect' | 'hellfire'
+  kind:
+    | 'move'
+    | 'attack'
+    | 'rally'
+    | 'fireball'
+    | 'bomb'
+    | 'escape'
+    | 'protect'
+    | 'hellfire'
+    | 'summon'
   from: Axial
   to: Axial
   centers?: Axial[]
@@ -114,40 +117,13 @@ export function reducer(state: GameState, action: Action): GameState {
   return reduce(state, action)
 }
 
-export function specialTargetingTiles(
-  pawn: Pawn,
-  tiles: Map<string, Tile>,
-  pawns: Pawn[],
-): Set<string> {
-  return (
-    pawn.special.tileTargets?.(pawn, tiles, pawns) ??
-    new Set(specialTargets(pawns, pawn).map((target) => key(target.q, target.r)))
-  )
-}
-
-export function targetingTiles(state: GameState, aim: Aim): Set<string> {
-  const pawn = activePawn(state)
-  if (!pawn || state.winner) return new Set()
-  if (aim.action === 'attack')
-    return new Set(
-      state.pawns
-        .filter((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
-        .map((target) => key(target.q, target.r)),
-    )
-  if (aim.destination)
-    return new Set(
-      specialTargets(state.pawns, pawn, aim.destination).map((target) =>
-        key(target.q, target.r),
-      ),
-    )
-  return specialTargetingTiles(pawn, state.tiles, state.pawns)
-}
-
 type ActionResult = {
   tiles: Map<string, Tile>
   pawns: Pawn[]
+  order: number[]
   actor: Pawn
   fallen: Pawn[]
+  spawned: Pawn[]
   log: string[]
   randomState: number
   effect: BattleEffect | null
@@ -159,25 +135,42 @@ const effectFrom = ({ kind, ...rest }: SpecialResult, from: Axial): BattleEffect
   ...rest,
 })
 
-// Only picking up a rune changes the map, so maps without runes are shared between states.
-const holdsRune = new WeakMap<Map<string, Tile>, boolean>()
-function mapHoldsRune(tiles: Map<string, Tile>): boolean {
-  let rune = holdsRune.get(tiles)
-  if (rune === undefined) {
-    rune = [...tiles.values()].some((tile) => tile.feature === 'rune')
-    holdsRune.set(tiles, rune)
+// Battle-spawned pawns continue the id sequence of the armies.
+const nextPawnId = (pawns: readonly Pawn[], order: readonly number[]) =>
+  Math.max(0, ...pawns.map((p) => p.id), ...order) + 1
+
+// Picking up a rune or waking a beast changes the map, so other maps are shared between states.
+const mutableMap = new WeakMap<Map<string, Tile>, boolean>()
+function mapIsMutable(tiles: Map<string, Tile>): boolean {
+  let mutable = mutableMap.get(tiles)
+  if (mutable === undefined) {
+    mutable = [...tiles.values()].some(
+      (tile) => tile.feature === 'rune' || tile.feature === 'den',
+    )
+    mutableMap.set(tiles, mutable)
   }
-  return rune
+  return mutable
 }
 
 function executeAction(state: GameState, action: Action): ActionResult | null {
-  const tiles = mapHoldsRune(state.tiles) ? new Map(state.tiles) : state.tiles
+  const tiles = mapIsMutable(state.tiles) ? new Map(state.tiles) : state.tiles
   const participants = state.pawns.map((pawn) => pawn.clone())
   const pawns = [...participants]
+  const order = [...state.order]
+  const spawned: Pawn[] = []
   const actor = pawns.find((pawn) => pawn.id === state.order[state.active])!
   const log: string[] = []
   const random = new SeededRandom(state.randomState)
   const from = { q: actor.q, r: actor.r }
+  const spawn: PawnSpawner = (kind, side, q, r, options) => {
+    if (pawns.some((pawn) => pawn.q === q && pawn.r === r)) return null
+    const Unit = PAWN_CLASSES[kind]
+    const pawn = new Unit(nextPawnId(pawns, order), q, r, side, options?.hp, options?.energy)
+    pawns.push(pawn)
+    order.push(pawn.id)
+    spawned.push(pawn)
+    return pawn
+  }
   const context = {
     pawn: actor,
     tiles,
@@ -185,6 +178,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     round: state.round,
     log,
     random,
+    spawn,
   }
   let effect: BattleEffect | null = null
 
@@ -195,8 +189,8 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
         key(action.q, action.r),
       )
       if (!route?.steps) return null
-      actor.energy -= actor.moveEnergyCost(route.steps)
-      const impacts = enterTiles(tiles, pawns, actor, routePath(route), state.round, log)
+      actor.payMove(route.steps)
+      const impacts = enterTiles(tiles, pawns, actor, routePath(route), state.round, log, spawn)
       effect = {
         kind: 'move',
         from,
@@ -238,8 +232,10 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   return {
     tiles,
     pawns,
+    order,
     actor,
     fallen: participants.filter((pawn) => pawn.hp <= 0),
+    spawned,
     log,
     randomState: random.state,
     effect,
@@ -257,13 +253,13 @@ function reduce(
 
   const result = executeAction(state, action)
   if (!result) return state
-  const { tiles, pawns, actor, fallen, log, randomState } = result
+  const { tiles, pawns, order, actor, fallen, spawned, log, randomState } = result
   let { effect } = result
   clearFallenProtection(pawns)
   const winner = winnerFrom(pawns, actor.side)
   const turnEnded =
     !winner && (action.type === 'endTurn' || actor.energy === 0 || actor.hp <= 0)
-  if (turnEnded && actor.hp > 0 && finishTurn(actor, log) && action.type === 'endTurn') {
+  if (turnEnded && actor.hp > 0 && finishTurn(pawns, actor, log) && action.type === 'endTurn') {
     const position = { q: pawn.q, r: pawn.r }
     effect = { kind: 'escape', from: position, to: position }
   }
@@ -288,6 +284,7 @@ function reduce(
     ...state,
     tiles,
     pawns,
+    order,
     randomState,
     lastClashRound: health(pawns) < health(state.pawns) ? state.round : state.lastClashRound,
     winner,
@@ -297,6 +294,14 @@ function reduce(
     escapes: escapes.length ? [...state.escapes, ...escapes] : state.escapes,
   }
   if (effect) record?.(captureFrame(next, effect, fallen))
+  for (const arrival of spawned)
+    record?.(
+      captureFrame(next, {
+        kind: 'summon',
+        from: { q: arrival.q, r: arrival.r },
+        to: { q: arrival.q, r: arrival.r },
+      }),
+    )
   if (winner) return endBattle(next, winner)
   return turnEnded ? advanceTurn(next, record) : next
 }

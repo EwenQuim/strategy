@@ -181,7 +181,7 @@ function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
       (a, b) => (dist.get(key(a.q, a.r)) ?? Infinity) - (dist.get(key(b.q, b.r)) ?? Infinity),
     )[0]
   const jumpDistance = jump ? (dist.get(key(jump.q, jump.r)) ?? Infinity) : Infinity
-  if (jump && jumpDistance < here && (!step || jumpDistance + pawn.special.cost < here)) {
+  if (jump && jumpDistance < here && (!step || jumpDistance + pawn.specialCost < here)) {
     return [{ type: 'special', target: { q: jump.q, r: jump.r } }]
   }
   return step && pawn.energy >= pawn.moveCost
