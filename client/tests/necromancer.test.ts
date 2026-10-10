@@ -3,6 +3,9 @@ import { test } from 'node:test'
 import {
   King,
   Necromancer,
+  PAWN_CLASSES,
+  RECRUIT_CLASSES,
+  Skeleton,
   Swordsman,
   reducer,
   targetingTiles,
@@ -11,7 +14,6 @@ import {
   type Pawn,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { raisable } from '../src/lib/engine/pawns/necromancer.ts'
 
 function field(pawns: Pawn[]): GameState {
   const tiles = new Map<string, Tile>()
@@ -42,92 +44,132 @@ const necromancers = () => [
   new King(3, -2, 3, 'enemy'),
 ]
 
-test('Raise pulls back the most recently fallen non-king unit', () => {
-  assert.equal(raisable([{ kind: 'archer', side: 'enemy' }])?.kind, 'archer')
-  assert.equal(
-    raisable([
-      { kind: 'archer', side: 'enemy' },
-      { kind: 'swordsman', side: 'player' },
-    ])?.kind,
-    'swordsman',
-  )
-  assert.equal(raisable([{ kind: 'king', side: 'enemy' }]), undefined)
-  assert.equal(raisable([]), undefined)
-})
-
-test('Raise returns the fallen unit at one health on an adjacent empty tile', () => {
+test('Summon spawns a skeleton with 2 health and 1 energy on an adjacent empty tile', () => {
   const state = field(necromancers())
-  state.blows = [
-    { fallen: [{ kind: 'king', side: 'enemy' }] },
-    {
-      fallen: [
-        { kind: 'archer', side: 'enemy' },
-        { kind: 'swordsman', side: 'player' },
-      ],
-    },
-  ]
   assert.deepEqual(
     targetingTiles(state, { action: 'special' }),
     new Set(['1,0', '0,1', '-1,0', '0,-1', '1,-1', '-1,1']),
   )
   const result = transition(state, { type: 'special', target: { q: 1, r: 0 } })
-  assert.equal(result.frames[0].effect?.kind, 'raise')
-  const raised = result.state.pawns.find((pawn) => pawn.id === 4)!
-  assert.ok(raised instanceof Swordsman)
-  assert.equal(raised.side, 'player')
-  assert.equal(raised.hp, 1)
-  assert.equal(raised.energy, 1)
-  assert.equal(raised.q, 1)
-  assert.equal(raised.r, 0)
-  assert.equal(result.state.pawns[0].energy, 0)
+  assert.equal(result.frames[0].effect?.kind, 'summon')
+  const skeleton = result.state.pawns.find((pawn) => pawn.id === 4)!
+  assert.ok(skeleton instanceof Skeleton)
+  assert.equal(skeleton.side, 'player')
+  assert.equal(skeleton.hp, 2)
+  assert.equal(skeleton.energy, 1)
+  assert.equal(skeleton.q, 1)
+  assert.equal(skeleton.r, 0)
+  assert.equal(result.state.pawns[0].energy, 1)
   assert.equal(result.state.order.at(-1), 4)
-  assert.ok(result.state.log.some((line) => line.includes('swordsman rises from the dead')))
+  assert.ok(result.state.log.some((line) => line.includes('skeleton rises')))
   assert.equal(state.pawns.length, 3)
 })
 
-test('Without fallen units Raise has no targets and rejects every tile', () => {
+test('Summon is repeatable: a channeled Necromancer floods three skeletons in one turn', () => {
   const state = field(necromancers())
-  assert.equal(targetingTiles(state, { action: 'special' }).size, 0)
-  assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
-  state.blows = [{ fallen: [{ kind: 'king', side: 'enemy' }] }]
-  assert.equal(targetingTiles(state, { action: 'special' }).size, 0)
-  assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
+  state.pawns[0].adrenaline = 1
+  assert.equal(state.pawns[0].specialCost, 1)
+  let next = reducer(state, { type: 'special', target: { q: 1, r: 0 } }) as GameState
+  next = reducer(next, { type: 'special', target: { q: 0, r: 1 } }) as GameState
+  next = reducer(next, { type: 'special', target: { q: -1, r: 0 } }) as GameState
+  const skeletons = next.pawns.filter((pawn) => pawn instanceof Skeleton)
+  assert.equal(skeletons.length, 3)
+  assert.equal(next.pawns[0].energy, 0)
+  assert.equal(targetingTiles(next, { action: 'special' }).size, 0)
 })
 
-test('Raise rejects occupied or distant tiles', () => {
+test('Channel discounts Summon down to 1 per banked point', () => {
+  const necromancer = new Necromancer(1, 0, 0, 'player')
+  assert.equal(necromancer.specialCost, 2)
+  necromancer.adrenaline = 1
+  assert.equal(necromancer.specialCost, 1)
+  necromancer.adrenaline = 5
+  assert.equal(necromancer.specialCost, 1)
+})
+
+test('Summon rejects occupied, distant or blocked tiles', () => {
   const state = field(necromancers())
-  state.blows = [{ fallen: [{ kind: 'archer', side: 'enemy' }] }]
   state.pawns.push(new Swordsman(4, 1, 0, 'player'))
   assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
   assert.equal(reducer(state, { type: 'special', target: { q: 3, r: 0 } }), state)
+  state.tiles.get('0,1')!.terrain = 'mountain'
+  assert.equal(reducer(state, { type: 'special', target: { q: 0, r: 1 } }), state)
 })
 
-test('Raise is once per round, even when channel discounts the cost', () => {
+test('Summon offers no tile without energy or free adjacent ground', () => {
   const state = field(necromancers())
-  state.blows = [{ fallen: [{ kind: 'archer', side: 'enemy' }] }]
-  state.pawns[0].adrenaline = 2
-  const next = reducer(state, { type: 'special', target: { q: 1, r: 0 } })
-  assert.equal(next.pawns[0].energy, 2)
-  assert.equal(targetingTiles(next, { action: 'special' }).size, 0)
-  assert.equal(reducer(next, { type: 'special', target: { q: 0, r: 1 } }), next)
+  state.pawns[0].energy = 1
+  assert.equal(targetingTiles(state, { action: 'special' }).size, 0)
+  assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
+  state.pawns[0].energy = 3
+  for (const [q, r] of [
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+    [0, -1],
+    [1, -1],
+    [-1, 1],
+  ])
+    state.pawns.push(new Swordsman(state.pawns.length + 1, q, r, 'player'))
+  assert.equal(targetingTiles(state, { action: 'special' }).size, 0)
 })
 
-test('The raised unit joins the turn order and fights for its new side', () => {
+test('The skeleton is a weak melee unit that only enters battles as a summon', () => {
+  const skeleton = new Skeleton(1, 0, 0, 'player')
+  assert.equal(skeleton.maxHp, 2)
+  assert.deepEqual(skeleton.attack, { damage: 1, minRange: 1, maxRange: 1 })
+  assert.ok(PAWN_CLASSES.skeleton === Skeleton)
+  assert.ok(!RECRUIT_CLASSES.some((Unit) => Unit === Skeleton))
+})
+
+test('Flood: a skeleton hits harder for every friendly skeleton beside it', () => {
   const state = field([
-    new Necromancer(1, 0, 0, 'player'),
+    new Skeleton(1, 0, 0, 'player'),
     new King(2, 2, 3, 'player'),
-    new Swordsman(3, 2, 0, 'enemy', 2),
+    new Swordsman(3, 1, 0, 'enemy', 6),
     new King(4, -2, 3, 'enemy'),
   ])
-  state.blows = [{ fallen: [{ kind: 'swordsman', side: 'enemy' }] }]
-  const raised = reducer(state, { type: 'special', target: { q: 1, r: 0 } })
-  const risen = raised.pawns.find((pawn) => pawn.id === 5)!
-  assert.equal(risen.side, 'player')
-  raised.active = raised.order.indexOf(5)
-  const strike = reducer(raised, { type: 'attack', q: 2, r: 0 })
-  assert.equal(
-    strike.pawns.some((pawn) => pawn.id === 3),
-    false,
-  )
-  assert.equal(strike.winner, null)
+  const strike = reducer(state, { type: 'attack', q: 1, r: 0 }) as GameState
+  assert.equal(strike.pawns.find((pawn) => pawn.id === 3)!.hp, 5)
+
+  state.pawns.push(new Skeleton(5, 0, 1, 'player'), new Skeleton(6, -1, 0, 'player'))
+  const flooded = reducer(state, { type: 'attack', q: 1, r: 0 }) as GameState
+  assert.equal(flooded.pawns.find((pawn) => pawn.id === 3)!.hp, 3)
+})
+
+test('Flood only counts friendly skeletons', () => {
+  const state = field([
+    new Skeleton(1, 0, 0, 'player'),
+    new King(2, 2, 3, 'player'),
+    new Swordsman(3, 1, 0, 'enemy', 6),
+    new King(4, -2, 3, 'enemy'),
+  ])
+  state.pawns.push(new Swordsman(5, 0, 1, 'player'), new Skeleton(6, -1, 0, 'enemy'))
+  const strike = reducer(state, { type: 'attack', q: 1, r: 0 }) as GameState
+  assert.equal(strike.pawns.find((pawn) => pawn.id === 3)!.hp, 5)
+})
+
+test('Rattle gives 1 energy to each adjacent friendly skeleton, once per round', () => {
+  const state = field([
+    new Skeleton(1, 0, 0, 'player'),
+    new Skeleton(2, 1, 0, 'player', 2, 0),
+    new King(3, 2, 3, 'player'),
+    new King(4, -2, 3, 'enemy'),
+  ])
+  const rattled = reducer(state, { type: 'special' }) as GameState
+  const ally = rattled.pawns.find((pawn) => pawn.id === 2)!
+  assert.equal(ally.energy, 1)
+  assert.equal(ally.bonusEnergy, 1)
+  assert.equal(rattled.pawns[0].energy, 2)
+  assert.equal(reducer(rattled, { type: 'special' }), rattled)
+})
+
+test('Rattle does nothing without an adjacent friendly skeleton', () => {
+  const state = field([
+    new Skeleton(1, 0, 0, 'player'),
+    new Swordsman(2, 1, 0, 'player'),
+    new King(3, 2, 3, 'player'),
+    new King(4, -2, 3, 'enemy'),
+  ])
+  assert.equal(reducer(state, { type: 'special' }), state)
 })

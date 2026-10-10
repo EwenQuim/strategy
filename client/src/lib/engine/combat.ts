@@ -259,7 +259,10 @@ export function performAttack(
       pawns,
       pawn,
       target,
-      { ...pawn.attack, damage: pawn.attack.damage + pawn.adrenalineDamage() },
+      {
+        ...pawn.attack,
+        damage: pawn.attack.damage + pawn.adrenalineDamage() + pawn.floodDamage(pawns),
+      },
       log,
       random,
     ),

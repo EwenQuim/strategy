@@ -61,6 +61,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   lancer: [unit('lancer', f.lancerBrief)],
   necromancer: [unit('necromancer', f.necromancerBrief)],
   beast: [unit('beast', f.beastBrief)],
+  skeleton: [unit('skeleton', f.skeletonBrief)],
   portal: [
     {
       name: featureTexts.portal.name,

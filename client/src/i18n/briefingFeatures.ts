@@ -16,11 +16,18 @@ export const lancerBrief = t({
   it: 'corri per qualsiasi distanza in linea retta finché non sei bloccato',
 })
 export const necromancerBrief = t({
-  en: 'the last fallen unit returns at 1 health, on your side',
-  fr: 'la dernière unité tombée revient avec 1 point de vie, dans votre camp',
-  de: 'die zuletzt gefallene Einheit kehrt mit 1 Leben zurück, auf deiner Seite',
-  es: 'la última unidad caída vuelve con 1 de vida, en tu bando',
-  it: "l'ultima unità caduta torna con 1 vita, dalla tua parte",
+  en: 'summon a skeleton on an adjacent empty tile, again and again while energy lasts',
+  fr: 'invoque un squelette sur une case vide adjacente, encore et encore tant qu’il reste de l’énergie',
+  de: 'beschwört ein Skelett auf einem freien angrenzenden Feld, immer wieder, solange Energie reicht',
+  es: 'invoca un esqueleto en una casilla vacía adyacente, una y otra vez mientras quede energía',
+  it: 'evoca uno scheletro su una casella vuota adiacente, ancora e ancora finché c’è energia',
+})
+export const skeletonBrief = t({
+  en: 'a shambling fighter that hits harder for every friendly skeleton beside it',
+  fr: 'un combattant claudiquant qui frappe plus fort pour chaque squelette allié à ses côtés',
+  de: 'ein schwankender Kämpfer, der für jedes befreundete Skelett neben ihm härter zuschlägt',
+  es: 'un luchador tambaleante que golpea más fuerte por cada esqueleto aliado a su lado',
+  it: 'un combattente barcollante che colpisce più forte per ogni scheletro alleato al suo fianco',
 })
 export const beastBrief = t({
   en: 'wakes for whoever reaches its den first',

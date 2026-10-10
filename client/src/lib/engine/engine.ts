@@ -64,7 +64,7 @@ export type BattleEffect = {
     | 'escape'
     | 'protect'
     | 'hellfire'
-    | 'raise'
+    | 'summon'
   from: Axial
   to: Axial
   centers?: Axial[]
@@ -177,7 +177,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     round: state.round,
     log,
     random,
-    fallen: state.blows.flatMap((blow) => blow.fallen),
     spawn,
   }
   let effect: BattleEffect | null = null
@@ -297,7 +296,7 @@ function reduce(
   for (const arrival of spawned)
     record?.(
       captureFrame(next, {
-        kind: 'raise',
+        kind: 'summon',
         from: { q: arrival.q, r: arrival.r },
         to: { q: arrival.q, r: arrival.r },
       }),

@@ -10,10 +10,10 @@ export const START_ENERGY = 3
 export const ESCAPE_BONUS = 20
 export const MAX_ESCAPE = 60
 
-// A unit struck down in this battle, as the Necromancer's Raise remembers them.
+// A unit struck down in this battle, as the battle log and achievements remember them.
 export type Unit = { kind: PawnKind; side: Side }
 
-// A unit spawned during a battle: a raised corpse or a beast waking from its den.
+// A unit spawned during a battle: a summoned skeleton or a beast waking from its den.
 type SpawnOptions = { hp?: number; energy?: number }
 export type PawnSpawner = (
   kind: PawnKind,
@@ -40,9 +40,7 @@ type SpecialContext = {
   round: number
   log: string[]
   random: SeededRandom
-  // Units fallen so far in the battle, oldest first: what a Necromancer can raise.
-  fallen: Unit[]
-  // Spawns a new pawn during the battle (raised corpse, waking beast), or null on an occupied tile.
+  // Spawns a new pawn during the battle (summoned skeleton, waking beast), or null on an occupied tile.
   spawn: PawnSpawner
 }
 
@@ -89,10 +87,13 @@ export type SpecialTextKey =
   | 'dashDescription'
   | 'dashTo'
   | 'noOpenLine'
-  | 'raise'
-  | 'raiseDescription'
-  | 'raiseTo'
-  | 'noFallenToRaise'
+  | 'summon'
+  | 'summonDescription'
+  | 'summonTo'
+  | 'noSpaceToSummon'
+  | 'rattle'
+  | 'rattleDescription'
+  | 'noSkeletonsNearby'
   | 'rampage'
   | 'rampageDescription'
 
@@ -180,6 +181,12 @@ export abstract class Pawn {
   }
 
   adrenalineSteps(): number {
+    return 0
+  }
+
+  // Flood: how many extra damage this class adds to its basic attacks per adjacent friendly
+  // skeleton. Only the skeleton defines it.
+  floodDamage(_pawns: readonly Pawn[]): number {
     return 0
   }
 

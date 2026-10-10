@@ -93,6 +93,13 @@ export const unitNames: Record<PawnKind, string> = {
     es: 'Bestia',
     it: 'Bestia',
   }),
+  skeleton: t({
+    en: 'Skeleton',
+    fr: 'Squelette',
+    de: 'Skelett',
+    es: 'Esqueleto',
+    it: 'Scheletro',
+  }),
 }
 
 export const adrenalineTexts: Record<PawnKind, string> = {
@@ -174,11 +181,11 @@ export const adrenalineTexts: Record<PawnKind, string> = {
     it: 'Slancio: +1 danno per punto accumulato',
   }),
   necromancer: t({
-    en: 'Channel: Raise costs 1 less per banked point, down to 1',
-    fr: 'Canalisation : la Résurrection coûte 1 de moins par point accumulé, jusqu’à 1',
-    de: 'Kanalisation: Erwecken kostet pro Punkt 1 weniger, bis 1',
-    es: 'Canalización: Levantar cuesta 1 menos por punto guardado, hasta 1',
-    it: 'Canalizzazione: Resurrezione costa 1 in meno per punto, fino a 1',
+    en: 'Channel: Summon costs 1 less per banked point, down to 1',
+    fr: 'Canalisation : l’Invocation coûte 1 de moins par point accumulé, jusqu’à 1',
+    de: 'Kanalisation: Beschwörung kostet pro Punkt 1 weniger, bis 1',
+    es: 'Canalización: Invocar cuesta 1 menos por punto guardado, hasta 1',
+    it: 'Canalizzazione: Evocazione costa 1 in meno per punto, fino a 1',
   }),
   beast: t({
     en: 'Frenzy: +1 attack damage per banked point',
@@ -186,5 +193,12 @@ export const adrenalineTexts: Record<PawnKind, string> = {
     de: 'Raserei: +1 Angriffsschaden pro gespartem Punkt',
     es: 'Delirio: +1 de daño de ataque por punto guardado',
     it: 'Frenesia: +1 danno per punto accumulato',
+  }),
+  skeleton: t({
+    en: 'Flood: +1 attack damage per adjacent friendly skeleton',
+    fr: 'Marée : +1 dégât d’attaque par squelette allié adjacent',
+    de: 'Schwarm: +1 Angriffsschaden pro angrenzendem befreundetem Skelett',
+    es: 'Marea: +1 de daño de ataque por esqueleto aliado adyacente',
+    it: 'Ondata: +1 danno per scheletro alleato adiacente',
   }),
 }
