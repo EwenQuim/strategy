@@ -857,6 +857,7 @@ test('Seeded armies mirror one King and five different recruits', () => {
     'bomber',
     'bulwark',
     'hoplite',
+    'lancer',
     'magician',
     'ninja',
     'swordsman',
