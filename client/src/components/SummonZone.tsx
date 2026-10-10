@@ -1,32 +1,24 @@
-import {
-  hexDist,
-  key,
-  passable,
-  Skeleton,
-  type Pawn,
-  type Side,
-  type Tile,
-} from '../lib/engine'
+import { hexDist, key, Skeleton, walkingPaths, type Pawn, type Tile } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
 
-// The little skulls that mark where a Necromancer must stand to summon: free ground within
-// 2 hexes of an enemy. Shown while a Necromancer acts, so the class reads as a front-line
-// unit that cannot flood the field from the safety of its back line.
+// The little skulls that mark where the acting Necromancer must stand to summon: the tiles it
+// can reach this turn that lie within 2 hexes of an enemy, the proximity Summon demands. They
+// stay inside the Necromancer's own stride, so they read as its placement options, never as a
+// haze over every enemy on the field.
 export function SummonZone({
+  pawn,
   tiles,
   pawns,
-  side,
 }: {
+  pawn: Pawn
   tiles: Map<string, Tile>
-  pawns: readonly Pawn[]
-  side: Side
+  pawns: Pawn[]
 }) {
-  const marks = [...tiles.values()].filter(
-    (tile) =>
-      passable(tile) &&
-      !pawns.some((pawn) => pawn.q === tile.q && pawn.r === tile.r) &&
-      pawns.some((foe) => foe.side !== side && hexDist(foe, tile) <= 2),
-  )
+  const here = key(pawn.q, pawn.r)
+  const marks = [...walkingPaths(tiles, pawns, pawn).keys()]
+    .filter((tileKey) => tileKey !== here)
+    .map((tileKey) => tiles.get(tileKey)!)
+    .filter((tile) => pawns.some((foe) => foe.side !== pawn.side && hexDist(foe, tile) <= 2))
   if (!marks.length) return null
   return (
     <g className="pointer-events-none" data-art="summon-zone" aria-hidden="true">

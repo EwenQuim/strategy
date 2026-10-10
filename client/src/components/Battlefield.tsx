@@ -294,7 +294,7 @@ export function Battlefield({
           )
         })}
         {active?.kind === 'necromancer' && (
-          <SummonZone tiles={tiles} pawns={pawns} side={active.side} />
+          <SummonZone pawn={active} tiles={tiles} pawns={pawns} />
         )}
       </svg>
       {/* Pawn moves and combat effects repaint only this composited layer, never the tiles and their drop-shadow. */}
