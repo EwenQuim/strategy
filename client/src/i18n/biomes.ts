@@ -42,6 +42,13 @@ export const biomeNames: Record<Biome, string> = {
     it: 'Cratere di braci',
   }),
   hell: t({ en: 'Hell', fr: 'Enfer', de: 'Hölle', es: 'Infierno', it: 'Inferno' }),
+  magic: t({
+    en: 'Magic World',
+    fr: 'Monde magique',
+    de: 'Magische Welt',
+    es: 'Mundo mágico',
+    it: 'Mondo magico',
+  }),
 }
 
 export const featureTexts: Record<TileFeature, { name: string; description: string }> = {

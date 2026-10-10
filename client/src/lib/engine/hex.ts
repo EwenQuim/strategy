@@ -1,6 +1,7 @@
 import type { SeededRandom } from './random.ts'
 import { BIOMES, type Biome } from './biomes/index.ts'
 import type { MapFeature, Shape } from './biomes/biome.ts'
+import { placeRareFeature } from './rareFeature.ts'
 
 export type Axial = { q: number; r: number }
 export type Terrain =
@@ -80,7 +81,6 @@ export const TILE_FEATURES: readonly TileFeature[] = [
   'portal',
   'den',
 ]
-// Portals and dens only exist on authored maps: the generator never places them.
 const PLACEABLE_FEATURES: readonly TileFeature[] = ['watchtower', 'spring', 'rune']
 
 function orient(shape: Shape, random: SeededRandom): Shape {
@@ -216,7 +216,7 @@ export function makeMap(
   protectedTiles: Axial[] = [],
   symmetric = false,
 ): Map<string, Tile> {
-  const { ground, scatter, features: terrainFeatures } = BIOMES[biome]
+  const { ground, scatter, features: terrainFeatures, rareFeature } = BIOMES[biome]
   const tiles = new Map<string, Tile>()
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))
   if (symmetric)
@@ -259,6 +259,8 @@ export function makeMap(
       candidates.splice(candidates.indexOf(mirrorTile), 1)
     }
   }
+  if (rareFeature && random.next() < rareFeature.chance)
+    placeRareFeature(tiles, reserved, rareFeature.feature, random, symmetric)
   return tiles
 }
 

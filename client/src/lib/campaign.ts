@@ -17,7 +17,7 @@ export type IntroducedElement =
   | PawnKind
   | Exclude<Terrain, 'plain' | 'forest' | 'palm' | 'basalt'>
   | TileFeature
-  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
+  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano' | 'magic'>
 
 export interface CampaignLevel {
   id: number

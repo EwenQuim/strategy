@@ -1,4 +1,4 @@
-import type { Terrain } from '../hex.ts'
+import type { Terrain, TileFeature } from '../hex.ts'
 
 export type Shape = [number, number][]
 
@@ -13,6 +13,7 @@ export type BiomeDefinition = {
   readonly ground: Terrain
   readonly scatter?: { readonly terrain: Terrain; readonly chance: number }
   readonly features: readonly MapFeature[]
+  readonly rareFeature?: { readonly feature: TileFeature; readonly chance: number }
   readonly theme: Readonly<Record<`--${string}`, string>>
 }
 
