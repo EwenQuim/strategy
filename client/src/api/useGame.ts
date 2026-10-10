@@ -22,7 +22,7 @@ import {
   type BotConfig,
 } from '../lib/engine/ai/decision.ts'
 
-const ASYNC_BOTS: Partial<Record<BotConfig['name'], AiStrategy>> = {
+const REMOTE_BOTS: Partial<Record<BotConfig['name'], AiStrategy>> = {
   mistral: async (state) => [await mistralChooseAction(state)],
   jev: async (state) => [await jevChooseAction(state)],
 }
@@ -81,7 +81,7 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  const strategy = ASYNC_BOTS[bot.name] ?? STRATEGIES[bot.name]
+  const strategy = REMOTE_BOTS[bot.name] ?? STRATEGIES[bot.name]
   const options = botOptions(bot)
   useEffect(() => {
     if (mode !== 'ai' || online || playing || state.winner) return

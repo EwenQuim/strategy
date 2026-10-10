@@ -1,4 +1,3 @@
-import { initialTransition } from './engine/bot.ts'
 import { activePawn, isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
 import type { Action, BattleSetup, GameState, Transition } from './engine/index.ts'
@@ -10,8 +9,7 @@ export function initialPlayback(
   mode: GameMode = 'ai',
   setup?: BattleSetup,
 ): Transition {
-  if (mode === 'ai') return initialTransition(seed, setup)
-  return { state: initialState(seed, setup), frames: [] }
+  return { state: initialState(seed, setup, mode === 'ai' ? 'player' : undefined), frames: [] }
 }
 
 export type PlaybackAction =
@@ -39,10 +37,10 @@ export function playbackReducer(
   return { ...result, frames: result.frames.filter(isImpactFrame) }
 }
 
-// A bot's whole proposal plays as one animated transition; a proposal the engine rejects
-// ends the turn so the battle can never stall.
+// A bot's whole proposal plays as one animated transition, opening on the unit it moves; a
+// proposal the engine rejects ends the turn so the battle can never stall.
 function playBotActions(state: GameState, actions: Action[]): Transition {
-  const frames: BattleFrame[] = []
+  const frames: BattleFrame[] = [{ state: { ...state, order: [...state.order] }, effect: null }]
   let current = state
   for (const action of actions) {
     const result = applyAction(current, action)

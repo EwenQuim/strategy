@@ -26,7 +26,8 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 

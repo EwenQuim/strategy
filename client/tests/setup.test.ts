@@ -14,7 +14,8 @@ import {
   type Biome,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer, type PlaybackAction } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'

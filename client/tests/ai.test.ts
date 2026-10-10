@@ -14,7 +14,8 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
