@@ -24,7 +24,7 @@ const jump: SpecialAbility = {
   candidates: (pawn, { tiles, pawns }) => jumpDestinations(tiles, pawns, pawn).map(aimAt),
   tileTargets: (pawn, tiles, pawns) =>
     new Set(jumpDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
-  perform: ({ pawn, tiles, pawns, tile, round, log }) => {
+  perform: ({ pawn, tiles, pawns, tile, round, log, spawn }) => {
     if (
       !tile ||
       !jumpDestinations(tiles, pawns, pawn).some(
@@ -34,7 +34,7 @@ const jump: SpecialAbility = {
       return null
     pawn.q = tile.q
     pawn.r = tile.r
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     const impacts = enterTiles(
       tiles,
       pawns,
@@ -42,6 +42,7 @@ const jump: SpecialAbility = {
       [tiles.get(key(tile.q, tile.r))!],
       round,
       log,
+      spawn,
     )
     return { kind: 'move', to: tile, ...(impacts.length ? { impacts } : {}) }
   },
@@ -81,6 +82,10 @@ export class Ninja extends Pawn {
   }
   override moveEnergyCost(steps: number): number {
     return Math.max(0, steps - this.adrenaline)
+  }
+  override payMove(steps: number): void {
+    super.payMove(steps)
+    this.adrenaline -= Math.min(steps, this.adrenaline)
   }
   get special(): SpecialAbility {
     return jump

@@ -194,3 +194,17 @@ test('Bomb throw: banked adrenaline extends the bomber reach by one hex per poin
   assert.equal(next.pawns[2].hp, 6)
   assert.equal(next.pawns[0].energy, 1)
 })
+
+test('Swift: the free steps are spent by the first move', () => {
+  const state = field([
+    new Ninja(1, 0, 0, 'player'),
+    new King(2, 2, 3, 'player'),
+    new King(3, 5, 5, 'enemy'),
+  ])
+  state.pawns[0].adrenaline = 2
+  const first = reducer(state, { type: 'move', q: 2, r: 0 })
+  assert.equal(first.pawns[0].energy, 3)
+  assert.equal(first.pawns[0].adrenaline, 0)
+  const second = reducer(first, { type: 'move', q: 3, r: 0 })
+  assert.equal(second.pawns[0].energy, 2)
+})

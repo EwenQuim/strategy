@@ -23,7 +23,7 @@ const aimedShot: SpecialAbility = {
   perform: ({ pawn, pawns, log, random, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     return {
       kind: 'attack',

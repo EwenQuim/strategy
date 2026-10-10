@@ -1,11 +1,10 @@
-import { hexDist, key, Skeleton, walkingPaths, type Pawn, type Tile } from '../lib/engine'
+import { key, walkingPaths, type Pawn, type Tile } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
 
-// The little skulls that mark where the acting Necromancer must stand to summon: the tiles it
-// can reach this turn that lie within 2 hexes of an enemy, the proximity Summon demands. They
-// stay inside the Necromancer's own stride, so they read as its placement options, never as a
-// haze over every enemy on the field.
-export function SummonZone({
+// Marks the tiles the acting unit can reach this turn and use its special from, such as the
+// skulls where a Necromancer stands close enough to an enemy to summon. They stay inside the
+// unit's own stride, so they read as its placement options, never as a haze over the field.
+export function ReadyZone({
   pawn,
   tiles,
   pawns,
@@ -14,14 +13,16 @@ export function SummonZone({
   tiles: Map<string, Tile>
   pawns: Pawn[]
 }) {
+  const zone = pawn.special.readyZone
+  if (!zone) return null
   const here = key(pawn.q, pawn.r)
   const marks = [...walkingPaths(tiles, pawns, pawn).keys()]
     .filter((tileKey) => tileKey !== here)
     .map((tileKey) => tiles.get(tileKey)!)
-    .filter((tile) => pawns.some((foe) => foe.side !== pawn.side && hexDist(foe, tile) <= 2))
+    .filter((tile) => zone.from(pawn, tile, pawns))
   if (!marks.length) return null
   return (
-    <g className="pointer-events-none" data-art="summon-zone" aria-hidden="true">
+    <g className="pointer-events-none" data-art="ready-zone" aria-hidden="true">
       {marks.map((tile) => (
         <g
           key={key(tile.q, tile.r)}
@@ -35,7 +36,7 @@ export function SummonZone({
           opacity=".6"
         >
           <path
-            d={Skeleton.icon}
+            d={zone.icon}
             fill="none"
             stroke="#cfc9b9"
             strokeWidth="1.8"

@@ -87,15 +87,16 @@ test('Summon demands an enemy within 2 hexes, so a back-line Necromancer cannot 
   assert.equal(targetingTiles(state, { action: 'special' }).size, 6)
 })
 
-test('Summon is repeatable: a channeled Necromancer floods three skeletons in one turn', () => {
+test('Summon is repeatable, and Channel only discounts the first summon', () => {
   const state = field(necromancers())
   state.pawns[0].adrenaline = 1
   assert.equal(state.pawns[0].specialCost, 1)
   let next = reducer(state, { type: 'special', target: { q: 1, r: 0 } }) as GameState
+  assert.equal(next.pawns[0].adrenaline, 0)
+  assert.equal(next.pawns[0].specialCost, 2)
   next = reducer(next, { type: 'special', target: { q: 0, r: 1 } }) as GameState
-  next = reducer(next, { type: 'special', target: { q: -1, r: 0 } }) as GameState
   const skeletons = next.pawns.filter((pawn) => pawn instanceof Skeleton)
-  assert.equal(skeletons.length, 3)
+  assert.equal(skeletons.length, 2)
   assert.equal(next.pawns[0].energy, 0)
   assert.equal(targetingTiles(next, { action: 'special' }).size, 0)
 })
@@ -194,4 +195,13 @@ test('Rattle does nothing without an adjacent friendly skeleton', () => {
     new King(4, -2, 3, 'enemy'),
   ])
   assert.equal(reducer(state, { type: 'special' }), state)
+})
+
+test('A summon never reuses the id of a fallen unit still in the turn order', () => {
+  const state = field(necromancers())
+  state.order.push(5)
+  const next = reducer(state, { type: 'special', target: { q: 1, r: 0 } }) as GameState
+  const skeleton = next.pawns.find((pawn) => pawn instanceof Skeleton)!
+  assert.equal(skeleton.id, 6)
+  assert.equal(new Set(next.order).size, next.order.length)
 })

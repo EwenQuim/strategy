@@ -224,14 +224,14 @@ function SpecialButton({
                 ? specialTexts[pawn.special.prompt]
                 : m.chooseEnemy
           : !preview.commanding
-            ? m.energyCost(pawn?.special.cost ?? 2)
+            ? m.energyCost(pawn?.specialCost ?? 2)
             : pawn?.special.oncePerRound && pawn.specialUsed
               ? m.usedThisRound
               : !hasSpecialTargets
                 ? pawn?.special.noTargets
                   ? specialTexts[pawn.special.noTargets]
                   : m.noTargets
-                : m.energyCost(pawn?.special.cost ?? 2)}
+                : m.energyCost(pawn?.specialCost ?? 2)}
       </small>
     </button>
   )

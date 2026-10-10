@@ -72,10 +72,7 @@ function maxDamage(attacker: Pawn, reach: Reach, target: Pawn): number {
   for (const { from, movementCost } of reach.positions)
     damage = Math.max(damage, damageFromPosition(attacker, { target, from, movementCost }))
   if (reach.jumps.some((from) => canAttack(attacker, target, from)))
-    damage = Math.max(
-      damage,
-      (attacker.energy - attacker.special.cost) * attacker.attack.damage,
-    )
+    damage = Math.max(damage, (attacker.energy - attacker.specialCost) * attacker.attack.damage)
   reach.damageAt.set(at, damage)
   return damage
 }

@@ -5,6 +5,7 @@ import {
   King,
   Lancer,
   Necromancer,
+  Ninja,
   RECRUIT_CLASSES,
   Swordsman,
   movementDestinations,
@@ -145,4 +146,15 @@ test('Rampage needs adjacent enemies and enough energy', () => {
     new King(4, -2, 3, 'enemy'),
   ])
   assert.equal(reducer(tired, { type: 'special' }), tired)
+})
+
+test('A ninja jump landing beside a den wakes it', () => {
+  const state = field([
+    new Ninja(1, 0, 0, 'player'),
+    new King(2, 2, 3, 'player'),
+    new King(3, -2, 3, 'enemy'),
+  ])
+  state.tiles.set('3,0', { q: 3, r: 0, terrain: 'plain', feature: 'den' })
+  const next = reducer(state, { type: 'special', target: { q: 2, r: 0 } })
+  assert.equal(next.pawns.find((pawn) => pawn.kind === 'beast')?.side, 'player')
 })

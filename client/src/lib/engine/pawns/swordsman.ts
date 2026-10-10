@@ -56,7 +56,7 @@ const charge: SpecialAbility = {
     const chargeCost = Math.max(0, movementCost - 2) + pawn.special.cost
     return pawn.energy >= chargeCost ? (1 + pawn.energy - chargeCost) * pawn.attack.damage : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random }) => {
+  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random, spawn }) => {
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -65,12 +65,12 @@ const charge: SpecialAbility = {
       !specialTargets(pawns, pawn, destination).includes(target)
     )
       return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const route = walkingPaths(tiles, pawns, pawn, 2, key(destination.q, destination.r)).get(
       key(destination.q, destination.r),
     )!
-    const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log)
+    const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log, spawn)
     if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },

@@ -21,7 +21,7 @@ const rampage: SpecialAbility = {
   perform: ({ pawn, pawns, log, random }) => {
     const foes = specialTargets(pawns, pawn)
     if (!foes.length) return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const impacts = foes.map((foe) => strike(pawns, pawn, foe, { ...pawn.attack }, log, random))

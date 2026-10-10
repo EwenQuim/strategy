@@ -23,7 +23,7 @@ const protect: SpecialAbility = {
   perform: ({ pawn, pawns, log, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     pawn.protectingId = target.id
     log.push(label(pawn) + ' protects ' + target.kind + ' #' + target.id + '.')

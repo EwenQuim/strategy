@@ -78,7 +78,7 @@ export function enterTiles(
   path: Tile[],
   round: number,
   log: string[],
-  spawn?: PawnSpawner,
+  spawn: PawnSpawner,
 ): BattleImpact[] {
   const impacts: BattleImpact[] = []
   for (const tile of path) {
@@ -112,9 +112,9 @@ function wakeDens(
   tiles: Map<string, Tile>,
   pawn: Pawn,
   log: string[],
-  spawn?: PawnSpawner,
+  spawn: PawnSpawner,
 ): void {
-  if (!spawn || pawn.hp <= 0) return
+  if (pawn.hp <= 0) return
   for (const den of [...tiles.values()].filter((tile) => tile.feature === 'den')) {
     if (hexDist(pawn, den) > 1) continue
     const beast = spawn('beast', pawn.side, den.q, den.r)

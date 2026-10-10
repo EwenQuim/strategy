@@ -136,7 +136,8 @@ const effectFrom = ({ kind, ...rest }: SpecialResult, from: Axial): BattleEffect
 })
 
 // Battle-spawned pawns continue the id sequence of the armies.
-const nextPawnId = (pawns: readonly Pawn[]) => Math.max(0, ...pawns.map((p) => p.id)) + 1
+const nextPawnId = (pawns: readonly Pawn[], order: readonly number[]) =>
+  Math.max(0, ...pawns.map((p) => p.id), ...order) + 1
 
 // Picking up a rune or waking a beast changes the map, so other maps are shared between states.
 const mutableMap = new WeakMap<Map<string, Tile>, boolean>()
@@ -164,7 +165,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   const spawn: PawnSpawner = (kind, side, q, r, options) => {
     if (pawns.some((pawn) => pawn.q === q && pawn.r === r)) return null
     const Unit = PAWN_CLASSES[kind]
-    const pawn = new Unit(nextPawnId(pawns), q, r, side, options?.hp, options?.energy)
+    const pawn = new Unit(nextPawnId(pawns, order), q, r, side, options?.hp, options?.energy)
     pawns.push(pawn)
     order.push(pawn.id)
     spawned.push(pawn)
@@ -188,7 +189,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
         key(action.q, action.r),
       )
       if (!route?.steps) return null
-      actor.energy -= actor.moveEnergyCost(route.steps)
+      actor.payMove(route.steps)
       const impacts = enterTiles(tiles, pawns, actor, routePath(route), state.round, log, spawn)
       effect = {
         kind: 'move',

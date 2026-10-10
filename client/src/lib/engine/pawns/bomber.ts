@@ -42,7 +42,7 @@ const bomb: SpecialAbility = {
       !bombTiles(pawn, tiles).some((center) => center.q === tile.q && center.r === tile.r)
     )
       return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const targets = bomb.areaTargets!(pawns, tile, pawn)
     return {

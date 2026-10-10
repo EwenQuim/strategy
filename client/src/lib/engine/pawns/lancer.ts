@@ -62,7 +62,7 @@ const dash: SpecialAbility = {
       ? dashPath(pawn, tiles, tile)
       : null
     if (!path) return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const impacts = enterTiles(tiles, pawns, pawn, path, round, log, spawn)
     return {

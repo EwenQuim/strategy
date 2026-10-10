@@ -1,12 +1,16 @@
 import { aimAt, canUseSpecial, label, pawnAt } from '../combat.ts'
-import { hexDist, key, passable, type Tile } from '../hex.ts'
+import { hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
 import type { Action, GameState } from '../engine.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
+import { Skeleton } from './skeleton.ts'
 
 // Summon demands proximity: it only works while an enemy stands within 2 hexes, so a
 // Necromancer cannot flood the field from the safety of its back line.
+const summonReadyFrom = (pawn: Pawn, from: Axial, pawns: readonly Pawn[]): boolean =>
+  pawns.some((foe) => foe.side !== pawn.side && hexDist(from, foe) <= 2)
+
 export const summonReady = (pawn: Pawn, pawns: readonly Pawn[]): boolean =>
-  pawns.some((foe) => foe.side !== pawn.side && hexDist(pawn, foe) <= 2)
+  summonReadyFrom(pawn, pawn, pawns)
 
 function summonTiles(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Tile[] {
   return [...tiles.values()].filter(
@@ -23,6 +27,7 @@ const summon: SpecialAbility = {
   prompt: 'chooseTile',
   description: 'summonDescription',
   noTargets: 'cannotSummon',
+  readyZone: { icon: Skeleton.icon, from: summonReadyFrom },
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: () => [],
   tileTargets: (pawn, tiles, pawns) =>
@@ -38,7 +43,7 @@ const summon: SpecialAbility = {
     const target = tiles.get(key(tile.q, tile.r))
     if (!target || !passable(target) || pawnAt(pawns, tile) || hexDist(pawn, tile) !== 1)
       return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     pawn.specialUsed = true
     const skeleton = spawn('skeleton', pawn.side, tile.q, tile.r, { energy: 1 })
     if (!skeleton) return null
@@ -62,6 +67,11 @@ export class Necromancer extends Pawn {
   // Channel: every banked energy point makes Summon cheaper, down to 1.
   override get specialCost(): number {
     return Math.max(1, this.special.cost - this.adrenaline)
+  }
+  override paySpecial(): void {
+    const discount = this.special.cost - this.specialCost
+    super.paySpecial()
+    this.adrenaline -= discount
   }
   get special(): SpecialAbility {
     return summon

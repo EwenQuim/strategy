@@ -18,7 +18,7 @@ const rally: SpecialAbility = {
   perform: ({ pawn, pawns, log }) => {
     const allies = specialTargets(pawns, pawn)
     if (!allies.length) return null
-    pawn.energy -= pawn.specialCost
+    pawn.paySpecial()
     pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const healing = 1 + pawn.adrenaline

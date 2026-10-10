@@ -119,6 +119,10 @@ export interface SpecialAbility {
   perform(context: SpecialContext): SpecialResult | null
   candidates(pawn: Pawn, state: GameState): Action[]
   threat?(pawn: Pawn, position: ThreatPosition): number
+  readonly readyZone?: {
+    readonly icon: string
+    from(pawn: Pawn, tile: Axial, pawns: readonly Pawn[]): boolean
+  }
 }
 
 export abstract class Pawn {
@@ -198,6 +202,14 @@ export abstract class Pawn {
 
   get specialCost(): number {
     return this.special.cost
+  }
+
+  payMove(steps: number): void {
+    this.energy -= this.moveEnergyCost(steps)
+  }
+
+  paySpecial(): void {
+    this.energy -= this.specialCost
   }
 
   constructor(
