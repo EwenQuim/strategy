@@ -9,7 +9,7 @@ const ragnarok = CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!
 // These encounters defeat the scripted player at every caution; a human wins them easily.
 const NOT_SCRIPTABLY_WINNABLE = new Set(['ragnarok:4'])
 
-test('Thermopylae and Ragnarok packs stay winnable level by level', () => {
+test('Thermopylae and Ragnarok packs stay winnable level by level', async () => {
   for (const pack of [sparta, ragnarok]) {
     assert.equal(pack.levels.length, 5)
     assert.equal(new Set(pack.levels.map((level) => level.seed)).size, 5)
@@ -19,7 +19,7 @@ test('Thermopylae and Ragnarok packs stay winnable level by level', () => {
       assert.deepEqual(core, coreState(level.seed, level.setup))
       if (NOT_SCRIPTABLY_WINNABLE.has(pack.slug + ':' + level.id)) continue
       assert.ok(
-        winnableAgainst(level, level.difficulty),
+        await winnableAgainst(level, level.difficulty),
         pack.slug + ' level ' + level.id + ': ' + level.name,
       )
     }

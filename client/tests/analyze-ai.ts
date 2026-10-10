@@ -22,7 +22,7 @@ const args = process.argv.slice(2)
 const option = (name: string, fallback: string) =>
   args.find((arg) => arg.startsWith('--' + name + '='))?.split('=')[1] ?? fallback
 
-function replay(
+async function replay(
   level: (typeof CAMPAIGNS)[number]['levels'][number],
   caution: number,
   log: Row[],
@@ -34,8 +34,8 @@ function replay(
     const enemy = pawn.side === 'enemy'
     const started = performance.now()
     const actions = enemy
-      ? chooseBotActions(state, { name: 'depthsearch', difficulty })
-      : campaignActions(state, caution)
+      ? await chooseBotActions(state, { name: 'depthsearch', difficulty })
+      : await campaignActions(state, caution)
     const ms = performance.now() - started
     if (searchStats.decisions > 0)
       log.push({
@@ -50,13 +50,16 @@ function replay(
   return state
 }
 
-function scan(slug: string) {
+async function scan(slug: string) {
   const pack = CAMPAIGNS.find((pack) => pack.slug === slug)!
   console.log(`Scanning ${pack.name} with the test's retry ladder`)
   const rows: [string, number, boolean, number][] = []
   for (const level of pack.levels) {
     const started = performance.now()
-    const winnable = winnableAgainst(level, (level.difficulty ?? 'normal') as BotDifficulty)
+    const winnable = await winnableAgainst(
+      level,
+      (level.difficulty ?? 'normal') as BotDifficulty,
+    )
     rows.push([level.name, performance.now() - started, winnable, level.id])
   }
   for (const [name, ms, winnable, id] of rows.sort((a, b) => b[1] - a[1]))
@@ -68,12 +71,12 @@ function scan(slug: string) {
 const quantile = (values: number[], q: number) =>
   values[Math.min(values.length - 1, Math.floor(values.length * q))]
 
-function deep(slug: string, id: number) {
+async function deep(slug: string, id: number) {
   const pack = CAMPAIGNS.find((pack) => pack.slug === slug)!
   const level = pack.levels.find((level) => level.id === id)!
   const caution = Number(option('caution', '0.25'))
   const rows: Row[] = []
-  const state = replay(level, caution, rows)
+  const state = await replay(level, caution, rows)
   console.log(
     `${level.name} at caution ${caution}: ${state.winner ?? 'no winner'} after ${rows.length} decisions`,
   )
@@ -129,4 +132,4 @@ function deep(slug: string, id: number) {
 
 const [slug, id] = args.filter((arg) => !arg.startsWith('--'))
 if (id) deep(slug, Number(id))
-else scan(slug)
+else await scan(slug)

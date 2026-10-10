@@ -217,7 +217,7 @@ function lakeBattle(side: Side): GameState {
   }
 }
 
-test('Lakes block walking and Charge for both sides, and cannot be Ninja landing tiles', () => {
+test('Lakes block walking and Charge for both sides, and cannot be Ninja landing tiles', async () => {
   for (const side of ['player', 'enemy'] as const) {
     for (const Unit of [King, ...RECRUIT_CLASSES]) {
       const state = lakeBattle(side)
@@ -237,7 +237,7 @@ test('Lakes block walking and Charge for both sides, and cannot be Ninja landing
         assert.equal(reducer(state, { type: 'special', target: { q: 2, r: 0 } }), state)
       }
       let next = state
-      for (const action of chooseBotActions(state)) {
+      for (const action of await chooseBotActions(state)) {
         const result = reducer(next, action)
         assert.notEqual(result, next)
         next = result

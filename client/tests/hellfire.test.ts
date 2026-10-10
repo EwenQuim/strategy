@@ -241,7 +241,7 @@ test('An empty blast survives local and player-controlled playback filtering', (
   }
 })
 
-test('AI evades with a healthy soldier on easy and saves a doomed king on normal to win after the blast', () => {
+test('AI evades with a healthy soldier on easy and saves a doomed king on normal to win after the blast', async () => {
   for (const [difficulty, actor] of [
     ['easy', new Swordsman(1, 0, 0, 'enemy')],
     ['normal', new King(1, 0, 0, 'enemy', 1)],
@@ -264,7 +264,10 @@ test('AI evades with a healthy soldier on easy and saves a doomed king on normal
     if (king) assert.equal(reducer(state, { type: 'endTurn' }).winner, 'draw')
     let next = state
     for (let step = 0; step < 4 && next.round === 1 && !next.winner; step++)
-      next = chooseBotActions(next, { name: 'depthsearch', difficulty }).reduce(reducer, next)
+      next = (await chooseBotActions(next, { name: 'depthsearch', difficulty })).reduce(
+        reducer,
+        next,
+      )
     const survivor = next.pawns.find((p) => p.id === actor.id)!
     assert.ok(survivor, difficulty)
     assert.equal(inHellfire(state.hellfire, survivor), false, difficulty)
@@ -274,7 +277,7 @@ test('AI evades with a healthy soldier on easy and saves a doomed king on normal
   }
 })
 
-test('AI leaves already-doomed enemies to Hellfire instead of wasting its last attack', () => {
+test('AI leaves already-doomed enemies to Hellfire instead of wasting its last attack', async () => {
   const state = battle(
     [
       new Swordsman(1, 0, 0, 'enemy', 5, 1),
@@ -287,7 +290,7 @@ test('AI leaves already-doomed enemies to Hellfire instead of wasting its last a
   )
   state.order = [4, 3, 2, 1, 5]
   state.active = 3
-  const actions = chooseBotActions(state)
+  const actions = await chooseBotActions(state)
   assert.deepEqual(actions, [{ type: 'attack', q: -1, r: 0 }])
   const next = finishRound(actions.reduce(reducer, state))
   assert.ok(!next.pawns.some((pawn) => pawn.id === 3 || pawn.id === 4))

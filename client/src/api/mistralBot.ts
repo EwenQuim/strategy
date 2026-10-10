@@ -11,8 +11,8 @@ import {
 
 // The whole Mistral bot lives here, outside the pure engine: the API key, the battle prompt,
 // the SDK call and the reply parsing. The engine stays the sole judge — only actions the
-// reducer accepts are played — and any failure falls back to the strategy's own synchronous
-// local search, so a battle can never stall.
+// reducer accepts are played — and any failure falls back to the strategy's own local
+// search, so a battle can never stall.
 
 // Z.ai GLM 5.3, hosted by Mistral: a reasoning model, markedly stronger at
 // positional planning than mistral-small at the cost of slower replies.
@@ -65,7 +65,7 @@ export function actionFromReply(reply: string, state: GameState): Action | null 
 
 export async function mistralChooseAction(state: GameState): Promise<Action> {
   const apiKey = readMistralApiKey()
-  if (!apiKey || !activePawn(state)) return fallbackAction(state, 'mistral')
+  if (!apiKey || !activePawn(state)) return fallbackAction(state)
   try {
     // Imported lazily so the SDK stays in its own chunk, loaded only for Mistral battles.
     const { MistralCore } = await import('@mistralai/mistralai/core.js')
@@ -83,16 +83,16 @@ export async function mistralChooseAction(state: GameState): Promise<Action> {
         { role: 'user', content: battlePrompt(state) },
       ],
     })
-    if (!result.ok) return fallbackAction(state, 'mistral')
+    if (!result.ok) return fallbackAction(state)
     const content = result.value.choices[0]?.message?.content
     const reply =
       typeof content === 'string'
         ? content
         : content?.map((chunk) => (chunk.type === 'text' ? chunk.text : '')).join('')
-    if (!reply) return fallbackAction(state, 'mistral')
-    return actionFromReply(reply, state) ?? fallbackAction(state, 'mistral')
+    if (!reply) return fallbackAction(state)
+    return actionFromReply(reply, state) ?? fallbackAction(state)
   } catch {
     // Network, quota or parsing failure: the local AI keeps the battle moving.
-    return fallbackAction(state, 'mistral')
+    return fallbackAction(state)
   }
 }

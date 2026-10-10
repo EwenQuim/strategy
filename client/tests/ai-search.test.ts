@@ -101,7 +101,7 @@ test('Turn plans keep equal positions that banked different adrenaline', () => {
   assert.ok(banks.includes(0) && banks.includes(2), 'Banks found: ' + banks.join(', '))
 })
 
-test('A rune-boosted attacker facing many targets plans and decides quickly', () => {
+test('A rune-boosted attacker facing many targets plans and decides quickly', async () => {
   const bulwarks = [
     [3, 2],
     [4, 2],
@@ -128,6 +128,6 @@ test('A rune-boosted attacker facing many targets plans and decides quickly', ()
   const plans = turnPlans(state)
   assert.ok(performance.now() - started < 1000, 'Enumeration took too long')
   assert.ok(plans.every((plan) => plan.actions.filter((a) => a.type === 'attack').length <= 3))
-  const actions = chooseBotActions(state, { name: 'depthsearch', difficulty: 'hard' })
+  const actions = await chooseBotActions(state, { name: 'depthsearch', difficulty: 'hard' })
   assert.notEqual(actions.reduce(reducer, state), state)
 })

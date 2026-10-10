@@ -22,7 +22,7 @@ import {
 // fixed list with a calibrated probability instead of writing text, so the legal actions are
 // sent as the criteria of a single choice question. The engine stays the sole judge — the
 // chosen option is played only if the reducer accepts it — and any failure falls back to the
-// strategy's own synchronous local search, so a battle can never stall.
+// strategy's own local search, so a battle can never stall.
 
 const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
@@ -95,7 +95,7 @@ export function actionFromChoice(choice: unknown, state: GameState): Action | nu
 
 export async function jevChooseAction(state: GameState): Promise<Action> {
   const apiKey = readJevApiKey()
-  if (!apiKey || !activePawn(state)) return fallbackAction(state, 'jev')
+  if (!apiKey || !activePawn(state)) return fallbackAction(state)
   try {
     const response = await fetch(ENDPOINT, {
       method: 'POST',
@@ -114,11 +114,11 @@ export async function jevChooseAction(state: GameState): Promise<Action> {
         },
       }),
     })
-    if (!response.ok) return fallbackAction(state, 'jev')
+    if (!response.ok) return fallbackAction(state)
     const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
-    return actionFromChoice(data.answers?.move?.choice, state) ?? fallbackAction(state, 'jev')
+    return actionFromChoice(data.answers?.move?.choice, state) ?? fallbackAction(state)
   } catch {
     // Network, quota or parsing failure: the local AI keeps the battle moving.
-    return fallbackAction(state, 'jev')
+    return fallbackAction(state)
   }
 }

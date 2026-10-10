@@ -221,12 +221,12 @@ test('Core skips fallen units and refreshes a round without running a controller
   assert.ok(state.pawns.every((p) => p.energy === 1 && p.escapeChance === 60 && p.specialUsed))
 })
 
-test('Invalid bot strategies fail instead of spinning on rejected actions', () => {
+test('Invalid bot strategies fail instead of spinning on rejected actions', async () => {
   const game = createBotGame({ chooseTarget: () => new King(99, 99, 99, 'player') })
   const state = duel('player')
   const original = structuredClone(state)
-  assert.throws(
-    () => game.reducer(state, { type: 'endTurn' }),
+  await assert.rejects(
+    game.reducer(state, { type: 'endTurn' }),
     /Bot selected an invalid action/,
   )
   assert.deepEqual(structuredClone(state), original)
@@ -288,14 +288,14 @@ test('Fireball reports each hit and dodge, including a killed target, without hi
   assert.equal(result.state.pawns.find((p) => p.id === 5)?.hp, 3)
 })
 
-test('Player attack playback precedes enemy responses and shows lethal damage before victory', () => {
+test('Player attack playback precedes enemy responses and shows lethal damage before victory', async () => {
   const game = createBotGame()
   for (const lethal of [false, true]) {
     const state = duel('player')
     state.pawns[0].energy = 1
     state.pawns[2].q = 1
     state.pawns[2].hp = lethal ? 1 : 7
-    const result = game.transition(state, { type: 'attack', q: 1, r: 0 })
+    const result = await game.transition(state, { type: 'attack', q: 1, r: 0 })
     assert.equal(activePawn(result.frames[0].state)?.side, 'player')
     assert.equal(result.frames[0].state.winner, null)
     assert.deepEqual(result.frames[0].effect?.impacts, [{ q: 1, r: 0, damage: 2 }])

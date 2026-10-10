@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { parseGameSearch, usesSymmetricField } from '../src/lib/game-mode.ts'
-import { createBotGame } from '../src/lib/engine/bot.ts'
+import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
-import { initialState, transition } from '../src/lib/engine/engine.ts'
+import { activePawn, initialState, transition } from '../src/lib/engine/engine.ts'
 import { MAP_WIDTH } from '../src/lib/engine/hex.ts'
 import {
   key,
@@ -70,7 +70,7 @@ test('Custom search accepts more Bulwarks than one front row', () => {
   )
 })
 
-test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', () => {
+test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', async () => {
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
     const config = { name: 'depthsearch', difficulty } as const
@@ -78,16 +78,21 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
-      const expected = bot.transition(playback.state, { type: 'endTurn' })
-      playback = playbackReducer(playback, { type: 'endTurn' }, 'ai', config)
-      assert.deepEqual(playback, expected)
-      playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai', config)
+      const expected = await bot.transition(playback.state, { type: 'endTurn' })
+      playback = playbackReducer(playback, { type: 'endTurn' }, 'ai')
+      while (!playback.state.winner && activePawn(playback.state)?.side === 'enemy') {
+        const actions = await chooseBotActions(playback.state, config)
+        playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai')
+        playback = playbackReducer(playback, { type: 'botActions', actions }, 'ai')
+      }
+      assert.deepEqual(playback.state, expected.state)
+      playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai')
     }
     outcomes.add(JSON.stringify(playback.state))
-    assert.deepEqual(playbackReducer(playback, { type: 'restart' }, 'ai', config), opening)
+    assert.deepEqual(playbackReducer(playback, { type: 'restart' }, 'ai'), opening)
     const local = initialPlayback('custom-difficulty-10', 'local', setup)
     const expected = transition(local.state, { type: 'endTurn' })
-    assert.deepEqual(playbackReducer(local, { type: 'endTurn' }, 'local', config), {
+    assert.deepEqual(playbackReducer(local, { type: 'endTurn' }, 'local'), {
       state: expected.state,
       frames: [],
     })

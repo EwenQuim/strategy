@@ -9,7 +9,7 @@ for (const [slug, id] of [
   ['iron-throne', 4],
 ] as const) {
   const level = CAMPAIGNS.find((pack) => pack.slug === slug)!.levels[id - 1]
-  test(level.name + ' stays winnable after the AI safety fixes', () => {
-    assert.ok(winnableAgainst(level, level.difficulty), level.name)
+  test(level.name + ' stays winnable after the AI safety fixes', async () => {
+    assert.ok(await winnableAgainst(level, level.difficulty), level.name)
   })
 }
