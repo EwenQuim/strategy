@@ -18,11 +18,8 @@ import {
   type Biome,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import {
-  initialState as botState,
-  transition as botTransition,
-  chooseBotActions,
-} from '../src/lib/engine/bot.ts'
+import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { initialState as botState, transition as botTransition } from './bot-game.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/engine/bot.ts'
 import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'

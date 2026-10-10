@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CAMPAIGNS } from '../../src/lib/campaign.ts'
 import { initialState as coreState } from '../../src/lib/engine/index.ts'
-import { createBotGame } from '../../src/lib/engine/bot.ts'
+import { createBotGame } from '../bot-game.ts'
 import { winnableAgainst } from '../campaign-actions.ts'
 
 const original = CAMPAIGNS[1]

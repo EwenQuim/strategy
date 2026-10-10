@@ -1,17 +1,7 @@
-import {
-  activePawn,
-  initialState as createState,
-  isImpactFrame,
-  transition as applyAction,
-  type Action,
-  type BattleFrame,
-  type GameState,
-  type Transition,
-} from './engine.ts'
+import { activePawn, type Action, type GameState } from './engine.ts'
 import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import type { BattleSetup } from './setup.ts'
 import type { BotOptions } from './ai.ts'
 import { botOptions, STRATEGIES, DEFAULT_BOT_CONFIG, type BotConfig } from './ai/decision.ts'
 
@@ -182,47 +172,3 @@ function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
     ? [{ type: 'move', q: step.q, r: step.r }]
     : [{ type: 'endTurn' }]
 }
-
-export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
-  async function playBots(state: GameState): Promise<Transition> {
-    const frames: BattleFrame[] = []
-    while (!state.winner && activePawn(state)?.side === 'enemy') {
-      const id = activePawn(state)!.id
-      const round = state.round
-      frames.push({ state: { ...state, order: [...state.order] }, effect: null })
-      do {
-        for (const action of await chooseBotActions(state, controller)) {
-          const result = applyAction(state, action)
-          if (result.state === state) throw new Error('Bot selected an invalid action')
-          state = result.state
-          frames.push(...result.frames)
-        }
-      } while (!state.winner && state.round === round && activePawn(state)?.id === id)
-    }
-    return { state, frames }
-  }
-
-  const initialTransition = (seed: string, setup?: BattleSetup): Transition => {
-    const state = createState(seed, setup, 'player')
-    return { state, frames: [] }
-  }
-  const transition = async (state: GameState, action: Action): Promise<Transition> => {
-    if (action.type === 'restart') return initialTransition(state.seed, state.setup)
-    if (activePawn(state)?.side === 'enemy') return { state, frames: [] }
-    const player = applyAction(state, action)
-    const bots = await playBots(player.state)
-    return {
-      state: bots.state,
-      frames: [...player.frames.filter(isImpactFrame), ...bots.frames],
-    }
-  }
-  return {
-    initialState: (seed: string, setup?: BattleSetup) => initialTransition(seed, setup).state,
-    reducer: async (state: GameState, action: Action) =>
-      (await transition(state, action)).state,
-    initialTransition,
-    transition,
-  }
-}
-
-export const { initialState, initialTransition, transition } = createBotGame()

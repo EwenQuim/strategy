@@ -18,7 +18,7 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { createBotGame } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import { seedState } from '../src/lib/engine/random.ts'
@@ -221,14 +221,12 @@ test('Core skips fallen units and refreshes a round without running a controller
   assert.ok(state.pawns.every((p) => p.energy === 1 && p.escapeChance === 60 && p.specialUsed))
 })
 
-test('Invalid bot strategies fail instead of spinning on rejected actions', async () => {
+test('Rejected bot proposals end the turn instead of spinning', async () => {
   const game = createBotGame({ chooseTarget: () => new King(99, 99, 99, 'player') })
   const state = duel('player')
   const original = structuredClone(state)
-  await assert.rejects(
-    game.reducer(state, { type: 'endTurn' }),
-    /Bot selected an invalid action/,
-  )
+  const next = await game.reducer(state, { type: 'endTurn' })
+  assert.equal(activePawn(next)?.side, 'player')
   assert.deepEqual(structuredClone(state), original)
 })
 

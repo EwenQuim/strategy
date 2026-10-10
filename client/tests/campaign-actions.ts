@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { CAMPAIGNS, type CampaignLevel } from '../src/lib/campaign.ts'
 import type { Action, GameState } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame, huntTheKing } from '../src/lib/engine/bot.ts'
+import { chooseBotActions, huntTheKing } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
 export function campaignActions(state: GameState, caution = 0.25): Promise<Action[]> {

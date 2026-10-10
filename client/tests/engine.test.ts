@@ -26,7 +26,7 @@ import {
   reducer as coreReducer,
   transition as coreTransition,
 } from '../src/lib/engine/index.ts'
-import { createBotGame } from '../src/lib/engine/bot.ts'
+import { createBotGame } from './bot-game.ts'
 import { huntTheKing, nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
@@ -684,16 +684,16 @@ test('Playback snapshots keep intermediate health, logs, and dead target coordin
   state.order = [1, 3, 2]
   state.pawns[2].energy = 3
   const result = await transition(state, { type: 'endTurn' })
-  assert.equal(result.frames.length, 4)
+  assert.equal(result.frames.length, 6)
   assert.deepEqual(
     result.frames.map((frame) => frame.state.pawns.find((p) => p.id === 1)?.hp),
-    [5, 3, 1, -1],
+    [5, 3, 3, 1, 1, -1],
   )
   assert.deepEqual(
     result.frames.map((frame) => frame.state.logCount),
-    [0, 1, 2, 4],
+    [0, 1, 1, 2, 2, 4],
   )
-  assert.deepEqual(result.frames[3].effect, {
+  assert.deepEqual(result.frames[5].effect, {
     kind: 'attack',
     from: { q: 1, r: 0 },
     to: { q: 0, r: 0 },
@@ -831,14 +831,14 @@ test('Player and enemy movement stays silent while each enemy step still has a p
   state.order = [1, 3, 2]
   const result = await transition(state, { type: 'endTurn' })
   assert.deepEqual(result.state.log, [])
-  assert.equal(result.frames.length, 4)
+  assert.equal(result.frames.length, 6)
   assert.deepEqual(
     result.frames.map((f) => activePawn(f.state)?.energy),
-    [3, 2, 1, 0],
+    [3, 2, 2, 1, 1, 0],
   )
   assert.deepEqual(
     result.frames.map((f) => f.state.logCount),
-    [0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
   )
   assert.equal(result.frames.filter((f) => f.effect?.kind === 'move').length, 3)
 })
@@ -979,11 +979,11 @@ test('Enemy Ninja jumps over a blocked path then attacks, with deterministic ord
   assert.deepEqual(result.state, await reducer(state, { type: 'endTurn' }))
   assert.deepEqual(
     result.frames.map((frame) => frame.effect?.kind),
-    [undefined, 'move', 'attack'],
+    [undefined, 'move', undefined, 'attack'],
   )
   assert.deepEqual(
     result.frames.map((frame) => activePawn(frame.state)?.energy),
-    [3, 1, 0],
+    [3, 1, 1, 0],
   )
   assert.deepEqual(result.frames[1].effect, {
     kind: 'move',
