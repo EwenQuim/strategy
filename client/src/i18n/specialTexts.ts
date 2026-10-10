@@ -248,11 +248,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Evocazione',
   }),
   summonDescription: t({
-    en: 'Spawn a skeleton (2 health, 1 damage) on an adjacent empty tile. Repeatable while energy lasts.',
-    fr: 'Fait apparaître un squelette (2 points de vie, 1 dégât) sur une case vide adjacente. Répétable tant qu’il reste de l’énergie.',
-    de: 'Beschwört ein Skelett (2 Leben, 1 Schaden) auf einem freien angrenzenden Feld. Wiederholbar, solange Energie reicht.',
-    es: 'Invoca un esqueleto (2 de vida, 1 de daño) en una casilla vacía adyacente. Repetible mientras quede energía.',
-    it: 'Evoca uno scheletro (2 vite, 1 danno) su una casella vuota adiacente. Ripetibile finché c’è energia.',
+    en: 'Spawn a skeleton (2 health, 1 damage) on an adjacent empty tile, only while an enemy stands within 2 hexes. Repeatable while energy lasts.',
+    fr: 'Fait apparaître un squelette (2 points de vie, 1 dégât) sur une case vide adjacente, seulement si un ennemi se trouve à moins de 2 hexagones. Répétable tant qu’il reste de l’énergie.',
+    de: 'Beschwört ein Skelett (2 Leben, 1 Schaden) auf einem freien angrenzenden Feld, nur solange ein Gegner innerhalb von 2 Feldern steht. Wiederholbar, solange Energie reicht.',
+    es: 'Invoca un esqueleto (2 de vida, 1 de daño) en una casilla vacía adyacente, solo mientras un enemigo esté a menos de 2 hexágonos. Repetible mientras quede energía.',
+    it: 'Evoca uno scheletro (2 vite, 1 danno) su una casella vuota adiacente, solo mentre un nemico si trova entro 2 esagoni. Ripetibile finché c’è energia.',
   }),
   summonTo: t({
     en: 'Summon on',
@@ -261,12 +261,12 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     es: 'Invocar en',
     it: 'Evocazione su',
   }),
-  noSpaceToSummon: t({
-    en: 'No free adjacent tile to summon a skeleton',
-    fr: 'Aucune case adjacente libre pour invoquer un squelette',
-    de: 'Kein freies angrenzendes Feld, um ein Skelett zu beschwören',
-    es: 'Ninguna casilla adyacente libre para invocar un esqueleto',
-    it: 'Nessuna casella adiacente libera per evocare uno scheletro',
+  cannotSummon: t({
+    en: 'No enemy within 2 hexes, or no free adjacent tile',
+    fr: 'Aucun ennemi à moins de 2 hexagones, ou aucune case adjacente libre',
+    de: 'Kein Gegner innerhalb von 2 Feldern, oder kein freies angrenzendes Feld',
+    es: 'Ningún enemigo a menos de 2 hexágonos, o ninguna casilla adyacente libre',
+    it: 'Nessun nemico entro 2 esagoni, o nessuna casella adiacente libera',
   }),
   rattle: t({
     en: 'Rattle',

@@ -14,6 +14,7 @@ import {
   type Pawn,
   type Tile,
 } from '../src/lib/engine/index.ts'
+import { summonReady } from '../src/lib/engine/pawns/necromancer.ts'
 
 function field(pawns: Pawn[]): GameState {
   const tiles = new Map<string, Tile>()
@@ -38,10 +39,12 @@ function field(pawns: Pawn[]): GameState {
   }
 }
 
+// An enemy within 2 hexes of the Necromancer: the proximity Summon demands.
 const necromancers = () => [
   new Necromancer(1, 0, 0, 'player'),
   new King(2, 2, 3, 'player'),
-  new King(3, -2, 3, 'enemy'),
+  new Swordsman(3, 2, 0, 'enemy', 6),
+  new King(4, -2, 3, 'enemy'),
 ]
 
 test('Summon spawns a skeleton with 2 health and 1 energy on an adjacent empty tile', () => {
@@ -52,7 +55,7 @@ test('Summon spawns a skeleton with 2 health and 1 energy on an adjacent empty t
   )
   const result = transition(state, { type: 'special', target: { q: 1, r: 0 } })
   assert.equal(result.frames[0].effect?.kind, 'summon')
-  const skeleton = result.state.pawns.find((pawn) => pawn.id === 4)!
+  const skeleton = result.state.pawns.find((pawn) => pawn.id === 5)!
   assert.ok(skeleton instanceof Skeleton)
   assert.equal(skeleton.side, 'player')
   assert.equal(skeleton.hp, 2)
@@ -60,9 +63,28 @@ test('Summon spawns a skeleton with 2 health and 1 energy on an adjacent empty t
   assert.equal(skeleton.q, 1)
   assert.equal(skeleton.r, 0)
   assert.equal(result.state.pawns[0].energy, 1)
-  assert.equal(result.state.order.at(-1), 4)
+  assert.equal(result.state.order.at(-1), 5)
   assert.ok(result.state.log.some((line) => line.includes('skeleton rises')))
-  assert.equal(state.pawns.length, 3)
+  assert.equal(state.pawns.length, 4)
+})
+
+test('Summon demands an enemy within 2 hexes, so a back-line Necromancer cannot flood', () => {
+  const state = field([
+    new Necromancer(1, 0, 0, 'player'),
+    new King(2, 2, 3, 'player'),
+    new King(3, -2, 3, 'enemy'),
+  ])
+  assert.equal(summonReady(state.pawns[0], state.pawns), false)
+  assert.equal(targetingTiles(state, { action: 'special' }).size, 0)
+  assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
+
+  state.pawns.push(new Swordsman(4, 3, 0, 'enemy', 6))
+  assert.equal(summonReady(state.pawns[0], state.pawns), false)
+  assert.equal(targetingTiles(state, { action: 'special' }).size, 0)
+
+  state.pawns[3].q = 2
+  assert.equal(summonReady(state.pawns[0], state.pawns), true)
+  assert.equal(targetingTiles(state, { action: 'special' }).size, 6)
 })
 
 test('Summon is repeatable: a channeled Necromancer floods three skeletons in one turn', () => {
@@ -89,7 +111,7 @@ test('Channel discounts Summon down to 1 per banked point', () => {
 
 test('Summon rejects occupied, distant or blocked tiles', () => {
   const state = field(necromancers())
-  state.pawns.push(new Swordsman(4, 1, 0, 'player'))
+  state.pawns.push(new Swordsman(5, 1, 0, 'player'))
   assert.equal(reducer(state, { type: 'special', target: { q: 1, r: 0 } }), state)
   assert.equal(reducer(state, { type: 'special', target: { q: 3, r: 0 } }), state)
   state.tiles.get('0,1')!.terrain = 'mountain'

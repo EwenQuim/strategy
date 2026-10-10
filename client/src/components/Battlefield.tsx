@@ -15,6 +15,7 @@ import { Icon } from './Icon'
 import { tileAriaLabel, tileFill } from './battlefield-tile'
 import { BattlefieldEffects } from './BattlefieldEffects'
 import { PawnChip } from './PawnChip'
+import { SummonZone } from './SummonZone'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY } from './hex-art'
@@ -292,6 +293,9 @@ export function Battlefield({
             </g>
           )
         })}
+        {active?.kind === 'necromancer' && (
+          <SummonZone tiles={tiles} pawns={pawns} side={active.side} />
+        )}
       </svg>
       {/* Pawn moves and combat effects repaint only this composited layer, never the tiles and their drop-shadow. */}
       <svg

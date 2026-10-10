@@ -90,7 +90,7 @@ export type SpecialTextKey =
   | 'summon'
   | 'summonDescription'
   | 'summonTo'
-  | 'noSpaceToSummon'
+  | 'cannotSummon'
   | 'rattle'
   | 'rattleDescription'
   | 'noSkeletonsNearby'

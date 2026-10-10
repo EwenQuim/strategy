@@ -16,11 +16,11 @@ export const lancerBrief = t({
   it: 'corri per qualsiasi distanza in linea retta finché non sei bloccato',
 })
 export const necromancerBrief = t({
-  en: 'summon a skeleton on an adjacent empty tile, again and again while energy lasts',
-  fr: 'invoque un squelette sur une case vide adjacente, encore et encore tant qu’il reste de l’énergie',
-  de: 'beschwört ein Skelett auf einem freien angrenzenden Feld, immer wieder, solange Energie reicht',
-  es: 'invoca un esqueleto en una casilla vacía adyacente, una y otra vez mientras quede energía',
-  it: 'evoca uno scheletro su una casella vuota adiacente, ancora e ancora finché c’è energia',
+  en: 'summon a skeleton on an adjacent empty tile, again and again while energy lasts — but only standing within 2 hexes of an enemy',
+  fr: 'invoque un squelette sur une case vide adjacente, encore et encore tant qu’il reste de l’énergie — mais seulement à moins de 2 hexagones d’un ennemi',
+  de: 'beschwört ein Skelett auf einem freien angrenzenden Feld, immer wieder, solange Energie reicht — aber nur innerhalb von 2 Feldern eines Gegners',
+  es: 'invoca un esqueleto en una casilla vacía adyacente, una y otra vez mientras quede energía — pero solo a menos de 2 hexágonos de un enemigo',
+  it: 'evoca uno scheletro su una casella vuota adiacente, ancora e ancora finché c’è energia — ma solo entro 2 esagoni da un nemico',
 })
 export const skeletonBrief = t({
   en: 'a shambling fighter that hits harder for every friendly skeleton beside it',
