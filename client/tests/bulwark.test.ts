@@ -129,14 +129,15 @@ test('Protect redirects exactly one successful hit and records damage at the Bul
     const original = structuredClone(state)
     const first = attack(state)
     assert.equal(first.state.pawns.find((p) => p.id === 3)?.hp, 1)
-    assert.equal(first.state.pawns[0].hp, 8)
+    assert.equal(first.state.pawns[0].hp, 9)
     assert.equal(first.state.pawns[0].protectingId, null)
-    assert.deepEqual(first.frames[0].effect?.impacts, [{ q: 0, r: 0, damage: 2 }])
+    assert.deepEqual(first.frames[0].effect?.impacts, [{ q: 0, r: 0, damage: 1 }])
+    assert.ok(first.state.log.some((line) => line.includes('braces')))
     assert.deepEqual(attack(state), first)
     assert.deepEqual(structuredClone(state), original)
     const second = attack(first.state)
     assert.ok(!second.state.pawns.some((p) => p.id === 3))
-    assert.equal(second.state.pawns[0].hp, 8)
+    assert.equal(second.state.pawns[0].hp, 9)
   }
 })
 
@@ -152,7 +153,7 @@ test('Misses preserve Protect; Aimed shot bypasses ally Escape with no second ro
   state = miss.state
   state.pawns[4] = new Archer(5, 3, 0, 'enemy')
   const shot = transition(state, { type: 'special', target: { q: 1, r: 0 } })
-  assert.equal(shot.state.pawns[0].hp, 8)
+  assert.equal(shot.state.pawns[0].hp, 9)
   assert.equal(shot.state.pawns[2].hp, 1)
   assert.equal(shot.state.pawns[0].protectingId, null)
   assert.equal(shot.state.randomState, state.randomState)

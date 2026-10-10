@@ -3,7 +3,7 @@ import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import { hapticMove } from '../haptics'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { specialTexts } from '../i18n/units'
+import { specialTexts } from '../i18n/specialTexts'
 import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../lib/engine/ai/decision'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
@@ -106,7 +106,7 @@ export function Game({
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
   const hasSpecialTargets =
-    !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
+    !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns, state).size > 0
   const hasFoes =
     !!pawn &&
     state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))

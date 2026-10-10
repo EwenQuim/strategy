@@ -18,12 +18,13 @@ const rally: SpecialAbility = {
   perform: ({ pawn, pawns, log }) => {
     const allies = specialTargets(pawns, pawn)
     if (!allies.length) return null
-    pawn.energy -= pawn.special.cost
+    pawn.energy -= pawn.specialCost
     pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
+    const healing = 1 + pawn.adrenaline
     for (const ally of allies) {
-      ally.hp = Math.min(ally.maxHp, ally.hp + 1)
-      log.push(label(ally) + ' recovers 1 health.')
+      ally.hp = Math.min(ally.maxHp, ally.hp + healing)
+      log.push(label(ally) + ' recovers ' + healing + ' health.')
     }
     return { kind: 'rally', to: { q: pawn.q, r: pawn.r } }
   },

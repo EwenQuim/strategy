@@ -122,12 +122,12 @@ export const energy = t({
   es: 'Energía',
   it: 'Energia',
 })
-export const escape = t({
-  en: 'Escape',
-  fr: 'Esquive',
-  de: 'Ausweichen',
-  es: 'Esquiva',
-  it: 'Schivata',
+export const adrenaline = t({
+  en: 'Adrenaline',
+  fr: 'Adrénaline',
+  de: 'Adrenalin',
+  es: 'Adrenalina',
+  it: 'Adrenalina',
 })
 export const cancel = t({
   en: 'Cancel',
@@ -172,23 +172,23 @@ export const endTurn = t({
   it: 'Fine turno',
 })
 export const endTurnHint = t({
-  en: (escape: number) =>
-    `Spend all remaining energy and end this turn. Escape: ${escape}% until the round ends.`,
-  fr: (escape: number) =>
-    `Dépense toute l'énergie restante et termine ce tour. Esquive : ${escape} % jusqu'à la fin de la manche.`,
-  de: (escape: number) =>
-    `Verbrauche alle restliche Energie und beende diesen Zug. Ausweichen: ${escape} % bis zum Ende der Runde.`,
-  es: (escape: number) =>
-    `Gasta toda la energía restante y termina este turno. Esquiva: ${escape} % hasta el final de la ronda.`,
-  it: (escape: number) =>
-    `Spendi tutta l'energia rimasta e termina questo turno. Schivata: ${escape}% fino alla fine del round.`,
+  en: (banked: number) =>
+    `End this turn. Leftover energy banks as Adrenaline: +${banked}, spent by this class its own way.`,
+  fr: (banked: number) =>
+    `Termine ce tour. L'énergie restante est accumulée en Adrénaline : +${banked}, dépensée selon la classe.`,
+  de: (banked: number) =>
+    `Beende diesen Zug. Restliche Energie wird als Adrenalin gespart: +${banked}, von dieser Klasse auf ihre Weise ausgegeben.`,
+  es: (banked: number) =>
+    `Termina este turno. La energía restante se acumula como Adrenalina: +${banked}, gastada según la clase.`,
+  it: (banked: number) =>
+    `Termina questo turno. L'energia rimasta si accumula come Adrenalina: +${banked}, spesa secondo la classe.`,
 })
-export const escapeGain = t({
-  en: (gain: number) => `+${gain}% escape`,
-  fr: (gain: number) => `+${gain} % esquive`,
-  de: (gain: number) => `+${gain} % Ausweichen`,
-  es: (gain: number) => `+${gain} % esquiva`,
-  it: (gain: number) => `+${gain}% schivata`,
+export const adrenalineGain = t({
+  en: (gain: number) => `+${gain} adrenaline`,
+  fr: (gain: number) => `+${gain} adrénaline`,
+  de: (gain: number) => `+${gain} Adrenalin`,
+  es: (gain: number) => `+${gain} adrenalina`,
+  it: (gain: number) => `+${gain} adrenalina`,
 })
 
 export const resultLevel = t({

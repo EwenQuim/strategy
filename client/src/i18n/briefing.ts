@@ -56,19 +56,6 @@ export const spendEnergy = t({
   es: 'Gástala para mover, atacar o usar un especial',
   it: 'Spendila per muoverti, attaccare o usare uno speciale',
 })
-export const unusedEnergy = t({
-  en: (bonus: number, max: number) =>
-    `Unused energy at end of turn → +${bonus}% dodge each, max ${max}%`,
-  fr: (bonus: number, max: number) =>
-    `Énergie non dépensée en fin de tour → +${bonus} % d'esquive par point, max ${max} %`,
-  de: (bonus: number, max: number) =>
-    `Ungenutzte Energie am Zugende → +${bonus} % Ausweichen je Punkt, max ${max} %`,
-  es: (bonus: number, max: number) =>
-    `Energía sin usar al final del turno → +${bonus} % de esquiva por cada punto, máx. ${max} %`,
-  it: (bonus: number, max: number) =>
-    `Energia non spesa a fine turno → +${bonus} % di schivata per punto, max ${max} %`,
-})
-
 export const rallyBrief = t({
   en: 'heal adjacent allies +1, once per round',
   fr: 'soigne les alliés adjacents de +1, une fois par manche',

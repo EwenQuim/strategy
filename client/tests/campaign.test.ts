@@ -25,7 +25,7 @@ import brutalLevels from '../src/lib/campaigns/002-brutal.json' with { type: 'js
 import shatteredLevels from '../src/lib/campaigns/003-shattered.json' with { type: 'json' }
 
 const CLASSIC_KINDS = Object.keys(PAWN_CLASSES).filter(
-  (kind) => !['hoplite', 'wolf', 'berserker'].includes(kind),
+  (kind) => !['hoplite', 'wolf', 'berserker', 'lancer', 'necromancer', 'beast'].includes(kind),
 )
 
 const tutorial = CAMPAIGNS[0]
@@ -138,7 +138,13 @@ test('Authored guardians cover their partners, including the wizard-flank deploy
 })
 
 test('All encounters have safe routes and later levels combine previously introduced features', () => {
-  const features: Record<TileFeature, number[]> = { watchtower: [], spring: [], rune: [] }
+  const features: Record<TileFeature, number[]> = {
+    watchtower: [],
+    spring: [],
+    rune: [],
+    portal: [],
+    den: [],
+  }
   for (const level of original.levels) {
     const state = coreState(level.seed, level.setup)
     const safe = new Map(
@@ -180,6 +186,8 @@ test('All encounters have safe routes and later levels combine previously introd
     watchtower: [5, 17, 18],
     spring: [14, 17, 19, 20],
     rune: [15, 18, 20],
+    portal: [],
+    den: [],
   })
 })
 

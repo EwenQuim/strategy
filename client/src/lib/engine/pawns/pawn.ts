@@ -10,6 +10,19 @@ export const START_ENERGY = 3
 export const ESCAPE_BONUS = 20
 export const MAX_ESCAPE = 60
 
+// A unit struck down in this battle, as the Necromancer's Raise remembers them.
+export type Unit = { kind: PawnKind; side: Side }
+
+// A unit spawned during a battle: a raised corpse or a beast waking from its den.
+type SpawnOptions = { hp?: number; energy?: number }
+export type PawnSpawner = (
+  kind: PawnKind,
+  side: Side,
+  q: number,
+  r: number,
+  options?: SpawnOptions,
+) => Pawn | null
+
 export interface AttackProfile {
   readonly damage: number
   readonly minRange: number
@@ -27,6 +40,10 @@ type SpecialContext = {
   round: number
   log: string[]
   random: SeededRandom
+  // Units fallen so far in the battle, oldest first: what a Necromancer can raise.
+  fallen: Unit[]
+  // Spawns a new pawn during the battle (raised corpse, waking beast), or null on an occupied tile.
+  spawn: PawnSpawner
 }
 
 export type SpecialResult = Omit<BattleEffect, 'from'>
@@ -68,6 +85,16 @@ export type SpecialTextKey =
   | 'cryDescription'
   | 'fury'
   | 'furyDescription'
+  | 'dash'
+  | 'dashDescription'
+  | 'dashTo'
+  | 'noOpenLine'
+  | 'raise'
+  | 'raiseDescription'
+  | 'raiseTo'
+  | 'noFallenToRaise'
+  | 'rampage'
+  | 'rampageDescription'
 
 export interface SpecialAbility {
   readonly name: SpecialTextKey
@@ -81,7 +108,12 @@ export interface SpecialAbility {
   readonly noTargets?: SpecialTextKey
   targets(pawn: Pawn, pawns: readonly Pawn[], from?: Axial): Pawn[]
   reaches(pawn: Pawn, tile: Tile, tiles: Map<string, Tile>): boolean
-  tileTargets?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
+  tileTargets?(
+    pawn: Pawn,
+    tiles: Map<string, Tile>,
+    pawns: Pawn[],
+    state: GameState,
+  ): Set<string>
   areaTargets?(pawns: readonly Pawn[], tile: Axial, pawn: Pawn): Pawn[]
   perform(context: SpecialContext): SpecialResult | null
   candidates(pawn: Pawn, state: GameState): Action[]
@@ -103,6 +135,10 @@ export abstract class Pawn {
   }
   bonusEnergy = 0
   springSince: number | null = null
+
+  // Energy banked at the end of the previous turn. Each class spends it its own way through the
+  // adrenaline hooks below; banking again at the end of a turn replaces it.
+  adrenaline = 0
 
   get maxEnergy(): number {
     return START_ENERGY + this.bonusEnergy
@@ -129,6 +165,34 @@ export abstract class Pawn {
     return 3
   }
 
+  // Adrenaline hooks: how many banked points this class adds to its blows, reach, armor or
+  // stride. Zero by default; classes override the ones that define them.
+  adrenalineDamage(): number {
+    return 0
+  }
+
+  adrenalineRange(): number {
+    return 0
+  }
+
+  adrenalineArmor(): number {
+    return 0
+  }
+
+  adrenalineSteps(): number {
+    return 0
+  }
+
+  // Escape banked at the end of a turn. Only the swordsman keeps the old conversion, and only
+  // while an enemy stands next to it.
+  endTurnEscape(_pawns: readonly Pawn[]): number {
+    return 0
+  }
+
+  get specialCost(): number {
+    return this.special.cost
+  }
+
   constructor(
     id: number,
     q: number,
@@ -147,12 +211,9 @@ export abstract class Pawn {
     this.escapeChance = escapeChance
   }
 
-  get endTurnEscapeChance(): number {
-    return Math.min(MAX_ESCAPE, this.escapeChance + this.energy * ESCAPE_BONUS)
-  }
-
-  endTurn(): void {
-    this.escapeChance = this.endTurnEscapeChance
+  endTurn(pawns: readonly Pawn[] = []): void {
+    this.adrenaline = this.energy
+    this.escapeChance = this.endTurnEscape(pawns)
     this.energy = 0
   }
 

@@ -1,11 +1,5 @@
-import {
-  activePawn,
-  reducer,
-  targetingTiles,
-  type Action,
-  type Aim,
-  type GameState,
-} from '../engine.ts'
+import { activePawn, reducer, type Action, type GameState } from '../engine.ts'
+import { targetingTiles, type Aim } from '../targeting.ts'
 import { movementDestinations } from '../combat.ts'
 import type { Axial } from '../hex.ts'
 

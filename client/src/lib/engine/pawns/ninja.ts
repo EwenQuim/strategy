@@ -34,7 +34,7 @@ const jump: SpecialAbility = {
       return null
     pawn.q = tile.q
     pawn.r = tile.r
-    pawn.energy -= pawn.special.cost
+    pawn.energy -= pawn.specialCost
     const impacts = enterTiles(
       tiles,
       pawns,
@@ -75,6 +75,13 @@ export class Ninja extends Pawn {
     return 1
   }
   readonly attack: AttackProfile = { damage: 5, minRange: 1, maxRange: 1 }
+  // Swift: every banked energy point makes the first tiles of its next move free.
+  override adrenalineSteps(): number {
+    return this.adrenaline
+  }
+  override moveEnergyCost(steps: number): number {
+    return Math.max(0, steps - this.adrenaline)
+  }
   get special(): SpecialAbility {
     return jump
   }

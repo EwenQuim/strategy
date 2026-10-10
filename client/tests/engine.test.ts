@@ -21,8 +21,10 @@ import {
   Swordsman,
   activePawn,
   type GameState,
+  type Pawn,
   type Tile,
   reducer as coreReducer,
+  transition as coreTransition,
 } from '../src/lib/engine/index.ts'
 import { createBotGame } from '../src/lib/engine/bot.ts'
 import { huntTheKing, nearestTarget } from '../src/lib/engine/bot.ts'
@@ -65,35 +67,47 @@ test('The last clash round follows combat damage, not plain moves', () => {
   assert.equal(coreReducer(state, { type: 'attack', q: 1, r: 0 }).lastClashRound, state.round)
 })
 
-test('End turn converts all remaining energy to Escape for every class and advances once', () => {
+test('End turn banks all remaining energy as adrenaline for every class and advances once', () => {
   for (const Ctor of [King, ...RECRUIT_CLASSES]) {
     for (const energy of [0, 1, 2, 3]) {
       const state = battle()
       state.pawns[0] = new Ctor(1, 0, 0, 'player', undefined, energy)
-      assert.equal(state.pawns[0].endTurnEscapeChance, energy * 20)
+      state.pawns[2].q = 5
+      state.pawns[2].r = 5
       const next = reducer(state, { type: 'endTurn' })
-      assert.equal(next.pawns[0].escapeChance, energy * 20)
+      assert.equal(next.pawns[0].adrenaline, energy)
+      assert.equal(next.pawns[0].escapeChance, 0)
       assert.equal(next.pawns[0].energy, 0)
       assert.equal(activePawn(next)?.id, 2)
       assert.equal(next.round, 1)
       assert.equal(next.logCount, energy > 0 ? 1 : 0)
       assert.ok(next.pawns[0] instanceof Ctor)
       assert.equal(state.pawns[0].energy, energy)
-      assert.equal(state.pawns[0].escapeChance, 0)
+      assert.equal(state.pawns[0].adrenaline, 0)
       assert.equal(next.randomState, state.randomState)
     }
   }
 })
 
-test('End turn caps Escape at 60% but always consumes energy and passes to the next unit', () => {
-  for (const chance of [20, 40, 50, 60]) {
+test('End turn Guard banks Escape only beside an enemy, capped at 60%, and always consumes energy', () => {
+  const alone = battle()
+  alone.pawns[2].q = 5
+  alone.pawns[2].r = 5
+  const unengaged = reducer(alone, { type: 'endTurn' })
+  assert.equal(unengaged.pawns[0].escapeChance, 0)
+  assert.equal(unengaged.pawns[0].adrenaline, 3)
+  assert.equal(unengaged.pawns[0].energy, 0)
+  assert.equal(activePawn(unengaged)?.id, 2)
+
+  for (const chance of [0, 20, 40, 50, 60]) {
     const state = battle()
     state.pawns[0].escapeChance = chance
     const next = reducer(state, { type: 'endTurn' })
     assert.equal(next.pawns[0].escapeChance, 60)
     assert.equal(next.pawns[0].energy, 0)
+    assert.equal(next.pawns[0].adrenaline, 3)
     assert.equal(activePawn(next)?.id, 2)
-    assert.equal(next.logCount, chance < 60 ? 1 : 0)
+    assert.equal(next.logCount, chance < 60 ? 2 : 1)
   }
 })
 
@@ -104,7 +118,7 @@ test('End turn cannot act for an enemy or after game over', () => {
   assert.equal(reducer(enemy, { type: 'endTurn' }), enemy)
 })
 
-test('End-turn Escape protects the outgoing unit before the enemy attacks', () => {
+test('End-turn Guard protects the outgoing swordsman and a dodge spends the whole bank', () => {
   for (const energy of [1, 2, 3]) {
     for (let randomState = 0; randomState < 20; randomState++) {
       const state = battle()
@@ -115,7 +129,8 @@ test('End-turn Escape protects the outgoing unit before the enemy attacks', () =
       const escaped = random.next() * 100 < energy * 20
       const next = reducer(state, { type: 'endTurn' })
       assert.equal(next.pawns[0].hp, escaped ? 5 : 3)
-      assert.equal(next.pawns[0].escapeChance, energy * 20)
+      assert.equal(next.pawns[0].escapeChance, escaped ? 0 : energy * 20)
+      assert.equal(next.pawns[0].adrenaline, energy)
       assert.equal(next.randomState, random.state)
       assert.equal(next.pawns[0].energy, 0)
     }
@@ -124,17 +139,17 @@ test('End-turn Escape protects the outgoing unit before the enemy attacks', () =
 
 test('Pawn classes can extend turn-end behavior and the UI preview uses the same rule', () => {
   class CautiousSwordsman extends Swordsman {
-    override get endTurnEscapeChance(): number {
-      return Math.min(super.endTurnEscapeChance, 40)
+    override endTurnEscape(pawns: readonly Pawn[]): number {
+      return Math.min(super.endTurnEscape(pawns), 40)
     }
-    override endTurn(): void {
-      super.endTurn()
+    override endTurn(pawns: readonly Pawn[] = []): void {
+      super.endTurn(pawns)
       this.hp = Math.min(this.maxHp, this.hp + 1)
     }
   }
   const state = battle()
   state.pawns[0] = new CautiousSwordsman(1, 0, 0, 'player', 3)
-  assert.equal(state.pawns[0].endTurnEscapeChance, 40)
+  assert.equal(state.pawns[0].endTurnEscape(state.pawns), 40)
   const next = reducer(state, { type: 'endTurn' })
   assert.equal(next.pawns[0].escapeChance, 40)
   assert.equal(next.pawns[0].hp, 4)
@@ -151,7 +166,8 @@ test('Pawn classes can extend turn-end behavior and the UI preview uses the same
   state.pawns.push(new CautiousSwordsman(4, 5, 5, 'enemy', 3))
   for (const tile of state.tiles.values()) tile.terrain = 'mountain'
   const enemy = reducer(state, { type: 'endTurn' }).pawns.find((p) => p.id === 4)!
-  assert.equal(enemy.escapeChance, 40)
+  assert.equal(enemy.escapeChance, 0)
+  assert.equal(enemy.adrenaline, 3)
   assert.equal(enemy.energy, 0)
   assert.equal(enemy.hp, 4)
 })
@@ -362,7 +378,7 @@ test('Notification IDs advance for repeated attacks even when the log is full', 
   assert.equal(new Set(state.log).size, 1)
   state.order = [1, 3, 2]
   state = reducer(state, { type: 'endTurn' })
-  assert.equal(state.logCount, 47)
+  assert.equal(state.logCount, 48)
   assert.equal(state.log.length, 40)
 })
 
@@ -693,13 +709,9 @@ test('Enemy moves, Escape, and all specials have board effects', () => {
   assert.notDeepEqual(moved.frames[1].effect?.from, moved.frames[1].effect?.to)
 
   const escape = battle()
-  escape.order = [1, 3, 2]
-  escape.pawns[2].q = 5
-  escape.pawns[2].r = 5
-  for (const tile of escape.tiles.values()) tile.terrain = 'mountain'
-  const escaped = transition(escape, { type: 'endTurn' })
-  assert.equal(escaped.frames[1].effect?.kind, 'escape')
-  assert.equal(activePawn(escaped.frames[1].state)?.escapeChance, 20)
+  const guarded = coreTransition(escape, { type: 'endTurn' })
+  assert.equal(guarded.frames[0].effect?.kind, 'escape')
+  assert.equal(activePawn(guarded.frames[0].state)?.escapeChance, 60)
 
   for (const Ctor of [King, Swordsman, Archer, Magician]) {
     const state = battle()
@@ -755,24 +767,20 @@ test('Playback locks actions, reveals the killing blow before defeat, and can sk
   )
 })
 
-test('Enemies convert remaining energy in one end-turn action, including at the Escape cap', () => {
+test('Enemies bank leftover energy as adrenaline in one end-turn action', () => {
   for (const energy of [1, 2, 3]) {
-    for (const chance of [0, 40, 60]) {
-      const state = battle()
-      state.order = [1, 3, 2]
-      state.pawns[2].q = 5
-      state.pawns[2].r = 5
-      state.pawns[2].energy = energy
-      state.pawns[2].escapeChance = chance
-      for (const tile of state.tiles.values()) tile.terrain = 'mountain'
-      const result = transition(state, { type: 'endTurn' })
-      const enemy = result.state.pawns.find((p) => p.id === 3)!
-      assert.equal(enemy.energy, 0)
-      assert.equal(enemy.escapeChance, Math.min(60, chance + energy * 20))
-      const effects = result.frames.filter((frame) => frame.effect?.kind === 'escape')
-      assert.equal(effects.length, chance < 60 ? 1 : 0)
-      if (effects.length) assert.equal(activePawn(effects[0].state)?.energy, 0)
-    }
+    const state = battle()
+    state.order = [1, 3, 2]
+    state.pawns[2].q = 5
+    state.pawns[2].r = 5
+    state.pawns[2].energy = energy
+    for (const tile of state.tiles.values()) tile.terrain = 'mountain'
+    const result = transition(state, { type: 'endTurn' })
+    const enemy = result.state.pawns.find((p) => p.id === 3)!
+    assert.equal(enemy.energy, 0)
+    assert.equal(enemy.adrenaline, energy)
+    assert.equal(enemy.escapeChance, 0)
+    assert.equal(result.frames.filter((frame) => frame.effect?.kind === 'escape').length, 0)
   }
 })
 
@@ -857,7 +865,9 @@ test('Seeded armies mirror one King and five different recruits', () => {
     'bomber',
     'bulwark',
     'hoplite',
+    'lancer',
     'magician',
+    'necromancer',
     'ninja',
     'swordsman',
     'wolf',

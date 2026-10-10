@@ -2,7 +2,8 @@ import type { Action, Aim, Pawn, RangeKind, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
 import * as m from '../i18n/game'
 import { attackSummary } from '../i18n/battlefield'
-import { specialTexts, unitNames } from '../i18n/units'
+import { unitNames } from '../i18n/units'
+import { specialTexts } from '../i18n/specialTexts'
 import { Icon, PawnIcon } from './Icon'
 import { usePreviewButton, type PreviewProps } from './usePreviewButton'
 import { UnitStats } from './UnitStats'
@@ -251,7 +252,7 @@ function EndTurnButton({
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
-      title={m.endTurnHint(pawn?.endTurnEscapeChance ?? 0)}
+      title={m.endTurnHint(pawn?.energy ?? 0)}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -261,7 +262,7 @@ function EndTurnButton({
         {m.endTurn}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-        {m.escapeGain(pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0)}
+        {m.adrenalineGain(pawn?.energy ?? 0)}
       </small>
     </button>
   )

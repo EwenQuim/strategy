@@ -5,11 +5,11 @@ import {
   hexOf,
   key,
   makeMap,
-  mapFromRows,
   mirrorAxial,
   passable,
   type Tile,
 } from './hex.ts'
+import { mapFromRows } from './mapRows.ts'
 import { King, PAWN_CLASSES, RECRUIT_CLASSES, type Pawn, type Side } from './pawns/index.ts'
 import { SeededRandom, seedState } from './random.ts'
 

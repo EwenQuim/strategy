@@ -27,7 +27,7 @@ const fury: SpecialAbility = {
         foe.q === tile?.q && foe.r === tile?.r && specialTargets(pawns, pawn).includes(foe),
     )
     if (!tile || !target) return null
-    const boost = pawn.energy - pawn.special.cost
+    const boost = pawn.energy - pawn.specialCost
     if (boost < 0) return null
     pawn.energy = 0
     pawn.specialUsed = true
@@ -75,6 +75,10 @@ export class Berserker extends Pawn {
     return 3
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
+  // Rage: every banked energy point adds 1 damage to the berserker's basic attacks.
+  override adrenalineDamage(): number {
+    return this.adrenaline
+  }
   get special(): SpecialAbility {
     return fury
   }
