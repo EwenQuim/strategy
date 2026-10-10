@@ -1,5 +1,4 @@
 import * as b from './i18n/briefing.ts'
-import * as f from './i18n/briefingFeatures.ts'
 import { unitNames } from './i18n/units.ts'
 import { specialTexts } from './i18n/specialTexts.ts'
 import { featureTexts } from './i18n/biomes.ts'
@@ -68,7 +67,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   hoplite: [unit('hoplite', b.phalanxBrief)],
   wolf: [unit('wolf', b.cryBrief)],
   berserker: [unit('berserker', b.furyBrief)],
-  lancer: [unit('lancer', f.lancerBrief)],
+  lancer: [unit('lancer', b.lancerBrief)],
   lake: [
     {
       name: b.lakes,
