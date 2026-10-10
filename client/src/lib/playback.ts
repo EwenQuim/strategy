@@ -1,8 +1,7 @@
-import { initialTransition, createBotGame } from './engine/bot.ts'
-import { DEFAULT_BOT_CONFIG, STRATEGIES, type BotConfig } from './engine/ai/decision.ts'
+import { initialTransition } from './engine/bot.ts'
 import { activePawn, isImpactFrame, type BattleFrame } from './engine/index.ts'
 import { initialState, transition as applyAction } from './engine/engine.ts'
-import type { Action, BattleSetup, Transition } from './engine/index.ts'
+import type { Action, BattleSetup, GameState, Transition } from './engine/index.ts'
 import type { GameMode } from './game-mode.ts'
 import type { OnlineAction } from './online.ts'
 
@@ -17,6 +16,7 @@ export function initialPlayback(
 
 export type PlaybackAction =
   | Action
+  | { type: 'botActions'; actions: Action[] }
   | { type: 'playbackNext' }
   | { type: 'playbackFinish' }
   | { type: 'resync'; actions: OnlineAction[] }
@@ -25,29 +25,33 @@ export function playbackReducer(
   playback: Transition,
   action: PlaybackAction,
   mode: GameMode = 'ai',
-  bot: BotConfig = DEFAULT_BOT_CONFIG,
 ): Transition {
   if (action.type === 'playbackFinish') return { ...playback, frames: [] }
   if (action.type === 'playbackNext') return { ...playback, frames: playback.frames.slice(1) }
   if (action.type === 'resync')
     return { state: replay(playback.state.seed, action.actions), frames: [] }
   if (playback.frames.length) return playback
-  if (mode === 'ai' && STRATEGIES[bot.name].adapterDriven) {
-    const result = applyAction(playback.state, action)
-    // Adapter-driven strategies are played action by action by their async adapter, so
-    // enemy moves animate like a local player's; the player's own actions keep only their
-    // impact frames, as in bot games.
-    const enemy = activePawn(playback.state)?.side === 'enemy'
-    return { ...result, frames: enemy ? result.frames : result.frames.filter(isImpactFrame) }
+  if (action.type === 'restart')
+    return initialPlayback(playback.state.seed, mode, playback.state.setup)
+  if (action.type === 'botActions') return playBotActions(playback.state, action.actions)
+  if (mode === 'ai' && activePawn(playback.state)?.side === 'enemy') return playback
+  const result = applyAction(playback.state, action)
+  return { ...result, frames: result.frames.filter(isImpactFrame) }
+}
+
+// A bot's whole proposal plays as one animated transition; a proposal the engine rejects
+// ends the turn so the battle can never stall.
+function playBotActions(state: GameState, actions: Action[]): Transition {
+  const frames: BattleFrame[] = []
+  let current = state
+  for (const action of actions) {
+    const result = applyAction(current, action)
+    current = result.state
+    frames.push(...result.frames)
   }
-  if (mode === 'local' || mode === 'online') {
-    const result = applyAction(playback.state, action)
-    return {
-      ...result,
-      frames: result.frames.filter(isImpactFrame),
-    }
-  }
-  return createBotGame(bot).transition(playback.state, action)
+  return current === state
+    ? applyAction(state, { type: 'endTurn' })
+    : { state: current, frames }
 }
 
 export function replay(seed: string, actions: OnlineAction[]) {

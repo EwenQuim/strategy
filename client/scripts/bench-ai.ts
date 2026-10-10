@@ -16,9 +16,9 @@ for (const [slug, id] of LEVELS) {
   let state = bot.initialState(level.seed, level.setup)
   const replies: number[] = []
   for (let step = 0; step < 300 && !state.winner; step++)
-    for (const action of campaignActions(state, 1)) {
+    for (const action of await campaignActions(state, 1)) {
       const started = performance.now()
-      state = bot.transition(state, action).state
+      state = (await bot.transition(state, action)).state
       replies.push(performance.now() - started)
     }
   const average = replies.reduce((sum, time) => sum + time, 0) / replies.length

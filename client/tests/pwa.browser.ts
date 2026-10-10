@@ -1852,7 +1852,7 @@ test(
     assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), opening)
 
     for (let step = 0; step < 100 && !state.winner; step++) {
-      for (const action of chooseBotActions(state, huntTheKing)) {
+      for (const action of await chooseBotActions(state, huntTheKing)) {
         const pawn = activePawn(state)!
         assert.equal(
           await page
@@ -1968,9 +1968,9 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
     id + ' / 20',
   )
   for (let step = 0; step < 200 && !state.winner; step++) {
-    const actions: Action[] = surrender ? [{ type: 'endTurn' }] : campaignActions(state)
+    const actions: Action[] = surrender ? [{ type: 'endTurn' }] : await campaignActions(state)
     for (const action of actions) {
-      const result = botTransition(state, action)
+      const result = await botTransition(state, action)
       await playInUi(page, state, action)
       state = result.state
       if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()

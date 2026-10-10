@@ -13,12 +13,7 @@ import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.t
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
 import type { BattleSetup } from './setup.ts'
 import type { BotOptions } from './ai.ts'
-import {
-  botOptions,
-  chooseAiActions,
-  DEFAULT_BOT_CONFIG,
-  type BotConfig,
-} from './ai/decision.ts'
+import { botOptions, STRATEGIES, DEFAULT_BOT_CONFIG, type BotConfig } from './ai/decision.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
@@ -55,15 +50,14 @@ const validBotOptions = (options: BotOptions | undefined): options is BotOptions
   options.latitude >= 0 &&
   options.latitude <= 100
 
-export function chooseBotActions(
+export async function chooseBotActions(
   state: GameState,
   controller: BotController = DEFAULT_BOT_CONFIG,
-): Action[] {
+): Promise<Action[]> {
   if (!('chooseTarget' in controller)) {
-    if ('name' in controller)
-      return chooseAiActions(state, botOptions(controller), controller.name)
+    if ('name' in controller) return STRATEGIES[controller.name](state, botOptions(controller))
     if (!validBotOptions(controller)) throw new RangeError('Invalid bot options')
-    return chooseAiActions(state, controller, 'depthsearch')
+    return STRATEGIES.depthsearch(state, controller)
   }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []
@@ -190,14 +184,14 @@ function ruleApproach(state: GameState, pawn: Pawn, foes: Pawn[]): Action[] {
 }
 
 export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
-  function playBots(state: GameState): Transition {
+  async function playBots(state: GameState): Promise<Transition> {
     const frames: BattleFrame[] = []
     while (!state.winner && activePawn(state)?.side === 'enemy') {
       const id = activePawn(state)!.id
       const round = state.round
       frames.push({ state: { ...state, order: [...state.order] }, effect: null })
       do {
-        for (const action of chooseBotActions(state, controller)) {
+        for (const action of await chooseBotActions(state, controller)) {
           const result = applyAction(state, action)
           if (result.state === state) throw new Error('Bot selected an invalid action')
           state = result.state
@@ -212,11 +206,11 @@ export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
     const state = createState(seed, setup, 'player')
     return { state, frames: [] }
   }
-  const transition = (state: GameState, action: Action): Transition => {
+  const transition = async (state: GameState, action: Action): Promise<Transition> => {
     if (action.type === 'restart') return initialTransition(state.seed, state.setup)
     if (activePawn(state)?.side === 'enemy') return { state, frames: [] }
     const player = applyAction(state, action)
-    const bots = playBots(player.state)
+    const bots = await playBots(player.state)
     return {
       state: bots.state,
       frames: [...player.frames.filter(isImpactFrame), ...bots.frames],
@@ -224,7 +218,8 @@ export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
   }
   return {
     initialState: (seed: string, setup?: BattleSetup) => initialTransition(seed, setup).state,
-    reducer: (state: GameState, action: Action) => transition(state, action).state,
+    reducer: async (state: GameState, action: Action) =>
+      (await transition(state, action)).state,
     initialTransition,
     transition,
   }
