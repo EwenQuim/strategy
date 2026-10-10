@@ -20,6 +20,12 @@
       }
     },
     {
+      "files": ["src/i18n/briefing.ts"],
+      "rules": {
+        "max-lines": "off"
+      }
+    },
+    {
       "files": ["src/**"],
       "rules": {
         "no-restricted-imports": [

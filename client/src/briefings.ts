@@ -58,10 +58,9 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   hoplite: [unit('hoplite', b.phalanxBrief)],
   wolf: [unit('wolf', b.cryBrief)],
   berserker: [unit('berserker', b.furyBrief)],
-  lancer: [unit('lancer', f.lancerBrief)],
-  necromancer: [unit('necromancer', f.necromancerBrief)],
-  beast: [unit('beast', f.beastBrief)],
-  skeleton: [unit('skeleton', f.skeletonBrief)],
+  necromancer: [unit('necromancer', b.necromancerBrief)],
+  beast: [unit('beast', b.beastBrief)],
+  skeleton: [unit('skeleton', b.skeletonBrief)],
   portal: [
     {
       name: featureTexts.portal.name,
@@ -76,6 +75,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
       points: [f.denBlocked, f.denWake],
     },
   ],
+  lancer: [unit('lancer', b.lancerBrief)],
   lake: [
     {
       name: b.lakes,

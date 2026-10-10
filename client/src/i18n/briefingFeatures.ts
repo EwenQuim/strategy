@@ -8,34 +8,6 @@ export const adrenalineBrief = t({
   it: "L'energia non spesa a fine turno si accumula come Adrenalina: ogni classe la spende a modo suo",
 })
 
-export const lancerBrief = t({
-  en: 'run any distance in a straight line until blocked',
-  fr: "courez n'importe quelle distance en ligne droite jusqu'à être bloqué",
-  de: 'renne beliebig weit in gerader Linie, bis etwas blockiert',
-  es: 'corre cualquier distancia en línea recta hasta ser bloqueado',
-  it: 'corri per qualsiasi distanza in linea retta finché non sei bloccato',
-})
-export const necromancerBrief = t({
-  en: 'summon a skeleton on an adjacent empty tile, again and again while energy lasts — but only standing within 2 hexes of an enemy',
-  fr: 'invoque un squelette sur une case vide adjacente, encore et encore tant qu’il reste de l’énergie — mais seulement à moins de 2 hexagones d’un ennemi',
-  de: 'beschwört ein Skelett auf einem freien angrenzenden Feld, immer wieder, solange Energie reicht — aber nur innerhalb von 2 Feldern eines Gegners',
-  es: 'invoca un esqueleto en una casilla vacía adyacente, una y otra vez mientras quede energía — pero solo a menos de 2 hexágonos de un enemigo',
-  it: 'evoca uno scheletro su una casella vuota adiacente, ancora e ancora finché c’è energia — ma solo entro 2 esagoni da un nemico',
-})
-export const skeletonBrief = t({
-  en: 'a shambling fighter that hits harder for every friendly skeleton beside it',
-  fr: 'un combattant claudiquant qui frappe plus fort pour chaque squelette allié à ses côtés',
-  de: 'ein schwankender Kämpfer, der für jedes befreundete Skelett neben ihm härter zuschlägt',
-  es: 'un luchador tambaleante que golpea más fuerte por cada esqueleto aliado a su lado',
-  it: 'un combattente barcollante che colpisce più forte per ogni scheletro alleato al suo fianco',
-})
-export const beastBrief = t({
-  en: 'wakes for whoever reaches its den first',
-  fr: 'se réveille pour le premier camp qui atteint sa tanière',
-  de: 'erwacht für die Seite, die zuerst ihre Höhle erreicht',
-  es: 'despierta para el bando que primero alcance su guarida',
-  it: 'si sveglia per chi raggiunge per primo la sua tana',
-})
 export const portalCrossing = t({
   en: 'Step in, continue from the twin portal',
   fr: 'Entrez, ressortez par le portail jumeau',
