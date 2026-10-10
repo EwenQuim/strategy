@@ -68,6 +68,10 @@ export type SpecialTextKey =
   | 'cryDescription'
   | 'fury'
   | 'furyDescription'
+  | 'dash'
+  | 'dashDescription'
+  | 'dashTo'
+  | 'noOpenLine'
 
 export interface SpecialAbility {
   readonly name: SpecialTextKey

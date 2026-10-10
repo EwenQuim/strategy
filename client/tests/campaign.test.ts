@@ -25,7 +25,7 @@ import brutalLevels from '../src/lib/campaigns/002-brutal.json' with { type: 'js
 import shatteredLevels from '../src/lib/campaigns/003-shattered.json' with { type: 'json' }
 
 const CLASSIC_KINDS = Object.keys(PAWN_CLASSES).filter(
-  (kind) => !['hoplite', 'wolf', 'berserker'].includes(kind),
+  (kind) => !['hoplite', 'wolf', 'berserker', 'lancer'].includes(kind),
 )
 
 const tutorial = CAMPAIGNS[0]
