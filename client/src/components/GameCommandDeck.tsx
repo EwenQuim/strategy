@@ -1,7 +1,6 @@
 import type { Action, Aim, Pawn, RangeKind, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
 import * as m from '../i18n/game'
-import { attackSummary } from '../i18n/battlefield'
 import { unitNames } from '../i18n/units'
 import { specialTexts } from '../i18n/specialTexts'
 import { Icon, PawnIcon } from './Icon'
@@ -21,9 +20,7 @@ interface GameCommandDeckProps {
   previewed: RangeKind | null
   onPreview: (range: RangeKind) => void
   onPeek: (range: RangeKind | null) => void
-  attacking: boolean
   usingSpecial: boolean
-  hasFoes: boolean
   hasSpecialTargets: boolean
   choosingTarget: boolean
   targetCount: number
@@ -41,9 +38,7 @@ export function GameCommandDeck({
   previewed,
   onPreview,
   onPeek,
-  attacking,
   usingSpecial,
-  hasFoes,
   hasSpecialTargets,
   choosingTarget,
   targetCount,
@@ -79,23 +74,11 @@ export function GameCommandDeck({
           </div>
           {pawn && !winner && <UnitStats pawn={pawn} />}
         </div>
-        <div className="grid grid-cols-3 gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
-          <AttackButton
-            pawn={pawn}
-            commanding={commanding}
-            previewed={previewed === 'attack'}
-            attacking={attacking}
-            usingSpecial={usingSpecial}
-            hasFoes={hasFoes}
-            onAim={onAim}
-            onPreview={onPreview}
-            onPeek={onPeek}
-          />
+        <div className="grid grid-cols-2 gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
           <SpecialButton
             pawn={pawn}
             commanding={commanding}
             previewed={previewed === 'special'}
-            attacking={attacking}
             usingSpecial={usingSpecial}
             hasSpecialTargets={hasSpecialTargets}
             targetCount={targetCount}
@@ -112,63 +95,8 @@ export function GameCommandDeck({
   )
 }
 
-function AttackButton({
-  pawn,
-  attacking,
-  usingSpecial,
-  hasFoes,
-  onAim,
-  ...preview
-}: {
-  pawn?: Pawn
-  attacking: boolean
-  usingSpecial: boolean
-  hasFoes: boolean
-  onAim: (aim: Aim | null) => void
-} & PreviewProps) {
-  const buttonProps = usePreviewButton(
-    'attack',
-    !preview.commanding || usingSpecial || !pawn?.energy || (!attacking && !hasFoes),
-    () => onAim(attacking ? null : { action: 'attack' }),
-    preview,
-  )
-  return (
-    <button
-      className={
-        actionButtonClassName +
-        ' border-[#d69e803d] bg-[#b8795809] text-[#e3b096] aria-pressed:border-[#e0a586] aria-pressed:bg-[#ab695333]'
-      }
-      data-action="attack"
-      {...buttonProps}
-      aria-pressed={attacking || preview.previewed}
-    >
-      <Icon
-        className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-        name={attacking ? 'close' : 'sword'}
-      />
-      <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-        {attacking ? m.cancel : m.attack}
-      </span>
-      <small className="mt-0.5 block text-[9px] max-[601px]:mt-0 max-[601px]:text-[8px] text-[#b5a997]">
-        {attacking
-          ? m.chooseEnemy
-          : preview.commanding || !pawn
-            ? m.energyCost(1)
-            : attackSummary(pawn.attack.damage, attackSpan(pawn))}
-      </small>
-    </button>
-  )
-}
-
-function attackSpan({ attack }: Pawn) {
-  return attack.minRange === attack.maxRange
-    ? String(attack.maxRange)
-    : attack.minRange + '-' + attack.maxRange
-}
-
 function SpecialButton({
   pawn,
-  attacking,
   usingSpecial,
   hasSpecialTargets,
   targetCount,
@@ -178,7 +106,6 @@ function SpecialButton({
   ...preview
 }: {
   pawn?: Pawn
-  attacking: boolean
   usingSpecial: boolean
   hasSpecialTargets: boolean
   targetCount: number
@@ -188,7 +115,7 @@ function SpecialButton({
 } & PreviewProps) {
   const buttonProps = usePreviewButton(
     'special',
-    !preview.commanding || attacking || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
+    !preview.commanding || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
     () => {
       if (usingSpecial) onAim(null)
       else if (pawn?.special.targeted) onAim({ action: 'special' })
@@ -225,7 +152,7 @@ function SpecialButton({
                 : m.chooseEnemy
           : !preview.commanding
             ? m.energyCost(pawn?.special.cost ?? 2)
-            : pawn?.special.oncePerRound && pawn.specialUsed
+            : pawn?.specialUsed
               ? m.usedThisRound
               : !hasSpecialTargets
                 ? pawn?.special.noTargets
@@ -252,17 +179,17 @@ function EndTurnButton({
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
-      title={m.endTurnHint(pawn?.endTurnEscapeChance ?? 0)}
+      title={m.endTurnHint}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-        name="escape"
+        name="arrow"
       />
       <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
         {m.endTurn}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-        {m.escapeGain(pawn ? pawn.endTurnEscapeChance - pawn.escapeChance : 0)}
+        {m.remainingEnergy(pawn?.energy ?? 0)}
       </small>
     </button>
   )

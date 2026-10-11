@@ -88,12 +88,6 @@ export function actionCriteria(state: GameState): Record<string, string> {
       ].filter(Boolean)
       return `${describeAction(action)} (${notes.join(', ')})`
     }
-    if (action.type === 'attack') {
-      const target = unitAt({ q: action.q, r: action.r })
-      return target
-        ? `strike ${target.kind} #${target.id} (hp ${target.hp}/${target.maxHp})`
-        : describeAction(action)
-    }
     if (action.type === 'special' && action.target) {
       const target = unitAt(action.target)
       return target

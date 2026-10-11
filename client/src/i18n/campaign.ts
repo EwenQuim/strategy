@@ -1,6 +1,28 @@
 import { t } from './locale'
 import { storyLevelNames } from './story-levels'
 
+export const recruitsUnlocked = t({
+  en: 'Recruits unlocked',
+  fr: 'Recrues débloquées',
+  de: 'Rekruten freigeschaltet',
+  es: 'Reclutas desbloqueados',
+  it: 'Reclute sbloccate',
+})
+export const unitUnlocked = t({
+  en: (unit: string) => `${unit} unlocked!`,
+  fr: (unit: string) => `${unit} débloqué !`,
+  de: (unit: string) => `${unit} freigeschaltet!`,
+  es: (unit: string) => `¡${unit} desbloqueado!`,
+  it: (unit: string) => `${unit} sbloccato!`,
+})
+export const playNextLevel = t({
+  en: 'Command this unit in the next battle.',
+  fr: 'Commandez cette unité au prochain combat.',
+  de: 'Befehle dieser Einheit in der nächsten Schlacht.',
+  es: 'Controla esta unidad en la próxima batalla.',
+  it: 'Comanda questa unità nella prossima battaglia.',
+})
+
 export const campaignNames: Record<
   | 'tutorial'
   | 'original'

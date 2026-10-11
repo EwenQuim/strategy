@@ -77,11 +77,6 @@
           "row": 2
         },
         {
-          "kind": "ninja",
-          "col": 5,
-          "row": 2
-        },
-        {
           "kind": "swordsman",
           "col": 3,
           "row": 1
@@ -185,21 +180,6 @@
           "row": 2
         },
         {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 1
-        },
-        {
           "kind": "bomber",
           "col": 2,
           "row": 0
@@ -289,16 +269,6 @@
         {
           "kind": "archer",
           "col": 6,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
           "row": 2
         },
         {
@@ -402,16 +372,6 @@
           "kind": "swordsman",
           "col": 5,
           "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 3
         },
         {
           "kind": "archer",
@@ -739,11 +699,6 @@
           "row": 3
         },
         {
-          "kind": "bulwark",
-          "col": 5,
-          "row": 3
-        },
-        {
           "kind": "swordsman",
           "col": 1,
           "row": 1
@@ -776,12 +731,8 @@
         {
           "kind": "swordsman",
           "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 3
+          "row": 3,
+          "hp": 3
         }
       ]
     }
@@ -825,6 +776,7 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 3,
           "col": 3,
           "row": 0
         },

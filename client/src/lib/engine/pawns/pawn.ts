@@ -3,12 +3,13 @@ import type { Action, BattleEffect, GameState } from '../engine.ts'
 import type { SeededRandom } from '../random.ts'
 import type { PawnKind } from './index.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
+import { GAMEPLAY } from '../rules.ts'
 
 export type Side = 'player' | 'enemy'
 
 export const START_ENERGY = 3
-export const ESCAPE_BONUS = 20
-export const MAX_ESCAPE = 60
+const ESCAPE_BONUS = 20
+const MAX_ESCAPE = 60
 
 export interface AttackProfile {
   readonly damage: number
@@ -35,6 +36,8 @@ export type ThreatPosition = {
   target: Pawn
   from: Axial
   movementCost: number
+  tiles?: Map<string, Tile>
+  pawns?: readonly Pawn[]
 }
 
 export type SpecialTextKey =
@@ -46,6 +49,7 @@ export type SpecialTextKey =
   | 'noEnemiesWithinReach'
   | 'chargeTo'
   | 'chooseTile'
+  | 'chooseEnemy'
   | 'aimedShot'
   | 'aimedShotDescription'
   | 'noEnemiesInRange'
@@ -80,6 +84,8 @@ export interface SpecialAbility {
   readonly targeted: boolean
   readonly oncePerRound?: boolean
   readonly choosesDestination?: boolean
+  readonly movement?: 'walk' | 'jump'
+  readonly landingRange?: number
   readonly targetLabel?: SpecialTextKey
   readonly prompt?: SpecialTextKey
   readonly noTargets?: SpecialTextKey
@@ -152,6 +158,7 @@ export abstract class Pawn {
   }
 
   get endTurnEscapeChance(): number {
+    if (!GAMEPLAY.randomEscape) return 0
     return Math.min(MAX_ESCAPE, this.escapeChance + this.energy * ESCAPE_BONUS)
   }
 

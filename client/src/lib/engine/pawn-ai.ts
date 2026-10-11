@@ -1,5 +1,6 @@
 import type { Action, GameState } from './engine.ts'
 import type { Pawn } from './pawns/index.ts'
+import { GAMEPLAY } from './rules.ts'
 
 type UnitThreat = {
   incoming: number
@@ -30,7 +31,7 @@ export const defaultAi: PawnAi = {
   value: (pawn, health) =>
     UNIT_SCORE.unit + pawn.attack.damage * UNIT_SCORE.attackDamage + health * UNIT_SCORE.health,
   risk: (pawn, { incoming, health, value, caution }) => {
-    const expected = incoming * (1 - pawn.escapeChance / 100)
+    const expected = incoming * (GAMEPLAY.randomEscape ? 1 - pawn.escapeChance / 100 : 1)
     return (
       caution *
       (Math.min(health, expected) * UNIT_SCORE.health + (expected >= health ? value : 0))

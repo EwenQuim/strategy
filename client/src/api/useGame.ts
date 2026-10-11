@@ -38,9 +38,6 @@ export function useGame({
   const [playback, dispatch] = useReducer(
     (currentPlayback: Transition, action: PlaybackAction) => {
       const next = playbackReducer(currentPlayback, action, mode)
-      // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
-      if (next.state.winner === 'player' && currentPlayback.state.winner !== 'player')
-        onVictory?.()
       return next
     },
     seed,
@@ -59,6 +56,11 @@ export function useGame({
   useEffect(() => {
     if (!online) saveBattleToLocalStorage(mode, seed, bot, setup, playback.state)
   }, [bot, mode, online, playback.state, seed, setup])
+
+  // Persist victory immediately, even while its final combat animation is playing.
+  useEffect(() => {
+    if (playback.state.winner === 'player') onVictory?.()
+  }, [onVictory, playback.state.winner])
 
   useEffect(() => {
     if (!frame) return

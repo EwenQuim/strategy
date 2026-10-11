@@ -11,16 +11,18 @@ import {
   reducer,
   inHellfire,
   activePawn,
-  canAttack,
   movementDestinations,
+  specialTargetingTiles,
   specialTargets,
+  hexDist,
+  passable,
   type Action,
   type Axial,
   type Biome,
   type GameState,
 } from '../src/lib/engine/index.ts'
-
-import { initialState as botState, transition as botTransition } from './bot-game.ts'
+import { createBotGame } from './bot-game.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/bots/targetPicker.ts'
 import { RulesBot } from '../src/bots/strategies/rules.ts'
@@ -35,6 +37,8 @@ import {
   BATTLE_SNAPSHOT_VERSION,
   snapshotState,
 } from '../src/lib/battleSnapshot.ts'
+import { DEFAULT_BOT_CONFIG } from '../src/bots/catalog.ts'
+import { victoryActions } from './campaign-replays.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -223,10 +227,6 @@ async function playInUi(page: Page, state: GameState, action: Action) {
       .click()
   if (action.type === 'endTurn') return page.locator('[data-action="endTurn"]').click()
   if (action.type === 'move') return clickTile(action)
-  if (action.type === 'attack') {
-    await page.locator('[data-action="attack"]').click()
-    return clickTile(action)
-  }
   if (action.type === 'special') {
     await page.locator('[data-action="special"]').click()
     if (action.destination) await clickTile(action.destination)
@@ -668,7 +668,7 @@ test(
 )
 
 test(
-  'Bulwarks show slow movement costs and protect allies offline on a small portrait screen',
+  'Bulwarks keep moving after protecting allies offline on a small portrait screen',
   { timeout: 30_000 },
   async (t) => {
     const { context, page, origin } = await fixture(t)
@@ -724,7 +724,7 @@ test(
     await page.locator('[data-testid="hex-tile"]').nth(tileIndex).click()
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '1',
+      '2',
     )
     assert.match(
       (await page
@@ -734,13 +734,13 @@ test(
       /protected by Bulwark/,
     )
     assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
-    assert.equal(await moves.count(), 0)
+    assert.ok((await moves.count()) > 0)
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     // Reloading resumes the recorded battle instead of resetting it.
     assert.equal(
       await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '1',
+      '2',
     )
     assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
     assert.match(
@@ -750,7 +750,7 @@ test(
         .getAttribute('aria-label'))!,
       /protected by Bulwark/,
     )
-    assert.equal(await moves.count(), 0)
+    assert.ok((await moves.count()) > 0)
     assert.equal(
       await page.locator('[data-action="special"]').getAttribute('aria-disabled'),
       'true',
@@ -1164,12 +1164,8 @@ test(
       await dismissQuickPlayTutorial(page)
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
-      assert.equal(await page.locator('[data-action="attack"]').isVisible(), true)
-      assert.equal(
-        await page.locator('[data-action="attack"]').getAttribute('aria-disabled'),
-        'true',
-      )
-      assert.equal(await page.locator('[data-action]').count(), 3)
+      assert.equal(await page.locator('[data-action="special"]').isVisible(), true)
+      assert.equal(await page.locator('[data-action]').count(), 2)
       assert.equal(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
         biomeNames[biome],
@@ -1504,6 +1500,27 @@ test(
       const pawn = activePawn(state)!
       const tile = state.tiles.get(position)!
       const index = [...state.tiles.keys()].indexOf(position)
+      if (kind === 'lava') {
+        // Ambush needs a victim beside the landing. Bring one into this lava-warning scenario.
+        const victimAt = [...state.tiles.values()].find(
+          (at) =>
+            hexDist(at, tile) === 1 &&
+            passable(at) &&
+            !state.pawns.some((p) => p.q === at.q && p.r === at.r),
+        )!
+        assert.ok(victimAt)
+        const victim = state.pawns.find((p) => p.side !== pawn.side)!
+        Object.assign(victim, { q: victimAt.q, r: victimAt.r })
+        assert.ok(specialTargetingTiles(pawn, state.tiles, state.pawns).has(position))
+        await page.evaluate(
+          (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+          {
+            version: BATTLE_SNAPSHOT_VERSION,
+            identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+            state: snapshotState(state),
+          },
+        )
+      }
       await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       const destination = page.locator('[data-testid="hex-tile"]').nth(index)
@@ -1593,15 +1610,14 @@ test(
           '3',
         )
         if (kind === 'watchtower') {
-          const archer = activePawn(state)!
-          const targets = state.pawns.filter((target) => canAttack(archer, target, tile))
+          const targets = specialTargets(state.pawns, activePawn(state)!)
           if (targets.length) {
-            await page.locator('[data-action="attack"]').click()
+            await page.locator('[data-action="special"]').click()
             assert.equal(
-              await page.getByRole('button', { name: /^Attack / }).count(),
+              await page.getByRole('button', { name: /^Aimed shot / }).count(),
               targets.length,
             )
-            await page.locator('[data-action="attack"]').click()
+            await page.locator('[data-action="special"]').click()
           }
         }
       }
@@ -1671,7 +1687,7 @@ test(
           .count(),
         0,
       )
-      for (const name of ['Goal', 'Turn order', 'Energy', 'King', 'Swordsman', 'Archer']) {
+      for (const name of ['Goal', 'Turn order', 'Energy', 'King', 'Swordsman']) {
         await briefing.getByRole('heading', { name, exact: true }).waitFor()
         assert.equal(
           await briefing
@@ -1708,7 +1724,7 @@ test(
           await briefing.evaluate((dialog) => dialog.getAnimations({ subtree: true }).length),
           0,
         )
-        if (name !== 'Archer')
+        if (name !== 'Swordsman')
           await briefing.getByRole('button', { name: 'Next', exact: true }).click()
       }
       assert.equal(
@@ -1716,7 +1732,7 @@ test(
         true,
       )
       await briefing.getByRole('button', { name: 'Previous', exact: true }).click()
-      await briefing.getByRole('heading', { name: 'Swordsman', exact: true }).waitFor()
+      await briefing.getByRole('heading', { name: 'King', exact: true }).waitFor()
       await briefing.getByRole('button', { name: 'Discover: Goal', exact: true }).click()
       await briefing.getByRole('heading', { name: 'Goal', exact: true }).waitFor()
       await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
@@ -1780,7 +1796,7 @@ test(
           .getByRole('button')
           .filter({ has: page.locator('span') })
         await pages.first().waitFor()
-        assert.equal(await pages.count(), 6, locale)
+        assert.equal(await pages.count(), 5, locale)
         for (const control of await pages.all()) {
           await control.click()
           const region = briefing.getByRole('region')
@@ -1859,7 +1875,10 @@ test(
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
     assert.match(await tutorial.innerText(), /Units act one at a time/)
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
-    assert.match(await tutorial.innerText(), /Spend it to move, attack or use a special/)
+    assert.match(
+      await tutorial.innerText(),
+      /Move and use your signature ability once per activation/,
+    )
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
     assert.match(await tutorial.innerText(), /Lose your king, lose the battle/)
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
@@ -2023,9 +2042,114 @@ test(
   },
 )
 
+test(
+  'Signature victories unlock recruits once and tutorial victories never earn achievements',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    for (const slug of ['tutorial', 'original']) {
+      const pack = CAMPAIGNS.find((pack) => pack.slug === slug)!
+      const level = pack.levels[0]
+      const actions = victoryActions(level)
+      let state = initialState(level.seed, level.setup, 'player')
+      for (const action of actions.slice(0, -1)) state = transition(state, action).state
+      assert.equal(state.winner, null)
+      assert.equal(activePawn(state)!.side, 'player')
+      const saved = {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity(
+          'ai',
+          level.seed,
+          { name: 'depthsearch', options: BOT_LEVELS[level.difficulty] },
+          level.setup,
+        ),
+        state: snapshotState(state),
+      }
+      await page.evaluate(
+        (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+        saved,
+      )
+      await page.goto(origin + base + 'campaign/' + slug + '/1')
+      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      assert.equal(await page.locator('[data-action]').count(), 2)
+      assert.equal(
+        await page.evaluate(() => localStorage.getItem('hexmate.achievements')),
+        null,
+      )
+      await playInUi(page, state, actions.at(-1)!)
+      await page.getByTestId('battle-result').waitFor()
+      const toast = page.getByTestId('unit-unlock-toast')
+      await toast.waitFor()
+      assert.match(
+        await toast.innerText(),
+        new RegExp(unitNames[level.unlocks[0]] + ' unlocked!'),
+      )
+      if (slug === 'tutorial') {
+        assert.equal(
+          await page.evaluate(() => localStorage.getItem('hexmate.achievements')),
+          null,
+        )
+        assert.equal(
+          await page.getByRole('status', { name: 'Achievement unlocked' }).count(),
+          0,
+        )
+      } else {
+        await page.waitForFunction(
+          () => JSON.parse(localStorage.getItem('hexmate.achievements') ?? '[]').length > 0,
+        )
+      }
+      for (const viewport of [
+        { width: 280, height: 480 },
+        { width: 390, height: 844 },
+        { width: 844, height: 390 },
+      ]) {
+        await page.setViewportSize(viewport)
+        assert.ok(
+          await toast.evaluate((element) => {
+            const rect = element.getBoundingClientRect()
+            return (
+              rect.left >= 0 &&
+              rect.right <= innerWidth &&
+              rect.top >= 0 &&
+              rect.bottom <= innerHeight &&
+              document.documentElement.scrollHeight <= innerHeight
+            )
+          }),
+        )
+      }
+      if (process.env.PR_MEDIA_DIR) {
+        await page.setViewportSize({ width: 390, height: 844 })
+        await page.evaluate(
+          () =>
+            new Promise((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            ),
+        )
+        await page.screenshot({ path: join(process.env.PR_MEDIA_DIR, slug + '-unlock.png') })
+      }
+      await page.reload()
+      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      await page.getByTestId('battle-result').waitFor()
+      assert.equal(await toast.count(), 0)
+      if (slug === 'tutorial')
+        assert.equal(
+          await page.evaluate(() => localStorage.getItem('hexmate.achievements')),
+          null,
+        )
+    }
+    assert.deepEqual(errors, [])
+  },
+)
+
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   const level = CAMPAIGNS[1].levels[id - 1]
-  let state = botState(level.seed, level.setup)
+  const bot = createBotGame(new DepthsearchBot(BOT_LEVELS[level.difficulty]))
+  let state = (
+    await bot.transition(bot.initialState(level.seed, level.setup), { type: 'restart' })
+  ).state
   if (level.newElements.length)
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
@@ -2036,7 +2160,7 @@ async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   for (let step = 0; step < 200 && !state.winner; step++) {
     const actions: Action[] = surrender ? [{ type: 'endTurn' }] : await campaignActions(state)
     for (const action of actions) {
-      const result = await botTransition(state, action)
+      const result = await bot.transition(state, action)
       await playInUi(page, state, action)
       state = result.state
       if (state.winner) await page.locator('[data-testid="battle-result"]').waitFor()

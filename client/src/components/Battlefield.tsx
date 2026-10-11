@@ -20,7 +20,7 @@ import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
 
-export type Targeting = 'attack' | 'charge' | 'jump' | 'special'
+export type Targeting = 'strike' | 'charge' | 'jump' | 'special'
 
 interface BattlefieldProps {
   labels: PlayerNames
@@ -189,7 +189,7 @@ export function Battlefield({
             damage,
             occupant,
             target,
-            attack: targeting === 'attack',
+            strike: targeting === 'strike',
             selected,
             previewed,
             canMove,

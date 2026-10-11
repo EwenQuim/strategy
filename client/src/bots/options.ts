@@ -21,7 +21,7 @@ export function readOptions<O extends object>(defaults: O, value: unknown): Read
 export function validOptions(options: BotOptions | undefined): options is BotOptions {
   return (
     !!options &&
-    [2, 3].includes(options.depth) &&
+    [2, 3, 4].includes(options.depth) &&
     Number.isInteger(options.beamWidth) &&
     options.beamWidth >= 1 &&
     options.beamWidth <= 32 &&

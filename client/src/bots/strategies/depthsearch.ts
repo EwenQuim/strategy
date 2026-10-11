@@ -1,16 +1,25 @@
-import { activePawn, reducer, type Action, type GameState } from '../../lib/engine/engine.ts'
-import type { Pawn, Side } from '../../lib/engine/pawns/index.ts'
+import { activePawn, type Action, type GameState } from '../../lib/engine/engine.ts'
+import type { Side } from '../../lib/engine/pawns/index.ts'
 import { BOT_LEVELS, type BotOptions } from '../../lib/engine/ai.ts'
-import type { Bot } from '../bot.ts'
-import { readOptions, validOptions } from '../options.ts'
 import {
   distancesToAttack,
   evaluatePosition,
   type ReachCache,
 } from '../../lib/engine/ai/evaluate.ts'
 import { sidePlan } from '../../lib/engine/ai/plan.ts'
-import { chooseOption, hpOf, type Outcome } from '../../lib/engine/ai/choice.ts'
+import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
+import type { Bot } from '../bot.ts'
+import { readOptions, validOptions } from '../options.ts'
+
+type ScoredTurn = TurnPlan & { value: number }
+type Search = {
+  side: Side
+  beamWidth: number
+  budget: number
+  leaf: (state: GameState) => number
+  scores: Map<string, number>
+}
 
 export const searchStats = {
   decisions: 0,
@@ -26,204 +35,71 @@ export const searchStats = {
   maxDepth: 0,
 }
 
+// A deterministic work budget bounds response time even when another ply is requested.
 const POSITION_BUDGET = 1500
 const SHORTLIST = 200
-const END_TURN: Action = { type: 'endTurn' }
+const usesAbility = (plan: TurnPlan) => plan.actions.some((action) => action.type === 'special')
 
-// Budgeted beam minimax over the unit turns the engine enumerates.
-export class DepthsearchBot implements Bot<BotOptions> {
-  readonly name = 'depthsearch'
-  readonly options: Readonly<BotOptions>
-
-  constructor(options: Partial<BotOptions> = {}) {
-    this.options = readOptions<BotOptions>(BOT_LEVELS.normal, options)
-    if (!validOptions(this.options)) throw new RangeError('Invalid bot options')
-  }
-
-  async chooseActions(state: GameState): Promise<Action[]> {
-    const options = this.options
-    Object.assign(searchStats, {
-      decisions: 1,
-      plansEnumerated: 0,
-      shortlisted: 0,
-      beamExpansions: 0,
-      leafEvals: 0,
-      rootLeafEvals: 0,
-      deepLeafEvals: 0,
-      replyLeafEvals: 0,
-      cutoffs: 0,
-      budgetBreaks: 0,
-      maxDepth: 0,
-    })
-    const pawn = activePawn(state)
-    if (!pawn || state.winner) return []
-    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-    const distance = distancesToAttack(state, pawn)
-    const reach: ReachCache = new Map()
-    const plan = sidePlan(state, pawn.side, options)
-    const search: Search = {
-      side: pawn.side,
-      beamWidth: options.beamWidth,
-      budget: POSITION_BUDGET,
-      leaf: (next) => {
-        search.budget--
-        searchStats.leafEvals++
-        return evaluatePosition(next, pawn, plan, distance, reach)
-      },
-    }
-    // A fixed stream keeps analysis from seeing the battle's future rolls, such as Hellfire.
-    const analysis = { ...state, randomState: 0 }
-    let floor = -Infinity
-    const ranked = rankedTurns(analysis, search)
-    searchStats.rootLeafEvals = searchStats.leafEvals
-    const valued = ranked
-      .slice(0, options.beamWidth)
-      .map((turn) => {
-        const window = turn.outcomes.length === 1 ? floor : -Infinity
-        const value = expectedScores(turn.outcomes, (outcome) =>
-          minimax(outcome.state, options.depth - 1, window, Infinity, search, outcome.score),
-        )
-        floor = Math.max(floor, value - options.latitude)
-        return { ...turn, value }
-      })
-      .sort((a, b) => b.value - a.value)
-    return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
-  }
-}
-
-function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
-  return {
-    ...state,
-    pawns: state.pawns.map((pawn) => {
-      if (pawn.side === side) return pawn
-      const foe = pawn.clone()
-      foe.escapeChance = escape(pawn)
-      return foe
-    }),
-  }
-}
-
-const rolls = (action: Action) =>
-  action.type === 'attack' || (action.type === 'special' && !!action.target)
-
-// Forcing escapes only lasts for the roll: the real chances come back unless a new round began and
-// reset every escape chance anyway.
-function restoreEscapes(before: GameState, after: GameState, side: Side): GameState {
-  if (after.round !== before.round) return after
-  const escapes = new Map(before.pawns.map((pawn) => [pawn.id, pawn.escapeChance]))
-  return withFoeEscape(after, side, (foe) => escapes.get(foe.id) ?? foe.escapeChance)
-}
-
-function rollOutcomes(current: GameState, action: Action, side: Side): Outcome[] {
-  const forced = (escape: number) => {
-    const world = withFoeEscape(current, side, (foe) => (foe.escapeChance > 0 ? escape : 0))
-    const next = reducer(world, action)
-    return next === world ? null : restoreEscapes(current, next, side)
-  }
-  const hit = forced(0)
-  if (!hit) return [{ state: current, weight: 1 }]
-  const dodge = forced(100)!
-  const struck = current.pawns.filter(
-    (foe) => foe.side !== side && hpOf(hit, foe.id) !== hpOf(dodge, foe.id),
-  )
-  if (!struck.length) return [{ state: hit, weight: 1 }]
-  const escape = struck.reduce((sum, foe) => sum + foe.escapeChance, 0) / struck.length / 100
-  return [
-    { state: hit, weight: 1 - escape },
-    { state: dodge, weight: escape },
-  ]
-}
-
-// A turn planned in the all-hit world is replayed with each roll at its own odds: three attacks
-// at 20% escape all land 51.2% of the time, not 80%. Every outcome finishes the turn, and equal
-// positions merge. Area specials keep one averaged roll per blast.
-export function turnOutcomes(state: GameState, plan: TurnPlan): Outcome[] {
-  const actor = activePawn(state)!
-  const side = actor.side
-  if (!state.pawns.some((p) => p.side !== side && p.escapeChance > 0))
-    return [{ state: plan.state, weight: 1 }]
-  if (!plan.actions.some(rolls))
-    return [{ state: restoreEscapes(state, plan.state, side), weight: 1 }]
-  const playing = (current: GameState) =>
-    !current.winner && activePawn(current)?.id === actor.id
-  let branches: Outcome[] = [{ state, weight: 1 }]
-  for (const action of plan.actions)
-    branches = branches.flatMap((branch) => {
-      if (!playing(branch.state)) return [branch]
-      if (rolls(action))
-        return rollOutcomes(branch.state, action, side).map((outcome) => ({
-          state: outcome.state,
-          weight: branch.weight * outcome.weight,
-        }))
-      const next = reducer(branch.state, action)
-      return [{ state: next, weight: branch.weight }]
-    })
-  const merged = new Map<string, Outcome>()
-  for (const branch of branches) {
-    const ended = playing(branch.state) ? reducer(branch.state, END_TURN) : branch.state
-    const position = positionKey(ended)
-    const known = merged.get(position)
-    if (known) known.weight += branch.weight
-    else merged.set(position, { state: ended, weight: branch.weight })
-  }
-  return [...merged.values()]
-}
-
-type Scored = Outcome & { score: number }
-type ScoredTurn = { actions: Action[]; outcomes: Scored[]; value: number }
-
-const expectedScores = (outcomes: Scored[], value: (outcome: Scored) => number) =>
-  outcomes.reduce((sum, outcome) => sum + outcome.weight * value(outcome), 0)
-
-type Search = {
-  side: Side
-  beamWidth: number
-  budget: number
-  leaf: (state: GameState) => number
-}
-
-// Rune-boosted units with many targets can plan thousands of turns. Every turn without a roll is
-// kept, then the attacking turns that deal the most damage if every blow lands.
 function shortlist(state: GameState, plans: TurnPlan[]): TurnPlan[] {
   if (plans.length <= SHORTLIST) return plans
   const side = activePawn(state)!.side
-  const foes = state.pawns.filter((p) => p.side !== side)
+  const foes = state.pawns.filter((pawn) => pawn.side !== side)
   const damage = (plan: TurnPlan) =>
     foes.reduce((sum, foe) => sum + foe.hp - hpOf(plan.state, foe.id), 0)
-  const quiet = plans.filter((plan) => !plan.actions.some(rolls))
-  const attacking = plans
-    .filter((plan) => plan.actions.some(rolls))
-    .sort((a, b) => damage(b) - damage(a))
-  return [...quiet, ...attacking.slice(0, Math.max(0, SHORTLIST - quiet.length))]
+  const quiet = plans.filter((plan) => !usesAbility(plan))
+  const active = plans.filter(usesAbility).sort((a, b) => damage(b) - damage(a))
+  return [
+    ...quiet.slice(0, SHORTLIST),
+    ...active.slice(0, Math.max(0, SHORTLIST - quiet.length)),
+  ]
 }
 
-function scoreTurn(state: GameState, plan: TurnPlan, search: Search): ScoredTurn {
-  const outcomes = turnOutcomes(state, plan).map((outcome) => ({
-    ...outcome,
-    score: search.leaf(outcome.state),
-  }))
-  return {
-    actions: plan.actions,
-    outcomes,
-    value: expectedScores(outcomes, (outcome) => outcome.score),
+function viableTurns(state: GameState, pawnId: number, ranked: ScoredTurn[]): ScoredTurn[] {
+  const pawn = state.pawns.find((p) => p.id === pawnId)!
+  const survives = (plan: ScoredTurn) => {
+    const actor = plan.state.pawns.find((p) => p.id === pawnId)
+    if (!actor) return false
+    return (
+      actor.hp > 1 ||
+      plan.state.round !== state.round ||
+      !plan.state.hellfire.some((center) => {
+        const q = actor.q - center.q,
+          r = actor.r - center.r
+        return Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)) <= 1
+      })
+    )
   }
+  const canSurvive = ranked.some(survives)
+  return ranked.filter((turn) => {
+    if (turn.value < ranked[0]!.value - 50_000) return false
+    if (survives(turn)) return true
+    return (
+      !canSurvive ||
+      (usesAbility(turn) &&
+        state.pawns.some((p) => p.side !== pawn.side && hpOf(turn.state, p.id) < p.hp))
+    )
+  })
 }
 
-// Turns are enumerated as if every attack lands, then valued over their roll outcomes.
+function score(plan: TurnPlan, search: Search): ScoredTurn {
+  const key = positionKey(plan.state)
+  let value = search.scores.get(key)
+  if (value === undefined) {
+    value = search.leaf(plan.state)
+    search.scores.set(key, value)
+  }
+  return { ...plan, value }
+}
+
 function rankedTurns(state: GameState, search: Search): ScoredTurn[] {
-  const side = activePawn(state)!.side
-  const direction = side === search.side ? -1 : 1
-  const enumerated = turnPlans(withFoeEscape(state, side, () => 0))
-  searchStats.plansEnumerated += enumerated.length
-  const kept = shortlist(state, enumerated)
+  const direction = activePawn(state)!.side === search.side ? -1 : 1
+  const plans = turnPlans(state)
+  searchStats.plansEnumerated += plans.length
+  const kept = shortlist(state, plans)
   searchStats.shortlisted += kept.length
-  return kept
-    .map((plan) => scoreTurn(state, plan, search))
-    .sort((a, b) => direction * (a.value - b.value))
+  return kept.map((plan) => score(plan, search)).sort((a, b) => direction * (a.value - b.value))
 }
 
-// On the last ply only the best turn matters, so turns with an attack or special go first and the
-// scan stops as soon as one is good enough for a cutoff or the budget runs out.
 function lastReply(
   state: GameState,
   alpha: number,
@@ -232,9 +108,8 @@ function lastReply(
   search: Search,
   fallback: number,
 ): number {
-  const side = activePawn(state)!.side
-  const plans = shortlist(state, turnPlans(withFoeEscape(state, side, () => 0))).sort(
-    (a, b) => Number(b.actions.some(rolls)) - Number(a.actions.some(rolls)),
+  const plans = shortlist(state, turnPlans(state)).sort(
+    (a, b) => Number(usesAbility(b)) - Number(usesAbility(a)),
   )
   searchStats.plansEnumerated += plans.length
   searchStats.shortlisted += plans.length
@@ -245,7 +120,7 @@ function lastReply(
       break
     }
     const before = searchStats.leafEvals
-    const { value } = scoreTurn(state, plan, search)
+    const { value } = score(plan, search)
     searchStats.replyLeafEvals += searchStats.leafEvals - before
     best = maximizing ? Math.max(best, value) : Math.min(best, value)
     if (maximizing ? best >= beta : best <= alpha) {
@@ -256,9 +131,7 @@ function lastReply(
   return Number.isFinite(best) ? best : fallback
 }
 
-// Minimax over unit turns: the searching side maximizes, the other minimizes, with alpha-beta
-// cutoffs. Turns with several roll outcomes average them, so they search with a full window. A
-// spent budget returns the score this position already received.
+// Every ability has one reliable outcome: ordinary alpha-beta over unit activations.
 function minimax(
   state: GameState,
   depth: number,
@@ -275,19 +148,14 @@ function minimax(
   searchStats.maxDepth = Math.max(searchStats.maxDepth, depth)
   const maximizing = activePawn(state)!.side === search.side
   if (depth === 1) return lastReply(state, alpha, beta, maximizing, search, fallback)
-  const beforeRanking = searchStats.leafEvals
+  const before = searchStats.leafEvals
   const turns = rankedTurns(state, search)
-  searchStats.deepLeafEvals += searchStats.leafEvals - beforeRanking
+  searchStats.deepLeafEvals += searchStats.leafEvals - before
   if (!turns.length) return fallback
   let best = maximizing ? -Infinity : Infinity
   for (const turn of turns.slice(0, search.beamWidth)) {
     searchStats.beamExpansions++
-    const value =
-      turn.outcomes.length === 1
-        ? minimax(turn.outcomes[0].state, depth - 1, alpha, beta, search, turn.value)
-        : expectedScores(turn.outcomes, (outcome) =>
-            minimax(outcome.state, depth - 1, -Infinity, Infinity, search, outcome.score),
-          )
+    const value = minimax(turn.state, depth - 1, alpha, beta, search, turn.value)
     if (maximizing) {
       best = Math.max(best, value)
       alpha = Math.max(alpha, best)
@@ -303,8 +171,60 @@ function minimax(
   return best
 }
 
-// Plays the chosen turn up to its first attack or special, then decides again with the result.
-function untilFirstRoll(actions: Action[]): Action[] {
-  const roll = actions.findIndex(rolls)
-  return roll < 0 ? actions : actions.slice(0, roll + 1)
+export class DepthsearchBot implements Bot<BotOptions> {
+  readonly name = 'depthsearch'
+  readonly options: Readonly<BotOptions>
+
+  constructor(options: Partial<BotOptions> = {}) {
+    this.options = readOptions<BotOptions>(BOT_LEVELS.normal, options)
+    if (!validOptions(this.options)) throw new RangeError('Invalid bot options')
+  }
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    const options = this.options
+    for (const key of Object.keys(searchStats) as (keyof typeof searchStats)[])
+      searchStats[key] = 0
+    searchStats.decisions = 1
+    const pawn = activePawn(state)
+    if (!pawn || state.winner) return []
+    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const distance = distancesToAttack(state, pawn)
+    const reach: ReachCache = new Map()
+    const plan = sidePlan(state, pawn.side, options)
+    const search: Search = {
+      side: pawn.side,
+      beamWidth: options.beamWidth,
+      budget: POSITION_BUDGET,
+      scores: new Map(),
+      leaf: (next) => {
+        search.budget--
+        searchStats.leafEvals++
+        return evaluatePosition(next, pawn, plan, distance, reach)
+      },
+    }
+    // Hellfire remains seeded; analysis does not peek into the battle's random stream.
+    const analysis = { ...state, randomState: 0 }
+    let floor = -Infinity
+    const ranked = viableTurns(analysis, pawn.id, rankedTurns(analysis, search))
+    const victory = ranked.find((turn) => turn.state.winner === pawn.side)
+    if (victory) return victory.actions
+    searchStats.rootLeafEvals = searchStats.leafEvals
+    const valued = ranked
+      .slice(0, options.beamWidth)
+      .map((turn) => {
+        const value = minimax(
+          turn.state,
+          options.depth - 1,
+          floor,
+          Infinity,
+          search,
+          turn.value,
+        )
+        floor = Math.max(floor, value - options.latitude)
+        // Keep near-term position quality as a small tie-breaker for equal distant outcomes.
+        return { ...turn, value: value + turn.value * 0.01 }
+      })
+      .sort((a, b) => b.value - a.value)
+    return chooseOption(analysis, pawn, valued, options).actions
+  }
 }

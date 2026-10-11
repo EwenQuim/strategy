@@ -16,11 +16,11 @@ export function useInspection(state: GameState, viewerSide: Side | undefined, lo
   const active = activePawn(state)
   const inspected = state.pawns.find((unit) => unit.id === inspection?.id && unit.hp > 0)
   const shown = inspected ?? active
-  const rangeKind = peek ?? inspection?.range ?? 'attack'
+  const rangeKind = peek ?? inspection?.range ?? 'special'
   const foeSide =
     viewerSide === 'enemy' || (local && active?.side === 'enemy') ? 'player' : 'enemy'
   const inspect = (id: number) =>
-    setInspection(id === inspected?.id ? null : { id, range: 'attack' })
+    setInspection(id === inspected?.id ? null : { id, range: 'special' })
   return {
     inspected,
     shown,

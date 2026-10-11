@@ -5,11 +5,12 @@ import { hexDist, key } from '../hex.ts'
 
 const protect: SpecialAbility = {
   name: 'protect',
-  cost: 2,
+  cost: 1,
   targeted: true,
   prompt: 'chooseAlly',
   noTargets: 'noNearbyAllies',
   description: 'protectDescription',
+  threat: () => 0,
   reaches: (pawn, tile) => hexDist(pawn, tile) <= 2,
   targets: (pawn, pawns) =>
     pawns.filter(
@@ -51,13 +52,10 @@ export class Bulwark extends Pawn {
   static override readonly icon =
     'M12 3 4 6v6c0 5 8 8.5 8 8.5s8-3.5 8-8.5V6l-8-3ZM8 10l4 3 4-3M8 14l4 3 4-3'
   static override readonly aiInstructions =
-    'melee, 1 damage; its own moves cost 2 energy for the first tile. Protect (2): shield an ally within 2 tiles and take its next hit, wherever it goes.'
+    'Protect (1): shield an ally within 2 tiles and take its next hit, wherever it goes, until your next activation. No offensive action. Once per activation.'
   readonly kind = 'bulwark' as const
   get maxHp(): number {
     return 10
-  }
-  override get moveCost(): number {
-    return 2
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 1 }
   get special(): SpecialAbility {

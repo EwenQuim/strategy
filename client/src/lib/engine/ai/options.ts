@@ -33,7 +33,6 @@ export function legalActions(state: GameState): Action[] {
     ...[...movementDestinations(state.tiles, state.pawns, pawn).keys()]
       .map(tileAt)
       .map((tile): Action => ({ type: 'move', ...tile })),
-    ...aimed({ action: 'attack' }).map((tile): Action => ({ type: 'attack', ...tile })),
     ...specials,
     { type: 'endTurn' },
   ]

@@ -1,31 +1,40 @@
-import { allyTargets, label, specialTargets } from '../combat.ts'
+import {
+  aimAt,
+  allyTargets,
+  attackTargets,
+  label,
+  pawnAt,
+  specialTargets,
+  strike,
+} from '../combat.ts'
 import { hexDist } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const rally: SpecialAbility = {
   name: 'rally',
-  cost: 1,
-  targeted: false,
+  cost: 2,
+  targeted: true,
   oncePerRound: true,
-  noTargets: 'noAlliesToHeal',
-  prompt: 'chooseAlly',
+  noTargets: 'noEnemiesWithinReach',
+  prompt: 'chooseEnemy',
   description: 'rallyDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
-  targets: (pawn, pawns) => allyTargets(pawn, pawns, true),
-  candidates: (pawn, { pawns }) =>
-    specialTargets(pawns, pawn).length ? [{ type: 'special' }] : [],
-  perform: ({ pawn, pawns, log }) => {
-    const allies = specialTargets(pawns, pawn)
-    if (!allies.length) return null
+  targets: attackTargets,
+  candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
+  perform: ({ pawn, pawns, tile, log, random }) => {
+    const target = tile && pawnAt(pawns, tile)
+    if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
     pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    for (const ally of allies) {
+    const impacts = [strike(pawns, pawn, target, pawn.attack, log, random)]
+    const ally = allyTargets(pawn, pawns, true).sort((a, b) => a.hp - b.hp || a.id - b.id)[0]
+    if (ally) {
       ally.hp = Math.min(ally.maxHp, ally.hp + 1)
       log.push(label(ally) + ' recovers 1 health.')
     }
-    return { kind: 'rally', to: { q: pawn.q, r: pawn.r } }
+    return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
 }
 
@@ -42,11 +51,11 @@ const soldiers = (army: readonly Pawn[]) => army.filter((pawn) => pawn.kind !== 
 // Damage the king can absorb while keeping a margin is cheap; closer to death it is dear.
 const kingAi: PawnAi = {
   value: (_king, health) => KING_SCORE.king + health * KING_SCORE.health,
-  risk: (_king, { incoming, health, hellfireDamage }) => {
+  risk: (king, { incoming, health, hellfireDamage }) => {
     const threat = incoming + hellfireDamage
     const absorbed = Math.min(threat, Math.max(0, health - DANGER_MARGIN))
     return (
-      absorbed * SAFE_DAMAGE +
+      absorbed * (king.hp >= 5 ? 10 : SAFE_DAMAGE) +
       (threat - absorbed) * DANGER_DAMAGE +
       (incoming >= health ? KING_SCORE.lethalThreat : 0)
     )
@@ -55,15 +64,14 @@ const kingAi: PawnAi = {
   goal: (king, surroundings) => {
     const { allies, foes } = surroundings
     const warrior = soldiers(allies) >= 2 * soldiers(foes) || soldiers(foes) <= 2
-    if (!allies.length || warrior) return defaultAi.goal(king, surroundings)
+    if (!allies.length || warrior)
+      return defaultAi.goal(king, { ...surroundings, aggression: surroundings.aggression * 8 })
     const wounded = allies.filter((ally) => ally.hp < ally.maxHp && hexDist(king, ally) === 1)
     return (
       -Math.min(...allies.map((ally) => hexDist(king, ally))) * ALLY_DISTANCE +
       wounded.length * RALLY_READY
     )
   },
-  ruleSpecial: (_king, _state, _foes, specials) =>
-    specials.length ? { type: 'special' } : null,
 }
 
 export class King extends Pawn {
@@ -71,7 +79,7 @@ export class King extends Pawn {
   static override readonly icon = 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12'
   readonly kind = 'king' as const
   static override readonly aiInstructions =
-    'melee, 2 damage. Rally (1): heal 1 hp of every adjacent ally, once per round.'
+    'Rallying Blow (2): strike an adjacent enemy for 2 and heal the most wounded adjacent ally for 1. Cannot heal yourself. Once per activation.'
   get maxHp(): number {
     return 7
   }

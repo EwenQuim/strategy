@@ -28,19 +28,12 @@ export const wins = t({
   es: (name: string) => `¡${name} gana!`,
   it: (name: string) => `${name} vince!`,
 })
-export const attack = t({
-  en: 'Attack',
-  fr: 'Attaque',
-  de: 'Angriff',
-  es: 'Ataque',
-  it: 'Attacco',
-})
 export const special = t({
-  en: 'Special',
-  fr: 'Spécial',
-  de: 'Spezial',
-  es: 'Especial',
-  it: 'Speciale',
+  en: 'Ability',
+  fr: 'Capacité',
+  de: 'Fähigkeit',
+  es: 'Habilidad',
+  it: 'Abilità',
 })
 
 export const onlineLobby = t({
@@ -172,23 +165,19 @@ export const endTurn = t({
   it: 'Fine turno',
 })
 export const endTurnHint = t({
-  en: (escapeChance: number) =>
-    `Spend all remaining energy and end this turn. Escape: ${escapeChance}% until the round ends.`,
-  fr: (escapeChance: number) =>
-    `Dépense toute l'énergie restante et termine ce tour. Esquive : ${escapeChance} % jusqu'à la fin de la manche.`,
-  de: (escapeChance: number) =>
-    `Verbrauche alle restliche Energie und beende diesen Zug. Ausweichen: ${escapeChance} % bis zum Ende der Runde.`,
-  es: (escapeChance: number) =>
-    `Gasta toda la energía restante y termina este turno. Esquiva: ${escapeChance} % hasta el final de la ronda.`,
-  it: (escapeChance: number) =>
-    `Spendi tutta l'energia rimasta e termina questo turno. Schivata: ${escapeChance}% fino alla fine del round.`,
+  en: 'End this turn. Unused energy expires; move to safety before finishing.',
+  fr: 'Terminez ce tour. L’énergie inutilisée est perdue ; déplacez-vous à l’abri avant de finir.',
+  de: 'Beende diesen Zug. Ungenutzte Energie verfällt; ziehe vorher in Sicherheit.',
+  es: 'Termina este turno. La energía sin usar se pierde; muévete a un lugar seguro antes.',
+  it: 'Termina il turno. L’energia inutilizzata si perde; mettiti al sicuro prima.',
 })
-export const escapeGain = t({
-  en: (gain: number) => `+${gain}% escape`,
-  fr: (gain: number) => `+${gain} % esquive`,
-  de: (gain: number) => `+${gain} % Ausweichen`,
-  es: (gain: number) => `+${gain} % esquiva`,
-  it: (gain: number) => `+${gain}% schivata`,
+export const remainingEnergy = t({
+  en: (energy: number) => `${energy} energy left`,
+  fr: (energy: number) =>
+    `${energy} ${plural(energy, { one: 'énergie restante', other: 'énergies restantes' })}`,
+  de: (energy: number) => `${energy} Energie übrig`,
+  es: (energy: number) => `${energy} de energía restante`,
+  it: (energy: number) => `${energy} energia rimasta`,
 })
 
 export const resultLevel = t({

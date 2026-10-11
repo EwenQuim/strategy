@@ -69,6 +69,7 @@
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 4,
           "row": 3
         },
@@ -79,6 +80,7 @@
         },
         {
           "kind": "bulwark",
+          "hp": 6,
           "col": 3,
           "row": 2
         },
@@ -160,11 +162,13 @@
         },
         {
           "kind": "archer",
+          "hp": 2,
           "col": 1,
           "row": 4
         },
         {
           "kind": "archer",
+          "hp": 2,
           "col": 6,
           "row": 4
         },
@@ -181,22 +185,8 @@
         {
           "kind": "swordsman",
           "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 0
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 0
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 0
+          "row": 9,
+          "hp": 3
         }
       ]
     }
@@ -310,6 +300,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "mountains",
+      "firstEnemyKinds": ["wolf"],
       "map": [
         "........",
         "........",
@@ -366,7 +357,7 @@
           "row": 9
         },
         {
-          "kind": "wolf",
+          "kind": "swordsman",
           "col": 3,
           "row": 9
         }
@@ -488,7 +479,7 @@
           "row": 8
         },
         {
-          "kind": "swordsman",
+          "kind": "wolf",
           "col": 5,
           "row": 8
         },
@@ -501,6 +492,7 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 5,
           "col": 3,
           "row": 0
         },
@@ -515,17 +507,14 @@
           "row": 3
         },
         {
-          "kind": "ninja",
-          "col": 6,
-          "row": 3
-        },
-        {
           "kind": "swordsman",
+          "hp": 3,
           "col": 2,
           "row": 4
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 5,
           "row": 4
         },
@@ -536,33 +525,9 @@
         },
         {
           "kind": "swordsman",
-          "col": 1,
-          "row": 4
-        },
-        {
-          "kind": "swordsman",
-          "col": 6,
-          "row": 4
-        },
-        {
-          "kind": "ninja",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 4
-        },
-        {
-          "kind": "swordsman",
           "col": 4,
-          "row": 5
-        },
-        {
-          "kind": "ninja",
-          "col": 0,
-          "row": 4
+          "row": 5,
+          "hp": 3
         }
       ]
     }
@@ -638,11 +603,13 @@
         },
         {
           "kind": "bulwark",
+          "hp": 6,
           "col": 2,
           "row": 3
         },
         {
           "kind": "bulwark",
+          "hp": 6,
           "col": 5,
           "row": 3
         },
@@ -909,36 +876,6 @@
         {
           "kind": "bulwark",
           "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 3
-        },
-        {
-          "kind": "ninja",
-          "col": 1,
-          "row": 3
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 2,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 0,
           "row": 1
         },
         {

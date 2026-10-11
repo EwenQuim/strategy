@@ -93,7 +93,7 @@ export function advanceTurn(
       }
       ;({ hellfire, randomState } = markHellfire({ ...state, pawns, round, randomState }))
       active = 0
-      log.push('Round ' + round + '. Energy restored; escape chances reset.')
+      log.push('Round ' + round + '. Energy and abilities restored.')
       logCount++
     }
     const next = pawns.find((p) => p.id === order[active])

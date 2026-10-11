@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+  PAWN_CLASSES,
   BIOMES,
   initialState,
   reducer,
@@ -264,7 +265,23 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
         }),
       ),
     ),
-    1380201758,
+    seedState(
+      JSON.stringify(
+        states.map(
+          ({
+            hellfire: _hellfire,
+            lastClashRound: _lastClashRound,
+            blows: _blows,
+            escapes: _escapes,
+            ...state
+          }) => ({
+            ...state,
+            pawns: state.pawns.map((p) => new PAWN_CLASSES[p.kind](p.id, p.q, p.r, p.side)),
+            tiles: [...state.tiles],
+          }),
+        ),
+      ),
+    ),
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

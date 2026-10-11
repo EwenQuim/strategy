@@ -50,23 +50,18 @@ export const energyPerRound = t({
   it: (count: number) => `${count} per unità a ogni round`,
 })
 export const spendEnergy = t({
-  en: 'Spend it to move, attack or use a special',
-  fr: 'Dépensez-la pour vous déplacer, attaquer ou utiliser un spécial',
-  de: 'Gib sie aus für Bewegen, Angreifen oder eine Spezialfähigkeit',
-  es: 'Gástala para mover, atacar o usar un especial',
-  it: 'Spendila per muoverti, attaccare o usare uno speciale',
+  en: 'Move and use your signature ability once per activation, in either order',
+  fr: 'Déplacez-vous et utilisez votre capacité une fois par activation, dans l’ordre souhaité',
+  de: 'Bewege dich und nutze deine Fähigkeit einmal pro Aktivierung, in beliebiger Reihenfolge',
+  es: 'Muévete y usa tu habilidad una vez por activación, en cualquier orden',
+  it: 'Muoviti e usa la tua abilità una volta per attivazione, in qualsiasi ordine',
 })
 export const unusedEnergy = t({
-  en: (bonus: number, max: number) =>
-    `Unused energy at end of turn → +${bonus}% dodge each, max ${max}%`,
-  fr: (bonus: number, max: number) =>
-    `Énergie non dépensée en fin de tour → +${bonus} % d'esquive par point, max ${max} %`,
-  de: (bonus: number, max: number) =>
-    `Ungenutzte Energie am Zugende → +${bonus} % Ausweichen je Punkt, max ${max} %`,
-  es: (bonus: number, max: number) =>
-    `Energía sin usar al final del turno → +${bonus} % de esquiva por cada punto, máx. ${max} %`,
-  it: (bonus: number, max: number) =>
-    `Energia non spesa a fine turno → +${bonus} % di schivata per punto, max ${max} %`,
+  en: 'Unused energy expires. Retreat by moving; hits do not randomly miss.',
+  fr: 'L’énergie inutilisée est perdue. Reculez en vous déplaçant ; les coups ne ratent pas au hasard.',
+  de: 'Ungenutzte Energie verfällt. Ziehe zum Rückzug; Treffer verfehlen nicht zufällig.',
+  es: 'La energía sin usar se pierde. Retírate moviéndote; los golpes no fallan al azar.',
+  it: 'L’energia inutilizzata si perde. Ritirati muovendoti; i colpi non mancano a caso.',
 })
 
 export const rallyBrief = t({
@@ -126,11 +121,11 @@ export const protectBrief = t({
   it: 'incassa il prossimo colpo per un alleato entro 2 caselle',
 })
 export const bulwarkSlow = t({
-  en: 'Slow: first step costs 2 energy',
-  fr: 'Lent : le premier pas coûte 2 énergies',
-  de: 'Langsam: der erste Schritt kostet 2 Energie',
-  es: 'Lento: el primer paso cuesta 2 de energía',
-  it: 'Lento: il primo passo costa 2 energia',
+  en: 'Mobile shield: 1 energy per step, no offensive ability',
+  fr: 'Bouclier mobile : 1 énergie par pas, aucune capacité offensive',
+  de: 'Mobiler Schild: 1 Energie pro Schritt, keine offensive Fähigkeit',
+  es: 'Escudo móvil: 1 energía por paso, sin habilidad ofensiva',
+  it: 'Scudo mobile: 1 energia per passo, nessuna abilità offensiva',
 })
 export const bombBrief = t({
   en: 'any tile within 2, 1 dmg to it and its 6 neighbors',
@@ -154,11 +149,11 @@ export const jumpBrief = t({
   it: 'fino a 3 caselle, sopra ogni cosa',
 })
 export const jumpNoAttack = t({
-  en: 'Jump does not attack: keep 1 energy to strike',
-  fr: 'Le saut n’attaque pas : gardez 1 énergie pour frapper',
-  de: 'Der Sprung greift nicht an: 1 Energie zum Zuschlagen aufheben',
-  es: 'El salto no ataca: guarda 1 de energía para golpear',
-  it: 'Il salto non attacca: tieni 1 energia per colpire',
+  en: 'Strike for 3 after landing; only 1 HP, so plan your retreat',
+  fr: 'Frappez pour 3 à l’arrivée ; seulement 1 PV, préparez votre retraite',
+  de: 'Triff nach der Landung für 3; nur 1 LP, plane deinen Rückzug',
+  es: 'Golpea por 3 al aterrizar; solo 1 PV, planea tu retirada',
+  it: 'Colpisci per 3 all’atterraggio; solo 1 PV, pianifica la ritirata',
 })
 
 export const phalanxBrief = t({
@@ -264,11 +259,11 @@ export const lavaDamage = t({
   it: '-1 PV per casella calpestata, anche in Carica',
 })
 export const ignoresEscapeProtect = t({
-  en: 'Ignores Escape and Protect',
-  fr: 'Ignore l’Esquive et la Protection',
-  de: 'Ignoriert Ausweichen und Schützen',
-  es: 'Ignora la Esquiva y la Protección',
-  it: 'Ignora Schivata e Protezione',
+  en: 'Ignores protection',
+  fr: 'Ignore la protection',
+  de: 'Ignoriert Schutz',
+  es: 'Ignora la protección',
+  it: 'Ignora la protezione',
 })
 export const basaltSafe = t({
   en: 'Basalt is safe',
@@ -278,11 +273,11 @@ export const basaltSafe = t({
   it: 'Il basalto è sicuro',
 })
 export const watchtowerRange = t({
-  en: 'Archer and Magician: +1 max range',
-  fr: 'Archer et Magicien : +1 de portée maximale',
-  de: 'Schütze und Magier: +1 max. Reichweite',
-  es: 'Arquero y Mago: +1 de alcance máximo',
-  it: 'Archiere e Mago: +1 di gittata massima',
+  en: 'Archer: +1 shot range',
+  fr: 'Archer : +1 de portée de tir',
+  de: 'Schütze: +1 Schussreichweite',
+  es: 'Arquero: +1 alcance de disparo',
+  it: 'Arciere: +1 gittata di tiro',
 })
 export const springStay = t({
   en: 'Stay until next turn: +1 HP',

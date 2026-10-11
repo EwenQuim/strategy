@@ -3,19 +3,13 @@ import type { Action, GameState } from '../engine.ts'
 import type { Pawn } from '../pawns/index.ts'
 import type { BotOptions } from '../ai.ts'
 
-export type Outcome = { state: GameState; weight: number }
-export type Option = { actions: Action[]; outcomes: Outcome[]; value: number }
-
-const expected = (outcomes: Outcome[], value: (state: GameState) => number) =>
-  outcomes.reduce((sum, outcome) => sum + outcome.weight * value(outcome.state), 0)
+export type Option = { actions: Action[]; state: GameState; value: number }
 
 export const hpOf = (state: GameState, id: number) =>
   state.pawns.find((p) => p.id === id)?.hp ?? 0
 
 const damageTo = (option: Option, pawns: Pawn[]) =>
-  expected(option.outcomes, (state) =>
-    pawns.reduce((sum, pawn) => sum + pawn.hp - hpOf(state, pawn.id), 0),
-  )
+  pawns.reduce((sum, pawn) => sum + pawn.hp - hpOf(option.state, pawn.id), 0)
 
 function focusTargets(foes: Pawn[], pawn: Pawn, focus: BotOptions['focus']): Pawn[] {
   if (focus === 'nearest')

@@ -1,6 +1,7 @@
 import { hexX, hexY } from './hex-art'
 import * as m from '../i18n/combat'
 import type { Pawn, Tile } from '../lib/engine'
+import { GAMEPLAY } from '../lib/engine/rules'
 import { FeatureArt } from './features/FeatureArt'
 import { Icon, PawnIcon } from './Icon'
 
@@ -35,7 +36,7 @@ export function PawnChip({
         {active && (
           <circle r="28" fill="#ead695" fillOpacity=".18" stroke="#f2df9e" strokeWidth="1.5" />
         )}
-        {pawn.escapeChance > 0 && (
+        {GAMEPLAY.randomEscape && pawn.escapeChance > 0 && (
           <circle r="25" fill="none" stroke="#b7e5de" strokeWidth="2" strokeDasharray="4 4" />
         )}
         {enemy ? (

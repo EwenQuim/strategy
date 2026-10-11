@@ -2,20 +2,17 @@
   {
     "id": 1,
     "name": "First Steps",
-    "seed": "tutorial-v1-1",
+    "seed": "tutorial-v2-1",
     "difficulty": "easy",
     "setup": {
       "biome": "verdant",
-      "map": ["__...__", "_....._", ".......", ".......", ".......", "_....._", "__...__"],
-      "player": [
-        { "kind": "king", "col": 3, "row": 6 },
-        { "kind": "swordsman", "col": 3, "row": 5 },
-        { "kind": "archer", "col": 2, "row": 6 }
-      ],
+      "enemyStance": "assault",
+      "firstEnemyKinds": ["swordsman"],
+      "map": ["...", "...", "..."],
+      "player": [{ "kind": "king", "col": 1, "row": 2 }],
       "enemy": [
-        { "kind": "king", "col": 3, "row": 0 },
-        { "kind": "swordsman", "col": 3, "row": 1 },
-        { "kind": "archer", "col": 4, "row": 0 }
+        { "kind": "king", "col": 1, "row": 0, "hp": 2 },
+        { "kind": "swordsman", "col": 2, "row": 1, "hp": 2 }
       ]
     }
   }

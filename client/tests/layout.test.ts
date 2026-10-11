@@ -159,7 +159,11 @@ test('Holes block walking and landing, but permit detours, ranged attacks and ju
   const moved = reducer(state, { type: 'move', ...destination }).pawns[0]
   assert.deepEqual({ q: moved.q, r: moved.r }, destination)
   const ninja = new Ninja(1, pawn.q, pawn.r, 'player')
-  const jumps = jumpDestinations(state.tiles, [ninja, ...state.pawns.slice(1)], ninja)
+  const jumps = jumpDestinations(
+    state.tiles,
+    [ninja, ...state.pawns.slice(1), new Archer(4, destination.q + 1, destination.r, 'enemy')],
+    ninja,
+  )
   assert.ok(jumps.some((tile) => key(tile.q, tile.r) === position))
   assert.ok(!jumps.some((tile) => tile.q === hole.q && tile.r === hole.r))
   const archer = new Archer(1, pawn.q, pawn.r, 'player')
@@ -270,12 +274,14 @@ test('Invalid terrain, missing positions, blocked spawns, and overlaps are rejec
     )
 })
 
-test('High Pass forces a walking detour while archers can fire across its mountain lines', () => {
-  const level = CAMPAIGNS[1].levels[5]
-  assert.equal(level.name, 'High Pass')
-  const state = initialState(level.seed, level.setup)
+test('Archers fire across an authored mountain line while walking must detour', () => {
+  const state = initialState('archer-detour', layout)
   const archer = state.pawns.find((pawn) => pawn.side === 'player' && pawn.kind === 'archer')!
   const enemy = state.pawns.find((pawn) => pawn.side === 'enemy' && pawn.kind === 'archer')!
+  archer.q = hexOf(2, 7).q
+  archer.r = 7
+  enemy.q = hexOf(2, 4).q
+  enemy.r = 4
   assert.ok(canAttack(archer, enemy))
   assert.ok(
     distFrom(state.tiles, [enemy]).get(key(archer.q, archer.r))! > hexDist(archer, enemy),
@@ -285,7 +291,7 @@ test('High Pass forces a walking detour while archers can fire across its mounta
   const mountain = hexOf(2, 6)
   assert.equal(state.tiles.get(key(mountain.q, mountain.r))!.terrain, 'mountain')
   assert.equal(reducer(state, { type: 'move', ...mountain }), state)
-  const hit = reducer(state, { type: 'attack', q: enemy.q, r: enemy.r })
+  const hit = reducer(state, { type: 'special', target: { q: enemy.q, r: enemy.r } })
   assert.equal(
     hit.pawns.find((pawn) => pawn.id === enemy.id)!.hp,
     enemy.hp - archer.attack.damage,

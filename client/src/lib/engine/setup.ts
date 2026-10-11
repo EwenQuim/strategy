@@ -22,6 +22,7 @@ type PawnPlacement = {
   readonly kind: Pawn['kind']
   readonly col: number
   readonly row: number
+  readonly hp?: number
 }
 
 const ENEMY_STANCES = ['hold', 'balanced', 'assault'] as const
@@ -32,6 +33,7 @@ export type FixedBattleSetup = {
   readonly map: readonly string[]
   readonly hellfireCount?: 1 | 2
   readonly enemyStance?: EnemyStance
+  readonly firstEnemyKinds?: readonly Pawn['kind'][]
   readonly player: readonly PawnPlacement[]
   readonly enemy: readonly PawnPlacement[]
 }
@@ -44,6 +46,29 @@ export type BattleSetup =
       readonly player: readonly Pawn['kind'][]
       readonly enemy: readonly Pawn['kind'][]
     }
+
+function validateInitiative(setup: BattleSetup): void {
+  if (
+    setup.map !== undefined &&
+    setup.firstEnemyKinds !== undefined &&
+    (!Array.isArray(setup.firstEnemyKinds) ||
+      setup.firstEnemyKinds.some(
+        (kind) =>
+          !Object.hasOwn(PAWN_CLASSES, kind) || !setup.enemy.some((p) => p.kind === kind),
+      ))
+  )
+    throw new Error('Early enemy initiative must name a unit in the enemy army')
+}
+
+function validateHealth(unit: PawnPlacement, side: Side): void {
+  if (
+    unit.hp !== undefined &&
+    (!Number.isInteger(unit.hp) ||
+      unit.hp < 1 ||
+      unit.hp > new PAWN_CLASSES[unit.kind](0, 0, 0, side).maxHp)
+  )
+    throw new Error(side + ' army must specify health within the unit maximum')
+}
 
 export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))
@@ -60,6 +85,7 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
     !ENEMY_STANCES.includes(setup.enemyStance)
   )
     throw new Error('Enemy stance must be hold, balanced or assault')
+  validateInitiative(setup)
   const maxUnits = tiles ? [...tiles.values()].filter(passable).length : MAP_WIDTH * 3
   const occupied = new Set<string>()
   for (const side of ['player', 'enemy'] as const) {
@@ -72,6 +98,7 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
       if (typeof kind !== 'string' || !Object.hasOwn(PAWN_CLASSES, kind))
         throw new Error(side + ' army contains an unknown pawn kind')
       if (kind === 'king') kings++
+      if (typeof unit === 'object') validateHealth(unit, side)
       if (tiles) {
         if (
           typeof unit !== 'object' ||
@@ -109,7 +136,7 @@ function spawnPlacedArmy(army: readonly PawnPlacement[], side: Side, firstId: nu
   return army.map((unit, index) => {
     const { q, r } = hexOf(unit.col, unit.row)
     const Unit = PAWN_CLASSES[unit.kind]
-    return new Unit(firstId + index, q, r, side)
+    return new Unit(firstId + index, q, r, side, unit.hp)
   })
 }
 
@@ -151,6 +178,9 @@ function copySetup(setup: BattleSetup | undefined): BattleSetup | undefined {
       map: [...setup.map],
       ...(setup.hellfireCount !== undefined ? { hellfireCount: setup.hellfireCount } : {}),
       ...(setup.enemyStance !== undefined ? { enemyStance: setup.enemyStance } : {}),
+      ...(setup.firstEnemyKinds !== undefined
+        ? { firstEnemyKinds: [...setup.firstEnemyKinds] }
+        : {}),
       player: setup.player.map((unit) => ({ ...unit })),
       enemy: setup.enemy.map((unit) => ({ ...unit })),
     }
@@ -196,6 +226,18 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
   if (startingSide) {
     const first = initiative.findIndex((pawn) => pawn.side === startingSide)
     initiative.push(...initiative.splice(0, first))
+  }
+  // Authored introductions act before the first player: show the threat before it can be killed.
+  if (setup?.map !== undefined && setup.firstEnemyKinds?.length) {
+    const first = initiative.filter(
+      (p) => p.side === 'enemy' && setup.firstEnemyKinds!.includes(p.kind),
+    )
+    initiative.splice(
+      0,
+      initiative.length,
+      ...first,
+      ...initiative.filter((p) => !first.includes(p)),
+    )
   }
   // Number the finalized initiative, including any starting-side rotation.
   initiative.forEach((pawn, index) => {

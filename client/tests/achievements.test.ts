@@ -30,11 +30,15 @@ function duel(): GameState {
 }
 
 test('A first-round ninja regicide earns its achievements for the winner only', () => {
-  const won = reducer(duel(), { type: 'attack', q: 1, r: 0 })
+  const won = reducer(duel(), {
+    type: 'special',
+    target: { q: 1, r: 0 },
+    destination: { q: 0, r: 0 },
+  })
   assert.equal(won.winner, 'player')
   assert.deepEqual(won.blows, [
     {
-      by: { id: 1, kind: 'ninja', side: 'player', hp: 1, special: false, watchtower: false },
+      by: { id: 1, kind: 'ninja', side: 'player', hp: 1, special: true, watchtower: false },
       fallen: [{ kind: 'king', side: 'enemy' }],
     },
   ])

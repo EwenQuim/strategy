@@ -25,6 +25,7 @@ export interface CampaignLevel {
   difficulty: BotDifficulty
   setup: FixedBattleSetup
   newElements: readonly IntroducedElement[]
+  unlocks: readonly PawnKind[]
 }
 
 export interface Campaign {
@@ -33,6 +34,7 @@ export interface Campaign {
   levels: CampaignLevel[]
   requiredVictories?: number
   developerPreview?: boolean
+  startingUnits: readonly PawnKind[]
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -46,6 +48,7 @@ const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
   'hoplite',
   'wolf',
   'berserker',
+  'lancer',
   'lake',
   'mountain',
   'sand',
@@ -80,14 +83,14 @@ export function withBriefings<Level extends { setup: FixedBattleSetup }>(
 }
 
 const packs = [
-  tutorialLevels as Omit<CampaignLevel, 'newElements'>[],
-  originalLevels as Omit<CampaignLevel, 'newElements'>[],
-  brutalLevels as Omit<CampaignLevel, 'newElements'>[],
-  shatteredLevels as Omit<CampaignLevel, 'newElements'>[],
-  ringLevels as Omit<CampaignLevel, 'newElements'>[],
-  throneLevels as Omit<CampaignLevel, 'newElements'>[],
-  spartaLevels as Omit<CampaignLevel, 'newElements'>[],
-  ragnarokLevels as Omit<CampaignLevel, 'newElements'>[],
+  tutorialLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  originalLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  brutalLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  shatteredLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  ringLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  throneLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  spartaLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
+  ragnarokLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
 ]
 
 for (const levels of packs) {
@@ -98,41 +101,112 @@ for (const levels of packs) {
   })
 }
 
-const briefedCampaigns = withBriefings(packs)
+const CLASSIC_UNITS: readonly PawnKind[] = [
+  'king',
+  'swordsman',
+  'archer',
+  'magician',
+  'bulwark',
+  'bomber',
+  'ninja',
+]
+const startingUnits: readonly (readonly PawnKind[])[] = [
+  ['king'],
+  ['king', 'swordsman'],
+  ['king', 'swordsman'],
+  CLASSIC_UNITS,
+  CLASSIC_UNITS,
+  CLASSIC_UNITS,
+  CLASSIC_UNITS,
+  [...CLASSIC_UNITS, 'wolf', 'hoplite'],
+]
+
+// Unlocks are inferred from authored armies, never from a generated/replaced deployment.
+export function withUnitUnlocks<Level extends { setup: FixedBattleSetup }>(
+  levels: readonly Level[],
+  availableAtStart: readonly PawnKind[],
+): (Level & { unlocks: readonly PawnKind[] })[] {
+  const available = new Set(availableAtStart)
+  return levels.map((level, index) => {
+    if (level.setup.player.some((unit) => !available.has(unit.kind)))
+      throw new Error(
+        `Campaign level ${index + 1} uses a recruit before its enemy introduction`,
+      )
+    const unlocks = [...new Set(level.setup.enemy.map((unit) => unit.kind))].filter(
+      (kind) => !available.has(kind),
+    )
+    if (unlocks.some((kind) => !level.setup.firstEnemyKinds?.includes(kind)))
+      throw new Error(`Campaign level ${index + 1} must give new enemies early initiative`)
+    for (const kind of unlocks) {
+      available.add(kind)
+      const next = levels[index + 1]
+      if (next && !next.setup.player.some((unit) => unit.kind === kind))
+        throw new Error(
+          `Campaign level ${index + 2} must let the player use the newly unlocked ${kind}`,
+        )
+    }
+    return { ...level, unlocks }
+  })
+}
+
+const briefedCampaigns = withBriefings(
+  packs.map((levels, index) => withUnitUnlocks(levels, startingUnits[index])),
+)
 
 export const CAMPAIGNS: Campaign[] = [
-  { slug: 'tutorial', name: 'Tutorial', levels: briefedCampaigns[0] },
-  { slug: 'original', name: 'Original', levels: briefedCampaigns[1] },
-  { slug: 'brutal', name: 'Brutal', levels: briefedCampaigns[2], requiredVictories: 10 },
+  {
+    slug: 'tutorial',
+    name: 'Tutorial',
+    levels: briefedCampaigns[0],
+    startingUnits: startingUnits[0],
+  },
+  {
+    slug: 'original',
+    name: 'Original',
+    levels: briefedCampaigns[1],
+    startingUnits: startingUnits[1],
+  },
+  {
+    slug: 'brutal',
+    name: 'Brutal',
+    levels: briefedCampaigns[2],
+    startingUnits: startingUnits[2],
+    requiredVictories: 10,
+  },
   {
     slug: 'shattered',
     name: 'Shattered Crown',
     levels: briefedCampaigns[3],
     developerPreview: true,
+    startingUnits: startingUnits[3],
   },
   {
     slug: 'war-of-the-ring',
     name: 'War of the Ring',
     levels: briefedCampaigns[4],
     requiredVictories: 25,
+    startingUnits: startingUnits[4],
   },
   {
     slug: 'iron-throne',
     name: 'Iron Throne',
     levels: briefedCampaigns[5],
     requiredVictories: 35,
+    startingUnits: startingUnits[5],
   },
   {
     slug: 'hot-gates',
     name: 'Thermopylae',
     levels: briefedCampaigns[6],
     requiredVictories: 45,
+    startingUnits: startingUnits[6],
   },
   {
     slug: 'ragnarok',
     name: 'Ragnarok',
     levels: briefedCampaigns[7],
     requiredVictories: 55,
+    startingUnits: startingUnits[7],
   },
 ]
 

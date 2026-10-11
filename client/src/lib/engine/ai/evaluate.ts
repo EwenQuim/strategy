@@ -1,38 +1,22 @@
 import { activePawn, reducer, type GameState } from '../engine.ts'
 import { inHellfire } from '../hellfire.ts'
-import { canAttack, routePath, walkingPaths, protectorFor } from '../combat.ts'
+import { abilityDamage, routePath, walkingPaths, protectorFor } from '../combat.ts'
 import type { SidePlan } from './plan.ts'
 import { distFrom, hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
-import {
-  START_ENERGY,
-  jumpDestinations,
-  type Pawn,
-  type Side,
-  type ThreatPosition,
-} from '../pawns/index.ts'
-
-function damageFromPosition(attacker: Pawn, position: ThreatPosition): number {
-  const base = canAttack(attacker, position.target, position.from)
-    ? (attacker.energy - position.movementCost) * attacker.attack.damage
-    : 0
-  return Math.max(base, attacker.special.threat?.(attacker, position) ?? 0)
-}
+import { START_ENERGY, type Pawn, type Side } from '../pawns/index.ts'
 
 type Reach = {
   positions: { from: Axial; movementCost: number }[]
-  jumps: Tile[]
   damageAt: Map<string, number>
+  tiles: Map<string, Tile>
+  pawns: readonly Pawn[]
+  landings: Axial[]
 }
 export type ReachCache = Map<string, Reach>
 
 // Only units and runes within walking or jumping range can change where an attacker reaches.
 function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCache): Reach {
-  const radius = Math.max(3, attacker.energy - attacker.moveCost + 1)
-  const nearby = (items: Axial[]) =>
-    items
-      .filter((item) => hexDist(attacker, item) <= radius)
-      .map((item) => key(item.q, item.r))
-      .join('|')
+  const nearby = (items: Axial[]) => items.map((item) => key(item.q, item.r)).join('|')
   const { id, q, r, hp, energy, specialUsed } = attacker
   const cacheKey = [
     id,
@@ -41,24 +25,49 @@ function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCa
     hp,
     energy,
     specialUsed,
-    nearby(state.pawns),
+    state.pawns.map((p) => `${p.id}:${p.q}:${p.r}:${p.hp}`).join('|'),
     nearby(runes),
   ].join()
   const cached = cache.get(cacheKey)
   if (cached) return cached
+  const maxSteps = runes.length
+    ? undefined
+    : Math.max(0, attacker.energy - attacker.special.cost - attacker.moveCost + 1)
+  const positions = [...walkingPaths(state.tiles, state.pawns, attacker, maxSteps)]
+    .filter(([, route]) => route.damage < attacker.hp)
+    .map(([position, route]) => ({
+      from: state.tiles.get(position) ?? attacker,
+      movementCost:
+        attacker.moveEnergyCost(route.steps) -
+        routePath(route).filter((tile) => tile.feature === 'rune').length * 2,
+    }))
+  const landings = new Map<string, Axial>()
+  const range = attacker.special.landingRange
+  if (range && !attacker.specialUsed)
+    for (const position of positions) {
+      if (position.movementCost + attacker.special.cost > attacker.energy) continue
+      const actor = attacker.clone()
+      Object.assign(actor, position.from)
+      if (attacker.special.movement === 'walk') {
+        for (const [at, route] of walkingPaths(state.tiles, state.pawns, actor, range))
+          if (route.damage < attacker.hp) landings.set(at, route.tile ?? position.from)
+      } else {
+        for (const tile of state.tiles.values())
+          if (
+            passable(tile) &&
+            hexDist(position.from, tile) <= range &&
+            (tile.terrain !== 'lava' || attacker.hp > 1) &&
+            !state.pawns.some((p) => p.id !== attacker.id && p.q === tile.q && p.r === tile.r)
+          )
+            landings.set(key(tile.q, tile.r), tile)
+      }
+    }
   const reach = {
-    positions: [...walkingPaths(state.tiles, state.pawns, attacker)]
-      .filter(([, route]) => route.damage < attacker.hp)
-      .map(([position, route]) => ({
-        from: state.tiles.get(position) ?? attacker,
-        movementCost:
-          attacker.moveEnergyCost(route.steps) -
-          routePath(route).filter((tile) => tile.feature === 'rune').length * 2,
-      })),
-    jumps: jumpDestinations(state.tiles, state.pawns, attacker).filter(
-      (tile) => tile.terrain !== 'lava',
-    ),
+    landings: [...landings.values()],
+    positions,
     damageAt: new Map<string, number>(),
+    tiles: state.tiles,
+    pawns: state.pawns,
   }
   cache.set(cacheKey, reach)
   return reach
@@ -69,12 +78,23 @@ function maxDamage(attacker: Pawn, reach: Reach, target: Pawn): number {
   const cached = reach.damageAt.get(at)
   if (cached !== undefined) return cached
   let damage = 0
+  if (attacker.special.landingRange) {
+    damage = reach.landings.some((from) => hexDist(from, target) === 1)
+      ? attacker.attack.damage
+      : 0
+    reach.damageAt.set(at, damage)
+    return damage
+  }
   for (const { from, movementCost } of reach.positions)
-    damage = Math.max(damage, damageFromPosition(attacker, { target, from, movementCost }))
-  if (reach.jumps.some((from) => canAttack(attacker, target, from)))
     damage = Math.max(
       damage,
-      (attacker.energy - attacker.special.cost) * attacker.attack.damage,
+      abilityDamage(attacker, {
+        target,
+        from,
+        movementCost,
+        tiles: reach.tiles,
+        pawns: reach.pawns,
+      }),
     )
   reach.damageAt.set(at, damage)
   return damage
@@ -112,7 +132,13 @@ function estimateIncomingDamage(
     if (actsNextRound && foe.hp <= 1 && inHellfire(state.hellfire, foe)) continue
     const attacker = foe.clone()
     attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
-    if (attacker.energy <= 0) continue
+    if (actsNextRound) attacker.specialUsed = false
+    if (
+      attacker.energy <= 0 ||
+      attacker.specialUsed ||
+      (attacker.energy < attacker.special.cost && !runes.length)
+    )
+      continue
     const reach = reachOf(state, attacker, runes, cache)
     // A target that acts before this attacker can move away or strike first, so only attackers
     // acting before the target's next turn threaten it.
@@ -205,7 +231,7 @@ export function distancesToAttack(state: GameState, pawn: Pawn): Map<string, num
   return distFrom(
     paths,
     [...paths.values()].filter(
-      (tile) => passable(tile) && foes.some((foe) => canAttack(pawn, foe, tile)),
+      (tile) => passable(tile) && pawn.special.targets(pawn, state.pawns, tile).length > 0,
     ),
   )
 }

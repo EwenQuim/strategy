@@ -1,34 +1,41 @@
-import { label, specialTargets } from '../combat.ts'
+import { aimAt, attackTargets, label, pawnAt, specialTargets, strike } from '../combat.ts'
 import { hexDist } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const cry: SpecialAbility = {
   name: 'cry',
   cost: 2,
-  targeted: false,
+  targeted: true,
   oncePerRound: true,
-  noTargets: 'noNearbyAllies',
-  prompt: 'chooseAlly',
+  noTargets: 'noEnemiesWithinReach',
+  prompt: 'chooseEnemy',
   description: 'cryDescription',
-  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2,
-  targets: (pawn, pawns) =>
-    pawns.filter(
-      (ally) => ally.side === pawn.side && ally.id !== pawn.id && hexDist(pawn, ally) <= 2,
-    ),
-  candidates: (pawn, { pawns }) =>
-    specialTargets(pawns, pawn).length ? [{ type: 'special' }] : [],
-  perform: ({ pawn, pawns, log }) => {
-    const allies = specialTargets(pawns, pawn)
-    if (!allies.length) return null
+  reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
+  targets: attackTargets,
+  candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
+  perform: ({ pawn, pawns, tile, log, random }) => {
+    const target = tile && pawnAt(pawns, tile)
+    if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
     pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    for (const ally of allies) {
+    const impacts = [strike(pawns, pawn, target, pawn.attack, log, random)]
+    const ally = pawns
+      .filter(
+        (p) =>
+          p.side === pawn.side &&
+          p.id !== pawn.id &&
+          p.energy > 0 &&
+          !p.specialUsed &&
+          hexDist(pawn, p) <= 2,
+      )
+      .sort((a, b) => hexDist(pawn, a) - hexDist(pawn, b) || a.id - b.id)[0]
+    if (ally) {
       ally.energy += 1
       ally.bonusEnergy += 1
       log.push(label(ally) + ' gains 1 energy.')
     }
-    return { kind: 'rally', to: { q: pawn.q, r: pawn.r } }
+    return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
 }
 
@@ -38,7 +45,7 @@ export class Wolf extends Pawn {
   static override readonly icon = 'M5 4l4 3h6l4-3v5l-3 5-4 7-4-7-3-5V4Zm4 7h.01m6 0h.01'
   readonly kind = 'wolf' as const
   static override readonly aiInstructions =
-    'melee, 2 damage. Cry (2): +1 energy to every ally within 2 tiles, once per round.'
+    'Pack Hunt (2): bite an adjacent enemy for 2 and give +1 energy to the nearest ally within 2 tiles that has not acted yet. Once per activation.'
   get maxHp(): number {
     return 3
   }

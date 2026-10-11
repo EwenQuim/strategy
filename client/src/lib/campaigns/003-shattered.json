@@ -6,6 +6,7 @@
     "difficulty": "normal",
     "setup": {
       "biome": "verdant",
+      "firstEnemyKinds": ["lancer"],
       "map": [
         "........",
         "........",
@@ -43,16 +44,18 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 5,
           "col": 3,
           "row": 0
         },
         {
-          "kind": "swordsman",
+          "kind": "lancer",
           "col": 4,
           "row": 1
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 2,
           "row": 1
         },
@@ -90,7 +93,7 @@
           "row": 9
         },
         {
-          "kind": "ninja",
+          "kind": "lancer",
           "col": 4,
           "row": 7
         },
@@ -100,7 +103,7 @@
           "row": 8
         },
         {
-          "kind": "swordsman",
+          "kind": "archer",
           "col": 5,
           "row": 9
         }
@@ -108,11 +111,12 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 5,
           "col": 4,
           "row": 0
         },
         {
-          "kind": "swordsman",
+          "kind": "lancer",
           "col": 3,
           "row": 1
         },
@@ -229,16 +233,19 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 5,
           "col": 4,
           "row": 0
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 6,
           "row": 1
         },
         {
           "kind": "archer",
+          "hp": 2,
           "col": 2,
           "row": 1
         }
@@ -405,16 +412,19 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 3,
           "col": 4,
           "row": 0
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 3,
           "row": 1
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 5,
           "row": 1
         }
@@ -460,6 +470,7 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 5,
           "col": 4,
           "row": 0
         },
@@ -600,11 +611,13 @@
       "enemy": [
         {
           "kind": "king",
+          "hp": 5,
           "col": 4,
           "row": 0
         },
         {
           "kind": "swordsman",
+          "hp": 3,
           "col": 3,
           "row": 1
         },

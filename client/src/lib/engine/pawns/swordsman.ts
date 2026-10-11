@@ -33,6 +33,8 @@ const charge: SpecialAbility = {
   targeted: true,
   noTargets: 'noEnemiesWithinReach',
   choosesDestination: true,
+  movement: 'walk',
+  landingRange: 2,
   targetLabel: 'chargeTo',
   prompt: 'chooseTile',
   description: 'chargeDescription',
@@ -50,10 +52,16 @@ const charge: SpecialAbility = {
           destination: { q: tile.q, r: tile.r },
         }))
     }),
-  threat: (pawn, { target, from, movementCost }) => {
-    if (!canAttack(pawn, target, from)) return 0
-    const chargeCost = Math.max(0, movementCost - 2) + pawn.special.cost
-    return pawn.energy >= chargeCost ? (1 + pawn.energy - chargeCost) * pawn.attack.damage : 0
+  threat: (pawn, { target, from, movementCost, tiles, pawns }) => {
+    if (!tiles || !pawns || pawn.energy < movementCost + pawn.special.cost) return 0
+    const actor = pawn.clone()
+    actor.q = from.q
+    actor.r = from.r
+    return [...walkingPaths(tiles, [...pawns], actor, 2).values()].some(
+      (route) => route.damage < pawn.hp && canAttack(pawn, target, route.tile ?? from),
+    )
+      ? pawn.attack.damage
+      : 0
   },
   perform: ({ pawn, tiles, pawns, tile, destination, round, log, random }) => {
     const target = tile && pawnAt(pawns, tile)
@@ -80,7 +88,7 @@ export class Swordsman extends Pawn {
   static override readonly icon =
     'M20 3.5 9.5 14M20 3.5h-3.2L7.5 12.8M20 3.5v3.2l-9.3 9.3M5.5 11.5l7 7M8 16.5 3.5 21'
   static override readonly aiInstructions =
-    'melee, 2 damage. Charge (2): pick a tile up to 2 steps away, then an adjacent enemy; move there and strike for 2.'
+    'Charge (2): pick a tile up to 2 walking steps away (or stay), then choose an adjacent enemy and strike for 2. Once per activation.'
   readonly kind = 'swordsman' as const
   get maxHp(): number {
     return 5
