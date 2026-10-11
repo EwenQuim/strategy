@@ -206,7 +206,8 @@ export const Route = createFileRoute('/custom')({
                             min={0}
                             max={max}
                             step={1}
-                            value={count}
+                            value={count || ''}
+                            placeholder="0"
                             onFocus={(event) => event.target.select()}
                             aria-label={labels[side] + ' ' + unitNames[kind]}
                             disabled={side === 1 && enemy === null}
