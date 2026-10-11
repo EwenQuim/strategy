@@ -122,34 +122,6 @@ export const aiStrategies = t<Record<'depthsearch' | 'random' | 'mistral' | 'jev
   es: { depthsearch: 'IA Hexmate', random: 'Aleatoria', mistral: 'IA Mistral', jev: 'IA Jev' },
   it: { depthsearch: 'IA Hexmate', random: 'Casuale', mistral: 'IA Mistral', jev: 'IA Jev' },
 })
-export const mistralApiKey = t({
-  en: 'Mistral API key',
-  fr: 'Clé API Mistral',
-  de: 'Mistral API-Schlüssel',
-  es: 'Clave de API de Mistral',
-  it: 'Chiave API Mistral',
-})
-export const mistralApiKeyHint = t({
-  en: 'Powers the experimental Mistral AI strategy in custom battles. Stored only in this browser.',
-  fr: 'Alimente la stratégie expérimentale IA Mistral dans les batailles personnalisées. Stockée uniquement dans ce navigateur.',
-  de: 'Versorgt die experimentelle Mistral-KI-Strategie in eigenen Kämpfen. Nur in diesem Browser gespeichert.',
-  es: 'Alimenta la estrategia experimental IA de Mistral en batallas personalizadas. Se guarda solo en este navegador.',
-  it: 'Alimenta la strategia sperimentale IA Mistral nelle battaglie personalizzate. Salvata solo in questo browser.',
-})
-export const jevApiKey = t({
-  en: 'Jev API key',
-  fr: 'Clé API Jev',
-  de: 'Jev API-Schlüssel',
-  es: 'Clave de API de Jev',
-  it: 'Chiave API Jev',
-})
-export const jevApiKeyHint = t({
-  en: 'Powers the experimental Jev AI strategy in custom battles. Stored only in this browser.',
-  fr: 'Alimente la stratégie expérimentale IA Jev dans les batailles personnalisées. Stockée uniquement dans ce navigateur.',
-  de: 'Versorgt die experimentelle Jev-KI-Strategie in eigenen Kämpfen. Nur in diesem Browser gespeichert.',
-  es: 'Alimenta la estrategia experimental IA de Jev en batallas personalizadas. Se guarda solo en este navegador.',
-  it: 'Alimenta la strategia sperimentale IA Jev nelle battaglie personalizzate. Salvata solo in questo browser.',
-})
 export const biome = t({ en: 'Biome', fr: 'Biome', de: 'Biom', es: 'Bioma', it: 'Bioma' })
 export const mirrorRoster = t({
   en: 'Mirror player roster',
@@ -262,41 +234,6 @@ export const levelCard = t({
   de: (id: number, name: string, status: string) => `Level ${id}: ${name}, ${status}`,
   es: (id: number, name: string, status: string) => `Nivel ${id}: ${name}, ${status}`,
   it: (id: number, name: string, status: string) => `Livello ${id}: ${name}, ${status}`,
-})
-export const settings = t({
-  en: 'Settings',
-  fr: 'Paramètres',
-  de: 'Einstellungen',
-  es: 'Ajustes',
-  it: 'Impostazioni',
-})
-export const developerPreview = t({
-  en: 'Developer preview',
-  fr: 'Aperçu développeur',
-  de: 'Entwicklervorschau',
-  es: 'Vista previa para desarrolladores',
-  it: 'Anteprima sviluppatori',
-})
-export const developerPreviewHint = t({
-  en: 'Shows unfinished content, such as the Shattered Crown campaign.',
-  fr: 'Affiche le contenu en cours, comme la campagne Couronne brisée.',
-  de: 'Zeigt unfertige Inhalte, etwa die Kampagne Zerbrochene Krone.',
-  es: 'Muestra contenido sin terminar, como la campaña Corona rota.',
-  it: 'Mostra contenuti incompleti, come la campagna Corona infranta.',
-})
-export const haptics = t({
-  en: 'Haptic feedback',
-  fr: 'Retour haptique',
-  de: 'Haptisches Feedback',
-  es: 'Retroalimentación háptica',
-  it: 'Feedback aptico',
-})
-export const hapticsHint = t({
-  en: 'Vibrate on hits, kills and other combat events.',
-  fr: 'Vibre lors des coups, éliminations et autres événements de combat.',
-  de: 'Vibriert bei Treffern, Kills und anderen Kampfereignissen.',
-  es: 'Vibra al impactar, eliminar y otros eventos de combate.',
-  it: 'Vibra ai colpi, uccisioni e altri eventi di combattimento.',
 })
 export const achievements = t({
   en: 'Achievements',

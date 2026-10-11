@@ -17,7 +17,7 @@ import {
 // Z.ai GLM 5.3, hosted by Mistral: a reasoning model, markedly stronger at
 // positional planning than mistral-small at the cost of slower replies.
 const MODEL = 'zai-glm-5-3'
-const API_KEY_STORAGE = 'hexmate.mistralApiKey'
+export const API_KEY_STORAGE = 'hexmate.mistralApiKey'
 
 export function readMistralApiKey(): string | undefined {
   return readApiKey(API_KEY_STORAGE)

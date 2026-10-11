@@ -9,6 +9,7 @@ import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProg
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { campaignName } from '../i18n/campaign'
+import { settings } from '../i18n/settings'
 
 const homeControlClassName =
   buttonClassName +
@@ -100,7 +101,7 @@ export const Route = createFileRoute('/')({
             {(
               [
                 ['/achievements', 'trophy', m.achievements],
-                ['/settings', 'gear', m.settings],
+                ['/settings', 'gear', settings],
               ] as const
             ).map(([to, icon, label]) => (
               <Link
