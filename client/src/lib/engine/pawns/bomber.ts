@@ -3,9 +3,11 @@ import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
 import type { Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
+const bombReach = (pawn: Pawn) => 2 + pawn.adrenaline
+
 function bombTiles(pawn: Pawn, tiles: Map<string, Tile>): Tile[] {
   return canUseSpecial(pawn)
-    ? [...tiles.values()].filter((tile) => hexDist(pawn, tile) <= 2)
+    ? [...tiles.values()].filter((tile) => hexDist(pawn, tile) <= bombReach(pawn))
     : []
 }
 
@@ -16,9 +18,11 @@ const bomb: SpecialAbility = {
   targetLabel: 'bomb',
   prompt: 'chooseTile',
   description: 'bombDescription',
-  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2,
+  reaches: (pawn, tile) => hexDist(pawn, tile) <= bombReach(pawn),
   targets: (pawn, pawns, from = pawn) =>
-    pawns.filter((target) => target.side !== pawn.side && hexDist(from, target) <= 3),
+    pawns.filter(
+      (target) => target.side !== pawn.side && hexDist(from, target) <= bombReach(pawn) + 1,
+    ),
   areaTargets: (pawns, tile) => pawns.filter((target) => hexDist(tile, target) <= 1),
   tileTargets: (pawn, tiles) =>
     new Set(bombTiles(pawn, tiles).map((tile) => key(tile.q, tile.r))),
@@ -38,7 +42,7 @@ const bomb: SpecialAbility = {
       !bombTiles(pawn, tiles).some((center) => center.q === tile.q && center.r === tile.r)
     )
       return null
-    pawn.energy -= pawn.special.cost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const targets = bomb.areaTargets!(pawns, tile, pawn)
     return {

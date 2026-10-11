@@ -7,7 +7,7 @@ import { winnableAgainst } from '../campaign-actions.ts'
 const sparta = CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!
 const ragnarok = CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!
 // These encounters defeat the scripted player at every caution; a human wins them easily.
-const NOT_SCRIPTABLY_WINNABLE = new Set(['hot-gates:3'])
+const NOT_SCRIPTABLY_WINNABLE = new Set(['ragnarok:4'])
 
 test('Thermopylae and Ragnarok packs stay winnable level by level', () => {
   for (const pack of [sparta, ragnarok]) {

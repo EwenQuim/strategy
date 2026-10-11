@@ -23,7 +23,7 @@ const phalanx: SpecialAbility = {
   perform: ({ pawn, pawns, log, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
-    pawn.energy -= pawn.special.cost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     pawn.protectingId = target.id
     log.push(label(pawn) + ' shields ' + target.kind + ' #' + target.id + '.')
@@ -57,6 +57,10 @@ export class Hoplite extends Pawn {
     return 5
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2 }
+  // Brace: every banked energy point absorbs 1 damage from an incoming blow.
+  override adrenalineArmor(): number {
+    return this.adrenaline
+  }
   get special(): SpecialAbility {
     return phalanx
   }

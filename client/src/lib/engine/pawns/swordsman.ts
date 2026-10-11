@@ -11,6 +11,7 @@ import {
   walkingPaths,
 } from '../combat.ts'
 import { hexDist, key, type Tile } from '../hex.ts'
+import { ESCAPE_BONUS, MAX_ESCAPE } from './pawn.ts'
 import type { Action } from '../engine.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -55,7 +56,7 @@ const charge: SpecialAbility = {
     const chargeCost = Math.max(0, movementCost - 2) + pawn.special.cost
     return pawn.energy >= chargeCost ? (1 + pawn.energy - chargeCost) * pawn.attack.damage : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random }) => {
+  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random, spawn }) => {
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -64,12 +65,12 @@ const charge: SpecialAbility = {
       !specialTargets(pawns, pawn, destination).includes(target)
     )
       return null
-    pawn.energy -= pawn.special.cost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const route = walkingPaths(tiles, pawns, pawn, 2, key(destination.q, destination.r)).get(
       key(destination.q, destination.r),
     )!
-    const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log)
+    const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log, spawn)
     if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
@@ -86,6 +87,13 @@ export class Swordsman extends Pawn {
     return 5
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
+  // Guard: leftover energy banks Escape, but only while an enemy stands adjacent.
+  override endTurnEscape(pawns: readonly Pawn[]): number {
+    const fighting = pawns.some(
+      (foe) => foe.side !== this.side && foe.hp > 0 && hexDist(this, foe) === 1,
+    )
+    return fighting ? Math.min(MAX_ESCAPE, this.escapeChance + this.energy * ESCAPE_BONUS) : 0
+  }
   get special(): SpecialAbility {
     return charge
   }

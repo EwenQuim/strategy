@@ -12,6 +12,12 @@ function direction(from: Axial, to: Axial): string | null {
     : null
 }
 
+// Only the first fireball gets the Channel discount.
+const fireballCasts = (pawn: Pawn, energy: number): number =>
+  energy < pawn.specialCost
+    ? 0
+    : 1 + Math.floor((energy - pawn.specialCost) / pawn.special.cost)
+
 const fireball: SpecialAbility = {
   name: 'fireball',
   cost: 2,
@@ -48,9 +54,7 @@ const fireball: SpecialAbility = {
           .map(aimAt)
       : [],
   threat: (pawn, { target, from, movementCost }) =>
-    direction(from, target)
-      ? Math.max(0, Math.floor((pawn.energy - movementCost) / pawn.special.cost))
-      : 0,
+    direction(from, target) ? fireballCasts(pawn, pawn.energy - movementCost) : 0,
   perform: ({ pawn, tiles, pawns, log, random, tile }) => {
     if (!tile || !canUseSpecial(pawn) || !tiles.has(key(tile.q, tile.r))) return null
     const ray = direction(pawn, tile)
@@ -59,7 +63,7 @@ const fireball: SpecialAbility = {
     const end = line.reduce((furthest, position) =>
       hexDist(pawn, position) > hexDist(pawn, furthest) ? position : furthest,
     )
-    pawn.energy -= pawn.special.cost
+    pawn.paySpecial()
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const targets = fireball.areaTargets!(pawns, tile, pawn)
     return {
@@ -94,6 +98,15 @@ export class Magician extends Pawn {
     'ranged, 1 damage at distance 1-2. Fireball (2): pick a direction; 1 damage to every enemy along the line to the board edge, through terrain and units.'
   readonly kind = 'magician' as const
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
+  // Channel: every banked energy point makes the next Fireball cheaper, down to 1.
+  override get specialCost(): number {
+    return Math.max(1, this.special.cost - this.adrenaline)
+  }
+  override paySpecial(): void {
+    const discount = this.special.cost - this.specialCost
+    super.paySpecial()
+    this.adrenaline -= discount
+  }
   get special(): SpecialAbility {
     return fireball
   }

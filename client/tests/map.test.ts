@@ -108,7 +108,10 @@ test('Seeded games cover random biomes without Hell, broken shapes or isolated s
       }
     }
   }
-  assert.deepEqual(biomes, new Set(Object.keys(BIOMES).filter((biome) => biome !== 'hell')))
+  assert.deepEqual(
+    biomes,
+    new Set(Object.keys(BIOMES).filter((biome) => biome !== 'hell' && biome !== 'magic')),
+  )
 })
 
 test('Symmetric seeds generate mirrored, connected battlefields with authored obstacle shapes', () => {
@@ -264,4 +267,23 @@ test('Arrows, Aimed shot, magic, and Fireball cross lakes for both sides', () =>
       }
     }
   }
+})
+
+test('Magic World maps hold one mirrored portal pair; dens appear in wild biomes', () => {
+  let dens = 0
+  for (let index = 0; index < 100; index++) {
+    const seed = seedState('rare-' + index)
+    for (const symmetric of [false, true]) {
+      const gates = [
+        ...makeMap(new SeededRandom(seed), 'magic', [], symmetric).values(),
+      ].filter((tile) => tile.feature === 'portal')
+      assert.equal(gates.length, 2)
+      assert.deepEqual(mirrorAxial(gates[0]), { q: gates[1].q, r: gates[1].r })
+    }
+    for (const biome of ['verdant', 'mountains'] as const)
+      dens += [...makeMap(new SeededRandom(seed), biome).values()].filter(
+        (tile) => tile.feature === 'den',
+      ).length
+  }
+  assert.ok(dens > 50 && dens < 150, String(dens))
 })

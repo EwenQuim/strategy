@@ -6,7 +6,8 @@ import ringLevels from './campaigns/004-war-of-the-ring.json' with { type: 'json
 import throneLevels from './campaigns/005-iron-throne.json' with { type: 'json' }
 import spartaLevels from './campaigns/006-hot-gates.json' with { type: 'json' }
 import ragnarokLevels from './campaigns/007-ragnarok.json' with { type: 'json' }
-import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
+import { type Terrain, type TileFeature } from './engine/hex.ts'
+import { mapFromRows } from './engine/mapRows.ts'
 import { validateSetup } from './engine/setup.ts'
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 import type { PawnKind } from './engine/pawns/index.ts'
@@ -16,7 +17,7 @@ export type IntroducedElement =
   | PawnKind
   | Exclude<Terrain, 'plain' | 'forest' | 'palm' | 'basalt'>
   | TileFeature
-  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano'>
+  | Exclude<Biome, 'verdant' | 'mountains' | 'desert' | 'volcano' | 'magic'>
 
 export interface CampaignLevel {
   id: number

@@ -1,5 +1,13 @@
-import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
-import type { AttackProfile, Pawn, Side } from './pawns/index.ts'
+import {
+  hexDist,
+  key,
+  neighborKeys,
+  passable,
+  portalTwin,
+  type Axial,
+  type Tile,
+} from './hex.ts'
+import type { AttackProfile, Pawn, PawnSpawner, Side } from './pawns/index.ts'
 import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
@@ -23,7 +31,7 @@ export function walkingPaths(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
-  maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1),
+  maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1 + pawn.adrenalineSteps()),
   destination?: string,
 ): Map<string, WalkRoute> {
   const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
@@ -36,7 +44,11 @@ export function walkingPaths(
   for (let step = 1; step <= maxSteps && frontier.length; step++) {
     const next: WalkRoute[] = []
     for (const current of frontier) {
-      for (const k of grid.get(current.key) ?? []) {
+      // Entering a portal tile continues on its twin as if it were the next tile.
+      const exits = [...(grid.get(current.key) ?? [])]
+      const twin = portalTwin(tiles, current.key)
+      if (twin) exits.push(twin)
+      for (const k of exits) {
         const tile = tiles.get(k)
         if (!tile || !passable(tile) || occupied.has(k)) continue
         const damage = current.damage + Number(tile.terrain === 'lava')
@@ -66,6 +78,7 @@ export function enterTiles(
   path: Tile[],
   round: number,
   log: string[],
+  spawn: PawnSpawner,
 ): BattleImpact[] {
   const impacts: BattleImpact[] = []
   for (const tile of path) {
@@ -88,8 +101,35 @@ export function enterTiles(
       tiles.set(key(tile.q, tile.r), { q: tile.q, r: tile.r, terrain: tile.terrain })
       log.push(label(pawn) + ' collects a power rune: +2 energy this round.')
     }
+    wakeDens(tiles, pawn, log, spawn)
   }
   return impacts
+}
+
+// Reaching a den wakes its beast for the moving side: the den feature is consumed and a Beast
+// pawn appears on the tile, joining the side that touched it.
+function wakeDens(
+  tiles: Map<string, Tile>,
+  pawn: Pawn,
+  log: string[],
+  spawn: PawnSpawner,
+): void {
+  if (pawn.hp <= 0) return
+  for (const den of [...tiles.values()].filter((tile) => tile.feature === 'den')) {
+    if (hexDist(pawn, den) > 1) continue
+    const beast = spawn('beast', pawn.side, den.q, den.r)
+    if (!beast) continue
+    tiles.set(key(den.q, den.r), { q: den.q, r: den.r, terrain: den.terrain })
+    log.push(
+      (pawn.side === 'player' ? 'Your ' : 'Enemy ') +
+        pawn.kind +
+        ' #' +
+        pawn.id +
+        ' wakes the sleeping beast: it fights for ' +
+        (pawn.side === 'player' ? 'you' : 'the enemy') +
+        '.',
+    )
+  }
 }
 
 export function movementDestinations(
@@ -115,7 +155,10 @@ export function inAttackRange(pawn: Pawn, at: Axial, from: Axial = pawn): boolea
   const distance = hexDist(from, at)
   const bonus =
     'feature' in from && from.feature === 'watchtower' ? (pawn.attack.rangeBonus ?? 0) : 0
-  return distance >= pawn.attack.minRange && distance <= pawn.attack.maxRange + bonus
+  return (
+    distance >= pawn.attack.minRange &&
+    distance <= pawn.attack.maxRange + bonus + pawn.adrenalineRange()
+  )
 }
 
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
@@ -123,7 +166,7 @@ export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean
 }
 
 export function canUseSpecial(pawn: Pawn): boolean {
-  return pawn.energy >= pawn.special.cost && (!pawn.special.oncePerRound || !pawn.specialUsed)
+  return pawn.energy >= pawn.specialCost && (!pawn.special.oncePerRound || !pawn.specialUsed)
 }
 
 export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): Pawn[] {
@@ -151,6 +194,8 @@ export function strike(
     target.escapeChance > 0 &&
     random.next() * 100 < target.escapeChance
   ) {
+    // A successful dodge spends the whole bank: the same unit cannot dodge twice off one turn.
+    target.escapeChance = 0
     log.push(label(target) + ' escapes the attack.')
     return { q: target.q, r: target.r, damage: 0 }
   }
@@ -160,7 +205,10 @@ export function strike(
     log.push(label(protector) + ' takes the hit for ' + target.kind + ' #' + target.id + '.')
     target = protector
   }
-  target.hp -= profile.damage
+  const braced = Math.min(profile.damage - 1, target.adrenalineArmor())
+  const damage = profile.damage - braced
+  if (braced > 0) log.push(label(target) + ' braces: ' + braced + ' damage absorbed.')
+  target.hp -= damage
   log.push(
     label(attacker) +
       ' strikes ' +
@@ -168,14 +216,14 @@ export function strike(
       ' #' +
       target.id +
       ' for ' +
-      profile.damage +
+      damage +
       ' damage.',
   )
   if (target.hp <= 0) {
     pawns.splice(pawns.indexOf(target), 1)
     log.push(label(target) + ' has fallen.')
   }
-  return { q: target.q, r: target.r, damage: profile.damage }
+  return { q: target.q, r: target.r, damage }
 }
 
 export function strikeArea(
@@ -206,7 +254,19 @@ export function performAttack(
 ): BattleImpact[] | null {
   if (pawn.energy < 1 || !canAttack(pawn, target, tiles.get(key(pawn.q, pawn.r)))) return null
   pawn.energy--
-  return [strike(pawns, pawn, target, pawn.attack, log, random)]
+  return [
+    strike(
+      pawns,
+      pawn,
+      target,
+      {
+        ...pawn.attack,
+        damage: pawn.attack.damage + pawn.adrenalineDamage() + pawn.floodDamage(pawns),
+      },
+      log,
+      random,
+    ),
+  ]
 }
 
 export const attackTargets = (pawn: Pawn, pawns: readonly Pawn[], from: Axial = pawn): Pawn[] =>

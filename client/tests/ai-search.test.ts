@@ -88,17 +88,17 @@ test('A dodged winning blow still finishes the turn before the next ply', () => 
     assert.ok(next.winner || activePawn(next)?.id !== 1, 'The swordsman is still acting')
 })
 
-test('Turn plans keep equal positions that saved different escape chances', () => {
+test('Turn plans keep equal positions that banked different adrenaline', () => {
   const state = battle([
     new Ninja(1, 0, 0, 'enemy'),
     new King(2, -6, 0, 'enemy'),
     new King(3, 6, 0, 'player'),
   ])
-  const escapes = turnPlans(state)
+  const banks = turnPlans(state)
     .map((plan) => plan.state.pawns.find((p) => p.id === 1)!)
     .filter((ninja) => ninja.q === 1 && ninja.r === 0)
-    .map((ninja) => ninja.escapeChance)
-  assert.ok(escapes.includes(0) && escapes.includes(40), 'Escapes found: ' + escapes.join(', '))
+    .map((ninja) => ninja.adrenaline)
+  assert.ok(banks.includes(0) && banks.includes(2), 'Banks found: ' + banks.join(', '))
 })
 
 test('A rune-boosted attacker facing many targets plans and decides quickly', () => {

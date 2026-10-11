@@ -13,7 +13,7 @@ const moveTo = (q: number, r: number): Action => ({ type: 'move', q, r })
 export function positionKey(state: GameState): string {
   let key = `${state.active}|${state.round}|${state.winner}`
   for (const pawn of state.pawns)
-    key += `|${pawn.id}:${pawn.q}:${pawn.r}:${pawn.hp}:${pawn.energy}:${pawn.escapeChance}:${pawn.protectingId}:${pawn.specialUsed}:${pawn.bonusEnergy}:${pawn.springSince}`
+    key += `|${pawn.id}:${pawn.q}:${pawn.r}:${pawn.hp}:${pawn.energy}:${pawn.escapeChance}:${pawn.protectingId}:${pawn.specialUsed}:${pawn.bonusEnergy}:${pawn.springSince}:${pawn.adrenaline}`
   return key
 }
 

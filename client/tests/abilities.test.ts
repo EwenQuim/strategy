@@ -151,7 +151,7 @@ for (const side of ['player', 'enemy'] as const) {
       assert.equal(protectorFor(next.pawns, next.pawns[1])?.id, 1)
       next = reducer(next, { type: 'endTurn' })
       next = reducer(next, { type: 'attack', q: 2, r: 0 })
-      assert.equal(next.pawns[0].hp, 8)
+      assert.equal(next.pawns[0].hp, 9)
       assert.equal(next.pawns[1].hp, 7)
       assert.equal(next.pawns[0].protectingId, null)
     },

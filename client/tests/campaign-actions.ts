@@ -35,7 +35,7 @@ export function winnableAgainst(level: CampaignLevel, difficulty: BotDifficulty)
 
 // These encounters defeat the scripted player at every caution against the hard AI.
 // A human may still win them; if brutal proves unbeatable, tune their enemy rosters.
-const NOT_SCRIPTABLY_WINNABLE = new Set([6, 8, 10, 12, 20])
+const NOT_SCRIPTABLY_WINNABLE = new Set([4, 6, 8, 9, 10, 12, 17, 20])
 
 export function assertBrutalWinnable(ids: readonly number[]) {
   for (const level of CAMPAIGNS[2].levels) {

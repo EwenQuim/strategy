@@ -116,6 +116,7 @@
                   "!../hex.ts",
                   "!../hellfire.ts",
                   "!../setup.ts",
+                  "!../targeting.ts",
                   "!../pawns/index.ts"
                 ]
               }

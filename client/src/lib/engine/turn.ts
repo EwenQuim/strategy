@@ -12,9 +12,11 @@ export function winnerFrom(pawns: Pawn[], actingSide: Side): Side | null {
   return null
 }
 
-export function finishTurn(pawn: Pawn, log: string[]): boolean {
+export function finishTurn(pawns: Pawn[], pawn: Pawn, log: string[]): boolean {
   const previousEscape = pawn.escapeChance
-  pawn.endTurn()
+  const banked = pawn.energy
+  pawn.endTurn(pawns)
+  if (banked > 0) log.push(`${label(pawn)} banks ${banked} adrenaline.`)
   const gained = pawn.escapeChance - previousEscape
   if (gained <= 0) return false
   log.push(`${label(pawn)} ends turn: +${gained}% escape (${pawn.escapeChance}% total).`)
