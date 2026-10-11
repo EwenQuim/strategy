@@ -2,19 +2,18 @@ import { activePawn, type Action, type GameState } from './engine.ts'
 import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import { BOT_LEVELS, type BotOptions } from './ai.ts'
-import { LOCAL_STRATEGIES, DEFAULT_BOT_CONFIG, type LocalBotConfig } from './ai/decision.ts'
+import type { AiStrategy } from './ai/decision.ts'
 
-export interface BotStrategy {
+export interface TargetPicker {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
 }
 
-export const nearestTarget: BotStrategy = {
+export const nearestTarget: TargetPicker = {
   chooseTarget: (attacker, targets) =>
     targets.toSorted((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
 }
 
-export const huntTheKing: BotStrategy = {
+export const huntTheKing: TargetPicker = {
   chooseTarget: (attacker, targets) =>
     nearestTarget.chooseTarget(
       attacker,
@@ -22,49 +21,20 @@ export const huntTheKing: BotStrategy = {
     ) ?? nearestTarget.chooseTarget(attacker, targets),
 }
 
-// Who thinks for the enemy army: a local bot config, raw search options for analysis
-// tools, or a rule-based target picker for scripted tests and campaigns.
-type BotController = BotStrategy | LocalBotConfig | BotOptions
-
-const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
-  !!options &&
-  [2, 3].includes(options.depth) &&
-  Number.isInteger(options.beamWidth) &&
-  options.beamWidth >= 1 &&
-  options.beamWidth <= 32 &&
-  Number.isFinite(options.riskAppetite) &&
-  options.riskAppetite >= -1 &&
-  options.riskAppetite <= 1 &&
-  ['best', 'nearest', 'weakest'].includes(options.focus) &&
-  Number.isFinite(options.latitude) &&
-  options.latitude >= 0 &&
-  options.latitude <= 100
-
-export async function chooseBotActions(
-  state: GameState,
-  controller: BotController = DEFAULT_BOT_CONFIG,
-): Promise<Action[]> {
-  if (!('chooseTarget' in controller)) {
-    if ('name' in controller)
-      return LOCAL_STRATEGIES[controller.name](
-        state,
-        controller.name === 'depthsearch'
-          ? BOT_LEVELS[controller.difficulty]
-          : BOT_LEVELS.normal,
-      )
-    if (!validBotOptions(controller)) throw new RangeError('Invalid bot options')
-    return LOCAL_STRATEGIES.depthsearch(state, controller)
+// Scripted opponents use the same action-proposing contract as local and remote strategies.
+export function ruleBased(targetPicker: TargetPicker): AiStrategy {
+  return async (state) => {
+    const pawn = activePawn(state)
+    if (!pawn || state.winner) return []
+    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const foes = state.pawns.filter((p) => p.side !== pawn.side)
+    const specials = specialTargets(state.pawns, pawn)
+    return (
+      ruleSpecial(state, pawn, foes, specials, targetPicker) ??
+      ruleAttack(state, pawn, foes, targetPicker) ??
+      ruleApproach(state, pawn, foes)
+    )
   }
-  const pawn = activePawn(state)
-  if (!pawn || state.winner) return []
-  if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-  const foes = state.pawns.filter((p) => p.side !== pawn.side)
-  const specials = specialTargets(state.pawns, pawn)
-  return (
-    ruleSpecial(state, pawn, foes, specials, controller) ??
-    ruleAttack(state, pawn, foes, controller) ??
-    ruleApproach(state, pawn, foes)
-  )
 }
 
 function ruleSpecial(
@@ -72,7 +42,7 @@ function ruleSpecial(
   pawn: Pawn,
   foes: Pawn[],
   specials: Pawn[],
-  strategy: BotStrategy,
+  strategy: TargetPicker,
 ): Action[] | null {
   const own = pawn.ai.ruleSpecial?.(pawn, state, foes, specials)
   if (own) return [own]
@@ -116,7 +86,7 @@ function ruleAttack(
   state: GameState,
   pawn: Pawn,
   foes: Pawn[],
-  strategy: BotStrategy,
+  strategy: TargetPicker,
 ): Action[] | null {
   const target = strategy.chooseTarget(
     pawn,

@@ -14,7 +14,7 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
 import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
@@ -41,10 +41,7 @@ async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Prom
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of await chooseBotActions(state, {
-      name: 'depthsearch',
-      difficulty: level,
-    })) {
+    for (const action of await depthsearch(state, BOT_LEVELS[level])) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next
@@ -65,10 +62,9 @@ test('Equally valued attacks keep candidate order at every difficulty', async ()
       ...targets,
     ])
     for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
-      assert.deepEqual(
-        await chooseBotActions(state, { name: 'depthsearch', difficulty: level }),
-        [{ type: 'attack', q: targets[0].q, r: targets[0].r }],
-      )
+      assert.deepEqual(await depthsearch(state, BOT_LEVELS[level]), [
+        { type: 'attack', q: targets[0].q, r: targets[0].r },
+      ])
     }
   }
 })
@@ -313,7 +309,9 @@ test('AI uses Aimed shot rather than gambling on an escaping king', async () => 
     new King(2, -6, 0, 'enemy'),
     new King(3, 2, 0, 'player', 2, 3, 60),
   ])
-  assert.deepEqual(await chooseBotActions(state), [{ type: 'special', target: { q: 2, r: 0 } }])
+  assert.deepEqual(await depthsearch(state, BOT_LEVELS.normal), [
+    { type: 'special', target: { q: 2, r: 0 } },
+  ])
 })
 
 test('Analysis is deterministic, immutable, configurable and independent of the real Escape stream', async () => {
@@ -323,11 +321,11 @@ test('Analysis is deterministic, immutable, configurable and independent of the 
     new King(3, 2, 0, 'player', 4, 3, 60),
   ])
   const original = structuredClone(state)
-  const actions = await chooseBotActions(state)
+  const actions = await depthsearch(state, BOT_LEVELS.normal)
   for (let randomState = 0; randomState < 10; randomState++)
-    assert.deepEqual(await chooseBotActions({ ...state, randomState }), actions)
+    assert.deepEqual(await depthsearch({ ...state, randomState }, BOT_LEVELS.normal), actions)
   assert.deepEqual(structuredClone(state), original)
-  assert.deepEqual(await chooseBotActions(state, { ...BOT_LEVELS.normal }), actions)
+  assert.deepEqual(await depthsearch(state, { ...BOT_LEVELS.normal }), actions)
   for (const options of [
     { ...BOT_LEVELS.normal, depth: 0 },
     { ...BOT_LEVELS.normal, beamWidth: 0 },
@@ -335,7 +333,7 @@ test('Analysis is deterministic, immutable, configurable and independent of the 
     { ...BOT_LEVELS.normal, latitude: 1000 },
   ])
     await assert.rejects(
-      chooseBotActions(state, options as typeof BOT_LEVELS.normal),
+      depthsearch(state, options as typeof BOT_LEVELS.normal),
       /Invalid bot options/,
     )
 })

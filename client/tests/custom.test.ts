@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { parseGameSearch, usesSymmetricField } from '../src/lib/game-mode.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { createBotGame } from './bot-game.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { activePawn, initialState, transition } from '../src/lib/engine/engine.ts'
@@ -74,15 +75,15 @@ test('Custom search accepts more Bulwarks than one front row', () => {
 test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', async () => {
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
-    const config = { name: 'depthsearch', difficulty } as const
-    const bot = createBotGame(config)
+    const options = BOT_LEVELS[difficulty]
+    const bot = createBotGame(depthsearch, options)
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
       const expected = await bot.transition(playback.state, { type: 'endTurn' })
       playback = playbackReducer(playback, { type: 'endTurn' }, 'ai')
       while (!playback.state.winner && activePawn(playback.state)?.side === 'enemy') {
-        const actions = await chooseBotActions(playback.state, config)
+        const actions = await depthsearch(playback.state, options)
         playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai')
         playback = playbackReducer(playback, { type: 'botActions', actions }, 'ai')
       }

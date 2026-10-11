@@ -1,14 +1,16 @@
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
-import { DEFAULT_BOT_CONFIG } from '../src/lib/bot-config.ts'
+import type { AiStrategy } from '../src/lib/engine/ai/decision.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { BOT_LEVELS, type BotOptions } from '../src/lib/engine/ai.ts'
 import { activePawn, type Action, type GameState } from '../src/lib/engine/index.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import type { BattleSetup, Transition } from '../src/lib/engine/index.ts'
 
-type BotController = Parameters<typeof chooseBotActions>[1]
-
 // Plays a single-player battle the way useGame does: the player's action, then every enemy
 // turn the bot proposes, through the same playback reducer.
-export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
+export function createBotGame(
+  strategy: AiStrategy = depthsearch,
+  options: BotOptions = BOT_LEVELS.normal,
+) {
   const initialTransition = (seed: string, setup?: BattleSetup) =>
     initialPlayback(seed, 'ai', setup)
   const transition = async (state: GameState, action: Action): Promise<Transition> => {
@@ -17,7 +19,7 @@ export function createBotGame(controller: BotController = DEFAULT_BOT_CONFIG) {
     let playback = playbackReducer({ state, frames: [] }, action, 'ai')
     const frames = [...playback.frames]
     while (!playback.state.winner && activePawn(playback.state)?.side === 'enemy') {
-      const actions = await chooseBotActions(playback.state, controller)
+      const actions = await strategy(playback.state, options)
       playback = playbackReducer(
         { state: playback.state, frames: [] },
         { type: 'botActions', actions },

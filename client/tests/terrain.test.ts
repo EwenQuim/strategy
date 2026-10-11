@@ -26,7 +26,9 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { ruleBased } from '../src/lib/engine/bot.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { createBotGame } from './bot-game.ts'
 import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
@@ -331,23 +333,20 @@ test('Jump ignores crossed lava and runes but triggers its landing tile', () => 
 })
 
 test('Bots can use tower range and evaluate lethal lava moves without crashing or choosing suicide', async () => {
-  for (const strategy of [
-    { name: 'depthsearch', difficulty: 'easy' },
-    { name: 'depthsearch', difficulty: 'normal' },
-    { name: 'depthsearch', difficulty: 'hard' },
-    nearestTarget,
+  for (const [strategy, options] of [
+    [depthsearch, BOT_LEVELS.easy],
+    [depthsearch, BOT_LEVELS.normal],
+    [depthsearch, BOT_LEVELS.hard],
+    [ruleBased(nearestTarget), BOT_LEVELS.normal],
   ] as const) {
     const state = battle(new Archer(1, 0, 5, 'enemy', 3, 1))
     state.tiles.get('0,5')!.feature = 'watchtower'
     state.pawns[2].q = 4
     state.pawns[2].r = 5
     state.pawns[2].hp = 1
-    assert.equal(
-      (await chooseBotActions(state, strategy)).reduce(reducer, state).winner,
-      'enemy',
-    )
+    assert.equal((await strategy(state, options)).reduce(reducer, state).winner, 'enemy')
     const lava = corridor(new Ninja(1, 0, 5, 'enemy'))
-    const next = (await chooseBotActions(lava, strategy)).reduce(reducer, lava)
+    const next = (await strategy(lava, options)).reduce(reducer, lava)
     assert.ok(next.pawns.some((pawn) => pawn.id === 1))
   }
 })

@@ -18,7 +18,8 @@ import {
   type Biome,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { ruleBased } from '../src/lib/engine/bot.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { initialState as botState, transition as botTransition } from './bot-game.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/lib/engine/bot.ts'
@@ -1849,7 +1850,7 @@ test(
     assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), opening)
 
     for (let step = 0; step < 100 && !state.winner; step++) {
-      for (const action of await chooseBotActions(state, huntTheKing)) {
+      for (const action of await ruleBased(huntTheKing)(state, BOT_LEVELS.normal)) {
         const pawn = activePawn(state)!
         assert.equal(
           await page

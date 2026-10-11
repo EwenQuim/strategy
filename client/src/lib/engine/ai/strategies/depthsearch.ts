@@ -247,7 +247,22 @@ function untilFirstRoll(actions: Action[]): Action[] {
   return roll < 0 ? actions : actions.slice(0, roll + 1)
 }
 
+const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
+  !!options &&
+  [2, 3].includes(options.depth) &&
+  Number.isInteger(options.beamWidth) &&
+  options.beamWidth >= 1 &&
+  options.beamWidth <= 32 &&
+  Number.isFinite(options.riskAppetite) &&
+  options.riskAppetite >= -1 &&
+  options.riskAppetite <= 1 &&
+  ['best', 'nearest', 'weakest'].includes(options.focus) &&
+  Number.isFinite(options.latitude) &&
+  options.latitude >= 0 &&
+  options.latitude <= 100
+
 export async function depthsearch(state: GameState, options: BotOptions): Promise<Action[]> {
+  if (!validBotOptions(options)) throw new RangeError('Invalid bot options')
   Object.assign(searchStats, {
     decisions: 1,
     plansEnumerated: 0,
