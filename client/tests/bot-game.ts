@@ -1,5 +1,5 @@
 import { chooseBotActions } from '../src/lib/engine/bot.ts'
-import { DEFAULT_BOT_CONFIG } from '../src/lib/engine/ai/decision.ts'
+import { DEFAULT_BOT_CONFIG } from '../src/lib/bot-config.ts'
 import { activePawn, type Action, type GameState } from '../src/lib/engine/index.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import type { BattleSetup, Transition } from '../src/lib/engine/index.ts'

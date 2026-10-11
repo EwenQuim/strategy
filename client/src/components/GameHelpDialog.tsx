@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 import type { BattleSetup, Biome } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
-import type { BotConfig } from '../lib/engine/ai/decision'
+import type { BotConfig } from '../lib/bot-config'
 import { INTRODUCTIONS } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'

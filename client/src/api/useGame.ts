@@ -8,24 +8,12 @@ import {
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
 import { hapticForFrame } from '../haptics.ts'
 import { useOnlineSync } from './onlineSync.ts'
-import { jevChooseAction } from './jevBot.ts'
-import { mistralChooseAction } from './mistralBot.ts'
+import { STRATEGIES } from './bots.ts'
 import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import {
-  botOptions,
-  DEFAULT_BOT_CONFIG,
-  STRATEGIES,
-  type AiStrategy,
-  type BotConfig,
-} from '../lib/engine/ai/decision.ts'
-
-const REMOTE_BOTS: Partial<Record<BotConfig['name'], AiStrategy>> = {
-  mistral: async (state) => [await mistralChooseAction(state)],
-  jev: async (state) => [await jevChooseAction(state)],
-}
+import { botOptions, DEFAULT_BOT_CONFIG, type BotConfig } from '../lib/bot-config.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -81,7 +69,7 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  const strategy = REMOTE_BOTS[bot.name] ?? STRATEGIES[bot.name]
+  const strategy = STRATEGIES[bot.name]
   const options = botOptions(bot)
   useEffect(() => {
     if (mode !== 'ai' || online || playing || state.winner) return

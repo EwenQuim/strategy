@@ -8,7 +8,7 @@ import {
   type GameState,
 } from '../src/lib/engine/index.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { STRATEGIES } from '../src/lib/engine/ai/decision.ts'
+import { STRATEGIES } from '../src/api/bots.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
 import { actionFromReply, battlePrompt, mistralChooseAction } from '../src/api/mistralBot.ts'
 
@@ -53,7 +53,7 @@ test('A model reply is accepted only when the engine accepts the action', () => 
   assert.equal(actionFromReply('{"type":"move","q":99,"r":99}', state), null)
 })
 
-test('Without the adapter the mistral strategy falls back to the local search', async () => {
+test('Without an API key the registered Mistral bot falls back to the local search', async () => {
   const state = enemyTurn('mistral-sync')
   const actions = await STRATEGIES.mistral(state, BOT_LEVELS.normal)
   assert.ok(actions.length > 0)

@@ -4,7 +4,7 @@ import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
 import { levelName } from '../i18n/campaign'
 import { type GameMode, type PlayerNames, searchFromBot } from '../lib/game-mode'
-import type { BotConfig } from '../lib/engine/ai/decision'
+import type { BotConfig } from '../lib/bot-config'
 import { Icon } from './Icon'
 import { primaryButtonClassName } from './styles'
 

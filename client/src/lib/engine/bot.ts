@@ -2,8 +2,8 @@ import { activePawn, type Action, type GameState } from './engine.ts'
 import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import type { BotOptions } from './ai.ts'
-import { botOptions, STRATEGIES, DEFAULT_BOT_CONFIG, type BotConfig } from './ai/decision.ts'
+import { BOT_LEVELS, type BotOptions } from './ai.ts'
+import { LOCAL_STRATEGIES, DEFAULT_BOT_CONFIG, type LocalBotConfig } from './ai/decision.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
@@ -22,9 +22,9 @@ export const huntTheKing: BotStrategy = {
     ) ?? nearestTarget.chooseTarget(attacker, targets),
 }
 
-// Who thinks for the enemy army: a registered config, raw search options for analysis
+// Who thinks for the enemy army: a local bot config, raw search options for analysis
 // tools, or a rule-based target picker for scripted tests and campaigns.
-type BotController = BotStrategy | BotConfig | BotOptions
+type BotController = BotStrategy | LocalBotConfig | BotOptions
 
 const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
   !!options &&
@@ -45,9 +45,15 @@ export async function chooseBotActions(
   controller: BotController = DEFAULT_BOT_CONFIG,
 ): Promise<Action[]> {
   if (!('chooseTarget' in controller)) {
-    if ('name' in controller) return STRATEGIES[controller.name](state, botOptions(controller))
+    if ('name' in controller)
+      return LOCAL_STRATEGIES[controller.name](
+        state,
+        controller.name === 'depthsearch'
+          ? BOT_LEVELS[controller.difficulty]
+          : BOT_LEVELS.normal,
+      )
     if (!validBotOptions(controller)) throw new RangeError('Invalid bot options')
-    return STRATEGIES.depthsearch(state, controller)
+    return LOCAL_STRATEGIES.depthsearch(state, controller)
   }
   const pawn = activePawn(state)
   if (!pawn || state.winner) return []

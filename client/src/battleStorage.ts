@@ -6,7 +6,7 @@ import {
   snapshotState,
 } from './lib/battleSnapshot.ts'
 import type { BattleSetup, GameState } from './lib/engine/index.ts'
-import type { BotConfig } from './lib/engine/ai/decision.ts'
+import type { BotConfig } from './lib/bot-config.ts'
 import type { GameMode } from './lib/game-mode.ts'
 
 // A single slot for the current battle: every save overwrites the previous game.
