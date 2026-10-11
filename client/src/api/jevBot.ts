@@ -26,7 +26,7 @@ import {
 
 const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
-const API_KEY_STORAGE = 'hexmate.jevApiKey'
+export const API_KEY_STORAGE = 'hexmate.jevApiKey'
 
 export function readJevApiKey(): string | undefined {
   return readApiKey(API_KEY_STORAGE)
