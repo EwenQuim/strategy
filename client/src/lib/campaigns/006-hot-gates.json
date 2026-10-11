@@ -412,11 +412,6 @@
           "row": 0
         },
         {
-          "kind": "archer",
-          "col": 5,
-          "row": 0
-        },
-        {
           "kind": "magician",
           "col": 4,
           "row": 1
