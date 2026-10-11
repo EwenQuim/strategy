@@ -18,7 +18,7 @@ import {
 import { seedState } from '../../src/lib/engine/random.ts'
 
 import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
-import { depthsearch } from '../../src/lib/engine/ai/strategies/depthsearch.ts'
+import { depthsearch } from '../../src/lib/bots/depthsearch.ts'
 
 async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Promise<GameState> {
   const id = activePawn(state)!.id

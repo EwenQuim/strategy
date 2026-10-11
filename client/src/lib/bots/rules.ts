@@ -1,8 +1,8 @@
-import { activePawn, type Action, type GameState } from './engine.ts'
-import { canAttack, specialTargets } from './combat.ts'
-import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
-import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import type { Bot } from './ai.ts'
+import { activePawn, type Action, type GameState } from '../engine/engine.ts'
+import { canAttack, specialTargets } from '../engine/combat.ts'
+import { chargeDestinations, jumpDestinations, type Pawn } from '../engine/pawns/index.ts'
+import { distFrom, hexDist, key, neighbors, passable } from '../engine/hex.ts'
+import type { Bot } from './bot.ts'
 
 export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
@@ -34,14 +34,6 @@ export function ruleBot(strategy: BotStrategy): Bot {
       ruleAttack(state, pawn, foes, strategy) ??
       ruleApproach(state, pawn, foes)
     )
-  }
-}
-
-// Plays the primary bot's proposal, or the fallback's when the primary fails or has nothing.
-export function withFallback(primary: Bot, fallback: Bot): Bot {
-  return async (state) => {
-    const actions = await primary(state).catch(() => [])
-    return actions.length ? actions : fallback(state)
   }
 }
 

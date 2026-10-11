@@ -29,7 +29,7 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][] {

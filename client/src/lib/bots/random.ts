@@ -1,6 +1,6 @@
-import { activePawn, reducer, type Action, type GameState } from '../../engine.ts'
-import { SeededRandom, seedState } from '../../random.ts'
-import { legalActions } from '../options.ts'
+import { activePawn, reducer, type Action, type GameState } from '../engine/engine.ts'
+import { SeededRandom, seedState } from '../engine/random.ts'
+import { legalActions } from '../engine/ai/options.ts'
 
 // Plays the whole turn from one seeded stream: the battle's stream only moves on rolls, so seeding
 // each step from its state would repeat the same draw after every move. The round and the unit

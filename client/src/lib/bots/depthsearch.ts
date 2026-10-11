@@ -1,10 +1,11 @@
-import { activePawn, reducer, type Action, type GameState } from '../../engine.ts'
-import type { Pawn, Side } from '../../pawns/index.ts'
-import type { Bot, BotOptions } from '../../ai.ts'
-import { distancesToAttack, evaluatePosition, type ReachCache } from '../evaluate.ts'
-import { sidePlan } from '../plan.ts'
-import { chooseOption, hpOf, type Outcome } from '../choice.ts'
-import { positionKey, turnPlans, type TurnPlan } from '../turns.ts'
+import { activePawn, reducer, type Action, type GameState } from '../engine/engine.ts'
+import type { Pawn, Side } from '../engine/pawns/index.ts'
+import type { BotOptions } from '../engine/ai.ts'
+import type { Bot } from './bot.ts'
+import { distancesToAttack, evaluatePosition, type ReachCache } from '../engine/ai/evaluate.ts'
+import { sidePlan } from '../engine/ai/plan.ts'
+import { chooseOption, hpOf, type Outcome } from '../engine/ai/choice.ts'
+import { positionKey, turnPlans, type TurnPlan } from '../engine/ai/turns.ts'
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
   return {

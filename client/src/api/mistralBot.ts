@@ -1,6 +1,6 @@
 import { legalActions } from '../lib/engine/ai/options.ts'
 import { activePawn, type Action, type GameState } from '../lib/engine/index.ts'
-import type { Bot } from '../lib/engine/ai.ts'
+import type { Bot } from '../lib/bots/bot.ts'
 import { acceptedAction, positionText, readApiKey, RULES_TEXT, saveApiKey } from './botText.ts'
 
 // The whole Mistral bot lives here, outside the pure engine: the API key, the battle prompt,

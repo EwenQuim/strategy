@@ -17,7 +17,7 @@ import {
 
 import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
   const tiles: GameState['tiles'] = new Map()

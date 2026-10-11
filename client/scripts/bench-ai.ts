@@ -1,7 +1,7 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 import { createBotGame } from '../tests/bot-game.ts'
 import { campaignActions } from '../tests/campaign-actions.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const LEVELS = [

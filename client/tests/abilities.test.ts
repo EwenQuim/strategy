@@ -20,9 +20,9 @@ import {
   type Side,
 } from '../src/lib/engine/index.ts'
 
-import { nearestTarget, ruleBot } from '../src/lib/engine/bot.ts'
+import { nearestTarget, ruleBot } from '../src/lib/bots/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(pawn: Pawn): GameState {

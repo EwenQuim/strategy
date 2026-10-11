@@ -16,7 +16,7 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { createBotGame } from './bot-game.ts'
-import { nearestTarget, ruleBot } from '../src/lib/engine/bot.ts'
+import { nearestTarget, ruleBot } from '../src/lib/bots/rules.ts'
 import { initialPlayback, playbackReducer, type PlaybackAction } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'
 

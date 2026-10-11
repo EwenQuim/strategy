@@ -25,7 +25,7 @@ import {
   reducer as coreReducer,
 } from '../src/lib/engine/index.ts'
 import { createBotGame } from './bot-game.ts'
-import { huntTheKing, nearestTarget, ruleBot } from '../src/lib/engine/bot.ts'
+import { huntTheKing, nearestTarget, ruleBot } from '../src/lib/bots/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 

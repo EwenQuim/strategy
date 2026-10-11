@@ -1,6 +1,6 @@
-import type { Bot } from '../src/lib/engine/ai.ts'
+import type { Bot } from '../src/lib/bots/bot.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
 import { activePawn, type Action, type GameState } from '../src/lib/engine/index.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import type { BattleSetup, Transition } from '../src/lib/engine/index.ts'

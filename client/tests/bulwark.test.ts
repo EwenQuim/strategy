@@ -22,8 +22,8 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 
-import { nearestTarget, ruleBot } from '../src/lib/engine/bot.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { nearestTarget, ruleBot } from '../src/lib/bots/rules.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(side: Side = 'player'): GameState {

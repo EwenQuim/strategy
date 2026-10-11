@@ -7,7 +7,7 @@ import {
   type Axial,
   type GameState,
 } from '../lib/engine/index.ts'
-import type { Bot } from '../lib/engine/ai.ts'
+import type { Bot } from '../lib/bots/bot.ts'
 import {
   acceptedAction,
   describeAction,
