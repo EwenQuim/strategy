@@ -14,10 +14,9 @@ import {
   type Biome,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { ruleBased } from '../src/lib/engine/bot.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+
 import { createBotGame } from './bot-game.ts'
-import { nearestTarget } from '../src/lib/engine/bot.ts'
+import { nearestTarget, ruleBot } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer, type PlaybackAction } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'
 
@@ -167,7 +166,7 @@ test('Authored encounters replay and restart identically through AI and local pl
     const opening = initialPlayback('campaign-1', mode, encounter)
     let playback = playbackReducer(opening, { type: 'playbackFinish' }, mode)
     for (let step = 0; step < 300 && !playback.state.winner; step++) {
-      const actions = await ruleBased(nearestTarget)(playback.state, BOT_LEVELS.normal)
+      const actions = await ruleBot(nearestTarget)(playback.state)
       const enemy = mode === 'ai' && activePawn(playback.state)?.side === 'enemy'
       const steps: PlaybackAction[] = enemy ? [{ type: 'botActions', actions }] : actions
       for (const action of steps) {

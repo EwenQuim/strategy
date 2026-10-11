@@ -17,9 +17,10 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
+
+import { playbackReducer } from '../src/lib/playback.ts'
 import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { playbackReducer } from '../src/lib/playback.ts'
 
 const encounter = {
   biome: 'hell',
@@ -265,7 +266,7 @@ test('AI evades with a healthy soldier on easy and saves a doomed king on normal
     if (king) assert.equal(reducer(state, { type: 'endTurn' }).winner, 'draw')
     let next = state
     for (let step = 0; step < 4 && next.round === 1 && !next.winner; step++)
-      next = (await depthsearch(next, BOT_LEVELS[difficulty])).reduce(reducer, next)
+      next = (await depthsearch(BOT_LEVELS[difficulty])(next)).reduce(reducer, next)
     const survivor = next.pawns.find((p) => p.id === actor.id)!
     assert.ok(survivor, difficulty)
     assert.equal(inHellfire(state.hellfire, survivor), false, difficulty)
@@ -288,7 +289,7 @@ test('AI leaves already-doomed enemies to Hellfire instead of wasting its last a
   )
   state.order = [4, 3, 2, 1, 5]
   state.active = 3
-  const actions = await depthsearch(state, BOT_LEVELS.normal)
+  const actions = await depthsearch(BOT_LEVELS.normal)(state)
   assert.deepEqual(actions, [{ type: 'attack', q: -1, r: 0 }])
   const next = finishRound(actions.reduce(reducer, state))
   assert.ok(!next.pawns.some((pawn) => pawn.id === 3 || pawn.id === 4))

@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { QuickPlayTutorial } from '../components/Briefing'
 import { Game } from '../components/Game'
-import { botFromSearch } from '../lib/game-mode'
+import { botFromSearch } from '../bots'
 
 export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {

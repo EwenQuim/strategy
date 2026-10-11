@@ -1,6 +1,6 @@
 import { activePawn, reducer, type Action, type GameState } from '../../engine.ts'
 import type { Pawn, Side } from '../../pawns/index.ts'
-import type { BotOptions } from '../../ai.ts'
+import type { Bot, BotOptions } from '../../ai.ts'
 import { distancesToAttack, evaluatePosition, type ReachCache } from '../evaluate.ts'
 import { sidePlan } from '../plan.ts'
 import { chooseOption, hpOf, type Outcome } from '../choice.ts'
@@ -247,7 +247,7 @@ function untilFirstRoll(actions: Action[]): Action[] {
   return roll < 0 ? actions : actions.slice(0, roll + 1)
 }
 
-const validBotOptions = (options: BotOptions | undefined): options is BotOptions =>
+const validOptions = (options: BotOptions | undefined): options is BotOptions =>
   !!options &&
   [2, 3].includes(options.depth) &&
   Number.isInteger(options.beamWidth) &&
@@ -261,8 +261,13 @@ const validBotOptions = (options: BotOptions | undefined): options is BotOptions
   options.latitude >= 0 &&
   options.latitude <= 100
 
-export async function depthsearch(state: GameState, options: BotOptions): Promise<Action[]> {
-  if (!validBotOptions(options)) throw new RangeError('Invalid bot options')
+// The depth search: budgeted beam minimax over the unit turns turns.ts enumerates.
+export function depthsearch(options: BotOptions): Bot {
+  if (!validOptions(options)) throw new RangeError('Invalid bot options')
+  return async (state) => planTurn(state, options)
+}
+
+function planTurn(state: GameState, options: BotOptions): Action[] {
   Object.assign(searchStats, {
     decisions: 1,
     plansEnumerated: 0,

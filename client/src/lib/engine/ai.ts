@@ -1,3 +1,10 @@
+import type { Action, GameState } from './engine.ts'
+
+// Anything that can think for the side to act: it proposes actions for the active unit and the
+// engine judges them. Built-in bots are constructors in ai/strategies/; any other bot only has
+// to fit this signature.
+export type Bot = (state: GameState) => Promise<Action[]>
+
 export type BotOptions = {
   depth: 2 | 3
   beamWidth: number

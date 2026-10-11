@@ -1,4 +1,5 @@
 import type { BotDifficulty } from '../lib/engine/ai'
+import type { BotName } from '../bots'
 import { plural, t } from './locale'
 
 export const chooseMode = t({
@@ -115,7 +116,7 @@ export const aiStrategy = t({
   es: 'Estrategia IA',
   it: 'Strategia IA',
 })
-export const aiStrategies = t<Record<'depthsearch' | 'random' | 'mistral' | 'jev', string>>({
+export const aiStrategies = t<Record<BotName, string>>({
   en: { depthsearch: 'Hexmate AI', random: 'Random AI', mistral: 'Mistral AI', jev: 'Jev AI' },
   fr: { depthsearch: 'IA Hexmate', random: 'Aléatoire', mistral: 'IA Mistral', jev: 'IA Jev' },
   de: { depthsearch: 'Hexmate KI', random: 'Zufall', mistral: 'Mistral KI', jev: 'Jev KI' },

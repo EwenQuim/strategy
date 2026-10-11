@@ -15,8 +15,9 @@ import {
   type Pawn,
 } from '../src/lib/engine/index.ts'
 import { depthsearch, turnOutcomes } from '../src/lib/engine/ai/strategies/depthsearch.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+
 import { turnPlans } from '../src/lib/engine/ai/turns.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id), active = 0): GameState {
   const tiles: GameState['tiles'] = new Map()
@@ -128,6 +129,6 @@ test('A rune-boosted attacker facing many targets plans and decides quickly', as
   const plans = turnPlans(state)
   assert.ok(performance.now() - started < 1000, 'Enumeration took too long')
   assert.ok(plans.every((plan) => plan.actions.filter((a) => a.type === 'attack').length <= 3))
-  const actions = await depthsearch(state, BOT_LEVELS.hard)
+  const actions = await depthsearch(BOT_LEVELS.hard)(state)
   assert.notEqual(actions.reduce(reducer, state), state)
 })

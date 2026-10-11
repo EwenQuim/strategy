@@ -18,11 +18,10 @@ import {
   type Biome,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import { ruleBased } from '../src/lib/engine/bot.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+
 import { initialState as botState, transition as botTransition } from './bot-game.ts'
 import { transition } from '../src/lib/engine/engine.ts'
-import { huntTheKing } from '../src/lib/engine/bot.ts'
+import { huntTheKing, ruleBot } from '../src/lib/engine/bot.ts'
 import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'
 import { biomeNames } from '../src/i18n/biomes.ts'
 import { unitNames } from '../src/i18n/units.ts'
@@ -1850,7 +1849,7 @@ test(
     assert.equal(await page.locator('ol[aria-label="Round turn order"]').innerHTML(), opening)
 
     for (let step = 0; step < 100 && !state.winner; step++) {
-      for (const action of await ruleBased(huntTheKing)(state, BOT_LEVELS.normal)) {
+      for (const action of await ruleBot(huntTheKing)(state)) {
         const pawn = activePawn(state)!
         assert.equal(
           await page

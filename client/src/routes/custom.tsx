@@ -8,7 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
-import type { AiStrategyId } from '../lib/bot-config'
+import type { BotName } from '../bots'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import {
@@ -28,7 +28,7 @@ export const Route = createFileRoute('/custom')({
     const navigate = Route.useNavigate()
     const [mode, setMode] = useState<GameMode>('ai')
     const [difficulty, setDifficulty] = useState<BotDifficulty>('normal')
-    const [strategy, setStrategy] = useState<AiStrategyId>('depthsearch')
+    const [strategy, setStrategy] = useState<BotName>('depthsearch')
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [developerPreview] = useState(readDeveloperPreview)
@@ -127,7 +127,7 @@ export const Route = createFileRoute('/custom')({
                     id="custom-strategy"
                     value={strategy}
                     disabled={mode === 'local'}
-                    onChange={(event) => setStrategy(event.target.value as AiStrategyId)}
+                    onChange={(event) => setStrategy(event.target.value as BotName)}
                   >
                     <option value="depthsearch">{m.aiStrategies.depthsearch}</option>
                     <option value="mistral">{m.aiStrategies.mistral}</option>

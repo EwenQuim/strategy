@@ -21,7 +21,8 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { ruleBased, nearestTarget } from '../src/lib/engine/bot.ts'
+
+import { nearestTarget, ruleBot } from '../src/lib/engine/bot.ts'
 import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
@@ -236,20 +237,20 @@ test('Protect is not chained between Bulwarks and never shields a king after its
 test('Bots protect threatened allies and never try to walk with only one energy', async () => {
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(side)
-    const actions = await depthsearch(state, BOT_LEVELS.normal)
+    const actions = await depthsearch(BOT_LEVELS.normal)(state)
     assert.deepEqual(actions, [{ type: 'special', target: { q: 0, r: 1 } }])
     let guarded = state
     for (const action of actions) guarded = reducer(guarded, action)
     assert.equal(guarded.pawns[0].protectingId, 2)
-    assert.deepEqual(await depthsearch(guarded, BOT_LEVELS.normal), [{ type: 'endTurn' }])
+    assert.deepEqual(await depthsearch(BOT_LEVELS.normal)(guarded), [{ type: 'endTurn' }])
     state.pawns = state.pawns.filter((p) => p.kind !== 'ninja' && p.kind !== 'swordsman')
     state.pawns[1].q = -3
     state.pawns[1].r = -3
-    const [move] = await ruleBased(nearestTarget)(state, BOT_LEVELS.normal)
+    const [move] = await ruleBot(nearestTarget)(state)
     assert.equal(move.type, 'move')
     const moved = reducer(state, move)
     assert.equal(moved.pawns[0].energy, 1)
     assert.equal(hexDist(state.pawns[0], moved.pawns[0]), 1)
-    assert.deepEqual(await depthsearch(moved, BOT_LEVELS.normal), [{ type: 'endTurn' }])
+    assert.deepEqual(await depthsearch(BOT_LEVELS.normal)(moved), [{ type: 'endTurn' }])
   }
 })

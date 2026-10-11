@@ -19,10 +19,10 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { createBotGame } from './bot-game.ts'
-import { ruleBased } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import { seedState } from '../src/lib/engine/random.ts'
+import { nearestTarget, ruleBot, withFallback } from '../src/lib/engine/bot.ts'
 
 function duel(side: Side): GameState {
   return {
@@ -223,12 +223,25 @@ test('Core skips fallen units and refreshes a round without running a controller
 })
 
 test('Rejected bot proposals end the turn instead of spinning', async () => {
-  const game = createBotGame(ruleBased({ chooseTarget: () => new King(99, 99, 99, 'player') }))
+  const game = createBotGame(ruleBot({ chooseTarget: () => new King(99, 99, 99, 'player') }))
   const state = duel('player')
   const original = structuredClone(state)
   const next = await game.reducer(state, { type: 'endTurn' })
   assert.equal(activePawn(next)?.side, 'player')
   assert.deepEqual(structuredClone(state), original)
+})
+
+test('A failing or empty bot hands the decision to its fallback', async () => {
+  const state = duel('enemy')
+  const fallback = ruleBot(nearestTarget)
+  const expected = await fallback(state)
+  assert.ok(expected.length > 0)
+  const failing = async () => {
+    throw new Error('offline')
+  }
+  assert.deepEqual(await withFallback(failing, fallback)(state), expected)
+  assert.deepEqual(await withFallback(async () => [], fallback)(state), expected)
+  assert.deepEqual(await withFallback(fallback, failing)(state), expected)
 })
 
 test('Path searches use shortest passable routes within the movement budget', () => {

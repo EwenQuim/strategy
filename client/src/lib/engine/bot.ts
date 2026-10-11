@@ -2,18 +2,18 @@ import { activePawn, type Action, type GameState } from './engine.ts'
 import { canAttack, specialTargets } from './combat.ts'
 import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
 import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import type { AiStrategy } from './ai/decision.ts'
+import type { Bot } from './ai.ts'
 
-export interface TargetPicker {
+export interface BotStrategy {
   chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
 }
 
-export const nearestTarget: TargetPicker = {
+export const nearestTarget: BotStrategy = {
   chooseTarget: (attacker, targets) =>
     targets.toSorted((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
 }
 
-export const huntTheKing: TargetPicker = {
+export const huntTheKing: BotStrategy = {
   chooseTarget: (attacker, targets) =>
     nearestTarget.chooseTarget(
       attacker,
@@ -21,8 +21,8 @@ export const huntTheKing: TargetPicker = {
     ) ?? nearestTarget.chooseTarget(attacker, targets),
 }
 
-// Scripted opponents use the same action-proposing contract as local and remote strategies.
-export function ruleBased(targetPicker: TargetPicker): AiStrategy {
+// A scripted bot around a target picker, for tests and campaign checks.
+export function ruleBot(strategy: BotStrategy): Bot {
   return async (state) => {
     const pawn = activePawn(state)
     if (!pawn || state.winner) return []
@@ -30,10 +30,18 @@ export function ruleBased(targetPicker: TargetPicker): AiStrategy {
     const foes = state.pawns.filter((p) => p.side !== pawn.side)
     const specials = specialTargets(state.pawns, pawn)
     return (
-      ruleSpecial(state, pawn, foes, specials, targetPicker) ??
-      ruleAttack(state, pawn, foes, targetPicker) ??
+      ruleSpecial(state, pawn, foes, specials, strategy) ??
+      ruleAttack(state, pawn, foes, strategy) ??
       ruleApproach(state, pawn, foes)
     )
+  }
+}
+
+// Plays the primary bot's proposal, or the fallback's when the primary fails or has nothing.
+export function withFallback(primary: Bot, fallback: Bot): Bot {
+  return async (state) => {
+    const actions = await primary(state).catch(() => [])
+    return actions.length ? actions : fallback(state)
   }
 }
 
@@ -42,7 +50,7 @@ function ruleSpecial(
   pawn: Pawn,
   foes: Pawn[],
   specials: Pawn[],
-  strategy: TargetPicker,
+  strategy: BotStrategy,
 ): Action[] | null {
   const own = pawn.ai.ruleSpecial?.(pawn, state, foes, specials)
   if (own) return [own]
@@ -86,7 +94,7 @@ function ruleAttack(
   state: GameState,
   pawn: Pawn,
   foes: Pawn[],
-  strategy: TargetPicker,
+  strategy: BotStrategy,
 ): Action[] | null {
   const target = strategy.chooseTarget(
     pawn,

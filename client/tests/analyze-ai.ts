@@ -1,8 +1,10 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
+
 import { depthsearch, searchStats } from '../src/lib/engine/ai/strategies/depthsearch.ts'
-import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
+import type { BotDifficulty } from '../src/lib/engine/ai.ts'
 import { campaignActions, winnableAgainst } from './campaign-actions.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 // Replays a campaign level with the real bots and reports where the search spends its budget.
 //   node tests/analyze-ai.ts <slug>            scan: one line per level, test path with retries
@@ -33,7 +35,7 @@ async function replay(
     const enemy = pawn.side === 'enemy'
     const started = performance.now()
     const actions = enemy
-      ? await depthsearch(state, BOT_LEVELS[difficulty])
+      ? await depthsearch(BOT_LEVELS[difficulty])(state)
       : await campaignActions(state, caution)
     const ms = performance.now() - started
     if (searchStats.decisions > 0)

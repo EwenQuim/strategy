@@ -14,7 +14,7 @@ const LEVELS = [
 
 for (const [slug, id] of LEVELS) {
   const level = CAMPAIGNS.find((pack) => pack.slug === slug)!.levels[id - 1]
-  const bot = createBotGame(depthsearch, BOT_LEVELS[level.difficulty])
+  const bot = createBotGame(depthsearch(BOT_LEVELS[level.difficulty]))
   let state = bot.initialState(level.seed, level.setup)
   const replies: number[] = []
   for (let step = 0; step < 300 && !state.winner; step++)

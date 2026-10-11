@@ -135,7 +135,6 @@
                 "group": [
                   "*",
                   "!./**",
-                  "!../decision.ts",
                   "!../turns.ts",
                   "!../evaluate.ts",
                   "!../plan.ts",

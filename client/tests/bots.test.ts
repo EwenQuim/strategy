@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { STRATEGIES } from '../src/api/bots.ts'
+import { createBot, botFromSearch, searchFromBot } from '../src/bots.ts'
 import { API_KEY_STORAGE as mistralKey } from '../src/api/mistralBot.ts'
 import { API_KEY_STORAGE as jevKey } from '../src/api/jevBot.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
-import { parseGameSearch, botFromSearch, searchFromBot } from '../src/lib/game-mode.ts'
+import { depthsearch } from '../src/lib/bots/depthsearch.ts'
+import { parseGameSearch } from '../src/lib/game-mode.ts'
 
 const storage = { getItem: (_key: string): string | null => null }
 Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable: true })
@@ -51,7 +51,7 @@ for (const [name, storageKey, endpoint] of [
       ),
     )
 
-    assert.deepEqual(await STRATEGIES[name](state, BOT_LEVELS.normal), [action])
+    assert.deepEqual(await createBot({ name })(state), [action])
     assert.equal(request.mock.callCount(), 1)
     const [input] = request.mock.calls[0].arguments
     assert.equal(input instanceof Request ? input.url : String(input), endpoint)
@@ -63,8 +63,8 @@ for (const [name, storageKey, endpoint] of [
     const request = t.mock.method(globalThis, 'fetch', async () => {
       throw new Error('No network request expected without a key')
     })
-    const [fallback] = await depthsearch(state, BOT_LEVELS.normal)
-    assert.deepEqual(await STRATEGIES[name](state, BOT_LEVELS.normal), [fallback])
+    const fallback = await depthsearch(BOT_LEVELS.normal)(state)
+    assert.deepEqual(await createBot({ name })(state), fallback)
     assert.equal(request.mock.callCount(), 0)
   })
 

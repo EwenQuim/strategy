@@ -1,5 +1,3 @@
-import { BOT_LEVELS } from '../lib/engine/ai.ts'
-import { depthsearch } from '../lib/engine/ai/strategies/depthsearch.ts'
 import {
   activePawn,
   PAWN_CLASSES,
@@ -82,12 +80,6 @@ export function describeAction(action: Action): string {
 export function acceptedAction(action: Action, state: GameState): Action | null {
   if (action.type === 'restart') return null
   return reducer(state, action) !== state ? action : null
-}
-
-// Any failure (no key, network, quota, illegal proposal) degrades to the local search at
-// normal difficulty, so a battle can never stall.
-export async function fallbackAction(state: GameState): Promise<Action> {
-  return (await depthsearch(state, BOT_LEVELS.normal))[0] ?? { type: 'endTurn' }
 }
 
 // BYOK key storage: the player pastes a key in Settings and it lives in localStorage.

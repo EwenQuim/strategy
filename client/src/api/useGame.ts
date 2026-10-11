@@ -8,12 +8,11 @@ import {
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
 import { hapticForFrame } from '../haptics.ts'
 import { useOnlineSync } from './onlineSync.ts'
-import { STRATEGIES } from './bots.ts'
 import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import { botOptions, DEFAULT_BOT_CONFIG, type BotConfig } from '../lib/bot-config.ts'
+import { createBot, DEFAULT_BOT_CONFIG, type BotConfig } from '../bots.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -69,13 +68,12 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  const strategy = STRATEGIES[bot.name]
-  const options = botOptions(bot)
+  const enemyBot = createBot(bot)
   useEffect(() => {
     if (mode !== 'ai' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void strategy(state, options)
+    void enemyBot(state)
       .catch(() => [])
       .then((actions) => {
         if (!cancelled) dispatch({ type: 'botActions', actions })
@@ -83,7 +81,7 @@ export function useGame({
     return () => {
       cancelled = true
     }
-  }, [dispatch, mode, online, options, playing, state, strategy])
+  }, [dispatch, enemyBot, mode, online, playing, state])
 
   return {
     state,
