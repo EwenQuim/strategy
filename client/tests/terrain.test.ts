@@ -26,7 +26,10 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { ruleBased } from '../src/lib/engine/bot.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+import { createBotGame } from './bot-game.ts'
 import { nearestTarget } from '../src/lib/engine/bot.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 
@@ -329,26 +332,26 @@ test('Jump ignores crossed lava and runes but triggers its landing tile', () => 
   assert.equal(activePawn(lethal)?.id, 2)
 })
 
-test('Bots can use tower range and evaluate lethal lava moves without crashing or choosing suicide', () => {
-  for (const strategy of [
-    { name: 'depthsearch', difficulty: 'easy' },
-    { name: 'depthsearch', difficulty: 'normal' },
-    { name: 'depthsearch', difficulty: 'hard' },
-    nearestTarget,
+test('Bots can use tower range and evaluate lethal lava moves without crashing or choosing suicide', async () => {
+  for (const [strategy, options] of [
+    [depthsearch, BOT_LEVELS.easy],
+    [depthsearch, BOT_LEVELS.normal],
+    [depthsearch, BOT_LEVELS.hard],
+    [ruleBased(nearestTarget), BOT_LEVELS.normal],
   ] as const) {
     const state = battle(new Archer(1, 0, 5, 'enemy', 3, 1))
     state.tiles.get('0,5')!.feature = 'watchtower'
     state.pawns[2].q = 4
     state.pawns[2].r = 5
     state.pawns[2].hp = 1
-    assert.equal(chooseBotActions(state, strategy).reduce(reducer, state).winner, 'enemy')
+    assert.equal((await strategy(state, options)).reduce(reducer, state).winner, 'enemy')
     const lava = corridor(new Ninja(1, 0, 5, 'enemy'))
-    const next = chooseBotActions(lava, strategy).reduce(reducer, lava)
+    const next = (await strategy(lava, options)).reduce(reducer, lava)
     assert.ok(next.pawns.some((pawn) => pawn.id === 1))
   }
 })
 
-test('Authored features and consumed runes restore on restart in both controllers', () => {
+test('Authored features and consumed runes restore on restart in both controllers', async () => {
   const map = Array<string>(12).fill('........')
   map[5] = 'HR......'
   const setup = {
@@ -361,11 +364,11 @@ test('Authored features and consumed runes restore on restart in both controller
     const state = game.initialState('restart-features', setup)
     state.order = [1, 2]
     state.active = 0
-    const next = game.reducer(state, { type: 'move', q: -1, r: 5 })
+    const next = await game.reducer(state, { type: 'move', q: -1, r: 5 })
     assert.equal(next.pawns[0].bonusEnergy, 2)
     assert.equal(next.tiles.get('-1,5')!.feature, undefined)
     assert.deepEqual(
-      game.reducer(next, { type: 'restart' }),
+      await game.reducer(next, { type: 'restart' }),
       game.initialState(state.seed, setup),
     )
   }

@@ -14,9 +14,11 @@ import {
   type Biome,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
+import { ruleBased } from '../src/lib/engine/bot.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+import { createBotGame } from './bot-game.ts'
 import { nearestTarget } from '../src/lib/engine/bot.ts'
-import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+import { initialPlayback, playbackReducer, type PlaybackAction } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'
 
 const encounter = {
@@ -141,7 +143,7 @@ test('Setup snapshots survive caller edits, combat changes and restarts without 
   assert.deepEqual(initialState('snapshot', encounter), original)
 })
 
-test('Authored encounters replay and restart identically through AI and local playback', () => {
+test('Authored encounters replay and restart identically through AI and local playback', async () => {
   const bot = createBotGame()
   const openingSides = new Set<string>()
   for (let index = 0; index < 10; index++) {
@@ -158,14 +160,17 @@ test('Authored encounters replay and restart identically through AI and local pl
       bot.initialTransition(seed, encounter).state,
     )
     const opening = bot.initialTransition(seed, encounter)
-    assert.deepEqual(bot.transition(opening.state, { type: 'restart' }), opening)
+    assert.deepEqual(await bot.transition(opening.state, { type: 'restart' }), opening)
   }
   assert.deepEqual(openingSides, new Set(['player', 'enemy']))
   for (const mode of ['ai', 'local'] as const) {
     const opening = initialPlayback('campaign-1', mode, encounter)
     let playback = playbackReducer(opening, { type: 'playbackFinish' }, mode)
     for (let step = 0; step < 300 && !playback.state.winner; step++) {
-      for (const action of chooseBotActions(playback.state, nearestTarget)) {
+      const actions = await ruleBased(nearestTarget)(playback.state, BOT_LEVELS.normal)
+      const enemy = mode === 'ai' && activePawn(playback.state)?.side === 'enemy'
+      const steps: PlaybackAction[] = enemy ? [{ type: 'botActions', actions }] : actions
+      for (const action of steps) {
         const before = structuredClone(playback)
         const result = playbackReducer(playback, action, mode)
         assert.deepEqual(result, playbackReducer(playback, action, mode))

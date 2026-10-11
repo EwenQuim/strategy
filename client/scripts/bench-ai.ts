@@ -1,6 +1,8 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
-import { createBotGame } from '../src/lib/engine/bot.ts'
+import { createBotGame } from '../tests/bot-game.ts'
 import { campaignActions } from '../tests/campaign-actions.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const LEVELS = [
   ['iron-throne', 8],
@@ -12,13 +14,13 @@ const LEVELS = [
 
 for (const [slug, id] of LEVELS) {
   const level = CAMPAIGNS.find((pack) => pack.slug === slug)!.levels[id - 1]
-  const bot = createBotGame({ name: 'depthsearch', difficulty: level.difficulty })
+  const bot = createBotGame(depthsearch, BOT_LEVELS[level.difficulty])
   let state = bot.initialState(level.seed, level.setup)
   const replies: number[] = []
   for (let step = 0; step < 300 && !state.winner; step++)
-    for (const action of campaignActions(state, 1)) {
+    for (const action of await campaignActions(state, 1)) {
       const started = performance.now()
-      state = bot.transition(state, action).state
+      state = (await bot.transition(state, action)).state
       replies.push(performance.now() - started)
     }
   const average = replies.reduce((sum, time) => sum + time, 0) / replies.length

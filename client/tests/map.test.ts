@@ -27,7 +27,8 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 
 function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][] {
@@ -214,7 +215,7 @@ function lakeBattle(side: Side): GameState {
   }
 }
 
-test('Lakes block walking and Charge for both sides, and cannot be Ninja landing tiles', () => {
+test('Lakes block walking and Charge for both sides, and cannot be Ninja landing tiles', async () => {
   for (const side of ['player', 'enemy'] as const) {
     for (const Unit of [King, ...RECRUIT_CLASSES]) {
       const state = lakeBattle(side)
@@ -234,7 +235,7 @@ test('Lakes block walking and Charge for both sides, and cannot be Ninja landing
         assert.equal(reducer(state, { type: 'special', target: { q: 2, r: 0 } }), state)
       }
       let next = state
-      for (const action of chooseBotActions(state)) {
+      for (const action of await depthsearch(state, BOT_LEVELS.normal)) {
         const result = reducer(next, action)
         assert.notEqual(result, next)
         next = result

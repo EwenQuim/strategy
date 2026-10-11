@@ -1,5 +1,5 @@
 import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
-import { STRATEGIES, type AiStrategyId, type BotConfig } from './engine/ai/decision.ts'
+import { BOT_NAMES, type AiStrategyId, type BotConfig } from './bot-config.ts'
 import { validateSetup } from './engine/setup.ts'
 import type { BattleSetup } from './engine/index.ts'
 
@@ -18,7 +18,7 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   }
   if (typeof search.difficulty === 'string' && Object.hasOwn(BOT_LEVELS, search.difficulty))
     result.difficulty = search.difficulty as BotDifficulty
-  if (typeof search.strategy === 'string' && Object.hasOwn(STRATEGIES, search.strategy))
+  if (BOT_NAMES.some((name) => name === search.strategy))
     result.strategy = search.strategy as AiStrategyId
   if (search.setup && typeof search.setup === 'object' && !('map' in search.setup)) {
     const setup = search.setup as NonNullable<GameSearch['setup']>
