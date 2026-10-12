@@ -20,8 +20,12 @@ import { acceptedAction, describeAction, positionText, RULES_TEXT } from '../rem
 const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
 // Proposes nothing without a key or a usable answer; the catalog falls back to the local search.
-export function jev(): Bot {
-  return async (state) => chooseActions(state)
+export class JevBot implements Bot {
+  readonly name = 'jev'
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    return chooseActions(state)
+  }
 }
 
 async function chooseActions(state: GameState): Promise<Action[]> {

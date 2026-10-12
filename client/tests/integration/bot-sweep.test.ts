@@ -18,7 +18,7 @@ import {
 import { seedState } from '../../src/lib/engine/random.ts'
 
 import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
-import { depthsearch } from '../../src/bots/strategies/depthsearch.ts'
+import { DepthsearchBot } from '../../src/bots/strategies/depthsearch.ts'
 
 async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Promise<GameState> {
   const id = activePawn(state)!.id
@@ -28,7 +28,7 @@ async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Prom
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of await depthsearch(BOT_LEVELS[level])(state)) {
+    for (const action of await new DepthsearchBot(BOT_LEVELS[level]).chooseActions(state)) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next
@@ -64,7 +64,7 @@ test('Class-specific candidates and threat estimates retain their reference deci
         }
         state.pawns[5].protectingId = 4
         for (const options of Object.values(BOT_LEVELS))
-          decisions.push(await depthsearch(options)(state))
+          decisions.push(await new DepthsearchBot(options).chooseActions(state))
       }
     }
   }
@@ -90,7 +90,7 @@ test('The bot proposes ordinary actions for either side without mutating the rul
     for (let turn = 0; turn < 200 && !state.winner; turn++) {
       sides.add(activePawn(state)!.side)
       const before = structuredClone(state)
-      const actions = await depthsearch(BOT_LEVELS.normal)(state)
+      const actions = await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)
       assert.ok(actions.length)
       assert.deepEqual(structuredClone(state), before)
       for (const action of actions) {

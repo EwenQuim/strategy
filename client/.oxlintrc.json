@@ -72,6 +72,7 @@
     {
       "files": [
         "src/bots/bot.ts",
+        "src/bots/options.ts",
         "src/bots/targetPicker.ts",
         "src/bots/remoteText.ts",
         "src/bots/strategies/depthsearch.ts",
@@ -89,9 +90,10 @@
                   "!../lib/**",
                   "!../../lib/**",
                   "!../bot.ts",
+                  "!../options.ts",
                   "!../targetPicker.ts"
                 ],
-                "message": "Pure bot modules can only import the game library, Bot contract and target pickers."
+                "message": "Pure bot modules can only import the game library, Bot contract, search options and target pickers."
               }
             ]
           }

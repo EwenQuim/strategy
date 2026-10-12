@@ -10,8 +10,17 @@ import type { Bot } from '../bot.ts'
 import type { TargetPicker } from '../targetPicker.ts'
 
 // A scripted bot around a target picker, for tests and campaign checks.
-export function rules(picker: TargetPicker): Bot {
-  return async (state) => chooseActions(state, picker)
+export class RulesBot implements Bot {
+  readonly name = 'rules'
+  readonly picker: TargetPicker
+
+  constructor(picker: TargetPicker) {
+    this.picker = picker
+  }
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    return chooseActions(state, this.picker)
+  }
 }
 
 function chooseActions(state: GameState, picker: TargetPicker): Action[] {

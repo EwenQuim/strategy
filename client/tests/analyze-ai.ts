@@ -1,7 +1,7 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 
-import { depthsearch, searchStats } from '../src/bots/strategies/depthsearch.ts'
+import { DepthsearchBot, searchStats } from '../src/bots/strategies/depthsearch.ts'
 import type { BotDifficulty } from '../src/lib/engine/ai.ts'
 import { campaignActions, winnableAgainst } from './campaign-actions.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
@@ -35,7 +35,7 @@ async function replay(
     const enemy = pawn.side === 'enemy'
     const started = performance.now()
     const actions = enemy
-      ? await depthsearch(BOT_LEVELS[difficulty])(state)
+      ? await new DepthsearchBot(BOT_LEVELS[difficulty]).chooseActions(state)
       : await campaignActions(state, caution)
     const ms = performance.now() - started
     if (searchStats.decisions > 0)

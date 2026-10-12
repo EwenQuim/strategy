@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { activePawn, initialState, reducer, type GameState } from '../src/lib/engine/index.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionCriteria, actionFromChoice, jev } from '../src/bots/strategies/jev.ts'
+import { actionCriteria, actionFromChoice, JevBot } from '../src/bots/strategies/jev.ts'
 
-const jevBot = jev()
+const jevBot = new JevBot()
 
 function enemyTurn(seed: string): GameState {
   let state = initialState(seed)
@@ -49,5 +49,5 @@ test("Jev's chosen key maps to an action only when the engine accepts it", () =>
 })
 
 test('Without an API key the adapter proposes nothing', async () => {
-  assert.deepEqual(await jevBot(enemyTurn('jev-fallback')), [])
+  assert.deepEqual(await jevBot.chooseActions(enemyTurn('jev-fallback')), [])
 })

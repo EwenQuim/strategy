@@ -12,7 +12,7 @@ import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import { createBot, DEFAULT_BOT_CONFIG, type BotConfig } from '../bots/catalog.ts'
+import { getBot, DEFAULT_BOT_CONFIG, type BotConfig } from '../bots/catalog.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -68,12 +68,13 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  const enemyBot = createBot(bot)
+  const enemyBot = getBot(bot)
   useEffect(() => {
     if (mode !== 'ai' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void enemyBot(state)
+    void enemyBot
+      .chooseActions(state)
       .catch(() => [])
       .then((actions) => {
         if (!cancelled) dispatch({ type: 'botActions', actions })

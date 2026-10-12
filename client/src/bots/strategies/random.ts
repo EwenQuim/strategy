@@ -6,8 +6,12 @@ import type { Bot } from '../bot.ts'
 // Plays the whole turn from one seeded stream: the battle's stream only moves on rolls, so seeding
 // each step from its state would repeat the same draw after every move. The round and the unit
 // keep quiet turns from all drawing alike.
-export function random(): Bot {
-  return async (state) => chooseActions(state)
+export class RandomBot implements Bot {
+  readonly name = 'random'
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    return chooseActions(state)
+  }
 }
 
 function chooseActions(state: GameState): Action[] {

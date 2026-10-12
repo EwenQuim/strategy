@@ -2,6 +2,7 @@ import { activePawn, reducer, type Action, type GameState } from '../../lib/engi
 import type { Pawn, Side } from '../../lib/engine/pawns/index.ts'
 import type { BotOptions } from '../../lib/engine/ai.ts'
 import type { Bot } from '../bot.ts'
+import { validOptions } from '../options.ts'
 import {
   distancesToAttack,
   evaluatePosition,
@@ -30,9 +31,18 @@ const SHORTLIST = 200
 const END_TURN: Action = { type: 'endTurn' }
 
 // Budgeted beam minimax over the unit turns the engine enumerates.
-export function depthsearch(options: BotOptions): Bot {
-  if (!validOptions(options)) throw new RangeError('Invalid bot options')
-  return async (state) => chooseActions(state, options)
+export class DepthsearchBot implements Bot {
+  readonly name = 'depthsearch'
+  readonly options: BotOptions
+
+  constructor(options: BotOptions) {
+    if (!validOptions(options)) throw new RangeError('Invalid bot options')
+    this.options = { ...options }
+  }
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    return chooseActions(state, this.options)
+  }
 }
 
 function chooseActions(state: GameState, options: BotOptions): Action[] {
@@ -82,23 +92,6 @@ function chooseActions(state: GameState, options: BotOptions): Action[] {
     })
     .sort((a, b) => b.value - a.value)
   return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
-}
-
-function validOptions(options: BotOptions | undefined): options is BotOptions {
-  return (
-    !!options &&
-    [2, 3].includes(options.depth) &&
-    Number.isInteger(options.beamWidth) &&
-    options.beamWidth >= 1 &&
-    options.beamWidth <= 32 &&
-    Number.isFinite(options.riskAppetite) &&
-    options.riskAppetite >= -1 &&
-    options.riskAppetite <= 1 &&
-    ['best', 'nearest', 'weakest'].includes(options.focus) &&
-    Number.isFinite(options.latitude) &&
-    options.latitude >= 0 &&
-    options.latitude <= 100
-  )
 }
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {

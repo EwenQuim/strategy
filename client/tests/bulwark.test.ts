@@ -23,8 +23,8 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { nearestTarget } from '../src/bots/targetPicker.ts'
-import { rules as ruleBot } from '../src/bots/strategies/rules.ts'
-import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(side: Side = 'player'): GameState {
@@ -238,20 +238,24 @@ test('Protect is not chained between Bulwarks and never shields a king after its
 test('Bots protect threatened allies and never try to walk with only one energy', async () => {
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(side)
-    const actions = await depthsearch(BOT_LEVELS.normal)(state)
+    const actions = await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)
     assert.deepEqual(actions, [{ type: 'special', target: { q: 0, r: 1 } }])
     let guarded = state
     for (const action of actions) guarded = reducer(guarded, action)
     assert.equal(guarded.pawns[0].protectingId, 2)
-    assert.deepEqual(await depthsearch(BOT_LEVELS.normal)(guarded), [{ type: 'endTurn' }])
+    assert.deepEqual(await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(guarded), [
+      { type: 'endTurn' },
+    ])
     state.pawns = state.pawns.filter((p) => p.kind !== 'ninja' && p.kind !== 'swordsman')
     state.pawns[1].q = -3
     state.pawns[1].r = -3
-    const [move] = await ruleBot(nearestTarget)(state)
+    const [move] = await new RulesBot(nearestTarget).chooseActions(state)
     assert.equal(move.type, 'move')
     const moved = reducer(state, move)
     assert.equal(moved.pawns[0].energy, 1)
     assert.equal(hexDist(state.pawns[0], moved.pawns[0]), 1)
-    assert.deepEqual(await depthsearch(BOT_LEVELS.normal)(moved), [{ type: 'endTurn' }])
+    assert.deepEqual(await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(moved), [
+      { type: 'endTurn' },
+    ])
   }
 })

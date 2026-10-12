@@ -1,34 +1,37 @@
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai.ts'
 import { withFallback, type Bot } from './bot.ts'
-import { depthsearch } from './strategies/depthsearch.ts'
-import { random } from './strategies/random.ts'
-import { mistral } from './strategies/mistral.ts'
-import { jev } from './strategies/jev.ts'
+import { DepthsearchBot } from './strategies/depthsearch.ts'
+import { RandomBot } from './strategies/random.ts'
+import { MistralBot } from './strategies/mistral.ts'
+import { JevBot } from './strategies/jev.ts'
 import type { GameSearch } from '../lib/game-mode.ts'
 
-// The only place bots have names: URLs, saved battles and menus refer to a bot through its
-// BotConfig, and createBot turns that config into the Bot the app plays. Adding a bot is one
-// factory in strategies/ plus one entry here; the engine never imports bots.
+// BotConfig is the serializable description for URLs and saves; getBot resolves it to a
+// stable named object with its own chooseActions method. Names belong to the implementations.
 const DEPTHSEARCH = {
-  easy: depthsearch(BOT_LEVELS.easy),
-  normal: depthsearch(BOT_LEVELS.normal),
-  hard: depthsearch(BOT_LEVELS.hard),
+  easy: new DepthsearchBot(BOT_LEVELS.easy),
+  normal: new DepthsearchBot(BOT_LEVELS.normal),
+  hard: new DepthsearchBot(BOT_LEVELS.hard),
 } satisfies Record<BotDifficulty, Bot>
 
+const random = new RandomBot()
+const mistral = withFallback(new MistralBot(), DEPTHSEARCH.normal)
+const jev = withFallback(new JevBot(), DEPTHSEARCH.normal)
+
 const BOTS = {
-  random: random(),
-  mistral: withFallback(mistral(), DEPTHSEARCH.normal),
-  jev: withFallback(jev(), DEPTHSEARCH.normal),
+  [random.name]: random,
+  [mistral.name]: mistral,
+  [jev.name]: jev,
 } satisfies Record<string, Bot>
 
-export type BotName = 'depthsearch' | keyof typeof BOTS
+export type BotName = DepthsearchBot['name'] | keyof typeof BOTS
 
 export type BotConfig =
-  { name: 'depthsearch'; difficulty: BotDifficulty } | { name: keyof typeof BOTS }
+  { name: DepthsearchBot['name']; difficulty: BotDifficulty } | { name: keyof typeof BOTS }
 
 export const DEFAULT_BOT_CONFIG: BotConfig = { name: 'depthsearch', difficulty: 'normal' }
 
-export function createBot(config: BotConfig): Bot {
+export function getBot(config: BotConfig): Bot {
   return config.name === 'depthsearch' ? DEPTHSEARCH[config.difficulty] : BOTS[config.name]
 }
 

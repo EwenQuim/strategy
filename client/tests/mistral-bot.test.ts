@@ -7,11 +7,11 @@ import {
   reducer,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import { createBot } from '../src/bots/catalog.ts'
+import { getBot } from '../src/bots/catalog.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionFromReply, battlePrompt, mistral } from '../src/bots/strategies/mistral.ts'
+import { actionFromReply, battlePrompt, MistralBot } from '../src/bots/strategies/mistral.ts'
 
-const mistralBot = mistral()
+const mistralBot = new MistralBot()
 
 test('Every pawn class carries its remote AI instructions', () => {
   for (const [kind, Unit] of Object.entries(PAWN_CLASSES))
@@ -56,12 +56,12 @@ test('A model reply is accepted only when the engine accepts the action', () => 
 
 test('Without an API key the registered Mistral bot falls back to the local search', async () => {
   const state = enemyTurn('mistral-sync')
-  const actions = await createBot({ name: 'mistral' })(state)
+  const actions = await getBot({ name: 'mistral' }).chooseActions(state)
   assert.ok(actions.length > 0)
   for (const action of actions)
     assert.notEqual(reducer(state, action), state, `illegal ${JSON.stringify(action)}`)
 })
 
 test('Without an API key the adapter proposes nothing', async () => {
-  assert.deepEqual(await mistralBot(enemyTurn('mistral-fallback')), [])
+  assert.deepEqual(await mistralBot.chooseActions(enemyTurn('mistral-fallback')), [])
 })

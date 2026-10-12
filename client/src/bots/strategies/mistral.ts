@@ -17,8 +17,12 @@ ${RULES_TEXT}
 You always answer with exactly one legal action from the list you are given, as pure JSON, with no other text.`
 
 // Proposes nothing without a key or a usable reply; the catalog falls back to the local search.
-export function mistral(): Bot {
-  return async (state) => chooseActions(state)
+export class MistralBot implements Bot {
+  readonly name = 'mistral'
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    return chooseActions(state)
+  }
 }
 
 async function chooseActions(state: GameState): Promise<Action[]> {

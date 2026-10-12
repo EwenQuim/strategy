@@ -13,7 +13,7 @@ import {
   symmetricSeed,
   type BattleSetup,
 } from '../src/lib/engine/index.ts'
-import { createBot } from '../src/bots/catalog.ts'
+import { getBot } from '../src/bots/catalog.ts'
 
 const setup = {
   biome: 'desert',
@@ -76,14 +76,14 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
     const config = { name: 'depthsearch', difficulty } as const
-    const bot = createBotGame(createBot(config))
+    const bot = createBotGame(getBot(config))
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
       const expected = await bot.transition(playback.state, { type: 'endTurn' })
       playback = playbackReducer(playback, { type: 'endTurn' }, 'ai')
       while (!playback.state.winner && activePawn(playback.state)?.side === 'enemy') {
-        const actions = await createBot(config)(playback.state)
+        const actions = await getBot(config).chooseActions(playback.state)
         playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai')
         playback = playbackReducer(playback, { type: 'botActions', actions }, 'ai')
       }

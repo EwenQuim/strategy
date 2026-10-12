@@ -1,7 +1,7 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 import { createBotGame } from '../tests/bot-game.ts'
 import { campaignActions } from '../tests/campaign-actions.ts'
-import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const LEVELS = [
@@ -14,7 +14,7 @@ const LEVELS = [
 
 for (const [slug, id] of LEVELS) {
   const level = CAMPAIGNS.find((pack) => pack.slug === slug)!.levels[id - 1]
-  const bot = createBotGame(depthsearch(BOT_LEVELS[level.difficulty]))
+  const bot = createBotGame(new DepthsearchBot(BOT_LEVELS[level.difficulty]))
   let state = bot.initialState(level.seed, level.setup)
   const replies: number[] = []
   for (let step = 0; step < 300 && !state.winner; step++)

@@ -21,9 +21,9 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { nearestTarget } from '../src/bots/targetPicker.ts'
-import { rules as ruleBot } from '../src/bots/strategies/rules.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
-import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(pawn: Pawn): GameState {
@@ -166,12 +166,12 @@ test('Bots use long-range rays and bombs centered on empty tiles', async () => {
     const state = battle(new Unit(1, 0, 0, 'player'))
     state.pawns[2] = new King(3, Unit === Magician ? 7 : 3, 0, 'enemy', 1)
     for (const level of [
-      depthsearch(BOT_LEVELS.easy),
-      depthsearch(BOT_LEVELS.normal),
-      depthsearch(BOT_LEVELS.hard),
-      ruleBot(nearestTarget),
+      new DepthsearchBot(BOT_LEVELS.easy),
+      new DepthsearchBot(BOT_LEVELS.normal),
+      new DepthsearchBot(BOT_LEVELS.hard),
+      new RulesBot(nearestTarget),
     ]) {
-      const actions = await level(state)
+      const actions = await level.chooseActions(state)
       const next = actions.reduce(reducer, state)
       assert.equal(next.winner, 'player')
     }
@@ -268,12 +268,12 @@ test('Bots avoid bombing their own king and do not target ally-only groups', asy
   state.pawns[1] = new King(2, 2, 0, 'player', 1)
   state.pawns[2] = new King(3, 3, 0, 'enemy', 1)
   for (const strategy of [
-    depthsearch(BOT_LEVELS.easy),
-    depthsearch(BOT_LEVELS.normal),
-    depthsearch(BOT_LEVELS.hard),
-    ruleBot(nearestTarget),
+    new DepthsearchBot(BOT_LEVELS.easy),
+    new DepthsearchBot(BOT_LEVELS.normal),
+    new DepthsearchBot(BOT_LEVELS.hard),
+    new RulesBot(nearestTarget),
   ]) {
-    const next = (await strategy(state)).reduce(reducer, state)
+    const next = (await strategy.chooseActions(state)).reduce(reducer, state)
     assert.equal(next.pawns.find((pawn) => pawn.id === 2)?.hp, 1)
     assert.notEqual(next.winner, 'enemy')
   }

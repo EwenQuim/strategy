@@ -29,7 +29,7 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][] {
@@ -236,7 +236,7 @@ test('Lakes block walking and Charge for both sides, and cannot be Ninja landing
         assert.equal(reducer(state, { type: 'special', target: { q: 2, r: 0 } }), state)
       }
       let next = state
-      for (const action of await depthsearch(BOT_LEVELS.normal)(state)) {
+      for (const action of await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)) {
         const result = reducer(next, action)
         assert.notEqual(result, next)
         next = result
