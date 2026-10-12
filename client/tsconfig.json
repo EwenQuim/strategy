@@ -21,7 +21,6 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" },
     { "path": "./tsconfig.lib.json" },
-    { "path": "./tsconfig.bots.json" },
     { "path": "./tsconfig.worker.json" }
   ]
 }

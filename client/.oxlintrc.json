@@ -70,40 +70,6 @@
       }
     },
     {
-      "files": [
-        "src/bots/bot.ts",
-        "src/bots/options.ts",
-        "src/bots/registration.ts",
-        "src/bots/targetPicker.ts",
-        "src/bots/remoteText.ts",
-        "src/bots/strategies/depthsearch.ts",
-        "src/bots/strategies/random.ts",
-        "src/bots/strategies/rules.ts"
-      ],
-      "rules": {
-        "no-restricted-imports": [
-          "error",
-          {
-            "patterns": [
-              {
-                "group": [
-                  "*",
-                  "!../lib/**",
-                  "!../../lib/**",
-                  "!../bot.ts",
-                  "!../options.ts",
-                  "!./bot.ts",
-                  "!./options.ts",
-                  "!../targetPicker.ts"
-                ],
-                "message": "Pure bot modules can only import the game library, Bot contract, search options and target pickers."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "files": ["src/lib/engine/**"],
       "rules": {
         "no-restricted-imports": [
