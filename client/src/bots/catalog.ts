@@ -1,48 +1,71 @@
-import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai.ts'
-import { withFallback, type Bot } from './bot.ts'
+import type { Bot } from './bot.ts'
+import { BOT_LEVELS } from '../lib/engine/ai.ts'
+import { registerBot } from './registration.ts'
 import { DepthsearchBot } from './strategies/depthsearch.ts'
 import { RandomBot } from './strategies/random.ts'
 import { MistralBot } from './strategies/mistral.ts'
 import { JevBot } from './strategies/jev.ts'
 import type { GameSearch } from '../lib/game-mode.ts'
 
-// BotConfig is the serializable description for URLs and saves; getBot resolves it to a
-// stable named object with its own chooseActions method. Names belong to the implementations.
-const DEPTHSEARCH = {
-  easy: new DepthsearchBot(BOT_LEVELS.easy),
-  normal: new DepthsearchBot(BOT_LEVELS.normal),
-  hard: new DepthsearchBot(BOT_LEVELS.hard),
-} satisfies Record<BotDifficulty, Bot>
+const depthsearch = registerBot(DepthsearchBot, undefined, BOT_LEVELS)
+const random = registerBot(RandomBot)
+const mistral = registerBot(MistralBot, new DepthsearchBot())
+const jev = registerBot(JevBot, new DepthsearchBot())
 
-const random = new RandomBot()
-const mistral = withFallback(new MistralBot(), DEPTHSEARCH.normal)
-const jev = withFallback(new JevBot(), DEPTHSEARCH.normal)
-
-const BOTS = {
+export const BOTS = {
+  [depthsearch.name]: depthsearch,
   [random.name]: random,
   [mistral.name]: mistral,
   [jev.name]: jev,
-} satisfies Record<string, Bot>
+}
 
-export type BotName = DepthsearchBot['name'] | keyof typeof BOTS
-
-export type BotConfig =
-  { name: DepthsearchBot['name']; difficulty: BotDifficulty } | { name: keyof typeof BOTS }
-
-export const DEFAULT_BOT_CONFIG: BotConfig = { name: 'depthsearch', difficulty: 'normal' }
+export type BotName = keyof typeof BOTS
+export type BotConfig = (typeof BOTS)[BotName]['defaultConfig']
+export const DEFAULT_BOT_CONFIG: BotConfig = depthsearch.defaultConfig
 
 export function getBot(config: BotConfig): Bot {
-  return config.name === 'depthsearch' ? DEPTHSEARCH[config.difficulty] : BOTS[config.name]
+  return BOTS[config.name].resolve(config.options)
 }
 
-// The URL keeps its two plain params (?difficulty=hard, ?strategy=mistral) for shareable
-// links; the app folds them into one bot description at the route boundary.
+export function configFromBot<B extends Bot>(bot: B): Pick<B, 'name' | 'options'> {
+  return { name: bot.name, options: bot.options }
+}
+
+// Validate unknown URL data through the same constructors used by the application.
+export function parseBotConfig(value: unknown): BotConfig {
+  try {
+    if (typeof value !== 'object' || value === null) return DEFAULT_BOT_CONFIG
+    const { name, options } = value as Record<string, unknown>
+    if (typeof name !== 'string' || !Object.hasOwn(BOTS, name)) return DEFAULT_BOT_CONFIG
+    if (options === undefined) {
+      const { difficulty } = value as Record<string, unknown>
+      return legacyBotConfig(name, difficulty)
+    }
+    return configFromBot(BOTS[name as BotName].resolve(options)) as BotConfig
+  } catch {
+    return DEFAULT_BOT_CONFIG
+  }
+}
+
+// A single structured URL parameter carries the entire bot, regardless of strategy.
+// Older ?difficulty=hard / ?strategy=mistral links are decoded only at this boundary.
 export function botFromSearch(search: GameSearch): BotConfig {
-  if (search.strategy && Object.hasOwn(BOTS, search.strategy))
-    return { name: search.strategy as keyof typeof BOTS }
-  return { name: 'depthsearch', difficulty: search.difficulty ?? 'normal' }
+  if (search.bot !== undefined) return parseBotConfig(search.bot)
+  return legacyBotConfig(search.strategy, search.difficulty)
 }
 
-export function searchFromBot(bot: BotConfig): Pick<GameSearch, 'difficulty' | 'strategy'> {
-  return bot.name === 'depthsearch' ? { difficulty: bot.difficulty } : { strategy: bot.name }
+export function searchFromBot(bot: BotConfig): Pick<GameSearch, 'bot'> {
+  return { bot }
+}
+
+function legacyBotConfig(name: unknown, difficulty: unknown): BotConfig {
+  const registration =
+    typeof name === 'string' && Object.hasOwn(BOTS, name)
+      ? BOTS[name as BotName]
+      : BOTS[DEFAULT_BOT_CONFIG.name]
+  const options =
+    typeof difficulty === 'string' && Object.hasOwn(registration.presets, difficulty)
+      ? registration.presets[difficulty]
+      : registration.defaultConfig.options
+  return configFromBot(registration.resolve(options)) as BotConfig
 }

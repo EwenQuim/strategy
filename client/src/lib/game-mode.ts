@@ -6,6 +6,8 @@ export type GameMode = 'ai' | 'local' | 'online'
 
 export type GameSearch = {
   mode: GameMode
+  // Bot configuration is validated by the application, never by the game library.
+  bot?: unknown
   difficulty?: BotDifficulty
   // Resolved by bots/catalog.ts in the app; unknown names play the default.
   strategy?: string
@@ -16,6 +18,7 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   const result: GameSearch = {
     mode: search.mode === 'local' ? 'local' : search.mode === 'online' ? 'online' : 'ai',
   }
+  if (search.bot !== undefined) result.bot = search.bot
   if (typeof search.difficulty === 'string' && Object.hasOwn(BOT_LEVELS, search.difficulty))
     result.difficulty = search.difficulty as BotDifficulty
   if (typeof search.strategy === 'string') result.strategy = search.strategy

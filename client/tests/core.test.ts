@@ -242,11 +242,12 @@ test('A failing or empty bot hands the decision to its fallback', async () => {
   assert.ok(expected.length > 0)
   const failing = {
     name: 'offline',
+    options: {},
     async chooseActions() {
       throw new Error('offline')
     },
   }
-  const empty = { name: 'empty', chooseActions: async () => [] }
+  const empty = { name: 'empty', options: {}, chooseActions: async () => [] }
   assert.deepEqual(await withFallback(failing, fallback).chooseActions(state), expected)
   assert.deepEqual(await withFallback(empty, fallback).chooseActions(state), expected)
   assert.deepEqual(await withFallback(fallback, failing).chooseActions(state), expected)

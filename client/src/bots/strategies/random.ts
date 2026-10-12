@@ -2,12 +2,18 @@ import { activePawn, reducer, type Action, type GameState } from '../../lib/engi
 import { SeededRandom, seedState } from '../../lib/engine/random.ts'
 import { legalActions } from '../../lib/engine/ai/options.ts'
 import type { Bot } from '../bot.ts'
+import { readOptions } from '../options.ts'
 
 // Plays the whole turn from one seeded stream: the battle's stream only moves on rolls, so seeding
 // each step from its state would repeat the same draw after every move. The round and the unit
 // keep quiet turns from all drawing alike.
-export class RandomBot implements Bot {
+export class RandomBot implements Bot<Record<string, never>> {
   readonly name = 'random'
+  readonly options: Readonly<Record<string, never>>
+
+  constructor(options: Partial<Record<string, never>> = {}) {
+    this.options = readOptions({}, options)
+  }
 
   async chooseActions(state: GameState): Promise<Action[]> {
     return chooseActions(state)

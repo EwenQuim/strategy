@@ -28,6 +28,7 @@ import { biomeNames } from '../src/i18n/biomes.ts'
 import { unitNames } from '../src/i18n/units.ts'
 import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
+import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -575,7 +576,10 @@ test(
       await page.getByLabel('Biome', { exact: true }).selectOption('desert')
       await page.getByRole('button', { name: 'Start battle' }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      assert.equal(new URL(page.url()).searchParams.get('difficulty'), difficulty)
+      assert.deepEqual(JSON.parse(new URL(page.url()).searchParams.get('bot')!), {
+        name: 'depthsearch',
+        options: BOT_LEVELS[difficulty as BotDifficulty],
+      })
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'desert')
       assert.equal(
         await page.locator('[data-testid="initiative-unit"][data-side="player"]').count(),

@@ -1,12 +1,27 @@
 import { legalActions } from '../../lib/engine/ai/options.ts'
 import { activePawn, type Action, type GameState } from '../../lib/engine/index.ts'
 import type { Bot } from '../bot.ts'
+import { readOptions } from '../options.ts'
 import { readMistralApiKey } from '../apiKeys.ts'
 import { acceptedAction, positionText, RULES_TEXT } from '../remoteText.ts'
 
 // Z.ai GLM 5.3, hosted by Mistral: a reasoning model, markedly stronger at
 // positional planning than mistral-small at the cost of slower replies.
 const MODEL = 'zai-glm-5-3'
+
+type MistralOptions = {
+  model: string
+  effort: 'low' | 'medium' | 'high'
+  maxTokens: number
+  temperature: number
+}
+
+const DEFAULT_OPTIONS: MistralOptions = {
+  model: MODEL,
+  effort: 'low',
+  maxTokens: 16384,
+  temperature: 0.4,
+}
 
 const SYSTEM_PROMPT = `You are the war master of the ENEMY army in Hexmate, a turn-based hexagonal strategy game on an axial hex grid (q, r; adjacent hexes differ by (1,0), (-1,0), (0,1), (0,-1), (1,-1), (-1,1)).
 
@@ -17,15 +32,30 @@ ${RULES_TEXT}
 You always answer with exactly one legal action from the list you are given, as pure JSON, with no other text.`
 
 // Proposes nothing without a key or a usable reply; the catalog falls back to the local search.
-export class MistralBot implements Bot {
+export class MistralBot implements Bot<MistralOptions> {
   readonly name = 'mistral'
+  readonly options: Readonly<MistralOptions>
+
+  constructor(options: Partial<MistralOptions> = {}) {
+    this.options = readOptions(DEFAULT_OPTIONS, options)
+    if (
+      !this.options.model.trim() ||
+      !['low', 'medium', 'high'].includes(this.options.effort) ||
+      !Number.isInteger(this.options.maxTokens) ||
+      this.options.maxTokens < 1 ||
+      !Number.isFinite(this.options.temperature) ||
+      this.options.temperature < 0 ||
+      this.options.temperature > 2
+    )
+      throw new RangeError('Invalid Mistral options')
+  }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    return chooseActions(state)
+    return chooseActions(state, this.options)
   }
 }
 
-async function chooseActions(state: GameState): Promise<Action[]> {
+async function chooseActions(state: GameState, options: MistralOptions): Promise<Action[]> {
   const apiKey = readMistralApiKey()
   if (!apiKey || !activePawn(state)) return []
   // Imported lazily so the SDK stays in its own chunk, loaded only for Mistral battles.
@@ -33,12 +63,12 @@ async function chooseActions(state: GameState): Promise<Action[]> {
   const { chatComplete } = await import('@mistralai/mistralai/funcs/chatComplete.js')
   const client = new MistralCore({ apiKey })
   const result = await chatComplete(client, {
-    model: MODEL,
-    temperature: 0.4,
+    model: options.model,
+    temperature: options.temperature,
     // GLM always reasons, and its thinking shares the completion budget: without a
     // generous budget and a low effort the reply is pure truncated thinking.
-    maxTokens: 16384,
-    reasoningEffort: 'low',
+    maxTokens: options.maxTokens,
+    reasoningEffort: options.effort,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: battlePrompt(state) },

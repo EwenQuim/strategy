@@ -7,6 +7,7 @@
   "include": [
     "src/bots/bot.ts",
     "src/bots/options.ts",
+    "src/bots/registration.ts",
     "src/bots/targetPicker.ts",
     "src/bots/remoteText.ts",
     "src/bots/strategies/depthsearch.ts",

@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { getBot, botFromSearch, searchFromBot, type BotConfig } from '../src/bots/catalog.ts'
+import {
+  BOTS,
+  DEFAULT_BOT_CONFIG,
+  getBot,
+  botFromSearch,
+  searchFromBot,
+  configFromBot,
+  parseBotConfig,
+  type BotConfig,
+} from '../src/bots/catalog.ts'
 import { withFallback, type Bot } from '../src/bots/bot.ts'
 import {
   MISTRAL_KEY_STORAGE as mistralKey,
@@ -10,6 +19,14 @@ import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
 import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { MistralBot } from '../src/bots/strategies/mistral.ts'
+import {
+  BATTLE_SNAPSHOT_VERSION,
+  battleIdentity,
+  isSameBattle,
+  snapshotState,
+} from '../src/lib/battleSnapshot.ts'
+import { readBattleFromLocalStorage } from '../src/battleStorage.ts'
 import { parseGameSearch } from '../src/lib/game-mode.ts'
 
 const storage = { getItem: (_key: string): string | null => null }
@@ -23,17 +40,18 @@ function enemyTurn() {
 
 test('Serializable bot descriptions resolve to stable objects with their own names', () => {
   const configs: BotConfig[] = [
-    { name: 'depthsearch', difficulty: 'easy' },
-    { name: 'depthsearch', difficulty: 'normal' },
-    { name: 'depthsearch', difficulty: 'hard' },
-    { name: 'random' },
-    { name: 'mistral' },
-    { name: 'jev' },
+    { name: 'depthsearch', options: BOT_LEVELS.easy },
+    { name: 'depthsearch', options: BOT_LEVELS.normal },
+    { name: 'depthsearch', options: BOT_LEVELS.hard },
+    BOTS.random.defaultConfig,
+    BOTS.mistral.defaultConfig,
+    BOTS.jev.defaultConfig,
   ]
   for (const config of configs) {
     const restored = JSON.parse(JSON.stringify(config)) as BotConfig
     const bot = getBot(restored)
     assert.equal(bot.name, config.name)
+    assert.deepEqual(bot.options, config.options)
     assert.equal(getBot(config), bot)
     assert.deepEqual(botFromSearch(parseGameSearch(searchFromBot(config))), config)
   }
@@ -45,6 +63,7 @@ test('Fallback preserves the remote identity and calls methods on their owning o
   const state = enemyTurn()
   const primary: Bot = {
     name: 'remote',
+    options: { effort: 'high' },
     async chooseActions() {
       assert.equal(this, primary)
       throw new Error('offline')
@@ -52,6 +71,7 @@ test('Fallback preserves the remote identity and calls methods on their owning o
   }
   const fallback: Bot = {
     name: 'local',
+    options: {},
     async chooseActions() {
       assert.equal(this, fallback)
       return [{ type: 'endTurn' }]
@@ -59,6 +79,7 @@ test('Fallback preserves the remote identity and calls methods on their owning o
   }
   const bot = withFallback(primary, fallback)
   assert.equal(bot.name, 'remote')
+  assert.equal(bot.options, primary.options)
   assert.deepEqual(await bot.chooseActions(state), [{ type: 'endTurn' }])
 })
 
@@ -106,7 +127,7 @@ for (const [name, storageKey, endpoint] of [
       ),
     )
 
-    assert.deepEqual(await getBot({ name }).chooseActions(state), [action])
+    assert.deepEqual(await getBot(BOTS[name].defaultConfig).chooseActions(state), [action])
     assert.equal(request.mock.callCount(), 1)
     const [input] = request.mock.calls[0].arguments
     assert.equal(input instanceof Request ? input.url : String(input), endpoint)
@@ -119,13 +140,142 @@ for (const [name, storageKey, endpoint] of [
       throw new Error('No network request expected without a key')
     })
     const fallback = await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)
-    assert.deepEqual(await getBot({ name }).chooseActions(state), fallback)
+    assert.deepEqual(await getBot(BOTS[name].defaultConfig).chooseActions(state), fallback)
     assert.equal(request.mock.callCount(), 0)
   })
 
   test(`${name} remains selectable through a shared battle URL`, () => {
     const search = parseGameSearch({ strategy: name })
     assert.equal(search.strategy, name)
-    assert.deepEqual(searchFromBot(botFromSearch(search)), { strategy: name })
+    assert.deepEqual(botFromSearch(search), BOTS[name].defaultConfig)
+    assert.deepEqual(
+      botFromSearch(parseGameSearch(searchFromBot(BOTS[name].defaultConfig))),
+      BOTS[name].defaultConfig,
+    )
   })
 }
+
+test('Arbitrary search options and Mistral effort use the same config, URL and save path', () => {
+  const configs: BotConfig[] = [
+    configFromBot(new DepthsearchBot({ ...BOT_LEVELS.hard, beamWidth: 7, latitude: 12 })),
+    configFromBot(new MistralBot({ effort: 'high', temperature: 0.7 })),
+  ]
+  for (const config of configs) {
+    const json = JSON.parse(JSON.stringify(searchFromBot(config)))
+    const restored = botFromSearch(parseGameSearch(json))
+    assert.deepEqual(restored, config)
+    assert.deepEqual(getBot(restored).options, config.options)
+    const identity = battleIdentity('ai', 'same-seed', config, undefined)
+    assert.ok(isSameBattle(identity, battleIdentity('ai', 'same-seed', restored, undefined)))
+    assert.ok(
+      !isSameBattle(
+        identity,
+        battleIdentity('ai', 'same-seed', BOTS[config.name].defaultConfig, undefined),
+      ),
+    )
+  }
+})
+
+test('Unknown, malformed and out-of-range bot options cannot reach a strategy', () => {
+  for (const config of [
+    null,
+    { name: 'toString', options: {} },
+    { name: 'depthsearch', options: { depth: 0 } },
+    { name: 'depthsearch', options: { beamWidth: '7' } },
+    { name: 'depthsearch', options: { latitude: 1000 } },
+    { name: 'mistral', options: { effort: 'extreme' } },
+    { name: 'mistral', options: { maxTokens: -1 } },
+    { name: 'mistral', options: { temperature: NaN } },
+    { name: 'random', options: { effort: 'high' } },
+    { name: 'jev', options: { model: '' } },
+  ])
+    assert.deepEqual(parseBotConfig(config), DEFAULT_BOT_CONFIG)
+  assert.deepEqual(botFromSearch(parseGameSearch({ difficulty: 'hard' })), {
+    name: 'depthsearch',
+    options: BOT_LEVELS.hard,
+  })
+})
+
+test('Option key order does not change bot identity or create another instance', () => {
+  const config = configFromBot(new DepthsearchBot({ ...BOT_LEVELS.hard, beamWidth: 7 }))
+  const bot = getBot(config)
+  const reordered = {
+    name: config.name,
+    options: Object.fromEntries(Object.entries(config.options).reverse()),
+  }
+  assert.deepEqual(parseBotConfig(reordered), config)
+  assert.equal(getBot(parseBotConfig(reordered)), bot)
+})
+
+test('An existing offline battle resumes after config migration but never with different options', (t) => {
+  const state = enemyTurn()
+  const saved = {
+    version: BATTLE_SNAPSHOT_VERSION,
+    identity: battleIdentity(
+      'ai',
+      state.seed,
+      { name: 'depthsearch', difficulty: 'hard' },
+      undefined,
+    ),
+    state: snapshotState(state),
+  }
+  t.mock.method(storage, 'getItem', () => JSON.stringify(saved))
+  const config: BotConfig = { name: 'depthsearch', options: BOT_LEVELS.hard }
+  assert.deepEqual(readBattleFromLocalStorage('ai', state.seed, config, undefined), state)
+  assert.equal(
+    readBattleFromLocalStorage('ai', state.seed, DEFAULT_BOT_CONFIG, undefined),
+    null,
+  )
+  const reordered = parseBotConfig({
+    name: config.name,
+    options: Object.fromEntries(Object.entries(config.options).reverse()),
+  })
+  assert.deepEqual(readBattleFromLocalStorage('ai', state.seed, reordered, undefined), state)
+  const remote = configFromBot(new MistralBot({ effort: 'high' }))
+  saved.identity = battleIdentity('ai', state.seed, remote, undefined)
+  assert.deepEqual(readBattleFromLocalStorage('ai', state.seed, remote, undefined), state)
+  assert.equal(
+    readBattleFromLocalStorage('ai', state.seed, BOTS.mistral.defaultConfig, undefined),
+    null,
+  )
+})
+
+test('Mistral effort and other constructor options reach the API after a URL round trip', async (t) => {
+  const config = configFromBot(
+    new MistralBot({
+      effort: 'high',
+      maxTokens: 2048,
+      temperature: 0.7,
+    }),
+  )
+  t.mock.method(storage, 'getItem', (key: string) =>
+    key === mistralKey ? 'test-api-key' : null,
+  )
+  const request = t.mock.method(globalThis, 'fetch', async () =>
+    Response.json({
+      id: 'test',
+      object: 'chat.completion',
+      created: 0,
+      model: config.options.model,
+      choices: [
+        {
+          index: 0,
+          finish_reason: 'stop',
+          message: { role: 'assistant', content: '{"type":"endTurn"}' },
+        },
+      ],
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+    }),
+  )
+  const restored = botFromSearch(
+    parseGameSearch(JSON.parse(JSON.stringify(searchFromBot(config)))),
+  )
+  assert.deepEqual(await getBot(restored).chooseActions(enemyTurn()), [{ type: 'endTurn' }])
+  const [input] = request.mock.calls[0].arguments
+  assert.ok(input instanceof Request)
+  const body = await input.json()
+  assert.equal(body.reasoning_effort, 'high')
+  assert.equal(body.max_tokens, 2048)
+  assert.equal(body.temperature, 0.7)
+  assert.equal(body.model, config.options.model)
+})

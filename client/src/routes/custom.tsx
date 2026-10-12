@@ -7,8 +7,8 @@ import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
-import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
-import type { BotName } from '../bots/catalog'
+import type { BotDifficulty } from '../lib/engine/ai'
+import { BOTS, searchFromBot, parseBotConfig, type BotName } from '../bots/catalog'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import {
@@ -42,6 +42,8 @@ export const Route = createFileRoute('/custom')({
     const [enemy, setEnemy] = useState<Pawn['kind'][] | null>(null)
     const enemyRoster = enemy ?? player
     const labels = mode === 'local' ? m.localSides : m.aiSides
+    const selectedBot = BOTS[strategy]
+    const presets = Object.entries(selectedBot.presets)
 
     return (
       <MenuLayout title={common.customPlay} scroll={false}>
@@ -53,9 +55,13 @@ export const Route = createFileRoute('/custom')({
               to: '/game',
               search: {
                 mode,
-                // Remote strategies have no difficulty dial, so the link carries only the
-                // param the chosen strategy uses.
-                ...(strategy === 'depthsearch' ? { difficulty } : { strategy }),
+                ...searchFromBot(
+                  parseBotConfig({
+                    name: strategy,
+                    options:
+                      selectedBot.presets[difficulty] ?? selectedBot.defaultConfig.options,
+                  }),
+                ),
                 setup: { biome, player, enemy: enemyRoster },
               },
             })
@@ -80,7 +86,7 @@ export const Route = createFileRoute('/custom')({
                   <option value="local">{m.twoPlayers}</option>
                 </select>
               </div>
-              {strategy === 'depthsearch' && (
+              {presets.length > 0 && (
                 <div className="grid gap-1.5 text-sm text-muted">
                   <label htmlFor="custom-difficulty">
                     {m.difficulty}
@@ -93,7 +99,7 @@ export const Route = createFileRoute('/custom')({
                     disabled={mode === 'local'}
                     onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
                   >
-                    {Object.keys(BOT_LEVELS).map((level) => (
+                    {presets.map(([level]) => (
                       <option key={level} value={level}>
                         {m.difficulties[level as BotDifficulty]}
                       </option>
@@ -129,9 +135,11 @@ export const Route = createFileRoute('/custom')({
                     disabled={mode === 'local'}
                     onChange={(event) => setStrategy(event.target.value as BotName)}
                   >
-                    <option value="depthsearch">{m.aiStrategies.depthsearch}</option>
-                    <option value="mistral">{m.aiStrategies.mistral}</option>
-                    <option value="jev">{m.aiStrategies.jev}</option>
+                    {Object.keys(BOTS).map((name) => (
+                      <option key={name} value={name}>
+                        {m.aiStrategies[name as BotName]}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}

@@ -14,6 +14,7 @@ import {
   type BattleSetup,
 } from '../src/lib/engine/index.ts'
 import { getBot } from '../src/bots/catalog.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const setup = {
   biome: 'desert',
@@ -75,7 +76,7 @@ test('Custom search accepts more Bulwarks than one front row', () => {
 test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', async () => {
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
-    const config = { name: 'depthsearch', difficulty } as const
+    const config = { name: 'depthsearch', options: BOT_LEVELS[difficulty] } as const
     const bot = createBotGame(getBot(config))
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening

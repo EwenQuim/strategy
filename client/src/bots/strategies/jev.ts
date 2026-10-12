@@ -8,6 +8,7 @@ import {
   type GameState,
 } from '../../lib/engine/index.ts'
 import type { Bot } from '../bot.ts'
+import { readOptions } from '../options.ts'
 import { readJevApiKey } from '../apiKeys.ts'
 import { acceptedAction, describeAction, positionText, RULES_TEXT } from '../remoteText.ts'
 
@@ -19,16 +20,24 @@ import { acceptedAction, describeAction, positionText, RULES_TEXT } from '../rem
 
 const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
+type JevOptions = { model: string }
+const DEFAULT_OPTIONS: JevOptions = { model: MODEL }
 // Proposes nothing without a key or a usable answer; the catalog falls back to the local search.
-export class JevBot implements Bot {
+export class JevBot implements Bot<JevOptions> {
   readonly name = 'jev'
+  readonly options: Readonly<JevOptions>
+
+  constructor(options: Partial<JevOptions> = {}) {
+    this.options = readOptions(DEFAULT_OPTIONS, options)
+    if (!this.options.model.trim()) throw new RangeError('Invalid Jev options')
+  }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    return chooseActions(state)
+    return chooseActions(state, this.options)
   }
 }
 
-async function chooseActions(state: GameState): Promise<Action[]> {
+async function chooseActions(state: GameState, options: JevOptions): Promise<Action[]> {
   const apiKey = readJevApiKey()
   if (!apiKey || !activePawn(state)) return []
   const response = await fetch(ENDPOINT, {
@@ -36,7 +45,7 @@ async function chooseActions(state: GameState): Promise<Action[]> {
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     signal: AbortSignal.timeout(30_000),
     body: JSON.stringify({
-      model: MODEL,
+      model: options.model,
       state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
       questions: {
         move: {

@@ -12,6 +12,7 @@ import type { TargetPicker } from '../targetPicker.ts'
 // A scripted bot around a target picker, for tests and campaign checks.
 export class RulesBot implements Bot {
   readonly name = 'rules'
+  readonly options = Object.freeze({})
   readonly picker: TargetPicker
 
   constructor(picker: TargetPicker) {

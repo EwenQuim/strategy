@@ -7,7 +7,7 @@ import {
   reducer,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import { getBot } from '../src/bots/catalog.ts'
+import { BOTS, getBot } from '../src/bots/catalog.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
 import { actionFromReply, battlePrompt, MistralBot } from '../src/bots/strategies/mistral.ts'
 
@@ -56,7 +56,7 @@ test('A model reply is accepted only when the engine accepts the action', () => 
 
 test('Without an API key the registered Mistral bot falls back to the local search', async () => {
   const state = enemyTurn('mistral-sync')
-  const actions = await getBot({ name: 'mistral' }).chooseActions(state)
+  const actions = await getBot(BOTS.mistral.defaultConfig).chooseActions(state)
   assert.ok(actions.length > 0)
   for (const action of actions)
     assert.notEqual(reducer(state, action), state, `illegal ${JSON.stringify(action)}`)

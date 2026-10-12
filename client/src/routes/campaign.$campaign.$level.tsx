@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Briefing } from '../components/Briefing'
 import { Game } from '../components/Game'
+import { BOT_LEVELS } from '../lib/engine/ai'
 import { isCampaignUnlocked, visibleCampaigns, isLevelUnlocked } from '../lib/campaign'
 import {
   readCampaignProgress,
@@ -36,7 +37,7 @@ export const Route = createFileRoute('/campaign/$campaign/$level')({
           seed={level.seed}
           mode="ai"
           setup={level.setup}
-          bot={{ name: 'depthsearch', difficulty: level.difficulty }}
+          bot={{ name: 'depthsearch', options: BOT_LEVELS[level.difficulty] }}
           campaign={campaign}
           campaignLevel={level.id}
           onVictory={() => recordCampaignVictory(campaign.slug, level.id)}

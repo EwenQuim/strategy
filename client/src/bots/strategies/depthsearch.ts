@@ -1,8 +1,8 @@
 import { activePawn, reducer, type Action, type GameState } from '../../lib/engine/engine.ts'
 import type { Pawn, Side } from '../../lib/engine/pawns/index.ts'
-import type { BotOptions } from '../../lib/engine/ai.ts'
+import { BOT_LEVELS, type BotOptions } from '../../lib/engine/ai.ts'
 import type { Bot } from '../bot.ts'
-import { validOptions } from '../options.ts'
+import { readOptions, validOptions } from '../options.ts'
 import {
   distancesToAttack,
   evaluatePosition,
@@ -31,13 +31,13 @@ const SHORTLIST = 200
 const END_TURN: Action = { type: 'endTurn' }
 
 // Budgeted beam minimax over the unit turns the engine enumerates.
-export class DepthsearchBot implements Bot {
+export class DepthsearchBot implements Bot<BotOptions> {
   readonly name = 'depthsearch'
-  readonly options: BotOptions
+  readonly options: Readonly<BotOptions>
 
-  constructor(options: BotOptions) {
-    if (!validOptions(options)) throw new RangeError('Invalid bot options')
-    this.options = { ...options }
+  constructor(options: Partial<BotOptions> = {}) {
+    this.options = readOptions<BotOptions>(BOT_LEVELS.normal, options)
+    if (!validOptions(this.options)) throw new RangeError('Invalid bot options')
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
