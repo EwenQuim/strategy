@@ -149,11 +149,11 @@ export const jumpBrief = t({
   it: 'fino a 3 caselle, sopra ogni cosa',
 })
 export const jumpNoAttack = t({
-  en: 'Strike for 3 after landing; only 1 HP, so plan your retreat',
-  fr: 'Frappez pour 3 à l’arrivée ; seulement 1 PV, préparez votre retraite',
-  de: 'Triff nach der Landung für 3; nur 1 LP, plane deinen Rückzug',
-  es: 'Golpea por 3 al aterrizar; solo 1 PV, planea tu retirada',
-  it: 'Colpisci per 3 all’atterraggio; solo 1 PV, pianifica la ritirata',
+  en: 'Fragile: plan your retreat',
+  fr: 'Fragile : préparez votre retraite',
+  de: 'Zerbrechlich: plane deinen Rückzug',
+  es: 'Frágil: planea tu retirada',
+  it: 'Fragile: pianifica la ritirata',
 })
 
 export const phalanxBrief = t({
