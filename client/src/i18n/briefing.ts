@@ -57,11 +57,11 @@ export const spendEnergy = t({
   it: 'Muoviti e usa la tua abilità una volta per attivazione, in qualsiasi ordine',
 })
 export const unusedEnergy = t({
-  en: 'Unused energy expires. Retreat by moving; hits do not randomly miss.',
-  fr: 'L’énergie inutilisée est perdue. Reculez en vous déplaçant ; les coups ne ratent pas au hasard.',
-  de: 'Ungenutzte Energie verfällt. Ziehe zum Rückzug; Treffer verfehlen nicht zufällig.',
-  es: 'La energía sin usar se pierde. Retírate moviéndote; los golpes no fallan al azar.',
-  it: 'L’energia inutilizzata si perde. Ritirati muovendoti; i colpi non mancano a caso.',
+  en: 'Unused energy expires. Retreat by moving.',
+  fr: 'L’énergie inutilisée est perdue. Reculez en vous déplaçant.',
+  de: 'Ungenutzte Energie verfällt. Ziehe zum Rückzug.',
+  es: 'La energía sin usar se pierde. Retírate moviéndote.',
+  it: 'L’energia inutilizzata si perde. Ritirati muovendoti.',
 })
 
 export const loseKing = t({
