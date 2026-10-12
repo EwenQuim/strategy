@@ -14,7 +14,7 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { depthsearch, turnOutcomes } from '../src/lib/bots/depthsearch.ts'
+import { depthsearch, turnOutcomes } from '../src/bots/strategies/depthsearch.ts'
 
 import { turnPlans } from '../src/lib/engine/ai/turns.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'

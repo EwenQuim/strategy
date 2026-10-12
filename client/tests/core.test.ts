@@ -22,8 +22,9 @@ import { createBotGame } from './bot-game.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import { seedState } from '../src/lib/engine/random.ts'
-import { nearestTarget, ruleBot } from '../src/lib/bots/rules.ts'
-import { withFallback } from '../src/lib/bots/bot.ts'
+import { nearestTarget } from '../src/bots/targetPicker.ts'
+import { rules as ruleBot } from '../src/bots/strategies/rules.ts'
+import { withFallback } from '../src/bots/bot.ts'
 
 function duel(side: Side): GameState {
   return {

@@ -13,7 +13,7 @@ import {
   symmetricSeed,
   type BattleSetup,
 } from '../src/lib/engine/index.ts'
-import { createBot } from '../src/bots.ts'
+import { createBot } from '../src/bots/catalog.ts'
 
 const setup = {
   biome: 'desert',

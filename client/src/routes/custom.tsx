@@ -8,7 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai'
-import type { BotName } from '../bots'
+import type { BotName } from '../bots/catalog'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import {

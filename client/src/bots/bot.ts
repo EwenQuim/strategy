@@ -1,4 +1,4 @@
-import type { Action, GameState } from '../engine/engine.ts'
+import type { Action, GameState } from '../lib/engine/engine.ts'
 
 // Anything that can think for the side to act: it proposes actions for the active unit and the
 // engine judges them. The engine only offers the toolbox (legal actions, turn enumeration,

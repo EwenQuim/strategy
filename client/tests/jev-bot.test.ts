@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { activePawn, initialState, reducer, type GameState } from '../src/lib/engine/index.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionCriteria, actionFromChoice, jevBot } from '../src/api/jevBot.ts'
+import { actionCriteria, actionFromChoice, jev } from '../src/bots/strategies/jev.ts'
+
+const jevBot = jev()
 
 function enemyTurn(seed: string): GameState {
   let state = initialState(seed)

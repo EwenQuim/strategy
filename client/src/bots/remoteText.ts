@@ -8,8 +8,8 @@ import {
 } from '../lib/engine/index.ts'
 
 // Provider-agnostic pieces shared by every remote bot adapter (Mistral, Jev, ...): the
-// position as text, BYOK key storage, action descriptions and the engine-as-judge rule.
-// Each provider keeps its own file for the key, the prompt shape and the API call.
+// position as text, action descriptions and the engine-as-judge rule.
+// Each strategy keeps its own prompt shape and API call.
 
 // The shared rule summary every remote bot needs to judge a position.
 export const RULES_TEXT = `Rules: the active unit acts alone with its remaining energy (moving costs 1 per step, attacking 1, specials their listed price; the turn ends when energy runs out). Terrain never blocks ranged attacks. Mountains and lakes cannot be walked through; lava hurts units standing on it and empowers attacks from it; watchtowers extend ranged attacks by 1; springs heal 1 hp per round; runes give +2 energy when picked up. Units may Escape (dodge) a hit; some attacks ignore Escape.`
@@ -80,24 +80,4 @@ export function describeAction(action: Action): string {
 export function acceptedAction(action: Action, state: GameState): Action | null {
   if (action.type === 'restart') return null
   return reducer(state, action) !== state ? action : null
-}
-
-// BYOK key storage: the player pastes a key in Settings and it lives in localStorage.
-// It is never read from the environment, so no key can ever be inlined into a build.
-export function readApiKey(storageKey: string): string | undefined {
-  try {
-    return localStorage.getItem(storageKey) ?? undefined
-  } catch {
-    // localStorage unavailable: no key, and the local fallback AI takes over
-  }
-  return undefined
-}
-
-export function saveApiKey(storageKey: string, key: string): void {
-  try {
-    if (key) localStorage.setItem(storageKey, key)
-    else localStorage.removeItem(storageKey)
-  } catch {
-    // localStorage unavailable: the key only lasts until the page is left
-  }
 }

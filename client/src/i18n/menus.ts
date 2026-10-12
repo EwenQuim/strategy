@@ -1,5 +1,5 @@
 import type { BotDifficulty } from '../lib/engine/ai'
-import type { BotName } from '../bots'
+import type { BotName } from '../bots/catalog'
 import { plural, t } from './locale'
 
 export const chooseMode = t({

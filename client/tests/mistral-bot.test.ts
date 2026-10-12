@@ -7,9 +7,11 @@ import {
   reducer,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import { createBot } from '../src/bots.ts'
+import { createBot } from '../src/bots/catalog.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionFromReply, battlePrompt, mistralBot } from '../src/api/mistralBot.ts'
+import { actionFromReply, battlePrompt, mistral } from '../src/bots/strategies/mistral.ts'
+
+const mistralBot = mistral()
 
 test('Every pawn class carries its remote AI instructions', () => {
   for (const [kind, Unit] of Object.entries(PAWN_CLASSES))

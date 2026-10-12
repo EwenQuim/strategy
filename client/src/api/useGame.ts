@@ -12,7 +12,7 @@ import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import { createBot, DEFAULT_BOT_CONFIG, type BotConfig } from '../bots.ts'
+import { createBot, DEFAULT_BOT_CONFIG, type BotConfig } from '../bots/catalog.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 

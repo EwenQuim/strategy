@@ -21,7 +21,8 @@ import {
 
 import { initialState as botState, transition as botTransition } from './bot-game.ts'
 import { transition } from '../src/lib/engine/engine.ts'
-import { huntTheKing, ruleBot } from '../src/lib/bots/rules.ts'
+import { huntTheKing } from '../src/bots/targetPicker.ts'
+import { rules as ruleBot } from '../src/bots/strategies/rules.ts'
 import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'
 import { biomeNames } from '../src/i18n/biomes.ts'
 import { unitNames } from '../src/i18n/units.ts'

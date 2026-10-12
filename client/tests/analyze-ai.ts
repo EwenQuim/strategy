@@ -1,7 +1,7 @@
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 
-import { depthsearch, searchStats } from '../src/lib/bots/depthsearch.ts'
+import { depthsearch, searchStats } from '../src/bots/strategies/depthsearch.ts'
 import type { BotDifficulty } from '../src/lib/engine/ai.ts'
 import { campaignActions, winnableAgainst } from './campaign-actions.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'

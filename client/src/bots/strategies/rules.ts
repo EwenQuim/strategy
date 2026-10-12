@@ -1,40 +1,30 @@
-import { activePawn, type Action, type GameState } from '../engine/engine.ts'
-import { canAttack, specialTargets } from '../engine/combat.ts'
-import { chargeDestinations, jumpDestinations, type Pawn } from '../engine/pawns/index.ts'
-import { distFrom, hexDist, key, neighbors, passable } from '../engine/hex.ts'
-import type { Bot } from './bot.ts'
-
-export interface BotStrategy {
-  chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
-}
-
-export const nearestTarget: BotStrategy = {
-  chooseTarget: (attacker, targets) =>
-    targets.toSorted((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
-}
-
-export const huntTheKing: BotStrategy = {
-  chooseTarget: (attacker, targets) =>
-    nearestTarget.chooseTarget(
-      attacker,
-      targets.filter((p) => p.kind === 'king'),
-    ) ?? nearestTarget.chooseTarget(attacker, targets),
-}
+import { activePawn, type Action, type GameState } from '../../lib/engine/engine.ts'
+import { canAttack, specialTargets } from '../../lib/engine/combat.ts'
+import {
+  chargeDestinations,
+  jumpDestinations,
+  type Pawn,
+} from '../../lib/engine/pawns/index.ts'
+import { distFrom, key, neighbors, passable } from '../../lib/engine/hex.ts'
+import type { Bot } from '../bot.ts'
+import type { TargetPicker } from '../targetPicker.ts'
 
 // A scripted bot around a target picker, for tests and campaign checks.
-export function ruleBot(strategy: BotStrategy): Bot {
-  return async (state) => {
-    const pawn = activePawn(state)
-    if (!pawn || state.winner) return []
-    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-    const foes = state.pawns.filter((p) => p.side !== pawn.side)
-    const specials = specialTargets(state.pawns, pawn)
-    return (
-      ruleSpecial(state, pawn, foes, specials, strategy) ??
-      ruleAttack(state, pawn, foes, strategy) ??
-      ruleApproach(state, pawn, foes)
-    )
-  }
+export function rules(picker: TargetPicker): Bot {
+  return async (state) => chooseActions(state, picker)
+}
+
+function chooseActions(state: GameState, picker: TargetPicker): Action[] {
+  const pawn = activePawn(state)
+  if (!pawn || state.winner) return []
+  if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+  const foes = state.pawns.filter((p) => p.side !== pawn.side)
+  const specials = specialTargets(state.pawns, pawn)
+  return (
+    ruleSpecial(state, pawn, foes, specials, picker) ??
+    ruleAttack(state, pawn, foes, picker) ??
+    ruleApproach(state, pawn, foes)
+  )
 }
 
 function ruleSpecial(
@@ -42,7 +32,7 @@ function ruleSpecial(
   pawn: Pawn,
   foes: Pawn[],
   specials: Pawn[],
-  strategy: BotStrategy,
+  strategy: TargetPicker,
 ): Action[] | null {
   const own = pawn.ai.ruleSpecial?.(pawn, state, foes, specials)
   if (own) return [own]
@@ -86,7 +76,7 @@ function ruleAttack(
   state: GameState,
   pawn: Pawn,
   foes: Pawn[],
-  strategy: BotStrategy,
+  strategy: TargetPicker,
 ): Action[] | null {
   const target = strategy.chooseTarget(
     pawn,

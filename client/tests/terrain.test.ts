@@ -28,9 +28,10 @@ import {
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 
 import { createBotGame } from './bot-game.ts'
-import { nearestTarget, ruleBot } from '../src/lib/bots/rules.ts'
+import { nearestTarget } from '../src/bots/targetPicker.ts'
+import { rules as ruleBot } from '../src/bots/strategies/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
-import { depthsearch } from '../src/lib/bots/depthsearch.ts'
+import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(pawn: Pawn): GameState {

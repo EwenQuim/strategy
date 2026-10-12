@@ -1,11 +1,16 @@
-import { activePawn, reducer, type Action, type GameState } from '../engine/engine.ts'
-import { SeededRandom, seedState } from '../engine/random.ts'
-import { legalActions } from '../engine/ai/options.ts'
+import { activePawn, reducer, type Action, type GameState } from '../../lib/engine/engine.ts'
+import { SeededRandom, seedState } from '../../lib/engine/random.ts'
+import { legalActions } from '../../lib/engine/ai/options.ts'
+import type { Bot } from '../bot.ts'
 
 // Plays the whole turn from one seeded stream: the battle's stream only moves on rolls, so seeding
 // each step from its state would repeat the same draw after every move. The round and the unit
 // keep quiet turns from all drawing alike.
-export async function random(state: GameState): Promise<Action[]> {
+export function random(): Bot {
+  return async (state) => chooseActions(state)
+}
+
+function chooseActions(state: GameState): Action[] {
   const id = activePawn(state)?.id
   const random = new SeededRandom(seedState(`${state.randomState}:${state.round}:${id}`))
   const actions: Action[] = []

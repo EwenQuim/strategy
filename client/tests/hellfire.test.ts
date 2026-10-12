@@ -19,7 +19,7 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { playbackReducer } from '../src/lib/playback.ts'
-import { depthsearch } from '../src/lib/bots/depthsearch.ts'
+import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const encounter = {

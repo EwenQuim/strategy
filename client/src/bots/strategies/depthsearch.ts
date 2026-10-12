@@ -1,11 +1,105 @@
-import { activePawn, reducer, type Action, type GameState } from '../engine/engine.ts'
-import type { Pawn, Side } from '../engine/pawns/index.ts'
-import type { BotOptions } from '../engine/ai.ts'
-import type { Bot } from './bot.ts'
-import { distancesToAttack, evaluatePosition, type ReachCache } from '../engine/ai/evaluate.ts'
-import { sidePlan } from '../engine/ai/plan.ts'
-import { chooseOption, hpOf, type Outcome } from '../engine/ai/choice.ts'
-import { positionKey, turnPlans, type TurnPlan } from '../engine/ai/turns.ts'
+import { activePawn, reducer, type Action, type GameState } from '../../lib/engine/engine.ts'
+import type { Pawn, Side } from '../../lib/engine/pawns/index.ts'
+import type { BotOptions } from '../../lib/engine/ai.ts'
+import type { Bot } from '../bot.ts'
+import {
+  distancesToAttack,
+  evaluatePosition,
+  type ReachCache,
+} from '../../lib/engine/ai/evaluate.ts'
+import { sidePlan } from '../../lib/engine/ai/plan.ts'
+import { chooseOption, hpOf, type Outcome } from '../../lib/engine/ai/choice.ts'
+import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
+
+export const searchStats = {
+  decisions: 0,
+  plansEnumerated: 0,
+  shortlisted: 0,
+  beamExpansions: 0,
+  leafEvals: 0,
+  rootLeafEvals: 0,
+  deepLeafEvals: 0,
+  replyLeafEvals: 0,
+  cutoffs: 0,
+  budgetBreaks: 0,
+  maxDepth: 0,
+}
+
+const POSITION_BUDGET = 1500
+const SHORTLIST = 200
+const END_TURN: Action = { type: 'endTurn' }
+
+// Budgeted beam minimax over the unit turns the engine enumerates.
+export function depthsearch(options: BotOptions): Bot {
+  if (!validOptions(options)) throw new RangeError('Invalid bot options')
+  return async (state) => chooseActions(state, options)
+}
+
+function chooseActions(state: GameState, options: BotOptions): Action[] {
+  Object.assign(searchStats, {
+    decisions: 1,
+    plansEnumerated: 0,
+    shortlisted: 0,
+    beamExpansions: 0,
+    leafEvals: 0,
+    rootLeafEvals: 0,
+    deepLeafEvals: 0,
+    replyLeafEvals: 0,
+    cutoffs: 0,
+    budgetBreaks: 0,
+    maxDepth: 0,
+  })
+  const pawn = activePawn(state)
+  if (!pawn || state.winner) return []
+  if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+  const distance = distancesToAttack(state, pawn)
+  const reach: ReachCache = new Map()
+  const plan = sidePlan(state, pawn.side, options)
+  const search: Search = {
+    side: pawn.side,
+    beamWidth: options.beamWidth,
+    budget: POSITION_BUDGET,
+    leaf: (next) => {
+      search.budget--
+      searchStats.leafEvals++
+      return evaluatePosition(next, pawn, plan, distance, reach)
+    },
+  }
+  // A fixed stream keeps analysis from seeing the battle's future rolls, such as Hellfire.
+  const analysis = { ...state, randomState: 0 }
+  let floor = -Infinity
+  const ranked = rankedTurns(analysis, search)
+  searchStats.rootLeafEvals = searchStats.leafEvals
+  const valued = ranked
+    .slice(0, options.beamWidth)
+    .map((turn) => {
+      const window = turn.outcomes.length === 1 ? floor : -Infinity
+      const value = expectedScores(turn.outcomes, (outcome) =>
+        minimax(outcome.state, options.depth - 1, window, Infinity, search, outcome.score),
+      )
+      floor = Math.max(floor, value - options.latitude)
+      return { ...turn, value }
+    })
+    .sort((a, b) => b.value - a.value)
+  return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
+}
+
+function validOptions(options: BotOptions | undefined): options is BotOptions {
+  return (
+    !!options &&
+    [2, 3].includes(options.depth) &&
+    Number.isInteger(options.beamWidth) &&
+    options.beamWidth >= 1 &&
+    options.beamWidth <= 32 &&
+    Number.isFinite(options.riskAppetite) &&
+    options.riskAppetite >= -1 &&
+    options.riskAppetite <= 1 &&
+    ['best', 'nearest', 'weakest'].includes(options.focus) &&
+    Number.isFinite(options.latitude) &&
+    options.latitude >= 0 &&
+    options.latitude <= 100
+  )
+}
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
   return {
@@ -21,7 +115,6 @@ function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => numb
 
 const rolls = (action: Action) =>
   action.type === 'attack' || (action.type === 'special' && !!action.target)
-const END_TURN: Action = { type: 'endTurn' }
 
 // Forcing escapes only lasts for the roll: the real chances come back unless a new round began and
 // reset every escape chance anyway.
@@ -98,28 +191,6 @@ type Search = {
   budget: number
   leaf: (state: GameState) => number
 }
-
-// Per-decision search shape, reset on every depthsearch call and read by the analysis
-// harness in tests/analyze-ai.ts. Plain counters only, so they stay free in production.
-export const searchStats = {
-  decisions: 0,
-  plansEnumerated: 0,
-  shortlisted: 0,
-  beamExpansions: 0,
-  leafEvals: 0,
-  rootLeafEvals: 0,
-  deepLeafEvals: 0,
-  replyLeafEvals: 0,
-  cutoffs: 0,
-  budgetBreaks: 0,
-  maxDepth: 0,
-}
-
-// Once a decision has scored this many positions it stops expanding and reuses the scores it
-// already has. With the shortlist below, a decision scores at most the budget plus one node's
-// shortlist. A count, not a clock, keeps decisions deterministic.
-const POSITION_BUDGET = 1500
-const SHORTLIST = 200
 
 // Rune-boosted units with many targets can plan thousands of turns. Every turn without a roll is
 // kept, then the attacking turns that deal the most damage if every blow lands.
@@ -246,73 +317,4 @@ function minimax(
 function untilFirstRoll(actions: Action[]): Action[] {
   const roll = actions.findIndex(rolls)
   return roll < 0 ? actions : actions.slice(0, roll + 1)
-}
-
-const validOptions = (options: BotOptions | undefined): options is BotOptions =>
-  !!options &&
-  [2, 3].includes(options.depth) &&
-  Number.isInteger(options.beamWidth) &&
-  options.beamWidth >= 1 &&
-  options.beamWidth <= 32 &&
-  Number.isFinite(options.riskAppetite) &&
-  options.riskAppetite >= -1 &&
-  options.riskAppetite <= 1 &&
-  ['best', 'nearest', 'weakest'].includes(options.focus) &&
-  Number.isFinite(options.latitude) &&
-  options.latitude >= 0 &&
-  options.latitude <= 100
-
-// The depth search: budgeted beam minimax over the unit turns turns.ts enumerates.
-export function depthsearch(options: BotOptions): Bot {
-  if (!validOptions(options)) throw new RangeError('Invalid bot options')
-  return async (state) => planTurn(state, options)
-}
-
-function planTurn(state: GameState, options: BotOptions): Action[] {
-  Object.assign(searchStats, {
-    decisions: 1,
-    plansEnumerated: 0,
-    shortlisted: 0,
-    beamExpansions: 0,
-    leafEvals: 0,
-    rootLeafEvals: 0,
-    deepLeafEvals: 0,
-    replyLeafEvals: 0,
-    cutoffs: 0,
-    budgetBreaks: 0,
-    maxDepth: 0,
-  })
-  const pawn = activePawn(state)
-  if (!pawn || state.winner) return []
-  if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-  const distance = distancesToAttack(state, pawn)
-  const reach: ReachCache = new Map()
-  const plan = sidePlan(state, pawn.side, options)
-  const search: Search = {
-    side: pawn.side,
-    beamWidth: options.beamWidth,
-    budget: POSITION_BUDGET,
-    leaf: (next) => {
-      search.budget--
-      searchStats.leafEvals++
-      return evaluatePosition(next, pawn, plan, distance, reach)
-    },
-  }
-  // A fixed random stream keeps the analysis from seeing the battle's future rolls, such as Hellfire.
-  const analysis = { ...state, randomState: 0 }
-  let floor = -Infinity
-  const ranked = rankedTurns(analysis, search)
-  searchStats.rootLeafEvals = searchStats.leafEvals
-  const valued = ranked
-    .slice(0, options.beamWidth)
-    .map((turn) => {
-      const window = turn.outcomes.length === 1 ? floor : -Infinity
-      const value = expectedScores(turn.outcomes, (outcome) =>
-        minimax(outcome.state, options.depth - 1, window, Infinity, search, outcome.score),
-      )
-      floor = Math.max(floor, value - options.latitude)
-      return { ...turn, value }
-    })
-    .sort((a, b) => b.value - a.value)
-  return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
 }

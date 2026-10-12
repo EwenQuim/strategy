@@ -1,15 +1,14 @@
-import { BOT_LEVELS, type BotDifficulty } from './lib/engine/ai.ts'
-import type { Bot } from './lib/bots/bot.ts'
-import { withFallback } from './lib/bots/bot.ts'
-import { depthsearch } from './lib/bots/depthsearch.ts'
-import { random } from './lib/bots/random.ts'
-import type { GameSearch } from './lib/game-mode.ts'
-import { mistralBot } from './api/mistralBot.ts'
-import { jevBot } from './api/jevBot.ts'
+import { BOT_LEVELS, type BotDifficulty } from '../lib/engine/ai.ts'
+import { withFallback, type Bot } from './bot.ts'
+import { depthsearch } from './strategies/depthsearch.ts'
+import { random } from './strategies/random.ts'
+import { mistral } from './strategies/mistral.ts'
+import { jev } from './strategies/jev.ts'
+import type { GameSearch } from '../lib/game-mode.ts'
 
 // The only place bots have names: URLs, saved battles and menus refer to a bot through its
-// BotConfig, and createBot turns that config into the Bot the engine plays. Adding a bot is one
-// entry in BOTS; the engine only ever sees the Bot.
+// BotConfig, and createBot turns that config into the Bot the app plays. Adding a bot is one
+// factory in strategies/ plus one entry here; the engine never imports bots.
 const DEPTHSEARCH = {
   easy: depthsearch(BOT_LEVELS.easy),
   normal: depthsearch(BOT_LEVELS.normal),
@@ -17,9 +16,9 @@ const DEPTHSEARCH = {
 } satisfies Record<BotDifficulty, Bot>
 
 const BOTS = {
-  random,
-  mistral: withFallback(mistralBot, DEPTHSEARCH.normal),
-  jev: withFallback(jevBot, DEPTHSEARCH.normal),
+  random: random(),
+  mistral: withFallback(mistral(), DEPTHSEARCH.normal),
+  jev: withFallback(jev(), DEPTHSEARCH.normal),
 } satisfies Record<string, Bot>
 
 export type BotName = 'depthsearch' | keyof typeof BOTS

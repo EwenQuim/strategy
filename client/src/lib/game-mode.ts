@@ -7,7 +7,7 @@ export type GameMode = 'ai' | 'local' | 'online'
 export type GameSearch = {
   mode: GameMode
   difficulty?: BotDifficulty
-  // Resolved against the bot catalog (src/bots.ts) by the app; unknown names play the default.
+  // Resolved by bots/catalog.ts in the app; unknown names play the default.
   strategy?: string
   setup?: Extract<BattleSetup, { map?: undefined }>
 }

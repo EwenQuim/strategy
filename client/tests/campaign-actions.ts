@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
 import { CAMPAIGNS, type CampaignLevel } from '../src/lib/campaign.ts'
 import type { Action, GameState } from '../src/lib/engine/index.ts'
-import { huntTheKing, ruleBot } from '../src/lib/bots/rules.ts'
+import { huntTheKing } from '../src/bots/targetPicker.ts'
+import { rules as ruleBot } from '../src/bots/strategies/rules.ts'
 import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
-import { depthsearch } from '../src/lib/bots/depthsearch.ts'
+import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
 
 export function campaignActions(state: GameState, caution = 0.25): Promise<Action[]> {
   // Press the attack in long endgames instead of testing two kings retreating forever.

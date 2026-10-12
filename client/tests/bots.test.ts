@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createBot, botFromSearch, searchFromBot } from '../src/bots.ts'
-import { API_KEY_STORAGE as mistralKey } from '../src/api/mistralBot.ts'
-import { API_KEY_STORAGE as jevKey } from '../src/api/jevBot.ts'
+import { createBot, botFromSearch, searchFromBot } from '../src/bots/catalog.ts'
+import {
+  MISTRAL_KEY_STORAGE as mistralKey,
+  JEV_KEY_STORAGE as jevKey,
+} from '../src/bots/apiKeys.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { depthsearch } from '../src/lib/bots/depthsearch.ts'
+import { depthsearch } from '../src/bots/strategies/depthsearch.ts'
 import { parseGameSearch } from '../src/lib/game-mode.ts'
 
 const storage = { getItem: (_key: string): string | null => null }

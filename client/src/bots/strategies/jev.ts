@@ -1,4 +1,4 @@
-import { legalActions } from '../lib/engine/ai/options.ts'
+import { legalActions } from '../../lib/engine/ai/options.ts'
 import {
   activePawn,
   hexDist,
@@ -6,34 +6,48 @@ import {
   type Action,
   type Axial,
   type GameState,
-} from '../lib/engine/index.ts'
-import type { Bot } from '../lib/bots/bot.ts'
-import {
-  acceptedAction,
-  describeAction,
-  positionText,
-  readApiKey,
-  RULES_TEXT,
-  saveApiKey,
-} from './botText.ts'
+} from '../../lib/engine/index.ts'
+import type { Bot } from '../bot.ts'
+import { readJevApiKey } from '../apiKeys.ts'
+import { acceptedAction, describeAction, positionText, RULES_TEXT } from '../remoteText.ts'
 
-// The whole Jev bot lives here, outside the pure engine: the API key, the decision request
-// and the answer mapping. Jev (TypeSafe AI) is a decision model: it picks one option from a
+// Jev (TypeSafe AI) is a decision model: it picks one option from a
 // fixed list with a calibrated probability instead of writing text, so the legal actions are
 // sent as the criteria of a single choice question. The engine stays the sole judge — the
 // chosen option is played only if the reducer accepts it — and a failed call proposes nothing,
-// so the catalog (src/bots.ts) falls back to the local search.
+// so the catalog falls back to the local search.
 
 const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
-export const API_KEY_STORAGE = 'hexmate.jevApiKey'
-
-export function readJevApiKey(): string | undefined {
-  return readApiKey(API_KEY_STORAGE)
+// Proposes nothing without a key or a usable answer; the catalog falls back to the local search.
+export function jev(): Bot {
+  return async (state) => chooseActions(state)
 }
 
-export function saveJevApiKey(key: string): void {
-  saveApiKey(API_KEY_STORAGE, key)
+async function chooseActions(state: GameState): Promise<Action[]> {
+  const apiKey = readJevApiKey()
+  if (!apiKey || !activePawn(state)) return []
+  const response = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(30_000),
+    body: JSON.stringify({
+      model: MODEL,
+      state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
+      questions: {
+        move: {
+          type: 'choice',
+          instructions:
+            'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
+          criteria: actionCriteria(state),
+        },
+      },
+    }),
+  })
+  if (!response.ok) return []
+  const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
+  const action = actionFromChoice(data.answers?.move?.choice, state)
+  return action ? [action] : []
 }
 
 // The fixed option list Jev picks from: one criteria entry per legal action, keyed by index.
@@ -91,31 +105,4 @@ export function actionFromChoice(choice: unknown, state: GameState): Action | nu
   const action = legalActions(state)[Number(choice)]
   if (!action || String(Number(choice)) !== choice) return null
   return acceptedAction(action, state)
-}
-
-// Proposes nothing without a key or a usable answer; the catalog falls back to the local search.
-export const jevBot: Bot = async (state) => {
-  const apiKey = readJevApiKey()
-  if (!apiKey || !activePawn(state)) return []
-  const response = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(30_000),
-    body: JSON.stringify({
-      model: MODEL,
-      state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
-      questions: {
-        move: {
-          type: 'choice',
-          instructions:
-            'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
-          criteria: actionCriteria(state),
-        },
-      },
-    }),
-  })
-  if (!response.ok) return []
-  const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
-  const action = actionFromChoice(data.answers?.move?.choice, state)
-  return action ? [action] : []
 }

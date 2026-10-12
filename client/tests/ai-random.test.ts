@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { initialState, reducer, type GameState } from '../src/lib/engine/index.ts'
-import { random } from '../src/lib/bots/random.ts'
+import { random as createRandomBot } from '../src/bots/strategies/random.ts'
+
+const random = createRandomBot()
 
 async function randomBattle(seed: string): Promise<GameState> {
   let state = initialState(seed)
