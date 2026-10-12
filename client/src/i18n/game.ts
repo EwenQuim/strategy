@@ -150,6 +150,13 @@ export const usedThisRound = t({
   es: 'Ya usado',
   it: 'Già usato',
 })
+export const stopPreviewing = t({
+  en: 'Stop previewing',
+  fr: 'Quitter l’aperçu',
+  de: 'Vorschau beenden',
+  es: 'Cerrar la vista previa',
+  it: 'Chiudi l’anteprima',
+})
 export const endTurn = t({
   en: 'End turn',
   fr: 'Finir le tour',

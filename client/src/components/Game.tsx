@@ -269,10 +269,10 @@ export function Game({
         winner={state.winner}
         winnerLabel={winnerLabel}
         myTurn={myTurn}
-        commanding={myTurn && !inspected}
         previewed={insight.previewed}
         onPreview={insight.preview}
         onPeek={insight.peek}
+        onCloseFocus={insight.close}
         usingSpecial={usingSpecial}
         hasSpecialTargets={hasSpecialTargets}
         choosingTarget={!!destination}
