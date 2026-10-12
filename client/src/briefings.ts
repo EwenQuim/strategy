@@ -3,7 +3,7 @@ import { unitNames } from './i18n/units.ts'
 import { specialTexts } from './i18n/specialTexts.ts'
 import { featureTexts } from './i18n/biomes.ts'
 import { PAWN_CLASSES, START_ENERGY, type PawnKind } from './lib/engine/index.ts'
-import type { IntroducedElement } from './lib/campaign.ts'
+import type { IntroducedElement } from './campaign.ts'
 
 export const ELEMENT_ACCENTS: Partial<Record<IntroducedElement, string>> = Object.fromEntries(
   Object.entries(PAWN_CLASSES).map(([kind, pawnClass]) => [kind, pawnClass.accent]),

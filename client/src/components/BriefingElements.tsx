@@ -2,7 +2,7 @@ import { Icon, PawnIcon, type IconName } from './Icon'
 import { hexPoints, terrainColors } from './hex-art'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
-import type { IntroducedElement } from '../lib/campaign'
+import type { IntroducedElement } from '../campaign'
 import { ELEMENT_ACCENTS, type BriefingElement } from '../briefings'
 import { PAWN_CLASSES, TILE_FEATURES, type PawnKind, type TileFeature } from '../lib/engine'
 

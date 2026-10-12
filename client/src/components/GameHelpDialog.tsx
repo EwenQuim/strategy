@@ -2,7 +2,6 @@ import type { RefObject } from 'react'
 import type { BattleSetup, Biome } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import { BOTS, type BotConfig } from '../bots/catalog'
-import type { BotDifficulty } from '../lib/engine/ai'
 import { INTRODUCTIONS } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
@@ -61,7 +60,7 @@ export function GameHelpDialog({
             mode !== 'local' &&
             ' ' +
               (preset
-                ? m.aiDifficulty(menus.difficulties[preset as BotDifficulty])
+                ? m.aiDifficulty(menus.difficulties[preset as keyof typeof menus.difficulties])
                 : m.aiStrategy(menus.aiStrategies[bot.name]))}{' '}
           {mode === 'local'
             ? m.localPlayers

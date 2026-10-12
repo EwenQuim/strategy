@@ -3,7 +3,7 @@ import {
   campaignStorageKey,
   completeCampaignLevel,
   parseCampaignProgress,
-} from './lib/campaign'
+} from './campaign'
 
 const NONE: readonly number[] = []
 const sessionCleared = new Map<string, readonly number[]>()

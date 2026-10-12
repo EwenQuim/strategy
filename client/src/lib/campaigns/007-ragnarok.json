@@ -3,7 +3,16 @@
     "id": 1,
     "name": "Raids on the Coast",
     "seed": "ragnarok-v2-1",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "verdant",
       "firstEnemyKinds": ["berserker"],
@@ -33,7 +42,16 @@
     "id": 2,
     "name": "Wolf Pack",
     "seed": "ragnarok-v2-2",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "verdant",
       "map": [
@@ -65,7 +83,16 @@
     "id": 3,
     "name": "Hall of the Skalds",
     "seed": "ragnarok-v2-3",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -99,7 +126,16 @@
     "id": 4,
     "name": "Fimbulwinter",
     "seed": "ragnarok-v2-4",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -133,7 +169,16 @@
     "id": 5,
     "name": "Ragnarok",
     "seed": "ragnarok-v2-5",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "hell",
       "hellfireCount": 2,

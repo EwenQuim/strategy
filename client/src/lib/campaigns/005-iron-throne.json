@@ -3,7 +3,16 @@
     "id": 1,
     "name": "Whispering Ambush",
     "seed": "throne-v1-1",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "verdant",
       "map": [
@@ -106,7 +115,16 @@
     "id": 2,
     "name": "The Crimson Feast",
     "seed": "throne-v1-2",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -195,7 +213,16 @@
     "id": 3,
     "name": "Green Fire Bay",
     "seed": "throne-v1-3",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "verdant",
       "map": [
@@ -297,7 +324,16 @@
     "id": 4,
     "name": "The Frozen Wall",
     "seed": "throne-v1-4",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "mountains",
       "firstEnemyKinds": ["wolf"],
@@ -430,7 +466,16 @@
     "id": 5,
     "name": "The Last Shore",
     "seed": "throne-v1-5",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -536,7 +581,16 @@
     "id": 6,
     "name": "The Plunder Road",
     "seed": "throne-v1-6",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -645,7 +699,16 @@
     "id": 7,
     "name": "The Bastards' Field",
     "seed": "throne-v1-7",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "verdant",
       "map": [
@@ -757,7 +820,16 @@
     "id": 8,
     "name": "The Long Night",
     "seed": "throne-v1-8",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "hell",
       "map": [

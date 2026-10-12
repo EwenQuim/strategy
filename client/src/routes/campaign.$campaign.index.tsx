@@ -12,7 +12,7 @@ import {
   isCampaignUnlocked,
   visibleCampaigns,
   isLevelUnlocked,
-} from '../lib/campaign'
+} from '../campaign'
 import { BIOMES } from '../lib/engine'
 import {
   readCampaignProgress,

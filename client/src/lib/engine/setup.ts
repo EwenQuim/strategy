@@ -25,14 +25,10 @@ type PawnPlacement = {
   readonly hp?: number
 }
 
-const ENEMY_STANCES = ['hold', 'balanced', 'assault'] as const
-export type EnemyStance = (typeof ENEMY_STANCES)[number]
-
 export type FixedBattleSetup = {
   readonly biome: Biome
   readonly map: readonly string[]
   readonly hellfireCount?: 1 | 2
-  readonly enemyStance?: EnemyStance
   readonly firstEnemyKinds?: readonly Pawn['kind'][]
   readonly player: readonly PawnPlacement[]
   readonly enemy: readonly PawnPlacement[]
@@ -79,12 +75,6 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
     (setup.biome !== 'hell' || ![1, 2].includes(setup.hellfireCount))
   )
     throw new Error('Hellfire count must be 1 or 2 in a Hell battle')
-  if (
-    setup.map !== undefined &&
-    setup.enemyStance !== undefined &&
-    !ENEMY_STANCES.includes(setup.enemyStance)
-  )
-    throw new Error('Enemy stance must be hold, balanced or assault')
   validateInitiative(setup)
   const maxUnits = tiles ? [...tiles.values()].filter(passable).length : MAP_WIDTH * 3
   const occupied = new Set<string>()
@@ -177,7 +167,6 @@ function copySetup(setup: BattleSetup | undefined): BattleSetup | undefined {
       biome: setup.biome,
       map: [...setup.map],
       ...(setup.hellfireCount !== undefined ? { hellfireCount: setup.hellfireCount } : {}),
-      ...(setup.enemyStance !== undefined ? { enemyStance: setup.enemyStance } : {}),
       ...(setup.firstEnemyKinds !== undefined
         ? { firstEnemyKinds: [...setup.firstEnemyKinds] }
         : {}),

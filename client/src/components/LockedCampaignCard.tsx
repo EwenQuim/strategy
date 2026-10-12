@@ -3,7 +3,7 @@ import { Icon } from './Icon'
 import { LevelMiniature } from './LevelMiniature'
 import * as m from '../i18n/menus'
 import { campaignName } from '../i18n/campaign'
-import { totalVictories, type Campaign } from '../lib/campaign'
+import { totalVictories, type Campaign } from '../campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 

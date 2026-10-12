@@ -14,7 +14,8 @@ type Reach = {
 }
 export type ReachCache = Map<string, Reach>
 
-// Reach depends on the current army positions and the map's remaining runes.
+// Keep every blocker in the key. Only the attacker's health affects its surviving routes;
+// changing another unit's health does not change occupancy.
 function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCache): Reach {
   const { id, q, r, hp, energy, specialUsed } = attacker
   const cacheKey = [
@@ -24,7 +25,7 @@ function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCa
     hp,
     energy,
     specialUsed,
-    state.pawns.map((p) => `${p.id}:${p.q}:${p.r}:${p.hp}`).join('|'),
+    state.pawns.map((p) => `${p.id}:${p.q}:${p.r}`).join('|'),
     runes.map((rune) => key(rune.q, rune.r)).join('|'),
   ].join()
   const cached = cache.get(cacheKey)
@@ -112,7 +113,7 @@ function runeTiles(tiles: Map<string, Tile>): Tile[] {
   return runes
 }
 
-function estimateIncomingDamage(
+export function estimateIncomingDamage(
   state: GameState,
   side: Side,
   cache: ReachCache,

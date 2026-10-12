@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import type { CampaignLevel } from '../src/lib/campaign.ts'
+import type { CampaignLevel } from '../src/campaign.ts'
 import type { Action, GameState } from '../src/lib/engine/index.ts'
 import { huntTheKing } from '../src/bots/targetPicker.ts'
 import { RulesBot } from '../src/bots/strategies/rules.ts'

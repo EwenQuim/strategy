@@ -102,12 +102,12 @@ export const aiOnly = t({
   es: ' (solo IA)',
   it: ' (solo IA)',
 })
-export const difficulties = t<Record<BotDifficulty, string>>({
-  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard' },
-  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile' },
-  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' },
-  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil' },
-  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile' },
+export const difficulties = t<Record<BotDifficulty | 'brutal', string>>({
+  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard', brutal: 'Brutal' },
+  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile', brutal: 'Brutale' },
+  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer', brutal: 'Brutal' },
+  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil', brutal: 'Brutal' },
+  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile', brutal: 'Brutale' },
 })
 export const aiStrategy = t({
   en: 'AI strategy',
@@ -117,11 +117,41 @@ export const aiStrategy = t({
   it: 'Strategia IA',
 })
 export const aiStrategies = t<Record<BotName, string>>({
-  en: { depthsearch: 'Hexmate AI', random: 'Random AI', mistral: 'Mistral AI', jev: 'Jev AI' },
-  fr: { depthsearch: 'IA Hexmate', random: 'Aléatoire', mistral: 'IA Mistral', jev: 'IA Jev' },
-  de: { depthsearch: 'Hexmate KI', random: 'Zufall', mistral: 'Mistral KI', jev: 'Jev KI' },
-  es: { depthsearch: 'IA Hexmate', random: 'Aleatoria', mistral: 'IA Mistral', jev: 'IA Jev' },
-  it: { depthsearch: 'IA Hexmate', random: 'Casuale', mistral: 'IA Mistral', jev: 'IA Jev' },
+  en: {
+    commander: 'Commander AI',
+    depthsearch: 'Depth search AI',
+    random: 'Random AI',
+    mistral: 'Mistral AI',
+    jev: 'Jev AI',
+  },
+  fr: {
+    commander: 'IA Commandant',
+    depthsearch: 'IA Recherche',
+    random: 'Aléatoire',
+    mistral: 'IA Mistral',
+    jev: 'IA Jev',
+  },
+  de: {
+    commander: 'Kommandant KI',
+    depthsearch: 'Such-KI',
+    random: 'Zufall',
+    mistral: 'Mistral KI',
+    jev: 'Jev KI',
+  },
+  es: {
+    commander: 'IA Comandante',
+    depthsearch: 'IA Búsqueda',
+    random: 'Aleatoria',
+    mistral: 'IA Mistral',
+    jev: 'IA Jev',
+  },
+  it: {
+    commander: 'IA Comandante',
+    depthsearch: 'IA Ricerca',
+    random: 'Casuale',
+    mistral: 'IA Mistral',
+    jev: 'IA Jev',
+  },
 })
 export const biome = t({ en: 'Biome', fr: 'Biome', de: 'Biom', es: 'Bioma', it: 'Bioma' })
 export const mirrorRoster = t({

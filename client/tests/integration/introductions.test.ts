@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { CAMPAIGNS } from '../../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../../src/campaign.ts'
 import { campaignBot } from '../../src/bots/campaign.ts'
 import { getBot } from '../../src/bots/catalog.ts'
 import { turnPlans } from '../../src/lib/engine/ai/turns.ts'
