@@ -28,10 +28,10 @@ import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'
 import { biomeNames } from '../src/i18n/biomes.ts'
 import { unitNames } from '../src/i18n/units.ts'
-import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/campaign.ts'
 import { campaignBot } from '../src/bots/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
-import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
+import { COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
 import {
   battleIdentity,
   BATTLE_SNAPSHOT_VERSION,
@@ -576,15 +576,15 @@ test(
     assert.match(await page.locator('dialog').innerText(), /This custom battle/)
     assert.doesNotMatch(await page.locator('dialog').innerText(), /unlock the next level/)
     await page.getByRole('button', { name: 'Close dialog' }).click()
-    for (const difficulty of ['easy', 'normal', 'hard']) {
+    for (const difficulty of ['easy', 'normal', 'hard', 'brutal'] as const) {
       await page.goto(origin + base + 'custom')
       await page.getByLabel('Difficulty', { exact: true }).selectOption(difficulty)
       await page.getByLabel('Biome', { exact: true }).selectOption('desert')
       await page.getByRole('button', { name: 'Start battle' }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.deepEqual(JSON.parse(new URL(page.url()).searchParams.get('bot')!), {
-        name: 'depthsearch',
-        options: BOT_LEVELS[difficulty as BotDifficulty],
+        name: 'commander',
+        options: COMMANDER_LEVELS[difficulty],
       })
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'desert')
       assert.equal(
@@ -1926,7 +1926,7 @@ test(
 )
 
 test(
-  'Brutal uses its depth-four bot configuration when playing and restoring a battle',
+  'Brutal uses its authored bot configuration when playing and restoring a battle',
   { timeout: 60_000 },
   async (t) => {
     const { page, origin } = await fixture(t)

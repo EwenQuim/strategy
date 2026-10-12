@@ -1,4 +1,4 @@
-import { CAMPAIGNS } from '../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../src/campaign.ts'
 import { activePawn, initialState, reducer, type GameState } from '../src/lib/engine/index.ts'
 import { victoryActions } from '../tests/campaign-replays.ts'
 import { DepthsearchBot, searchStats } from '../src/bots/strategies/depthsearch.ts'

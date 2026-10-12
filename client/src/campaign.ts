@@ -1,16 +1,16 @@
-import tutorialLevels from './campaigns/000-tutorial.json' with { type: 'json' }
-import originalLevels from './campaigns/001-original.json' with { type: 'json' }
-import brutalLevels from './campaigns/002-brutal.json' with { type: 'json' }
-import shatteredLevels from './campaigns/003-shattered.json' with { type: 'json' }
-import ringLevels from './campaigns/004-war-of-the-ring.json' with { type: 'json' }
-import throneLevels from './campaigns/005-iron-throne.json' with { type: 'json' }
-import spartaLevels from './campaigns/006-hot-gates.json' with { type: 'json' }
-import ragnarokLevels from './campaigns/007-ragnarok.json' with { type: 'json' }
-import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
-import { validateSetup } from './engine/setup.ts'
-import { BOT_LEVELS, type BotDifficulty, type BotOptions } from './engine/ai.ts'
-import type { PawnKind } from './engine/pawns/index.ts'
-import type { Biome, FixedBattleSetup } from './engine/index.ts'
+import tutorialLevels from './lib/campaigns/000-tutorial.json' with { type: 'json' }
+import originalLevels from './lib/campaigns/001-original.json' with { type: 'json' }
+import brutalLevels from './lib/campaigns/002-brutal.json' with { type: 'json' }
+import shatteredLevels from './lib/campaigns/003-shattered.json' with { type: 'json' }
+import ringLevels from './lib/campaigns/004-war-of-the-ring.json' with { type: 'json' }
+import throneLevels from './lib/campaigns/005-iron-throne.json' with { type: 'json' }
+import spartaLevels from './lib/campaigns/006-hot-gates.json' with { type: 'json' }
+import ragnarokLevels from './lib/campaigns/007-ragnarok.json' with { type: 'json' }
+import { mapFromRows, type Terrain, type TileFeature } from './lib/engine/hex.ts'
+import { validateSetup } from './lib/engine/setup.ts'
+import { BOTS, type BotConfig } from './bots/catalog.ts'
+import type { PawnKind } from './lib/engine/pawns/index.ts'
+import type { Biome, FixedBattleSetup } from './lib/engine/index.ts'
 
 export type IntroducedElement =
   | PawnKind
@@ -22,7 +22,7 @@ export interface CampaignLevel {
   id: number
   name: string
   seed: string
-  difficulty: BotDifficulty
+  bot: BotConfig
   setup: FixedBattleSetup
   newElements: readonly IntroducedElement[]
   unlocks: readonly PawnKind[]
@@ -35,7 +35,6 @@ export interface Campaign {
   requiredVictories?: number
   developerPreview?: boolean
   startingUnits: readonly PawnKind[]
-  depth?: BotOptions['depth']
   unlockToasts?: boolean
   achievements?: boolean
 }
@@ -148,7 +147,6 @@ const packs: AuthoredCampaign[] = [
     startingUnits: ['king', 'swordsman'],
     unlockToasts: false,
     requiredVictories: 10,
-    depth: 4,
   },
   {
     slug: 'shattered',
@@ -189,8 +187,18 @@ const packs: AuthoredCampaign[] = [
 
 for (const { levels } of packs) {
   levels.forEach((level, index) => {
-    if (level.id !== index + 1 || !level.name || !level.seed || !BOT_LEVELS[level.difficulty])
+    if (
+      level.id !== index + 1 ||
+      !level.name ||
+      !level.seed ||
+      !level.bot ||
+      !Object.hasOwn(BOTS, level.bot.name) ||
+      typeof level.bot.options !== 'object' ||
+      level.bot.options === null
+    )
       throw new Error('Campaign level ' + (index + 1) + ' is malformed')
+    const bot = BOTS[level.bot.name].resolve(level.bot.options)
+    level.bot = { name: bot.name, options: bot.options } as BotConfig
     validateSetup(level.setup, mapFromRows(level.setup.map))
   })
 }

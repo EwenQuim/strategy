@@ -11,6 +11,8 @@ import {
 
 import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
 import { DepthsearchBot } from '../../src/bots/strategies/depthsearch.ts'
+import { CommanderBot, COMMANDER_LEVELS } from '../../src/bots/strategies/commander.ts'
+import { PAWN_CLASSES } from '../../src/lib/engine/pawns/index.ts'
 
 async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Promise<GameState> {
   const id = activePawn(state)!.id
@@ -69,4 +71,28 @@ test('The bot proposes ordinary actions for either side without mutating the rul
     }
   }
   assert.deepEqual(sides, new Set(['player', 'enemy']))
+})
+test('Commander plays every signature class on both sides with legal complete activations and immutable input', async () => {
+  const kinds = Object.keys(PAWN_CLASSES) as (keyof typeof PAWN_CLASSES)[]
+  const opening = initialState('commander-all-classes', {
+    biome: 'desert',
+    player: kinds,
+    enemy: kinds,
+  })
+  const bot = new CommanderBot(COMMANDER_LEVELS.normal)
+  for (const [active] of opening.order.entries()) {
+    const state = { ...opening, active }
+    const before = structuredClone(state)
+    const actor = activePawn(state)!
+    const actions = await bot.chooseActions(state)
+    assert.ok(actions.length)
+    let next = state
+    for (const action of actions) {
+      const applied = reducer(next, action)
+      assert.notEqual(applied, next)
+      next = applied
+    }
+    assert.ok(next.winner || activePawn(next)?.id !== actor.id)
+    assert.deepEqual(structuredClone(state), before)
+  }
 })

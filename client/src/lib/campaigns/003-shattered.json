@@ -3,7 +3,16 @@
     "id": 1,
     "name": "Narrow Gate",
     "seed": "shattered-1",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "verdant",
       "firstEnemyKinds": ["lancer"],
@@ -71,7 +80,16 @@
     "id": 2,
     "name": "Gap Walker",
     "seed": "shattered-2",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -132,7 +150,16 @@
     "id": 3,
     "name": "The Moat",
     "seed": "shattered-3",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "verdant",
       "map": [
@@ -198,7 +225,16 @@
     "id": 4,
     "name": "Spring Shrine",
     "seed": "shattered-4",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -256,7 +292,16 @@
     "id": 5,
     "name": "Mirror of Sand",
     "seed": "shattered-5",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -321,7 +366,16 @@
     "id": 6,
     "name": "Lava Ford",
     "seed": "shattered-6",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
@@ -376,7 +430,16 @@
     "id": 7,
     "name": "Basalt Court",
     "seed": "shattered-7",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "hell",
       "hellfireCount": 1,
@@ -435,7 +498,16 @@
     "id": 8,
     "name": "Twin Runes",
     "seed": "shattered-8",
-    "difficulty": "normal",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -491,7 +563,16 @@
     "id": 9,
     "name": "Broken Wall",
     "seed": "shattered-9",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "hell",
       "hellfireCount": 2,
@@ -551,7 +632,16 @@
     "id": 10,
     "name": "Crown of Ashes",
     "seed": "shattered-10",
-    "difficulty": "hard",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
     "setup": {
       "biome": "volcano",
       "map": [

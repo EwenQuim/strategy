@@ -3,7 +3,10 @@
     "id": 1,
     "name": "First Watch",
     "seed": "campaign-v2-1",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
       "firstEnemyKinds": ["archer"],
@@ -23,7 +26,10 @@
     "id": 2,
     "name": "Bowmen",
     "seed": "campaign-v2-2",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
       "firstEnemyKinds": ["magician"],
@@ -45,7 +51,10 @@
     "id": 3,
     "name": "River Guard",
     "seed": "campaign-v2-3",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
       "firstEnemyKinds": ["bulwark"],
@@ -76,7 +85,10 @@
     "id": 4,
     "name": "Forest Magic",
     "seed": "campaign-v2-4",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
       "firstEnemyKinds": ["bomber"],
@@ -109,7 +121,10 @@
     "id": 5,
     "name": "Highland Keep",
     "seed": "campaign-v2-5",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
       "firstEnemyKinds": ["ninja"],
@@ -142,7 +157,10 @@
     "id": 6,
     "name": "High Pass",
     "seed": "campaign-v2-6",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
       "firstEnemyKinds": ["lancer"],
@@ -175,7 +193,10 @@
     "id": 7,
     "name": "Stone Wall",
     "seed": "campaign-v2-7",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -208,7 +229,10 @@
     "id": 8,
     "name": "Powder Lesson",
     "seed": "campaign-v2-8",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -241,7 +265,10 @@
     "id": 9,
     "name": "Split Battery",
     "seed": "campaign-v2-9",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -273,7 +300,10 @@
     "id": 10,
     "name": "Dune Patrol",
     "seed": "campaign-v2-10",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -307,7 +337,10 @@
     "id": 11,
     "name": "Twin Daggers",
     "seed": "campaign-v2-11",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -340,7 +373,10 @@
     "id": 12,
     "name": "Iron Caravan",
     "seed": "campaign-v2-12",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -374,7 +410,10 @@
     "id": 13,
     "name": "Ember Crossing",
     "seed": "campaign-v2-13",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
@@ -406,7 +445,10 @@
     "id": 14,
     "name": "Ember Spring",
     "seed": "campaign-v2-14",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
@@ -440,7 +482,10 @@
     "id": 15,
     "name": "Cinder Keep",
     "seed": "campaign-v2-15",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
@@ -474,7 +519,10 @@
     "id": 16,
     "name": "Wizard Curtain",
     "seed": "campaign-v2-16",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
@@ -508,7 +556,10 @@
     "id": 17,
     "name": "Hell's Gate",
     "seed": "campaign-v2-17",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "hellfireCount": 1,
@@ -544,7 +595,10 @@
     "id": 18,
     "name": "Caldera Run",
     "seed": "campaign-v2-18",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "map": [
@@ -578,7 +632,10 @@
     "id": 19,
     "name": "Royal Guard",
     "seed": "campaign-v2-19",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "map": [
@@ -614,7 +671,10 @@
     "id": 20,
     "name": "Last Crown",
     "seed": "campaign-v2-20",
-    "difficulty": "normal",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "map": [

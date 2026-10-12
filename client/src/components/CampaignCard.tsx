@@ -5,7 +5,7 @@ import { LevelMiniature } from './LevelMiniature'
 import { LockedCampaignCard } from './LockedCampaignCard'
 import * as m from '../i18n/menus'
 import { campaignName } from '../i18n/campaign'
-import { isCampaignUnlocked, TUTORIAL, type Campaign } from '../lib/campaign'
+import { isCampaignUnlocked, TUTORIAL, type Campaign } from '../campaign'
 import { BIOMES } from '../lib/engine'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 

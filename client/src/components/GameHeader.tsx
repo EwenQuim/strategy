@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { OnlineSession } from '../api/useGame'
-import type { Campaign } from '../lib/campaign'
+import type { Campaign } from '../campaign'
 import type { Biome, Pawn, Side } from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'

@@ -5,13 +5,16 @@ import { DepthsearchBot } from './strategies/depthsearch.ts'
 import { RandomBot } from './strategies/random.ts'
 import { MistralBot } from './strategies/mistral.ts'
 import { JevBot } from './strategies/jev.ts'
+import { CommanderBot, COMMANDER_LEVELS } from './strategies/commander.ts'
 
 const depthsearch = registerBot(DepthsearchBot, undefined, BOT_LEVELS)
 const random = registerBot(RandomBot)
 const mistral = registerBot(MistralBot, new DepthsearchBot())
 const jev = registerBot(JevBot, new DepthsearchBot())
+const commander = registerBot(CommanderBot, undefined, COMMANDER_LEVELS)
 
 export const BOTS = {
+  [commander.name]: commander,
   [depthsearch.name]: depthsearch,
   [random.name]: random,
   [mistral.name]: mistral,
@@ -20,7 +23,7 @@ export const BOTS = {
 
 export type BotName = keyof typeof BOTS
 export type BotConfig = (typeof BOTS)[BotName]['defaultConfig']
-export const DEFAULT_BOT_CONFIG: BotConfig = depthsearch.defaultConfig
+export const DEFAULT_BOT_CONFIG: BotConfig = commander.defaultConfig
 
 export function getBot(config: BotConfig): Bot {
   return BOTS[config.name].resolve(config.options)

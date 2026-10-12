@@ -3,10 +3,12 @@
     "id": 1,
     "name": "First Steps",
     "seed": "tutorial-v2-1",
-    "difficulty": "easy",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 3, "replies": 1, "aggression": 1.2, "caution": 0.35 }
+    },
     "setup": {
       "biome": "verdant",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["swordsman"],
       "map": ["...", "...", "..."],
       "player": [{ "kind": "king", "col": 1, "row": 2 }],

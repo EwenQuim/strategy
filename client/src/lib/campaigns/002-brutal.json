@@ -3,10 +3,12 @@
     "id": 1,
     "name": "First Watch",
     "seed": "brutal-v2-1",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "verdant",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["archer"],
       "map": ["__..__", "_...._", "......", "......", "......", "_...._", "__..__"],
       "player": [
@@ -25,10 +27,12 @@
     "id": 2,
     "name": "Bowmen",
     "seed": "brutal-v2-2",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "verdant",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["magician"],
       "map": ["__...__", "_....._", "ff....f", "_....._", "__.....", "_....._", "__...__"],
       "player": [
@@ -49,10 +53,12 @@
     "id": 3,
     "name": "River Guard",
     "seed": "brutal-v2-3",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "verdant",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["bulwark"],
       "map": [
         "__....__",
@@ -82,10 +88,12 @@
     "id": 4,
     "name": "Forest Magic",
     "seed": "brutal-v2-4",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "verdant",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["bomber"],
       "map": [
         "_....___",
@@ -117,10 +125,12 @@
     "id": 5,
     "name": "Highland Keep",
     "seed": "brutal-v2-5",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "mountains",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["ninja"],
       "map": [
         "__....__",
@@ -152,10 +162,12 @@
     "id": 6,
     "name": "High Pass",
     "seed": "brutal-v2-6",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "mountains",
-      "enemyStance": "assault",
       "firstEnemyKinds": ["lancer"],
       "map": [
         "__....__",
@@ -187,10 +199,12 @@
     "id": 7,
     "name": "Stone Wall",
     "seed": "brutal-v2-7",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "mountains",
-      "enemyStance": "assault",
       "map": [
         "__....__",
         "__....__",
@@ -223,10 +237,12 @@
     "id": 8,
     "name": "Powder Lesson",
     "seed": "brutal-v2-8",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "mountains",
-      "enemyStance": "assault",
       "map": [
         "__....__",
         "_......_",
@@ -257,10 +273,12 @@
     "id": 9,
     "name": "Split Battery",
     "seed": "brutal-v2-9",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "desert",
-      "enemyStance": "assault",
       "map": [
         "__ssss__",
         "_ssssss_",
@@ -291,10 +309,12 @@
     "id": 10,
     "name": "Dune Patrol",
     "seed": "brutal-v2-10",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "desert",
-      "enemyStance": "assault",
       "map": [
         "___ss___",
         "__ssss__",
@@ -327,10 +347,12 @@
     "id": 11,
     "name": "Twin Daggers",
     "seed": "brutal-v2-11",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "desert",
-      "enemyStance": "assault",
       "map": [
         "__ssss__",
         "_ssssss_",
@@ -363,10 +385,12 @@
     "id": 12,
     "name": "Iron Caravan",
     "seed": "brutal-v2-12",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "desert",
-      "enemyStance": "assault",
       "map": [
         "__ssss__",
         "_ssssss_",
@@ -399,10 +423,12 @@
     "id": 13,
     "name": "Ember Crossing",
     "seed": "brutal-v2-13",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "volcano",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -433,10 +459,12 @@
     "id": 14,
     "name": "Ember Spring",
     "seed": "brutal-v2-14",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 2, "caution": 1 }
+    },
     "setup": {
       "biome": "volcano",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -469,10 +497,12 @@
     "id": 15,
     "name": "Cinder Keep",
     "seed": "brutal-v2-15",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "volcano",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -505,10 +535,12 @@
     "id": 16,
     "name": "Wizard Curtain",
     "seed": "brutal-v2-16",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "volcano",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_lbbbbl_",
@@ -541,10 +573,12 @@
     "id": 17,
     "name": "Hell's Gate",
     "seed": "brutal-v2-17",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "hell",
-      "enemyStance": "assault",
       "hellfireCount": 1,
       "map": [
         "__bbbb__",
@@ -580,10 +614,12 @@
     "id": 18,
     "name": "Caldera Run",
     "seed": "brutal-v2-18",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "hell",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -616,10 +652,12 @@
     "id": 19,
     "name": "Royal Guard",
     "seed": "brutal-v2-19",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "hell",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "bbbbbbbb",
@@ -654,10 +692,12 @@
     "id": 20,
     "name": "Last Crown",
     "seed": "brutal-v2-20",
-    "difficulty": "hard",
+    "bot": {
+      "name": "commander",
+      "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+    },
     "setup": {
       "biome": "hell",
-      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "bbbbbbbb",

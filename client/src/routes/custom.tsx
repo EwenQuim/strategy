@@ -8,7 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import type { BotDifficulty } from '../lib/engine/ai'
-import { BOTS, parseBotConfig, type BotName } from '../bots/catalog'
+import { BOTS, DEFAULT_BOT_CONFIG, parseBotConfig, type BotName } from '../bots/catalog'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import {
@@ -27,8 +27,8 @@ export const Route = createFileRoute('/custom')({
   component: function CustomPlay() {
     const navigate = Route.useNavigate()
     const [mode, setMode] = useState<GameMode>('ai')
-    const [difficulty, setDifficulty] = useState<BotDifficulty>('normal')
-    const [strategy, setStrategy] = useState<BotName>('depthsearch')
+    const [difficulty, setDifficulty] = useState<BotDifficulty | 'brutal'>('normal')
+    const [strategy, setStrategy] = useState<BotName>(DEFAULT_BOT_CONFIG.name)
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [developerPreview] = useState(readDeveloperPreview)
@@ -94,11 +94,13 @@ export const Route = createFileRoute('/custom')({
                     id="custom-difficulty"
                     value={difficulty}
                     disabled={mode === 'local'}
-                    onChange={(event) => setDifficulty(event.target.value as BotDifficulty)}
+                    onChange={(event) =>
+                      setDifficulty(event.target.value as BotDifficulty | 'brutal')
+                    }
                   >
                     {presets.map(([level]) => (
                       <option key={level} value={level}>
-                        {m.difficulties[level as BotDifficulty]}
+                        {m.difficulties[level as keyof typeof m.difficulties]}
                       </option>
                     ))}
                   </select>

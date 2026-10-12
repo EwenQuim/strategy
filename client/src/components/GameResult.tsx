@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { Campaign } from '../lib/campaign'
+import type { Campaign } from '../campaign'
 import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
 import { levelName } from '../i18n/campaign'

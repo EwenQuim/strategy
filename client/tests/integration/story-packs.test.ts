@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { CAMPAIGNS } from '../../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../../src/campaign.ts'
 import { initialState as coreState } from '../../src/lib/engine/index.ts'
 
 const sparta = CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!

@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import { CampaignCard } from '../components/CampaignCard'
-import { totalVictories, visibleCampaigns } from '../lib/campaign'
+import { totalVictories, visibleCampaigns } from '../campaign'
 import { readCampaignProgress } from '../campaignProgress'
 import { readDeveloperPreview } from '../preferences'
 

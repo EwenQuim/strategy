@@ -7,7 +7,7 @@ import { specialTexts } from '../i18n/specialTexts'
 import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
-import type { Campaign } from '../lib/campaign'
+import type { Campaign } from '../campaign'
 import {
   subscribeCampaignProgress,
   campaignProgressSaved,

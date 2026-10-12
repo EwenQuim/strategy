@@ -17,7 +17,7 @@ import {
 } from '../src/lib/engine/index.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { jumpDestinations } from '../src/lib/engine/pawns/ninja.ts'
-import { CAMPAIGNS } from '../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../src/campaign.ts'
 
 const layout = {
   biome: 'mountains',
