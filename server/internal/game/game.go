@@ -7,6 +7,9 @@ import (
 
 type Status string
 
+// A public game only stays in the lobby listing while newer than this window.
+const PublicLobbyWindow = time.Hour
+
 const (
 	Waiting  Status = "waiting"
 	Active   Status = "active"

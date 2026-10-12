@@ -118,9 +118,10 @@ func (s *Store) Game(ctx context.Context, code string) (game.Game, error) {
 }
 
 func (s *Store) PublicWaiting(ctx context.Context) ([]game.Game, error) {
+	cutoff := time.Now().Add(-game.PublicLobbyWindow).Unix()
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT code, name_player, public, created_at FROM games
-		 WHERE public = 1 AND status = 'waiting' ORDER BY created_at DESC`)
+		 WHERE public = 1 AND status = 'waiting' AND created_at >= ? ORDER BY created_at DESC`, cutoff)
 	if err != nil {
 		return nil, err
 	}

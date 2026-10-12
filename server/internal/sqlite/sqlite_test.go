@@ -176,3 +176,29 @@ func TestAppendAcrossTwoConnectionsYieldsVersionConflict(t *testing.T) {
 		t.Fatalf("version=%d actions=%d, want 1 and 1", g.Version, len(g.Actions))
 	}
 }
+
+func TestPublicWaitingOnlyListsRecentGames(t *testing.T) {
+	store, err := sqlite.Open(filepath.Join(t.TempDir(), "hexmate.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = store.Close() }()
+	ctx := context.Background()
+	now := time.Now()
+	for _, g := range []game.Game{
+		{Code: "FRESH1", Seed: "s", NamePlayer: "Ewen", TokenPlayer: "h1", Public: true, Status: game.Waiting, CreatedAt: now, UpdatedAt: now},
+		{Code: "OLD123", Seed: "s", NamePlayer: "Bob", TokenPlayer: "h2", Public: true, Status: game.Waiting, CreatedAt: now.Add(-2 * game.PublicLobbyWindow), UpdatedAt: now},
+		{Code: "PRIVA1", Seed: "s", NamePlayer: "Alice", TokenPlayer: "h3", Status: game.Waiting, CreatedAt: now, UpdatedAt: now},
+	} {
+		if err := store.Create(ctx, g); err != nil {
+			t.Fatal(err)
+		}
+	}
+	waiting, err := store.PublicWaiting(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(waiting) != 1 || waiting[0].Code != "FRESH1" {
+		t.Fatalf("public waiting = %+v, want only FRESH1", waiting)
+	}
+}

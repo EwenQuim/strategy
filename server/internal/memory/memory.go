@@ -41,9 +41,10 @@ func (s *Store) Game(_ context.Context, code string) (game.Game, error) {
 func (s *Store) PublicWaiting(_ context.Context) ([]game.Game, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+	cutoff := time.Now().Add(-game.PublicLobbyWindow)
 	var waiting []game.Game
 	for _, g := range s.games {
-		if g.Public && g.Status == game.Waiting {
+		if g.Public && g.Status == game.Waiting && g.CreatedAt.After(cutoff) {
 			waiting = append(waiting, clone(g))
 		}
 	}
