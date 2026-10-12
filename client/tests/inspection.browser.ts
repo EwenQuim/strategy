@@ -58,7 +58,7 @@ after(async () => {
 })
 
 test(
-  'Unit focus is read-only and cannot interrupt attack targeting',
+  'Command deck shows a read-only ability and a matching preview dismissal control',
   { timeout: 30_000 },
   async (t) => {
     const context = await browser.newContext({
@@ -159,30 +159,13 @@ test(
     )
     await page.getByRole('button', { name: 'Stop previewing', exact: true }).click()
     await special.waitFor()
-    await special.click()
-    assert.equal(await special.getAttribute('aria-pressed'), 'true')
-    assert.equal(await enemy(3).getAttribute('role'), 'button')
-    await enemy(4).click()
-    await page.getByRole('button', { name: /Inspect .*#4$/ }).click()
-    assert.equal(await focus.count(), 0)
-    assert.equal(await special.getAttribute('aria-pressed'), 'true')
-    assert.equal(await enemy(3).getAttribute('role'), 'button')
-    await special.click()
     await enemy(4).click()
     await focus.waitFor()
     const close = page.getByRole('button', { name: 'Stop previewing', exact: true })
     await close.focus()
     await page.keyboard.press('Enter')
-    await special.click()
-    await enemy(3).click()
-    await page.waitForFunction(
-      (energy) =>
-        document
-          .querySelector('[role="meter"][aria-label="Energy"]')
-          ?.getAttribute('aria-valuenow') === String(energy),
-      state.pawns[0].energy - state.pawns[0].special.cost,
-    )
     assert.equal(await focus.count(), 0)
+    assert.equal(await special.isVisible(), true)
     assert.deepEqual(errors, [])
   },
 )

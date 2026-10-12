@@ -92,6 +92,7 @@ export function GameCommandDeck({
             <SpecialButton
               pawn={active}
               commanding={myTurn}
+              previewed={previewed}
               usingSpecial={usingSpecial}
               hasSpecialTargets={hasSpecialTargets}
               targetCount={targetCount}

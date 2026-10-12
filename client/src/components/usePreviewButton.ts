@@ -4,6 +4,7 @@ const LONG_PRESS_MS = 350
 
 export type PreviewProps = {
   commanding: boolean
+  previewed: boolean
   onPreview: () => void
   onPeek: (shown: boolean) => void
 }

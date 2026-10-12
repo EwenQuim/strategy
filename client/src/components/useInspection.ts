@@ -8,12 +8,7 @@ import {
   type Side,
 } from '../lib/engine'
 
-export function useInspection(
-  state: GameState,
-  viewerSide: Side | undefined,
-  local: boolean,
-  enabled: boolean,
-) {
+export function useInspection(state: GameState, viewerSide: Side | undefined, local: boolean) {
   const [inspection, setInspection] = useState<number | null>(null)
   const [peek, setPeek] = useState(false)
   const [threatsShown, setThreatsShown] = useState(false)
@@ -22,9 +17,7 @@ export function useInspection(
   const shown = inspected ?? active
   const foeSide =
     viewerSide === 'enemy' || (local && active?.side === 'enemy') ? 'player' : 'enemy'
-  const inspect = (id: number | null) => {
-    if (enabled) setInspection(id === inspected?.id ? null : id)
-  }
+  const inspect = (id: number) => setInspection(id === inspected?.id ? null : id)
   // React Compiler memoizes this board calculation across UI-only renders.
   const threats = threatsShown
     ? threatenedTiles(state.tiles, state.pawns, foeSide)
@@ -33,17 +26,15 @@ export function useInspection(
     inspected,
     shown,
     previewed: !!inspected,
-    range:
-      enabled && shown && (inspected || peek)
-        ? rangeTiles(shown, state.tiles)
-        : new Set<string>(),
+    range: shown && (inspected || peek) ? rangeTiles(shown, state.tiles) : new Set<string>(),
     threatsShown,
     threats,
     toggleThreats: () => setThreatsShown(!threatsShown),
     inspect,
     inspectAt: (at: Axial) => {
       const occupant = state.pawns.find((unit) => unit.q === at.q && unit.r === at.r)
-      inspect(occupant?.id ?? null)
+      if (occupant) inspect(occupant.id)
+      else setInspection(null)
     },
     preview: () => shown && inspect(shown.id),
     peek: setPeek,

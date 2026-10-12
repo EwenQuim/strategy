@@ -146,7 +146,7 @@ export function Game({
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
   const aim = myTurn && aiming?.state === state ? aiming.aim : null
-  const insight = useInspection(state, viewerSide, local, !aim)
+  const insight = useInspection(state, viewerSide, local)
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
