@@ -102,6 +102,50 @@
     {
       "files": ["src/lib/engine/**"],
       "rules": {
+        "no-restricted-globals": [
+          "error",
+          {
+            "checkGlobalObject": true,
+            "globals": [
+              {
+                "name": "Date",
+                "message": "Engine rules must not read clocks."
+              },
+              {
+                "name": "performance",
+                "message": "Engine rules must not read clocks."
+              },
+              {
+                "name": "crypto",
+                "message": "Use the seeded randomness stored in game state."
+              },
+              {
+                "name": "fetch",
+                "message": "Networking belongs in adapters."
+              },
+              {
+                "name": "WebSocket",
+                "message": "Networking belongs in adapters."
+              },
+              {
+                "name": "EventSource",
+                "message": "Networking belongs in adapters."
+              },
+              {
+                "name": "XMLHttpRequest",
+                "message": "Networking belongs in adapters."
+              }
+            ]
+          }
+        ],
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "Use the seeded randomness stored in game state instead of Math.random."
+          }
+        ],
         "no-restricted-imports": [
           "error",
           {
