@@ -7,6 +7,7 @@ const protect: SpecialAbility = {
   name: 'protect',
   cost: 1,
   damage: 0,
+  range: '2',
   targeted: true,
   prompt: 'chooseAlly',
   noTargets: 'noNearbyAllies',

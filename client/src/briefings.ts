@@ -21,9 +21,10 @@ export interface BriefingElement {
 function unit(kind: PawnKind, ...points: string[]): BriefingElement {
   const { maxHp, attack, special } = new PAWN_CLASSES[kind](0, 0, 0, 'player')
   const range =
-    attack.minRange === attack.maxRange
+    special.range ??
+    (attack.minRange === attack.maxRange
       ? String(attack.maxRange)
-      : attack.minRange + '-' + attack.maxRange
+      : attack.minRange + '-' + attack.maxRange)
   return {
     name: unitNames[kind],
     art: kind,

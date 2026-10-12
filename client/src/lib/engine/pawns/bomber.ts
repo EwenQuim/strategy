@@ -12,6 +12,7 @@ function bombTiles(pawn: Pawn, tiles: Map<string, Tile>): Tile[] {
 const bomb: SpecialAbility = {
   name: 'bomb',
   cost: 2,
+  range: '3',
   targeted: true,
   targetLabel: 'bomb',
   prompt: 'chooseTile',

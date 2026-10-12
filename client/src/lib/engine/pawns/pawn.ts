@@ -76,6 +76,8 @@ export interface SpecialAbility {
   readonly cost: number
   // Base signature damage; defaults to the pawn's attack profile. Zero means no offense.
   readonly damage?: number
+  // Briefing stat chip range; defaults to the pawn's attack range.
+  readonly range?: string
   readonly description: SpecialTextKey
   readonly targeted: boolean
   readonly choosesDestination?: boolean

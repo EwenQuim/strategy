@@ -15,6 +15,7 @@ function direction(from: Axial, to: Axial): string | null {
 const fireball: SpecialAbility = {
   name: 'fireball',
   cost: 2,
+  range: '∞',
   targeted: true,
   targetLabel: 'fireballToward',
   prompt: 'chooseDirection',
