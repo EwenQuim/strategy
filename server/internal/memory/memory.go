@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"sort"
 	"sync"
 	"time"
 
@@ -35,6 +36,23 @@ func (s *Store) Game(_ context.Context, code string) (game.Game, error) {
 		return game.Game{}, game.ErrNotFound
 	}
 	return clone(g), nil
+}
+
+func (s *Store) PublicWaiting(_ context.Context) ([]game.Game, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	cutoff := time.Now().Add(-game.PublicLobbyWindow)
+	var waiting []game.Game
+	for _, g := range s.games {
+		if g.Public && g.Status == game.Waiting && g.CreatedAt.After(cutoff) {
+			waiting = append(waiting, clone(g))
+		}
+	}
+	sort.Slice(waiting, func(i, j int) bool { return waiting[i].CreatedAt.After(waiting[j].CreatedAt) })
+	if len(waiting) > game.PublicLobbyLimit {
+		waiting = waiting[:game.PublicLobbyLimit]
+	}
+	return waiting, nil
 }
 
 func (s *Store) Join(_ context.Context, code, name, tokenHash string) (game.Game, error) {

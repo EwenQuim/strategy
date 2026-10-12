@@ -3,7 +3,12 @@ import { test } from 'node:test'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import type { OnlineAction, StoredGame } from '../src/lib/online.ts'
 import { initialPlayback, playbackReducer, replay } from '../src/lib/playback.ts'
-import { readStoredGames, saveStoredGame } from '../src/onlineSession.ts'
+import {
+  readPublicHosting,
+  readStoredGames,
+  savePublicHosting,
+  saveStoredGame,
+} from '../src/onlineSession.ts'
 import { activePawn, key, mirrorAxial, symmetricSeed } from '../src/lib/engine/index.ts'
 
 test('Online mode applies actions like local mode, without a bot', () => {
@@ -113,4 +118,12 @@ test('Stored online games round-trip and ignore corrupted entries', () => {
   assert.deepEqual(readStoredGames(), [game])
   storage.set('hexmate.online.games', 'not json')
   assert.deepEqual(readStoredGames(), [])
+})
+
+test('Public game setting defaults to private and round-trips', () => {
+  assert.equal(readPublicHosting(), false)
+  savePublicHosting(true)
+  assert.equal(readPublicHosting(), true)
+  savePublicHosting(false)
+  assert.equal(readPublicHosting(), false)
 })

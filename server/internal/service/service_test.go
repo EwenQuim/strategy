@@ -3,9 +3,11 @@ package service_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"hexmate/server/internal/game"
 	"hexmate/server/internal/memory"
@@ -21,7 +23,7 @@ func TestGameLifecycle(t *testing.T) {
 			ctx := context.Background()
 			svc := service.New(store)
 
-			creds, err := svc.Create(ctx, "Ewen")
+			creds, err := svc.Create(ctx, "Ewen", false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -122,7 +124,7 @@ func TestCredentialsAreHashedAndWellFormed(t *testing.T) {
 	ctx := context.Background()
 	svc := service.New(store)
 
-	creds, err := svc.Create(ctx, "Ewen")
+	creds, err := svc.Create(ctx, "Ewen", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,6 +162,94 @@ func TestUnknownGame(t *testing.T) {
 	}
 	if _, err := svc.Join(ctx, "NOPE12", "Bob"); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("want ErrNotFound, got %v", err)
+	}
+}
+
+func TestPublicWaitingListing(t *testing.T) {
+	for name, newStore := range stores() {
+		t.Run(name, func(t *testing.T) {
+			store, cleanup := newStore(t)
+			defer cleanup()
+			ctx := context.Background()
+			svc := service.New(store)
+
+			private, err := svc.Create(ctx, "Ewen", false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			public, err := svc.Create(ctx, "Bob", true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			waiting, err := svc.PublicWaiting(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(waiting) != 1 || waiting[0].Code != public.Game.Code || waiting[0].NamePlayer != "Bob" {
+				t.Fatalf("public waiting = %+v, want only Bob's game", waiting)
+			}
+
+			if _, err := svc.Join(ctx, public.Game.Code, "Alice"); err != nil {
+				t.Fatal(err)
+			}
+			waiting, err = svc.PublicWaiting(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(waiting) != 0 {
+				t.Fatalf("public waiting = %+v, want empty once joined", waiting)
+			}
+
+			g, err := svc.Game(ctx, private.Game.Code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if g.Public {
+				t.Fatal("private game is flagged public")
+			}
+			g, err = svc.Game(ctx, public.Game.Code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !g.Public {
+				t.Fatal("public game is not flagged public")
+			}
+		})
+	}
+}
+
+func TestPublicWaitingLimit(t *testing.T) {
+	for name, newStore := range stores() {
+		t.Run(name, func(t *testing.T) {
+			store, cleanup := newStore(t)
+			defer cleanup()
+			ctx := context.Background()
+			now := time.Now()
+			const created = game.PublicLobbyLimit + 5
+			for i := range created {
+				g := game.Game{
+					Code: fmt.Sprintf("PUB%03d", i), Seed: "s", NamePlayer: "Ewen",
+					TokenPlayer: "h", Public: true, Status: game.Waiting,
+					CreatedAt: now.Add(time.Duration(i) * time.Second), UpdatedAt: now,
+				}
+				if err := store.Create(ctx, g); err != nil {
+					t.Fatal(err)
+				}
+			}
+			waiting, err := store.PublicWaiting(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(waiting) != game.PublicLobbyLimit {
+				t.Fatalf("public waiting = %d games, want %d", len(waiting), game.PublicLobbyLimit)
+			}
+			for i, g := range waiting {
+				if want := fmt.Sprintf("PUB%03d", created-1-i); g.Code != want {
+					t.Fatalf("public waiting[%d] = %s, want %s (newest first)", i, g.Code, want)
+				}
+			}
+		})
 	}
 }
 

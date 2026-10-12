@@ -2,6 +2,7 @@ import type { StoredGame } from './lib/online.ts'
 
 const NAME_KEY = 'hexmate.online.name'
 const GAMES_KEY = 'hexmate.online.games'
+const PUBLIC_KEY = 'hexmate.online.public'
 
 export function readPlayerName(): string {
   try {
@@ -14,6 +15,22 @@ export function readPlayerName(): string {
 export function savePlayerName(name: string): void {
   try {
     localStorage.setItem(NAME_KEY, name)
+  } catch {
+    // localStorage unavailable: keep working in-memory for the session
+  }
+}
+
+export function readPublicHosting(): boolean {
+  try {
+    return localStorage.getItem(PUBLIC_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+export function savePublicHosting(publicHosting: boolean): void {
+  try {
+    localStorage.setItem(PUBLIC_KEY, String(publicHosting))
   } catch {
     // localStorage unavailable: keep working in-memory for the session
   }
