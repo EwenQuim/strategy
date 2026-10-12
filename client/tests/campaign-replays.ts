@@ -5,7 +5,7 @@ import victories from './campaign-victories.json' with { type: 'json' }
 import { CAMPAIGNS, type CampaignLevel } from '../src/lib/campaign.ts'
 import { initialState, reducer, type Action } from '../src/lib/engine/index.ts'
 
-// Both armies' commands are recorded. Setup hashes force edited encounters to be solved again.
+// Both armies' commands are recorded. Hashes bind setups and campaign depth overrides.
 // Regenerate with make record-campaign ARGS="<pack> [level ...]". Compressed commands:
 // e = end turn; m,q,r = move; s,q,r[,destinationQ,destinationR] = ability.
 export function victoryActions(level: CampaignLevel): Action[] {
@@ -15,7 +15,13 @@ export function victoryActions(level: CampaignLevel): Action[] {
   const [setup, encoded] = entry
   assert.equal(
     createHash('sha256')
-      .update(JSON.stringify([level.seed, level.setup]))
+      .update(
+        JSON.stringify([
+          level.seed,
+          level.setup,
+          ...(pack.depth !== undefined ? [pack.depth] : []),
+        ]),
+      )
       .digest('hex')
       .slice(0, 16),
     setup,

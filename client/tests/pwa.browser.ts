@@ -22,14 +22,13 @@ import {
   type GameState,
 } from '../src/lib/engine/index.ts'
 import { createBotGame } from './bot-game.ts'
-import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/bots/targetPicker.ts'
 import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'
 import { biomeNames } from '../src/i18n/biomes.ts'
 import { unitNames } from '../src/i18n/units.ts'
-import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY, campaignBot } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 import {
@@ -37,7 +36,7 @@ import {
   BATTLE_SNAPSHOT_VERSION,
   snapshotState,
 } from '../src/lib/battleSnapshot.ts'
-import { DEFAULT_BOT_CONFIG } from '../src/bots/catalog.ts'
+import { DEFAULT_BOT_CONFIG, getBot } from '../src/bots/catalog.ts'
 import { victoryActions } from './campaign-replays.ts'
 
 const base = '/strategy/'
@@ -1871,7 +1870,7 @@ test(
       identity: battleIdentity(
         'ai',
         level.seed,
-        { name: 'depthsearch', difficulty: level.difficulty },
+        campaignBot(CAMPAIGNS[1], level),
         level.setup,
       ),
       state: snapshotState(enemyTurn),
@@ -1927,6 +1926,29 @@ test(
       assert.equal(after.r, pawn.r)
     }
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  },
+)
+
+test(
+  'Brutal uses its depth-four bot configuration when playing and restoring a battle',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const pack = CAMPAIGNS.find((pack) => pack.slug === 'brutal')!
+    const level = pack.levels[0]
+    await page.evaluate((key) => localStorage.setItem(key, '10'), CAMPAIGN_STORAGE_KEY)
+    await page.goto(origin + base + 'campaign/brutal/1')
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    const readSaved = () =>
+      page.evaluate(() => JSON.parse(localStorage.getItem('hexmate.battle')!))
+    const saved = await readSaved()
+    assert.deepEqual(JSON.parse(saved.identity.bot), campaignBot(pack, level))
+    await playTurn(page)
+    const after = await readSaved()
+    assert.notDeepEqual(after.state, saved.state)
+    await page.reload()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.deepEqual(await readSaved(), after)
   },
 )
 
@@ -2161,7 +2183,7 @@ test(
         identity: battleIdentity(
           'ai',
           level.seed,
-          { name: 'depthsearch', options: BOT_LEVELS[level.difficulty] },
+          campaignBot(pack, level),
           level.setup,
         ),
         state: snapshotState(state),
@@ -2245,7 +2267,7 @@ test(
 
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   const level = CAMPAIGNS[1].levels[id - 1]
-  const bot = createBotGame(new DepthsearchBot(BOT_LEVELS[level.difficulty]))
+  const bot = createBotGame(getBot(campaignBot(CAMPAIGNS[1], level)))
   let state = (
     await bot.transition(bot.initialState(level.seed, level.setup), { type: 'restart' })
   ).state

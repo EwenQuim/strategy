@@ -1,9 +1,8 @@
 import { createHash } from 'node:crypto'
 import { deflateSync } from 'node:zlib'
-import { CAMPAIGNS } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, campaignBot } from '../src/lib/campaign.ts'
 import { activePawn, initialState, reducer, type Action } from '../src/lib/engine/index.ts'
-import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+import { getBot } from '../src/bots/catalog.ts'
 import { campaignActions } from '../tests/campaign-actions.ts'
 
 // Run locally after authoring encounters; copy the emitted entries into campaign-victories.json.
@@ -26,6 +25,7 @@ for (const pack of packs) {
   for (const level of pack.levels.filter(
     (level) => !ids.length || ids.includes(String(level.id)),
   )) {
+    const enemyBot = getBot(campaignBot(pack, level))
     let victory: Action[] | undefined
     for (const caution of [0.25, 0.7, 1, 1.5, 2]) {
       let state = initialState(level.seed, level.setup, 'player')
@@ -34,7 +34,7 @@ for (const pack of packs) {
         const next =
           activePawn(state)!.side === 'player'
             ? await campaignActions(state, caution)
-            : await new DepthsearchBot(BOT_LEVELS[level.difficulty]).chooseActions(state)
+            : await enemyBot.chooseActions(state)
         for (const action of next) {
           const applied = reducer(state, action)
           if (applied === state) throw new Error('Invalid recorded action')
@@ -50,7 +50,7 @@ for (const pack of packs) {
     if (!victory) throw new Error(`No scripted victory for ${pack.slug}:${level.id}`)
     entries[`${pack.slug}:${level.id}`] = [
       createHash('sha256')
-        .update(JSON.stringify([level.seed, level.setup]))
+        .update(JSON.stringify([level.seed, level.setup, ...(pack.depth !== undefined ? [pack.depth] : [])]))
         .digest('hex')
         .slice(0, 16),
       deflateSync(victory.map(command).join(';')).toString('base64'),

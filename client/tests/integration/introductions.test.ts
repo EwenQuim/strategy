@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { CAMPAIGNS } from '../../src/lib/campaign.ts'
-import { BOT_LEVELS } from '../../src/lib/engine/ai.ts'
-import { DepthsearchBot } from '../../src/bots/strategies/depthsearch.ts'
+import { CAMPAIGNS, campaignBot } from '../../src/lib/campaign.ts'
+import { getBot } from '../../src/bots/catalog.ts'
 import { turnPlans } from '../../src/lib/engine/ai/turns.ts'
 import {
   activePawn,
@@ -15,13 +14,14 @@ import {
 test('New enemies showcase their signatures after every legal player opening', async () => {
   for (const pack of CAMPAIGNS) {
     for (const level of pack.levels.filter((level) => level.unlocks.length)) {
+      const bot = getBot(campaignBot(pack, level))
       const opening = initialState(level.seed, level.setup, 'player')
       for (const plan of turnPlans(opening)) {
         let state = plan.state
         const before = state
         const pawn = activePawn(state)!
         const encounter = `${pack.slug}:${level.id} after ${JSON.stringify(plan.actions)}`
-        const actions = await new DepthsearchBot(BOT_LEVELS[level.difficulty]).chooseActions(state)
+        const actions = await bot.chooseActions(state)
         assert.equal(actions.filter((action) => action.type === 'special').length, 1, encounter)
         const effects: BattleEffect[] = []
         for (const action of actions) {

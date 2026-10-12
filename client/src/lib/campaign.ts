@@ -8,7 +8,8 @@ import spartaLevels from './campaigns/006-hot-gates.json' with { type: 'json' }
 import ragnarokLevels from './campaigns/007-ragnarok.json' with { type: 'json' }
 import { mapFromRows, type Terrain, type TileFeature } from './engine/hex.ts'
 import { validateSetup } from './engine/setup.ts'
-import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
+import { BOT_LEVELS, type BotDifficulty, type BotOptions } from './engine/ai.ts'
+import type { BotConfig } from '../bots/catalog.ts'
 import type { PawnKind } from './engine/pawns/index.ts'
 import type { Biome, FixedBattleSetup } from './engine/index.ts'
 
@@ -35,6 +36,7 @@ export interface Campaign {
   requiredVictories?: number
   developerPreview?: boolean
   startingUnits: readonly PawnKind[]
+  depth?: BotOptions['depth']
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -172,6 +174,7 @@ export const CAMPAIGNS: Campaign[] = [
     levels: briefedCampaigns[2],
     startingUnits: startingUnits[2],
     requiredVictories: 10,
+    depth: 4,
   },
   {
     slug: 'shattered',
@@ -211,6 +214,16 @@ export const CAMPAIGNS: Campaign[] = [
 ]
 
 export const TUTORIAL = CAMPAIGNS[0]
+
+export function campaignBot(campaign: Campaign, level: CampaignLevel): BotConfig {
+  return {
+    name: 'depthsearch',
+    options: {
+      ...BOT_LEVELS[level.difficulty],
+      ...(campaign.depth !== undefined ? { depth: campaign.depth } : {}),
+    },
+  }
+}
 
 export function totalVictories(completedIn: (slug: string) => number): number {
   return CAMPAIGNS.reduce((sum, campaign) => sum + completedIn(campaign.slug), 0)

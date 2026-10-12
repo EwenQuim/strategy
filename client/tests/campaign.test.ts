@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   CAMPAIGNS,
+  campaignBot,
   completeCampaignLevel,
   isLevelUnlocked,
   parseCampaignProgress,
@@ -18,6 +19,8 @@ import {
   type PawnKind,
 } from '../src/lib/engine/index.ts'
 import { turnPlans } from '../src/lib/engine/ai/turns.ts'
+import { getBot } from '../src/bots/catalog.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import original from '../src/lib/campaigns/001-original.json' with { type: 'json' }
 
 test('All packs use authored, deterministic, compact maps and validated armies', () => {
@@ -107,6 +110,20 @@ test('Briefings remain global first appearances while unlocks are pack-local', (
   const result = withBriefings([[levels[0]], [levels[0]]])
   assert.ok(result[0][0].newElements.length > 0)
   assert.equal(result[1][0].newElements.length, 0)
+})
+
+test('Brutal uses depth four while other campaigns keep their difficulty presets', () => {
+  for (const pack of CAMPAIGNS) {
+    for (const level of pack.levels) {
+      const bot = campaignBot(pack, level)
+      const options = getBot(bot).options
+      assert.deepEqual(options, {
+        ...BOT_LEVELS[level.difficulty],
+        ...(pack.slug === 'brutal' ? { depth: 4 } : {}),
+      })
+      assert.deepEqual(getBot(JSON.parse(JSON.stringify(bot))).options, options)
+    }
+  }
 })
 
 test('Original retains twenty encounters across five biomes and introduces Hellfire gently', () => {
