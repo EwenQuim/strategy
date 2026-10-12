@@ -2,7 +2,6 @@ import type { BattleEffect } from '../lib/engine'
 import { key } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
 import { PawnIcon } from './Icon'
-import * as m from '../i18n/game'
 import { SupportFeedback } from './SupportFeedback'
 
 export function BattlefieldEffects({
@@ -118,32 +117,9 @@ export function BattlefieldEffects({
                       : 'combat-impact-label--miss text-[24px] italic')
                   }
                 >
-                  {hit.damage > 0 ? '-' + hit.damage : m.miss}
+                  {hit.damage > 0 ? '-' + hit.damage : 'MISS'}
                 </text>
               </g>
-            </g>
-          ))}
-        </g>
-      )}
-      {!!effect?.blocked?.length && (
-        <g
-          key={'blocked-' + effectId}
-          className="pointer-events-none text-[#c9eaf4]"
-          aria-hidden="true"
-        >
-          {effect.blocked.map((at) => (
-            <g
-              key={key(at.q, at.r)}
-              transform={'translate(' + hexX(at.q, at.r) + ' ' + hexY(at.r) + ')'}
-            >
-              <text
-                data-testid="combat-blocked"
-                y="-28"
-                textAnchor="middle"
-                className="combat-impact-label combat-impact-label--miss fill-current stroke-[#14271f] stroke-[5] text-[22px] font-black italic [paint-order:stroke] motion-reduce:animate-none"
-              >
-                {m.blocked}
-              </text>
             </g>
           ))}
         </g>

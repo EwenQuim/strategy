@@ -54,11 +54,11 @@ export const featureTexts: Record<TileFeature, { name: string; description: stri
       it: 'Torre di vedetta',
     }),
     description: t({
-      en: '+1 attack range for Archers and Bombers.',
-      fr: '+1 de portée d’attaque pour les Archers et les Grenadiers.',
-      de: '+1 Angriffsreichweite für Schützen und Grenadiere.',
-      es: '+1 de alcance de ataque para Arqueros y Granaderos.',
-      it: '+1 di gittata d’attacco per Arcieri e Granatieri.',
+      en: '+1 shot range for Archers.',
+      fr: '+1 de portée de tir pour les Archers.',
+      de: '+1 Schussreichweite für Schützen.',
+      es: '+1 de alcance de disparo para Arqueros.',
+      it: '+1 di gittata di tiro per Arcieri.',
     }),
   },
   spring: {

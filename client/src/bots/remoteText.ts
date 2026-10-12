@@ -12,7 +12,7 @@ import {
 // Each strategy keeps its own prompt shape and API call.
 
 // The shared rule summary every remote bot needs to judge a position.
-export const RULES_TEXT = `Rules: the active unit acts alone with 3 energy. Move for 1 energy per step and use its one signature ability at the listed cost, at most once per activation. There is no basic attack and no random dodge. Move before or after the ability; leftover energy is lost when ending the turn. Terrain never blocks ranged abilities. Mountains, lakes and absent tiles cannot be walked through; lava deals 1 damage on entry; watchtowers extend Archer shots and Bomber throws by 1; springs heal 1 hp per round; runes give +2 energy when picked up. Charge and Rush cannot cross absent tiles; Ambush can jump over terrain, gaps and units.`
+export const RULES_TEXT = `Rules: the active unit acts alone with 3 energy. Move for 1 energy per step and use its one signature ability at the listed cost, at most once per activation. There is no basic attack and no random dodge. Move before or after the ability; leftover energy is lost when ending the turn. Terrain never blocks ranged abilities. Mountains, lakes and absent tiles cannot be walked through; lava deals 1 damage on entry; watchtowers extend Archer shots by 1; springs heal 1 hp per round; runes give +2 energy when picked up. Charge and Rush cannot cross absent tiles; Ambush can jump over terrain, gaps and units.`
 
 function describeUnit(pawn: {
   kind: PawnKind

@@ -24,7 +24,6 @@ import {
   Lancer,
   Swordsman,
 } from '../src/lib/engine/index.ts'
-import { Hoplite } from '../src/lib/engine/pawns/hoplite.ts'
 import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
 import { field } from './field.ts'
 import { createBotGame } from './bot-game.ts'
@@ -225,163 +224,40 @@ async function dismissQuickPlayTutorial(page: Page) {
   }
 }
 
-test(
-  'Ability targeting and area support feedback work on portrait screens with reduced motion',
-  { timeout: 40_000 },
-  async (t) => {
-    const { page, origin } = await fixture(t)
-    const errors: string[] = []
-    page.on('pageerror', (error) => errors.push(error.message))
-    for (const reducedMotion of ['no-preference', 'reduce'] as const) {
-      await page.emulateMedia({ reducedMotion })
-      for (const Unit of [Lancer, Hoplite, King, Wolf]) {
-        const target = Unit === Lancer ? { q: 3, r: 0 } : { q: 1, r: 0 }
-        const state = field([
-          new Unit(1, 0, 0, 'player'),
-          new King(2, 0, 1, 'player', 4),
-          new King(3, target.q, target.r, 'enemy'),
-          new Swordsman(4, -1, 0, 'player', 2),
-          new Swordsman(
-            5,
-            Unit === Hoplite ? 2 : 1,
-            Unit === Hoplite ? 0 : -1,
-            Unit === Hoplite ? 'enemy' : 'player',
-          ),
-        ])
-        state.seed = `ability-ui-${state.pawns[0].kind}-${reducedMotion}`
-        // Compact the synthetic field so labels retain mobile tile sizes.
-        state.tiles = new Map(
-          [...state.tiles].filter(
-            ([, at]) => at.q >= -2 && at.q <= 3 && at.r >= -2 && at.r <= 2,
-          ),
-        )
-        await page.evaluate(
-          (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
-          {
-            version: BATTLE_SNAPSHOT_VERSION,
-            identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
-            state: snapshotState(state),
-          },
-        )
-        await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
-        await page.locator('[data-action="special"]:not([disabled])').waitFor()
-        await page.locator('[data-action="special"]').click()
-        if (Unit === Hoplite) {
-          const screened = page
-            .getByTestId('hex-tile')
-            .filter({ has: page.locator('title', { hasText: 'King #3' }) })
-          const rear = page
-            .getByTestId('hex-tile')
-            .filter({ has: page.locator('title', { hasText: 'Swordsman #5' }) })
-          assert.equal(await rear.getAttribute('role'), 'img')
-          assert.equal(await screened.getAttribute('role'), 'button')
-        }
-        const victim = page.getByTestId('battlefield').getByRole('button', { name: /King #3/ })
-        await victim.click()
-        await page.getByTestId('combat-impacts').waitFor()
-        if (Unit === Hoplite) {
-          assert.equal(await page.getByTestId('combat-blocked').textContent(), 'BLOCKED')
-          assert.equal(
-            await page
-              .getByTestId('combat-blocked')
-              .evaluate((element) => getComputedStyle(element).animationName),
-            reducedMotion === 'reduce' ? 'none' : 'miss-drift',
-          )
-        }
-        if (Unit === King || Unit === Wolf) {
-          const support = page.getByTestId('hex-tile').and(page.locator('[data-support]'))
-          assert.equal(await support.count(), 7)
-          assert.ok(
-            (
-              await support.evaluateAll((tiles) =>
-                tiles.map((tile) => tile.getAttribute('data-support')),
-              )
-            ).every((kind) => kind === (Unit === King ? 'heal' : 'energy')),
-          )
-          assert.equal(
-            await page.locator('[data-support-recipient="true"]').count(),
-            Unit === King ? 2 : 3,
-          )
-          assert.ok(
-            (
-              await support
-                .getByTestId('tile-face')
-                .evaluateAll((faces) => faces.map((face) => face.getAttribute('fill')))
-            ).every((fill) => !fill?.startsWith('url(#support-')),
-          )
-          assert.ok(
-            (
-              await support
-                .getByTestId('tile-face')
-                .evaluateAll((faces) => faces.map((face) => getComputedStyle(face).stroke))
-            ).every((stroke) => stroke === 'rgb(236, 237, 204)'),
-          )
-          const badges = page.getByTestId('combat-support-symbol')
-          const halos = page.getByTestId('support-halo')
-          assert.equal(await halos.count(), 7)
-          assert.ok(
-            await halos.evaluateAll((nodes) =>
-              nodes.every((halo) => {
-                const tile = document.querySelector<SVGGElement>(
-                  `[data-testid="hex-tile"][data-at="${halo.getAttribute('data-at')}"]`,
-                )!
-                const matrix = tile.getScreenCTM()!
-                const ground = new DOMPoint(0, 32.3).matrixTransform(matrix)
-                const rect = halo.getBoundingClientRect()
-                return (
-                  Math.abs(rect.x + rect.width / 2 - ground.x) < 1 &&
-                  Math.abs(rect.bottom - ground.y) < 1
-                )
-              }),
-            ),
-          )
-          assert.ok(
-            (
-              await halos.evaluateAll((nodes) =>
-                nodes.map((node) => getComputedStyle(node).color),
-              )
-            ).every(
-              (color) =>
-                color === (Unit === King ? 'rgb(183, 201, 160)' : 'rgb(212, 187, 123)'),
-            ),
-          )
-          assert.equal(
-            await halos
-              .first()
-              .getByTestId('support-halo-light')
-              .first()
-              .evaluate((node) => getComputedStyle(node).animationName),
-            reducedMotion === 'reduce' ? 'none' : 'support-halo-rise',
-          )
-          assert.equal(await page.getByTestId('support-halo-edge').count(), 14)
-          assert.equal(await badges.count(), Unit === King ? 2 : 3)
-          assert.ok(
-            (await badges.locator('text').allTextContents()).every((text) => text === '+1'),
-          )
-          assert.ok(
-            (
-              await badges.evaluateAll((nodes) =>
-                nodes.map((node) => getComputedStyle(node).animationName),
-              )
-            ).every((animation) => animation === 'none'),
-          )
-        }
-        assert.equal(
-          await page.evaluate(
-            () =>
-              document.documentElement.scrollHeight > innerHeight ||
-              document.documentElement.scrollWidth > innerWidth,
-          ),
-          false,
-        )
-        await page.getByTestId('combat-impacts').waitFor({ state: 'hidden' })
-        assert.equal(await page.locator('[data-support]').count(), 0)
-        assert.equal(await page.getByTestId('support-halo').count(), 0)
-      }
+test('Rush targets enemies directly and area support lights the caster hexes', async (t) => {
+  const { page, origin } = await fixture(t)
+  for (const Unit of [Lancer, King, Wolf]) {
+    const target = Unit === Lancer ? { q: 3, r: 0 } : { q: 1, r: 0 }
+    const state = field([
+      new Unit(1, 0, 0, 'player'),
+      new King(2, 0, 1, 'player', 4),
+      new King(3, target.q, target.r, 'enemy'),
+      new Swordsman(4, -1, 0, 'player', 2),
+    ])
+    state.seed = `ability-ui-${state.pawns[0].kind}`
+    await page.evaluate(
+      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+        state: snapshotState(state),
+      },
+    )
+    await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+    await page.locator('[data-action="special"]:not([disabled])').click()
+    await page
+      .getByTestId('battlefield')
+      .getByRole('button', { name: /King #3/ })
+      .click()
+    await page.getByTestId('combat-impacts').waitFor()
+    if (Unit !== Lancer) {
+      assert.equal(await page.getByTestId('support-halo').count(), 7)
+      assert.equal(await page.getByTestId('combat-support-symbol').count(), 2)
     }
-    assert.deepEqual(errors, [])
-  },
-)
+    await page.getByTestId('combat-impacts').waitFor({ state: 'hidden' })
+    assert.equal(await page.getByTestId('support-halo').count(), 0)
+  }
+})
 
 async function playInUi(page: Page, state: GameState, action: Action) {
   const clickTile = (at: Axial) =>

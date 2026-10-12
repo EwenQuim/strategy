@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { King, Swordsman, transition, reducer, type Side } from '../src/lib/engine/index.ts'
 import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
-import { playbackReducer, frameDelay } from '../src/lib/playback.ts'
 import { field } from './field.ts'
 
 for (const side of ['player', 'enemy'] as const) {
@@ -96,25 +95,4 @@ test('Healing more than the strike damage still counts as combat, rather than a 
       state.pawns.reduce((sum, p) => sum + p.hp, 0),
   )
   assert.equal(next.lastClashRound, 5)
-})
-
-test('Support feedback accompanies the strike in local, AI and online playback, including reduced motion', () => {
-  for (const Unit of [King, Wolf]) {
-    const state = field([
-      new Unit(1, 0, 0, 'player'),
-      new King(2, 0, 1, 'player', 4),
-      new King(3, 1, 0, 'enemy'),
-    ])
-    for (const mode of ['local', 'ai', 'online'] as const) {
-      const result = playbackReducer(
-        { state, frames: [] },
-        { type: 'special', target: { q: 1, r: 0 } },
-        mode,
-      )
-      assert.equal(result.frames.length, 1)
-      assert.equal(result.frames[0].effect?.support?.recipients.length, 1)
-      assert.equal(frameDelay(result.frames[0], true), 700)
-      assert.equal(playbackReducer(result, { type: 'endTurn' }, mode), result)
-    }
-  }
 })

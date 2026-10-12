@@ -192,11 +192,11 @@ export const basaltSafe = t({
   it: 'Il basalto è sicuro',
 })
 export const watchtowerRange = t({
-  en: 'Archer & Bomber: +1 attack range',
-  fr: 'Archer et Grenadier : +1 de portée d’attaque',
-  de: 'Schütze & Grenadier: +1 Angriffsreichweite',
-  es: 'Arquero y Granadero: +1 alcance de ataque',
-  it: 'Arciere e Granatiere: +1 gittata d’attacco',
+  en: 'Archer: +1 shot range',
+  fr: 'Archer : +1 de portée de tir',
+  de: 'Schütze: +1 Schussreichweite',
+  es: 'Arquero: +1 alcance de disparo',
+  it: 'Arciere: +1 gittata di tiro',
 })
 export const springStay = t({
   en: 'Stay until next turn: +1 HP',

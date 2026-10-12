@@ -62,7 +62,6 @@ export type BattleEffect = {
   to: Axial
   centers?: Axial[]
   impacts?: BattleImpact[]
-  blocked?: Axial[]
   support?: { kind: 'heal' | 'energy'; recipients: Axial[] }
 }
 

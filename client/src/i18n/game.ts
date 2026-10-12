@@ -1,20 +1,5 @@
 import { plural, t } from './locale'
 
-export const blocked = t({
-  en: 'BLOCKED',
-  fr: 'BLOQUÉ',
-  de: 'BLOCKIERT',
-  es: 'BLOQUEADO',
-  it: 'BLOCCATO',
-})
-export const miss = t({
-  en: 'MISS',
-  fr: 'RATÉ',
-  de: 'VERFEHLT',
-  es: 'FALLO',
-  it: 'MANCATO',
-})
-
 export const battlefield = t({
   en: 'The battlefield',
   fr: 'Le champ de bataille',

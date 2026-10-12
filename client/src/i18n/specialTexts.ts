@@ -129,11 +129,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Bomba',
   }),
   bombDescription: t({
-    en: 'Hits every unit on a tile within 2 and its six neighbors. Throw range increases to 3 from a watchtower.',
-    fr: 'Frappe toutes les unités sur une case à 2 ou moins et ses six voisines. Portée de lancer de 3 depuis une tour.',
-    de: 'Trifft jede Einheit auf einem Feld innerhalb von 2 und dessen sechs Nachbarn. Wurfweite vom Wachturm: 3.',
-    es: 'Golpea a toda unidad en una casilla a 2 o menos y en sus seis vecinas. Alcance de lanzamiento de 3 desde una torre.',
-    it: 'Colpisce ogni unità su una casella entro 2 e sulle sue sei vicine. Gittata di lancio di 3 da una torre.',
+    en: 'Hits every unit on a tile within 2 and its six neighbors.',
+    fr: 'Frappe toutes les unités sur une case à 2 ou moins et ses six voisines.',
+    de: 'Trifft jede Einheit auf einem Feld innerhalb von 2 und dessen sechs Nachbarn.',
+    es: 'Golpea a toda unidad en una casilla a 2 o menos y en sus seis vecinas.',
+    it: 'Colpisce ogni unità su una casella entro 2 e sulle sue sei vicine.',
   }),
   protect: t({
     en: 'Protect',
@@ -192,11 +192,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Affondo',
   }),
   phalanxDescription: t({
-    en: 'Units screen enemies behind them on straight hex lines. Push the survivor one tile back only onto free ground; never chain-push.',
-    fr: 'Les unités masquent les ennemis derrière elles sur une ligne droite. Repoussez le survivant d’une case libre ; aucune poussée en chaîne.',
-    de: 'Einheiten schirmen Gegner hinter sich auf geraden Hexlinien ab. Stoße den Überlebenden ein Feld auf freien Boden; kein Kettenstoß.',
-    es: 'Las unidades cubren a los enemigos detrás en líneas rectas. Empuja al superviviente una casilla libre; sin empujes en cadena.',
-    it: 'Le unità schermano i nemici dietro sulle linee rette. Spingi il sopravvissuto su una casella libera; nessuna spinta a catena.',
+    en: 'On a straight hex line, push the survivor one tile back if it is free.',
+    fr: 'Sur une ligne hexagonale droite, repoussez le survivant d’une case si elle est libre.',
+    de: 'Auf einer geraden Hexlinie stößt du den Überlebenden ein Feld zurück, wenn es frei ist.',
+    es: 'En línea hexagonal recta, empuja al superviviente una casilla si está libre.',
+    it: 'Su una linea esagonale retta, spingi il sopravvissuto di una casella se è libera.',
   }),
   cry: t({
     en: 'Pack Hunt',
