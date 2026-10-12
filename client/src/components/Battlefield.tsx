@@ -11,7 +11,8 @@ import {
 } from '../lib/engine'
 import { featureTexts } from '../i18n/biomes'
 import { Icon } from './Icon'
-import { tileAriaLabel, tileFill } from './battlefield-tile'
+import { tileAriaLabel, tileFill, tileSupport } from './battlefield-tile'
+import { SupportHalos } from './SupportFeedback'
 import { BattlefieldEffects } from './BattlefieldEffects'
 import { PawnChip } from './PawnChip'
 import { TerrainArt } from './terrains/TerrainArt'
@@ -164,6 +165,7 @@ export function Battlefield({
           const lethal = !!active && damage >= active.hp
           const inRange = range.has(tileKey)
           const threatened = threats.has(tileKey)
+          const support = tileSupport(effect, tile)
           const actionLabel = tileAriaLabel({
             tile,
             occupant,
@@ -201,8 +203,11 @@ export function Battlefield({
               data-feature={tile.feature}
               data-hellfire={warned || undefined}
               data-hellfire-center={impactCenter || undefined}
+              data-support={support.kind}
+              data-support-recipient={support.recipient}
               className="group/tile outline-none [&[role=button]]:cursor-pointer"
               data-testid="hex-tile"
+              data-at={tileKey}
               role={interactive ? 'button' : 'img'}
               tabIndex={interactive ? 0 : undefined}
               aria-label={actionLabel}
@@ -290,6 +295,7 @@ export function Battlefield({
           )
         })}
       </svg>
+      <SupportHalos key={'halos-' + effectId} effect={effect} tiles={tiles} viewBox={viewBox} />
       {/* Pawn moves and combat effects repaint only this composited layer, never the tiles and their drop-shadow. */}
       <svg
         viewBox={viewBox}

@@ -87,6 +87,9 @@
   .combat-impact-label--miss {
     animation-name: miss-drift;
   }
+  .support-halo-rise {
+    animation: support-halo-rise 700ms ease-out both;
+  }
   .pawn-fall {
     animation: pawn-fall 650ms ease-in both;
   }
@@ -231,6 +234,24 @@
   }
   100% {
     transform: translate(8px, -16px);
+    opacity: 0;
+  }
+}
+
+@keyframes support-halo-rise {
+  0% {
+    transform: scaleY(0.08);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  60% {
+    transform: scaleY(1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scaleY(1.15);
     opacity: 0;
   }
 }

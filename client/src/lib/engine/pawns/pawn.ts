@@ -43,6 +43,7 @@ export type SpecialTextKey =
   | 'noEnemiesWithinReach'
   | 'chargeTo'
   | 'chooseTile'
+  | 'chooseTileOrEnemy'
   | 'chooseEnemy'
   | 'aimedShot'
   | 'aimedShotDescription'

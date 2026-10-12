@@ -1,4 +1,4 @@
-import { aimAt, canUseSpecial, enterTiles, strike } from '../combat.ts'
+import { aimAt, canUseSpecial, enterTiles, pawnAt, strike } from '../combat.ts'
 import { hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -25,8 +25,11 @@ function sprints(
       if (!tile || !passable(tile)) break
       const occupant = pawns.find((p) => p.id !== pawn.id && p.q === q && p.r === r)
       if (occupant) {
-        if (occupant.side !== pawn.side && landings.length)
-          landings[landings.length - 1]!.target = occupant
+        if (occupant.side !== pawn.side) {
+          if (landings.length) landings[landings.length - 1]!.target = occupant
+          else
+            landings.push({ tile: tiles.get(key(from.q, from.r))!, path: [], target: occupant })
+        }
         break
       }
       path.push(tile)
@@ -37,7 +40,12 @@ function sprints(
 }
 
 function dashDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
-  return canUseSpecial(pawn) ? sprints(pawn, tiles, pawns).map(({ tile }) => tile) : []
+  return canUseSpecial(pawn)
+    ? sprints(pawn, tiles, pawns).flatMap(({ tile, path, target }) => [
+        ...(path.length ? [tile] : []),
+        ...(target ? [tiles.get(key(target.q, target.r))!] : []),
+      ])
+    : []
 }
 
 const dash: SpecialAbility = {
@@ -45,7 +53,7 @@ const dash: SpecialAbility = {
   cost: 2,
   targeted: true,
   targetLabel: 'dashTo',
-  prompt: 'chooseTile',
+  prompt: 'chooseTileOrEnemy',
   description: 'dashDescription',
   noTargets: 'noOpenLine',
   reaches: (pawn, tile) => {
@@ -57,7 +65,9 @@ const dash: SpecialAbility = {
     pawns.filter((p) => {
       const q = p.q - from.q,
         r = p.r - from.r
-      return p.side !== pawn.side && hexDist(from, p) > 1 && (q === 0 || r === 0 || q + r === 0)
+      return (
+        p.side !== pawn.side && hexDist(from, p) >= 1 && (q === 0 || r === 0 || q + r === 0)
+      )
     }),
   tileTargets: (pawn, tiles, pawns) =>
     new Set(dashDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
@@ -71,8 +81,7 @@ const dash: SpecialAbility = {
         const at = key(pawn.q + dq * step, pawn.r + dr * step)
         const tile = tiles.get(at)
         if (!tile || !passable(tile)) break
-        // A hypothetical enemy can be hit only after a surviving, empty sprint landing.
-        if (step > 1 && damage < pawn.hp) threatened.add(at)
+        if (damage < pawn.hp) threatened.add(at)
         if (occupied.has(at)) break
         damage += Number(tile.terrain === 'lava')
         if (damage >= pawn.hp) break
@@ -95,10 +104,11 @@ const dash: SpecialAbility = {
       : 0
   },
   perform: ({ pawn, tiles, pawns, tile, round, log }) => {
+    const target = tile && pawnAt(pawns, tile)
     const sprint =
       tile &&
-      sprints(pawn, tiles, pawns).find(
-        (entry) => entry.tile.q === tile.q && entry.tile.r === tile.r,
+      sprints(pawn, tiles, pawns).find((entry) =>
+        target ? entry.target === target : entry.tile.q === tile.q && entry.tile.r === tile.r,
       )
     if (!sprint) return null
     pawn.energy -= pawn.special.cost
@@ -118,7 +128,7 @@ export class Lancer extends Pawn {
   static override readonly icon =
     'M5 19 17 7M17 7l2.5-4.5L15 5l2 2ZM8.5 15.5l-4 4M12 12l-2.5 1 1 2.5'
   static override readonly aiInstructions =
-    'Rush (2): sprint any distance to an empty tile along a clear hex line. Automatically strike for 2 if an enemy is immediately ahead in the sprint direction. Hitting is optional, no sideways strikes; terrain, gaps and units block movement. Once per activation.'
+    'Rush (2): select an enemy on a clear hex line to stop beside it and strike for 2, including adjacent enemies. Or sprint to an empty tile, striking automatically if an enemy is immediately ahead. No sideways strikes; terrain, gaps and units block movement. Once per activation.'
   readonly kind = 'lancer' as const
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
   get special(): SpecialAbility {

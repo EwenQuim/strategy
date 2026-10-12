@@ -110,11 +110,15 @@ export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {
   )
 }
 
-export function inAttackRange(pawn: Pawn, at: Axial, from: Axial = pawn): boolean {
-  const distance = hexDist(from, at)
+export function attackRange(pawn: Pawn, from: Axial = pawn): number {
   const bonus =
     'feature' in from && from.feature === 'watchtower' ? (pawn.attack.rangeBonus ?? 0) : 0
-  return distance >= pawn.attack.minRange && distance <= pawn.attack.maxRange + bonus
+  return pawn.attack.maxRange + bonus
+}
+
+export function inAttackRange(pawn: Pawn, at: Axial, from: Axial = pawn): boolean {
+  const distance = hexDist(from, at)
+  return distance >= pawn.attack.minRange && distance <= attackRange(pawn, from)
 }
 
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {

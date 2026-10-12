@@ -1,10 +1,18 @@
-import type { Pawn, Tile } from '../lib/engine'
+import { hexDist, type BattleEffect, type Pawn, type Tile } from '../lib/engine'
 import type { PlayerNames } from '../lib/game-mode'
 import { energyCost } from '../i18n/game'
 import * as bf from '../i18n/battlefield'
 import { unitNames } from '../i18n/units'
 import { terrainNames } from '../i18n/biomes'
 import { terrainColors } from './hex-art'
+
+export function tileSupport(effect: BattleEffect | null, tile: Tile) {
+  const support = effect?.support
+  if (!effect || !support || hexDist(effect.from, tile) > 1)
+    return { kind: undefined, recipient: undefined }
+  const recipient = support.recipients.some((at) => at.q === tile.q && at.r === tile.r)
+  return { kind: support.kind, recipient: recipient || undefined }
+}
 
 export function tileAriaLabel({
   tile,

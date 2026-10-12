@@ -77,9 +77,19 @@ test('New enemies showcase their signatures after every legal player opening', a
             encounter,
           )
         }
-        if (pawn.kind === 'ninja' || pawn.kind === 'lancer') {
+        if (pawn.kind === 'ninja') {
           assert.ok(
             effects.some((effect) => hexDist(effect.from, effect.to) > 1),
+            encounter,
+          )
+        }
+        if (pawn.kind === 'lancer') {
+          assert.ok(
+            effects.some((effect) => {
+              const q = effect.to.q - effect.from.q
+              const r = effect.to.r - effect.from.r
+              return effect.kind === 'attack' && (q === 0 || r === 0 || q + r === 0)
+            }),
             encounter,
           )
         }
