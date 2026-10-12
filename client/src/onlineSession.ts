@@ -20,7 +20,7 @@ export function savePlayerName(name: string): void {
   }
 }
 
-export function readPublicGame(): boolean {
+export function readPublicHosting(): boolean {
   try {
     return localStorage.getItem(PUBLIC_KEY) === 'true'
   } catch {
@@ -28,9 +28,9 @@ export function readPublicGame(): boolean {
   }
 }
 
-export function savePublicGame(publicGame: boolean): void {
+export function savePublicHosting(publicHosting: boolean): void {
   try {
-    localStorage.setItem(PUBLIC_KEY, String(publicGame))
+    localStorage.setItem(PUBLIC_KEY, String(publicHosting))
   } catch {
     // localStorage unavailable: keep working in-memory for the session
   }

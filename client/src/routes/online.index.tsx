@@ -21,10 +21,10 @@ import {
 import { Icon } from '../components/Icon'
 import {
   readPlayerName,
-  readPublicGame,
+  readPublicHosting,
   readStoredGames,
   savePlayerName,
-  savePublicGame,
+  savePublicHosting,
   saveStoredGame,
 } from '../onlineSession.ts'
 import type { StoredGame } from '../lib/online.ts'
@@ -46,7 +46,7 @@ export const Route = createFileRoute('/online/')({
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
     const [games] = useState<StoredGame[]>(readStoredGames)
-    const [publicGame, setPublicGame] = useState(readPublicGame)
+    const [publicHosting, setPublicHosting] = useState(readPublicHosting)
     const [showGames, setShowGames] = useState(false)
     const createGame = useCreateOnlineGame()
     const joinGame = useJoinOnlineGame()
@@ -87,7 +87,7 @@ export const Route = createFileRoute('/online/')({
             event.preventDefault()
             if (!trimmedName || busy) return
             void start(async () => {
-              const game = await createGame.mutateAsync(trimmedName, publicGame)
+              const game = await createGame.mutateAsync(trimmedName, publicHosting)
               saveStoredGame(game)
               return game.code
             })
@@ -121,10 +121,10 @@ export const Route = createFileRoute('/online/')({
               role="switch"
               aria-describedby="online-public-hint"
               className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
-              checked={publicGame}
+              checked={publicHosting}
               onChange={(event) => {
-                setPublicGame(event.target.checked)
-                savePublicGame(event.target.checked)
+                setPublicHosting(event.target.checked)
+                savePublicHosting(event.target.checked)
               }}
             />
           </label>

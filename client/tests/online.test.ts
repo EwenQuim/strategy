@@ -4,9 +4,9 @@ import { battleMessage } from '../src/lib/game-mode.ts'
 import type { OnlineAction, StoredGame } from '../src/lib/online.ts'
 import { initialPlayback, playbackReducer, replay } from '../src/lib/playback.ts'
 import {
-  readPublicGame,
+  readPublicHosting,
   readStoredGames,
-  savePublicGame,
+  savePublicHosting,
   saveStoredGame,
 } from '../src/onlineSession.ts'
 import { activePawn, key, mirrorAxial, symmetricSeed } from '../src/lib/engine/index.ts'
@@ -121,9 +121,9 @@ test('Stored online games round-trip and ignore corrupted entries', () => {
 })
 
 test('Public game setting defaults to private and round-trips', () => {
-  assert.equal(readPublicGame(), false)
-  savePublicGame(true)
-  assert.equal(readPublicGame(), true)
-  savePublicGame(false)
-  assert.equal(readPublicGame(), false)
+  assert.equal(readPublicHosting(), false)
+  savePublicHosting(true)
+  assert.equal(readPublicHosting(), true)
+  savePublicHosting(false)
+  assert.equal(readPublicHosting(), false)
 })
