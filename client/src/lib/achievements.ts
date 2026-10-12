@@ -1,4 +1,4 @@
-import { key, type GameState, type PawnKind, type Side } from './engine/index.ts'
+import { inHellfire, key, type GameState, type PawnKind, type Side } from './engine/index.ts'
 
 export const ACHIEVEMENTS = [
   { id: 'cleanHands', logo: '🗡️' },
@@ -16,6 +16,12 @@ export const ACHIEVEMENTS = [
   { id: 'untouchable', logo: '🎲' },
   { id: 'speedrun', logo: '⚡' },
   { id: 'dogs', logo: '🐺' },
+  { id: 'crispy', logo: '🍗' },
+  { id: 'smite', logo: '⚡' },
+  { id: 'divineAssist', logo: '🙏' },
+  { id: 'oops', logo: '🙈' },
+  { id: 'boomRegicide', logo: '💣' },
+  { id: 'daredevil', logo: '😈' },
 ] as const
 
 export type AchievementId = (typeof ACHIEVEMENTS)[number]['id']
@@ -67,6 +73,28 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
     speedrun: state.round <= 3,
     dogs:
       myRoster.has('wolf') && [...myRoster].every((kind) => kind === 'king' || kind === 'wolf'),
+    crispy: state.blows.some(
+      ({ by, fallen: victims }) =>
+        by?.side === me && !by.special && victims.some((unit) => unit.side === me),
+    ),
+    smite: state.blows.some(
+      ({ by, fallen: victims }) => !by && victims.some((unit) => unit.side === me),
+    ),
+    divineAssist: state.blows.some(
+      ({ by, fallen: victims }) =>
+        !by && victims.some((unit) => unit.side !== me && unit.kind === 'king'),
+    ),
+    oops: state.blows.some(
+      ({ by, fallen: victims }) =>
+        by?.side === me &&
+        by.kind === 'bomber' &&
+        by.special &&
+        victims.some((unit) => unit.side === me),
+    ),
+    boomRegicide:
+      !!regicide?.by.special &&
+      (regicide.by.kind === 'bomber' || regicide.by.kind === 'magician'),
+    daredevil: inHellfire(state.hellfire, king),
   }
   return ACHIEVEMENTS.map(({ id }) => id).filter((id) => rules[id])
 }
