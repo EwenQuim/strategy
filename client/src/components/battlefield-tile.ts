@@ -75,7 +75,7 @@ export function tileFill({
   damage,
   occupant,
   target,
-  attack,
+  strike,
   selected,
   previewed,
   canMove,
@@ -86,7 +86,7 @@ export function tileFill({
   damage: number
   occupant?: Pawn
   target: boolean
-  attack: boolean
+  strike: boolean
   selected: boolean
   previewed: boolean
   canMove: boolean
@@ -94,8 +94,8 @@ export function tileFill({
   range?: RangeKind
 }): string {
   if (interactive && damage > 0 && !occupant) return '#94716d'
-  if (target) return attack ? '#b98370' : '#b79dce'
+  if (target) return strike ? '#b98370' : '#b79dce'
   if (selected || previewed) return 'var(--selected-tint, #c9b77f)'
-  if (range) return range === 'attack' ? '#b98370' : '#b79dce'
+  if (range) return '#b79dce'
   return canMove ? 'var(--move-tint)' : terrainColors[terrain]
 }

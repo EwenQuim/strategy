@@ -13,7 +13,7 @@ import {
   symmetricSeed,
   type BattleSetup,
 } from '../src/lib/engine/index.ts'
-import { getBot } from '../src/bots/catalog.ts'
+import { getBot, parseBotConfig, DEFAULT_BOT_CONFIG } from '../src/bots/catalog.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const setup = {
@@ -59,6 +59,22 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
     assert.deepEqual(parseGameSearch({ mode: 'local', setup: invalid }), {
       mode: 'local',
     })
+  }
+})
+
+test('Explicit bot depth survives shared battle URLs and rejects invalid overrides', () => {
+  const bot = { name: 'depthsearch', options: { ...BOT_LEVELS.hard, depth: 4 } } as const
+  assert.deepEqual(
+    parseBotConfig(parseGameSearch(JSON.parse(JSON.stringify({ bot }))).bot),
+    bot,
+  )
+  for (const depth of [0, 1, 5, 100, '4', null]) {
+    assert.deepEqual(
+      parseBotConfig(
+        parseGameSearch({ bot: { ...bot, options: { ...bot.options, depth } } }).bot,
+      ),
+      DEFAULT_BOT_CONFIG,
+    )
   }
 })
 

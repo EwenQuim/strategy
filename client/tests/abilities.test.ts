@@ -153,7 +153,11 @@ for (const side of ['player', 'enemy'] as const) {
       let next = reducer(state, { type: 'special', target: { q: 2, r: 0 } })
       assert.equal(protectorFor(next.pawns, next.pawns[1])?.id, 1)
       next = reducer(next, { type: 'endTurn' })
-      next = reducer(next, { type: 'attack', q: 2, r: 0 })
+      next = reducer(next, {
+        type: 'special',
+        target: { q: 2, r: 0 },
+        destination: { q: 2, r: 1 },
+      })
       assert.equal(next.pawns[0].hp, 8)
       assert.equal(next.pawns[1].hp, 7)
       assert.equal(next.pawns[0].protectingId, null)
@@ -217,7 +221,7 @@ test('Bomb friendly fire hits allies, enemies and the caster, even if the caster
   }
 })
 
-test('Bomb friendly fire respects Escape and killing your own king loses, including mutual king kills', () => {
+test('Bomb friendly fire is reliable and killing your own king loses, including mutual king kills', () => {
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(new Bomber(1, 0, 0, side))
     state.pawns[1].q = 1
@@ -225,14 +229,8 @@ test('Bomb friendly fire respects Escape and killing your own king loses, includ
     state.pawns[1].hp = 1
     state.pawns[1].escapeChance = 60
     state.randomState = 0
-    const missed = transition(state, { type: 'special', target: { q: 1, r: 0 } })
-    assert.equal(missed.state.pawns[1].hp, 1)
-    assert.equal(missed.state.winner, null)
-    assert.ok(
-      missed.frames[0].effect?.impacts?.some(
-        (hit) => hit.q === 1 && hit.r === 0 && hit.damage === 0,
-      ),
-    )
+    const hit = transition(state, { type: 'special', target: { q: 1, r: 0 } })
+    assert.equal(hit.state.winner, side === 'player' ? 'enemy' : 'player')
     state.pawns[1].escapeChance = 0
     for (const mutual of [false, true]) {
       if (mutual) {

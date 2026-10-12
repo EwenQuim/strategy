@@ -12,7 +12,7 @@ import {
 // Each strategy keeps its own prompt shape and API call.
 
 // The shared rule summary every remote bot needs to judge a position.
-export const RULES_TEXT = `Rules: the active unit acts alone with its remaining energy (moving costs 1 per step, attacking 1, specials their listed price; the turn ends when energy runs out). Terrain never blocks ranged attacks. Mountains and lakes cannot be walked through; lava hurts units standing on it and empowers attacks from it; watchtowers extend ranged attacks by 1; springs heal 1 hp per round; runes give +2 energy when picked up. Units may Escape (dodge) a hit; some attacks ignore Escape.`
+export const RULES_TEXT = `Rules: the active unit acts alone with 3 energy. Move for 1 energy per step and use its one signature ability at the listed cost, at most once per activation. There is no basic attack and no random dodge. Move before or after the ability; leftover energy is lost when ending the turn. Terrain never blocks ranged abilities. Mountains, lakes and absent tiles cannot be walked through; lava deals 1 damage on entry; watchtowers extend Archer shots by 1; springs heal 1 hp per round; runes give +2 energy when picked up. Charge and Rush cannot cross absent tiles; Ambush can jump over terrain, gaps and units.`
 
 function describeUnit(pawn: {
   kind: PawnKind
@@ -68,9 +68,8 @@ export function positionText(state: GameState): string {
 // A short human wording of one action, for option lists a decision model can read.
 export function describeAction(action: Action): string {
   if (action.type === 'move') return `move to (${action.q},${action.r})`
-  if (action.type === 'attack') return `attack (${action.q},${action.r})`
   if (action.type === 'special')
-    return `special${action.target ? ` on (${action.target.q},${action.target.r})` : ''}${
+    return `ability${action.target ? ` on (${action.target.q},${action.target.r})` : ''}${
       action.destination ? `, landing on (${action.destination.q},${action.destination.r})` : ''
     }`
   return 'end the turn'

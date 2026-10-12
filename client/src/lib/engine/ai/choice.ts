@@ -1,21 +1,52 @@
 import { hexDist } from '../hex.ts'
-import type { Action, GameState } from '../engine.ts'
+import { activePawn, type Action, type GameState } from '../engine.ts'
 import type { Pawn } from '../pawns/index.ts'
 import type { BotOptions } from '../ai.ts'
+import type { TurnPlan } from './turns.ts'
 
-export type Outcome = { state: GameState; weight: number }
-export type Option = { actions: Action[]; outcomes: Outcome[]; value: number }
-
-const expected = (outcomes: Outcome[], value: (state: GameState) => number) =>
-  outcomes.reduce((sum, outcome) => sum + outcome.weight * value(outcome.state), 0)
+export type Option = { actions: Action[]; state: GameState; value: number }
 
 export const hpOf = (state: GameState, id: number) =>
   state.pawns.find((p) => p.id === id)?.hp ?? 0
 
 const damageTo = (option: Option, pawns: Pawn[]) =>
-  expected(option.outcomes, (state) =>
-    pawns.reduce((sum, pawn) => sum + pawn.hp - hpOf(state, pawn.id), 0),
+  pawns.reduce((sum, pawn) => sum + pawn.hp - hpOf(option.state, pawn.id), 0)
+
+// An authored debut demonstrates its signature once, then returns to ordinary tactics.
+// If the player removes every opportunity, search the remaining legal turns normally.
+export function introductionTurns<Plan extends TurnPlan>(
+  state: GameState,
+  plans: Plan[],
+): Plan[] {
+  const pawn = activePawn(state)!
+  if (
+    state.round !== 1 ||
+    pawn.side !== 'enemy' ||
+    !state.setup?.map ||
+    !state.setup.firstEnemyKinds?.includes(pawn.kind)
   )
+    return plans
+  const demonstrations = plans.filter(
+    (plan) =>
+      plan.actions.some((action) => action.type === 'special') &&
+      plan.state.pawns.some((p) => p.id === pawn.id) &&
+      (state.pawns.some((p) => p.side !== pawn.side && hpOf(plan.state, p.id) < p.hp) ||
+        plan.state.pawns.some((p) => p.id === pawn.id && p.protectingId !== null)),
+  )
+  if (!demonstrations.length) return plans
+  const impact = (plan: TurnPlan) =>
+    state.pawns.reduce((sum, p) => {
+      const after = plan.state.pawns.find((next) => next.id === p.id)
+      return (
+        sum +
+        (p.side !== pawn.side
+          ? (p.hp - hpOf(plan.state, p.id)) * 100 + Number(!!after && hexDist(p, after) > 0)
+          : (after?.bonusEnergy ?? 0) - p.bonusEnergy)
+      )
+    }, 0)
+  const strongest = Math.max(...demonstrations.map(impact))
+  return demonstrations.filter((plan) => impact(plan) === strongest)
+}
 
 function focusTargets(foes: Pawn[], pawn: Pawn, focus: BotOptions['focus']): Pawn[] {
   if (focus === 'nearest')

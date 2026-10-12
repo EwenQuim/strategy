@@ -34,5 +34,3 @@ export function createBotGame(bot: Bot = new DepthsearchBot(BOT_LEVELS.normal)) 
     transition,
   }
 }
-
-export const { initialState, transition } = createBotGame()

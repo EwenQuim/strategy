@@ -8,11 +8,16 @@ import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../lib/campaign'
-import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
+import {
+  subscribeCampaignProgress,
+  campaignProgressSaved,
+  readClearedLevels,
+} from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
 import { Battlefield, type Targeting } from './Battlefield'
 import { GameHeader } from './GameHeader'
 import { AchievementToast } from './AchievementToast'
+import { UnitUnlockToast } from './UnitUnlockToast'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
@@ -20,7 +25,6 @@ import { useInspection } from './useInspection'
 import {
   activePawn,
   BIOMES,
-  canAttack,
   specialTargetingTiles,
   targetingTiles,
   key,
@@ -35,6 +39,25 @@ function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: numbe
   return !!campaign && campaignLevel === campaign.levels.length
 }
 
+function campaignUnlocks(
+  campaign: Campaign | undefined,
+  level: number | undefined,
+  alreadyCleared: boolean,
+  winner: GameState['winner'],
+) {
+  return winner === 'player' &&
+    campaign &&
+    campaign.slug !== 'brutal' &&
+    level &&
+    !alreadyCleared
+    ? campaign.levels[level - 1].unlocks
+    : []
+}
+
+function clearedAtStart(campaign: Campaign | undefined, level: number | undefined) {
+  return !!campaign && !!level && readClearedLevels(campaign.slug).includes(level)
+}
+
 function resolveWinnerLabel(
   winner: GameState['winner'],
   campaignComplete: boolean,
@@ -47,26 +70,26 @@ function resolveWinnerLabel(
 }
 
 function resolveTargetLabel(aim: Aim | null, pawn: Pawn | undefined) {
-  if (aim?.action === 'attack') return m.attack
   if (aim?.action === 'special' && !aim.destination && pawn?.special.targetLabel)
     return specialTexts[pawn.special.targetLabel]
   return pawn ? specialTexts[pawn.special.name] : m.special
 }
 
 function resolveTargeting(
-  attacking: boolean,
   usingSpecial: boolean,
   pawn: Pawn | undefined,
+  choosingEnemy: boolean,
 ): Targeting {
-  if (attacking) return 'attack'
-  if (usingSpecial && pawn?.special.name === 'charge') return 'charge'
-  if (usingSpecial && pawn?.special.name === 'jump') return 'jump'
+  if (choosingEnemy) return 'strike'
+  if (usingSpecial && pawn?.special.movement === 'walk') return 'charge'
+  if (usingSpecial && pawn?.special.movement === 'jump') return 'jump'
   return 'special'
 }
 
 export function Game({
   seed,
   mode,
+  paused,
   setup,
   campaign,
   campaignLevel,
@@ -81,6 +104,7 @@ export function Game({
   players?: PlayerNames
 }) {
   const local = mode === 'local'
+  const [levelAlreadyCleared] = useState(() => clearedAtStart(campaign, campaignLevel))
   const isOnline = mode === 'online'
   const viewerSide = online?.side
   const names = players ?? playerNames
@@ -88,6 +112,7 @@ export function Game({
   const { state, dispatch, effect, effectId, playing } = useGame({
     seed,
     mode,
+    paused,
     setup,
     bot,
     onVictory,
@@ -96,7 +121,12 @@ export function Game({
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
-  const freshAchievements = useFreshAchievements(state, mode, viewerSide)
+  const freshAchievements = useFreshAchievements(
+    state,
+    mode,
+    viewerSide,
+    campaign?.slug !== 'tutorial',
+  )
   const winnerLabel = resolveWinnerLabel(
     state.winner,
     isCampaignComplete(campaign, campaignLevel),
@@ -107,13 +137,11 @@ export function Game({
   const pawn = activePawn(state)
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
-  const hasFoes =
-    !!pawn &&
-    state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
   const myTurn =
     !!pawn &&
     (isOnline ? pawn.side === viewerSide : local || pawn.side === 'player') &&
     !state.winner &&
+    !paused &&
     !playing
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
@@ -124,12 +152,11 @@ export function Game({
     insight.close()
     setAiming(next && { state, aim: next })
   }
-  const attacking = aim?.action === 'attack'
   const usingSpecial = aim?.action === 'special'
   const destination = usingSpecial ? aim.destination : undefined
   const targets = aim && !inspected ? targetingTiles(state, aim) : new Set<string>()
   const targetLabel = resolveTargetLabel(aim, pawn)
-  const targeting = resolveTargeting(attacking, usingSpecial, pawn)
+  const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
 
   const reach =
     myTurn && pawn.energy > 0 && !aim && !inspected
@@ -140,7 +167,6 @@ export function Game({
     if (!myTurn) return
     const at = { q: tile.q, r: tile.r }
     if (aim && targets.has(key(at.q, at.r))) {
-      if (aim.action === 'attack') return dispatch({ type: 'attack', ...at })
       if (pawn.special.choosesDestination && !destination)
         return setAim({ action: 'special', destination: at })
       return dispatch({ type: 'special', target: at, destination })
@@ -233,6 +259,9 @@ export function Game({
         {state.winner && freshAchievements.length > 0 && (
           <AchievementToast achievements={freshAchievements} />
         )}
+        <UnitUnlockToast
+          units={campaignUnlocks(campaign, campaignLevel, levelAlreadyCleared, state.winner)}
+        />
       </section>
 
       <GameCommandDeck
@@ -245,9 +274,7 @@ export function Game({
         previewed={insight.previewed}
         onPreview={insight.preview}
         onPeek={insight.peek}
-        attacking={attacking}
         usingSpecial={usingSpecial}
-        hasFoes={hasFoes}
         hasSpecialTargets={hasSpecialTargets}
         choosingTarget={!!destination}
         targetCount={targets.size}

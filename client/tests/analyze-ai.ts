@@ -1,10 +1,10 @@
-import { CAMPAIGNS } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, type Campaign } from '../src/lib/campaign.ts'
+import { campaignBot } from '../src/bots/campaign.ts'
+import { getBot } from '../src/bots/catalog.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 
-import { DepthsearchBot, searchStats } from '../src/bots/strategies/depthsearch.ts'
-import type { BotDifficulty } from '../src/lib/engine/ai.ts'
+import { searchStats } from '../src/bots/strategies/depthsearch.ts'
 import { campaignActions, winnableAgainst } from './campaign-actions.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 // Replays a campaign level with the real bots and reports where the search spends its budget.
 //   node tests/analyze-ai.ts <slug>            scan: one line per level, test path with retries
@@ -24,18 +24,19 @@ const option = (name: string, fallback: string) =>
   args.find((arg) => arg.startsWith('--' + name + '='))?.split('=')[1] ?? fallback
 
 async function replay(
+  pack: Campaign,
   level: (typeof CAMPAIGNS)[number]['levels'][number],
   caution: number,
   log: Row[],
 ) {
-  const difficulty = (level.difficulty ?? 'normal') as BotDifficulty
+  const bot = getBot(campaignBot(pack, level))
   let state = initialState(level.seed, level.setup, 'player')
   for (let step = 0; step < 300 && !state.winner; step++) {
     const pawn = activePawn(state)!
     const enemy = pawn.side === 'enemy'
     const started = performance.now()
     const actions = enemy
-      ? await new DepthsearchBot(BOT_LEVELS[difficulty]).chooseActions(state)
+      ? await bot.chooseActions(state)
       : await campaignActions(state, caution)
     const ms = performance.now() - started
     if (searchStats.decisions > 0)
@@ -57,10 +58,7 @@ async function scan(slug: string) {
   const rows: [string, number, boolean, number][] = []
   for (const level of pack.levels) {
     const started = performance.now()
-    const winnable = await winnableAgainst(
-      level,
-      (level.difficulty ?? 'normal') as BotDifficulty,
-    )
+    const winnable = await winnableAgainst(level, getBot(campaignBot(pack, level)))
     rows.push([level.name, performance.now() - started, winnable, level.id])
   }
   for (const [name, ms, winnable, id] of rows.sort((a, b) => b[1] - a[1]))
@@ -77,7 +75,7 @@ async function deep(slug: string, id: number) {
   const level = pack.levels.find((candidate) => candidate.id === id)!
   const caution = Number(option('caution', '0.25'))
   const rows: Row[] = []
-  const state = await replay(level, caution, rows)
+  const state = await replay(pack, level, caution, rows)
   console.log(
     `${level.name} at caution ${caution}: ${state.winner ?? 'no winner'} after ${rows.length} decisions`,
   )

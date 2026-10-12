@@ -33,12 +33,13 @@ export function useFreshAchievements(
   state: GameState,
   mode: GameMode,
   viewerSide: Side = 'player',
+  enabled = true,
 ): AchievementId[] {
   const [known] = useState(readUnlockedAchievements)
   const earned = earnedAchievements(state, viewerSide)
   // Two players sharing a device could farm achievements, so local games never earn any.
   useEffect(() => {
-    if (mode !== 'local') unlockAchievements(earned)
-  }, [earned, mode])
-  return mode === 'local' ? [] : earned.filter((id) => !known.includes(id))
+    if (mode !== 'local' && enabled) unlockAchievements(earned)
+  }, [earned, enabled, mode])
+  return mode === 'local' || !enabled ? [] : earned.filter((id) => !known.includes(id))
 }

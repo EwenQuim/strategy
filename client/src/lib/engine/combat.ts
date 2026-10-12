@@ -1,5 +1,6 @@
 import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
-import type { AttackProfile, Pawn, Side } from './pawns/index.ts'
+import type { AttackProfile, Pawn, Side, ThreatPosition } from './pawns/index.ts'
+import { GAMEPLAY } from './rules.ts'
 import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
@@ -123,7 +124,15 @@ export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean
 }
 
 export function canUseSpecial(pawn: Pawn): boolean {
-  return pawn.energy >= pawn.special.cost && (!pawn.special.oncePerRound || !pawn.specialUsed)
+  return pawn.energy >= pawn.special.cost && !pawn.specialUsed
+}
+
+export function abilityDamage(pawn: Pawn, position: ThreatPosition): number {
+  if (pawn.specialUsed || pawn.energy < position.movementCost + pawn.special.cost) return 0
+  return (
+    pawn.special.threat?.(pawn, position) ??
+    (canAttack(pawn, position.target, position.from) ? pawn.attack.damage : 0)
+  )
 }
 
 export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): Pawn[] {
@@ -147,6 +156,7 @@ export function strike(
   random: SeededRandom,
 ): BattleImpact {
   if (
+    GAMEPLAY.randomEscape &&
     !profile.ignoresEscape &&
     target.escapeChance > 0 &&
     random.next() * 100 < target.escapeChance
@@ -196,19 +206,6 @@ export function strikeArea(
   return impacts
 }
 
-export function performAttack(
-  tiles: Map<string, Tile>,
-  pawns: Pawn[],
-  pawn: Pawn,
-  target: Pawn,
-  log: string[],
-  random: SeededRandom,
-): BattleImpact[] | null {
-  if (pawn.energy < 1 || !canAttack(pawn, target, tiles.get(key(pawn.q, pawn.r)))) return null
-  pawn.energy--
-  return [strike(pawns, pawn, target, pawn.attack, log, random)]
-}
-
 export const attackTargets = (pawn: Pawn, pawns: readonly Pawn[], from: Axial = pawn): Pawn[] =>
   pawns.filter((p) => canAttack(pawn, p, from))
 
@@ -221,17 +218,16 @@ export const allyTargets = (pawn: Pawn, pawns: readonly Pawn[], woundedOnly = fa
       (!woundedOnly || p.hp < p.maxHp),
   )
 
-export type RangeKind = 'attack' | 'special'
+export type RangeKind = 'special'
 
-export function rangeTiles(pawn: Pawn, tiles: Map<string, Tile>, kind: RangeKind): Set<string> {
-  const from = tiles.get(key(pawn.q, pawn.r))
+export function rangeTiles(
+  pawn: Pawn,
+  tiles: Map<string, Tile>,
+  _kind: RangeKind,
+): Set<string> {
   return new Set(
     [...tiles.values()]
-      .filter((tile) =>
-        kind === 'attack'
-          ? inAttackRange(pawn, tile, from)
-          : pawn.special.reaches(pawn, tile, tiles),
-      )
+      .filter((tile) => pawn.special.reaches(pawn, tile, tiles))
       .map((tile) => key(tile.q, tile.r)),
   )
 }
@@ -244,12 +240,26 @@ export function threatenedTiles(
   const threatened = new Set<string>()
   for (const pawn of pawns) {
     if (pawn.side !== side || pawn.hp <= 0) continue
-    const steps = Math.max(0, pawn.maxEnergy - pawn.moveCost)
-    for (const route of walkingPaths(tiles, pawns, pawn, steps).values()) {
+    const attacker = pawn.clone()
+    attacker.energy = attacker.maxEnergy
+    attacker.specialUsed = false
+    for (const route of walkingPaths(tiles, pawns, attacker).values()) {
       if (route.damage >= pawn.hp) continue
-      const from = route.tile ?? tiles.get(route.key)
-      for (const tile of tiles.values())
-        if (inAttackRange(pawn, tile, from)) threatened.add(key(tile.q, tile.r))
+      const from = route.tile ?? tiles.get(route.key)!
+      for (const tile of tiles.values()) {
+        const target = pawn.clone()
+        Object.assign(target, tile, { id: -1, side: side === 'player' ? 'enemy' : 'player' })
+        if (
+          abilityDamage(attacker, {
+            target,
+            from,
+            movementCost: attacker.moveEnergyCost(route.steps),
+            tiles,
+            pawns,
+          }) > 0
+        )
+          threatened.add(key(tile.q, tile.r))
+      }
     }
   }
   return threatened

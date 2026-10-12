@@ -54,11 +54,11 @@ export const featureTexts: Record<TileFeature, { name: string; description: stri
       it: 'Torre di vedetta',
     }),
     description: t({
-      en: '+1 basic-attack range for Archers and Magicians.',
-      fr: "+1 de portée d'attaque de base pour les Archers et les Magiciens.",
-      de: '+1 Grundangriffsreichweite für Schützen und Magier.',
-      es: '+1 de alcance de ataque básico para Arqueros y Magos.',
-      it: '+1 di gittata di attacco base per Archieri e Maghi.',
+      en: '+1 shot range for Archers.',
+      fr: '+1 de portée de tir pour les Archers.',
+      de: '+1 Schussreichweite für Schützen.',
+      es: '+1 de alcance de disparo para Arqueros.',
+      it: '+1 di gittata di tiro per Arcieri.',
     }),
   },
   spring: {

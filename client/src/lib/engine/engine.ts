@@ -13,25 +13,22 @@ import {
 } from './turn.ts'
 import { markHellfire } from './hellfire.ts'
 import {
-  canAttack,
   walkingPaths,
   routePath,
   enterTiles,
   canUseSpecial,
   specialTargets,
-  performAttack,
   type BattleImpact,
 } from './combat.ts'
 
 export type Action =
   | { type: 'move'; q: number; r: number }
-  | { type: 'attack'; q: number; r: number }
   | { type: 'special'; target?: Axial; destination?: Axial }
   | { type: 'endTurn' }
   | { type: 'restart' }
 
-// A command still being aimed: an attack, or a special whose destination may already be chosen.
-export type Aim = { action: 'attack' } | { action: 'special'; destination?: Axial }
+// A signature ability whose landing position may already be chosen.
+export type Aim = { action: 'special'; destination?: Axial }
 
 type Unit = { kind: PawnKind; side: Side }
 
@@ -121,19 +118,17 @@ export function specialTargetingTiles(
 ): Set<string> {
   return (
     pawn.special.tileTargets?.(pawn, tiles, pawns) ??
-    new Set(specialTargets(pawns, pawn).map((target) => key(target.q, target.r)))
+    new Set(
+      specialTargets(pawns, pawn, tiles.get(key(pawn.q, pawn.r))).map((target) =>
+        key(target.q, target.r),
+      ),
+    )
   )
 }
 
 export function targetingTiles(state: GameState, aim: Aim): Set<string> {
   const pawn = activePawn(state)
   if (!pawn || state.winner) return new Set()
-  if (aim.action === 'attack')
-    return new Set(
-      state.pawns
-        .filter((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
-        .map((target) => key(target.q, target.r)),
-    )
   if (aim.destination)
     return new Set(
       specialTargets(state.pawns, pawn, aim.destination).map((target) =>
@@ -205,14 +200,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       }
       break
     }
-    case 'attack': {
-      const target = pawns.find((pawn) => pawn.q === action.q && pawn.r === action.r)
-      if (!target) return null
-      const impacts = performAttack(tiles, pawns, actor, target, log, random)
-      if (!impacts) return null
-      effect = { kind: 'attack', from, to: { q: target.q, r: target.r }, impacts }
-      break
-    }
     case 'special': {
       const { special } = actor
       if (
@@ -227,6 +214,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
         destination: action.destination,
       })
       if (!result) return null
+      actor.specialUsed = true
       effect = effectFrom(result, from)
       break
     }

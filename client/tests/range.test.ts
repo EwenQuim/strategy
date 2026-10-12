@@ -2,46 +2,34 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   Archer,
-  hexDist,
-  key,
+  King,
+  Lancer,
+  Ninja,
   rangeTiles,
   threatenedTiles,
-  type Tile,
 } from '../src/lib/engine/index.ts'
-import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
+import { field } from './field.ts'
 
-function plains(): Map<string, Tile> {
-  const tiles = new Map<string, Tile>()
-  for (let q = -5; q <= 5; q++)
-    for (let r = -5; r <= 5; r++) tiles.set(key(q, r), { q, r, terrain: 'plain' })
-  return tiles
-}
-
-test('Range previews follow the attack band, the special shape and the watchtower bonus', () => {
-  const tiles = plains()
-  const archer = new Archer(1, 0, 0, 'enemy')
-  const attack = rangeTiles(archer, tiles, 'attack')
-  assert.ok(
-    [...tiles.values()].every(
-      (tile) =>
-        attack.has(key(tile.q, tile.r)) ===
-        (hexDist(archer, tile) >= 2 && hexDist(archer, tile) <= 3),
-    ),
-  )
-
-  const wolf = new Wolf(2, 0, 0, 'enemy')
-  const cry = rangeTiles(wolf, tiles, 'special')
-  assert.ok(cry.has(key(2, 0)) && !cry.has(key(3, 0)))
-
-  tiles.set(key(0, 0), { q: 0, r: 0, terrain: 'plain', feature: 'watchtower' })
-  assert.ok(rangeTiles(archer, tiles, 'attack').has(key(4, 0)))
+test('Inspection shows signature ranges, including watchtower shots and Rush lines', () => {
+  const state = field([
+    new Archer(1, 0, 0, 'player'),
+    new King(2, -3, 0, 'player'),
+    new King(3, 4, 0, 'enemy'),
+  ])
+  assert.ok(!rangeTiles(state.pawns[0], state.tiles, 'special').has('4,0'))
+  state.tiles.get('0,0')!.feature = 'watchtower'
+  assert.ok(rangeTiles(state.pawns[0], state.tiles, 'special').has('4,0'))
+  const lancer = new Lancer(1, 0, 0, 'player')
+  assert.ok(rangeTiles(lancer, state.tiles, 'special').has('4,0'))
+  assert.ok(!rangeTiles(lancer, state.tiles, 'special').has('2,1'))
 })
 
-test('Threat zone covers tiles a foe can walk to and then strike, but not beyond', () => {
-  const tiles = plains()
-  const wolf = new Wolf(1, 0, 0, 'enemy')
-  const threats = threatenedTiles(tiles, [wolf], 'enemy')
-  assert.ok(threats.has(key(3, 0)))
-  assert.ok(!threats.has(key(4, 0)))
-  assert.equal(threatenedTiles(tiles, [wolf], 'player').size, 0)
+test('Threat preview includes Ambush across gaps and excludes lethal lava landings', () => {
+  const state = field([
+    new Ninja(1, 0, 0, 'enemy'),
+    new King(2, -3, -2, 'enemy'),
+    new King(3, 4, 0, 'player'),
+  ])
+  state.tiles.delete('1,0')
+  assert.ok(threatenedTiles(state.tiles, state.pawns, 'enemy').has('4,0'))
 })

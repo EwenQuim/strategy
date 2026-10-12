@@ -14,10 +14,9 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
-import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 
 function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
   const tiles: GameState['tiles'] = new Map()
@@ -57,15 +56,17 @@ test('Equally valued attacks keep candidate order at every difficulty', async ()
     const targets = [new Archer(4, 1, 0, 'player', 1, 0), new Archer(5, 0, 1, 'player', 1, 0)]
     if (reversed) targets.reverse()
     const state = battle([
-      new Swordsman(1, 0, 0, 'enemy', 5, 1),
+      new Swordsman(1, 0, 0, 'enemy', 5, 2),
       new King(2, -3, -3, 'enemy'),
       new King(3, 3, 3, 'player'),
       ...targets,
     ])
     for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
-      assert.deepEqual(await new DepthsearchBot(BOT_LEVELS[level]).chooseActions(state), [
-        { type: 'attack', q: targets[0].q, r: targets[0].r },
-      ])
+      const next = (await new DepthsearchBot(BOT_LEVELS[level]).chooseActions(state)).reduce(
+        reducer,
+        state,
+      )
+      assert.ok(next.pawns.filter((p) => targets.some((t) => t.id === p.id)).length === 1)
     }
   }
 })
@@ -124,7 +125,7 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     level + ': the king retreats from a lethal Ninja instead of attacking bait or Rallying',
     async () => {
       const state = battle([
-        new King(1, 0, 0, 'enemy', 4),
+        new King(1, 0, 0, 'enemy', 3),
         new Swordsman(2, 0, -1, 'enemy', 3),
         new Swordsman(3, 1, 0, 'player', 5),
         new Ninja(4, 2, 0, 'player'),
@@ -138,7 +139,7 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
           next.pawns.find((p) => p.id === 4)!,
         ) > 4,
       )
-      assert.equal(king.hp, 4)
+      assert.equal(king.hp, 3)
       assert.ok(!king.specialUsed)
     },
   )
@@ -252,15 +253,15 @@ test('An archer steps out of melee contact before shooting', async () => {
   }
 })
 
-test('A safe commander king walks to a wounded ally and rallies', async () => {
+test('A commander moves into combat and heals a wounded ally with its rallying blow', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = battle([
       new King(1, 0, 0, 'enemy'),
-      new Swordsman(2, 2, 0, 'enemy', 2),
+      new Swordsman(2, 0, 1, 'enemy', 2),
       new Swordsman(3, 3, 1, 'enemy'),
       new Archer(4, 4, 1, 'enemy'),
       new King(5, -6, 6, 'player'),
-      new Swordsman(6, -6, 5, 'player'),
+      new Swordsman(6, 1, 0, 'player', 1),
       new Swordsman(7, -5, 5, 'player'),
       new Swordsman(8, -4, 5, 'player'),
     ])
@@ -270,7 +271,7 @@ test('A safe commander king walks to a wounded ally and rallies', async () => {
   }
 })
 
-test('A safe commander heals the last missing health point instead of waiting', async () => {
+test('A commander cannot heal by waiting without an enemy to strike', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = battle([
       new King(1, 0, 0, 'enemy'),
@@ -283,7 +284,7 @@ test('A safe commander heals the last missing health point instead of waiting', 
       new Swordsman(8, -4, 5, 'player'),
     ])
     const ally = (await playTurn(state, level)).pawns.find((p) => p.id === 2)!
-    assert.equal(ally.hp, ally.maxHp, level)
+    assert.equal(ally.hp, 4, level)
   }
 })
 

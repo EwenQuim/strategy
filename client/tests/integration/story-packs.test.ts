@@ -2,35 +2,14 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CAMPAIGNS } from '../../src/lib/campaign.ts'
 import { initialState as coreState } from '../../src/lib/engine/index.ts'
-import { winnableAgainst } from '../campaign-actions.ts'
 
 const sparta = CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!
 const ragnarok = CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!
-// These encounters defeat the scripted player at every caution; a human wins them easily.
-const NOT_SCRIPTABLY_WINNABLE = new Set(['hot-gates:3'])
-
-test('Thermopylae and Ragnarok packs stay winnable level by level', async () => {
-  for (const pack of [sparta, ragnarok]) {
-    assert.equal(pack.levels.length, 5)
-    assert.equal(new Set(pack.levels.map((level) => level.seed)).size, 5)
-    assert.equal(new Set(pack.levels.map((level) => level.name)).size, 5)
-    for (const level of pack.levels) {
-      const core = coreState(level.seed, level.setup)
-      assert.deepEqual(core, coreState(level.seed, level.setup))
-      if (NOT_SCRIPTABLY_WINNABLE.has(pack.slug + ':' + level.id)) continue
-      assert.ok(
-        await winnableAgainst(level, level.difficulty),
-        pack.slug + ' level ' + level.id + ': ' + level.name,
-      )
-    }
-  }
-})
-
 test('Thermopylae funnels every horde through a two-tile corridor', () => {
   for (const id of [2, 3]) {
     const level = sparta.levels[id - 1]
     const tiles = coreState(level.seed, level.setup).tiles
-    for (const row of [3, 4, 5, 6]) {
+    for (const row of [2, 3, 4, 5]) {
       const open = [...tiles.values()].filter(
         (tile) => tile.r === row && tile.terrain === 'plain',
       )

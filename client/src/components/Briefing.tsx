@@ -238,12 +238,13 @@ function BriefingPopup({
   )
 }
 
-export function Briefing({ level }: { level: CampaignLevel }) {
+export function Briefing({ level, onClose }: { level: CampaignLevel; onClose: () => void }) {
   return (
     <BriefingPopup
       title={b.title}
       theme={BIOMES[level.setup.biome].theme}
       elements={level.newElements.flatMap((element) => INTRODUCTIONS[element])}
+      onClose={onClose}
     />
   )
 }

@@ -85,10 +85,3 @@ export const inspect = t({
   es: (name: string) => `Inspeccionar ${name}`,
   it: (name: string) => `Ispeziona ${name}`,
 })
-export const attackSummary = t({
-  en: (damage: number, range: string) => `${damage} damage, range ${range}`,
-  fr: (damage: number, range: string) => `${damage} dégâts, portée ${range}`,
-  de: (damage: number, range: string) => `${damage} Schaden, Reichweite ${range}`,
-  es: (damage: number, range: string) => `${damage} de daño, alcance ${range}`,
-  it: (damage: number, range: string) => `${damage} danni, portata ${range}`,
-})

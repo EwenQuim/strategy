@@ -59,6 +59,19 @@ test('restoreState rejects unreadable snapshots', () => {
   assert.equal(restoreState({ pawns: [{ kind: 'tank' }] }), null)
 })
 
+test('Saved battle identities distinguish depth-four campaign bots from ordinary Hard', () => {
+  const bot = { name: 'depthsearch', options: BOT_LEVELS.hard } as const
+  const ordinary = battleIdentity('ai', 'seed', bot, undefined)
+  const brutal = battleIdentity(
+    'ai',
+    'seed',
+    { ...bot, options: { ...bot.options, depth: 4 } },
+    undefined,
+  )
+  assert.equal(isSameBattle(ordinary, brutal), false)
+  assert.equal(isSameBattle(JSON.parse(JSON.stringify(brutal)), brutal), true)
+})
+
 test('isSameBattle only matches the identical game', () => {
   const identity = battleIdentity(
     'ai',

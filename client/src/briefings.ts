@@ -2,13 +2,7 @@ import * as b from './i18n/briefing.ts'
 import { unitNames } from './i18n/units.ts'
 import { specialTexts } from './i18n/specialTexts.ts'
 import { featureTexts } from './i18n/biomes.ts'
-import {
-  ESCAPE_BONUS,
-  MAX_ESCAPE,
-  PAWN_CLASSES,
-  START_ENERGY,
-  type PawnKind,
-} from './lib/engine/index.ts'
+import { PAWN_CLASSES, START_ENERGY, type PawnKind } from './lib/engine/index.ts'
 import type { IntroducedElement } from './lib/campaign.ts'
 
 export const ELEMENT_ACCENTS: Partial<Record<IntroducedElement, string>> = Object.fromEntries(
@@ -33,11 +27,11 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
   return {
     name: unitNames[kind],
     art: kind,
-    stats: { hp: maxHp, damage: attack.damage, range },
+    stats: { hp: maxHp, damage: kind === 'bulwark' ? 0 : attack.damage, range },
     special: {
       name: specialTexts[special.name],
       cost: special.cost,
-      description: specialPoints[0],
+      description: specialTexts[special.description],
     },
     points: specialPoints.slice(1),
   }
@@ -50,11 +44,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.energy,
       icon: 'energy',
-      points: [
-        b.energyPerRound(START_ENERGY),
-        b.spendEnergy,
-        b.unusedEnergy(ESCAPE_BONUS, MAX_ESCAPE),
-      ],
+      points: [b.energyPerRound(START_ENERGY), b.spendEnergy, b.unusedEnergy],
     },
     unit('king', b.rallyBrief, b.loseKing),
   ],

@@ -273,30 +273,6 @@ export function makeMap(
   return tiles
 }
 
-export function reachable(
-  tiles: Map<string, Tile>,
-  occupied: Set<string>,
-  start: Axial,
-  maxSteps: number,
-): Map<string, number> {
-  const dist = new Map([[key(start.q, start.r), 0]])
-  let frontier: Axial[] = [start]
-  for (let step = 1; step <= maxSteps; step++) {
-    const next: Axial[] = []
-    for (const cur of frontier) {
-      for (const n of neighbors(cur.q, cur.r)) {
-        const k = key(n.q, n.r)
-        const tile = tiles.get(k)
-        if (!passable(tile) || occupied.has(k) || dist.has(k)) continue
-        dist.set(k, step)
-        next.push(n)
-      }
-    }
-    frontier = next
-  }
-  return dist
-}
-
 export function distFrom(tiles: Map<string, Tile>, sources: Axial[]): Map<string, number> {
   const dist = new Map<string, number>()
   let frontier = sources.filter((s) => passable(tiles.get(key(s.q, s.r))))

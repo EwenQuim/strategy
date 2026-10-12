@@ -108,6 +108,9 @@
   .achievement-toast {
     animation: achievement-toast 5s ease-out both;
   }
+  .unit-unlock-toast {
+    animation: unit-unlock-toast 7s ease-out both;
+  }
   .briefing-card {
     animation: briefing-card-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -306,6 +309,23 @@
   to {
     opacity: 0;
     transform: scale(1.25) rotate(12deg);
+  }
+}
+
+@keyframes unit-unlock-toast {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.94);
+  }
+  8%,
+  85% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+    visibility: hidden;
   }
 }
 
