@@ -244,7 +244,7 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       description: 'Töte den feindlichen König mit einer Bombe oder einem Feuerball.',
     },
     daredevil: {
-      title: 'Himmelfahrtskommando',
+      title: 'Tollkühn',
       description: 'Gewinne, während dein König im Höllenfeuer-Einwirkbereich steht.',
     },
   },
