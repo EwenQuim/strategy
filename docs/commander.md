@@ -1,6 +1,6 @@
 # Commander: a new default local bot
 
-Built on the signature rules of PR #114 and its merged #117 follow-up. Implementation:
+Built on the signature rules of PR #114 and the merged #117/#118 follow-ups. Implementation:
 `client/src/bots/strategies/commander.ts`, registered through `BOTS` and implementing `Bot<Options>`.
 
 ## Decision model
@@ -49,7 +49,7 @@ Tutorial and Original use Commander Easy/Normal. Brutal uses its strongest candi
 ## Evidence and acceptance
 
 - `make bench-commander`: six symmetric 5v5 seeds, both Commander sides, against legacy depth-four Hard. Latest run on the merged baseline: **6 wins, 5 losses, 1 unfinished**. This is a small regression benchmark, not evidence of overwhelming general superiority.
-- Latest native run: p95 **568 ms**, worst **1,697 ms**. At 6× browser CPU throttling, the measured Brutal sample had a worst main-thread bot task of **508 ms**, with **zero idle paints**. A deterministic evaluation budget is not a wall-clock guarantee.
+- Latest native run after #118: p95 **361 ms**, worst **810 ms**. At 6× browser CPU throttling, the earlier measured Brutal sample had a worst main-thread bot task of **508 ms**, with **zero idle paints**. A deterministic evaluation budget is not a wall-clock guarantee.
 - `make record-campaign ARGS="--write"`: freshly solved all **78** levels against their authored bots. Re-recording updates only solved entries and includes the bot configuration in fixture identity.
 - Brutal: five recorded victories finish with a **1-HP king** (levels 1, 2, 5, 14, 19); level 4 required the Commander assault player policy instead of the existing scripted search player. No maps or armies were weakened.
 - Integration replays recorded human decisions against **fresh live bots**, in addition to replaying engine commands. Historical enemy commands alone cannot establish that a level remains beatable.
