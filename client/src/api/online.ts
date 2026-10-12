@@ -6,6 +6,7 @@ import {
   useCreateGame,
   useGetGame,
   useJoinGame,
+  useListGames,
 } from '../../generated/sdk.gen.ts'
 import { watchOnlineGame } from './events.ts'
 import type { PublicGame } from '../../generated/sdk.gen.ts'
@@ -53,12 +54,14 @@ export async function fetchOnlineGame(code: string): Promise<OnlineGame> {
   return toOnlineGame(await getGame(code))
 }
 
+export const useListOnlineGames = () => useListGames({ query: { refetchInterval: 5000 } })
+
 export const useCreateOnlineGame = () => {
   const mutation = useCreateGame()
   return {
     ...mutation,
-    mutateAsync: async (name: string): Promise<StoredGame> => {
-      const creds = await mutation.mutateAsync({ data: { name } })
+    mutateAsync: async (name: string, publicGame: boolean): Promise<StoredGame> => {
+      const creds = await mutation.mutateAsync({ data: { name, public: publicGame } })
       return { code: creds.game.code, token: creds.token, side: 'player' }
     },
   }

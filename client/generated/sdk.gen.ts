@@ -192,6 +192,8 @@ export interface HTTPError {
 export interface CreateGameRequest {
   /** Player name, 1 to 20 characters */
   name: string;
+  /** List the game publicly so anyone can join */
+  public: boolean;
 }
 
 /**
@@ -255,6 +257,14 @@ export interface PlayerCredentials {
 }
 
 /**
+ * publicWaitingGame schema
+ */
+export interface PublicWaitingGame {
+  code: string;
+  namePlayer: string;
+}
+
+/**
  * unknown-interface schema
  */
 export interface UnknownInterface {}
@@ -277,6 +287,116 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getListGamesUrl = () => {
+
+
+
+
+  return `/api/games`
+}
+
+/**
+ * #### Controller:
+ *
+ * `hexmate/server/internal/handlers.(*Handlers).listGames`
+ *
+ * #### Middlewares:
+ *
+ * - `github.com/go-fuego/fuego.defaultLogger.middleware`
+ *
+ * ---
+ * @summary List public games waiting for an opponent
+ */
+export const listGames = async ( options?: Parameters<typeof client>[1]): Promise<PublicWaitingGame[]> => {
+
+  return client<PublicWaitingGame[]>(getListGamesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListGamesQueryKey = () => {
+    return [
+    `/api/games`
+    ] as const;
+    }
+
+
+export const getListGamesQueryOptions = <TData = Awaited<ReturnType<typeof listGames>>, TError = ErrorType<HTTPError>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGames>>, TError, TData>>, request?: SecondParameter<typeof client>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListGamesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listGames>>> = ({ signal }) => listGames({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listGames>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListGamesQueryResult = NonNullable<Awaited<ReturnType<typeof listGames>>>
+export type ListGamesQueryError = ErrorType<HTTPError>
+
+
+export function useListGames<TData = Awaited<ReturnType<typeof listGames>>, TError = ErrorType<HTTPError>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGames>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listGames>>,
+          TError,
+          Awaited<ReturnType<typeof listGames>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListGames<TData = Awaited<ReturnType<typeof listGames>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGames>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listGames>>,
+          TError,
+          Awaited<ReturnType<typeof listGames>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListGames<TData = Awaited<ReturnType<typeof listGames>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGames>>, TError, TData>>, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List public games waiting for an opponent
+ */
+
+export function useListGames<TData = Awaited<ReturnType<typeof listGames>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listGames>>, TError, TData>>, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListGamesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getCreateGameUrl = () => {
 

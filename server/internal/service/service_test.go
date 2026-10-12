@@ -21,7 +21,7 @@ func TestGameLifecycle(t *testing.T) {
 			ctx := context.Background()
 			svc := service.New(store)
 
-			creds, err := svc.Create(ctx, "Ewen")
+			creds, err := svc.Create(ctx, "Ewen", false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -122,7 +122,7 @@ func TestCredentialsAreHashedAndWellFormed(t *testing.T) {
 	ctx := context.Background()
 	svc := service.New(store)
 
-	creds, err := svc.Create(ctx, "Ewen")
+	creds, err := svc.Create(ctx, "Ewen", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,6 +160,60 @@ func TestUnknownGame(t *testing.T) {
 	}
 	if _, err := svc.Join(ctx, "NOPE12", "Bob"); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("want ErrNotFound, got %v", err)
+	}
+}
+
+func TestPublicWaitingListing(t *testing.T) {
+	for name, newStore := range stores() {
+		t.Run(name, func(t *testing.T) {
+			store, cleanup := newStore(t)
+			defer cleanup()
+			ctx := context.Background()
+			svc := service.New(store)
+
+			private, err := svc.Create(ctx, "Ewen", false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			public, err := svc.Create(ctx, "Bob", true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			waiting, err := svc.PublicWaiting(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(waiting) != 1 || waiting[0].Code != public.Game.Code || waiting[0].NamePlayer != "Bob" {
+				t.Fatalf("public waiting = %+v, want only Bob's game", waiting)
+			}
+
+			if _, err := svc.Join(ctx, public.Game.Code, "Alice"); err != nil {
+				t.Fatal(err)
+			}
+			waiting, err = svc.PublicWaiting(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(waiting) != 0 {
+				t.Fatalf("public waiting = %+v, want empty once joined", waiting)
+			}
+
+			g, err := svc.Game(ctx, private.Game.Code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if g.Public {
+				t.Fatal("private game is flagged public")
+			}
+			g, err = svc.Game(ctx, public.Game.Code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !g.Public {
+				t.Fatal("public game is not flagged public")
+			}
+		})
 	}
 }
 

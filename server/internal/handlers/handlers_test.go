@@ -183,6 +183,46 @@ func TestCreateNameValidation(t *testing.T) {
 	}
 }
 
+func TestPublicGameListing(t *testing.T) {
+	ts := newTestServer(t)
+
+	status, listed := do[[]struct {
+		Code       string `json:"code"`
+		NamePlayer string `json:"namePlayer"`
+	}](t, ts, http.MethodGet, "/api/games", nil)
+	if status != http.StatusOK || len(listed) != 0 {
+		t.Fatalf("empty listing: status=%d body=%+v", status, listed)
+	}
+
+	status, _ = do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]any{"name": "Ewen", "public": false})
+	if status != http.StatusCreated {
+		t.Fatalf("create private: status=%d", status)
+	}
+	status, public := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]any{"name": "Bob", "public": true})
+	if status != http.StatusCreated {
+		t.Fatalf("create public: status=%d", status)
+	}
+
+	status, listed = do[[]struct {
+		Code       string `json:"code"`
+		NamePlayer string `json:"namePlayer"`
+	}](t, ts, http.MethodGet, "/api/games", nil)
+	if status != http.StatusOK || len(listed) != 1 || listed[0].Code != public.Game.Code || listed[0].NamePlayer != "Bob" {
+		t.Fatalf("listing: status=%d body=%+v", status, listed)
+	}
+
+	if status, _ := do[credentialsResponse](t, ts, http.MethodPost, fmt.Sprintf("/api/games/%s/join", public.Game.Code), map[string]string{"name": "Alice"}); status != http.StatusOK {
+		t.Fatalf("join public game: status=%d", status)
+	}
+	status, listed = do[[]struct {
+		Code       string `json:"code"`
+		NamePlayer string `json:"namePlayer"`
+	}](t, ts, http.MethodGet, "/api/games", nil)
+	if status != http.StatusOK || len(listed) != 0 {
+		t.Fatalf("listing after join: status=%d body=%+v", status, listed)
+	}
+}
+
 func TestPlayActionValidation(t *testing.T) {
 	ts := newTestServer(t)
 	_, creator := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]string{"name": "Ewen"})

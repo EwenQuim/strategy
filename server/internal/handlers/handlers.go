@@ -15,7 +15,8 @@ import (
 )
 
 type createGameRequest struct {
-	Name string `json:"name" description:"Player name, 1 to 20 characters"`
+	Name   string `json:"name" description:"Player name, 1 to 20 characters"`
+	Public bool   `json:"public" description:"List the game publicly so anyone can join"`
 }
 
 func (r *createGameRequest) InTransform(_ context.Context) error {
@@ -82,6 +83,11 @@ type playActionResponse struct {
 	Version int `json:"version"`
 }
 
+type publicWaitingGame struct {
+	Code       string `json:"code"`
+	NamePlayer string `json:"namePlayer"`
+}
+
 // Handlers binds the game service to HTTP. Register wires its methods as
 // fuego controllers.
 type Handlers struct {
@@ -97,6 +103,11 @@ func Register(s *fuego.Server, svc *service.Service) {
 		option.OperationID("health"),
 		option.Summary("Health check"),
 		option.Tags("health"))
+
+	fuego.Get(api, "/games", h.listGames,
+		option.OperationID("listGames"),
+		option.Summary("List public games waiting for an opponent"),
+		option.Tags("games"))
 
 	fuego.Post(api, "/games", h.createGame,
 		option.OperationID("createGame"),
@@ -131,12 +142,24 @@ func (h *Handlers) health(fuego.ContextNoBody) (healthResponse, error) {
 	return healthResponse{Status: "ok"}, nil
 }
 
+func (h *Handlers) listGames(c fuego.ContextNoBody) ([]publicWaitingGame, error) {
+	games, err := h.svc.PublicWaiting(c.Context())
+	if err != nil {
+		return nil, httpError(err)
+	}
+	waiting := make([]publicWaitingGame, 0, len(games))
+	for _, g := range games {
+		waiting = append(waiting, publicWaitingGame{Code: g.Code, NamePlayer: g.NamePlayer})
+	}
+	return waiting, nil
+}
+
 func (h *Handlers) createGame(c fuego.ContextWithBody[createGameRequest]) (playerCredentials, error) {
 	req, err := c.Body()
 	if err != nil {
 		return playerCredentials{}, err
 	}
-	creds, err := h.svc.Create(c.Context(), req.Name)
+	creds, err := h.svc.Create(c.Context(), req.Name, req.Public)
 	if err != nil {
 		return playerCredentials{}, httpError(err)
 	}
