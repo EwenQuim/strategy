@@ -104,6 +104,9 @@ export function Battlefield({
               opacity=".6"
             />
           </pattern>
+          <pattern id="range-hatch" width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M0 0V8M4 0V8" stroke="#b79dce" strokeWidth="1.5" opacity=".8" />
+          </pattern>
           <pattern id="threat-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
             <circle cx="3.5" cy="3.5" r="1.1" fill="#ff8a6e" opacity=".75" />
           </pattern>
@@ -191,7 +194,6 @@ export function Battlefield({
             previewed,
             canMove,
             terrain: tile.terrain,
-            inRange,
           })
           return (
             <g
@@ -240,18 +242,16 @@ export function Battlefield({
                 <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
               )}
               {!occupant && tile.feature && <FeatureArt feature={tile.feature} />}
-              {warned && (
-                <g className="pointer-events-none" aria-hidden="true">
-                  <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
-                </g>
-              )}
-              {threatened && (
-                <polygon
-                  points={hexPoints}
-                  fill="url(#threat-hatch)"
-                  className="pointer-events-none"
-                  aria-hidden="true"
-                />
+              {[
+                inRange && 'range-hatch',
+                warned && 'hellfire-hatch',
+                threatened && 'threat-hatch',
+              ].map((pattern) =>
+                pattern ? (
+                  <g key={pattern} className="pointer-events-none" aria-hidden="true">
+                    <polygon points={hexPoints} fill={'url(#' + pattern + ')'} />
+                  </g>
+                ) : null,
               )}
               {canMove && !occupant && (
                 <g className="pointer-events-none">

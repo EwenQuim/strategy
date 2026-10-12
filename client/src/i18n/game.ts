@@ -150,6 +150,20 @@ export const usedThisRound = t({
   es: 'Ya usado',
   it: 'Già usato',
 })
+export const unitFocus = t({
+  en: 'Unit focus',
+  fr: 'Unité observée',
+  de: 'Einheit im Fokus',
+  es: 'Unidad en foco',
+  it: 'Unità in primo piano',
+})
+export const closeFocus = t({
+  en: 'Close unit focus',
+  fr: 'Fermer la vue de l’unité',
+  de: 'Einheitenfokus schließen',
+  es: 'Cerrar el foco de unidad',
+  it: 'Chiudi la vista dell’unità',
+})
 export const endTurn = t({
   en: 'End turn',
   fr: 'Finir le tour',

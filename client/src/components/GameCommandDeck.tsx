@@ -20,6 +20,7 @@ interface GameCommandDeckProps {
   previewed: boolean
   onPreview: () => void
   onPeek: (shown: boolean) => void
+  onCloseFocus: () => void
   usingSpecial: boolean
   hasSpecialTargets: boolean
   choosingTarget: boolean
@@ -38,6 +39,7 @@ export function GameCommandDeck({
   previewed,
   onPreview,
   onPeek,
+  onCloseFocus,
   usingSpecial,
   hasSpecialTargets,
   choosingTarget,
@@ -74,22 +76,44 @@ export function GameCommandDeck({
           </div>
           {pawn && !winner && <UnitStats pawn={pawn} />}
         </div>
-        <div className="grid grid-cols-2 gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
-          <SpecialButton
-            pawn={pawn}
-            commanding={commanding}
-            previewed={previewed}
-            usingSpecial={usingSpecial}
-            hasSpecialTargets={hasSpecialTargets}
-            targetCount={targetCount}
-            choosingTarget={choosingTarget}
-            dispatch={dispatch}
-            onAim={onAim}
-            onPreview={onPreview}
-            onPeek={onPeek}
-          />
-          <EndTurnButton pawn={active} myTurn={myTurn} dispatch={dispatch} />
-        </div>
+        {previewed && pawn && !winner ? (
+          <div
+            className="flex min-w-0 items-center gap-3 rounded-lg border border-line bg-white/5 p-2 text-[#d0b6e7] [@media(min-width:600px)_and_(max-height:480px)]:flex-1"
+            data-testid="unit-focus"
+          >
+            <Icon name="target" className="size-5 shrink-0" />
+            <div className="min-w-0 flex-1 text-xs">
+              <p className="font-semibold text-ink">{m.unitFocus}</p>
+              <p className="text-[11px]">
+                {specialTexts[pawn.special.name]} · {m.energyCost(pawn.special.cost)}
+              </p>
+            </div>
+            <button
+              className="grid size-11 shrink-0 place-items-center rounded-lg border border-line text-muted hover:bg-white/5 hover:text-ink"
+              onClick={onCloseFocus}
+              aria-label={m.closeFocus}
+              title={m.closeFocus}
+            >
+              <Icon name="close" className="size-5" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
+            <SpecialButton
+              pawn={pawn}
+              commanding={commanding}
+              usingSpecial={usingSpecial}
+              hasSpecialTargets={hasSpecialTargets}
+              targetCount={targetCount}
+              choosingTarget={choosingTarget}
+              dispatch={dispatch}
+              onAim={onAim}
+              onPreview={onPreview}
+              onPeek={onPeek}
+            />
+            <EndTurnButton pawn={active} myTurn={myTurn} dispatch={dispatch} />
+          </div>
+        )}
       </div>
     </footer>
   )
@@ -131,7 +155,7 @@ function SpecialButton({
       data-action="special"
       {...buttonProps}
       title={pawn ? specialTexts[pawn.special.description] : undefined}
-      aria-pressed={usingSpecial || preview.previewed}
+      aria-pressed={usingSpecial}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -174,7 +198,10 @@ function EndTurnButton({
 }) {
   return (
     <button
-      className={actionButtonClassName + ' border-[#bcc8a62e] bg-[#ffffff04] text-[#e6e7d4]'}
+      className={
+        actionButtonClassName +
+        ' border-[#bcc8a62e] bg-[#ffffff04] px-3 text-[#e6e7d4] max-[601px]:px-2'
+      }
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
