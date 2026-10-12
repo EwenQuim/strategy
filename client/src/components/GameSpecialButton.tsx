@@ -76,6 +76,7 @@ function specialNote({
   if (commanding) {
     if (pawn?.specialUsed) return m.usedThisRound
     if (!hasSpecialTargets) {
+      if (pawn && pawn.energy < pawn.special.cost) return m.notEnoughEnergy(pawn.special.cost)
       return pawn?.special.noTargets ? specialTexts[pawn.special.noTargets] : m.noTargets
     }
   }
