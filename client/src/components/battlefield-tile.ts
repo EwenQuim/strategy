@@ -1,4 +1,4 @@
-import type { Pawn, RangeKind, Tile } from '../lib/engine'
+import type { Pawn, Tile } from '../lib/engine'
 import type { PlayerNames } from '../lib/game-mode'
 import { energyCost } from '../i18n/game'
 import * as bf from '../i18n/battlefield'
@@ -80,7 +80,7 @@ export function tileFill({
   previewed,
   canMove,
   terrain,
-  range,
+  inRange,
 }: {
   interactive: boolean
   damage: number
@@ -91,11 +91,11 @@ export function tileFill({
   previewed: boolean
   canMove: boolean
   terrain: Tile['terrain']
-  range?: RangeKind
+  inRange: boolean
 }): string {
   if (interactive && damage > 0 && !occupant) return '#94716d'
   if (target) return strike ? '#b98370' : '#b79dce'
   if (selected || previewed) return 'var(--selected-tint, #c9b77f)'
-  if (range) return '#b79dce'
+  if (inRange) return '#b79dce'
   return canMove ? 'var(--move-tint)' : terrainColors[terrain]
 }

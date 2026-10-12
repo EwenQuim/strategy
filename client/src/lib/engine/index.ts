@@ -13,6 +13,5 @@ export {
   protectorFor,
   rangeTiles,
   threatenedTiles,
-  type RangeKind,
 } from './combat.ts'
 export { BIOMES, type Biome } from './biomes/index.ts'

@@ -33,7 +33,7 @@ test('Every pawn has one usable signature, immutable execution and consistent fr
     if (activePawn(next.state)?.id === 1) {
       assert.equal(reducer(next.state, action), next.state)
       assert.equal(
-        reducer(next.state, { type: 'endTurn' }).pawns.find((p) => p.id === 1)?.escapeChance,
+        reducer(next.state, { type: 'endTurn' }).pawns.find((p) => p.id === 1)?.energy,
         0,
       )
     }
@@ -102,5 +102,5 @@ test('A completed round restores energy and signatures, and basic attack command
   assert.equal(reducer(state, oldCommand), state)
   state = reducer(reducer(state, { type: 'endTurn' }), { type: 'endTurn' })
   assert.equal(state.round, 2)
-  assert.ok(state.pawns.every((p) => p.energy === 3 && !p.specialUsed && p.escapeChance === 0))
+  assert.ok(state.pawns.every((p) => p.energy === 3 && !p.specialUsed))
 })

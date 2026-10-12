@@ -1,4 +1,4 @@
-import type { Action, Aim, Pawn, RangeKind, Side } from '../lib/engine'
+import type { Action, Aim, Pawn, Side } from '../lib/engine'
 import { canUseSpecial } from '../lib/engine'
 import * as m from '../i18n/game'
 import { unitNames } from '../i18n/units'
@@ -17,9 +17,9 @@ interface GameCommandDeckProps {
   winnerLabel: string | null
   myTurn: boolean
   commanding: boolean
-  previewed: RangeKind | null
-  onPreview: (range: RangeKind) => void
-  onPeek: (range: RangeKind | null) => void
+  previewed: boolean
+  onPreview: () => void
+  onPeek: (shown: boolean) => void
   usingSpecial: boolean
   hasSpecialTargets: boolean
   choosingTarget: boolean
@@ -78,7 +78,7 @@ export function GameCommandDeck({
           <SpecialButton
             pawn={pawn}
             commanding={commanding}
-            previewed={previewed === 'special'}
+            previewed={previewed}
             usingSpecial={usingSpecial}
             hasSpecialTargets={hasSpecialTargets}
             targetCount={targetCount}
@@ -114,7 +114,6 @@ function SpecialButton({
   onAim: (aim: Aim | null) => void
 } & PreviewProps) {
   const buttonProps = usePreviewButton(
-    'special',
     !preview.commanding || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
     () => {
       if (usingSpecial) onAim(null)

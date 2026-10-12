@@ -6,20 +6,18 @@ const cry: SpecialAbility = {
   name: 'cry',
   cost: 2,
   targeted: true,
-  oncePerRound: true,
   noTargets: 'noEnemiesWithinReach',
   prompt: 'chooseEnemy',
   description: 'cryDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
-  perform: ({ pawn, pawns, tile, log, random }) => {
+  perform: ({ pawn, pawns, tile, log }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
-    pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const impacts = [strike(pawns, pawn, target, pawn.attack, log, random)]
+    const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
     const ally = pawns
       .filter(
         (p) =>

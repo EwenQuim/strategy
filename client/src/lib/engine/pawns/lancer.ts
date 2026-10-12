@@ -62,6 +62,24 @@ const dash: SpecialAbility = {
   tileTargets: (pawn, tiles, pawns) =>
     new Set(dashDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
   candidates: (pawn, { tiles, pawns }) => dashDestinations(tiles, pawns, pawn).map(aimAt),
+  threatenedTiles: (pawn, tiles, pawns) => {
+    const threatened = new Set<string>()
+    const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
+    for (const [dq, dr] of LINES) {
+      let damage = 0
+      for (let step = 1; ; step++) {
+        const at = key(pawn.q + dq * step, pawn.r + dr * step)
+        const tile = tiles.get(at)
+        if (!tile || !passable(tile)) break
+        // A hypothetical enemy can be hit only after a surviving, empty sprint landing.
+        if (step > 1 && damage < pawn.hp) threatened.add(at)
+        if (occupied.has(at)) break
+        damage += Number(tile.terrain === 'lava')
+        if (damage >= pawn.hp) break
+      }
+    }
+    return threatened
+  },
   threat: (pawn, { target, from, tiles, pawns }) => {
     if (!tiles || !pawns) return 0
     const occupants = [
@@ -76,7 +94,7 @@ const dash: SpecialAbility = {
       ? pawn.attack.damage
       : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, round, log, random }) => {
+  perform: ({ pawn, tiles, pawns, tile, round, log }) => {
     const sprint =
       tile &&
       sprints(pawn, tiles, pawns).find(
@@ -86,7 +104,7 @@ const dash: SpecialAbility = {
     pawn.energy -= pawn.special.cost
     const impacts = enterTiles(tiles, pawns, pawn, sprint.path, round, log)
     if (pawn.hp > 0 && sprint.target)
-      impacts.push(strike(pawns, pawn, sprint.target, pawn.attack, log, random))
+      impacts.push(strike(pawns, pawn, sprint.target, pawn.attack, log))
     return {
       kind: sprint.target ? 'attack' : 'move',
       to: sprint.target ?? sprint.tile,

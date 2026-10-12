@@ -4,7 +4,6 @@ const paths = {
   shield: Bulwark.icon,
   crown: King.icon,
   sword: Swordsman.icon,
-  escape: 'M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M5 16h5a3 3 0 1 1-3 3',
   energy: 'm13 2-9 12h7l-1 8 10-13h-8l1-7Z',
   spark: 'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z',
   arrow: 'M4 12h16m-6-6 6 6-6 6',

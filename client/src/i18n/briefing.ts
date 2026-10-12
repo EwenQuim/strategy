@@ -258,7 +258,7 @@ export const lavaDamage = t({
   es: '-1 PV por casilla pisada, incluso con Carga',
   it: '-1 PV per casella calpestata, anche in Carica',
 })
-export const ignoresEscapeProtect = t({
+export const ignoresProtection = t({
   en: 'Ignores protection',
   fr: 'Ignore la protection',
   de: 'Ignoriert Schutz',

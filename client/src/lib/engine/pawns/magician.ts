@@ -49,7 +49,7 @@ const fireball: SpecialAbility = {
       : [],
   threat: (pawn, { target, from, movementCost }) =>
     direction(from, target) ? Number(pawn.energy - movementCost >= pawn.special.cost) : 0,
-  perform: ({ pawn, tiles, pawns, log, random, tile }) => {
+  perform: ({ pawn, tiles, pawns, log, tile }) => {
     if (!tile || !canUseSpecial(pawn) || !tiles.has(key(tile.q, tile.r))) return null
     const ray = direction(pawn, tile)
     if (!ray) return null
@@ -63,7 +63,7 @@ const fireball: SpecialAbility = {
     return {
       kind: 'fireball',
       to: { q: end.q, r: end.r },
-      impacts: strikeArea(pawns, pawn, targets, log, random),
+      impacts: strikeArea(pawns, pawn, targets, log),
     }
   },
 }

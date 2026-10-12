@@ -1,7 +1,5 @@
 import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
 import type { AttackProfile, Pawn, Side, ThreatPosition } from './pawns/index.ts'
-import { GAMEPLAY } from './rules.ts'
-import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
 export type BattleImpact = Axial & { damage: number }
@@ -153,17 +151,7 @@ export function strike(
   target: Pawn,
   profile: AttackProfile,
   log: string[],
-  random: SeededRandom,
 ): BattleImpact {
-  if (
-    GAMEPLAY.randomEscape &&
-    !profile.ignoresEscape &&
-    target.escapeChance > 0 &&
-    random.next() * 100 < target.escapeChance
-  ) {
-    log.push(label(target) + ' escapes the attack.')
-    return { q: target.q, r: target.r, damage: 0 }
-  }
   const protector = protectorFor(pawns, target)
   if (protector) {
     protector.protectingId = null
@@ -193,12 +181,11 @@ export function strikeArea(
   attacker: Pawn,
   targets: Pawn[],
   log: string[],
-  random: SeededRandom,
 ): BattleImpact[] {
   const impacts: BattleImpact[] = []
   for (const target of targets) {
     if (!pawns.includes(target)) continue
-    const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log, random)
+    const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log)
     const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
     if (previous) previous.damage += hit.damage
     else impacts.push(hit)
@@ -218,18 +205,39 @@ export const allyTargets = (pawn: Pawn, pawns: readonly Pawn[], woundedOnly = fa
       (!woundedOnly || p.hp < p.maxHp),
   )
 
-export type RangeKind = 'special'
-
-export function rangeTiles(
-  pawn: Pawn,
-  tiles: Map<string, Tile>,
-  _kind: RangeKind,
-): Set<string> {
+export function rangeTiles(pawn: Pawn, tiles: Map<string, Tile>): Set<string> {
   return new Set(
     [...tiles.values()]
       .filter((tile) => pawn.special.reaches(pawn, tile, tiles))
       .map((tile) => key(tile.q, tile.r)),
   )
+}
+
+// Charge and Ambush share adjacent strikes: build their landing reach once per origin.
+export function landingThreatenedTiles(
+  pawn: Pawn,
+  tiles: Map<string, Tile>,
+  pawns: Pawn[],
+): Set<string> {
+  const range = pawn.special.landingRange!
+  const landings =
+    pawn.special.movement === 'walk'
+      ? [...walkingPaths(tiles, pawns, pawn, range).values()]
+          .filter((route) => route.damage < pawn.hp)
+          .map((route) => route.tile ?? pawn)
+      : [...tiles.values()].filter(
+          (tile) =>
+            passable(tile) &&
+            hexDist(pawn, tile) <= range &&
+            (tile.terrain !== 'lava' || pawn.hp > 1) &&
+            !pawns.some((p) => p.id !== pawn.id && p.q === tile.q && p.r === tile.r),
+        )
+  const threatened = new Set<string>()
+  const grid = neighborKeys(tiles)
+  for (const landing of landings)
+    for (const at of grid.get(key(landing.q, landing.r)) ?? [])
+      if (tiles.has(at)) threatened.add(at)
+  return threatened
 }
 
 export function threatenedTiles(
@@ -239,21 +247,38 @@ export function threatenedTiles(
 ): Set<string> {
   const threatened = new Set<string>()
   for (const pawn of pawns) {
-    if (pawn.side !== side || pawn.hp <= 0) continue
+    if (pawn.side !== side || pawn.hp <= 0 || pawn.special.damage === 0) continue
     const attacker = pawn.clone()
     attacker.energy = attacker.maxEnergy
     attacker.specialUsed = false
-    for (const route of walkingPaths(tiles, pawns, attacker).values()) {
+    const maxSteps = Math.max(
+      0,
+      attacker.energy - attacker.special.cost - attacker.moveCost + 1,
+    )
+    const target = pawn.clone()
+    Object.assign(target, { id: -1, side: side === 'player' ? 'enemy' : 'player' })
+    for (const route of walkingPaths(tiles, pawns, attacker, maxSteps).values()) {
       if (route.damage >= pawn.hp) continue
       const from = route.tile ?? tiles.get(route.key)!
+      const movementCost = attacker.moveEnergyCost(route.steps)
+      if (attacker.energy < movementCost + attacker.special.cost) continue
+      if (attacker.special.threatenedTiles) {
+        const actor = attacker.clone()
+        actor.q = from.q
+        actor.r = from.r
+        actor.energy -= movementCost
+        for (const at of attacker.special.threatenedTiles(actor, tiles, pawns))
+          threatened.add(at)
+        continue
+      }
       for (const tile of tiles.values()) {
-        const target = pawn.clone()
-        Object.assign(target, tile, { id: -1, side: side === 'player' ? 'enemy' : 'player' })
+        target.q = tile.q
+        target.r = tile.r
         if (
           abilityDamage(attacker, {
             target,
             from,
-            movementCost: attacker.moveEnergyCost(route.steps),
+            movementCost,
             tiles,
             pawns,
           }) > 0

@@ -73,7 +73,6 @@ test('Authored setups control both army sizes and classes with legal determinist
           assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
           assert.equal(pawn.hp, pawn.maxHp)
           assert.equal(pawn.energy, pawn.maxEnergy)
-          assert.equal(pawn.escapeChance, 0)
           assert.equal(pawn.specialUsed, false)
           assert.equal(pawn.clone().kind, pawn.kind)
         }

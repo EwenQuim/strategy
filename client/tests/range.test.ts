@@ -16,12 +16,12 @@ test('Inspection shows signature ranges, including watchtower shots and Rush lin
     new King(2, -3, 0, 'player'),
     new King(3, 4, 0, 'enemy'),
   ])
-  assert.ok(!rangeTiles(state.pawns[0], state.tiles, 'special').has('4,0'))
+  assert.ok(!rangeTiles(state.pawns[0], state.tiles).has('4,0'))
   state.tiles.get('0,0')!.feature = 'watchtower'
-  assert.ok(rangeTiles(state.pawns[0], state.tiles, 'special').has('4,0'))
+  assert.ok(rangeTiles(state.pawns[0], state.tiles).has('4,0'))
   const lancer = new Lancer(1, 0, 0, 'player')
-  assert.ok(rangeTiles(lancer, state.tiles, 'special').has('4,0'))
-  assert.ok(!rangeTiles(lancer, state.tiles, 'special').has('2,1'))
+  assert.ok(rangeTiles(lancer, state.tiles).has('4,0'))
+  assert.ok(!rangeTiles(lancer, state.tiles).has('2,1'))
 })
 
 test('Threat preview includes Ambush across gaps and excludes lethal lava landings', () => {

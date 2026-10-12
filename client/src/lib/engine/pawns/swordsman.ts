@@ -4,6 +4,7 @@ import {
   canUseSpecial,
   enterTiles,
   label,
+  landingThreatenedTiles,
   pawnAt,
   routePath,
   specialTargets,
@@ -40,6 +41,7 @@ const charge: SpecialAbility = {
   description: 'chargeDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) <= 2 + pawn.attack.maxRange,
   targets: attackTargets,
+  threatenedTiles: landingThreatenedTiles,
   tileTargets: (pawn, tiles, pawns) => new Set(chargeDestinations(tiles, pawns, pawn).keys()),
   candidates: (pawn, { tiles, pawns }) =>
     [...chargeDestinations(tiles, pawns, pawn).keys()].flatMap((position) => {
@@ -63,7 +65,7 @@ const charge: SpecialAbility = {
       ? pawn.attack.damage
       : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random }) => {
+  perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -78,7 +80,7 @@ const charge: SpecialAbility = {
       key(destination.q, destination.r),
     )!
     const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log)
-    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
+    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
 }

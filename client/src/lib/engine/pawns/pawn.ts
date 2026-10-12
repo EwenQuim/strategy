@@ -1,22 +1,17 @@
 import type { Axial, Tile } from '../hex.ts'
 import type { Action, BattleEffect, GameState } from '../engine.ts'
-import type { SeededRandom } from '../random.ts'
 import type { PawnKind } from './index.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
-import { GAMEPLAY } from '../rules.ts'
 
 export type Side = 'player' | 'enemy'
 
 export const START_ENERGY = 3
-const ESCAPE_BONUS = 20
-const MAX_ESCAPE = 60
 
 export interface AttackProfile {
   readonly damage: number
   readonly minRange: number
   readonly maxRange: number
   readonly rangeBonus?: number
-  readonly ignoresEscape?: boolean
 }
 
 type SpecialContext = {
@@ -27,7 +22,6 @@ type SpecialContext = {
   destination?: Axial
   round: number
   log: string[]
-  random: SeededRandom
 }
 
 export type SpecialResult = Omit<BattleEffect, 'from'>
@@ -80,9 +74,10 @@ export type SpecialTextKey =
 export interface SpecialAbility {
   readonly name: SpecialTextKey
   readonly cost: number
+  // Base signature damage; defaults to the pawn's attack profile. Zero means no offense.
+  readonly damage?: number
   readonly description: SpecialTextKey
   readonly targeted: boolean
-  readonly oncePerRound?: boolean
   readonly choosesDestination?: boolean
   readonly movement?: 'walk' | 'jump'
   readonly landingRange?: number
@@ -96,6 +91,7 @@ export interface SpecialAbility {
   perform(context: SpecialContext): SpecialResult | null
   candidates(pawn: Pawn, state: GameState): Action[]
   threat?(pawn: Pawn, position: ThreatPosition): number
+  threatenedTiles?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
 }
 
 export abstract class Pawn {
@@ -123,7 +119,6 @@ export abstract class Pawn {
   r: number
   hp: number
   energy: number
-  escapeChance: number
   specialUsed = false
   protectingId: number | null = null
 
@@ -146,7 +141,6 @@ export abstract class Pawn {
     side: Side,
     hp?: number,
     energy = START_ENERGY,
-    escapeChance = 0,
   ) {
     this.id = id
     this.q = q
@@ -154,16 +148,9 @@ export abstract class Pawn {
     this.side = side
     this.hp = hp ?? this.maxHp
     this.energy = energy
-    this.escapeChance = escapeChance
-  }
-
-  get endTurnEscapeChance(): number {
-    if (!GAMEPLAY.randomEscape) return 0
-    return Math.min(MAX_ESCAPE, this.escapeChance + this.energy * ESCAPE_BONUS)
   }
 
   endTurn(): void {
-    this.escapeChance = this.endTurnEscapeChance
     this.energy = 0
   }
 

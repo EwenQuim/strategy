@@ -27,7 +27,7 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
   return {
     name: unitNames[kind],
     art: kind,
-    stats: { hp: maxHp, damage: kind === 'bulwark' ? 0 : attack.damage, range },
+    stats: { hp: maxHp, damage: special.damage ?? attack.damage, range },
     special: {
       name: specialTexts[special.name],
       cost: special.cost,
@@ -83,7 +83,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.lava,
       art: 'lava',
-      points: [b.lavaDamage, b.ignoresEscapeProtect, b.basaltSafe],
+      points: [b.lavaDamage, b.ignoresProtection, b.basaltSafe],
     },
   ],
   watchtower: [
@@ -111,7 +111,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.hellfire,
       art: 'hell',
-      points: [b.hellfireDamage, b.ignoresEscapeProtect, b.bothKingsDraw],
+      points: [b.hellfireDamage, b.ignoresProtection, b.bothKingsDraw],
     },
   ],
 }

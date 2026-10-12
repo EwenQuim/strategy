@@ -15,25 +15,23 @@ export function BattlefieldEffects({
       {effect && (
         <g
           key={effectId}
-          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
+          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
           data-kind={effect.kind}
           aria-hidden="true"
         >
-          {effect.kind !== 'escape' &&
-            effect.kind !== 'rally' &&
-            effect.kind !== 'hellfire' && (
-              <line
-                x1={hexX(effect.from.q, effect.from.r)}
-                y1={hexY(effect.from.r)}
-                x2={hexX(effect.to.q, effect.to.r)}
-                y2={hexY(effect.to.r)}
-                pathLength="1"
-                className={
-                  'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
-                  (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
-                }
-              />
-            )}
+          {effect.kind !== 'rally' && effect.kind !== 'hellfire' && (
+            <line
+              x1={hexX(effect.from.q, effect.from.r)}
+              y1={hexY(effect.from.r)}
+              x2={hexX(effect.to.q, effect.to.r)}
+              y2={hexY(effect.to.r)}
+              pathLength="1"
+              className={
+                'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
+                (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
+              }
+            />
+          )}
           {(effect.kind === 'bomb' || effect.kind === 'hellfire') &&
             (effect.kind === 'hellfire' ? (effect.centers ?? [effect.to]) : [effect.to]).map(
               (center) => (

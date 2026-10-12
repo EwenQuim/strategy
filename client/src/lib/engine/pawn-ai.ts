@@ -1,6 +1,5 @@
 import type { Action, GameState } from './engine.ts'
 import type { Pawn } from './pawns/index.ts'
-import { GAMEPLAY } from './rules.ts'
 
 type UnitThreat = {
   incoming: number
@@ -30,13 +29,9 @@ const UNREACHABLE_DISTANCE = 100
 export const defaultAi: PawnAi = {
   value: (pawn, health) =>
     UNIT_SCORE.unit + pawn.attack.damage * UNIT_SCORE.attackDamage + health * UNIT_SCORE.health,
-  risk: (pawn, { incoming, health, value, caution }) => {
-    const expected = incoming * (GAMEPLAY.randomEscape ? 1 - pawn.escapeChance / 100 : 1)
-    return (
-      caution *
-      (Math.min(health, expected) * UNIT_SCORE.health + (expected >= health ? value : 0))
-    )
-  },
+  risk: (_pawn, { incoming, health, value, caution }) =>
+    caution *
+    (Math.min(health, incoming) * UNIT_SCORE.health + (incoming >= health ? value : 0)),
   goal: (_pawn, { attackDistance, aggression }) =>
     -(attackDistance ?? UNREACHABLE_DISTANCE) * UNIT_SCORE.attackDistance * aggression,
 }

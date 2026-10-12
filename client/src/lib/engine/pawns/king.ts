@@ -15,20 +15,18 @@ const rally: SpecialAbility = {
   name: 'rally',
   cost: 2,
   targeted: true,
-  oncePerRound: true,
   noTargets: 'noEnemiesWithinReach',
   prompt: 'chooseEnemy',
   description: 'rallyDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
-  perform: ({ pawn, pawns, tile, log, random }) => {
+  perform: ({ pawn, pawns, tile, log }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
-    pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const impacts = [strike(pawns, pawn, target, pawn.attack, log, random)]
+    const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
     const ally = allyTargets(pawn, pawns, true).sort((a, b) => a.hp - b.hp || a.id - b.id)[0]
     if (ally) {
       ally.hp = Math.min(ally.maxHp, ally.hp + 1)
@@ -40,11 +38,14 @@ const rally: SpecialAbility = {
 
 const KING_SCORE = { king: 1000, health: 30, lethalThreat: 100_000 }
 const SAFE_DAMAGE = 30
+const HEALTHY_HP = 5
+const HEALTHY_DAMAGE = 10
 const DANGER_DAMAGE = 120
 const DANGER_MARGIN = 2
 const ALLY_DISTANCE = 0.5
 // Staying beside a wounded ally must be worth less than healing it.
 const RALLY_READY = 3
+const FIGHTING_AGGRESSION = 8
 
 const soldiers = (army: readonly Pawn[]) => army.filter((pawn) => pawn.kind !== 'king').length
 
@@ -55,7 +56,7 @@ const kingAi: PawnAi = {
     const threat = incoming + hellfireDamage
     const absorbed = Math.min(threat, Math.max(0, health - DANGER_MARGIN))
     return (
-      absorbed * (king.hp >= 5 ? 10 : SAFE_DAMAGE) +
+      absorbed * (king.hp >= HEALTHY_HP ? HEALTHY_DAMAGE : SAFE_DAMAGE) +
       (threat - absorbed) * DANGER_DAMAGE +
       (incoming >= health ? KING_SCORE.lethalThreat : 0)
     )
@@ -65,7 +66,10 @@ const kingAi: PawnAi = {
     const { allies, foes } = surroundings
     const warrior = soldiers(allies) >= 2 * soldiers(foes) || soldiers(foes) <= 2
     if (!allies.length || warrior)
-      return defaultAi.goal(king, { ...surroundings, aggression: surroundings.aggression * 8 })
+      return defaultAi.goal(king, {
+        ...surroundings,
+        aggression: surroundings.aggression * FIGHTING_AGGRESSION,
+      })
     const wounded = allies.filter((ally) => ally.hp < ally.maxHp && hexDist(king, ally) === 1)
     return (
       -Math.min(...allies.map((ally) => hexDist(king, ally))) * ALLY_DISTANCE +

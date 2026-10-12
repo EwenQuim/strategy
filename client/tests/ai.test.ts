@@ -305,22 +305,22 @@ test('King safety includes a move followed by Charge, and refreshed enemy energy
   }
 })
 
-test('AI uses Aimed shot rather than gambling on an escaping king', async () => {
+test('AI uses its shot to finish a king in range', async () => {
   const state = battle([
     new Archer(1, 0, 0, 'enemy'),
     new King(2, -6, 0, 'enemy'),
-    new King(3, 2, 0, 'player', 2, 3, 60),
+    new King(3, 2, 0, 'player', 2, 3),
   ])
   assert.deepEqual(await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state), [
     { type: 'special', target: { q: 2, r: 0 } },
   ])
 })
 
-test('Analysis is deterministic, immutable, configurable and independent of the real Escape stream', async () => {
+test('Analysis is deterministic, immutable, configurable and independent of the random stream', async () => {
   const state = battle([
     new Archer(1, 0, 0, 'enemy'),
     new King(2, -6, 0, 'enemy'),
-    new King(3, 2, 0, 'player', 4, 3, 60),
+    new King(3, 2, 0, 'player', 4, 3),
   ])
   const original = structuredClone(state)
   const actions = await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)

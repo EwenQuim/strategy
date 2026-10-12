@@ -7,7 +7,9 @@ import {
   type ReachCache,
 } from '../../lib/engine/ai/evaluate.ts'
 import { sidePlan } from '../../lib/engine/ai/plan.ts'
-import { chooseOption, hpOf, introductionTurns } from '../../lib/engine/ai/choice.ts'
+import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
+import { introductionTurns } from '../introductions.ts'
+import { inHellfire } from '../../lib/engine/hellfire.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
 import type { Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'
@@ -38,6 +40,8 @@ export const searchStats = {
 // A deterministic work budget bounds response time even when another ply is requested.
 const POSITION_BUDGET = 1500
 const SHORTLIST = 200
+// Keep root turns well below a lethal-King penalty out of the deeper search.
+const VIABLE_SCORE_MARGIN = 50_000
 const usesAbility = (plan: TurnPlan) => plan.actions.some((action) => action.type === 'special')
 
 export class DepthsearchBot implements Bot<BotOptions> {
@@ -124,16 +128,12 @@ function viableTurns(state: GameState, pawnId: number, ranked: ScoredTurn[]): Sc
     return (
       actor.hp > 1 ||
       plan.state.round !== state.round ||
-      !plan.state.hellfire.some((center) => {
-        const q = actor.q - center.q,
-          r = actor.r - center.r
-        return Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)) <= 1
-      })
+      !inHellfire(plan.state.hellfire, actor)
     )
   }
   const canSurvive = ranked.some(survives)
   return ranked.filter((turn) => {
-    if (turn.value < ranked[0]!.value - 50_000) return false
+    if (turn.value < ranked[0]!.value - VIABLE_SCORE_MARGIN) return false
     if (survives(turn)) return true
     return (
       !canSurvive ||

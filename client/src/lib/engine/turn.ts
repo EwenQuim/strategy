@@ -12,15 +12,6 @@ export function winnerFrom(pawns: Pawn[], actingSide: Side): Side | null {
   return null
 }
 
-export function finishTurn(pawn: Pawn, log: string[]): boolean {
-  const previousEscape = pawn.escapeChance
-  pawn.endTurn()
-  const gained = pawn.escapeChance - previousEscape
-  if (gained <= 0) return false
-  log.push(`${label(pawn)} ends turn: +${gained}% escape (${pawn.escapeChance}% total).`)
-  return true
-}
-
 export function endBattle(
   state: GameState,
   winner: NonNullable<GameState['winner']>,
@@ -88,7 +79,6 @@ export function advanceTurn(
       for (const pawn of pawns) {
         pawn.bonusEnergy = 0
         pawn.energy = pawn.maxEnergy
-        pawn.escapeChance = 0
         pawn.specialUsed = false
       }
       ;({ hellfire, randomState } = markHellfire({ ...state, pawns, round, randomState }))

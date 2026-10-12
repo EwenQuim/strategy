@@ -115,13 +115,6 @@ export const energy = t({
   es: 'Energía',
   it: 'Energia',
 })
-export const escape = t({
-  en: 'Escape',
-  fr: 'Esquive',
-  de: 'Ausweichen',
-  es: 'Esquiva',
-  it: 'Schivata',
-})
 export const cancel = t({
   en: 'Cancel',
   fr: 'Annuler',
