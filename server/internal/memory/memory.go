@@ -49,6 +49,9 @@ func (s *Store) PublicWaiting(_ context.Context) ([]game.Game, error) {
 		}
 	}
 	sort.Slice(waiting, func(i, j int) bool { return waiting[i].CreatedAt.After(waiting[j].CreatedAt) })
+	if len(waiting) > game.PublicLobbyLimit {
+		waiting = waiting[:game.PublicLobbyLimit]
+	}
 	return waiting, nil
 }
 

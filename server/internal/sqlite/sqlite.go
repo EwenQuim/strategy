@@ -49,6 +49,11 @@ type Store struct {
 	mu sync.Mutex
 }
 
+const lobbyIndex = `
+CREATE INDEX IF NOT EXISTS games_public_waiting
+ON games(created_at DESC)
+WHERE public = 1 AND status = 'waiting'`
+
 func Open(path string) (*Store, error) {
 	db, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)")
 	if err != nil {
@@ -60,10 +65,30 @@ func Open(path string) (*Store, error) {
 			return nil, fmt.Errorf("create schema: %w", err)
 		}
 	}
-	// Databases created before the public flag lack the column; the ALTER
-	// fails with "duplicate column" once applied, which is fine.
-	_, _ = db.Exec(`ALTER TABLE games ADD COLUMN public INTEGER NOT NULL DEFAULT 0`)
+	if err := addPublicColumn(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	if _, err := db.Exec(lobbyIndex); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("create schema: %w", err)
+	}
 	return &Store{db: db}, nil
+}
+
+// Databases created before the public flag lack the column.
+func addPublicColumn(db *sql.DB) error {
+	var present int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('games') WHERE name = 'public'`).Scan(&present); err != nil {
+		return err
+	}
+	if present > 0 {
+		return nil
+	}
+	if _, err := db.Exec(`ALTER TABLE games ADD COLUMN public INTEGER NOT NULL DEFAULT 0`); err != nil {
+		return fmt.Errorf("add public column: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) Close() error {
@@ -121,7 +146,8 @@ func (s *Store) PublicWaiting(ctx context.Context) ([]game.Game, error) {
 	cutoff := time.Now().Add(-game.PublicLobbyWindow).Unix()
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT code, name_player, public, created_at FROM games
-		 WHERE public = 1 AND status = 'waiting' AND created_at >= ? ORDER BY created_at DESC`, cutoff)
+		 WHERE public = 1 AND status = 'waiting' AND created_at >= ? ORDER BY created_at DESC LIMIT ?`,
+		cutoff, game.PublicLobbyLimit)
 	if err != nil {
 		return nil, err
 	}

@@ -7,8 +7,10 @@ import (
 
 type Status string
 
-// A public game only stays in the lobby listing while newer than this window.
+// A public game only stays in the lobby listing while newer than this window,
+// and the listing holds at most this many games.
 const PublicLobbyWindow = time.Hour
+const PublicLobbyLimit = 100
 
 const (
 	Waiting  Status = "waiting"

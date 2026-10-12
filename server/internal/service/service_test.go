@@ -3,9 +3,11 @@ package service_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"hexmate/server/internal/game"
 	"hexmate/server/internal/memory"
@@ -212,6 +214,40 @@ func TestPublicWaitingListing(t *testing.T) {
 			}
 			if !g.Public {
 				t.Fatal("public game is not flagged public")
+			}
+		})
+	}
+}
+
+func TestPublicWaitingLimit(t *testing.T) {
+	for name, newStore := range stores() {
+		t.Run(name, func(t *testing.T) {
+			store, cleanup := newStore(t)
+			defer cleanup()
+			ctx := context.Background()
+			now := time.Now()
+			const created = game.PublicLobbyLimit + 5
+			for i := range created {
+				g := game.Game{
+					Code: fmt.Sprintf("PUB%03d", i), Seed: "s", NamePlayer: "Ewen",
+					TokenPlayer: "h", Public: true, Status: game.Waiting,
+					CreatedAt: now.Add(time.Duration(i) * time.Second), UpdatedAt: now,
+				}
+				if err := store.Create(ctx, g); err != nil {
+					t.Fatal(err)
+				}
+			}
+			waiting, err := store.PublicWaiting(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(waiting) != game.PublicLobbyLimit {
+				t.Fatalf("public waiting = %d games, want %d", len(waiting), game.PublicLobbyLimit)
+			}
+			for i, g := range waiting {
+				if want := fmt.Sprintf("PUB%03d", created-1-i); g.Code != want {
+					t.Fatalf("public waiting[%d] = %s, want %s (newest first)", i, g.Code, want)
+				}
 			}
 		})
 	}
