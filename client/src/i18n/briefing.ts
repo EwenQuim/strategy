@@ -106,11 +106,11 @@ export const fireballPasses = t({
   it: 'Attraversa tutto, gli alleati sono salvi',
 })
 export const protectBrief = t({
-  en: 'takes the next hit for an ally within 2',
-  fr: 'encaisse le prochain coup pour un allié à 2 cases ou moins',
-  de: 'nimmt den nächsten Treffer für einen Verbündeten innerhalb von 2 Feldern',
-  es: 'recibe el próximo golpe por un aliado a 2 casillas o menos',
-  it: 'incassa il prossimo colpo per un alleato entro 2 caselle',
+  en: 'takes every hit for an ally within 2 until its next turn',
+  fr: "encaisse chaque coup pour un allié à 2 cases ou moins jusqu'à son prochain tour",
+  de: 'nimmt jeden Treffer für einen Verbündeten innerhalb von 2 Feldern bis zum nächsten Zug',
+  es: 'recibe cada golpe por un aliado a 2 casillas o menos hasta su próximo turno',
+  it: 'incassa ogni colpo per un alleato entro 2 caselle fino al suo prossimo turno',
 })
 export const bulwarkSlow = t({
   en: 'Slow: first step costs 2 energy',
@@ -149,11 +149,11 @@ export const jumpNoAttack = t({
 })
 
 export const phalanxBrief = t({
-  en: 'shields an adjacent ally from the next hit',
-  fr: 'protège un allié adjacent du prochain coup',
-  de: 'schirmt einen angrenzenden Verbündeten vom nächsten Treffer ab',
-  es: 'protege a un aliado adyacente del próximo golpe',
-  it: 'protegge un alleato adiacente dal prossimo colpo',
+  en: 'shields an adjacent ally from every hit until its next turn',
+  fr: "protège un allié adjacent de chaque coup jusqu'à son prochain tour",
+  de: 'schirmt einen angrenzenden Verbündeten bis zum nächsten Zug von jedem Treffer ab',
+  es: 'protege a un aliado adyacente de cada golpe hasta su próximo turno',
+  it: 'protegge un alleato adiacente da ogni colpo fino al suo prossimo turno',
 })
 
 export const cryBrief = t({
@@ -202,6 +202,14 @@ export const beastBrief = t({
   de: 'erwacht für die Seite, die zuerst ihre Höhle erreicht',
   es: 'despierta para el bando que primero alcance su guarida',
   it: 'si sveglia per chi raggiunge per primo la sua tana',
+})
+
+export const mysticBrief = t({
+  en: '+25% Escape to itself or an ally within 2, up to 75%, against every attack until its next turn',
+  fr: "+25 % d'Esquive pour lui ou un allié à 2 cases, jusqu'à 75 %, contre chaque attaque jusqu'à son prochain tour",
+  de: '+25 % Ausweichen für sich oder einen Verbündeten innerhalb von 2, bis 75 %, gegen jeden Angriff bis zum nächsten Zug',
+  es: '+25 % de Esquiva para sí o un aliado a 2 casillas, hasta 75 %, contra cada ataque hasta su próximo turno',
+  it: '+25% di Schivata a sé o a un alleato entro 2, fino al 75%, contro ogni attacco fino al suo prossimo turno',
 })
 
 export const lakes = t({

@@ -98,15 +98,6 @@ export class Magician extends Pawn {
     'ranged, 1 damage at distance 1-2. Fireball (2): pick a direction; 1 damage to every enemy along the line to the board edge, through terrain and units.'
   readonly kind = 'magician' as const
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2, rangeBonus: 1 }
-  // Channel: every banked energy point makes the next Fireball cheaper, down to 1.
-  override get specialCost(): number {
-    return Math.max(1, this.special.cost - this.adrenaline)
-  }
-  override paySpecial(): void {
-    const discount = this.special.cost - this.specialCost
-    super.paySpecial()
-    this.adrenaline -= discount
-  }
   get special(): SpecialAbility {
     return fireball
   }

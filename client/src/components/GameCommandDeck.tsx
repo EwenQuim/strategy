@@ -246,13 +246,14 @@ function EndTurnButton({
   myTurn: boolean
   dispatch: (action: Action) => void
 }) {
+  const nextEnergy = pawn?.nextTurnEnergy ?? 0
   return (
     <button
       className={actionButtonClassName + ' border-[#bcc8a62e] bg-[#ffffff04] text-[#e6e7d4]'}
       data-action="endTurn"
       disabled={!myTurn}
       onClick={() => dispatch({ type: 'endTurn' })}
-      title={m.endTurnHint(pawn?.energy ?? 0)}
+      title={m.endTurnHint(nextEnergy)}
     >
       <Icon
         className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
@@ -262,7 +263,7 @@ function EndTurnButton({
         {m.endTurn}
       </span>
       <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-        {m.adrenalineGain(pawn?.energy ?? 0)}
+        {m.nextTurnEnergy(nextEnergy)}
       </small>
     </button>
   )

@@ -51,7 +51,7 @@ export class Bulwark extends Pawn {
   static override readonly icon =
     'M12 3 4 6v6c0 5 8 8.5 8 8.5s8-3.5 8-8.5V6l-8-3ZM8 10l4 3 4-3M8 14l4 3 4-3'
   static override readonly aiInstructions =
-    'melee, 1 damage; its own moves cost 2 energy for the first tile. Protect (2): shield an ally within 2 tiles and take its next hit, wherever it goes.'
+    'melee, 1 damage; its own moves cost 2 energy for the first tile. Protect (2): shield an ally within 2 tiles and take every hit meant for it until its next turn, wherever it goes.'
   readonly kind = 'bulwark' as const
   get maxHp(): number {
     return 10
@@ -60,10 +60,6 @@ export class Bulwark extends Pawn {
     return 2
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 1 }
-  // Brace: every banked energy point absorbs 1 damage from an incoming blow.
-  override adrenalineArmor(): number {
-    return this.adrenaline
-  }
   get special(): SpecialAbility {
     return protect
   }

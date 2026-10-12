@@ -43,10 +43,6 @@ export class Wolf extends Pawn {
     return 3
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
-  // Rage: every banked energy point adds 1 damage to the wolf's basic attacks.
-  override adrenalineDamage(): number {
-    return this.adrenaline
-  }
   get special(): SpecialAbility {
     return cry
   }

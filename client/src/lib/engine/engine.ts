@@ -259,10 +259,7 @@ function reduce(
   const winner = winnerFrom(pawns, actor.side)
   const turnEnded =
     !winner && (action.type === 'endTurn' || actor.energy === 0 || actor.hp <= 0)
-  if (turnEnded && actor.hp > 0 && finishTurn(pawns, actor, log) && action.type === 'endTurn') {
-    const position = { q: pawn.q, r: pawn.r }
-    effect = { kind: 'escape', from: position, to: position }
-  }
+  if (turnEnded && actor.hp > 0) finishTurn(actor, log)
   const health = (army: Pawn[]) => army.reduce((sum, p) => sum + p.hp, 0)
   const escapes = (result.effect?.impacts ?? []).flatMap((impact) => {
     const dodger =

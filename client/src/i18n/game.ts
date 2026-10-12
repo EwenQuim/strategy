@@ -122,13 +122,6 @@ export const energy = t({
   es: 'Energía',
   it: 'Energia',
 })
-export const adrenaline = t({
-  en: 'Adrenaline',
-  fr: 'Adrénaline',
-  de: 'Adrenalin',
-  es: 'Adrenalina',
-  it: 'Adrenalina',
-})
 export const cancel = t({
   en: 'Cancel',
   fr: 'Annuler',
@@ -172,23 +165,23 @@ export const endTurn = t({
   it: 'Fine turno',
 })
 export const endTurnHint = t({
-  en: (banked: number) =>
-    `End this turn. Leftover energy banks as Adrenaline: +${banked}, spent by this class its own way.`,
-  fr: (banked: number) =>
-    `Termine ce tour. L'énergie restante est accumulée en Adrénaline : +${banked}, dépensée selon la classe.`,
-  de: (banked: number) =>
-    `Beende diesen Zug. Restliche Energie wird als Adrenalin gespart: +${banked}, von dieser Klasse auf ihre Weise ausgegeben.`,
-  es: (banked: number) =>
-    `Termina este turno. La energía restante se acumula como Adrenalina: +${banked}, gastada según la clase.`,
-  it: (banked: number) =>
-    `Termina questo turno. L'energia rimasta si accumula come Adrenalina: +${banked}, spesa secondo la classe.`,
+  en: (next: number) =>
+    `End this turn. Leftover energy carries over: ${next} energy next turn.`,
+  fr: (next: number) =>
+    `Termine ce tour. L'énergie restante est conservée : ${next} énergie au prochain tour.`,
+  de: (next: number) =>
+    `Beende diesen Zug. Restliche Energie bleibt erhalten: ${next} Energie im nächsten Zug.`,
+  es: (next: number) =>
+    `Termina este turno. La energía restante se conserva: ${next} de energía el próximo turno.`,
+  it: (next: number) =>
+    `Termina questo turno. L'energia rimasta si conserva: ${next} energia il prossimo turno.`,
 })
-export const adrenalineGain = t({
-  en: (gain: number) => `+${gain} adrenaline`,
-  fr: (gain: number) => `+${gain} adrénaline`,
-  de: (gain: number) => `+${gain} Adrenalin`,
-  es: (gain: number) => `+${gain} adrenalina`,
-  it: (gain: number) => `+${gain} adrenalina`,
+export const nextTurnEnergy = t({
+  en: (next: number) => `${next} next turn`,
+  fr: (next: number) => `${next} au prochain tour`,
+  de: (next: number) => `${next} im nächsten Zug`,
+  es: (next: number) => `${next} el próximo turno`,
+  it: (next: number) => `${next} il prossimo turno`,
 })
 
 export const resultLevel = t({

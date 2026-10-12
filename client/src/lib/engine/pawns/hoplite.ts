@@ -51,16 +51,12 @@ export class Hoplite extends Pawn {
   static override readonly icon =
     'M12 3a8 8 0 0 1 8 8v10H4V11a8 8 0 0 1 8-8Zm-3 8h1.5m3.5 0h1.5M12 3V1M8.5 3.5 7 1.5m8.5 2L17 1.5'
   static override readonly aiInstructions =
-    '1 damage at distance 1-2. Phalanx (1): shield an adjacent ally and take its next hit.'
+    '1 damage at distance 1-2. Phalanx (1): shield an adjacent ally and take every hit meant for it until its next turn.'
   readonly kind = 'hoplite' as const
   get maxHp(): number {
     return 5
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2 }
-  // Brace: every banked energy point absorbs 1 damage from an incoming blow.
-  override adrenalineArmor(): number {
-    return this.adrenaline
-  }
   get special(): SpecialAbility {
     return phalanx
   }

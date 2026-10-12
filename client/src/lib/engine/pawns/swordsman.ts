@@ -11,7 +11,6 @@ import {
   walkingPaths,
 } from '../combat.ts'
 import { hexDist, key, type Tile } from '../hex.ts'
-import { ESCAPE_BONUS, MAX_ESCAPE } from './pawn.ts'
 import type { Action } from '../engine.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -88,12 +87,6 @@ export class Swordsman extends Pawn {
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
   // Guard: leftover energy banks Escape, but only while an enemy stands adjacent.
-  override endTurnEscape(pawns: readonly Pawn[]): number {
-    const fighting = pawns.some(
-      (foe) => foe.side !== this.side && foe.hp > 0 && hexDist(this, foe) === 1,
-    )
-    return fighting ? Math.min(MAX_ESCAPE, this.escapeChance + this.energy * ESCAPE_BONUS) : 0
-  }
   get special(): SpecialAbility {
     return charge
   }
