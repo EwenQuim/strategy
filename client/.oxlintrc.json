@@ -32,7 +32,7 @@
       }
     },
     {
-      "files": ["src/i18n/briefing.ts"],
+      "files": ["src/i18n/briefing.ts", "src/i18n/achievements.ts"],
       "rules": {
         "max-lines": "off"
       }
