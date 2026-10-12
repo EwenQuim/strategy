@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6.37.0/schema.json",
   "entry": ["generated/sdk.gen.ts", "tests/analyze-ai.ts"],
-  "ignore": ["generated/routeTree.gen.ts"]
+  "ignore": ["generated/routeTree.gen.ts"],
+  "ignoreBinaries": ["go", "gofmt", "golangci-lint"]
 }

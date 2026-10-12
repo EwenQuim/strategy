@@ -1,14 +1,25 @@
-import { initialState, symmetricSeed, type GameState } from '../src/lib/engine/index.ts'
+import {
+  initialState,
+  symmetricSeed,
+  type GameState,
+  type Biome,
+} from '../src/lib/engine/index.ts'
 import type { PawnKind } from '../src/lib/engine/pawns/index.ts'
 
-export function trainingBattle(seed: string, index: number): GameState {
-  const rosters: PawnKind[][] = [
-    ['king', 'swordsman', 'archer'],
-    ['king', 'swordsman', 'archer', 'ninja', 'lancer'],
-    ['king', 'bulwark', 'bomber', 'magician', 'archer'],
-    ['king', 'swordsman', 'archer', 'ninja', 'bulwark', 'wolf', 'hoplite'],
-  ]
-  const biomes = ['verdant', 'desert', 'mountains', 'volcano'] as const
+export const TRAINING_ROSTERS: PawnKind[][] = [
+  ['king', 'swordsman', 'archer'],
+  ['king', 'swordsman', 'archer', 'ninja', 'lancer'],
+  ['king', 'bulwark', 'bomber', 'magician', 'archer'],
+  ['king', 'swordsman', 'archer', 'ninja', 'bulwark', 'wolf', 'hoplite'],
+]
+export const TRAINING_BIOMES: Biome[] = ['verdant', 'desert', 'mountains', 'volcano']
+
+export function trainingBattle(
+  seed: string,
+  index: number,
+  rosters = TRAINING_ROSTERS,
+  biomes = TRAINING_BIOMES,
+): GameState {
   const roster = rosters[index % rosters.length]
   return initialState(
     symmetricSeed(seed),

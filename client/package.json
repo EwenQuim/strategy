@@ -20,6 +20,7 @@
     "bench:commander": "node scripts/bench-commander.ts",
     "bench:learned": "node scripts/bench-learned.ts",
     "train:value": "node scripts/train-value.ts",
+    "retrain:value": "node scripts/retrain-value.ts",
     "record:campaign": "node scripts/record-campaign.ts",
     "bench:web": "node scripts/bench-web.ts",
     "test:ci": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",

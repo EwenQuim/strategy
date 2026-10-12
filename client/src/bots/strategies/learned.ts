@@ -81,8 +81,9 @@ type Search = {
 export class LearnedBot implements Bot<LearnedOptions> {
   readonly name = 'learned'
   readonly options: Readonly<LearnedOptions>
+  private readonly weights: readonly number[]
 
-  constructor(options: Partial<LearnedOptions> = {}) {
+  constructor(options: Partial<LearnedOptions> = {}, candidateWeights?: readonly number[]) {
     this.options = readOptions<LearnedOptions>(LEARNED_LEVELS.normal, options)
     const { model, simulations, candidates, exploration, horizon, backup, pressure } =
       this.options
@@ -106,6 +107,10 @@ export class LearnedBot implements Bot<LearnedOptions> {
       pressure > 1
     )
       throw new RangeError('Invalid learned-search options')
+    const weights = candidateWeights ?? VALUE_MODELS[model]
+    if (weights.length !== VALUE_MODELS[model].length || !weights.every(Number.isFinite))
+      throw new RangeError('Invalid learned value weights')
+    this.weights = Object.freeze([...weights])
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
@@ -114,7 +119,7 @@ export class LearnedBot implements Bot<LearnedOptions> {
     if (actor.energy <= 0) return [{ type: 'endTurn' }]
     const search: Search = {
       side: actor.side,
-      weights: VALUE_MODELS[this.options.model],
+      weights: this.weights,
       cache: { reach: new Map() },
       values: new Map(),
       options: this.options,

@@ -97,6 +97,46 @@ No campaign is switched to this bot on the strength of these experiments alone.
 
 ## Reproduce
 
+### Automated retraining after a gameplay change
+
+```sh
+make retrain-value ARGS="--config=scripts/value-training.example.json --output=training-runs/update-001"
+# Any scalar can be overridden; longer runs do not change CI or push-hook work.
+make retrain-value ARGS="--output=training-runs/update-002 --training.games=800 --training.epochs=2000 --evaluation.pairs=32 --evaluation.search.simulations=128"
+```
+
+Paths are relative to `client/`, because Make invokes npm there. JSON configuration supports
+partial nested overrides, including full training `league` and evaluation `opponents` arrays
+of ordinary `{ name, options }` bot configurations. Unknown fields, invalid budgets and
+overlapping seed prefixes are rejected before a run starts.
+`scenarios.rosters` and `scenarios.biomes` select the armies and terrain used for both
+datasets; they are validated with the engine's setup contract. Include new units explicitly
+after adding them to the game.
+
+The pipeline generates fresh league games, excludes timeouts by default (`training.timeouts`
+can explicitly select `draw`), splits by whole game, fits a checkpoint, then plays paired
+evaluation matches against the configured opponents and optionally the incumbent. Training
+and evaluation are sequential, so inference timing does not compete with model fitting.
+
+Each new run directory contains `config.json`, `provenance.json`, `samples.json`,
+`candidate.json` and `report.json`. Existing directories are rejected to preserve results.
+Artifacts are ignored by Git. The incumbent checkpoint is never overwritten. A failed
+strength, validation, timeout or latency gate exits nonzero but retains all evidence.
+Evaluation timeouts receive **zero** score credit, unlike the early exploratory benchmarks.
+The incumbent gate has its own `incumbentMinScore` (default 0.5); other opponents use
+`minScore` (default 0.75).
+
+An accepted candidate is ready for review, not automatically released. Register a new stable
+model id before promoting it; gameplay replay identity should retain the checkpoint that was
+actually used. Feature/action schema changes may need code changes before retraining.
+
+Normal CI never runs training or tournaments. Unit tests exercise fitting on tiny synthetic
+samples and validate configuration/acceptance rules. Pre-push checks only the changed stack:
+client changes avoid unrelated Go handler tests, server changes still run them, and shared
+hook/Makefile changes or an unknown diff run both. Full integration remains in CI's AI job.
+
+### Original experiment commands
+
 ```sh
 GAMES=80 make train-value
 PREFIX=value-frozen-test STRIDE=2 PAIRS=8 SIMULATIONS=128 make bench-learned

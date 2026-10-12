@@ -5,12 +5,12 @@ import { CommanderBot, COMMANDER_LEVELS } from '../src/bots/strategies/commander
 import { RandomBot } from '../src/bots/strategies/random.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { valueFeatures, VALUE_FEATURES } from '../src/bots/valueFeatures.ts'
-import { BASELINE_WEIGHTS, predictValue } from '../src/bots/valueModel.ts'
+import { BASELINE_WEIGHTS } from '../src/bots/valueModel.ts'
 import { trainingBattle } from './learned-matches.ts'
+import { fitValue, type Sample } from './value-fit.ts'
 
 const games = Number(process.env.GAMES ?? 80)
 const epochs = Number(process.env.EPOCHS ?? 400)
-type Sample = { features: number[]; label: number; game: number }
 const samples: Sample[] = []
 const league = [
   new DepthsearchBot(BOT_LEVELS.easy),
@@ -46,43 +46,12 @@ for (let game = 0; game < games; game++) {
     `Training game ${game + 1}/${games}: ${state.winner ?? 'timeout'}, ${positions.length} positions`,
   )
 }
-// Validation split is by entire game, never randomly by neighbouring states.
-const train = samples.filter((sample) => sample.game % 5 !== 0)
-const validation = samples.filter((sample) => sample.game % 5 === 0)
-const weights = [...BASELINE_WEIGHTS]
-const first = weights.map(() => 0),
-  second = weights.map(() => 0)
-function loss(data: Sample[], parameters: number[]): number {
-  return (
-    data.reduce((sum, sample) => {
-      const p = Math.max(1e-6, Math.min(1 - 1e-6, predictValue(sample.features, parameters)))
-      return sum - sample.label * Math.log(p) - (1 - sample.label) * Math.log(1 - p)
-    }, 0) / data.length
-  )
-}
-let best = [...weights],
-  bestLoss = loss(validation, best)
-for (let epoch = 1; epoch <= epochs; epoch++) {
-  const gradient = weights.map(() => 0)
-  for (const sample of train) {
-    const error = predictValue(sample.features, weights) - sample.label
-    for (let feature = 0; feature < weights.length; feature++)
-      gradient[feature] += (error * sample.features[feature]) / train.length
-  }
-  for (let feature = 0; feature < weights.length; feature++) {
-    const g = gradient[feature] + 0.001 * weights[feature]
-    first[feature] = 0.9 * first[feature] + 0.1 * g
-    second[feature] = 0.999 * second[feature] + 0.001 * g * g
-    weights[feature] -=
-      (0.03 * (first[feature] / (1 - 0.9 ** epoch))) /
-      (Math.sqrt(second[feature] / (1 - 0.999 ** epoch)) + 1e-8)
-  }
-  const heldout = loss(validation, weights)
-  if (heldout < bestLoss) {
-    bestLoss = heldout
-    best = [...weights]
-  }
-}
+const fitted = fitValue(samples, BASELINE_WEIGHTS, {
+  epochs,
+  learningRate: 0.03,
+  regularization: 0.001,
+  validationEvery: 5,
+})
 const report = {
   version: 1,
   trainingGames: games,
@@ -90,9 +59,7 @@ const report = {
   positions: samples.length,
   features: VALUE_FEATURES,
   trainingPrefix: 'value-training-v1-',
-  baselineValidationLoss: loss(validation, BASELINE_WEIGHTS),
-  validationLoss: bestLoss,
-  weights: best.map((weight) => Number(weight.toFixed(6))),
+  ...fitted,
 }
 writeFileSync(
   new URL('../src/bots/value-model.json', import.meta.url),
