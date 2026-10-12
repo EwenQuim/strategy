@@ -11,8 +11,8 @@
       "map": ["...", "...", "..."],
       "player": [{ "kind": "king", "col": 1, "row": 2 }],
       "enemy": [
-        { "kind": "king", "col": 1, "row": 0, "hp": 2 },
-        { "kind": "swordsman", "col": 2, "row": 1, "hp": 2 }
+        { "kind": "king", "col": 1, "row": 0, "hp": 3 },
+        { "kind": "swordsman", "col": 2, "row": 1, "hp": 3 }
       ]
     }
   }

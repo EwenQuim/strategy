@@ -396,7 +396,7 @@
         {
           "kind": "swordsman",
           "col": 2,
-          "row": 3
+          "row": 7
         },
         {
           "kind": "ninja",
@@ -420,8 +420,8 @@
         },
         {
           "kind": "wolf",
-          "col": 3,
-          "row": 1
+          "col": 1,
+          "row": 7
         }
       ]
     }

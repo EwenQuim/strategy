@@ -85,6 +85,7 @@ function resolveTargeting(
 export function Game({
   seed,
   mode,
+  paused,
   setup,
   campaign,
   campaignLevel,
@@ -107,6 +108,7 @@ export function Game({
   const { state, dispatch, effect, effectId, playing } = useGame({
     seed,
     mode,
+    paused,
     setup,
     bot,
     onVictory,
@@ -135,6 +137,7 @@ export function Game({
     !!pawn &&
     (isOnline ? pawn.side === viewerSide : local || pawn.side === 'player') &&
     !state.winner &&
+    !paused &&
     !playing
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)

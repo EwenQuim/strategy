@@ -227,16 +227,18 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     const first = initiative.findIndex((pawn) => pawn.side === startingSide)
     initiative.push(...initiative.splice(0, first))
   }
-  // Authored introductions act before the first player: show the threat before it can be killed.
+  // Introductions follow a safe opening by the player King, before any other unit acts.
   if (setup?.map !== undefined && setup.firstEnemyKinds?.length) {
+    const opening = initiative.find((p) => p.side === 'player' && p.kind === 'king')!
     const first = initiative.filter(
       (p) => p.side === 'enemy' && setup.firstEnemyKinds!.includes(p.kind),
     )
     initiative.splice(
       0,
       initiative.length,
+      opening,
       ...first,
-      ...initiative.filter((p) => !first.includes(p)),
+      ...initiative.filter((p) => p !== opening && !first.includes(p)),
     )
   }
   // Number the finalized initiative, including any starting-side rotation.

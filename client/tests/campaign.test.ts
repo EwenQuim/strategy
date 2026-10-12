@@ -11,11 +11,13 @@ import {
 } from '../src/lib/campaign.ts'
 import {
   initialState,
+  activePawn,
   mapFromRows,
   passable,
   key,
   type PawnKind,
 } from '../src/lib/engine/index.ts'
+import { turnPlans } from '../src/lib/engine/ai/turns.ts'
 import original from '../src/lib/campaigns/001-original.json' with { type: 'json' }
 
 test('All packs use authored, deterministic, compact maps and validated armies', () => {
@@ -46,11 +48,11 @@ test('Each unfamiliar recruit debuts enemy-only, unlocks on victory and is playa
         assert.ok(available.has(p.kind), `${pack.slug}:${level.id} ${p.kind}`)
       for (const kind of level.unlocks) {
         const state = initialState(level.seed, level.setup, 'player')
-        const firstPlayer = state.order.findIndex(
-          (id) => state.pawns.find((p) => p.id === id)?.side === 'player',
-        )
+        assert.equal(activePawn(state)?.side, 'player')
+        assert.equal(activePawn(state)?.kind, 'king')
+        const introductions = state.order.slice(1, 1 + level.setup.firstEnemyKinds!.length)
         assert.ok(
-          state.order.slice(0, firstPlayer).some((id) => {
+          introductions.some((id) => {
             const pawn = state.pawns.find((p) => p.id === id)
             return pawn?.side === 'enemy' && pawn.kind === kind
           }),
@@ -72,6 +74,21 @@ test('Each unfamiliar recruit debuts enemy-only, unlocks on victory and is playa
   assert.deepEqual(CAMPAIGNS[5].levels[3].unlocks, ['wolf'])
   assert.deepEqual(CAMPAIGNS[6].levels[0].unlocks, ['hoplite'])
   assert.deepEqual(CAMPAIGNS[7].levels[0].unlocks, ['berserker'])
+})
+
+test('Every introduction allows a non-lethal player opening before the new enemy acts', () => {
+  for (const pack of CAMPAIGNS) {
+    for (const level of pack.levels.filter((level) => level.unlocks.length)) {
+      const state = initialState(level.seed, level.setup, 'player')
+      for (const { state: next } of turnPlans(state)) {
+        const encounter = `${pack.slug}:${level.id}`
+        assert.equal(next.winner, null, encounter)
+        assert.equal(next.pawns.length, state.pawns.length, encounter)
+        assert.equal(activePawn(next)?.side, 'enemy', encounter)
+        assert.ok(level.unlocks.includes(activePawn(next)!.kind), encounter)
+      }
+    }
+  }
 })
 
 test('Invalid authored unlock progressions are rejected rather than replacing units at runtime', () => {

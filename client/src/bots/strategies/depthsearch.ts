@@ -7,7 +7,7 @@ import {
   type ReachCache,
 } from '../../lib/engine/ai/evaluate.ts'
 import { sidePlan } from '../../lib/engine/ai/plan.ts'
-import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
+import { chooseOption, hpOf, introductionTurns } from '../../lib/engine/ai/choice.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
 import type { Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'
@@ -205,7 +205,7 @@ export class DepthsearchBot implements Bot<BotOptions> {
     // Hellfire remains seeded; analysis does not peek into the battle's random stream.
     const analysis = { ...state, randomState: 0 }
     let floor = -Infinity
-    const ranked = viableTurns(analysis, pawn.id, rankedTurns(analysis, search))
+    const ranked = viableTurns(analysis, pawn.id, introductionTurns(analysis, rankedTurns(analysis, search)))
     const victory = ranked.find((turn) => turn.state.winner === pawn.side)
     if (victory) return victory.actions
     searchStats.rootLeafEvals = searchStats.leafEvals

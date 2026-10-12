@@ -19,6 +19,7 @@ export type OnlineSession = { code: string; token: string; side: Side }
 export interface GameOptions {
   seed: string
   mode: GameMode
+  paused?: boolean
   setup?: BattleSetup
   bot?: BotConfig
   onVictory?: () => void
@@ -28,6 +29,7 @@ export interface GameOptions {
 export function useGame({
   seed,
   mode,
+  paused = false,
   setup,
   bot = DEFAULT_BOT_CONFIG,
   onVictory,
@@ -63,7 +65,7 @@ export function useGame({
   }, [onVictory, playback.state.winner])
 
   useEffect(() => {
-    if (!frame) return
+    if (!frame || paused) return
     hapticForFrame(frame)
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const timer = window.setTimeout(
@@ -71,10 +73,10 @@ export function useGame({
       frameDelay(frame, reducedMotion),
     )
     return () => window.clearTimeout(timer)
-  }, [frame])
+  }, [frame, paused])
 
   useEffect(() => {
-    if (!enemyBot || mode !== 'ai' || online || playing || state.winner) return
+    if (!enemyBot || mode !== 'ai' || online || paused || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
     void enemyBot
@@ -86,7 +88,7 @@ export function useGame({
     return () => {
       cancelled = true
     }
-  }, [dispatch, enemyBot, mode, online, playing, state])
+  }, [dispatch, enemyBot, mode, online, paused, playing, state])
 
   return {
     state,

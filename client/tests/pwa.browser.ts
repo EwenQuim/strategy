@@ -1831,6 +1831,105 @@ test(
   },
 )
 
+test(
+  'Campaign briefings pause fresh and restored battles until the player is ready',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const level = CAMPAIGNS[1].levels[0]
+    const opening = initialState(level.seed, level.setup, 'player')
+    const readSavedState = () =>
+      page.evaluate(() => JSON.parse(localStorage.getItem('hexmate.battle')!).state)
+    await page.goto(origin + base + 'campaign/original/1')
+    const briefing = page.getByRole('dialog', { name: 'Battle briefing', exact: true })
+    await briefing.waitFor()
+    await page.waitForFunction(() => localStorage.getItem('hexmate.battle'))
+    const savedOpening = await readSavedState()
+    assert.deepEqual(savedOpening, JSON.parse(JSON.stringify(snapshotState(opening))))
+    await page.waitForTimeout(1500)
+    assert.deepEqual(await readSavedState(), savedOpening)
+    assert.equal(await page.locator('[data-action="endTurn"]').isDisabled(), true)
+    await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    await page.waitForTimeout(1000)
+    assert.deepEqual(await readSavedState(), savedOpening)
+    await page.locator('[data-action="endTurn"]').click()
+    await page.getByTestId('enemy-turn').waitFor()
+    assert.match(
+      (await page
+        .locator('[data-testid="initiative-unit"][aria-current="step"]')
+        .getAttribute('title')) ?? '',
+      /Enemy Archer/,
+    )
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.notDeepEqual(await readSavedState(), savedOpening)
+
+    // A reload during an enemy activation must also wait behind the briefing.
+    const enemyTurn = transition(opening, { type: 'endTurn' }).state
+    const saved = {
+      version: BATTLE_SNAPSHOT_VERSION,
+      identity: battleIdentity(
+        'ai',
+        level.seed,
+        { name: 'depthsearch', difficulty: level.difficulty },
+        level.setup,
+      ),
+      state: snapshotState(enemyTurn),
+    }
+    await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
+    await page.evaluate(
+      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      saved,
+    )
+    await page.goto(origin + base + 'campaign/original/1')
+    await briefing.waitFor()
+    await page.waitForTimeout(1500)
+    assert.deepEqual(await readSavedState(), JSON.parse(JSON.stringify(saved.state)))
+    await page.keyboard.press('Escape')
+    await briefing.waitFor({ state: 'hidden' })
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.notDeepEqual(await readSavedState(), JSON.parse(JSON.stringify(saved.state)))
+  },
+)
+
+test(
+  'A newly discovered Magician burns the default aligned army after the player opening',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const level = CAMPAIGNS[1].levels[1]
+    const opening = initialState(level.seed, level.setup, 'player')
+    const aligned = opening.pawns.filter((p) => p.side === 'player' && p.kind !== 'king')
+    await page.evaluate((key) => localStorage.setItem(key, '1'), CAMPAIGN_STORAGE_KEY)
+    await page.goto(origin + base + 'campaign/original/2')
+    const briefing = page.getByRole('dialog', { name: 'Battle briefing', exact: true })
+    await briefing.waitFor()
+    await page.waitForTimeout(1000)
+    assert.equal(await page.getByTestId('enemy-turn').count(), 0)
+    await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    await page.locator('[data-action="endTurn"]').click()
+    await page.getByTestId('enemy-turn').waitFor()
+    await page.getByTestId('combat-feedback').waitFor({ state: 'attached' })
+    assert.match(
+      (await page
+        .locator('[data-testid="initiative-unit"][aria-current="step"]')
+        .getAttribute('title')) ?? '',
+      /Enemy Magician/,
+    )
+    const saved = await page.evaluate(
+      () => JSON.parse(localStorage.getItem('hexmate.battle')!).state,
+    )
+    for (const pawn of aligned) {
+      const after = saved.pawns.find((p: { id: number }) => p.id === pawn.id)
+      assert.equal(after.hp, pawn.hp - 1)
+      assert.equal(after.q, pawn.q)
+      assert.equal(after.r, pawn.r)
+    }
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  },
+)
+
 test('Briefings stay dismissed until route remount', { timeout: 60_000 }, async (t) => {
   const { page, origin } = await fixture(t)
   const errors: string[] = []

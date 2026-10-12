@@ -1,28 +1,31 @@
 {
-  "tutorial:1": ["6bd6004e90a45c6e", "eJwr1jHQMdIx1DG0TrXO1THQMbQu1jHUMQAAQJsFUA=="],
+  "tutorial:1": [
+    "064835bded2e5b42",
+    "eJxNjDEKAFAIQi/kUK2dp7HJ+8MnKfg46EupYfAkHJacPMrKRsgpbtj2pn3pEuqPXXzq/cPP4wGizxrY"
+  ],
   "original:1": [
     "ea98b412b60c32a4",
-    "eJxVizEKwEAMwz6kIXHaye+5MVP+D4VAC10sI1BTyENwuwnKgwiS9OweN/l5kW5Erb+21a86+19u8QCw4hdu"
+    "eJxdyzEKADAIQ9EL/cHU0fM4OvX+UCqllC6SPGIx8Jh9C8eisCPGQJ0UGYWuC/V6++yWz8dvQgvk1hgH"
   ],
   "original:2": [
-    "5c8a7400a4a3f069",
-    "eJxdjLENwEAIAxe64jF0zJPyK/aXoreSFKk4nY0HkX31IESYN8X6nB6XZG+C6qGInmMo5GaxSML83uPKfL5lo95edOqu/hs3HUkiiA=="
+    "cccbf1fd44af8536",
+    "eJwti7ENwDAMwx7iEMvppHsyesr/QFDDmyCSRZC+iPTxJVkkMTtcbJaL4GtLbRbZ1c/aY08j5NOVmoucR1PoASL7GvY="
   ],
   "original:3": [
     "f1d8deb386bfb561",
-    "eJw9T0sORCEIu1AnERA3nMelK+6fTKg8V9LaDyQMGgcTEjsOBjySXCH5EAwWB4ZF7HGgmPRpZM0wzEhMjDhwpiW5TTyIHUJHMco8exlO5yKvWJ2S71fo2c3c/nxN9Zb7XvH1KtmboxBYT9ZbVfKipjbJ1v+kC0pcAAP6B/5HRfE="
+    "eJxNUDkOBCEM+5BXygVN3kNJNf+XRjgZtE0u7NhhwxD5wGG5EdBcuSEYPTudIxgnZ+fFEHB4Lk6cKIX+dQbpbIyTrME9ylqoY9whrWS9oxBK9mpmZb25FIsV7brQSqa2i4ObnI6roHz97vuVMYETPGhosLZ7RAnMA1f+mGAe2Auw9EzS"
   ],
   "original:4": [
-    "83bd5a90c87bb78f",
-    "eJxdjjEOwDAIAz/kSlBIFt6TMVP+L1W4pFW7QIgP44kTFguKxuoxcSh6TDgkBruxK8EUIaQdBoPHKLnFiEW/CUPjn97e3HicT/jXSYvudBL0ksm2d1BGSd4gvLxI571b963T6dgL+ciyw0oBUqHlz1056UIj"
+    "1036f98178ee32eb",
+    "eJxVTzkOBDEI+5BHCpCj4D0pU83/pREGZbVNOHzEHBiWb38hGFW7H04HBvHtBx1ajECM/axZMfwNBjoRxaSPweiQmsm+Fx4bqd/m3SyqOn0Ku/5yUy4meoRmGSNXUsTxR2zkxZucmEKMxnzKzNmnNKqWNK0aRhmk0eFt+2ZrvLFV6h+Tqg82gFQz"
   ],
   "original:5": [
     "3e3fa3280cda4fb6",
-    "eJxlkDEOwDAIAz/kSgGSLrwnY6b8X6rAqK3aCWLOBmXBoL5xCE40DF/Z+mRjvkNFSylEMpqT8CgGYUWnJ+PitWMIKUDRqnafXzM3pXn+fEYlJy/EIBWld7U0jLrzobiW5IIlJ0X0WhIJFt+BfgGK2EFH"
+    "eJxVT0sKxSAMvNAUokl9i5zHpSvvD2XG0EcpWDO/jDMXHD03roYBw52LV8/NAYaRM2dudFEdP53kaSBKLoSOXERftVVOIWi4lbYQ5QhNpuldG4qJU8qVQqDJ53KcBl3Y9deqFb+uzudPV6s3tNrnxX+1zDXpLTc3P9z9Q4E="
   ],
   "original:6": [
-    "9c19b28926e0cf0e",
-    "eJw9jzEOQzEIQy/kSgGS38HnyZiJ+0sVDr+LIwF+dhIO44G1LiYCjkDwYMK49brmC4HJg4/hy82EY/Fg4JFe85RG7wsbGMyCCXSwpI4hV92bOK9Ghxqzb6cIrhovZ98iroALXDoqYC9MjhrdNrObVa4r1/+fr/5bmGDWvt2mLE1+27xGwQ=="
+    "9f6d494f683341db",
+    "eJxVjjEOxCAMBD80BQabFH5PSir+L51YSKJr0MqeWTMwrrxzUPCcFGK/FLrmQck7J42g4Ye9RHXl0NZz4Jj2jTiOU5X/GyZ22k1Xl7fsuik1NHHLd+VBV/vnPr8JquYdIw7zzDY7X7djP/yqOyY="
   ],
   "original:7": [
     "3db784cfb0316595",
@@ -82,27 +85,27 @@
   ],
   "brutal:1": [
     "1b55078431f96ea2",
-    "eJxFizkKwDAQxD6kwB52Ne9JuZX/D4G1ibtBGhVJaGFMFUGqMEJvs8DIf3vzYnSxv48ztY66SYu83QfsrhfH"
+    "eJxdi6kNADAMAxc6kAd6nsKg7C9VjVpS4pNlXxGkerJITIURWupDnFAd3m6k1jx9GJh6Wt/tef57G0whGMU="
   ],
   "brutal:2": [
-    "043077c5ce01f564",
-    "eJxFTjEOBEEI+hCF4mzle6a02v8nF9HsNQYUkAJhebNAnHxx4DigEJtl4dE8CM1Rh1iAmpYvAi6XrWtSYlPuZj/CBZcm9pOvv1s0Jlz8Kue/sSwYuH0n1XSjNvy460fzuZn6jrc10Xk/FNU6WA=="
+    "088baa378bd7a69e",
+    "eJw1jDEOwDAMAj90Q7DTye/p6Cn/l6qSZEEGwzUiaxFkNUnU+pW0n/ZyEvWe3+1u1clVjZhmRTXD3Nxrd4bd5YjpzYM2t5rwHegDW1cizA=="
   ],
   "brutal:3": [
     "a970e36767036dcb",
-    "eJxdUEEOBCEI+1A3QYGZA++Zoyf/n2yoncNuTBCBttSNgNVCYNRTC46rNhxZC4ZkPmthImp3hMM5mTDeQ4g+wfdQtbufgWDSAptxSbKJumJwVqcmTs+0zMNFnBKmqRbvdVkT+uBSMYmbmNJuCxdZEvZnOWgzafA1ldzlly2FT+bB+PK21k2u8023PjKQXxmpU6I="
+    "eJxNUFsOwCAIu1CX8FD3wXn2yZf3TxaqM4sJYGmhmjC0mGiQSDRoPJFwjJhw9EgIOmuLWVw4nJwOYdbNrdOIK1HdveJcisbCuMZgjMqRsggLGoTWXj/t2jUrHocC+yZ3CsukMhJ6+CZl/uuOk0txb/8lEoxt7FMm/4Q/U/cX8KVGOQ=="
   ],
   "brutal:4": [
-    "5b8673f12be2f3d2",
-    "eJxNUUsOBSEIu1AnEfzMgvO4dDX3T14oqG+l1rYUWChQWxB0+yBQCOrfO+7DFgpemzZtOYdn56+iBBOF78dFVyr20VSgR955Br2h2ozS+2SkyT8hpmjUDaKSqP86px2vgka8purGjiY+tjUjZDsW/UQYJLhoR3RRIXaknibS9ZT16yjoyX9uRRe/2ftIYx8vKf6saXWUNeGW7FiRsqreaiWHtiOdbI/kCPWMvSZSkqLsXbmsuMfONbeqiYf/riM/jaaHFw=="
+    "71f4238b6a330912",
+    "eJxVkDEORCEIRC80JgLqLziPpZX3TzYgGLdRAd/AsCD4dOoGoetCg+i2E4LmcdON6rV6f1qlEIYuMMiTBk5dEFS/a8Tn10EqxsVTclx5Agf5BVmzHQjivdjPFnn2vL3ZNc1C9kxD4vMZ1T0nwYpP6Dbiyqn2CXInr6lylK3+gJwyO6PqWyt0dzIeR2cbMz4cZCY7r4EZw+/HArtV/hPtt2o9O+gHEb9vzw=="
   ],
   "brutal:5": [
     "6228f1547d9fde0f",
-    "eJxVkDkOBTEIQy/kL7Ek03CelKm4v/QVw0Sahix+NoiE4YFhxooNh/Ac8NhHiRUr8ujQZn6KEQnHIDKJS2MPnFjek/gBpT5p7BynR25DhbKO8jk57Vnel0WitLya8m733xjkbKCf6G+K9WSnWjulEzdmjya9m9NlUrF26p2itqZNVtaA/AGjUFP9"
+    "eJxVkDEOxTAIQy/kSoFAFs6TsRP3l75iaNW/BAk/bMiOhGJB4bHjxsRgNczY1BzS2iWwSExYo05wEJxwGCzuUyMLvqEYfD2yAHYvwaR5iYt+3pFeXr2GfAZPR0idqYfQz+JJ/Xgd5wUhWVnCfvlVrr6nll4+0jnWftZZifFerv05f8wPu6hPuA=="
   ],
   "brutal:6": [
-    "5e5af97066e2b752",
-    "eJxdj0sOBCEIRC9UnQiCG87j0pX3TyaU2J3MRj71LGBDILHQoLHwKDxmLDg0Njo8Vr2tlAE5ChSDnSeTDUUj3AgPohqTyqBJ5sI4/ywEPRYMjbSy42/u7Assh0ntoegFHANjtEJTa2/vrGFQGAc5bc+qh7XK7415/YCSvB75o7O6x3g5f2RVP76uUgI="
+    "1f205fdeca38a18b",
+    "eJw9jkEOBCEIBD9Ukwiie+A9Hj35/2QzreMFmraEHjkpRC4KLSeP0+/Q8FxU6bcuXNr46dVybJZCz5ETP/2xI4Kqb33Xu6xrzXHFmXjTmaBSiXt280X8p9vh3+xG4IScqi7vC7KHnc900nD8D6SwO6I="
   ],
   "brutal:7": [
     "42b932309fa94964",
@@ -161,8 +164,8 @@
     "eJxNkDuuBTEIQzfkkYBApmA9U6bK/qUnnM99FQqQY+OJhsgBR88JQ88Bg+eAorGjOdEg7EtOBCwHXvYFbw48eornR5bsGqyBll/OIsL4u6iDv2ve4GvKXnHPT0VcFaHDmi+mkfkoLT+2/et61EmdqA5F/2f55crqNELGgny802D0oczgUViJLGCjxsrL6EmJ5FYZNBqTYyzY9N/GTSi2sFB3ULOSFfgh+l54bwD30qALZ8IrWd/SyleU+52T3Oz7H9iZdFI="
   ],
   "shattered:1": [
-    "d89bd68de965e691",
-    "eJxlUDsORCEIvNAUKPIsOI+llfdPNsC4b5NtSMb5MHJgaL58o8F8Q9ETdQzfEExfvvwkjveBRnTwoPnGhPhJX+itWCg0fRoMvbGhsiW5wm/2wyTljLyHXe6LZtvrOX/Zlp3sZ0Nwk90jvxTXp5CcSnc1kFTYd+t1ClsueuuPxgxJZSdbrQfvOdP13ncQG/WR0j9jRmFb"
+    "50d60a21f94ebb3a",
+    "eJxNj1sKxSAMRDd0BOOrXlxPP/Pl/qEkpuUiqBlPMqOSCr91r00SrnUvJVXmWyuVGgXZhSRM18vbZuXZm4tKZhzyciYzELrfhY4wHGtI4PNQ/+PrJ2X6aYzJO16rhaCt25eGhVLCqiFfTDvNMIdxCY/DZSoSgdR+6tSIeEZvUx94Q0gM"
   ],
   "shattered:2": [
     "5bd10b7cf6217437",
@@ -249,8 +252,8 @@
     "eJxtUlEOxSAIuxBLBOe2F8+zT7+4f/JCqW4fyxJFhLbUDVE5+92HqFzYt0y4qFgfYmL9ZsHOvTKzIxqymWhBVFDjkblw/GE90HYAdEd8rriQv4qiNfbI2tTisTVI0Ul3UcGmyexZOojZKBocMrt3rK07hD+KKjUiXgoLziVJjJO3BWqEmM1xf6BcMfoJsTdBjU6FCIenMXClY1BvnLmIdkfsiB9bky4cqiGAgA3EuvKVnvqa1UCVHgdZA4+CIW8NQgtfoLzOgVX5LkZWJ2uO/Wbwl/PfaGmYLfX6evmvjpv/wsKM7w8fP6Z/"
   ],
   "iron-throne:4": [
-    "3e1d175c1cea3421",
-    "eJx1VEmOwDAI+xCVIEvbqO/pMaf8XxoBJkk1M6esYGOcdKokz/t0OhJdz6BDqOhKh2GbOr+e93mfQUI3+apTpmIjW0Cyld64iOn2FLcdNAQfEWmToSEkVJEs41YmfjoVSrZfwK4YiHNVkEpM55yLgeuK6QwcBbgD7141vqjLqJ8WZycNU6E8q3NCGUQ8fVBOoKwRzbWxlFfQ8rQ3Lns6cERgJcaMAZqX0NCum5wOc1n0DsMm97mXGT2xw41n1PaPUIreJj8N+43AJLy30lNVdIz3Cv3KxwWB49JwmMGPiiU5SRwGkg2oHSDVuhAtjzrXWij99tfeoGEh7+x9N78tgBOr5Sqd7z5tqPL91Kx0k2Vty2d9KezZL2RPcLf3u9OR0Wi/fOKyzMRBeNiuA4/lrnDGObsX6ka1EkhiBSxTzbdRJ9xul/bRahksz3cpmy7rM2jTCWVzuo4Jj0o2GmHahofXt0fGGBt0lPkbFLyZcF/YI+a88aqUPz2OueAWb3/Pqi2Dqe4lKBC806bPMp/7xU3MUyFzREGJ/oTHlM6N4wAv3kCId8dvVZArTQ1djfT3VfWQ/ADl/nBT"
+    "653c822298d450a8",
+    "eJxtU1Gu5DAIu5BXApJOUuU8+cxX7y89YUg6I61GahswtiHMwr8ClTHH4189PhRtLD/fY445FhQl4nUsGA+KDsd5uqDybajjgaAFxSSsQci7PKgSPHfK+KNHiiELZQugsPgTpszRFmjDTVc3xctxWQmNknDtpox5j3enPKdwtiDkCU6v9cqIt2yrBZ51zrdQyRpRR9bT3wyD7VjykoaYaYUyLiRRWv8dUgzCDTh5xZ55CvT0+CadvuYUHgosXJA91JkF/v5AUq8wKunobVWoLlQvKKlrxJ873Yn5o728iW0yYRnWvCCD7EV4ZcyHQROaw4kF2/Hvu50/a9bzBvynibpOTCn23b7kpky2XfZO/IfFfjgetrDHFxvnT8ueHfGB4Pqeve0d78Tq2UTXFnIG20XVJ9lfLtn/xZ5FmuJ6wGHpycFX2m6QP86o6mo="
   ],
   "iron-throne:5": [
     "00e34a115725ac5c",
@@ -270,7 +273,7 @@
   ],
   "hot-gates:1": [
     "8d6e70d455d04856",
-    "eJxNjrsNADEIQxfyFfzSME9KKvaXTlgUabBk8wwFhWVDEZwGhefNojPq0DfPwicIBpJ3ISHU400FQYNRgwVGVNY7ZIvHejbgfONAuH+3Qdkaq5Me6A8s/Crv"
+    "eJxNirkNwDAMAxe6wno6zaNSlfcHAjCOkYYgeTcssraya3CtxEi8No5XV78NI44VekIkWAT2Weezy1x9fkz+AyqxHWk="
   ],
   "hot-gates:2": [
     "f6461c424d1370ee",
@@ -289,8 +292,8 @@
     "eJxVUDsOQzEIu5ArBfJ5A+fJyMT9pSoORX0LIMc2JgHFNIfiYe22LaCQ7AoprPrBbZtDMC/LHAtigQlNTic6WBu1V72o/AiHwEAzx0T7LYbQPFIqGOY0izMzhjMUTQbhnvs3qcsCnVc1PLVXy7hnes1Ux24lMrIrb2mMtyvAjXn9JvGRP/XmXpdZb/JS7b+DV3IW5Auh+mBK"
   ],
   "ragnarok:1": [
-    "c67827826a3a09ba",
-    "eJxNjEsKACEMQy+UAftxNjmPy668PwxGhaHQ9POSgiE5YejqiYbOwmMSw8shPW8WXIYU7Kw1iXEEC4HUFvAftTNMGavuJY/zJux7Q3BwLl3sB2g3JrA="
+    "f642f3b8d62194fa",
+    "eJxVjLENADEIxBZyAwlpmCclFftLL+CbNCc4G64ninVuhO3XA+FM49GZw1CPmtpR1kNX0/nw+uWd/8pQz9ow5ANEBR0k"
   ],
   "ragnarok:2": [
     "abc8d08f8262358f",
