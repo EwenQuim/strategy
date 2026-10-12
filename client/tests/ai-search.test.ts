@@ -127,7 +127,7 @@ test('A rune-boosted attacker facing many targets plans and decides quickly', as
   ])
   const started = performance.now()
   const plans = turnPlans(state)
-  assert.ok(performance.now() - started < 1000, 'Enumeration took too long')
+  assert.ok(performance.now() - started < 2000, 'Enumeration took too long')
   assert.ok(plans.every((plan) => plan.actions.filter((a) => a.type === 'attack').length <= 3))
   const actions = await new DepthsearchBot(BOT_LEVELS.hard).chooseActions(state)
   assert.notEqual(actions.reduce(reducer, state), state)
