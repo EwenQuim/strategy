@@ -22,7 +22,6 @@ export {
   Bulwark,
   King,
   Lancer,
-  Mystic,
   Magician,
   Necromancer,
   Ninja,
