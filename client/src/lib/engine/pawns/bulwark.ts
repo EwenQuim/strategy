@@ -6,6 +6,7 @@ import { hexDist, key } from '../hex.ts'
 const protect: SpecialAbility = {
   name: 'protect',
   cost: 1,
+  damage: 0,
   targeted: true,
   prompt: 'chooseAlly',
   noTargets: 'noNearbyAllies',

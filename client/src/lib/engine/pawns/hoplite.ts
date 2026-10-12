@@ -17,7 +17,14 @@ const phalanx: SpecialAbility = {
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
     const impacts = [strike(pawns, pawn, target, pawn.attack, log, random)]
-    if (pawns.includes(target) && impacts[0]!.q === target.q && impacts[0]!.r === target.r) {
+    const q = target.q - pawn.q
+    const r = target.r - pawn.r
+    if (
+      (q === 0 || r === 0 || q + r === 0) &&
+      pawns.includes(target) &&
+      impacts[0]!.q === target.q &&
+      impacts[0]!.r === target.r
+    ) {
       const beyond = tiles.get(
         key(target.q + Math.sign(target.q - pawn.q), target.r + Math.sign(target.r - pawn.r)),
       )

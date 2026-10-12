@@ -7,7 +7,8 @@ import {
   type ReachCache,
 } from '../../lib/engine/ai/evaluate.ts'
 import { sidePlan } from '../../lib/engine/ai/plan.ts'
-import { chooseOption, hpOf, introductionTurns } from '../../lib/engine/ai/choice.ts'
+import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
+import { introductionTurns } from '../introductions.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
 import type { Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'

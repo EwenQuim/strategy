@@ -2295,6 +2295,49 @@ test(
   },
 )
 
+test('Campaign victory persists once across playback, parent updates and finished restores', async (t) => {
+  const { page, origin } = await fixture(t)
+  await page.addInitScript((progressKey) => {
+    const setItem = Storage.prototype.setItem
+    Storage.prototype.setItem = function (key, value) {
+      if (this === localStorage && key === progressKey) {
+        const writes = Number(sessionStorage.getItem('test:campaign-writes') ?? '0')
+        setItem.call(sessionStorage, 'test:campaign-writes', String(writes + 1))
+      }
+      setItem.call(this, key, value)
+    }
+  }, CAMPAIGN_STORAGE_KEY)
+  const pack = CAMPAIGNS[1]
+  const level = pack.levels[0]
+  const actions = victoryActions(level)
+  let state = initialState(level.seed, level.setup, 'player')
+  for (const action of actions.slice(0, -1)) state = transition(state, action).state
+  assert.equal(state.winner, null)
+  await page.evaluate(
+    (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+    {
+      version: BATTLE_SNAPSHOT_VERSION,
+      identity: battleIdentity('ai', level.seed, campaignBot(pack, level), level.setup),
+      state: snapshotState(state),
+    },
+  )
+  await page.goto(origin + base + 'campaign/original/1')
+  await page.getByRole('button', { name: 'Go !', exact: true }).click()
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  await playInUi(page, state, actions.at(-1)!)
+  await page.getByTestId('battle-result').waitFor()
+  const writes = () =>
+    page.evaluate(() => Number(sessionStorage.getItem('test:campaign-writes')))
+  assert.equal(await writes(), 1)
+  for (let restore = 0; restore < 2; restore++) {
+    await page.reload()
+    await page.getByTestId('battle-result').waitFor()
+    assert.equal(await writes(), 1, 'Restoring a finished battle must not notify victory')
+    await page.getByRole('button', { name: 'Go !', exact: true }).click()
+    assert.equal(await writes(), 1, 'Closing the briefing must not notify victory again')
+  }
+})
+
 async function finishCampaignLevel(page: Page, id: number, surrender = false) {
   const level = CAMPAIGNS[1].levels[id - 1]
   const bot = createBotGame(getBot(campaignBot(CAMPAIGNS[1], level)))

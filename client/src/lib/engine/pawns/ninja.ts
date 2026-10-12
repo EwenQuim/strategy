@@ -2,6 +2,7 @@ import {
   attackTargets,
   canUseSpecial,
   enterTiles,
+  landingThreatenedTiles,
   pawnAt,
   specialTargets,
   strike,
@@ -37,6 +38,7 @@ const jump: SpecialAbility = {
   description: 'jumpDescription',
   reaches: (pawn, tile) => passable(tile) && hexDist(pawn, tile) <= 3,
   targets: attackTargets,
+  threatenedTiles: landingThreatenedTiles,
   candidates: (pawn, { tiles, pawns }) =>
     jumpDestinations(tiles, pawns, pawn).flatMap((destination) =>
       attackTargets(pawn, pawns, destination).map((target): Action => ({

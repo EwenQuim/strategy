@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import {
   initialPlayback,
   playbackReducer,
@@ -60,8 +60,11 @@ export function useGame({
   }, [bot, mode, online, playback.state, seed, setup])
 
   // Persist victory immediately, even while its final combat animation is playing.
+  const previousWinner = useRef(playback.state.winner)
   useEffect(() => {
-    if (playback.state.winner === 'player') onVictory?.()
+    const won = previousWinner.current === null && playback.state.winner === 'player'
+    previousWinner.current = playback.state.winner
+    if (won) onVictory?.()
   }, [onVictory, playback.state.winner])
 
   useEffect(() => {

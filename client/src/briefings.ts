@@ -27,7 +27,7 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
   return {
     name: unitNames[kind],
     art: kind,
-    stats: { hp: maxHp, damage: kind === 'bulwark' ? 0 : attack.damage, range },
+    stats: { hp: maxHp, damage: special.damage ?? attack.damage, range },
     special: {
       name: specialTexts[special.name],
       cost: special.cost,

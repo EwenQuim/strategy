@@ -21,6 +21,10 @@ export function useInspection(state: GameState, viewerSide: Side | undefined, lo
     viewerSide === 'enemy' || (local && active?.side === 'enemy') ? 'player' : 'enemy'
   const inspect = (id: number) =>
     setInspection(id === inspected?.id ? null : { id, range: 'special' })
+  // React Compiler memoizes this board calculation across UI-only renders.
+  const threats = threatsShown
+    ? threatenedTiles(state.tiles, state.pawns, foeSide)
+    : new Set<string>()
   return {
     inspected,
     shown,
@@ -31,9 +35,7 @@ export function useInspection(state: GameState, viewerSide: Side | undefined, lo
         ? rangeTiles(shown, state.tiles, rangeKind)
         : new Set<string>(),
     threatsShown,
-    threats: threatsShown
-      ? threatenedTiles(state.tiles, state.pawns, foeSide)
-      : new Set<string>(),
+    threats,
     toggleThreats: () => setThreatsShown(!threatsShown),
     inspect,
     inspectAt: (at: Axial) => {

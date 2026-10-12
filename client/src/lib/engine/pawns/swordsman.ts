@@ -4,6 +4,7 @@ import {
   canUseSpecial,
   enterTiles,
   label,
+  landingThreatenedTiles,
   pawnAt,
   routePath,
   specialTargets,
@@ -40,6 +41,7 @@ const charge: SpecialAbility = {
   description: 'chargeDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) <= 2 + pawn.attack.maxRange,
   targets: attackTargets,
+  threatenedTiles: landingThreatenedTiles,
   tileTargets: (pawn, tiles, pawns) => new Set(chargeDestinations(tiles, pawns, pawn).keys()),
   candidates: (pawn, { tiles, pawns }) =>
     [...chargeDestinations(tiles, pawns, pawn).keys()].flatMap((position) => {

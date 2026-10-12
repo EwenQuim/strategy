@@ -80,6 +80,8 @@ export type SpecialTextKey =
 export interface SpecialAbility {
   readonly name: SpecialTextKey
   readonly cost: number
+  // Base signature damage; defaults to the pawn's attack profile. Zero means no offense.
+  readonly damage?: number
   readonly description: SpecialTextKey
   readonly targeted: boolean
   readonly oncePerRound?: boolean
@@ -96,6 +98,7 @@ export interface SpecialAbility {
   perform(context: SpecialContext): SpecialResult | null
   candidates(pawn: Pawn, state: GameState): Action[]
   threat?(pawn: Pawn, position: ThreatPosition): number
+  threatenedTiles?(pawn: Pawn, tiles: Map<string, Tile>, pawns: Pawn[]): Set<string>
 }
 
 export abstract class Pawn {
