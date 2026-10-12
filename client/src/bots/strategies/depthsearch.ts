@@ -159,7 +159,15 @@ function rankedTurns(state: GameState, search: Search): ScoredTurn[] {
   searchStats.plansEnumerated += plans.length
   const kept = shortlist(state, plans)
   searchStats.shortlisted += kept.length
-  return kept.map((plan) => score(plan, search)).sort((a, b) => direction * (a.value - b.value))
+  const ranked: ScoredTurn[] = []
+  for (const plan of kept) {
+    if (search.budget <= 0) {
+      searchStats.budgetBreaks++
+      return []
+    }
+    ranked.push(score(plan, search))
+  }
+  return ranked.sort((a, b) => direction * (a.value - b.value))
 }
 
 function lastReply(

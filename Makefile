@@ -46,7 +46,7 @@ test-integration:
 	$(NPM) run test:integration
 
 bench-ai:
-	$(NPM) run bench:ai
+	$(NPM) run bench:ai -- $(ARGS)
 
 record-campaign:
 	$(NPM) run record:campaign -- $(ARGS)
