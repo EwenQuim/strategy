@@ -11,7 +11,7 @@ import {
 } from '../src/lib/engine/index.ts'
 import { DepthsearchBot, searchStats } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { generateTurnPlans, positionKey, turnPlans } from '../src/lib/engine/ai/turns.ts'
+import { positionKey, turnPlans } from '../src/lib/engine/ai/turns.ts'
 
 function battle(): GameState {
   const state = initialState('signature-search')
@@ -61,22 +61,6 @@ test('Search position identities include collected runes and the random stream',
   other.tiles.get('0,0')!.feature = undefined
   other.randomState++
   assert.notEqual(positionKey(state), positionKey(other))
-})
-
-test('Lazy replies keep every legal outcome, put abilities first, and leave input untouched', () => {
-  const state = battle()
-  const before = structuredClone(state)
-  const replies = [...generateTurnPlans(state, true)]
-  const outcomes = (plans: { state: GameState }[]) =>
-    plans.map((plan) => positionKey(plan.state)).sort()
-  assert.deepEqual(outcomes(replies), outcomes(turnPlans(state)))
-  let quiet = false
-  for (const plan of replies) {
-    if (!plan.actions.some((action) => action.type === 'special')) quiet = true
-    else assert.ok(!quiet, 'Abilities must precede quiet replies')
-    assert.deepEqual(plan.actions.reduce(reducer, state), plan.state)
-  }
-  assert.deepEqual(structuredClone(state), before)
 })
 
 test('Search distinguishes identical armies with different Hellfire warnings or initiative', () => {

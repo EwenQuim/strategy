@@ -10,12 +10,7 @@ import { sidePlan } from '../../lib/engine/ai/plan.ts'
 import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
 import { introductionTurns } from '../introductions.ts'
 import { inHellfire } from '../../lib/engine/hellfire.ts'
-import {
-  generateTurnPlans,
-  positionKey,
-  turnPlans,
-  type TurnPlan,
-} from '../../lib/engine/ai/turns.ts'
+import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
 import type { Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'
 
@@ -183,11 +178,13 @@ function lastReply(
   search: Search,
   fallback: number,
 ): number {
-  const plans = generateTurnPlans(state, true)
+  const plans = shortlist(state, turnPlans(state)).sort(
+    (a, b) => Number(usesAbility(b)) - Number(usesAbility(a)),
+  )
+  searchStats.plansEnumerated += plans.length
+  searchStats.shortlisted += plans.length
   let best = maximizing ? -Infinity : Infinity
   for (const plan of plans) {
-    searchStats.plansEnumerated++
-    searchStats.shortlisted++
     if (search.budget <= 0) {
       searchStats.budgetBreaks++
       break
