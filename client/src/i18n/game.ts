@@ -136,6 +136,14 @@ export const energyCost = t({
   es: (cost: number) => `${cost} de energía`,
   it: (cost: number) => `${cost} di energia`,
 })
+export const notEnoughEnergy = t({
+  en: (cost: number) => `Needs ${cost} energy`,
+  fr: (cost: number) =>
+    `Il faut ${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}`,
+  de: (cost: number) => `${cost} Energie nötig`,
+  es: (cost: number) => `Necesita ${cost} de energía`,
+  it: (cost: number) => `Richiede ${cost} energia`,
+})
 export const noTargets = t({
   en: 'No targets',
   fr: 'Aucune cible',
