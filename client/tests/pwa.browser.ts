@@ -20,7 +20,12 @@ import {
   type Axial,
   type Biome,
   type GameState,
+  King,
+  Lancer,
+  Swordsman,
 } from '../src/lib/engine/index.ts'
+import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
+import { field } from './field.ts'
 import { createBotGame } from './bot-game.ts'
 import { transition } from '../src/lib/engine/engine.ts'
 import { huntTheKing } from '../src/bots/targetPicker.ts'
@@ -218,6 +223,41 @@ async function dismissQuickPlayTutorial(page: Page) {
     await tutorial.waitFor({ state: 'hidden' })
   }
 }
+
+test('Rush targets enemies directly and area support lights the caster hexes', async (t) => {
+  const { page, origin } = await fixture(t)
+  for (const Unit of [Lancer, King, Wolf]) {
+    const target = Unit === Lancer ? { q: 3, r: 0 } : { q: 1, r: 0 }
+    const state = field([
+      new Unit(1, 0, 0, 'player'),
+      new King(2, 0, 1, 'player', 4),
+      new King(3, target.q, target.r, 'enemy'),
+      new Swordsman(4, -1, 0, 'player', 2),
+    ])
+    state.seed = `ability-ui-${state.pawns[0].kind}`
+    await page.evaluate(
+      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+        state: snapshotState(state),
+      },
+    )
+    await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+    await page.locator('[data-action="special"]:not([disabled])').click()
+    await page
+      .getByTestId('battlefield')
+      .getByRole('button', { name: /King #3/ })
+      .click()
+    await page.getByTestId('combat-impacts').waitFor()
+    if (Unit !== Lancer) {
+      assert.equal(await page.getByTestId('support-halo').count(), 7)
+      assert.equal(await page.getByTestId('combat-support-symbol').count(), 2)
+    }
+    await page.getByTestId('combat-impacts').waitFor({ state: 'hidden' })
+    assert.equal(await page.getByTestId('support-halo').count(), 0)
+  }
+})
 
 async function playInUi(page: Page, state: GameState, action: Action) {
   const clickTile = (at: Axial) =>

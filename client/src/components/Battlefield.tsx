@@ -12,6 +12,7 @@ import {
 import { featureTexts } from '../i18n/biomes'
 import { Icon } from './Icon'
 import { tileAriaLabel, tileFill } from './battlefield-tile'
+import { SupportHalos } from './SupportFeedback'
 import { BattlefieldEffects } from './BattlefieldEffects'
 import { PawnChip } from './PawnChip'
 import { TerrainArt } from './terrains/TerrainArt'
@@ -290,6 +291,7 @@ export function Battlefield({
           )
         })}
       </svg>
+      <SupportHalos key={'halos-' + effectId} effect={effect} tiles={tiles} viewBox={viewBox} />
       {/* Pawn moves and combat effects repaint only this composited layer, never the tiles and their drop-shadow. */}
       <svg
         viewBox={viewBox}

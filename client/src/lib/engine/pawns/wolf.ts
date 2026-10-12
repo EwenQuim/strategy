@@ -1,4 +1,12 @@
-import { aimAt, attackTargets, label, pawnAt, specialTargets, strike } from '../combat.ts'
+import {
+  aimAt,
+  allyTargets,
+  attackTargets,
+  label,
+  pawnAt,
+  specialTargets,
+  strike,
+} from '../combat.ts'
 import { hexDist } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -18,22 +26,18 @@ const cry: SpecialAbility = {
     pawn.energy -= pawn.special.cost
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
-    const ally = pawns
-      .filter(
-        (p) =>
-          p.side === pawn.side &&
-          p.id !== pawn.id &&
-          p.energy > 0 &&
-          !p.specialUsed &&
-          hexDist(pawn, p) <= 2,
-      )
-      .sort((a, b) => hexDist(pawn, a) - hexDist(pawn, b) || a.id - b.id)[0]
-    if (ally) {
+    const allies = allyTargets(pawn, pawns)
+    for (const ally of allies) {
       ally.energy += 1
       ally.bonusEnergy += 1
       log.push(label(ally) + ' gains 1 energy.')
     }
-    return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
+    return {
+      kind: 'attack',
+      to: { q: target.q, r: target.r },
+      impacts,
+      support: { kind: 'energy', recipients: allies.map(({ q, r }) => ({ q, r })) },
+    }
   },
 }
 
@@ -43,7 +47,7 @@ export class Wolf extends Pawn {
   static override readonly icon = 'M5 4l4 3h6l4-3v5l-3 5-4 7-4-7-3-5V4Zm4 7h.01m6 0h.01'
   readonly kind = 'wolf' as const
   static override readonly aiInstructions =
-    'Pack Hunt (2): bite an adjacent enemy for 2 and give +1 energy to the nearest ally within 2 tiles that has not acted yet. Once per activation.'
+    'Pack Hunt (2): bite an adjacent enemy for 2 and give +1 energy this round to every adjacent ally, even those that have acted. Does not restore used abilities or grant another activation. Once per activation.'
   get maxHp(): number {
     return 3
   }

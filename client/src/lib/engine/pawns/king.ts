@@ -27,12 +27,17 @@ const rally: SpecialAbility = {
     pawn.energy -= pawn.special.cost
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
-    const ally = allyTargets(pawn, pawns, true).sort((a, b) => a.hp - b.hp || a.id - b.id)[0]
-    if (ally) {
+    const allies = allyTargets(pawn, pawns, true)
+    for (const ally of allies) {
       ally.hp = Math.min(ally.maxHp, ally.hp + 1)
       log.push(label(ally) + ' recovers 1 health.')
     }
-    return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
+    return {
+      kind: 'attack',
+      to: { q: target.q, r: target.r },
+      impacts,
+      support: { kind: 'heal', recipients: allies.map(({ q, r }) => ({ q, r })) },
+    }
   },
 }
 
@@ -83,7 +88,7 @@ export class King extends Pawn {
   static override readonly icon = 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12'
   readonly kind = 'king' as const
   static override readonly aiInstructions =
-    'Rallying Blow (2): strike an adjacent enemy for 2 and heal the most wounded adjacent ally for 1. Cannot heal yourself. Once per activation.'
+    'Rallying Blow (2): strike an adjacent enemy for 2 and heal every adjacent ally for 1, up to its maximum health. Cannot heal yourself. Once per activation.'
   get maxHp(): number {
     return 7
   }

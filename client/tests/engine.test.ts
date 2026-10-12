@@ -79,7 +79,7 @@ test('Hoplite pushes survivors onto lava but cannot push through occupied ground
   assert.equal(blocked.pawns[2].hp, 6)
 })
 
-test('Rallying blow heals one wounded ally and Pack Hunt boosts an ally still able to act', () => {
+test('Rallying blow heals adjacent allies and Pack Hunt boosts adjacent allies', () => {
   const king = field([
     new King(1, 0, 0, 'player'),
     new Swordsman(2, 0, 1, 'player', 2),

@@ -62,6 +62,7 @@ export type BattleEffect = {
   to: Axial
   centers?: Axial[]
   impacts?: BattleImpact[]
+  support?: { kind: 'heal' | 'energy'; recipients: Axial[] }
 }
 
 export type BattleFrame = { state: GameState; effect: BattleEffect | null }
@@ -246,7 +247,6 @@ function reduce(
   const turnEnded =
     !winner && (action.type === 'endTurn' || actor.energy === 0 || actor.hp <= 0)
   if (turnEnded && actor.hp > 0) actor.endTurn()
-  const health = (army: Pawn[]) => army.reduce((sum, p) => sum + p.hp, 0)
   const blow: Blow = {
     by: {
       id: actor.id,
@@ -262,7 +262,9 @@ function reduce(
     ...state,
     tiles,
     pawns,
-    lastClashRound: health(pawns) < health(state.pawns) ? state.round : state.lastClashRound,
+    lastClashRound: effect?.impacts?.some((hit) => hit.damage > 0)
+      ? state.round
+      : state.lastClashRound,
     winner,
     log: log.length ? [...state.log, ...log].slice(-40) : state.log,
     logCount: state.logCount + log.length,

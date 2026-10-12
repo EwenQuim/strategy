@@ -43,6 +43,8 @@ test('Rush threat stops at units, gaps and impassable ground and requires a surv
     Array.from({ length: 6 }, (_, q) => [`${q},0`, { q, r: 0, terrain: 'plain' as const }]),
   )
   assert.deepEqual([...threatenedTiles(state.tiles, state.pawns, 'enemy')].sort(), [
+    '0,0',
+    '1,0',
     '2,0',
     '3,0',
     '4,0',
@@ -50,17 +52,29 @@ test('Rush threat stops at units, gaps and impassable ground and requires a surv
   ])
   state.pawns.push(new Bulwark(2, 3, 0, 'player'))
   assert.deepEqual([...threatenedTiles(state.tiles, state.pawns, 'enemy')].sort(), [
+    '0,0',
+    '1,0',
     '2,0',
     '3,0',
   ])
   state.pawns.pop()
   state.tiles.get('2,0')!.terrain = 'lava'
   // It can hit a foe on lava from safe ground, but cannot sprint onto lava and strike beyond.
-  assert.deepEqual([...threatenedTiles(state.tiles, state.pawns, 'enemy')], ['2,0'])
+  assert.deepEqual([...threatenedTiles(state.tiles, state.pawns, 'enemy')].sort(), [
+    '0,0',
+    '1,0',
+    '2,0',
+  ])
   state.tiles.get('2,0')!.terrain = 'mountain'
-  assert.equal(threatenedTiles(state.tiles, state.pawns, 'enemy').size, 0)
+  assert.deepEqual([...threatenedTiles(state.tiles, state.pawns, 'enemy')].sort(), [
+    '0,0',
+    '1,0',
+  ])
   state.tiles.delete('2,0')
-  assert.equal(threatenedTiles(state.tiles, state.pawns, 'enemy').size, 0)
+  assert.deepEqual([...threatenedTiles(state.tiles, state.pawns, 'enemy')].sort(), [
+    '0,0',
+    '1,0',
+  ])
 })
 
 test('Protect threatens no tiles and previews leave current activation state untouched', () => {

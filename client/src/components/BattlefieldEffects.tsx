@@ -2,6 +2,7 @@ import type { BattleEffect } from '../lib/engine'
 import { key } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
 import { PawnIcon } from './Icon'
+import { SupportFeedback } from './SupportFeedback'
 
 export function BattlefieldEffects({
   effect,
@@ -19,7 +20,7 @@ export function BattlefieldEffects({
           data-kind={effect.kind}
           aria-hidden="true"
         >
-          {effect.kind !== 'rally' && effect.kind !== 'hellfire' && (
+          {effect.kind !== 'rally' && effect.kind !== 'hellfire' && !effect.support && (
             <line
               x1={hexX(effect.from.q, effect.from.r)}
               y1={hexY(effect.from.r)}
@@ -123,6 +124,7 @@ export function BattlefieldEffects({
           ))}
         </g>
       )}
+      <SupportFeedback key={'support-' + effectId} effect={effect} />
     </>
   )
 }
