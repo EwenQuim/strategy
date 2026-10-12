@@ -230,9 +230,9 @@ for (const side of ['player', 'enemy'] as const) {
 
   test(
     side +
-      ': lava damages every entered tile, bypasses Escape and Protect, and stops lethal crossings',
+      ': lava damages every entered tile, bypasses Protect, and stops lethal crossings',
     () => {
-      const state = corridor(new Swordsman(1, 0, 5, side, 5, 3, 60))
+      const state = corridor(new Swordsman(1, 0, 5, side, 5, 3))
       const guard = new Bulwark(4, 0, 6, side)
       guard.protectingId = 1
       state.pawns.push(guard)

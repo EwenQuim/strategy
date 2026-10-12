@@ -118,13 +118,13 @@ test('Warnings stay fixed through movement and resolve once when the last actor 
   ])
 })
 
-test('Overlap damages once through Escape and Protect, cleans up deaths, and preserves prior states and frames', () => {
+test('Overlap damages once through Protect, cleans up deaths, and preserves prior states and frames', () => {
   const guard = new Bulwark(3, 2, 0, 'player')
   guard.protectingId = 2
   const state = battle(
     [
-      new Swordsman(1, -1, 1, 'player', 5, 0, 60),
-      new Ninja(2, 0, 0, 'player', 1, 0, 60),
+      new Swordsman(1, -1, 1, 'player', 5, 0),
+      new Ninja(2, 0, 0, 'player', 1, 0),
       guard,
       new King(4, -5, 0, 'player'),
       new King(5, 5, 0, 'enemy'),

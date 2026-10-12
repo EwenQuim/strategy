@@ -63,7 +63,7 @@ export function restoreState(saved: unknown): GameState | null {
     return {
       ...s,
       tiles: new Map(s.tiles),
-      pawns: s.pawns.map((pawn) =>
+      pawns: s.pawns.map(({ escapeChance: _legacyEscape, ...pawn }) =>
         Object.assign(new PAWN_CLASSES[pawn.kind](pawn.id, pawn.q, pawn.r, pawn.side), pawn),
       ),
     }

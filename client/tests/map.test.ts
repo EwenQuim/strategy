@@ -14,8 +14,6 @@ import {
   reducer,
   symmetricSeed,
   targetingTiles,
-  chargeDestinations,
-  jumpDestinations,
   King,
   Swordsman,
   Archer,
@@ -29,6 +27,8 @@ import {
 } from '../src/lib/engine/index.ts'
 
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
+import { chargeDestinations } from '../src/lib/engine/pawns/swordsman.ts'
+import { jumpDestinations } from '../src/lib/engine/pawns/ninja.ts'
 import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 

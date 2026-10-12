@@ -227,11 +227,9 @@ test('Bomb friendly fire is reliable and killing your own king loses, including 
     state.pawns[1].q = 1
     state.pawns[1].r = 0
     state.pawns[1].hp = 1
-    state.pawns[1].escapeChance = 60
     state.randomState = 0
     const hit = transition(state, { type: 'special', target: { q: 1, r: 0 } })
     assert.equal(hit.state.winner, side === 'player' ? 'enemy' : 'player')
-    state.pawns[1].escapeChance = 0
     for (const mutual of [false, true]) {
       if (mutual) {
         state.pawns[2].q = 2

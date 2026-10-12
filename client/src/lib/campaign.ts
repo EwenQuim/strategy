@@ -36,6 +36,8 @@ export interface Campaign {
   developerPreview?: boolean
   startingUnits: readonly PawnKind[]
   depth?: BotOptions['depth']
+  unlockToasts?: boolean
+  achievements?: boolean
 }
 
 const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
@@ -83,25 +85,6 @@ export function withBriefings<Level extends { setup: FixedBattleSetup }>(
   )
 }
 
-const packs = [
-  tutorialLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  originalLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  brutalLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  shatteredLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  ringLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  throneLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  spartaLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-  ragnarokLevels as Omit<CampaignLevel, 'newElements' | 'unlocks'>[],
-]
-
-for (const levels of packs) {
-  levels.forEach((level, index) => {
-    if (level.id !== index + 1 || !level.name || !level.seed || !BOT_LEVELS[level.difficulty])
-      throw new Error('Campaign level ' + (index + 1) + ' is malformed')
-    validateSetup(level.setup, mapFromRows(level.setup.map))
-  })
-}
-
 const CLASSIC_UNITS: readonly PawnKind[] = [
   'king',
   'swordsman',
@@ -110,16 +93,6 @@ const CLASSIC_UNITS: readonly PawnKind[] = [
   'bulwark',
   'bomber',
   'ninja',
-]
-const startingUnits: readonly (readonly PawnKind[])[] = [
-  ['king'],
-  ['king', 'swordsman'],
-  ['king', 'swordsman'],
-  CLASSIC_UNITS,
-  CLASSIC_UNITS,
-  CLASSIC_UNITS,
-  CLASSIC_UNITS,
-  [...CLASSIC_UNITS, 'wolf', 'hoplite'],
 ]
 
 // Unlocks are inferred from authored armies, never from a generated/replaced deployment.
@@ -150,67 +123,81 @@ export function withUnitUnlocks<Level extends { setup: FixedBattleSetup }>(
   })
 }
 
-const briefedCampaigns = withBriefings(
-  packs.map((levels, index) => withUnitUnlocks(levels, startingUnits[index])),
-)
+type AuthoredCampaign = Omit<Campaign, 'levels'> & {
+  levels: Omit<CampaignLevel, 'newElements' | 'unlocks'>[]
+}
 
-export const CAMPAIGNS: Campaign[] = [
+const packs: AuthoredCampaign[] = [
   {
     slug: 'tutorial',
     name: 'Tutorial',
-    levels: briefedCampaigns[0],
-    startingUnits: startingUnits[0],
+    levels: tutorialLevels as AuthoredCampaign['levels'],
+    startingUnits: ['king'],
+    achievements: false,
   },
   {
     slug: 'original',
     name: 'Original',
-    levels: briefedCampaigns[1],
-    startingUnits: startingUnits[1],
+    levels: originalLevels as AuthoredCampaign['levels'],
+    startingUnits: ['king', 'swordsman'],
   },
   {
     slug: 'brutal',
     name: 'Brutal',
-    levels: briefedCampaigns[2],
-    startingUnits: startingUnits[2],
+    levels: brutalLevels as AuthoredCampaign['levels'],
+    startingUnits: ['king', 'swordsman'],
+    unlockToasts: false,
     requiredVictories: 10,
     depth: 4,
   },
   {
     slug: 'shattered',
     name: 'Shattered Crown',
-    levels: briefedCampaigns[3],
+    levels: shatteredLevels as AuthoredCampaign['levels'],
     developerPreview: true,
-    startingUnits: startingUnits[3],
+    startingUnits: CLASSIC_UNITS,
   },
   {
     slug: 'war-of-the-ring',
     name: 'War of the Ring',
-    levels: briefedCampaigns[4],
+    levels: ringLevels as AuthoredCampaign['levels'],
     requiredVictories: 25,
-    startingUnits: startingUnits[4],
+    startingUnits: CLASSIC_UNITS,
   },
   {
     slug: 'iron-throne',
     name: 'Iron Throne',
-    levels: briefedCampaigns[5],
+    levels: throneLevels as AuthoredCampaign['levels'],
     requiredVictories: 35,
-    startingUnits: startingUnits[5],
+    startingUnits: CLASSIC_UNITS,
   },
   {
     slug: 'hot-gates',
     name: 'Thermopylae',
-    levels: briefedCampaigns[6],
+    levels: spartaLevels as AuthoredCampaign['levels'],
     requiredVictories: 45,
-    startingUnits: startingUnits[6],
+    startingUnits: CLASSIC_UNITS,
   },
   {
     slug: 'ragnarok',
     name: 'Ragnarok',
-    levels: briefedCampaigns[7],
+    levels: ragnarokLevels as AuthoredCampaign['levels'],
     requiredVictories: 55,
-    startingUnits: startingUnits[7],
+    startingUnits: [...CLASSIC_UNITS, 'wolf', 'hoplite'],
   },
 ]
+
+for (const { levels } of packs) {
+  levels.forEach((level, index) => {
+    if (level.id !== index + 1 || !level.name || !level.seed || !BOT_LEVELS[level.difficulty])
+      throw new Error('Campaign level ' + (index + 1) + ' is malformed')
+    validateSetup(level.setup, mapFromRows(level.setup.map))
+  })
+}
+
+export const CAMPAIGNS: Campaign[] = withBriefings(
+  packs.map((pack) => withUnitUnlocks(pack.levels, pack.startingUnits)),
+).map((levels, index) => ({ ...packs[index], levels }))
 
 export const TUTORIAL = CAMPAIGNS[0]
 

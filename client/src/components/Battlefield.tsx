@@ -7,7 +7,6 @@ import {
   type Axial,
   type BattleEffect,
   type Pawn,
-  type RangeKind,
   type Tile,
 } from '../lib/engine'
 import { featureTexts } from '../i18n/biomes'
@@ -34,7 +33,6 @@ interface BattlefieldProps {
   targeting: Targeting
   preview: Axial | null
   range: Set<string>
-  rangeKind: RangeKind
   threats: Set<string>
   effect: BattleEffect | null
   effectId: number
@@ -54,7 +52,6 @@ export function Battlefield({
   targeting,
   preview,
   range,
-  rangeKind,
   threats,
   effect,
   effectId,
@@ -194,7 +191,7 @@ export function Battlefield({
             previewed,
             canMove,
             terrain: tile.terrain,
-            range: inRange ? rangeKind : undefined,
+            inRange,
           })
           return (
             <g

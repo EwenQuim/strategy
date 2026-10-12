@@ -12,8 +12,6 @@ import { Wolf } from './wolf.ts'
 
 export * from './pawn.ts'
 export { Archer, Bomber, Bulwark, King, Lancer, Magician, Ninja, Swordsman }
-export { chargeDestinations } from './swordsman.ts'
-export { jumpDestinations } from './ninja.ts'
 
 export const PAWN_CLASSES = {
   king: King,

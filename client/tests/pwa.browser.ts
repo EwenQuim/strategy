@@ -2137,7 +2137,7 @@ test(
     await playTurn(page)
     for (const side of ['player', 'enemy']) {
       assert.ok(actionsBySide.has(side + '-move'))
-      assert.ok(actionsBySide.has(side + '-attack'))
+      assert.ok(actionsBySide.has(side + '-special'))
     }
     await page.getByRole('link', { name: 'Hexmate home' }).click()
     await page.getByRole('link', { name: 'Quick play' }).click()

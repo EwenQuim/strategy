@@ -21,7 +21,7 @@ const aimedShot: SpecialAbility = {
   targets: (pawn, pawns, from = pawn) => attackTargets(pawn, pawns, from),
   candidates: (pawn, { pawns, tiles }) =>
     specialTargets(pawns, pawn, tiles.get(key(pawn.q, pawn.r))).map(aimAt),
-  perform: ({ pawn, pawns, tiles, log, random, tile }) => {
+  perform: ({ pawn, pawns, tiles, log, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -33,16 +33,7 @@ const aimedShot: SpecialAbility = {
     return {
       kind: 'attack',
       to: { q: target.q, r: target.r },
-      impacts: [
-        strike(
-          pawns,
-          pawn,
-          target,
-          { ...pawn.attack, damage: 2, ignoresEscape: true },
-          log,
-          random,
-        ),
-      ],
+      impacts: [strike(pawns, pawn, target, pawn.attack, log)],
     }
   },
 }

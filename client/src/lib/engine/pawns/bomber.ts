@@ -30,7 +30,7 @@ const bomb: SpecialAbility = {
       .map(aimAt),
   threat: (pawn, { target, from, movementCost }) =>
     hexDist(from, target) <= 3 ? Number(pawn.energy - movementCost >= pawn.special.cost) : 0,
-  perform: ({ pawn, tiles, pawns, log, random, tile }) => {
+  perform: ({ pawn, tiles, pawns, log, tile }) => {
     if (
       !tile ||
       !bombTiles(pawn, tiles).some((center) => center.q === tile.q && center.r === tile.r)
@@ -42,7 +42,7 @@ const bomb: SpecialAbility = {
     return {
       kind: 'bomb',
       to: tile,
-      impacts: strikeArea(pawns, pawn, targets, log, random),
+      impacts: strikeArea(pawns, pawn, targets, log),
     }
   },
 }

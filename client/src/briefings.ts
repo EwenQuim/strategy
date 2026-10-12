@@ -83,7 +83,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.lava,
       art: 'lava',
-      points: [b.lavaDamage, b.ignoresEscapeProtect, b.basaltSafe],
+      points: [b.lavaDamage, b.ignoresProtection, b.basaltSafe],
     },
   ],
   watchtower: [
@@ -111,7 +111,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.hellfire,
       art: 'hell',
-      points: [b.hellfireDamage, b.ignoresEscapeProtect, b.bothKingsDraw],
+      points: [b.hellfireDamage, b.ignoresProtection, b.bothKingsDraw],
     },
   ],
 }

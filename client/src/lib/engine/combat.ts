@@ -1,7 +1,5 @@
 import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
 import type { AttackProfile, Pawn, Side, ThreatPosition } from './pawns/index.ts'
-import { GAMEPLAY } from './rules.ts'
-import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
 export type BattleImpact = Axial & { damage: number }
@@ -153,17 +151,7 @@ export function strike(
   target: Pawn,
   profile: AttackProfile,
   log: string[],
-  random: SeededRandom,
 ): BattleImpact {
-  if (
-    GAMEPLAY.randomEscape &&
-    !profile.ignoresEscape &&
-    target.escapeChance > 0 &&
-    random.next() * 100 < target.escapeChance
-  ) {
-    log.push(label(target) + ' escapes the attack.')
-    return { q: target.q, r: target.r, damage: 0 }
-  }
   const protector = protectorFor(pawns, target)
   if (protector) {
     protector.protectingId = null
@@ -193,12 +181,11 @@ export function strikeArea(
   attacker: Pawn,
   targets: Pawn[],
   log: string[],
-  random: SeededRandom,
 ): BattleImpact[] {
   const impacts: BattleImpact[] = []
   for (const target of targets) {
     if (!pawns.includes(target)) continue
-    const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log, random)
+    const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log)
     const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
     if (previous) previous.damage += hit.damage
     else impacts.push(hit)
@@ -218,13 +205,7 @@ export const allyTargets = (pawn: Pawn, pawns: readonly Pawn[], woundedOnly = fa
       (!woundedOnly || p.hp < p.maxHp),
   )
 
-export type RangeKind = 'special'
-
-export function rangeTiles(
-  pawn: Pawn,
-  tiles: Map<string, Tile>,
-  _kind: RangeKind,
-): Set<string> {
+export function rangeTiles(pawn: Pawn, tiles: Map<string, Tile>): Set<string> {
   return new Set(
     [...tiles.values()]
       .filter((tile) => pawn.special.reaches(pawn, tile, tiles))

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { Pawn, activePawn, type GameState } from '../src/lib/engine/index.ts'
+import { Pawn, King, activePawn, transition, type GameState } from '../src/lib/engine/index.ts'
+import { field } from './field.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import {
@@ -57,6 +58,22 @@ test('restoreState rejects unreadable snapshots', () => {
   assert.equal(restoreState(null), null)
   assert.equal(restoreState({}), null)
   assert.equal(restoreState({ pawns: [{ kind: 'tank' }] }), null)
+})
+
+test('Legacy Escape chances are discarded on restore and cannot change reliable combat', () => {
+  const state = field([new King(1, 0, 0, 'player'), new King(2, 1, 0, 'enemy')])
+  state.escapes = Array.from({ length: 3 }, () => ({ kind: 'king', side: 'player' }))
+  const saved = snapshotState(state)
+  for (const pawn of saved.pawns) pawn.escapeChance = 100
+  const restored = restoreState(JSON.parse(JSON.stringify(saved)))!
+  assert.ok(restored.pawns.every((pawn) => !('escapeChance' in pawn)))
+  assert.deepEqual(restored.escapes, state.escapes)
+  const action = { type: 'special', target: { q: 1, r: 0 } } as const
+  const result = transition(restored, action)
+  assert.equal(result.state.pawns[1].hp, 5)
+  assert.equal(result.state.randomState, restored.randomState)
+  assert.deepEqual(result, transition(state, action))
+  assert.deepEqual(result.state.escapes, state.escapes)
 })
 
 test('Saved battle identities distinguish depth-four campaign bots from ordinary Hard', () => {

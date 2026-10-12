@@ -7,7 +7,6 @@ const fury: SpecialAbility = {
   name: 'fury',
   cost: 1,
   targeted: true,
-  oncePerRound: true,
   noTargets: 'noEnemiesWithinReach',
   description: 'furyDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
@@ -21,7 +20,7 @@ const fury: SpecialAbility = {
     const boost = pawn.energy - movementCost - pawn.special.cost
     return pawn.attack.damage + boost
   },
-  perform: ({ pawn, pawns, log, random, tile }) => {
+  perform: ({ pawn, pawns, log, tile }) => {
     const target = pawns.find(
       (foe) =>
         foe.q === tile?.q && foe.r === tile?.r && specialTargets(pawns, pawn).includes(foe),
@@ -30,7 +29,6 @@ const fury: SpecialAbility = {
     const boost = pawn.energy - pawn.special.cost
     if (boost < 0) return null
     pawn.energy = 0
-    pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     return {
       kind: 'attack',
@@ -40,9 +38,8 @@ const fury: SpecialAbility = {
           pawns,
           pawn,
           target,
-          { ...pawn.attack, damage: pawn.attack.damage + boost, ignoresEscape: true },
+          { ...pawn.attack, damage: pawn.attack.damage + boost },
           log,
-          random,
         ),
       ],
     }

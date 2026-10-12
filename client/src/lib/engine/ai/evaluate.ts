@@ -14,9 +14,8 @@ type Reach = {
 }
 export type ReachCache = Map<string, Reach>
 
-// Only units and runes within walking or jumping range can change where an attacker reaches.
+// Reach depends on the current army positions and the map's remaining runes.
 function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCache): Reach {
-  const nearby = (items: Axial[]) => items.map((item) => key(item.q, item.r)).join('|')
   const { id, q, r, hp, energy, specialUsed } = attacker
   const cacheKey = [
     id,
@@ -26,7 +25,7 @@ function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCa
     energy,
     specialUsed,
     state.pawns.map((p) => `${p.id}:${p.q}:${p.r}:${p.hp}`).join('|'),
-    nearby(runes),
+    runes.map((rune) => key(rune.q, rune.r)).join('|'),
   ].join()
   const cached = cache.get(cacheKey)
   if (cached) return cached

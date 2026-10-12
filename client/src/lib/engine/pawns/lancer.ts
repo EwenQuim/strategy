@@ -94,7 +94,7 @@ const dash: SpecialAbility = {
       ? pawn.attack.damage
       : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, round, log, random }) => {
+  perform: ({ pawn, tiles, pawns, tile, round, log }) => {
     const sprint =
       tile &&
       sprints(pawn, tiles, pawns).find(
@@ -104,7 +104,7 @@ const dash: SpecialAbility = {
     pawn.energy -= pawn.special.cost
     const impacts = enterTiles(tiles, pawns, pawn, sprint.path, round, log)
     if (pawn.hp > 0 && sprint.target)
-      impacts.push(strike(pawns, pawn, sprint.target, pawn.attack, log, random))
+      impacts.push(strike(pawns, pawn, sprint.target, pawn.attack, log))
     return {
       kind: sprint.target ? 'attack' : 'move',
       to: sprint.target ?? sprint.tile,

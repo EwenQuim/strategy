@@ -1,6 +1,5 @@
 import { key, type Axial, type Tile } from './hex.ts'
 import type { Pawn, PawnKind, Side, SpecialResult } from './pawns/index.ts'
-import { SeededRandom } from './random.ts'
 import { prepareBattle, type BattleSetup } from './setup.ts'
 import type { Biome } from './biomes/index.ts'
 import {
@@ -8,7 +7,6 @@ import {
   captureFrame,
   clearFallenProtection,
   endBattle,
-  finishTurn,
   winnerFrom,
 } from './turn.ts'
 import { markHellfire } from './hellfire.ts'
@@ -54,11 +52,12 @@ export type GameState = {
   log: string[]
   logCount: number
   blows: Blow[]
+  // Historical achievement evidence retained when restoring older battles; no new escapes occur.
   escapes: Unit[]
 }
 
 export type BattleEffect = {
-  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'escape' | 'protect' | 'hellfire'
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'protect' | 'hellfire'
   from: Axial
   to: Axial
   centers?: Axial[]
@@ -144,7 +143,6 @@ type ActionResult = {
   actor: Pawn
   fallen: Pawn[]
   log: string[]
-  randomState: number
   effect: BattleEffect | null
 }
 
@@ -171,7 +169,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   const pawns = [...participants]
   const actor = pawns.find((pawn) => pawn.id === state.order[state.active])!
   const log: string[] = []
-  const random = new SeededRandom(state.randomState)
   const from = { q: actor.q, r: actor.r }
   const context = {
     pawn: actor,
@@ -179,7 +176,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     pawns,
     round: state.round,
     log,
-    random,
   }
   let effect: BattleEffect | null = null
 
@@ -229,7 +225,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     actor,
     fallen: participants.filter((pawn) => pawn.hp <= 0),
     log,
-    randomState: random.state,
     effect,
   }
 }
@@ -245,22 +240,13 @@ function reduce(
 
   const result = executeAction(state, action)
   if (!result) return state
-  const { tiles, pawns, actor, fallen, log, randomState } = result
-  let { effect } = result
+  const { tiles, pawns, actor, fallen, log, effect } = result
   clearFallenProtection(pawns)
   const winner = winnerFrom(pawns, actor.side)
   const turnEnded =
     !winner && (action.type === 'endTurn' || actor.energy === 0 || actor.hp <= 0)
-  if (turnEnded && actor.hp > 0 && finishTurn(actor, log) && action.type === 'endTurn') {
-    const position = { q: pawn.q, r: pawn.r }
-    effect = { kind: 'escape', from: position, to: position }
-  }
+  if (turnEnded && actor.hp > 0) actor.endTurn()
   const health = (army: Pawn[]) => army.reduce((sum, p) => sum + p.hp, 0)
-  const escapes = (result.effect?.impacts ?? []).flatMap((impact) => {
-    const dodger =
-      impact.damage === 0 && pawns.find((p) => p.q === impact.q && p.r === impact.r)
-    return dodger ? [{ kind: dodger.kind, side: dodger.side }] : []
-  })
   const blow: Blow = {
     by: {
       id: actor.id,
@@ -276,13 +262,11 @@ function reduce(
     ...state,
     tiles,
     pawns,
-    randomState,
     lastClashRound: health(pawns) < health(state.pawns) ? state.round : state.lastClashRound,
     winner,
     log: log.length ? [...state.log, ...log].slice(-40) : state.log,
     logCount: state.logCount + log.length,
     blows: fallen.length ? [...state.blows, blow] : state.blows,
-    escapes: escapes.length ? [...state.escapes, ...escapes] : state.escapes,
   }
   if (effect) record?.(captureFrame(next, effect, fallen))
   if (winner) return endBattle(next, winner)

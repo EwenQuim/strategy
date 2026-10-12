@@ -10,13 +10,13 @@ import {
   canAttack,
   distFrom,
   walkingPaths,
-  jumpDestinations,
   Ninja,
   Archer,
   type BattleSetup,
   type FixedBattleSetup,
 } from '../src/lib/engine/index.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+import { jumpDestinations } from '../src/lib/engine/pawns/ninja.ts'
 import { CAMPAIGNS } from '../src/lib/campaign.ts'
 
 const layout = {

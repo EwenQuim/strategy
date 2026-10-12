@@ -47,7 +47,7 @@ function campaignUnlocks(
 ) {
   return winner === 'player' &&
     campaign &&
-    campaign.slug !== 'brutal' &&
+    campaign.unlockToasts !== false &&
     level &&
     !alreadyCleared
     ? campaign.levels[level - 1].unlocks
@@ -125,7 +125,7 @@ export function Game({
     state,
     mode,
     viewerSide,
-    campaign?.slug !== 'tutorial',
+    campaign?.achievements !== false,
   )
   const winnerLabel = resolveWinnerLabel(
     state.winner,
@@ -233,7 +233,6 @@ export function Game({
             targeting={targeting}
             preview={inspected ?? destination ?? null}
             range={insight.range}
-            rangeKind={insight.rangeKind}
             threats={insight.threats}
             effect={effect}
             effectId={effectId}

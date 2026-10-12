@@ -62,7 +62,7 @@ const jump: SpecialAbility = {
   },
   tileTargets: (pawn, tiles, pawns) =>
     new Set(jumpDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random }) => {
+  perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -82,7 +82,7 @@ const jump: SpecialAbility = {
       round,
       log,
     )
-    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
+    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
 }
