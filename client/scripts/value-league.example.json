@@ -1,0 +1,63 @@
+{
+  "scenarios": {
+    "rosters": [
+      ["king", "swordsman", "archer"],
+      ["king", "wolf", "swordsman", "lancer", "archer"],
+      ["king", "bulwark", "bomber", "magician", "archer"],
+      ["king", "swordsman", "archer", "ninja", "lancer"],
+      ["king", "wolf", "berserker", "hoplite", "magician"]
+    ],
+    "biomes": ["verdant", "desert", "mountains", "volcano", "hell"]
+  },
+  "training": {
+    "games": 500,
+    "maxActivations": 360,
+    "epochs": 600,
+    "learningRate": 0.01,
+    "regularization": 0.001,
+    "validationEvery": 5,
+    "seedPrefix": "league-v2-training",
+    "league": [
+      { "name": "learned", "options": { "model": "league-v1", "simulations": 128 } },
+      {
+        "name": "commander",
+        "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+      },
+      {
+        "name": "depthsearch",
+        "options": {
+          "depth": 4,
+          "beamWidth": 6,
+          "riskAppetite": 0,
+          "focus": "best",
+          "latitude": 0
+        }
+      },
+      { "name": "learned", "options": { "model": "league-v1", "simulations": 32 } },
+      {
+        "name": "depthsearch",
+        "options": {
+          "depth": 2,
+          "beamWidth": 4,
+          "riskAppetite": 0.65,
+          "focus": "weakest",
+          "latitude": 25
+        }
+      },
+      { "name": "random", "options": {} }
+    ]
+  },
+  "evaluation": {
+    "pairs": 32,
+    "stride": 1,
+    "seedPrefix": "league-v2-selection",
+    "includeIncumbent": true,
+    "search": { "model": "league-v1", "simulations": 128, "candidates": 16 },
+    "opponents": [
+      {
+        "name": "commander",
+        "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
+      }
+    ]
+  }
+}
