@@ -1,4 +1,3 @@
-import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 import { validateSetup } from './engine/setup.ts'
 import type { BattleSetup } from './engine/index.ts'
 
@@ -8,9 +7,6 @@ export type GameSearch = {
   mode: GameMode
   // Bot configuration is validated by the application, never by the game library.
   bot?: unknown
-  difficulty?: BotDifficulty
-  // Resolved by bots/catalog.ts in the app; unknown names play the default.
-  strategy?: string
   setup?: Extract<BattleSetup, { map?: undefined }>
 }
 
@@ -19,9 +15,6 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
     mode: search.mode === 'local' ? 'local' : search.mode === 'online' ? 'online' : 'ai',
   }
   if (search.bot !== undefined) result.bot = search.bot
-  if (typeof search.difficulty === 'string' && Object.hasOwn(BOT_LEVELS, search.difficulty))
-    result.difficulty = search.difficulty as BotDifficulty
-  if (typeof search.strategy === 'string') result.strategy = search.strategy
   if (search.setup && typeof search.setup === 'object' && !('map' in search.setup)) {
     const setup = search.setup as NonNullable<GameSearch['setup']>
     try {

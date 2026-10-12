@@ -24,7 +24,7 @@ const setup = {
 
 test('Custom search keeps valid settings, snapshots armies and safely rejects malformed URLs', () => {
   assert.deepEqual(parseGameSearch({}), { mode: 'ai' })
-  assert.deepEqual(parseGameSearch({ mode: 'bad', difficulty: 'toString' }), { mode: 'ai' })
+  assert.deepEqual(parseGameSearch({ mode: 'bad' }), { mode: 'ai' })
   assert.equal(usesSymmetricField({ mode: 'ai' }, true), false)
   assert.equal(usesSymmetricField({ mode: 'ai', setup }, false), false)
   assert.equal(usesSymmetricField({ mode: 'ai', setup }, true), true)
@@ -33,8 +33,9 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
   assert.equal(usesSymmetricField({ mode: 'local', setup }, true), true)
   for (const mode of ['ai', 'local'] as const) {
     for (const difficulty of ['easy', 'normal', 'hard'] as const) {
-      const search = parseGameSearch({ mode, difficulty, setup })
-      assert.deepEqual(search, { mode, difficulty, setup })
+      const bot = { name: 'depthsearch', options: BOT_LEVELS[difficulty] }
+      const search = parseGameSearch({ mode, bot, setup })
+      assert.deepEqual(search, { mode, bot, setup })
       assert.notEqual(search.setup?.player, setup.player)
       assert.notEqual(search.setup?.enemy, setup.enemy)
       assert.deepEqual(initialState('custom', search.setup).setup, setup)
@@ -55,9 +56,8 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
     { ...setup, enemy: ['king', ...Array(MAP_WIDTH * 3).fill('archer')] },
     { ...setup, enemy: ['king', { kind: 'archer', col: 0, row: 0 }] },
   ]) {
-    assert.deepEqual(parseGameSearch({ mode: 'local', difficulty: 'hard', setup: invalid }), {
+    assert.deepEqual(parseGameSearch({ mode: 'local', setup: invalid }), {
       mode: 'local',
-      difficulty: 'hard',
     })
   }
 })
@@ -65,8 +65,8 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
 test('Custom search accepts more Bulwarks than one front row', () => {
   const bulwarks: BattleSetup['player'] = ['king', ...Array(MAP_WIDTH + 1).fill('bulwark')]
   const many = { ...setup, player: bulwarks }
-  const search = parseGameSearch({ mode: 'local', difficulty: 'hard', setup: many })
-  assert.deepEqual(search, { mode: 'local', difficulty: 'hard', setup: many })
+  const search = parseGameSearch({ mode: 'local', setup: many })
+  assert.deepEqual(search, { mode: 'local', setup: many })
   assert.equal(
     initialState('custom', search.setup).pawns.filter((p) => p.kind === 'bulwark').length,
     MAP_WIDTH + 1,

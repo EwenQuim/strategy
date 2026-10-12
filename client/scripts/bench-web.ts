@@ -19,11 +19,13 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, type CDPSession, type Page } from 'playwright-core'
+import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 
 const PORT = 4199
 const BASE = `http://127.0.0.1:${PORT}/strategy/`
 const SEED = process.env.SEED ?? 'perfprobe1'
 const DIFFICULTY = process.env.DIFFICULTY ?? 'normal'
+if (!Object.hasOwn(BOT_LEVELS, DIFFICULTY)) throw new RangeError('Invalid difficulty')
 const THROTTLE = Number(process.env.THROTTLE ?? 6)
 const TURNS = Number(process.env.TURNS ?? 5)
 const IDLE_WINDOW_MS = 3000
@@ -204,7 +206,8 @@ async function runBenchmarks(): Promise<Report> {
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLE })
 
     const loadedAt = Date.now()
-    await page.goto(`${BASE}game/${SEED}?mode=ai&difficulty=${DIFFICULTY}`, {
+    const bot = { name: 'depthsearch', options: BOT_LEVELS[DIFFICULTY as BotDifficulty] }
+    await page.goto(`${BASE}game/${SEED}?bot=${encodeURIComponent(JSON.stringify(bot))}`, {
       waitUntil: 'networkidle',
     })
     await page.waitForSelector('[data-testid="battlefield"]')
