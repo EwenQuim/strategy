@@ -64,33 +64,12 @@ export const unusedEnergy = t({
   it: 'L’energia inutilizzata si perde. Ritirati muovendoti; i colpi non mancano a caso.',
 })
 
-export const rallyBrief = t({
-  en: 'heal adjacent allies +1, once per round',
-  fr: 'soigne les alliés adjacents de +1, une fois par manche',
-  de: 'heilt angrenzende Verbündete um +1, einmal pro Runde',
-  es: 'cura a los aliados adyacentes +1, una vez por ronda',
-  it: 'cura gli alleati adiacenti di +1, una volta per round',
-})
 export const loseKing = t({
   en: 'Lose your king, lose the battle',
   fr: 'Perdez votre roi, perdez la bataille',
   de: 'Verlierst du deinen König, verlierst du die Schlacht',
   es: 'Pierde tu rey, pierde la batalla',
   it: 'Perdi il tuo re, perdi la battaglia',
-})
-export const chargeBrief = t({
-  en: 'move up to 2, then hit adjacent for 2',
-  fr: 'déplacez-vous jusqu’à 2 cases, puis frappez un adjacent pour 2',
-  de: 'bis zu 2 Felder bewegen, dann einen Angrenzenden für 2 treffen',
-  es: 'muévete hasta 2 casillas, luego golpea a un adyacente por 2',
-  it: 'muoviti fino a 2 caselle, poi colpisci un adiacente per 2',
-})
-export const aimedShotBrief = t({
-  en: '2 dmg, ignores Escape',
-  fr: "2 dégâts, ignore l'Esquive",
-  de: '2 Schaden, ignoriert Ausweichen',
-  es: '2 de daño, ignora la Esquiva',
-  it: '2 danni, ignora la Schivata',
 })
 export const archerMinRange = t({
   en: 'Cannot shoot adjacent enemies',
@@ -99,26 +78,12 @@ export const archerMinRange = t({
   es: 'No puede disparar a enemigos adyacentes',
   it: 'Non può colpire i nemici adiacenti',
 })
-export const fireballBrief = t({
-  en: '1 dmg to every enemy on a line',
-  fr: '1 dégât à chaque ennemi sur une ligne',
-  de: '1 Schaden bei jedem Gegner auf einer Linie',
-  es: '1 de daño a cada enemigo en línea',
-  it: '1 danno a ogni nemico in linea',
-})
 export const fireballPasses = t({
   en: 'Passes through everything, allies safe',
   fr: 'Traverse tout, les alliés sont épargnés',
   de: 'Durchdringt alles, Verbündete bleiben unversehrt',
   es: 'Atraviesa todo, los aliados están a salvo',
   it: 'Attraversa tutto, gli alleati sono salvi',
-})
-export const protectBrief = t({
-  en: 'takes the next hit for an ally within 2',
-  fr: 'encaisse le prochain coup pour un allié à 2 cases ou moins',
-  de: 'nimmt den nächsten Treffer für einen Verbündeten innerhalb von 2 Feldern',
-  es: 'recibe el próximo golpe por un aliado a 2 casillas o menos',
-  it: 'incassa il prossimo colpo per un alleato entro 2 caselle',
 })
 export const bulwarkSlow = t({
   en: 'Mobile shield: 1 energy per step, no offensive ability',
@@ -127,13 +92,6 @@ export const bulwarkSlow = t({
   es: 'Escudo móvil: 1 energía por paso, sin habilidad ofensiva',
   it: 'Scudo mobile: 1 energia per passo, nessuna abilità offensiva',
 })
-export const bombBrief = t({
-  en: 'any tile within 2, 1 dmg to it and its 6 neighbors',
-  fr: 'n’importe quelle case à 2 ou moins, 1 dégât à elle et ses 6 voisines',
-  de: 'ein beliebiges Feld innerhalb von 2, 1 Schaden an ihm und seinen 6 Nachbarn',
-  es: 'cualquier casilla a 2 o menos, 1 de daño a ella y sus 6 vecinas',
-  it: 'una qualsiasi casella entro 2, 1 danno a essa e alle 6 vicine',
-})
 export const bombFriendly = t({
   en: 'Hits allies and the bomber too',
   fr: 'Touche aussi les alliés et le grenadier',
@@ -141,51 +99,12 @@ export const bombFriendly = t({
   es: 'También afecta a aliados y al granadero',
   it: 'Colpisce anche gli alleati e il granatiere',
 })
-export const jumpBrief = t({
-  en: 'up to 3 tiles, over anything',
-  fr: 'jusqu’à 3 cases, par-dessus tout',
-  de: 'bis zu 3 Felder, über alles hinweg',
-  es: 'hasta 3 casillas, por encima de todo',
-  it: 'fino a 3 caselle, sopra ogni cosa',
-})
 export const jumpNoAttack = t({
   en: 'Fragile: plan your retreat',
   fr: 'Fragile : préparez votre retraite',
   de: 'Zerbrechlich: plane deinen Rückzug',
   es: 'Frágil: planea tu retirada',
   it: 'Fragile: pianifica la ritirata',
-})
-
-export const phalanxBrief = t({
-  en: 'shields an adjacent ally from the next hit',
-  fr: 'protège un allié adjacent du prochain coup',
-  de: 'schirmt einen angrenzenden Verbündeten vom nächsten Treffer ab',
-  es: 'protege a un aliado adyacente del próximo golpe',
-  it: 'protegge un alleato adiacente dal prossimo colpo',
-})
-
-export const cryBrief = t({
-  en: '+1 energy to allies within 2, once per round',
-  fr: '+1 énergie aux alliés à 2 cases, une fois par manche',
-  de: '+1 Energie für Verbündete innerhalb von 2, einmal pro Runde',
-  es: '+1 de energía a aliados a 2 casillas, una vez por ronda',
-  it: '+1 energia agli alleati entro 2 caselle, una volta per round',
-})
-
-export const furyBrief = t({
-  en: 'spends all energy: 2 dmg +1 per extra energy, ignores Escape',
-  fr: "dépense toute l'énergie : 2 dégâts +1 par énergie en plus, ignore l'Esquive",
-  de: 'gibt alle Energie aus: 2 Schaden +1 pro zusätzlicher Energie, ignoriert Ausweichen',
-  es: 'gasta toda la energía: 2 de daño +1 por energía extra, ignora la Esquiva',
-  it: "spende tutta l'energia: 2 danni +1 per energia extra, ignora la Schivata",
-})
-
-export const lancerBrief = t({
-  en: 'run any distance in a straight line until blocked',
-  fr: "courez n'importe quelle distance en ligne droite jusqu'à être bloqué",
-  de: 'renne beliebig weit in gerader Linie, bis etwas blockiert',
-  es: 'corre cualquier distancia en línea recta hasta ser bloqueado',
-  it: 'corri per qualsiasi distanza in linea retta finché non sei bloccato',
 })
 
 export const lakes = t({

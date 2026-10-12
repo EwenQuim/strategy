@@ -18,7 +18,7 @@ export interface BriefingElement {
   readonly special?: { name: string; cost: number; description: string }
 }
 
-function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
+function unit(kind: PawnKind, ...points: string[]): BriefingElement {
   const { maxHp, attack, special } = new PAWN_CLASSES[kind](0, 0, 0, 'player')
   const range =
     attack.minRange === attack.maxRange
@@ -33,7 +33,7 @@ function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
       cost: special.cost,
       description: specialTexts[special.description],
     },
-    points: specialPoints.slice(1),
+    points,
   }
 }
 
@@ -46,18 +46,18 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
       icon: 'energy',
       points: [b.energyPerRound(START_ENERGY), b.spendEnergy, b.unusedEnergy],
     },
-    unit('king', b.rallyBrief, b.loseKing),
+    unit('king', b.loseKing),
   ],
-  swordsman: [unit('swordsman', b.chargeBrief)],
-  archer: [unit('archer', b.aimedShotBrief, b.archerMinRange)],
-  magician: [unit('magician', b.fireballBrief, b.fireballPasses)],
-  bulwark: [unit('bulwark', b.protectBrief, b.bulwarkSlow)],
-  bomber: [unit('bomber', b.bombBrief, b.bombFriendly)],
-  ninja: [unit('ninja', b.jumpBrief, b.jumpNoAttack)],
-  hoplite: [unit('hoplite', b.phalanxBrief)],
-  wolf: [unit('wolf', b.cryBrief)],
-  berserker: [unit('berserker', b.furyBrief)],
-  lancer: [unit('lancer', b.lancerBrief)],
+  swordsman: [unit('swordsman')],
+  archer: [unit('archer', b.archerMinRange)],
+  magician: [unit('magician', b.fireballPasses)],
+  bulwark: [unit('bulwark', b.bulwarkSlow)],
+  bomber: [unit('bomber', b.bombFriendly)],
+  ninja: [unit('ninja', b.jumpNoAttack)],
+  hoplite: [unit('hoplite')],
+  wolf: [unit('wolf')],
+  berserker: [unit('berserker')],
+  lancer: [unit('lancer')],
   lake: [
     {
       name: b.lakes,
