@@ -27,9 +27,10 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][] {
   const seen = new Set<string>()
@@ -235,7 +236,7 @@ test('Lakes block walking and Charge for both sides, and cannot be Ninja landing
         assert.equal(reducer(state, { type: 'special', target: { q: 2, r: 0 } }), state)
       }
       let next = state
-      for (const action of await depthsearch(state, BOT_LEVELS.normal)) {
+      for (const action of await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)) {
         const result = reducer(next, action)
         assert.notEqual(result, next)
         next = result

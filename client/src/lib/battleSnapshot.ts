@@ -1,7 +1,6 @@
 import { PAWN_CLASSES, type PawnKind, type Side } from './engine/pawns/index.ts'
 import type { Tile } from './engine/hex.ts'
 import type { BattleSetup, GameState } from './engine/index.ts'
-import type { BotConfig } from './bot-config.ts'
 import type { GameMode } from './game-mode.ts'
 
 // Bump when the saved state shape changes; older records are then discarded.
@@ -32,7 +31,7 @@ export type BattleIdentity = {
 export function battleIdentity(
   mode: GameMode,
   seed: string,
-  bot: BotConfig,
+  bot: object,
   setup: BattleSetup | undefined,
 ): BattleIdentity {
   return { mode, seed, bot: JSON.stringify(bot), setup: JSON.stringify(setup ?? null) }

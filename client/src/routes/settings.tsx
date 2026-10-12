@@ -15,8 +15,12 @@ import {
   saveHapticsEnabled,
 } from '../preferences'
 import { clearLocalData } from '../localData'
-import { readMistralApiKey, saveMistralApiKey } from '../api/mistralBot'
-import { readJevApiKey, saveJevApiKey } from '../api/jevBot'
+import {
+  readMistralApiKey,
+  saveMistralApiKey,
+  readJevApiKey,
+  saveJevApiKey,
+} from '../bots/apiKeys'
 
 export const Route = createFileRoute('/settings')({
   component: function Settings() {

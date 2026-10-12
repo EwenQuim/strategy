@@ -1,4 +1,4 @@
-import { legalActions } from '../lib/engine/ai/options.ts'
+import { legalActions } from '../../lib/engine/ai/options.ts'
 import {
   activePawn,
   hexDist,
@@ -6,34 +6,56 @@ import {
   type Action,
   type Axial,
   type GameState,
-} from '../lib/engine/index.ts'
-import {
-  acceptedAction,
-  describeAction,
-  fallbackAction,
-  positionText,
-  readApiKey,
-  RULES_TEXT,
-  saveApiKey,
-} from './botText.ts'
+} from '../../lib/engine/index.ts'
+import type { Bot } from '../bot.ts'
+import { readOptions } from '../options.ts'
+import { readJevApiKey } from '../apiKeys.ts'
+import { acceptedAction, describeAction, positionText, RULES_TEXT } from '../remoteText.ts'
 
-// The whole Jev bot lives here, outside the pure engine: the API key, the decision request
-// and the answer mapping. Jev (TypeSafe AI) is a decision model: it picks one option from a
+// Jev (TypeSafe AI) is a decision model: it picks one option from a
 // fixed list with a calibrated probability instead of writing text, so the legal actions are
 // sent as the criteria of a single choice question. The engine stays the sole judge — the
-// chosen option is played only if the reducer accepts it — and any failure falls back to the
-// strategy's own local search, so a battle can never stall.
+// chosen option is played only if the reducer accepts it — and a failed call proposes nothing,
+// so the catalog falls back to the local search.
 
-const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
-export const API_KEY_STORAGE = 'hexmate.jevApiKey'
+type JevOptions = { model: string }
+const DEFAULT_OPTIONS: JevOptions = { model: 'jev-latest' }
+// Proposes nothing without a key or a usable answer; the catalog falls back to the local search.
+export class JevBot implements Bot<JevOptions> {
+  readonly name = 'jev'
+  readonly options: Readonly<JevOptions>
 
-export function readJevApiKey(): string | undefined {
-  return readApiKey(API_KEY_STORAGE)
-}
+  constructor(options: Partial<JevOptions> = {}) {
+    this.options = readOptions(DEFAULT_OPTIONS, options)
+    if (!this.options.model.trim()) throw new RangeError('Invalid Jev options')
+  }
 
-export function saveJevApiKey(key: string): void {
-  saveApiKey(API_KEY_STORAGE, key)
+  async chooseActions(state: GameState): Promise<Action[]> {
+    const apiKey = readJevApiKey()
+    if (!apiKey || !activePawn(state)) return []
+    const response = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(30_000),
+      body: JSON.stringify({
+        model: this.options.model,
+        state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
+        questions: {
+          move: {
+            type: 'choice',
+            instructions:
+              'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
+            criteria: actionCriteria(state),
+          },
+        },
+      }),
+    })
+    if (!response.ok) return []
+    const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
+    const action = actionFromChoice(data.answers?.move?.choice, state)
+    return action ? [action] : []
+  }
 }
 
 // The fixed option list Jev picks from: one criteria entry per legal action, keyed by index.
@@ -91,34 +113,4 @@ export function actionFromChoice(choice: unknown, state: GameState): Action | nu
   const action = legalActions(state)[Number(choice)]
   if (!action || String(Number(choice)) !== choice) return null
   return acceptedAction(action, state)
-}
-
-export async function jevChooseAction(state: GameState): Promise<Action> {
-  const apiKey = readJevApiKey()
-  if (!apiKey || !activePawn(state)) return fallbackAction(state)
-  try {
-    const response = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(30_000),
-      body: JSON.stringify({
-        model: MODEL,
-        state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
-        questions: {
-          move: {
-            type: 'choice',
-            instructions:
-              'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
-            criteria: actionCriteria(state),
-          },
-        },
-      }),
-    })
-    if (!response.ok) return fallbackAction(state)
-    const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
-    return actionFromChoice(data.answers?.move?.choice, state) ?? fallbackAction(state)
-  } catch {
-    // Network, quota or parsing failure: the local AI keeps the battle moving.
-    return fallbackAction(state)
-  }
 }

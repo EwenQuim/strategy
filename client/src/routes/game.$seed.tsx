@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { QuickPlayTutorial } from '../components/Briefing'
 import { Game } from '../components/Game'
-import { botFromSearch } from '../lib/game-mode'
+import { parseBotConfig } from '../bots/catalog'
 
 export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {
@@ -13,7 +13,12 @@ export const Route = createFileRoute('/game/$seed')({
     const search = Route.useSearch()
     return (
       <>
-        <Game seed={seed} mode={search.mode} bot={botFromSearch(search)} setup={search.setup} />
+        <Game
+          seed={seed}
+          mode={search.mode}
+          bot={parseBotConfig(search.bot)}
+          setup={search.setup}
+        />
         {search.mode === 'ai' && !search.setup && <QuickPlayTutorial />}
       </>
     )

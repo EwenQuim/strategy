@@ -19,10 +19,12 @@ import {
   type Pawn,
   type Side,
 } from '../src/lib/engine/index.ts'
-import { ruleBased, nearestTarget } from '../src/lib/engine/bot.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+
+import { nearestTarget } from '../src/bots/targetPicker.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(pawn: Pawn): GameState {
   const tiles: GameState['tiles'] = new Map()
@@ -163,13 +165,13 @@ test('Bots use long-range rays and bombs centered on empty tiles', async () => {
   for (const Unit of [Magician, Bomber]) {
     const state = battle(new Unit(1, 0, 0, 'player'))
     state.pawns[2] = new King(3, Unit === Magician ? 7 : 3, 0, 'enemy', 1)
-    for (const [strategy, options] of [
-      [depthsearch, BOT_LEVELS.easy],
-      [depthsearch, BOT_LEVELS.normal],
-      [depthsearch, BOT_LEVELS.hard],
-      [ruleBased(nearestTarget), BOT_LEVELS.normal],
-    ] as const) {
-      const actions = await strategy(state, options)
+    for (const level of [
+      new DepthsearchBot(BOT_LEVELS.easy),
+      new DepthsearchBot(BOT_LEVELS.normal),
+      new DepthsearchBot(BOT_LEVELS.hard),
+      new RulesBot(nearestTarget),
+    ]) {
+      const actions = await level.chooseActions(state)
       const next = actions.reduce(reducer, state)
       assert.equal(next.winner, 'player')
     }
@@ -265,13 +267,13 @@ test('Bots avoid bombing their own king and do not target ally-only groups', asy
   const state = battle(new Bomber(1, 0, 0, 'player'))
   state.pawns[1] = new King(2, 2, 0, 'player', 1)
   state.pawns[2] = new King(3, 3, 0, 'enemy', 1)
-  for (const [strategy, options] of [
-    [depthsearch, BOT_LEVELS.easy],
-    [depthsearch, BOT_LEVELS.normal],
-    [depthsearch, BOT_LEVELS.hard],
-    [ruleBased(nearestTarget), BOT_LEVELS.normal],
-  ] as const) {
-    const next = (await strategy(state, options)).reduce(reducer, state)
+  for (const strategy of [
+    new DepthsearchBot(BOT_LEVELS.easy),
+    new DepthsearchBot(BOT_LEVELS.normal),
+    new DepthsearchBot(BOT_LEVELS.hard),
+    new RulesBot(nearestTarget),
+  ]) {
+    const next = (await strategy.chooseActions(state)).reduce(reducer, state)
     assert.equal(next.pawns.find((pawn) => pawn.id === 2)?.hp, 1)
     assert.notEqual(next.winner, 'enemy')
   }

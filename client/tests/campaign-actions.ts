@@ -1,22 +1,23 @@
 import assert from 'node:assert/strict'
 import { CAMPAIGNS, type CampaignLevel } from '../src/lib/campaign.ts'
 import type { Action, GameState } from '../src/lib/engine/index.ts'
-import { ruleBased, huntTheKing } from '../src/lib/engine/bot.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
+import { huntTheKing } from '../src/bots/targetPicker.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { createBotGame } from './bot-game.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
-
-const hunt = ruleBased(huntTheKing)
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 
 export function campaignActions(state: GameState, caution = 0.25): Promise<Action[]> {
   // Press the attack in long endgames instead of testing two kings retreating forever.
-  return state.round > 20
-    ? hunt(state, BOT_LEVELS.hard)
-    : depthsearch(state, { ...BOT_LEVELS.hard, riskAppetite: 1 - caution })
+  const bot =
+    state.round > 20
+      ? new RulesBot(huntTheKing)
+      : new DepthsearchBot({ ...BOT_LEVELS.hard, riskAppetite: 1 - caution })
+  return bot.chooseActions(state)
 }
 
 async function playToTheEnd(level: CampaignLevel, difficulty: BotDifficulty, caution: number) {
-  const bot = createBotGame(depthsearch, BOT_LEVELS[difficulty])
+  const bot = createBotGame(new DepthsearchBot(BOT_LEVELS[difficulty]))
   let state = bot.initialState(level.seed, level.setup)
   for (let step = 0; step < 300 && !state.winner; step++) {
     for (const action of await campaignActions(state, caution)) {

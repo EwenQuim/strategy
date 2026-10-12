@@ -1,37 +1,33 @@
-import { activePawn, type Action, type GameState } from './engine.ts'
-import { canAttack, specialTargets } from './combat.ts'
-import { chargeDestinations, jumpDestinations, type Pawn } from './pawns/index.ts'
-import { distFrom, hexDist, key, neighbors, passable } from './hex.ts'
-import type { AiStrategy } from './ai/decision.ts'
+import { activePawn, type Action, type GameState } from '../../lib/engine/engine.ts'
+import { canAttack, specialTargets } from '../../lib/engine/combat.ts'
+import {
+  chargeDestinations,
+  jumpDestinations,
+  type Pawn,
+} from '../../lib/engine/pawns/index.ts'
+import { distFrom, key, neighbors, passable } from '../../lib/engine/hex.ts'
+import type { Bot } from '../bot.ts'
+import type { TargetPicker } from '../targetPicker.ts'
 
-export interface TargetPicker {
-  chooseTarget(attacker: Pawn, targets: readonly Pawn[]): Pawn | undefined
-}
+// A scripted bot around a target picker, for tests and campaign checks.
+export class RulesBot implements Bot {
+  readonly name = 'rules'
+  readonly options = Object.freeze({})
+  readonly picker: TargetPicker
 
-export const nearestTarget: TargetPicker = {
-  chooseTarget: (attacker, targets) =>
-    targets.toSorted((a, b) => hexDist(attacker, a) - hexDist(attacker, b))[0],
-}
+  constructor(picker: TargetPicker) {
+    this.picker = picker
+  }
 
-export const huntTheKing: TargetPicker = {
-  chooseTarget: (attacker, targets) =>
-    nearestTarget.chooseTarget(
-      attacker,
-      targets.filter((p) => p.kind === 'king'),
-    ) ?? nearestTarget.chooseTarget(attacker, targets),
-}
-
-// Scripted opponents use the same action-proposing contract as local and remote strategies.
-export function ruleBased(targetPicker: TargetPicker): AiStrategy {
-  return async (state) => {
+  async chooseActions(state: GameState): Promise<Action[]> {
     const pawn = activePawn(state)
     if (!pawn || state.winner) return []
     if (pawn.energy <= 0) return [{ type: 'endTurn' }]
     const foes = state.pawns.filter((p) => p.side !== pawn.side)
     const specials = specialTargets(state.pawns, pawn)
     return (
-      ruleSpecial(state, pawn, foes, specials, targetPicker) ??
-      ruleAttack(state, pawn, foes, targetPicker) ??
+      ruleSpecial(state, pawn, foes, specials, this.picker) ??
+      ruleAttack(state, pawn, foes, this.picker) ??
       ruleApproach(state, pawn, foes)
     )
   }

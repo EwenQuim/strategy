@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { Pawn, activePawn, type GameState } from '../src/lib/engine/index.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import {
   battleIdentity,
   restoreState,
@@ -62,33 +63,51 @@ test('isSameBattle only matches the identical game', () => {
   const identity = battleIdentity(
     'ai',
     'seed',
-    { name: 'depthsearch', difficulty: 'normal' },
+    { name: 'depthsearch', options: BOT_LEVELS.normal },
     undefined,
   )
   assert.ok(isSameBattle(identity, identity))
   assert.equal(
     isSameBattle(
-      battleIdentity('ai', 'other', { name: 'depthsearch', difficulty: 'normal' }, undefined),
+      battleIdentity(
+        'ai',
+        'other',
+        { name: 'depthsearch', options: BOT_LEVELS.normal },
+        undefined,
+      ),
       identity,
     ),
     false,
   )
   assert.equal(
     isSameBattle(
-      battleIdentity('local', 'seed', { name: 'depthsearch', difficulty: 'normal' }, undefined),
+      battleIdentity(
+        'local',
+        'seed',
+        { name: 'depthsearch', options: BOT_LEVELS.normal },
+        undefined,
+      ),
       identity,
     ),
     false,
   )
   assert.equal(
     isSameBattle(
-      battleIdentity('ai', 'seed', { name: 'depthsearch', difficulty: 'hard' }, undefined),
+      battleIdentity(
+        'ai',
+        'seed',
+        { name: 'depthsearch', options: BOT_LEVELS.hard },
+        undefined,
+      ),
       identity,
     ),
     false,
   )
   assert.equal(
-    isSameBattle(battleIdentity('ai', 'seed', { name: 'mistral' }, undefined), identity),
+    isSameBattle(
+      battleIdentity('ai', 'seed', { name: 'random', options: {} }, undefined),
+      identity,
+    ),
     false,
   )
   assert.equal(isSameBattle(null, identity), false)

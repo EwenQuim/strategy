@@ -1,7 +1,8 @@
 import type { RefObject } from 'react'
 import type { BattleSetup, Biome } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
-import type { BotConfig } from '../lib/bot-config'
+import { BOTS, type BotConfig } from '../bots/catalog'
+import type { BotDifficulty } from '../lib/engine/ai'
 import { INTRODUCTIONS } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
@@ -29,6 +30,9 @@ export function GameHelpDialog({
   campaignLevel,
 }: GameHelpDialogProps) {
   const { hell, ...elements } = INTRODUCTIONS
+  const preset = Object.entries(BOTS[bot.name].presets).find(
+    ([, options]) => JSON.stringify(options) === JSON.stringify(bot.options),
+  )?.[0]
   return (
     <dialog
       ref={dialogRef}
@@ -56,8 +60,8 @@ export function GameHelpDialog({
           {setup &&
             mode !== 'local' &&
             ' ' +
-              (bot.name === 'depthsearch'
-                ? m.aiDifficulty(menus.difficulties[bot.difficulty])
+              (preset
+                ? m.aiDifficulty(menus.difficulties[preset as BotDifficulty])
                 : m.aiStrategy(menus.aiStrategies[bot.name]))}{' '}
           {mode === 'local'
             ? m.localPlayers

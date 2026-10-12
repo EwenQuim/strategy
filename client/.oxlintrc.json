@@ -123,34 +123,6 @@
           }
         ]
       }
-    },
-    {
-      "files": ["src/lib/engine/ai/strategies/*"],
-      "rules": {
-        "no-restricted-imports": [
-          "error",
-          {
-            "patterns": [
-              {
-                "group": [
-                  "*",
-                  "!./**",
-                  "!../decision.ts",
-                  "!../turns.ts",
-                  "!../evaluate.ts",
-                  "!../plan.ts",
-                  "!../choice.ts",
-                  "!../options.ts",
-                  "!../../engine.ts",
-                  "!../../ai.ts",
-                  "!../../random.ts",
-                  "!../../pawns/index.ts"
-                ]
-              }
-            ]
-          }
-        ]
-      }
     }
   ]
 }

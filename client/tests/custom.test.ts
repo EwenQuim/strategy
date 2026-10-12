@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { parseGameSearch, usesSymmetricField } from '../src/lib/game-mode.ts'
-import { depthsearch } from '../src/lib/engine/ai/strategies/depthsearch.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+
 import { createBotGame } from './bot-game.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { activePawn, initialState, transition } from '../src/lib/engine/engine.ts'
@@ -14,6 +13,8 @@ import {
   symmetricSeed,
   type BattleSetup,
 } from '../src/lib/engine/index.ts'
+import { getBot } from '../src/bots/catalog.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 const setup = {
   biome: 'desert',
@@ -23,7 +24,7 @@ const setup = {
 
 test('Custom search keeps valid settings, snapshots armies and safely rejects malformed URLs', () => {
   assert.deepEqual(parseGameSearch({}), { mode: 'ai' })
-  assert.deepEqual(parseGameSearch({ mode: 'bad', difficulty: 'toString' }), { mode: 'ai' })
+  assert.deepEqual(parseGameSearch({ mode: 'bad' }), { mode: 'ai' })
   assert.equal(usesSymmetricField({ mode: 'ai' }, true), false)
   assert.equal(usesSymmetricField({ mode: 'ai', setup }, false), false)
   assert.equal(usesSymmetricField({ mode: 'ai', setup }, true), true)
@@ -32,8 +33,9 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
   assert.equal(usesSymmetricField({ mode: 'local', setup }, true), true)
   for (const mode of ['ai', 'local'] as const) {
     for (const difficulty of ['easy', 'normal', 'hard'] as const) {
-      const search = parseGameSearch({ mode, difficulty, setup })
-      assert.deepEqual(search, { mode, difficulty, setup })
+      const bot = { name: 'depthsearch', options: BOT_LEVELS[difficulty] }
+      const search = parseGameSearch({ mode, bot, setup })
+      assert.deepEqual(search, { mode, bot, setup })
       assert.notEqual(search.setup?.player, setup.player)
       assert.notEqual(search.setup?.enemy, setup.enemy)
       assert.deepEqual(initialState('custom', search.setup).setup, setup)
@@ -54,9 +56,8 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
     { ...setup, enemy: ['king', ...Array(MAP_WIDTH * 3).fill('archer')] },
     { ...setup, enemy: ['king', { kind: 'archer', col: 0, row: 0 }] },
   ]) {
-    assert.deepEqual(parseGameSearch({ mode: 'local', difficulty: 'hard', setup: invalid }), {
+    assert.deepEqual(parseGameSearch({ mode: 'local', setup: invalid }), {
       mode: 'local',
-      difficulty: 'hard',
     })
   }
 })
@@ -64,8 +65,8 @@ test('Custom search keeps valid settings, snapshots armies and safely rejects ma
 test('Custom search accepts more Bulwarks than one front row', () => {
   const bulwarks: BattleSetup['player'] = ['king', ...Array(MAP_WIDTH + 1).fill('bulwark')]
   const many = { ...setup, player: bulwarks }
-  const search = parseGameSearch({ mode: 'local', difficulty: 'hard', setup: many })
-  assert.deepEqual(search, { mode: 'local', difficulty: 'hard', setup: many })
+  const search = parseGameSearch({ mode: 'local', setup: many })
+  assert.deepEqual(search, { mode: 'local', setup: many })
   assert.equal(
     initialState('custom', search.setup).pawns.filter((p) => p.kind === 'bulwark').length,
     MAP_WIDTH + 1,
@@ -75,15 +76,15 @@ test('Custom search accepts more Bulwarks than one front row', () => {
 test('Custom playback applies the selected difficulty, preserves setups on restart and ignores AI in 2P', async () => {
   const outcomes = new Set<string>()
   for (const difficulty of ['easy', 'normal', 'hard'] as const) {
-    const options = BOT_LEVELS[difficulty]
-    const bot = createBotGame(depthsearch, options)
+    const config = { name: 'depthsearch', options: BOT_LEVELS[difficulty] } as const
+    const bot = createBotGame(getBot(config))
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening
     for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
       const expected = await bot.transition(playback.state, { type: 'endTurn' })
       playback = playbackReducer(playback, { type: 'endTurn' }, 'ai')
       while (!playback.state.winner && activePawn(playback.state)?.side === 'enemy') {
-        const actions = await depthsearch(playback.state, options)
+        const actions = await getBot(config).chooseActions(playback.state)
         playback = playbackReducer(playback, { type: 'playbackFinish' }, 'ai')
         playback = playbackReducer(playback, { type: 'botActions', actions }, 'ai')
       }

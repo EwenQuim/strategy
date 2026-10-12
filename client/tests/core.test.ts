@@ -19,10 +19,12 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { createBotGame } from './bot-game.ts'
-import { ruleBased } from '../src/lib/engine/bot.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import { seedState } from '../src/lib/engine/random.ts'
+import { nearestTarget } from '../src/bots/targetPicker.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
+import { withFallback } from '../src/bots/bot.ts'
 
 function duel(side: Side): GameState {
   return {
@@ -223,12 +225,32 @@ test('Core skips fallen units and refreshes a round without running a controller
 })
 
 test('Rejected bot proposals end the turn instead of spinning', async () => {
-  const game = createBotGame(ruleBased({ chooseTarget: () => new King(99, 99, 99, 'player') }))
+  const game = createBotGame(
+    new RulesBot({ chooseTarget: () => new King(99, 99, 99, 'player') }),
+  )
   const state = duel('player')
   const original = structuredClone(state)
   const next = await game.reducer(state, { type: 'endTurn' })
   assert.equal(activePawn(next)?.side, 'player')
   assert.deepEqual(structuredClone(state), original)
+})
+
+test('A failing or empty bot hands the decision to its fallback', async () => {
+  const state = duel('enemy')
+  const fallback = new RulesBot(nearestTarget)
+  const expected = await fallback.chooseActions(state)
+  assert.ok(expected.length > 0)
+  const failing = {
+    name: 'offline',
+    options: {},
+    async chooseActions() {
+      throw new Error('offline')
+    },
+  }
+  const empty = { name: 'empty', options: {}, chooseActions: async () => [] }
+  assert.deepEqual(await withFallback(failing, fallback).chooseActions(state), expected)
+  assert.deepEqual(await withFallback(empty, fallback).chooseActions(state), expected)
+  assert.deepEqual(await withFallback(fallback, failing).chooseActions(state), expected)
 })
 
 test('Path searches use shortest passable routes within the movement budget', () => {

@@ -25,12 +25,13 @@ import {
   reducer as coreReducer,
 } from '../src/lib/engine/index.ts'
 import { createBotGame } from './bot-game.ts'
-import { huntTheKing, nearestTarget, ruleBased } from '../src/lib/engine/bot.ts'
+import { huntTheKing, nearestTarget } from '../src/bots/targetPicker.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
 
 const { initialState, initialTransition, transition, reducer } = createBotGame(
-  ruleBased(nearestTarget),
+  new RulesBot(nearestTarget),
 )
 
 function battle(): GameState {
@@ -267,10 +268,10 @@ test('The reducer uses the supplied enemy strategy', async () => {
   state.pawns[1].q = 0
   state.pawns[1].r = 1
   state.order = [1, 3, 2]
-  const nearest = await createBotGame(ruleBased(nearestTarget)).reducer(state, {
+  const nearest = await createBotGame(new RulesBot(nearestTarget)).reducer(state, {
     type: 'endTurn',
   })
-  const hunting = await createBotGame(ruleBased(huntTheKing)).reducer(state, {
+  const hunting = await createBotGame(new RulesBot(huntTheKing)).reducer(state, {
     type: 'endTurn',
   })
   assert.equal(nearest.pawns[0].hp, 3)
@@ -636,8 +637,8 @@ test('Enemy kings Rally, swordsmen Charge, and magicians use Fireball', async ()
 })
 
 test('Enemy playback records each action in order without changing seeded results', async () => {
-  for (const strategy of [nearestTarget, huntTheKing]) {
-    const engine = createBotGame(ruleBased(strategy))
+  for (const strategy of [new RulesBot(nearestTarget), new RulesBot(huntTheKing)]) {
+    const engine = createBotGame(strategy)
     for (const seed of ['alpha', 'bravo', 'animation-review']) {
       const opening = engine.initialTransition(seed)
       assert.deepEqual(opening.state, engine.initialState(seed))

@@ -7,10 +7,11 @@ import {
   reducer,
   type GameState,
 } from '../src/lib/engine/index.ts'
-import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { STRATEGIES } from '../src/api/bots.ts'
+import { BOTS, getBot } from '../src/bots/catalog.ts'
 import { legalActions } from '../src/lib/engine/ai/options.ts'
-import { actionFromReply, battlePrompt, mistralChooseAction } from '../src/api/mistralBot.ts'
+import { actionFromReply, battlePrompt, MistralBot } from '../src/bots/strategies/mistral.ts'
+
+const mistralBot = new MistralBot()
 
 test('Every pawn class carries its remote AI instructions', () => {
   for (const [kind, Unit] of Object.entries(PAWN_CLASSES))
@@ -55,14 +56,12 @@ test('A model reply is accepted only when the engine accepts the action', () => 
 
 test('Without an API key the registered Mistral bot falls back to the local search', async () => {
   const state = enemyTurn('mistral-sync')
-  const actions = await STRATEGIES.mistral(state, BOT_LEVELS.normal)
+  const actions = await getBot(BOTS.mistral.defaultConfig).chooseActions(state)
   assert.ok(actions.length > 0)
   for (const action of actions)
     assert.notEqual(reducer(state, action), state, `illegal ${JSON.stringify(action)}`)
 })
 
-test('Without an API key the adapter falls back to a legal local action', async () => {
-  const state = enemyTurn('mistral-fallback')
-  const action = await mistralChooseAction(state)
-  assert.notEqual(reducer(state, action), state)
+test('Without an API key the adapter proposes nothing', async () => {
+  assert.deepEqual(await mistralBot.chooseActions(enemyTurn('mistral-fallback')), [])
 })
