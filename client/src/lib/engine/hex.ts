@@ -248,8 +248,8 @@ export function makeMap(
   }
   for (const feature of terrainFeatures)
     placeFeature(tiles, [...tiles.values()], reserved, feature, random, symmetric)
-  const roll = random.next()
-  const drawn = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+  const featureRoll = random.next()
+  const drawn = featureRoll < 0.5 ? 0 : featureRoll < 0.9 ? 1 : 2
   const count = symmetric ? Math.ceil(drawn / 2) : drawn
   const candidates = [...tiles.values()].filter(
     (tile) =>

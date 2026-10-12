@@ -30,8 +30,8 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
     ...mine.map((pawn) => pawn.kind),
     ...fallen.filter((unit) => unit.side === me).map((unit) => unit.kind),
   ])
-  const myBlows = state.blows.flatMap(({ by, fallen }) =>
-    by?.side === me ? [{ by, kills: fallen.filter((unit) => unit.side !== me) }] : [],
+  const myBlows = state.blows.flatMap(({ by, fallen: victims }) =>
+    by?.side === me ? [{ by, kills: victims.filter((unit) => unit.side !== me) }] : [],
   )
   const regicide = myBlows.find(({ kills }) => kills.some((unit) => unit.kind === 'king'))
   const killsBy = new Map<number, number>()

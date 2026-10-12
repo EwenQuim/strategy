@@ -95,9 +95,9 @@ test('Online battle messages use the two player names', () => {
 
 const storage = new Map<string, string>()
 const localStorageStub = {
-  getItem: (key: string) => storage.get(key) ?? null,
-  setItem: (key: string, value: string) => void storage.set(key, value),
-  removeItem: (key: string) => void storage.delete(key),
+  getItem: (storageKey: string) => storage.get(storageKey) ?? null,
+  setItem: (storageKey: string, value: string) => void storage.set(storageKey, value),
+  removeItem: (storageKey: string) => void storage.delete(storageKey),
 }
 Object.assign(globalThis, { localStorage: localStorageStub })
 

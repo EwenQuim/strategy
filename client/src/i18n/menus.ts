@@ -178,26 +178,26 @@ export const startBattle = t({
 })
 
 export const levelsCompleted = t({
-  en: (completed: number, total: number) => `${completed} / ${total} completed`,
-  fr: (completed: number, total: number) =>
-    `${completed} / ${total} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
-  de: (completed: number, total: number) => `${completed} / ${total} abgeschlossen`,
-  es: (completed: number, total: number) =>
-    `${completed} / ${total} ${plural(completed, { one: 'completado', other: 'completados' })}`,
-  it: (completed: number, total: number) =>
-    `${completed} / ${total} ${plural(completed, { one: 'completato', other: 'completati' })}`,
+  en: (completed: number, levelCount: number) => `${completed} / ${levelCount} completed`,
+  fr: (completed: number, levelCount: number) =>
+    `${completed} / ${levelCount} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
+  de: (completed: number, levelCount: number) => `${completed} / ${levelCount} abgeschlossen`,
+  es: (completed: number, levelCount: number) =>
+    `${completed} / ${levelCount} ${plural(completed, { one: 'completado', other: 'completados' })}`,
+  it: (completed: number, levelCount: number) =>
+    `${completed} / ${levelCount} ${plural(completed, { one: 'completato', other: 'completati' })}`,
 })
 export const campaignCard = t({
-  en: (name: string, completed: number, total: number) =>
-    `${name} campaign, ${completed} / ${total} completed`,
-  fr: (name: string, completed: number, total: number) =>
-    `Campagne ${name}, ${completed} / ${total} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
-  de: (name: string, completed: number, total: number) =>
-    `Kampagne ${name}, ${completed} / ${total} abgeschlossen`,
-  es: (name: string, completed: number, total: number) =>
-    `Campaña ${name}, ${completed} / ${total} ${plural(completed, { one: 'completado', other: 'completados' })}`,
-  it: (name: string, completed: number, total: number) =>
-    `Campagna ${name}, ${completed} / ${total} ${plural(completed, { one: 'completato', other: 'completati' })}`,
+  en: (name: string, completed: number, levelCount: number) =>
+    `${name} campaign, ${completed} / ${levelCount} completed`,
+  fr: (name: string, completed: number, levelCount: number) =>
+    `Campagne ${name}, ${completed} / ${levelCount} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
+  de: (name: string, completed: number, levelCount: number) =>
+    `Kampagne ${name}, ${completed} / ${levelCount} abgeschlossen`,
+  es: (name: string, completed: number, levelCount: number) =>
+    `Campaña ${name}, ${completed} / ${levelCount} ${plural(completed, { one: 'completado', other: 'completados' })}`,
+  it: (name: string, completed: number, levelCount: number) =>
+    `Campagna ${name}, ${completed} / ${levelCount} ${plural(completed, { one: 'completato', other: 'completati' })}`,
 })
 export const lockedCampaignCard = t({
   en: (name: string, victories: number, required: number) =>

@@ -174,7 +174,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     ]
   } else {
     // Keep existing seeded and online battles stable; Hell is an explicit setup choice.
-    const biomes = (Object.keys(BIOMES) as Biome[]).filter((biome) => biome !== 'hell')
+    const biomes = (Object.keys(BIOMES) as Biome[]).filter((name) => name !== 'hell')
     biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
     const playerArmy = setup
       ? setup.player.map((kind) => PAWN_CLASSES[kind])

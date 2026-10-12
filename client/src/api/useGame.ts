@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
 import {
   initialPlayback,
   playbackReducer,
@@ -25,6 +25,12 @@ export interface GameOptions {
   online?: OnlineSession
 }
 
+function useEnemyBot(botKey: string) {
+  // This wrapper has no hook calls or JSX for inference; compile its value-keyed cache explicitly.
+  'use memo'
+  return getBot(JSON.parse(botKey) as BotConfig)
+}
+
 export function useGame({
   seed,
   mode,
@@ -34,17 +40,18 @@ export function useGame({
   online,
 }: GameOptions) {
   const [playback, dispatch] = useReducer(
-    (playback: Transition, action: PlaybackAction) => {
-      const next = playbackReducer(playback, action, mode)
+    (currentPlayback: Transition, action: PlaybackAction) => {
+      const next = playbackReducer(currentPlayback, action, mode)
       // Saving before playback ends keeps a victory if the tab closes mid-animation; StrictMode's double call is harmless because saving is idempotent.
-      if (next.state.winner === 'player' && playback.state.winner !== 'player') onVictory?.()
+      if (next.state.winner === 'player' && currentPlayback.state.winner !== 'player')
+        onVictory?.()
       return next
     },
     seed,
-    (seed) => {
+    (initialSeed) => {
       // Online battles resync from the server snapshot instead of the saved one.
-      const saved = online ? null : readBattleFromLocalStorage(mode, seed, bot, setup)
-      return saved ? { state: saved, frames: [] } : initialPlayback(seed, mode, setup)
+      const saved = online ? null : readBattleFromLocalStorage(mode, initialSeed, bot, setup)
+      return saved ? { state: saved, frames: [] } : initialPlayback(initialSeed, mode, setup)
     },
   )
   const dispatchOnline = useOnlineSync(online, playback, mode, dispatch)
@@ -69,8 +76,7 @@ export function useGame({
   }, [frame])
 
   // URL configs are normalized at the boundary; equal values keep this game's bot stable.
-  const botKey = JSON.stringify(bot)
-  const enemyBot = useMemo(() => getBot(JSON.parse(botKey) as BotConfig), [botKey])
+  const enemyBot = useEnemyBot(JSON.stringify(bot))
   useEffect(() => {
     if (mode !== 'ai' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return

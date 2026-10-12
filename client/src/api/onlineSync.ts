@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePlayAction } from '../../generated/sdk.gen.ts'
 import { playbackReducer, type PlaybackAction } from '../lib/playback.ts'
 import type { OnlineAction } from '../lib/online.ts'
@@ -30,7 +30,7 @@ export function useOnlineSync(
     }
   }, [dispatch, game.data, game.dataUpdatedAt, online])
 
-  const resync = useCallback(async () => {
+  const resync = async () => {
     if (!online) return
     needsResync.current = true
     try {
@@ -42,38 +42,35 @@ export function useOnlineSync(
     } catch {
       // A reconnect snapshot also repairs rejected optimistic moves at the same version.
     }
-  }, [dispatch, online])
+  }
 
-  return useCallback(
-    (action: PlaybackAction) => {
-      if (
-        !online ||
-        action.type === 'playbackNext' ||
-        action.type === 'playbackFinish' ||
-        action.type === 'resync'
-      ) {
-        dispatch(action)
-        return
-      }
-      const winner = playbackReducer(playback, action, mode).state.winner
+  return (action: PlaybackAction) => {
+    if (
+      !online ||
+      action.type === 'playbackNext' ||
+      action.type === 'playbackFinish' ||
+      action.type === 'resync'
+    ) {
       dispatch(action)
-      void (async () => {
-        try {
-          const res = await playAction.mutateAsync({
-            code: online.code,
-            data: {
-              token: online.token,
-              version: appliedActions.current,
-              action,
-              winner: winner ?? null,
-            },
-          })
-          appliedActions.current = Math.max(appliedActions.current, res.version)
-        } catch {
-          await resync()
-        }
-      })()
-    },
-    [dispatch, mode, online, playback, playAction, resync],
-  )
+      return
+    }
+    const winner = playbackReducer(playback, action, mode).state.winner
+    dispatch(action)
+    void (async () => {
+      try {
+        const res = await playAction.mutateAsync({
+          code: online.code,
+          data: {
+            token: online.token,
+            version: appliedActions.current,
+            action,
+            winner: winner ?? null,
+          },
+        })
+        appliedActions.current = Math.max(appliedActions.current, res.version)
+      } catch {
+        await resync()
+      }
+    })()
+  }
 }

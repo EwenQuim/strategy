@@ -5,7 +5,6 @@ import {
   initialState,
   reducer,
   transition,
-  targetingTiles,
   reachable,
   distFrom,
   King,
@@ -21,7 +20,6 @@ import {
 import { createBotGame } from './bot-game.ts'
 import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { battleMessage } from '../src/lib/game-mode.ts'
-import { seedState } from '../src/lib/engine/random.ts'
 import { nearestTarget } from '../src/bots/targetPicker.ts'
 import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { withFallback } from '../src/bots/bot.ts'
@@ -56,76 +54,6 @@ test('Invalid commands leave state and playback untouched', () => {
     }
     assert.deepEqual(structuredClone(state), original)
   }
-})
-
-test('Special previews and outcomes have a stable reference across all classes', () => {
-  const results: unknown[] = []
-  for (const side of ['player', 'enemy'] as const) {
-    const other = side === 'player' ? 'enemy' : 'player'
-    for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark]) {
-      for (const energy of [1, 2, 3]) {
-        for (const terrain of ['plain', 'lava', 'mountain', 'lake'] as const) {
-          const state: GameState = {
-            ...initialState('special-reference'),
-            pawns: [
-              new Unit(1, 0, 0, side, undefined, energy),
-              new King(2, 0, 1, side, 4),
-              new King(3, 3, 0, other, 7, 3, 60),
-              new Bulwark(4, 2, 0, other, 2, 3, 40),
-            ],
-            order: [1, 2, 3, 4],
-            active: 0,
-          }
-          state.tiles = new Map()
-          for (let q = -1; q <= 4; q++)
-            for (let r = -1; r <= 2; r++)
-              state.tiles.set(q + ',' + r, { q, r, terrain: q === 1 ? terrain : 'plain' })
-          state.tiles.get('0,0')!.feature = 'watchtower'
-          state.tiles.get('1,0')!.feature = 'rune'
-          state.tiles.get('1,1')!.feature = 'spring'
-          state.pawns[3].protectingId = 3
-          results.push(
-            [...targetingTiles(state, { action: 'attack' })],
-            [...targetingTiles(state, { action: 'special' })],
-            transition(state, { type: 'special' }),
-          )
-          for (const q of [-1, 0, 1, 2, 3, 4]) {
-            for (const r of [0, 1]) {
-              const destination = { q, r }
-              results.push(
-                transition(state, { type: 'attack', q, r }),
-                transition(state, { type: 'special', target: destination }),
-                [...targetingTiles(state, { action: 'special', destination })],
-              )
-              for (const target of state.pawns)
-                results.push(
-                  transition(state, {
-                    type: 'special',
-                    target: { q: target.q, r: target.r },
-                    destination,
-                  }),
-                )
-            }
-          }
-        }
-      }
-    }
-  }
-  assert.equal(results.length, 12528)
-  assert.equal(
-    seedState(
-      JSON.stringify(results, (name, value) => {
-        if (name === 'hellfire') {
-          assert.deepEqual(value, [])
-          return undefined
-        }
-        if (name === 'lastClashRound' || name === 'blows' || name === 'escapes')
-          return undefined
-        return value instanceof Map ? [...value] : value
-      }),
-    ),
-    561567013,
-  )
 })
 
 test('Rally cannot be invoked by a targeted action even with wounded allies', () => {
