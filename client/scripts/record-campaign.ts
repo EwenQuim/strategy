@@ -9,6 +9,7 @@ import { campaignActions } from '../tests/campaign-actions.ts'
 // CI replays these solutions without running a potentially lengthy balancing search.
 const [slug, ...ids] = process.argv.slice(2)
 const entries: Record<string, [string, string]> = {}
+const unsolved: string[] = []
 const packs = CAMPAIGNS.filter((pack) => !slug || pack.slug === slug)
 if (!packs.length) throw new Error('Unknown campaign: ' + slug)
 const command = (action: Action): string => {
@@ -44,10 +45,17 @@ for (const pack of packs) {
       }
       if (state.winner === 'player') {
         victory = actions
+        console.error(
+          `Solved ${pack.slug}:${level.id} at caution ${caution}: ${state.pawns.filter((p) => p.side === 'player').length}/${level.setup.player.length} survivors, King ${state.pawns.find((p) => p.side === 'player' && p.kind === 'king')!.hp} HP`,
+        )
         break
       }
     }
-    if (!victory) throw new Error(`No scripted victory for ${pack.slug}:${level.id}`)
+    if (!victory) {
+      unsolved.push(`${pack.slug}:${level.id}`)
+      console.error(`No scripted victory for ${pack.slug}:${level.id}`)
+      continue
+    }
     entries[`${pack.slug}:${level.id}`] = [
       createHash('sha256')
         .update(JSON.stringify([level.seed, level.setup, ...(pack.depth !== undefined ? [pack.depth] : [])]))
@@ -55,7 +63,7 @@ for (const pack of packs) {
         .slice(0, 16),
       deflateSync(victory.map(command).join(';')).toString('base64'),
     ]
-    console.error(`Solved ${pack.slug}:${level.id}`)
   }
 }
 console.log(JSON.stringify(entries, null, 2))
+if (unsolved.length) throw new Error('No scripted victory for ' + unsolved.join(', '))

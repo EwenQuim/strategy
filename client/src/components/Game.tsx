@@ -45,7 +45,11 @@ function campaignUnlocks(
   alreadyCleared: boolean,
   winner: GameState['winner'],
 ) {
-  return winner === 'player' && campaign && level && !alreadyCleared
+  return winner === 'player' &&
+    campaign &&
+    campaign.slug !== 'brutal' &&
+    level &&
+    !alreadyCleared
     ? campaign.levels[level - 1].unlocks
     : []
 }

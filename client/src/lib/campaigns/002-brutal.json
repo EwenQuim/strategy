@@ -6,6 +6,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "verdant",
+      "enemyStance": "assault",
       "firstEnemyKinds": ["archer"],
       "map": ["__..__", "_...._", "......", "......", "......", "_...._", "__..__"],
       "player": [
@@ -15,7 +16,8 @@
       ],
       "enemy": [
         { "kind": "king", "col": 2, "row": 0 },
-        { "kind": "archer", "col": 3, "row": 1 }
+        { "kind": "archer", "col": 3, "row": 1 },
+        { "kind": "swordsman", "col": 2, "row": 2 }
       ]
     }
   },
@@ -26,6 +28,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "verdant",
+      "enemyStance": "assault",
       "firstEnemyKinds": ["magician"],
       "map": ["__...__", "_....._", "ff....f", "_....._", "__.....", "_....._", "__...__"],
       "player": [
@@ -37,7 +40,8 @@
       "enemy": [
         { "kind": "king", "col": 3, "row": 0 },
         { "kind": "magician", "col": 3, "row": 2 },
-        { "kind": "swordsman", "col": 4, "row": 1 }
+        { "kind": "swordsman", "col": 4, "row": 1 },
+        { "kind": "swordsman", "col": 5, "row": 1, "hp": 2 }
       ]
     }
   },
@@ -48,6 +52,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "verdant",
+      "enemyStance": "assault",
       "firstEnemyKinds": ["bulwark"],
       "map": [
         "__....__",
@@ -68,7 +73,8 @@
       "enemy": [
         { "kind": "king", "col": 4, "row": 0 },
         { "kind": "bulwark", "col": 3, "row": 1 },
-        { "kind": "swordsman", "col": 4, "row": 2 }
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "archer", "col": 5, "row": 3 }
       ]
     }
   },
@@ -79,6 +85,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "verdant",
+      "enemyStance": "assault",
       "firstEnemyKinds": ["bomber"],
       "map": [
         "_....___",
@@ -101,7 +108,8 @@
         { "kind": "king", "col": 3, "row": 0 },
         { "kind": "bomber", "col": 4, "row": 3 },
         { "kind": "archer", "col": 4, "row": 1 },
-        { "kind": "swordsman", "col": 2, "row": 2 }
+        { "kind": "swordsman", "col": 2, "row": 2 },
+        { "kind": "magician", "col": 5, "row": 2 }
       ]
     }
   },
@@ -112,6 +120,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "mountains",
+      "enemyStance": "assault",
       "firstEnemyKinds": ["ninja"],
       "map": [
         "__....__",
@@ -134,7 +143,8 @@
         { "kind": "king", "col": 4, "row": 0 },
         { "kind": "ninja", "col": 5, "row": 2 },
         { "kind": "swordsman", "col": 3, "row": 2 },
-        { "kind": "archer", "col": 2, "row": 1 }
+        { "kind": "archer", "col": 2, "row": 1 },
+        { "kind": "swordsman", "col": 4, "row": 3, "hp": 3 }
       ]
     }
   },
@@ -145,6 +155,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "mountains",
+      "enemyStance": "assault",
       "firstEnemyKinds": ["lancer"],
       "map": [
         "__....__",
@@ -167,7 +178,8 @@
         { "kind": "king", "col": 4, "row": 0 },
         { "kind": "lancer", "col": 2, "row": 5 },
         { "kind": "archer", "col": 5, "row": 1 },
-        { "kind": "swordsman", "col": 4, "row": 2 }
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "ninja", "col": 5, "row": 3 }
       ]
     }
   },
@@ -178,6 +190,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "mountains",
+      "enemyStance": "assault",
       "map": [
         "__....__",
         "__....__",
@@ -200,7 +213,9 @@
         { "kind": "king", "col": 3, "row": 0 },
         { "kind": "bulwark", "col": 3, "row": 1 },
         { "kind": "swordsman", "col": 4, "row": 2 },
-        { "kind": "archer", "col": 2, "row": 1 }
+        { "kind": "archer", "col": 2, "row": 1 },
+        { "kind": "magician", "col": 4, "row": 3 },
+        { "kind": "lancer", "col": 2, "row": 3 }
       ]
     }
   },
@@ -211,6 +226,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "mountains",
+      "enemyStance": "assault",
       "map": [
         "__....__",
         "_......_",
@@ -232,7 +248,8 @@
         { "kind": "king", "col": 3, "row": 0 },
         { "kind": "archer", "col": 3, "row": 2 },
         { "kind": "archer", "col": 4, "row": 2 },
-        { "kind": "swordsman", "col": 3, "row": 3 }
+        { "kind": "swordsman", "col": 3, "row": 3 },
+        { "kind": "bomber", "col": 4, "row": 3 }
       ]
     }
   },
@@ -243,6 +260,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "desert",
+      "enemyStance": "assault",
       "map": [
         "__ssss__",
         "_ssssss_",
@@ -264,7 +282,8 @@
         { "kind": "king", "col": 4, "row": 0 },
         { "kind": "archer", "col": 1, "row": 2 },
         { "kind": "magician", "col": 6, "row": 2 },
-        { "kind": "swordsman", "col": 4, "row": 4 }
+        { "kind": "swordsman", "col": 4, "row": 4 },
+        { "kind": "lancer", "col": 2, "row": 3 }
       ]
     }
   },
@@ -275,6 +294,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "desert",
+      "enemyStance": "assault",
       "map": [
         "___ss___",
         "__ssss__",
@@ -298,7 +318,8 @@
         { "kind": "lancer", "col": 2, "row": 2 },
         { "kind": "lancer", "col": 5, "row": 2 },
         { "kind": "archer", "col": 4, "row": 1 },
-        { "kind": "swordsman", "col": 3, "row": 2 }
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "magician", "col": 2, "row": 3 }
       ]
     }
   },
@@ -309,6 +330,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "desert",
+      "enemyStance": "assault",
       "map": [
         "__ssss__",
         "_ssssss_",
@@ -332,7 +354,8 @@
         { "kind": "ninja", "col": 1, "row": 2 },
         { "kind": "ninja", "col": 6, "row": 2 },
         { "kind": "swordsman", "col": 4, "row": 2 },
-        { "kind": "archer", "col": 3, "row": 1 }
+        { "kind": "archer", "col": 3, "row": 1 },
+        { "kind": "bomber", "col": 4, "row": 3 }
       ]
     }
   },
@@ -343,6 +366,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "desert",
+      "enemyStance": "assault",
       "map": [
         "__ssss__",
         "_ssssss_",
@@ -366,7 +390,8 @@
         { "kind": "bulwark", "col": 3, "row": 2 },
         { "kind": "bulwark", "col": 4, "row": 2 },
         { "kind": "archer", "col": 3, "row": 1 },
-        { "kind": "swordsman", "col": 4, "row": 3 }
+        { "kind": "swordsman", "col": 4, "row": 3 },
+        { "kind": "lancer", "col": 2, "row": 4 }
       ]
     }
   },
@@ -377,6 +402,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "volcano",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -398,7 +424,8 @@
         { "kind": "king", "col": 4, "row": 0 },
         { "kind": "swordsman", "col": 3, "row": 2 },
         { "kind": "archer", "col": 5, "row": 1 },
-        { "kind": "bomber", "col": 4, "row": 2 }
+        { "kind": "bomber", "col": 4, "row": 2 },
+        { "kind": "magician", "col": 2, "row": 4 }
       ]
     }
   },
@@ -409,6 +436,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "volcano",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -432,7 +460,8 @@
         { "kind": "swordsman", "col": 3, "row": 2 },
         { "kind": "magician", "col": 5, "row": 2 },
         { "kind": "bulwark", "col": 4, "row": 1 },
-        { "kind": "archer", "col": 2, "row": 1 }
+        { "kind": "archer", "col": 2, "row": 1 },
+        { "kind": "lancer", "col": 5, "row": 3 }
       ]
     }
   },
@@ -443,6 +472,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "volcano",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -466,7 +496,8 @@
         { "kind": "bulwark", "col": 3, "row": 1 },
         { "kind": "swordsman", "col": 3, "row": 2 },
         { "kind": "magician", "col": 5, "row": 1 },
-        { "kind": "ninja", "col": 6, "row": 2 }
+        { "kind": "ninja", "col": 6, "row": 2 },
+        { "kind": "bomber", "col": 4, "row": 3 }
       ]
     }
   },
@@ -477,6 +508,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "volcano",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_lbbbbl_",
@@ -500,7 +532,8 @@
         { "kind": "magician", "col": 2, "row": 3 },
         { "kind": "magician", "col": 3, "row": 3 },
         { "kind": "magician", "col": 4, "row": 3 },
-        { "kind": "magician", "col": 5, "row": 3 }
+        { "kind": "magician", "col": 5, "row": 3 },
+        { "kind": "swordsman", "col": 3, "row": 2 }
       ]
     }
   },
@@ -511,6 +544,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "hell",
+      "enemyStance": "assault",
       "hellfireCount": 1,
       "map": [
         "__bbbb__",
@@ -536,7 +570,9 @@
         { "kind": "swordsman", "col": 3, "row": 2 },
         { "kind": "archer", "col": 2, "row": 1 },
         { "kind": "magician", "col": 5, "row": 1 },
-        { "kind": "bomber", "col": 4, "row": 2 }
+        { "kind": "bomber", "col": 4, "row": 2 },
+        { "kind": "lancer", "col": 3, "row": 3 },
+        { "kind": "bulwark", "col": 4, "row": 1 }
       ]
     }
   },
@@ -547,6 +583,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "hell",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
@@ -570,7 +607,8 @@
         { "kind": "ninja", "col": 1, "row": 3 },
         { "kind": "archer", "col": 3, "row": 1 },
         { "kind": "magician", "col": 5, "row": 2 },
-        { "kind": "swordsman", "col": 4, "row": 2 }
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "bomber", "col": 6, "row": 3 }
       ]
     }
   },
@@ -581,6 +619,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "hell",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "bbbbbbbb",
@@ -606,7 +645,8 @@
         { "kind": "bulwark", "col": 4, "row": 1 },
         { "kind": "swordsman", "col": 3, "row": 2 },
         { "kind": "archer", "col": 5, "row": 1 },
-        { "kind": "bomber", "col": 4, "row": 2 }
+        { "kind": "bomber", "col": 4, "row": 2 },
+        { "kind": "magician", "col": 6, "row": 3 }
       ]
     }
   },
@@ -617,6 +657,7 @@
     "difficulty": "hard",
     "setup": {
       "biome": "hell",
+      "enemyStance": "assault",
       "map": [
         "__bbbb__",
         "bbbbbbbb",
@@ -644,7 +685,8 @@
         { "kind": "magician", "col": 6, "row": 1 },
         { "kind": "bulwark", "col": 3, "row": 1 },
         { "kind": "bomber", "col": 5, "row": 1 },
-        { "kind": "ninja", "col": 2, "row": 1 }
+        { "kind": "ninja", "col": 2, "row": 1 },
+        { "kind": "lancer", "col": 4, "row": 3 }
       ]
     }
   }

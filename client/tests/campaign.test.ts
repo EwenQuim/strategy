@@ -126,6 +126,16 @@ test('Brutal uses depth four while other campaigns keep their difficulty presets
   }
 })
 
+test('Brutal fields equal-sized assault forces with extra forward pressure in every encounter', () => {
+  const original = CAMPAIGNS.find((pack) => pack.slug === 'original')!
+  const brutal = CAMPAIGNS.find((pack) => pack.slug === 'brutal')!
+  for (const [index, level] of brutal.levels.entries()) {
+    assert.equal(level.setup.enemyStance, 'assault')
+    assert.ok(level.setup.enemy.length >= level.setup.player.length, level.seed)
+    assert.ok(level.setup.enemy.length > original.levels[index].setup.enemy.length, level.seed)
+  }
+})
+
 test('Original retains twenty encounters across five biomes and introduces Hellfire gently', () => {
   const levels = CAMPAIGNS[1].levels
   assert.equal(levels.length, 20)

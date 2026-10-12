@@ -2164,6 +2164,45 @@ test(
 )
 
 test(
+  'Brutal victories never show recruit unlock notifications, including first clears and reloads',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    const pack = CAMPAIGNS.find((pack) => pack.slug === 'brutal')!
+    await page.evaluate((key) => localStorage.setItem(key, '10'), CAMPAIGN_STORAGE_KEY)
+    for (const level of pack.levels.filter((level) => level.unlocks.length)) {
+      await page.goto(origin + base)
+      const actions = victoryActions(level)
+      let state = initialState(level.seed, level.setup, 'player')
+      for (const action of actions.slice(0, -1)) state = transition(state, action).state
+      assert.equal(state.winner, null)
+      assert.equal(activePawn(state)?.side, 'player')
+      const saved = {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('ai', level.seed, campaignBot(pack, level), level.setup),
+        state: snapshotState(state),
+      }
+      await page.evaluate(
+        (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+        saved,
+      )
+      await page.goto(origin + base + 'campaign/brutal/' + level.id)
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      await playInUi(page, state, actions.at(-1)!)
+      await page.getByTestId('battle-result').waitFor()
+      assert.equal(
+        await page.getByTestId('unit-unlock-toast').count(),
+        0,
+        `First clear ${level.id}`,
+      )
+      await page.reload()
+      await page.getByTestId('battle-result').waitFor()
+      assert.equal(await page.getByTestId('unit-unlock-toast').count(), 0, `Reload ${level.id}`)
+    }
+  },
+)
+
+test(
   'Signature victories unlock recruits once and tutorial victories never earn achievements',
   { timeout: 60_000 },
   async (t) => {
