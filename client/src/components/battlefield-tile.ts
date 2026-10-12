@@ -80,6 +80,7 @@ export function tileFill({
   previewed,
   canMove,
   terrain,
+  inRange,
 }: {
   interactive: boolean
   damage: number
@@ -90,9 +91,11 @@ export function tileFill({
   previewed: boolean
   canMove: boolean
   terrain: Tile['terrain']
+  inRange: boolean
 }): string {
   if (interactive && damage > 0 && !occupant) return '#94716d'
   if (target) return strike ? '#b98370' : '#b79dce'
   if (selected || previewed) return 'var(--selected-tint, #c9b77f)'
+  if (inRange) return '#b79dce'
   return canMove ? 'var(--move-tint)' : terrainColors[terrain]
 }

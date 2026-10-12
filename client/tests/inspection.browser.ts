@@ -117,8 +117,17 @@ test(
         await enemy(id).click()
         await focus.waitFor()
         assert.deepEqual(await geometry(), initialGeometry, JSON.stringify(viewport))
+        assert.deepEqual(
+          await focus.getByTestId('preview-ability').boundingBox(),
+          await special.boundingBox(),
+        )
+        assert.deepEqual(
+          await focus.getByRole('button').boundingBox(),
+          await page.locator('[data-action="endTurn"]').boundingBox(),
+        )
+        assert.equal(await focus.getByRole('button').count(), 1)
         assert.equal(await page.getByRole('button', { name: /End turn/ }).count(), 0)
-        await page.getByRole('button', { name: 'Close unit focus', exact: true }).click()
+        await page.getByRole('button', { name: 'Stop previewing', exact: true }).click()
         assert.deepEqual(await geometry(), initialGeometry)
       }
     }
@@ -127,23 +136,32 @@ test(
     await focus.waitFor()
     assert.equal(await special.isVisible(), false)
     assert.equal(await page.locator('[data-action="endTurn"]').isVisible(), false)
+    const previewAbility = focus.getByTestId('preview-ability')
+    assert.equal(await previewAbility.evaluate((element) => element.tagName), 'DIV')
+    assert.equal(await previewAbility.getAttribute('tabindex'), null)
+    const previewEnergy = await page
+      .getByRole('meter', { name: 'Energy' })
+      .getAttribute('aria-valuenow')
+    await previewAbility.click()
+    assert.equal(await focus.isVisible(), true)
+    assert.equal(
+      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+      previewEnergy,
+    )
     assert.equal(
       await page.getByRole('meter', { name: 'Health' }).getAttribute('aria-valuenow'),
       String(state.pawns[2].hp),
     )
-    assert.ok(await page.locator('polygon[fill="url(#range-hatch)"]').count())
-    assert.equal(await page.locator('[data-testid="tile-face"][fill="#b79dce"]').count(), 0)
     await page.getByRole('button', { name: /Inspect .*#4$/ }).click()
     assert.equal(
       await page.getByRole('meter', { name: 'Health' }).getAttribute('aria-valuenow'),
       String(state.pawns[3].hp),
     )
-    await page.getByRole('button', { name: 'Close unit focus', exact: true }).click()
+    await page.getByRole('button', { name: 'Stop previewing', exact: true }).click()
     await special.waitFor()
     await special.click()
     assert.equal(await special.getAttribute('aria-pressed'), 'true')
     assert.equal(await enemy(3).getAttribute('role'), 'button')
-    assert.equal(await page.locator('polygon[fill="url(#range-hatch)"]').count(), 0)
     await enemy(4).click()
     await page.getByRole('button', { name: /Inspect .*#4$/ }).click()
     assert.equal(await focus.count(), 0)
@@ -152,7 +170,7 @@ test(
     await special.click()
     await enemy(4).click()
     await focus.waitFor()
-    const close = page.getByRole('button', { name: 'Close unit focus', exact: true })
+    const close = page.getByRole('button', { name: 'Stop previewing', exact: true })
     await close.focus()
     await page.keyboard.press('Enter')
     await special.click()
@@ -260,6 +278,39 @@ test(
             dimensions.get(key),
             locale + ' energy ' + energy + ' at ' + key,
           )
+          if (energy === 3) {
+            await page
+              .getByTestId('hex-tile')
+              .filter({ has: page.locator('title', { hasText: /#3,/ }) })
+              .click()
+            const focus = page.getByTestId('unit-focus')
+            await focus.waitFor()
+            assert.deepEqual(
+              await focus.getByTestId('preview-ability').boundingBox(),
+              await page.locator('[data-action="special"]').boundingBox(),
+            )
+            assert.deepEqual(
+              await focus.getByRole('button').boundingBox(),
+              await endTurn.boundingBox(),
+            )
+            assert.ok(
+              await focus.evaluate((element) =>
+                [...element.querySelectorAll('span, small')].every((label) => {
+                  const box = label.getBoundingClientRect()
+                  const parent = label.parentElement!.getBoundingClientRect()
+                  return (
+                    label.scrollWidth <= label.clientWidth &&
+                    box.left >= parent.left &&
+                    box.right <= parent.right &&
+                    box.top >= parent.top &&
+                    box.bottom <= parent.bottom
+                  )
+                }),
+              ),
+              locale + ' preview at ' + key,
+            )
+            await focus.getByRole('button').click()
+          }
         }
         await page.close()
       }

@@ -10,6 +10,15 @@ import { UnitStats } from './UnitStats'
 const actionButtonClassName =
   'grid min-h-16 select-none [-webkit-touch-callout:none] aria-disabled:cursor-help aria-disabled:not-aria-pressed:opacity-38 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left [&:enabled:not([aria-disabled=true]):hover]:border-[#bcc8a670] [&:enabled:not([aria-disabled=true]):hover]:bg-[#ffffff0c] max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
 
+const actionGridClassName =
+  'grid grid-cols-[minmax(0,1fr)_10rem] gap-2 min-[900px]:gap-3 max-[601px]:grid-cols-[minmax(0,1fr)_7rem] max-[601px]:gap-1.5'
+const actionIconClassName =
+  'row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5'
+const actionLabelClassName =
+  'text-[13px] font-semibold max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]'
+const actionNoteClassName =
+  'mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]'
+
 interface GameCommandDeckProps {
   pawn?: Pawn
   active?: Pawn
@@ -76,7 +85,7 @@ export function GameCommandDeck({
         </div>
         <div className="relative min-w-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
           <div
-            className="grid grid-cols-[minmax(0,1fr)_10rem] gap-2 data-[previewed=true]:invisible min-[900px]:gap-3 max-[601px]:grid-cols-[minmax(0,1fr)_7rem] max-[601px]:gap-1.5"
+            className={actionGridClassName + ' data-[previewed=true]:invisible'}
             data-previewed={previewed}
             inert={previewed}
           >
@@ -95,24 +104,36 @@ export function GameCommandDeck({
             <EndTurnButton pawn={active} myTurn={myTurn} dispatch={dispatch} />
           </div>
           {previewed && pawn && !winner && (
-            <div
-              className="absolute inset-0 flex min-w-0 items-center gap-3 rounded-lg border border-line bg-white/5 p-2 text-[#d0b6e7]"
-              data-testid="unit-focus"
-            >
-              <Icon name="target" className="size-5 shrink-0" />
-              <div className="min-w-0 flex-1 text-xs">
-                <p className="font-semibold text-ink">{m.unitFocus}</p>
-                <p className="text-[11px]">
-                  {specialTexts[pawn.special.name]} · {m.energyCost(pawn.special.cost)}
-                </p>
+            <div className={actionGridClassName + ' absolute inset-0'} data-testid="unit-focus">
+              <div
+                className={
+                  actionButtonClassName +
+                  ' border-none bg-none text-gray-400 [&>small]:text-inherit'
+                }
+                data-testid="preview-ability"
+                title={specialTexts[pawn.special.description]}
+              >
+                <Icon name="spark" className={actionIconClassName} />
+                <span className={actionLabelClassName + ' whitespace-nowrap'}>
+                  {specialTexts[pawn.special.name]}
+                </span>
+                <small className={actionNoteClassName}>{m.energyCost(pawn.special.cost)}</small>
               </div>
               <button
-                className="grid size-11 shrink-0 place-items-center rounded-lg border border-line text-muted hover:bg-white/5 hover:text-ink"
+                className={
+                  actionButtonClassName +
+                  ' border-[#bcc8a62e] bg-[#ffffff04] px-3 text-[#e6e7d4] max-[601px]:px-2'
+                }
                 onClick={onCloseFocus}
-                aria-label={m.closeFocus}
-                title={m.closeFocus}
+                aria-label={m.stopPreviewing}
+                title={m.stopPreviewing}
               >
-                <Icon name="close" className="size-5" />
+                <Icon name="close" className={actionIconClassName} />
+                <span
+                  className={actionLabelClassName + ' row-span-2 min-w-0 max-[601px]:row-auto'}
+                >
+                  {m.stopPreviewing}
+                </span>
               </button>
             </div>
           )}
@@ -160,14 +181,11 @@ function SpecialButton({
       title={pawn ? specialTexts[pawn.special.description] : undefined}
       aria-pressed={usingSpecial}
     >
-      <Icon
-        className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-        name={usingSpecial ? 'close' : 'spark'}
-      />
-      <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
+      <Icon className={actionIconClassName} name={usingSpecial ? 'close' : 'spark'} />
+      <span className={actionLabelClassName + ' whitespace-nowrap'}>
         {usingSpecial ? m.cancel : pawn ? specialTexts[pawn.special.name] : m.special}
       </span>
-      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+      <small className={actionNoteClassName}>
         {usingSpecial
           ? !targetCount
             ? m.noTargets
@@ -210,16 +228,9 @@ function EndTurnButton({
       onClick={() => dispatch({ type: 'endTurn' })}
       title={m.endTurnHint}
     >
-      <Icon
-        className="row-span-2 size-[22px] max-[601px]:row-auto max-[601px]:mb-0.5 max-[601px]:size-5"
-        name="arrow"
-      />
-      <span className="text-[13px] font-semibold whitespace-nowrap max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px]">
-        {m.endTurn}
-      </span>
-      <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
-        {m.remainingEnergy(pawn?.energy ?? 0)}
-      </small>
+      <Icon className={actionIconClassName} name="arrow" />
+      <span className={actionLabelClassName + ' whitespace-nowrap'}>{m.endTurn}</span>
+      <small className={actionNoteClassName}>{m.remainingEnergy(pawn?.energy ?? 0)}</small>
     </button>
   )
 }
