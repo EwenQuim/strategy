@@ -5,8 +5,6 @@ import {
   DEFAULT_BOT_CONFIG,
   getBot,
   botFromSearch,
-  searchFromBot,
-  configFromBot,
   parseBotConfig,
   type BotConfig,
 } from '../src/bots/catalog.ts'
@@ -38,7 +36,7 @@ function enemyTurn() {
   return state
 }
 
-test('Serializable bot descriptions resolve to stable objects with their own names', () => {
+test('Serializable bot descriptions resolve independently with their own names and options', () => {
   const configs: BotConfig[] = [
     { name: 'depthsearch', options: BOT_LEVELS.easy },
     { name: 'depthsearch', options: BOT_LEVELS.normal },
@@ -52,8 +50,10 @@ test('Serializable bot descriptions resolve to stable objects with their own nam
     const bot = getBot(restored)
     assert.equal(bot.name, config.name)
     assert.deepEqual(bot.options, config.options)
-    assert.equal(getBot(config), bot)
-    assert.deepEqual(botFromSearch(parseGameSearch(searchFromBot(config))), config)
+    const other = getBot(config)
+    assert.notEqual(other, bot)
+    assert.deepEqual(other.options, bot.options)
+    assert.deepEqual(botFromSearch(parseGameSearch({ bot: config })), config)
   }
   assert.notEqual(getBot(configs[0]), getBot(configs[1]))
   assert.notEqual(getBot(configs[1]), getBot(configs[2]))
@@ -149,7 +149,7 @@ for (const [name, storageKey, endpoint] of [
     assert.equal(search.strategy, name)
     assert.deepEqual(botFromSearch(search), BOTS[name].defaultConfig)
     assert.deepEqual(
-      botFromSearch(parseGameSearch(searchFromBot(BOTS[name].defaultConfig))),
+      botFromSearch(parseGameSearch({ bot: BOTS[name].defaultConfig })),
       BOTS[name].defaultConfig,
     )
   })
@@ -157,11 +157,11 @@ for (const [name, storageKey, endpoint] of [
 
 test('Arbitrary search options and Mistral effort use the same config, URL and save path', () => {
   const configs: BotConfig[] = [
-    configFromBot(new DepthsearchBot({ ...BOT_LEVELS.hard, beamWidth: 7, latitude: 12 })),
-    configFromBot(new MistralBot({ effort: 'high', temperature: 0.7 })),
+    { name: 'depthsearch', options: { ...BOT_LEVELS.hard, beamWidth: 7, latitude: 12 } },
+    { name: 'mistral', options: new MistralBot({ effort: 'high', temperature: 0.7 }).options },
   ]
   for (const config of configs) {
-    const json = JSON.parse(JSON.stringify(searchFromBot(config)))
+    const json = JSON.parse(JSON.stringify({ bot: config }))
     const restored = botFromSearch(parseGameSearch(json))
     assert.deepEqual(restored, config)
     assert.deepEqual(getBot(restored).options, config.options)
@@ -196,15 +196,22 @@ test('Unknown, malformed and out-of-range bot options cannot reach a strategy', 
   })
 })
 
-test('Option key order does not change bot identity or create another instance', () => {
-  const config = configFromBot(new DepthsearchBot({ ...BOT_LEVELS.hard, beamWidth: 7 }))
+test('Option key order does not change bot identity or decisions', async () => {
+  const config: BotConfig = {
+    name: 'depthsearch',
+    options: { ...BOT_LEVELS.hard, beamWidth: 7 },
+  }
   const bot = getBot(config)
   const reordered = {
     name: config.name,
     options: Object.fromEntries(Object.entries(config.options).reverse()),
   }
   assert.deepEqual(parseBotConfig(reordered), config)
-  assert.equal(getBot(parseBotConfig(reordered)), bot)
+  const state = enemyTurn()
+  assert.deepEqual(
+    await getBot(parseBotConfig(reordered)).chooseActions(state),
+    await bot.chooseActions(state),
+  )
 })
 
 test('An existing offline battle resumes after config migration but never with different options', (t) => {
@@ -231,7 +238,10 @@ test('An existing offline battle resumes after config migration but never with d
     options: Object.fromEntries(Object.entries(config.options).reverse()),
   })
   assert.deepEqual(readBattleFromLocalStorage('ai', state.seed, reordered, undefined), state)
-  const remote = configFromBot(new MistralBot({ effort: 'high' }))
+  const remote: BotConfig = {
+    name: 'mistral',
+    options: new MistralBot({ effort: 'high' }).options,
+  }
   saved.identity = battleIdentity('ai', state.seed, remote, undefined)
   assert.deepEqual(readBattleFromLocalStorage('ai', state.seed, remote, undefined), state)
   assert.equal(
@@ -241,13 +251,14 @@ test('An existing offline battle resumes after config migration but never with d
 })
 
 test('Mistral effort and other constructor options reach the API after a URL round trip', async (t) => {
-  const config = configFromBot(
-    new MistralBot({
+  const config: BotConfig = {
+    name: 'mistral',
+    options: new MistralBot({
       effort: 'high',
       maxTokens: 2048,
       temperature: 0.7,
-    }),
-  )
+    }).options,
+  }
   t.mock.method(storage, 'getItem', (key: string) =>
     key === mistralKey ? 'test-api-key' : null,
   )
@@ -267,9 +278,7 @@ test('Mistral effort and other constructor options reach the API after a URL rou
       usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
     }),
   )
-  const restored = botFromSearch(
-    parseGameSearch(JSON.parse(JSON.stringify(searchFromBot(config)))),
-  )
+  const restored = botFromSearch(parseGameSearch(JSON.parse(JSON.stringify({ bot: config }))))
   assert.deepEqual(await getBot(restored).chooseActions(enemyTurn()), [{ type: 'endTurn' }])
   const [input] = request.mock.calls[0].arguments
   assert.ok(input instanceof Request)

@@ -20,21 +20,17 @@ export class RulesBot implements Bot {
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    return chooseActions(state, this.picker)
+    const pawn = activePawn(state)
+    if (!pawn || state.winner) return []
+    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const foes = state.pawns.filter((p) => p.side !== pawn.side)
+    const specials = specialTargets(state.pawns, pawn)
+    return (
+      ruleSpecial(state, pawn, foes, specials, this.picker) ??
+      ruleAttack(state, pawn, foes, this.picker) ??
+      ruleApproach(state, pawn, foes)
+    )
   }
-}
-
-function chooseActions(state: GameState, picker: TargetPicker): Action[] {
-  const pawn = activePawn(state)
-  if (!pawn || state.winner) return []
-  if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-  const foes = state.pawns.filter((p) => p.side !== pawn.side)
-  const specials = specialTargets(state.pawns, pawn)
-  return (
-    ruleSpecial(state, pawn, foes, specials, picker) ??
-    ruleAttack(state, pawn, foes, picker) ??
-    ruleApproach(state, pawn, foes)
-  )
 }
 
 function ruleSpecial(

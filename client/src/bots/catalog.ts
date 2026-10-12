@@ -27,10 +27,6 @@ export function getBot(config: BotConfig): Bot {
   return BOTS[config.name].resolve(config.options)
 }
 
-export function configFromBot<B extends Bot>(bot: B): Pick<B, 'name' | 'options'> {
-  return { name: bot.name, options: bot.options }
-}
-
 // Validate unknown URL data through the same constructors used by the application.
 export function parseBotConfig(value: unknown): BotConfig {
   try {
@@ -41,7 +37,8 @@ export function parseBotConfig(value: unknown): BotConfig {
       const { difficulty } = value as Record<string, unknown>
       return legacyBotConfig(name, difficulty)
     }
-    return configFromBot(BOTS[name as BotName].resolve(options)) as BotConfig
+    const bot = BOTS[name as BotName].resolve(options)
+    return { name: bot.name, options: bot.options } as BotConfig
   } catch {
     return DEFAULT_BOT_CONFIG
   }
@@ -54,10 +51,6 @@ export function botFromSearch(search: GameSearch): BotConfig {
   return legacyBotConfig(search.strategy, search.difficulty)
 }
 
-export function searchFromBot(bot: BotConfig): Pick<GameSearch, 'bot'> {
-  return { bot }
-}
-
 function legacyBotConfig(name: unknown, difficulty: unknown): BotConfig {
   const registration =
     typeof name === 'string' && Object.hasOwn(BOTS, name)
@@ -67,5 +60,5 @@ function legacyBotConfig(name: unknown, difficulty: unknown): BotConfig {
     typeof difficulty === 'string' && Object.hasOwn(registration.presets, difficulty)
       ? registration.presets[difficulty]
       : registration.defaultConfig.options
-  return configFromBot(registration.resolve(options)) as BotConfig
+  return { name: registration.name, options } as BotConfig
 }

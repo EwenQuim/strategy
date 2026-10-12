@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useMemo, useReducer } from 'react'
 import {
   initialPlayback,
   playbackReducer,
@@ -68,7 +68,9 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  const enemyBot = getBot(bot)
+  // URL configs are normalized at the boundary; equal values keep this game's bot stable.
+  const botKey = JSON.stringify(bot)
+  const enemyBot = useMemo(() => getBot(JSON.parse(botKey) as BotConfig), [botKey])
   useEffect(() => {
     if (mode !== 'ai' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return

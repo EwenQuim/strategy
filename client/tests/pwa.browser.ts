@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright-core'
 import {
   initialState,
+  reducer,
   inHellfire,
   activePawn,
   canAttack,
@@ -29,6 +30,11 @@ import { unitNames } from '../src/i18n/units.ts'
 import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
+import {
+  battleIdentity,
+  BATTLE_SNAPSHOT_VERSION,
+  snapshotState,
+} from '../src/lib/battleSnapshot.ts'
 
 const base = '/strategy/'
 const timeout = 10_000
@@ -600,6 +606,64 @@ test(
       await playTurn(page)
     }
     assert.deepEqual(errors, [])
+  },
+)
+
+test(
+  'A pending remote bot survives UI rerenders without duplicate requests',
+  { timeout: 30_000 },
+  async (t) => {
+    const { context, page, origin } = await fixture(t)
+    let state = initialState('bot-rerender')
+    while (activePawn(state)?.side !== 'enemy') state = reducer(state, { type: 'endTurn' })
+    const bot = { name: 'jev', options: { model: 'jev-latest' } }
+    await page.evaluate(
+      (saved) => {
+        localStorage.setItem('hexmate.jevApiKey', 'test-api-key')
+        localStorage.setItem('hexmate.tutorial-seen', 'true')
+        localStorage.setItem('hexmate.battle', JSON.stringify(saved))
+      },
+      {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('ai', state.seed, bot, undefined),
+        state: snapshotState(state),
+      },
+    )
+    let release!: () => void
+    const pending = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    t.after(() => release())
+    let requests = 0
+    const firstRequest = page.waitForRequest('https://api.typesafe.ai/v1/systemone')
+    await context.route('https://api.typesafe.ai/v1/systemone', async (route) => {
+      requests++
+      if (requests === 1) await pending
+      const criteria = route.request().postDataJSON().questions.move.criteria as Record<
+        string,
+        string
+      >
+      const choice = Object.entries(criteria).find(([, text]) =>
+        text.startsWith('end the turn'),
+      )?.[0]
+      assert.ok(choice)
+      await route.fulfill({ json: { answers: { move: { choice } } } })
+    })
+    await page.goto(
+      origin + base + 'game/' + state.seed + '?bot=' + encodeURIComponent(JSON.stringify(bot)),
+    )
+    await firstRequest
+    try {
+      await page.getByRole('button', { name: 'Enemy threat zone' }).click()
+      await page.getByRole('button', { name: 'Enemy threat zone' }).click()
+      await page.getByRole('button', { name: 'How to play' }).click()
+      await page.getByRole('button', { name: 'Close dialog', exact: true }).click()
+      assert.equal(requests, 1, 'UI rerenders must keep the pending decision')
+    } finally {
+      release()
+    }
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    assert.ok(requests > 0)
   },
 )
 

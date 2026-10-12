@@ -5,10 +5,6 @@ import { readOptions } from '../options.ts'
 import { readMistralApiKey } from '../apiKeys.ts'
 import { acceptedAction, positionText, RULES_TEXT } from '../remoteText.ts'
 
-// Z.ai GLM 5.3, hosted by Mistral: a reasoning model, markedly stronger at
-// positional planning than mistral-small at the cost of slower replies.
-const MODEL = 'zai-glm-5-3'
-
 type MistralOptions = {
   model: string
   effort: 'low' | 'medium' | 'high'
@@ -17,7 +13,8 @@ type MistralOptions = {
 }
 
 const DEFAULT_OPTIONS: MistralOptions = {
-  model: MODEL,
+  // Z.ai GLM 5.3, hosted by Mistral: stronger planning at the cost of slower replies.
+  model: 'zai-glm-5-3',
   effort: 'low',
   maxTokens: 16384,
   temperature: 0.4,
@@ -51,37 +48,33 @@ export class MistralBot implements Bot<MistralOptions> {
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    return chooseActions(state, this.options)
+    const apiKey = readMistralApiKey()
+    if (!apiKey || !activePawn(state)) return []
+    // Imported lazily so the SDK stays in its own chunk, loaded only for Mistral battles.
+    const { MistralCore } = await import('@mistralai/mistralai/core.js')
+    const { chatComplete } = await import('@mistralai/mistralai/funcs/chatComplete.js')
+    const client = new MistralCore({ apiKey })
+    const result = await chatComplete(client, {
+      model: this.options.model,
+      temperature: this.options.temperature,
+      // GLM always reasons, and its thinking shares the completion budget: without a
+      // generous budget and a low effort the reply is pure truncated thinking.
+      maxTokens: this.options.maxTokens,
+      reasoningEffort: this.options.effort,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: battlePrompt(state) },
+      ],
+    })
+    if (!result.ok) return []
+    const content = result.value.choices[0]?.message?.content
+    const reply =
+      typeof content === 'string'
+        ? content
+        : content?.map((chunk) => (chunk.type === 'text' ? chunk.text : '')).join('')
+    const action = reply && actionFromReply(reply, state)
+    return action ? [action] : []
   }
-}
-
-async function chooseActions(state: GameState, options: MistralOptions): Promise<Action[]> {
-  const apiKey = readMistralApiKey()
-  if (!apiKey || !activePawn(state)) return []
-  // Imported lazily so the SDK stays in its own chunk, loaded only for Mistral battles.
-  const { MistralCore } = await import('@mistralai/mistralai/core.js')
-  const { chatComplete } = await import('@mistralai/mistralai/funcs/chatComplete.js')
-  const client = new MistralCore({ apiKey })
-  const result = await chatComplete(client, {
-    model: options.model,
-    temperature: options.temperature,
-    // GLM always reasons, and its thinking shares the completion budget: without a
-    // generous budget and a low effort the reply is pure truncated thinking.
-    maxTokens: options.maxTokens,
-    reasoningEffort: options.effort,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: battlePrompt(state) },
-    ],
-  })
-  if (!result.ok) return []
-  const content = result.value.choices[0]?.message?.content
-  const reply =
-    typeof content === 'string'
-      ? content
-      : content?.map((chunk) => (chunk.type === 'text' ? chunk.text : '')).join('')
-  const action = reply && actionFromReply(reply, state)
-  return action ? [action] : []
 }
 
 // The whole position plus every legal action, as one chat message.

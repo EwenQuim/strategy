@@ -18,10 +18,9 @@ import { acceptedAction, describeAction, positionText, RULES_TEXT } from '../rem
 // chosen option is played only if the reducer accepts it — and a failed call proposes nothing,
 // so the catalog falls back to the local search.
 
-const MODEL = 'jev-latest'
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
 type JevOptions = { model: string }
-const DEFAULT_OPTIONS: JevOptions = { model: MODEL }
+const DEFAULT_OPTIONS: JevOptions = { model: 'jev-latest' }
 // Proposes nothing without a key or a usable answer; the catalog falls back to the local search.
 export class JevBot implements Bot<JevOptions> {
   readonly name = 'jev'
@@ -33,34 +32,30 @@ export class JevBot implements Bot<JevOptions> {
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    return chooseActions(state, this.options)
-  }
-}
-
-async function chooseActions(state: GameState, options: JevOptions): Promise<Action[]> {
-  const apiKey = readJevApiKey()
-  if (!apiKey || !activePawn(state)) return []
-  const response = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(30_000),
-    body: JSON.stringify({
-      model: options.model,
-      state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
-      questions: {
-        move: {
-          type: 'choice',
-          instructions:
-            'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
-          criteria: actionCriteria(state),
+    const apiKey = readJevApiKey()
+    if (!apiKey || !activePawn(state)) return []
+    const response = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(30_000),
+      body: JSON.stringify({
+        model: this.options.model,
+        state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
+        questions: {
+          move: {
+            type: 'choice',
+            instructions:
+              'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
+            criteria: actionCriteria(state),
+          },
         },
-      },
-    }),
-  })
-  if (!response.ok) return []
-  const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
-  const action = actionFromChoice(data.answers?.move?.choice, state)
-  return action ? [action] : []
+      }),
+    })
+    if (!response.ok) return []
+    const data = (await response.json()) as { answers?: { move?: { choice?: unknown } } }
+    const action = actionFromChoice(data.answers?.move?.choice, state)
+    return action ? [action] : []
+  }
 }
 
 // The fixed option list Jev picks from: one criteria entry per legal action, keyed by index.

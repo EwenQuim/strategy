@@ -8,7 +8,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import type { BotDifficulty } from '../lib/engine/ai'
-import { BOTS, searchFromBot, parseBotConfig, type BotName } from '../bots/catalog'
+import { BOTS, parseBotConfig, type BotName } from '../bots/catalog'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import type { GameMode } from '../lib/game-mode'
 import {
@@ -55,13 +55,10 @@ export const Route = createFileRoute('/custom')({
               to: '/game',
               search: {
                 mode,
-                ...searchFromBot(
-                  parseBotConfig({
-                    name: strategy,
-                    options:
-                      selectedBot.presets[difficulty] ?? selectedBot.defaultConfig.options,
-                  }),
-                ),
+                bot: parseBotConfig({
+                  name: strategy,
+                  options: selectedBot.presets[difficulty] ?? selectedBot.defaultConfig.options,
+                }),
                 setup: { biome, player, enemy: enemyRoster },
               },
             })

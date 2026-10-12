@@ -41,57 +41,54 @@ export class DepthsearchBot implements Bot<BotOptions> {
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    return chooseActions(state, this.options)
-  }
-}
-
-function chooseActions(state: GameState, options: BotOptions): Action[] {
-  Object.assign(searchStats, {
-    decisions: 1,
-    plansEnumerated: 0,
-    shortlisted: 0,
-    beamExpansions: 0,
-    leafEvals: 0,
-    rootLeafEvals: 0,
-    deepLeafEvals: 0,
-    replyLeafEvals: 0,
-    cutoffs: 0,
-    budgetBreaks: 0,
-    maxDepth: 0,
-  })
-  const pawn = activePawn(state)
-  if (!pawn || state.winner) return []
-  if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-  const distance = distancesToAttack(state, pawn)
-  const reach: ReachCache = new Map()
-  const plan = sidePlan(state, pawn.side, options)
-  const search: Search = {
-    side: pawn.side,
-    beamWidth: options.beamWidth,
-    budget: POSITION_BUDGET,
-    leaf: (next) => {
-      search.budget--
-      searchStats.leafEvals++
-      return evaluatePosition(next, pawn, plan, distance, reach)
-    },
-  }
-  // A fixed stream keeps analysis from seeing the battle's future rolls, such as Hellfire.
-  const analysis = { ...state, randomState: 0 }
-  let floor = -Infinity
-  const ranked = rankedTurns(analysis, search)
-  searchStats.rootLeafEvals = searchStats.leafEvals
-  const valued = ranked
-    .slice(0, options.beamWidth)
-    .map((turn) => {
-      const window = turn.outcomes.length === 1 ? floor : -Infinity
-      const value = expectedScores(turn.outcomes, (outcome) =>
-        minimax(outcome.state, options.depth - 1, window, Infinity, search, outcome.score),
-      )
-      floor = Math.max(floor, value - options.latitude)
-      return { ...turn, value }
+    const options = this.options
+    Object.assign(searchStats, {
+      decisions: 1,
+      plansEnumerated: 0,
+      shortlisted: 0,
+      beamExpansions: 0,
+      leafEvals: 0,
+      rootLeafEvals: 0,
+      deepLeafEvals: 0,
+      replyLeafEvals: 0,
+      cutoffs: 0,
+      budgetBreaks: 0,
+      maxDepth: 0,
     })
-    .sort((a, b) => b.value - a.value)
-  return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
+    const pawn = activePawn(state)
+    if (!pawn || state.winner) return []
+    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const distance = distancesToAttack(state, pawn)
+    const reach: ReachCache = new Map()
+    const plan = sidePlan(state, pawn.side, options)
+    const search: Search = {
+      side: pawn.side,
+      beamWidth: options.beamWidth,
+      budget: POSITION_BUDGET,
+      leaf: (next) => {
+        search.budget--
+        searchStats.leafEvals++
+        return evaluatePosition(next, pawn, plan, distance, reach)
+      },
+    }
+    // A fixed stream keeps analysis from seeing the battle's future rolls, such as Hellfire.
+    const analysis = { ...state, randomState: 0 }
+    let floor = -Infinity
+    const ranked = rankedTurns(analysis, search)
+    searchStats.rootLeafEvals = searchStats.leafEvals
+    const valued = ranked
+      .slice(0, options.beamWidth)
+      .map((turn) => {
+        const window = turn.outcomes.length === 1 ? floor : -Infinity
+        const value = expectedScores(turn.outcomes, (outcome) =>
+          minimax(outcome.state, options.depth - 1, window, Infinity, search, outcome.score),
+        )
+        floor = Math.max(floor, value - options.latitude)
+        return { ...turn, value }
+      })
+      .sort((a, b) => b.value - a.value)
+    return untilFirstRoll(chooseOption(analysis, pawn, valued, options).actions)
+  }
 }
 
 function withFoeEscape(state: GameState, side: Side, escape: (foe: Pawn) => number): GameState {
