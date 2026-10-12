@@ -29,7 +29,7 @@ const rally: SpecialAbility = {
     const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
     const allies = allyTargets(pawn, pawns, true)
     for (const ally of allies) {
-      ally.hp += 1
+      ally.hp = Math.min(ally.maxHp, ally.hp + 1)
       log.push(label(ally) + ' recovers 1 health.')
     }
     return {
