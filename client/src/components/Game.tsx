@@ -269,7 +269,6 @@ export function Game({
         winner={state.winner}
         winnerLabel={winnerLabel}
         myTurn={myTurn}
-        commanding={myTurn && !inspected}
         previewed={insight.previewed}
         onPreview={insight.preview}
         onPeek={insight.peek}

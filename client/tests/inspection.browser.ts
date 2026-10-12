@@ -94,9 +94,39 @@ test(
         .getByTestId('hex-tile')
         .filter({ has: page.locator('title', { hasText: new RegExp('#' + id + ',') }) })
     const focus = page.getByTestId('unit-focus')
+    const geometry = () =>
+      page.evaluate(() =>
+        ['battlefield', 'command-deck'].map((id) => {
+          const rect = document.querySelector(`[data-testid="${id}"]`)!.getBoundingClientRect()
+          return [rect.x, rect.y, rect.width, rect.height]
+        }),
+      )
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+      { width: 600, height: 480 },
+      { width: 600, height: 481 },
+      { width: 601, height: 844 },
+      { width: 800, height: 450 },
+      { width: 900, height: 650 },
+      { width: 900, height: 651 },
+    ]) {
+      await page.setViewportSize(viewport)
+      const initialGeometry = await geometry()
+      for (const id of [3, 4]) {
+        await enemy(id).click()
+        await focus.waitFor()
+        assert.deepEqual(await geometry(), initialGeometry, JSON.stringify(viewport))
+        assert.equal(await page.getByRole('button', { name: /End turn/ }).count(), 0)
+        await page.getByRole('button', { name: 'Close unit focus', exact: true }).click()
+        assert.deepEqual(await geometry(), initialGeometry)
+      }
+    }
+    await page.setViewportSize({ width: 320, height: 568 })
     await enemy(3).click()
     await focus.waitFor()
-    assert.equal(await page.locator('[data-action]').count(), 0)
+    assert.equal(await special.isVisible(), false)
+    assert.equal(await page.locator('[data-action="endTurn"]').isVisible(), false)
     assert.equal(
       await page.getByRole('meter', { name: 'Health' }).getAttribute('aria-valuenow'),
       String(state.pawns[2].hp),
@@ -150,50 +180,88 @@ test(
         serviceWorkers: 'block',
       })
       t.after(() => context.close())
-      const page = await context.newPage()
-      await page.goto(origin + '/strategy/game/style-check?mode=local')
-      const endTurn = page.locator('[data-action="endTurn"]')
-      await endTurn.waitFor()
-      for (const viewport of [
-        { width: 320, height: 568 },
-        { width: 360, height: 568 },
-        { width: 390, height: 844 },
-        { width: 600, height: 480 },
-        { width: 600, height: 481 },
-        { width: 601, height: 844 },
-        { width: 800, height: 450 },
-        { width: 900, height: 650 },
-        { width: 900, height: 651 },
-        { width: 1280, height: 900 },
-      ]) {
-        await page.setViewportSize(viewport)
-        assert.ok(
-          await endTurn.evaluate((button) => {
-            const rect = button.getBoundingClientRect()
-            const special = document
-              .querySelector('[data-action="special"]')!
-              .getBoundingClientRect()
-            return (
-              rect.width < special.width &&
-              rect.height >= 44 &&
-              rect.right <= innerWidth &&
-              rect.bottom <= innerHeight &&
-              [...button.querySelectorAll('span, small')].every((label) => {
-                const box = label.getBoundingClientRect()
-                return (
-                  label.scrollWidth <= label.clientWidth &&
-                  box.left >= rect.left &&
-                  box.right <= rect.right &&
-                  box.top >= rect.top &&
-                  box.bottom <= rect.bottom
-                )
-              }) &&
-              document.documentElement.scrollWidth <= innerWidth &&
-              document.documentElement.scrollHeight <= innerHeight
-            )
-          }),
-          locale + ' at ' + JSON.stringify(viewport),
+      const state = field([
+        new Archer(1, 0, 0, 'player'),
+        new King(2, -3, -2, 'player'),
+        new King(3, 2, 0, 'enemy'),
+      ])
+      state.pawns[0].bonusEnergy = 1
+      const dimensions = new Map<string, number[][]>()
+      for (const energy of [3, 2, 1, 0, 4]) {
+        state.pawns[0].energy = energy
+        const page = await context.newPage()
+        await page.addInitScript(
+          (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+          {
+            version: BATTLE_SNAPSHOT_VERSION,
+            identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+            state: snapshotState(state),
+          },
         )
+        await page.goto(origin + '/strategy/game/' + state.seed + '?mode=local')
+        const endTurn = page.locator('[data-action="endTurn"]')
+        await endTurn.waitFor()
+        await page.evaluate(() => document.fonts.ready)
+        for (const viewport of [
+          { width: 320, height: 568 },
+          { width: 360, height: 568 },
+          { width: 390, height: 844 },
+          { width: 600, height: 480 },
+          { width: 600, height: 481 },
+          { width: 601, height: 844 },
+          { width: 800, height: 450 },
+          { width: 900, height: 650 },
+          { width: 900, height: 651 },
+          { width: 1280, height: 900 },
+        ]) {
+          await page.setViewportSize(viewport)
+          assert.ok(
+            await endTurn.evaluate((button) => {
+              const rect = button.getBoundingClientRect()
+              const special = document
+                .querySelector('[data-action="special"]')!
+                .getBoundingClientRect()
+              return (
+                rect.width < special.width &&
+                rect.height >= 44 &&
+                rect.right <= innerWidth &&
+                rect.bottom <= innerHeight &&
+                [...button.querySelectorAll('span, small')].every((label) => {
+                  const box = label.getBoundingClientRect()
+                  return (
+                    label.scrollWidth <= label.clientWidth &&
+                    box.left >= rect.left &&
+                    box.right <= rect.right &&
+                    box.top >= rect.top &&
+                    box.bottom <= rect.bottom
+                  )
+                }) &&
+                document.documentElement.scrollWidth <= innerWidth &&
+                document.documentElement.scrollHeight <= innerHeight
+              )
+            }),
+            locale + ' at ' + JSON.stringify(viewport),
+          )
+          const geometry = await page.evaluate(() =>
+            [
+              '[data-action="endTurn"]',
+              '[data-action="special"]',
+              '[data-testid="command-deck"]',
+              '[data-testid="battlefield"]',
+            ].map((selector) => {
+              const rect = document.querySelector(selector)!.getBoundingClientRect()
+              return [rect.x, rect.y, rect.width, rect.height]
+            }),
+          )
+          const key = JSON.stringify(viewport)
+          if (!dimensions.has(key)) dimensions.set(key, geometry)
+          assert.deepEqual(
+            geometry,
+            dimensions.get(key),
+            locale + ' energy ' + energy + ' at ' + key,
+          )
+        }
+        await page.close()
       }
       await context.close()
     }

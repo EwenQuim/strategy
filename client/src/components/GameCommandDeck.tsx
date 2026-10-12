@@ -16,7 +16,6 @@ interface GameCommandDeckProps {
   winner: Side | 'draw' | null
   winnerLabel: string | null
   myTurn: boolean
-  commanding: boolean
   previewed: boolean
   onPreview: () => void
   onPeek: (shown: boolean) => void
@@ -35,7 +34,6 @@ export function GameCommandDeck({
   winner,
   winnerLabel,
   myTurn,
-  commanding,
   previewed,
   onPreview,
   onPeek,
@@ -53,7 +51,7 @@ export function GameCommandDeck({
       data-testid="command-deck"
     >
       <div className="m-auto max-w-[920px] px-[18px] pt-3.5 pb-2.5 min-[900px]:pt-[17px] min-[900px]:pb-3 max-[601px]:px-3.5 max-[601px]:pt-3 max-[601px]:pb-[9px] max-[360px]:px-2.5 [@media(max-height:650px)]:pt-2 [@media(max-height:650px)]:pb-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex [@media(min-width:600px)_and_(max-height:480px)]:items-center [@media(min-width:600px)_and_(max-height:480px)]:gap-5 [@media(min-width:600px)_and_(max-height:480px)]:px-[18px] [@media(min-width:600px)_and_(max-height:480px)]:py-2">
-        <div className="mb-3.5 flex items-center justify-between gap-[15px] min-[900px]:mb-[17px] max-[601px]:mb-3 max-[601px]:gap-2.5 [@media(max-height:650px)]:mb-2 [@media(min-width:600px)_and_(max-height:480px)]:m-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-col [@media(min-width:600px)_and_(max-height:480px)]:items-start [@media(min-width:600px)_and_(max-height:480px)]:gap-1.5">
+        <div className="mb-3.5 flex items-center justify-between gap-[15px] min-[900px]:mb-[17px] max-[601px]:mb-3 max-[601px]:gap-2.5 [@media(max-height:650px)]:mb-2 [@media(min-width:600px)_and_(max-height:480px)]:m-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-col [@media(min-width:600px)_and_(max-height:480px)]:items-start [@media(min-width:600px)_and_(max-height:480px)]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:w-48 [@media(min-width:600px)_and_(max-height:480px)]:shrink-0">
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="grid h-[46px] w-[42px] shrink-0 place-items-center rounded-[10px_10px_16px_16px] border border-[#c4d1a53b] bg-[linear-gradient(135deg,#4c604038,#203d3077)] text-gold [&>svg]:size-[26px] min-[900px]:h-[49px] min-[900px]:w-[47px] max-[601px]:hidden [@media(min-width:600px)_and_(max-height:480px)]:hidden">
               <PawnIcon kind={pawn?.kind ?? 'swordsman'} />
@@ -76,32 +74,15 @@ export function GameCommandDeck({
           </div>
           {pawn && !winner && <UnitStats pawn={pawn} />}
         </div>
-        {previewed && pawn && !winner ? (
+        <div className="relative min-w-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
           <div
-            className="flex min-w-0 items-center gap-3 rounded-lg border border-line bg-white/5 p-2 text-[#d0b6e7] [@media(min-width:600px)_and_(max-height:480px)]:flex-1"
-            data-testid="unit-focus"
+            className="grid grid-cols-[minmax(0,1fr)_10rem] gap-2 data-[previewed=true]:invisible min-[900px]:gap-3 max-[601px]:grid-cols-[minmax(0,1fr)_7rem] max-[601px]:gap-1.5"
+            data-previewed={previewed}
+            inert={previewed}
           >
-            <Icon name="target" className="size-5 shrink-0" />
-            <div className="min-w-0 flex-1 text-xs">
-              <p className="font-semibold text-ink">{m.unitFocus}</p>
-              <p className="text-[11px]">
-                {specialTexts[pawn.special.name]} · {m.energyCost(pawn.special.cost)}
-              </p>
-            </div>
-            <button
-              className="grid size-11 shrink-0 place-items-center rounded-lg border border-line text-muted hover:bg-white/5 hover:text-ink"
-              onClick={onCloseFocus}
-              aria-label={m.closeFocus}
-              title={m.closeFocus}
-            >
-              <Icon name="close" className="size-5" />
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 min-[900px]:gap-3 max-[601px]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
             <SpecialButton
-              pawn={pawn}
-              commanding={commanding}
+              pawn={active}
+              commanding={myTurn}
               usingSpecial={usingSpecial}
               hasSpecialTargets={hasSpecialTargets}
               targetCount={targetCount}
@@ -113,7 +94,29 @@ export function GameCommandDeck({
             />
             <EndTurnButton pawn={active} myTurn={myTurn} dispatch={dispatch} />
           </div>
-        )}
+          {previewed && pawn && !winner && (
+            <div
+              className="absolute inset-0 flex min-w-0 items-center gap-3 rounded-lg border border-line bg-white/5 p-2 text-[#d0b6e7]"
+              data-testid="unit-focus"
+            >
+              <Icon name="target" className="size-5 shrink-0" />
+              <div className="min-w-0 flex-1 text-xs">
+                <p className="font-semibold text-ink">{m.unitFocus}</p>
+                <p className="text-[11px]">
+                  {specialTexts[pawn.special.name]} · {m.energyCost(pawn.special.cost)}
+                </p>
+              </div>
+              <button
+                className="grid size-11 shrink-0 place-items-center rounded-lg border border-line text-muted hover:bg-white/5 hover:text-ink"
+                onClick={onCloseFocus}
+                aria-label={m.closeFocus}
+                title={m.closeFocus}
+              >
+                <Icon name="close" className="size-5" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </footer>
   )

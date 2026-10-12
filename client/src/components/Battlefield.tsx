@@ -104,8 +104,9 @@ export function Battlefield({
               opacity=".6"
             />
           </pattern>
-          <pattern id="range-hatch" width="8" height="8" patternUnits="userSpaceOnUse">
-            <path d="M0 0V8M4 0V8" stroke="#b79dce" strokeWidth="1.5" opacity=".8" />
+          <pattern id="range-hatch" width="9" height="9" patternUnits="userSpaceOnUse">
+            <rect width="9" height="9" fill="#b79dce" opacity=".12" />
+            <circle cx="4.5" cy="4.5" r="1" fill="#b79dce" opacity=".65" />
           </pattern>
           <pattern id="threat-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
             <circle cx="3.5" cy="3.5" r="1.1" fill="#ff8a6e" opacity=".75" />
