@@ -28,7 +28,8 @@ import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { possessiveArmyLabels, playerNames } from '../src/army-labels.ts'
 import { biomeNames } from '../src/i18n/biomes.ts'
 import { unitNames } from '../src/i18n/units.ts'
-import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY, campaignBot } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/lib/campaign.ts'
+import { campaignBot } from '../src/bots/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
 import { BOT_LEVELS, type BotDifficulty } from '../src/lib/engine/ai.ts'
 import {
@@ -1867,17 +1868,12 @@ test(
     const enemyTurn = transition(opening, { type: 'endTurn' }).state
     const saved = {
       version: BATTLE_SNAPSHOT_VERSION,
-      identity: battleIdentity(
-        'ai',
-        level.seed,
-        campaignBot(CAMPAIGNS[1], level),
-        level.setup,
-      ),
+      identity: battleIdentity('ai', level.seed, campaignBot(CAMPAIGNS[1], level), level.setup),
       state: snapshotState(enemyTurn),
     }
     await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
     await page.evaluate(
-      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      (snapshot) => localStorage.setItem('hexmate.battle', JSON.stringify(snapshot)),
       saved,
     )
     await page.goto(origin + base + 'campaign/original/1')
@@ -1920,10 +1916,10 @@ test(
       () => JSON.parse(localStorage.getItem('hexmate.battle')!).state,
     )
     for (const pawn of aligned) {
-      const after = saved.pawns.find((p: { id: number }) => p.id === pawn.id)
-      assert.equal(after.hp, pawn.hp - 1)
-      assert.equal(after.q, pawn.q)
-      assert.equal(after.r, pawn.r)
+      const survivor = saved.pawns.find((p: { id: number }) => p.id === pawn.id)
+      assert.equal(survivor.hp, pawn.hp - 1)
+      assert.equal(survivor.q, pawn.q)
+      assert.equal(survivor.r, pawn.r)
     }
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   },
@@ -1934,7 +1930,7 @@ test(
   { timeout: 60_000 },
   async (t) => {
     const { page, origin } = await fixture(t)
-    const pack = CAMPAIGNS.find((pack) => pack.slug === 'brutal')!
+    const pack = CAMPAIGNS.find((candidate) => candidate.slug === 'brutal')!
     const level = pack.levels[0]
     await page.evaluate((key) => localStorage.setItem(key, '10'), CAMPAIGN_STORAGE_KEY)
     await page.goto(origin + base + 'campaign/brutal/1')
@@ -1944,11 +1940,11 @@ test(
     const saved = await readSaved()
     assert.deepEqual(JSON.parse(saved.identity.bot), campaignBot(pack, level))
     await playTurn(page)
-    const after = await readSaved()
-    assert.notDeepEqual(after.state, saved.state)
+    const updated = await readSaved()
+    assert.notDeepEqual(updated.state, saved.state)
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    assert.deepEqual(await readSaved(), after)
+    assert.deepEqual(await readSaved(), updated)
   },
 )
 
@@ -2168,9 +2164,9 @@ test(
   { timeout: 60_000 },
   async (t) => {
     const { page, origin } = await fixture(t)
-    const pack = CAMPAIGNS.find((pack) => pack.slug === 'brutal')!
+    const pack = CAMPAIGNS.find((candidate) => candidate.slug === 'brutal')!
     await page.evaluate((key) => localStorage.setItem(key, '10'), CAMPAIGN_STORAGE_KEY)
-    for (const level of pack.levels.filter((level) => level.unlocks.length)) {
+    for (const level of pack.levels.filter((candidate) => candidate.unlocks.length)) {
       await page.goto(origin + base)
       const actions = victoryActions(level)
       let state = initialState(level.seed, level.setup, 'player')
@@ -2183,7 +2179,7 @@ test(
         state: snapshotState(state),
       }
       await page.evaluate(
-        (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+        (snapshot) => localStorage.setItem('hexmate.battle', JSON.stringify(snapshot)),
         saved,
       )
       await page.goto(origin + base + 'campaign/brutal/' + level.id)
@@ -2210,7 +2206,7 @@ test(
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     for (const slug of ['tutorial', 'original']) {
-      const pack = CAMPAIGNS.find((pack) => pack.slug === slug)!
+      const pack = CAMPAIGNS.find((candidate) => candidate.slug === slug)!
       const level = pack.levels[0]
       const actions = victoryActions(level)
       let state = initialState(level.seed, level.setup, 'player')
@@ -2219,16 +2215,11 @@ test(
       assert.equal(activePawn(state)!.side, 'player')
       const saved = {
         version: BATTLE_SNAPSHOT_VERSION,
-        identity: battleIdentity(
-          'ai',
-          level.seed,
-          campaignBot(pack, level),
-          level.setup,
-        ),
+        identity: battleIdentity('ai', level.seed, campaignBot(pack, level), level.setup),
         state: snapshotState(state),
       }
       await page.evaluate(
-        (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+        (snapshot) => localStorage.setItem('hexmate.battle', JSON.stringify(snapshot)),
         saved,
       )
       await page.goto(origin + base + 'campaign/' + slug + '/1')

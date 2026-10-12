@@ -9,7 +9,7 @@ import { initialState, reducer, type Action } from '../src/lib/engine/index.ts'
 // Regenerate with make record-campaign ARGS="<pack> [level ...]". Compressed commands:
 // e = end turn; m,q,r = move; s,q,r[,destinationQ,destinationR] = ability.
 export function victoryActions(level: CampaignLevel): Action[] {
-  const pack = CAMPAIGNS.find((pack) => pack.levels.includes(level))!
+  const pack = CAMPAIGNS.find((candidate) => candidate.levels.includes(level))!
   const entry = (victories as Record<string, string[]>)[`${pack.slug}:${level.id}`]
   assert.ok(entry, `Missing victory for ${pack.slug}:${level.id}`)
   const [setup, encoded] = entry

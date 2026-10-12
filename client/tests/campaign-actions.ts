@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { CAMPAIGNS, type CampaignLevel } from '../src/lib/campaign.ts'
+import type { CampaignLevel } from '../src/lib/campaign.ts'
 import type { Action, GameState } from '../src/lib/engine/index.ts'
 import { huntTheKing } from '../src/bots/targetPicker.ts'
 import { RulesBot } from '../src/bots/strategies/rules.ts'
@@ -36,18 +36,4 @@ export async function winnableAgainst(level: CampaignLevel, enemyBot: Bot) {
     if ((await playToTheEnd(level, enemyBot, caution)).winner === 'player') return true
   }
   return false
-}
-
-// These encounters defeat the scripted player at every caution against the hard AI.
-// A human may still win them; if brutal proves unbeatable, tune their enemy rosters.
-const NOT_SCRIPTABLY_WINNABLE = new Set([6, 8, 10, 12, 20])
-
-export async function assertBrutalWinnable(ids: readonly number[]) {
-  for (const level of CAMPAIGNS[2].levels) {
-    if (!ids.includes(level.id) || NOT_SCRIPTABLY_WINNABLE.has(level.id)) continue
-    assert.ok(
-      await winnableAgainst(level, 'hard'),
-      'Brutal level ' + level.id + ': ' + level.name,
-    )
-  }
 }

@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   CAMPAIGNS,
-  campaignBot,
   completeCampaignLevel,
   isLevelUnlocked,
   parseCampaignProgress,
@@ -10,6 +9,7 @@ import {
   withBriefings,
   isCampaignUnlocked,
 } from '../src/lib/campaign.ts'
+import { campaignBot } from '../src/bots/campaign.ts'
 import {
   initialState,
   activePawn,
@@ -81,7 +81,7 @@ test('Each unfamiliar recruit debuts enemy-only, unlocks on victory and is playa
 
 test('Every introduction allows a non-lethal player opening before the new enemy acts', () => {
   for (const pack of CAMPAIGNS) {
-    for (const level of pack.levels.filter((level) => level.unlocks.length)) {
+    for (const level of pack.levels.filter((candidate) => candidate.unlocks.length)) {
       const state = initialState(level.seed, level.setup, 'player')
       for (const { state: next } of turnPlans(state)) {
         const encounter = `${pack.slug}:${level.id}`
@@ -127,12 +127,15 @@ test('Brutal uses depth four while other campaigns keep their difficulty presets
 })
 
 test('Brutal fields equal-sized assault forces with extra forward pressure in every encounter', () => {
-  const original = CAMPAIGNS.find((pack) => pack.slug === 'original')!
+  const originalPack = CAMPAIGNS.find((pack) => pack.slug === 'original')!
   const brutal = CAMPAIGNS.find((pack) => pack.slug === 'brutal')!
   for (const [index, level] of brutal.levels.entries()) {
     assert.equal(level.setup.enemyStance, 'assault')
     assert.ok(level.setup.enemy.length >= level.setup.player.length, level.seed)
-    assert.ok(level.setup.enemy.length > original.levels[index].setup.enemy.length, level.seed)
+    assert.ok(
+      level.setup.enemy.length > originalPack.levels[index].setup.enemy.length,
+      level.seed,
+    )
   }
 })
 

@@ -62,7 +62,7 @@ function ruleAbility(
       ),
     ),
   )
-  const action =
+  const selected =
     target &&
     candidates.find(
       (action) =>
@@ -70,7 +70,7 @@ function ruleAbility(
         action.target?.q === target.q &&
         action.target.r === target.r,
     )
-  return action ? [action] : null
+  return selected ? [selected] : null
 }
 
 function ruleApproach(state: GameState, pawn: Pawn): Action[] {

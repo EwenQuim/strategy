@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { deflateSync } from 'node:zlib'
-import { CAMPAIGNS, campaignBot } from '../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../src/lib/campaign.ts'
+import { campaignBot } from '../src/bots/campaign.ts'
 import { activePawn, initialState, reducer, type Action } from '../src/lib/engine/index.ts'
 import { getBot } from '../src/bots/catalog.ts'
 import { campaignActions } from '../tests/campaign-actions.ts'
@@ -24,7 +25,7 @@ const command = (action: Action): string => {
 }
 for (const pack of packs) {
   for (const level of pack.levels.filter(
-    (level) => !ids.length || ids.includes(String(level.id)),
+    (candidate) => !ids.length || ids.includes(String(candidate.id)),
   )) {
     const enemyBot = getBot(campaignBot(pack, level))
     let victory: Action[] | undefined
@@ -58,7 +59,13 @@ for (const pack of packs) {
     }
     entries[`${pack.slug}:${level.id}`] = [
       createHash('sha256')
-        .update(JSON.stringify([level.seed, level.setup, ...(pack.depth !== undefined ? [pack.depth] : [])]))
+        .update(
+          JSON.stringify([
+            level.seed,
+            level.setup,
+            ...(pack.depth !== undefined ? [pack.depth] : []),
+          ]),
+        )
         .digest('hex')
         .slice(0, 16),
       deflateSync(victory.map(command).join(';')).toString('base64'),

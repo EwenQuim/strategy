@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { CAMPAIGNS, campaignBot } from '../../src/lib/campaign.ts'
+import { CAMPAIGNS } from '../../src/lib/campaign.ts'
+import { campaignBot } from '../../src/bots/campaign.ts'
 import { getBot } from '../../src/bots/catalog.ts'
 import { turnPlans } from '../../src/lib/engine/ai/turns.ts'
 import {
@@ -13,7 +14,7 @@ import {
 
 test('New enemies showcase their signatures after every legal player opening', async () => {
   for (const pack of CAMPAIGNS) {
-    for (const level of pack.levels.filter((level) => level.unlocks.length)) {
+    for (const level of pack.levels.filter((candidate) => candidate.unlocks.length)) {
       const bot = getBot(campaignBot(pack, level))
       const opening = initialState(level.seed, level.setup, 'player')
       for (const plan of turnPlans(opening)) {

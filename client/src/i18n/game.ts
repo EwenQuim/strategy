@@ -172,12 +172,12 @@ export const endTurnHint = t({
   it: 'Termina il turno. L’energia inutilizzata si perde; mettiti al sicuro prima.',
 })
 export const remainingEnergy = t({
-  en: (energy: number) => `${energy} energy left`,
-  fr: (energy: number) =>
-    `${energy} ${plural(energy, { one: 'énergie restante', other: 'énergies restantes' })}`,
-  de: (energy: number) => `${energy} Energie übrig`,
-  es: (energy: number) => `${energy} de energía restante`,
-  it: (energy: number) => `${energy} energia rimasta`,
+  en: (count: number) => `${count} energy left`,
+  fr: (count: number) =>
+    `${count} ${plural(count, { one: 'énergie restante', other: 'énergies restantes' })}`,
+  de: (count: number) => `${count} Energie übrig`,
+  es: (count: number) => `${count} de energía restante`,
+  it: (count: number) => `${count} energia rimasta`,
 })
 
 export const resultLevel = t({

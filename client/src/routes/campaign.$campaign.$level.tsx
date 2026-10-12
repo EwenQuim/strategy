@@ -2,12 +2,8 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Briefing } from '../components/Briefing'
 import { Game } from '../components/Game'
-import {
-  campaignBot,
-  isCampaignUnlocked,
-  visibleCampaigns,
-  isLevelUnlocked,
-} from '../lib/campaign'
+import { isCampaignUnlocked, visibleCampaigns, isLevelUnlocked } from '../lib/campaign'
+import { campaignBot } from '../bots/campaign'
 import {
   readCampaignProgress,
   readClearedLevels,

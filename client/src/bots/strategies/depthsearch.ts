@@ -40,6 +40,68 @@ const POSITION_BUDGET = 1500
 const SHORTLIST = 200
 const usesAbility = (plan: TurnPlan) => plan.actions.some((action) => action.type === 'special')
 
+export class DepthsearchBot implements Bot<BotOptions> {
+  readonly name = 'depthsearch'
+  readonly options: Readonly<BotOptions>
+
+  constructor(options: Partial<BotOptions> = {}) {
+    this.options = readOptions<BotOptions>(BOT_LEVELS.normal, options)
+    if (!validOptions(this.options)) throw new RangeError('Invalid bot options')
+  }
+
+  async chooseActions(state: GameState): Promise<Action[]> {
+    const options = this.options
+    for (const key of Object.keys(searchStats) as (keyof typeof searchStats)[])
+      searchStats[key] = 0
+    searchStats.decisions = 1
+    const pawn = activePawn(state)
+    if (!pawn || state.winner) return []
+    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const distance = distancesToAttack(state, pawn)
+    const reach: ReachCache = new Map()
+    const plan = sidePlan(state, pawn.side, options)
+    const search: Search = {
+      side: pawn.side,
+      beamWidth: options.beamWidth,
+      budget: POSITION_BUDGET,
+      scores: new Map(),
+      leaf: (next) => {
+        search.budget--
+        searchStats.leafEvals++
+        return evaluatePosition(next, pawn, plan, distance, reach)
+      },
+    }
+    // Hellfire remains seeded; analysis does not peek into the battle's random stream.
+    const analysis = { ...state, randomState: 0 }
+    let floor = -Infinity
+    const ranked = viableTurns(
+      analysis,
+      pawn.id,
+      introductionTurns(analysis, rankedTurns(analysis, search)),
+    )
+    const victory = ranked.find((turn) => turn.state.winner === pawn.side)
+    if (victory) return victory.actions
+    searchStats.rootLeafEvals = searchStats.leafEvals
+    const valued = ranked
+      .slice(0, options.beamWidth)
+      .map((turn) => {
+        const value = minimax(
+          turn.state,
+          options.depth - 1,
+          floor,
+          Infinity,
+          search,
+          turn.value,
+        )
+        floor = Math.max(floor, value - options.latitude)
+        // Keep near-term position quality as a small tie-breaker for equal distant outcomes.
+        return { ...turn, value: value + turn.value * 0.01 }
+      })
+      .sort((a, b) => b.value - a.value)
+    return chooseOption(analysis, pawn, valued, options).actions
+  }
+}
+
 function shortlist(state: GameState, plans: TurnPlan[]): TurnPlan[] {
   if (plans.length <= SHORTLIST) return plans
   const side = activePawn(state)!.side
@@ -169,62 +231,4 @@ function minimax(
     }
   }
   return best
-}
-
-export class DepthsearchBot implements Bot<BotOptions> {
-  readonly name = 'depthsearch'
-  readonly options: Readonly<BotOptions>
-
-  constructor(options: Partial<BotOptions> = {}) {
-    this.options = readOptions<BotOptions>(BOT_LEVELS.normal, options)
-    if (!validOptions(this.options)) throw new RangeError('Invalid bot options')
-  }
-
-  async chooseActions(state: GameState): Promise<Action[]> {
-    const options = this.options
-    for (const key of Object.keys(searchStats) as (keyof typeof searchStats)[])
-      searchStats[key] = 0
-    searchStats.decisions = 1
-    const pawn = activePawn(state)
-    if (!pawn || state.winner) return []
-    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
-    const distance = distancesToAttack(state, pawn)
-    const reach: ReachCache = new Map()
-    const plan = sidePlan(state, pawn.side, options)
-    const search: Search = {
-      side: pawn.side,
-      beamWidth: options.beamWidth,
-      budget: POSITION_BUDGET,
-      scores: new Map(),
-      leaf: (next) => {
-        search.budget--
-        searchStats.leafEvals++
-        return evaluatePosition(next, pawn, plan, distance, reach)
-      },
-    }
-    // Hellfire remains seeded; analysis does not peek into the battle's random stream.
-    const analysis = { ...state, randomState: 0 }
-    let floor = -Infinity
-    const ranked = viableTurns(analysis, pawn.id, introductionTurns(analysis, rankedTurns(analysis, search)))
-    const victory = ranked.find((turn) => turn.state.winner === pawn.side)
-    if (victory) return victory.actions
-    searchStats.rootLeafEvals = searchStats.leafEvals
-    const valued = ranked
-      .slice(0, options.beamWidth)
-      .map((turn) => {
-        const value = minimax(
-          turn.state,
-          options.depth - 1,
-          floor,
-          Infinity,
-          search,
-          turn.value,
-        )
-        floor = Math.max(floor, value - options.latitude)
-        // Keep near-term position quality as a small tie-breaker for equal distant outcomes.
-        return { ...turn, value: value + turn.value * 0.01 }
-      })
-      .sort((a, b) => b.value - a.value)
-    return chooseOption(analysis, pawn, valued, options).actions
-  }
 }

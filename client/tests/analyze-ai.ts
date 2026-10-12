@@ -1,4 +1,5 @@
-import { CAMPAIGNS, campaignBot, type Campaign } from '../src/lib/campaign.ts'
+import { CAMPAIGNS, type Campaign } from '../src/lib/campaign.ts'
+import { campaignBot } from '../src/bots/campaign.ts'
 import { getBot } from '../src/bots/catalog.ts'
 import { activePawn, initialState, reducer } from '../src/lib/engine/index.ts'
 
