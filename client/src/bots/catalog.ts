@@ -6,14 +6,17 @@ import { RandomBot } from './strategies/random.ts'
 import { MistralBot } from './strategies/mistral.ts'
 import { JevBot } from './strategies/jev.ts'
 import { CommanderBot, COMMANDER_LEVELS } from './strategies/commander.ts'
+import { LearnedBot, LEARNED_LEVELS } from './strategies/learned.ts'
 
 const depthsearch = registerBot(DepthsearchBot, undefined, BOT_LEVELS)
 const random = registerBot(RandomBot)
 const mistral = registerBot(MistralBot, new DepthsearchBot())
 const jev = registerBot(JevBot, new DepthsearchBot())
 const commander = registerBot(CommanderBot, undefined, COMMANDER_LEVELS)
+const learned = registerBot(LearnedBot, undefined, LEARNED_LEVELS)
 
 export const BOTS = {
+  [learned.name]: learned,
   [commander.name]: commander,
   [depthsearch.name]: depthsearch,
   [random.name]: random,

@@ -1,0 +1,26 @@
+{
+  "output": "training-runs/gameplay-update",
+  "training": {
+    "games": 160,
+    "epochs": 800,
+    "maxActivations": 240,
+    "learningRate": 0.03,
+    "regularization": 0.001,
+    "validationEvery": 5,
+    "seedPrefix": "gameplay-update-training",
+    "timeouts": "skip"
+  },
+  "evaluation": {
+    "pairs": 16,
+    "seedPrefix": "gameplay-update-evaluation",
+    "includeIncumbent": true,
+    "search": { "simulations": 128, "candidates": 16 }
+  },
+  "acceptance": {
+    "minScore": 0.75,
+    "incumbentMinScore": 0.5,
+    "maxTimeoutRate": 0.2,
+    "maxP95Ms": 500,
+    "validationImprovement": true
+  }
+}

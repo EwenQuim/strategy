@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc"],
-  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts", "generated"],
+  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts", "generated", "training-runs"],
   "rules": {
     "no-shadow": "error",
     "no-restricted-properties": [

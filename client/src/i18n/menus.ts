@@ -119,6 +119,7 @@ export const aiStrategy = t({
 export const aiStrategies = t<Record<BotName, string>>({
   en: {
     commander: 'Commander AI',
+    learned: 'Learned search AI',
     depthsearch: 'Depth search AI',
     random: 'Random AI',
     mistral: 'Mistral AI',
@@ -126,6 +127,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   },
   fr: {
     commander: 'IA Commandant',
+    learned: 'IA Recherche apprise',
     depthsearch: 'IA Recherche',
     random: 'Aléatoire',
     mistral: 'IA Mistral',
@@ -133,6 +135,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   },
   de: {
     commander: 'Kommandant KI',
+    learned: 'Lernende Such-KI',
     depthsearch: 'Such-KI',
     random: 'Zufall',
     mistral: 'Mistral KI',
@@ -140,6 +143,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   },
   es: {
     commander: 'IA Comandante',
+    learned: 'IA Búsqueda aprendida',
     depthsearch: 'IA Búsqueda',
     random: 'Aleatoria',
     mistral: 'IA Mistral',
@@ -147,6 +151,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   },
   it: {
     commander: 'IA Comandante',
+    learned: 'IA Ricerca appresa',
     depthsearch: 'IA Ricerca',
     random: 'Casuale',
     mistral: 'IA Mistral',
