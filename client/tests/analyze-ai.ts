@@ -52,7 +52,7 @@ async function replay(
 }
 
 async function scan(slug: string) {
-  const pack = CAMPAIGNS.find((pack) => pack.slug === slug)!
+  const pack = CAMPAIGNS.find((candidate) => candidate.slug === slug)!
   console.log(`Scanning ${pack.name} with the test's retry ladder`)
   const rows: [string, number, boolean, number][] = []
   for (const level of pack.levels) {
@@ -73,8 +73,8 @@ const quantile = (values: number[], q: number) =>
   values[Math.min(values.length - 1, Math.floor(values.length * q))]
 
 async function deep(slug: string, id: number) {
-  const pack = CAMPAIGNS.find((pack) => pack.slug === slug)!
-  const level = pack.levels.find((level) => level.id === id)!
+  const pack = CAMPAIGNS.find((candidate) => candidate.slug === slug)!
+  const level = pack.levels.find((candidate) => candidate.id === id)!
   const caution = Number(option('caution', '0.25'))
   const rows: Row[] = []
   const state = await replay(level, caution, rows)

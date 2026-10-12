@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ACHIEVEMENTS, earnedAchievements, type AchievementId } from './lib/achievements'
 import type { GameState, Side } from './lib/engine/index.ts'
 import type { GameMode } from './lib/game-mode.ts'
@@ -35,11 +35,10 @@ export function useFreshAchievements(
   viewerSide: Side = 'player',
 ): AchievementId[] {
   const [known] = useState(readUnlockedAchievements)
+  const earned = earnedAchievements(state, viewerSide)
   // Two players sharing a device could farm achievements, so local games never earn any.
-  const earned = useMemo(
-    () => (mode === 'local' ? [] : earnedAchievements(state, viewerSide)),
-    [mode, state, viewerSide],
-  )
-  useEffect(() => unlockAchievements(earned), [earned])
-  return earned.filter((id) => !known.includes(id))
+  useEffect(() => {
+    if (mode !== 'local') unlockAchievements(earned)
+  }, [earned, mode])
+  return mode === 'local' ? [] : earned.filter((id) => !known.includes(id))
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   getGame,
@@ -45,7 +45,7 @@ export function useOnlineGame(code: string, stream = false) {
     })
   }, [client, code, live])
 
-  const data = useMemo(() => (query.data ? toOnlineGame(query.data) : undefined), [query.data])
+  const data = query.data ? toOnlineGame(query.data) : undefined
   return { ...query, data }
 }
 

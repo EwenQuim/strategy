@@ -10,13 +10,13 @@ Every feature must make the game fun and strategic, never static or boring. Batt
 
 - Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.
 - Prioritize space for the grid: keep top information and bottom actions compact, remove redundant instructions, and show battle history as transient overlays rather than permanent panels.
-- Game logic is plain TypeScript in `client/src/lib/engine/` (hex math, pawn classes, reducer), pure and framework-free. Routes only render it.
-- Each pawn type lives in its own file in `client/src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`; every non-king class is recruitable. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
+- Game logic lives in `client/src/lib/engine/` (hex math, pawn classes, reducer) and stays pure. Routes only render it.
+- Each pawn type lives in its own file in `client/src/lib/engine/pawns/` (class extending `Pawn`, its icon path and its special ability). Register it in `PAWN_CLASSES` in `pawns/index.ts`. UI hints come from ability fields (`targetLabel`, `prompt`, `noTargets`), not `kind` checks.
 - Each biome lives in its own file in `client/src/lib/engine/biomes/` (terrain generation, theme CSS variables). Register it in `BIOMES` in `biomes/index.ts`; the game screen applies `theme` as inline CSS variables, and display names come from `i18n/biomes.ts`.
 - The engine contains no bots: `client/src/lib/engine/ai/` is only a toolbox (legal actions, turn enumeration, position scoring). All bots live in `client/src/bots/`: shared utilities at the root, implementations in `strategies/`. Each strategy exports a class implementing `Bot<Options>` from `bots/bot.ts`, with a readonly stable `name`, owned immutable `options` and `chooseActions(state): Promise<Action[]>`; keep configuration first, then the class with its decision method and helpers. Constructors alone own defaults, normalization and validation. Register every selectable strategy through `registerBot` in the single `BOTS` catalog; `BotConfig` is inferred from those registrations as `{ name, options }`. Resolution constructs independent bots; React owns per-game instance stability. Parameterized bots use the same resolution and structured URL serialization as other bots; never add strategy-specific config unions, caches or dispatch branches. Difficulty levels are option presets. Fallback composition preserves the primary bot's name and options. Bots follow the existing app TypeScript and lint configuration; do not introduce bot-specific projects or file-by-file allowlists.
 - Tile highlighting (reachable / attackable) changes the polygon fill color, never the border.
 - Prefer avoiding `useEffect`: when reactive state can do the job — a lazy `useState` initializer instead of a mount read, or state moved up, into Context, or into a separate hook — code it that way, and prefer CSS keyframes over effect-driven animation. Keep the effects that are necessary reactions to external systems (storage, subscriptions, timers, imperative DOM APIs); never route side effects through reducers to dodge an effect. When touching code that has one, try to remove it by coding differently.
-- UI text lives in `client/src/i18n/`: one exported `t({ en, fr, de, es, it })` constant per message, imported as `import * as m from '../i18n/<area>'`. Use `plural()` for count-dependent words. A missing locale or unknown key fails `tsc`; an unused message fails knip. Engine display text (unit and ability names, biomes, tile features, terrain, campaign and level names) lives in i18n maps keyed by stable ids; ability text fields hold `SpecialTextKey` message keys resolved through `i18n/units.ts`. The battle log is the only engine text still untranslated.
+- UI text lives in `client/src/i18n/`: one exported `t({ en, fr, de, es, it })` constant per message, imported as `import * as m from '../i18n/<area>'`. Use `plural()` for count-dependent words. Engine display text (unit and ability names, biomes, tile features, terrain, campaign and level names) lives in i18n maps keyed by stable ids; ability text fields hold `SpecialTextKey` message keys resolved through `i18n/units.ts`. The battle log is the only engine text still untranslated.
 
 ## Styling
 
@@ -34,13 +34,15 @@ Use the `Makefile` targets; it is the source of truth for setup, dev, format, li
 
 Tests encode gameplay. Editing an existing test to make a change pass is a red flag: it may hide an unintended gameplay change, so flag it and get the change confirmed instead of adjusting the test silently.
 
+Assert observable rules and outcomes rather than opaque hashes of whole game states or bot decisions. Keep fixed references when they protect a real compatibility contract, such as seeded maps and the PRNG stream. Remove redundant coverage only after identifying the behavioral tests that remain.
+
 ## Boundaries
 
 - `client/src/lib/engine/`: deterministic game rules. `reducer(state, action)` applies an action for whichever side owns the active pawn; it never runs a bot or mutates its input.
 - `client/src/lib/playback.ts`: pure playback state and input locking.
 - `client/src/useGame.ts`, routes, and components: React, browser timers, reduced-motion preferences, and rendering.
 
-The library is checked without DOM or Node globals and cannot import runtime packages or files outside `client/src/lib/`. Seeded randomness is stored in game state; the engine does not read clocks or global randomness. Networking and serialization belong in adapters, not in the rules engine.
+Seeded randomness is stored in game state. Networking and serialization belong in adapters.
 
 ## Authored battle setups
 

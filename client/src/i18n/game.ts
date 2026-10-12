@@ -172,16 +172,16 @@ export const endTurn = t({
   it: 'Fine turno',
 })
 export const endTurnHint = t({
-  en: (escape: number) =>
-    `Spend all remaining energy and end this turn. Escape: ${escape}% until the round ends.`,
-  fr: (escape: number) =>
-    `Dépense toute l'énergie restante et termine ce tour. Esquive : ${escape} % jusqu'à la fin de la manche.`,
-  de: (escape: number) =>
-    `Verbrauche alle restliche Energie und beende diesen Zug. Ausweichen: ${escape} % bis zum Ende der Runde.`,
-  es: (escape: number) =>
-    `Gasta toda la energía restante y termina este turno. Esquiva: ${escape} % hasta el final de la ronda.`,
-  it: (escape: number) =>
-    `Spendi tutta l'energia rimasta e termina questo turno. Schivata: ${escape}% fino alla fine del round.`,
+  en: (escapeChance: number) =>
+    `Spend all remaining energy and end this turn. Escape: ${escapeChance}% until the round ends.`,
+  fr: (escapeChance: number) =>
+    `Dépense toute l'énergie restante et termine ce tour. Esquive : ${escapeChance} % jusqu'à la fin de la manche.`,
+  de: (escapeChance: number) =>
+    `Verbrauche alle restliche Energie und beende diesen Zug. Ausweichen: ${escapeChance} % bis zum Ende der Runde.`,
+  es: (escapeChance: number) =>
+    `Gasta toda la energía restante y termina este turno. Esquiva: ${escapeChance} % hasta el final de la ronda.`,
+  it: (escapeChance: number) =>
+    `Spendi tutta l'energia rimasta e termina questo turno. Schivata: ${escapeChance}% fino alla fine del round.`,
 })
 export const escapeGain = t({
   en: (gain: number) => `+${gain}% escape`,

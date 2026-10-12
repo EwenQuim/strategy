@@ -139,9 +139,9 @@ async function fixture(t: TestContext) {
   const probe = await context.newPage()
   await probe.goto(origin + '/probe')
   const registration = await probe.evaluateHandle(async () => {
-    const registration = await navigator.serviceWorker.getRegistration('/strategy/')
-    if (!registration) throw new Error('Missing app registration')
-    return registration
+    const appRegistration = await navigator.serviceWorker.getRegistration('/strategy/')
+    if (!appRegistration) throw new Error('Missing app registration')
+    return appRegistration
   })
   assert.equal(await probe.evaluate(() => navigator.serviceWorker.controller), null)
   assert.equal(
@@ -882,9 +882,9 @@ test(
     const next = releaseB()
     await context.setOffline(false)
     await probe.waitForFunction(
-      (registration) =>
-        registration.waiting?.state === 'installed' &&
-        registration.active?.state === 'activated',
+      (appRegistration) =>
+        appRegistration.waiting?.state === 'installed' &&
+        appRegistration.active?.state === 'activated',
       registration,
       polling,
     )
@@ -927,15 +927,15 @@ test(
     assert.equal(await releaseMarker(other), undefined)
     await page.close()
     assert.equal(
-      await probe.evaluate((registration) => registration.waiting?.state, registration),
+      await probe.evaluate((appRegistration) => appRegistration.waiting?.state, registration),
       'installed',
       'Another open tab must keep the previous release active',
     )
     assert.ok((await probe.evaluate(() => caches.keys())).includes(cacheName))
     await other.close()
     await probe.waitForFunction(
-      (registration) =>
-        registration.waiting === null && registration.active?.state === 'activated',
+      (appRegistration) =>
+        appRegistration.waiting === null && appRegistration.active?.state === 'activated',
       registration,
       polling,
     )
@@ -1157,8 +1157,8 @@ test(
     for (const [biome, seed] of seeds) {
       await page.goto(origin + base)
       assert.equal(await readBuildLabel(page), buildLabel)
-      await page.evaluate((seed) => {
-        Object.defineProperty(crypto, 'randomUUID', { value: () => seed })
+      await page.evaluate((battleSeed) => {
+        Object.defineProperty(crypto, 'randomUUID', { value: () => battleSeed })
       }, seed)
       await page.getByRole('link', { name: 'Quick play' }).click()
       await dismissQuickPlayTutorial(page)
@@ -1724,7 +1724,7 @@ test(
     }
     await page.setViewportSize({ width: 320, height: 568 })
     for (const level of CAMPAIGNS[1].levels.filter(
-      (level) => level.id > 1 && level.newElements.length > 0,
+      (candidate) => candidate.id > 1 && candidate.newElements.length > 0,
     )) {
       await page.goto(origin + base + 'campaign/original/' + level.id)
       await briefing.waitFor()
@@ -2123,10 +2123,13 @@ test(
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     for (const value of ['garbage', '-1', '21', '1.5', '{}']) {
-      await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
-        key: CAMPAIGN_STORAGE_KEY,
-        value,
-      })
+      await page.evaluate(
+        ({ key, value: storedValue }) => localStorage.setItem(key, storedValue),
+        {
+          key: CAMPAIGN_STORAGE_KEY,
+          value,
+        },
+      )
       await page.goto(origin + base + 'campaign/original')
       await page.locator('ol[aria-label="Campaign levels"]').waitFor()
       assert.equal(await page.locator('ol[aria-label="Campaign levels"] a').count(), 1)
@@ -2139,8 +2142,8 @@ test(
       )
       await page.goto(origin + base + 'campaign/original')
       await page.locator('ol[aria-label="Campaign levels"]').waitFor()
-      await page.evaluate((method) => {
-        Storage.prototype[method] = () => {
+      await page.evaluate((storageMethod) => {
+        Storage.prototype[storageMethod] = () => {
           throw new DOMException('Storage blocked', 'SecurityError')
         }
       }, method)
