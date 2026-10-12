@@ -131,9 +131,8 @@ model id before promoting it; gameplay replay identity should retain the checkpo
 actually used. Feature/action schema changes may need code changes before retraining.
 
 Normal CI never runs training or tournaments. Unit tests exercise fitting on tiny synthetic
-samples and validate configuration/acceptance rules. Pre-push checks only the changed stack:
-client changes avoid unrelated Go handler tests, server changes still run them, and shared
-hook/Makefile changes or an unknown diff run both. Full integration remains in CI's AI job.
+samples and validate configuration/acceptance rules. Pre-push runs the existing fast client
+and Go checks. Full integration remains in CI's AI job.
 
 ### Original experiment commands
 

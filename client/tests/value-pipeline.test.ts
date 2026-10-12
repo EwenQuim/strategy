@@ -6,7 +6,6 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fitValue } from '../scripts/value-fit.ts'
 import { acceptanceFailures } from '../scripts/value-pipeline.ts'
-import { checkScopes } from '../scripts/push-checks.ts'
 import { LearnedBot } from '../src/bots/strategies/learned.ts'
 
 test('Retraining overrides are typed, independent and reject unknown fields before starting work', () => {
@@ -109,20 +108,6 @@ test('Candidate acceptance needs predictive improvement, match strength, complet
     assert.ok(acceptanceFailures(config, candidate, [changed]).length)
   assert.ok(acceptanceFailures(config, candidate, []).length)
   assert.ok(acceptanceFailures(config, { ...candidate, validationLoss: 0.5 }, [result]).length)
-})
-
-test('Push scopes run client-only checks for bots and Go checks for server changes', () => {
-  assert.deepEqual(checkScopes(['client/src/bots/value-model.json']), {
-    client: true,
-    server: false,
-  })
-  assert.deepEqual(checkScopes(['server/internal/handlers/game.go']), {
-    client: false,
-    server: true,
-  })
-  assert.deepEqual(checkScopes(['Makefile']), { client: true, server: true })
-  assert.deepEqual(checkScopes(['.githooks/pre-push']), { client: true, server: true })
-  assert.deepEqual(checkScopes(['docs/learned-search.md']), { client: false, server: false })
 })
 
 test('Candidate weights are validated and copied into an independent bot', () => {

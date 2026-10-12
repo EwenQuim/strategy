@@ -1,5 +1,22 @@
 #!/bin/sh
 set -eu
 
-# Check only the stacks being published. Training and integration sweeps are never push work.
-node client/scripts/push-checks.ts
+# Fast guard: format + lint + typecheck + the unit suite.
+# Slow exhaustive sweeps live in tests/integration and run in CI's dedicated ai job, not here.
+npm --prefix client run format:check
+npm --prefix client run lint
+npm --prefix client run typecheck
+npm --prefix client run test
+
+if command -v go >/dev/null 2>&1; then
+	unformatted=$(gofmt -l server)
+	if [ -n "$unformatted" ]; then
+		echo "gofmt needed:"
+		echo "$unformatted"
+		exit 1
+	fi
+	go -C server test ./...
+	if command -v golangci-lint >/dev/null 2>&1; then
+		(cd server && golangci-lint run)
+	fi
+fi
