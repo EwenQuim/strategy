@@ -62,6 +62,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Who Let the Dogs Out',
       description: 'Win with an army of only Wolves and your King.',
     },
+    crispy: {
+      title: 'Extra Crispy',
+      description: 'Win after walking one of your units into lava.',
+    },
+    smite: {
+      title: 'The Gods Missed',
+      description: 'Win after Hellfire consumed one of your units.',
+    },
+    divineAssist: {
+      title: 'Divine Assist',
+      description: 'Win because Hellfire killed the enemy King.',
+    },
+    oops: {
+      title: 'Oops',
+      description: 'Win after killing one of your own units with a Bomb.',
+    },
+    boomRegicide: {
+      title: 'Boom, King',
+      description: 'Kill the enemy King with a Bomb or Fireball.',
+    },
+    daredevil: {
+      title: 'Daredevil',
+      description: 'Win while your King stands inside a Hellfire blast area.',
+    },
   },
   fr: {
     cleanHands: {
@@ -114,6 +138,31 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     dogs: {
       title: 'Qui a lâché les chiens ?',
       description: 'Gagner avec uniquement des loups et votre roi.',
+    },
+    crispy: {
+      title: 'Bien croustillant',
+      description: 'Gagner après avoir envoyé une de vos unités dans la lave.',
+    },
+    smite: {
+      title: 'Les dieux ont raté',
+      description: "Gagner après que le feu de l'enfer a emporté une de vos unités.",
+    },
+    divineAssist: {
+      title: 'Assistance divine',
+      description: "Gagner parce que le feu de l'enfer a tué le roi ennemi.",
+    },
+    oops: {
+      title: 'Oups',
+      description: 'Gagner après avoir tué une de vos unités avec une bombe.',
+    },
+    boomRegicide: {
+      title: 'Boum, roi',
+      description: 'Tuer le roi ennemi avec une bombe ou une boule de feu.',
+    },
+    daredevil: {
+      title: 'Casse-cou',
+      description:
+        "Gagner pendant que votre roi est dans une zone de souffle du feu de l'enfer.",
     },
   },
   de: {
@@ -174,6 +223,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Lasst die Hunde los',
       description: 'Gewinne mit einer Armee nur aus Wölfen und deinem König.',
     },
+    crispy: {
+      title: 'Extra knusprig',
+      description: 'Gewinne, nachdem du eine deiner Einheiten in Lava laufen lassen hast.',
+    },
+    smite: {
+      title: 'Die Götter haben verfehlt',
+      description: 'Gewinne, nachdem Höllenfeuer eine deiner Einheiten verzehrt hat.',
+    },
+    divineAssist: {
+      title: 'Göttliche Hilfe',
+      description: 'Gewinne, weil Höllenfeuer den feindlichen König getötet hat.',
+    },
+    oops: {
+      title: 'Ups',
+      description: 'Gewinne, nachdem du eine eigene Einheit mit einer Bombe getötet hast.',
+    },
+    boomRegicide: {
+      title: 'Wumm, König',
+      description: 'Töte den feindlichen König mit einer Bombe oder einem Feuerball.',
+    },
+    daredevil: {
+      title: 'Himmelfahrtskommando',
+      description: 'Gewinne, während dein König im Höllenfeuer-Einwirkbereich steht.',
+    },
   },
   es: {
     cleanHands: {
@@ -230,6 +303,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: '¿Quién soltó a los perros?',
       description: 'Gana con un ejército de solo lobos y tu rey.',
     },
+    crispy: {
+      title: 'Extra crujiente',
+      description: 'Gana tras mandar una de tus unidades a la lava.',
+    },
+    smite: {
+      title: 'Los dioses fallaron',
+      description: 'Gana después de que el fuego infernal consuma a una de tus unidades.',
+    },
+    divineAssist: {
+      title: 'Asistencia divina',
+      description: 'Gana porque el fuego infernal mató al rey enemigo.',
+    },
+    oops: {
+      title: 'Ups',
+      description: 'Gana tras matar a una de tus unidades con una bomba.',
+    },
+    boomRegicide: {
+      title: 'Boom, rey',
+      description: 'Mata al rey enemigo con una bomba o una bola de fuego.',
+    },
+    daredevil: {
+      title: 'Temerario',
+      description: 'Gana mientras tu rey está en la zona de ráfaga del fuego infernal.',
+    },
   },
   it: {
     cleanHands: {
@@ -285,6 +382,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     dogs: {
       title: 'Chi ha liberato i cani?',
       description: 'Vinci con un esercito di soli lupi e il tuo re.',
+    },
+    crispy: {
+      title: 'Extra croccante',
+      description: 'Vinci dopo aver mandato una delle tue unità nella lava.',
+    },
+    smite: {
+      title: 'Gli dei hanno sbagliato mira',
+      description: 'Vinci dopo che il fuoco infernale ha consumato una delle tue unità.',
+    },
+    divineAssist: {
+      title: 'Assistenza divina',
+      description: 'Vinci perché il fuoco infernale ha ucciso il re nemico.',
+    },
+    oops: {
+      title: 'Ops',
+      description: 'Vinci dopo aver ucciso una delle tue unità con una bomba.',
+    },
+    boomRegicide: {
+      title: 'Boom, re',
+      description: 'Uccidi il re nemico con una bomba o una palla di fuoco.',
+    },
+    daredevil: {
+      title: 'Temerario',
+      description: 'Vinci mentre il tuo re è nella zona di vampata del fuoco infernale.',
     },
   },
 })
