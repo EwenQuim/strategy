@@ -139,11 +139,22 @@ export function estimateIncomingDamage(
       (attacker.energy < attacker.special.cost && !runes.length)
     )
       continue
-    const reach = reachOf(state, attacker, runes, cache)
+    // Runes can extend movement, and custom threats such as Rush can be unbounded.
+    const hasBoundedRange = attacker.special.landingRange || !attacker.special.threat
+    const threatRange =
+      !runes.length && hasBoundedRange
+        ? Math.max(0, attacker.energy - attacker.special.cost - attacker.moveCost + 1) +
+          (attacker.special.landingRange ?? 0) +
+          attacker.attack.maxRange +
+          (attacker.attack.rangeBonus ?? 0)
+        : Infinity
+    let reach: Reach | undefined
     // A target that acts before this attacker can move away or strike first, so only attackers
     // acting before the target's next turn threaten it.
     for (const target of targets) {
       if (turnOffset.get(foe.id)! >= turnOffset.get(target.id)!) continue
+      if (hexDist(attacker, target) > threatRange) continue
+      reach ??= reachOf(state, attacker, runes, cache)
       const damage = maxDamage(attacker, reach, target)
       damageByTarget.set(target.id, damageByTarget.get(target.id)! + damage)
       if (damage > 0) {
