@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import {
   initialPlayback,
   playbackReducer,
@@ -25,12 +25,6 @@ export interface GameOptions {
   online?: OnlineSession
 }
 
-function useEnemyBot(botKey: string) {
-  // This wrapper has no hook calls or JSX for inference; compile its value-keyed cache explicitly.
-  'use memo'
-  return getBot(JSON.parse(botKey) as BotConfig)
-}
-
 export function useGame({
   seed,
   mode,
@@ -39,6 +33,8 @@ export function useGame({
   onVictory,
   online,
 }: GameOptions) {
+  // Routes remount when battle settings change; the bot belongs to that battle's lifetime.
+  const [enemyBot] = useState(() => (mode === 'ai' && !online ? getBot(bot) : null))
   const [playback, dispatch] = useReducer(
     (currentPlayback: Transition, action: PlaybackAction) => {
       const next = playbackReducer(currentPlayback, action, mode)
@@ -75,10 +71,8 @@ export function useGame({
     return () => window.clearTimeout(timer)
   }, [frame])
 
-  // URL configs are normalized at the boundary; equal values keep this game's bot stable.
-  const enemyBot = useEnemyBot(JSON.stringify(bot))
   useEffect(() => {
-    if (mode !== 'ai' || online || playing || state.winner) return
+    if (!enemyBot || mode !== 'ai' || online || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
     void enemyBot
