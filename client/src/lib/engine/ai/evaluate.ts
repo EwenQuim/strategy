@@ -3,13 +3,7 @@ import { inHellfire } from '../hellfire.ts'
 import { canAttack, routePath, walkingPaths, protectorFor } from '../combat.ts'
 import type { SidePlan } from './plan.ts'
 import { distFrom, hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
-import {
-  START_ENERGY,
-  jumpDestinations,
-  type Pawn,
-  type Side,
-  type ThreatPosition,
-} from '../pawns/index.ts'
+import { jumpDestinations, type Pawn, type Side, type ThreatPosition } from '../pawns/index.ts'
 
 function damageFromPosition(attacker: Pawn, position: ThreatPosition): number {
   const base = canAttack(attacker, position.target, position.from)
@@ -108,7 +102,6 @@ function estimateIncomingDamage(
     const actsNextRound = order.indexOf(foe.id) < state.active
     if (actsNextRound && foe.hp <= 1 && inHellfire(state.hellfire, foe)) continue
     const attacker = foe.clone()
-    attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
     if (attacker.energy <= 0) continue
     const reach = reachOf(state, attacker, runes, cache)
     // A target that acts before this attacker can move away or strike first, so only attackers

@@ -59,10 +59,6 @@ export class Archer extends Pawn {
   static override readonly aiInstructions =
     'ranged, 1 damage at distance 2-3, never adjacent. Eagle eye (2): 2 damage at distance 2-3 that cannot be escaped.'
   readonly attack: AttackProfile = { damage: 1, minRange: 2, maxRange: 3, rangeBonus: 1 }
-  // Focus: every banked energy point adds 1 tile of attack range.
-  override adrenalineRange(): number {
-    return this.adrenaline
-  }
   get special(): SpecialAbility {
     return aimedShot
   }

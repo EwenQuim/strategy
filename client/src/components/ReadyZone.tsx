@@ -15,9 +15,7 @@ export function ReadyZone({
 }) {
   const zone = pawn.special.readyZone
   if (!zone) return null
-  const here = key(pawn.q, pawn.r)
   const marks = [...walkingPaths(tiles, pawns, pawn).keys()]
-    .filter((tileKey) => tileKey !== here)
     .map((tileKey) => tiles.get(tileKey)!)
     .filter((tile) => zone.from(pawn, tile, pawns))
   if (!marks.length) return null

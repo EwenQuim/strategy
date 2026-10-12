@@ -84,10 +84,6 @@ export class Lancer extends Pawn {
     return 3
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2 }
-  // Momentum: every banked energy point adds 1 damage to the lancer's basic attacks.
-  override adrenalineDamage(): number {
-    return this.adrenaline
-  }
   get special(): SpecialAbility {
     return dash
   }

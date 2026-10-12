@@ -1,7 +1,5 @@
 import type { Pawn } from '../lib/engine'
 import * as m from '../i18n/game'
-import { adrenalineTexts } from '../i18n/units'
-import { Icon } from './Icon'
 
 function StatMeter({
   name,
@@ -63,21 +61,9 @@ export function UnitStats({ pawn }: { pawn: Pawn }) {
         name={m.energy}
         note={pawn.bonusEnergy ? '+' + pawn.bonusEnergy : undefined}
         value={pawn.energy}
-        max={pawn.maxEnergy}
+        max={Math.max(pawn.maxEnergy, pawn.energy)}
         filledClass="data-[filled=true]:bg-[#d4bb7b]"
       />
-      <div
-        title={adrenalineTexts[pawn.kind]}
-        className="w-[60px] min-w-[43px] min-[900px]:w-[83px] min-[900px]:min-w-[83px] max-[601px]:w-[49px] max-[601px]:min-w-[41px] [@media(min-width:600px)_and_(max-height:480px)]:w-[45px] [@media(min-width:600px)_and_(max-height:480px)]:min-w-[45px] border-l border-line pl-3.5 [&_svg]:size-[15px] [&_small]:-ml-[3px] [&_small]:text-[10px] max-[601px]:pl-2 max-[601px]:[&_svg]:hidden [@media(min-width:600px)_and_(max-height:480px)]:pl-2"
-      >
-        <span className="flex justify-between gap-2.5 text-[9px] text-muted max-[601px]:gap-[5px] max-[601px]:text-[8px]">
-          {m.adrenaline}
-        </span>
-        <strong className="mt-0.5 flex items-center gap-1 text-[18px] leading-none font-medium text-[#bad0bb] max-[601px]:text-[17px]">
-          <Icon name="energy" />
-          {pawn.adrenaline}
-        </strong>
-      </div>
     </div>
   )
 }

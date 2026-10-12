@@ -3,7 +3,7 @@ import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
 import type { Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
-const bombReach = (pawn: Pawn) => 2 + pawn.adrenaline
+const bombReach = (_pawn: Pawn) => 2
 
 function bombTiles(pawn: Pawn, tiles: Map<string, Tile>): Tile[] {
   return canUseSpecial(pawn)

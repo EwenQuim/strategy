@@ -7,8 +7,7 @@ import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 export type Side = 'player' | 'enemy'
 
 export const START_ENERGY = 3
-export const ESCAPE_BONUS = 20
-export const MAX_ESCAPE = 60
+export const MAX_ESCAPE = 75
 
 // A unit struck down in this battle, as the battle log and achievements remember them.
 export type Unit = { kind: PawnKind; side: Side }
@@ -74,6 +73,8 @@ export type SpecialTextKey =
   | 'protectDescription'
   | 'chooseAlly'
   | 'noNearbyAllies'
+  | 'veil'
+  | 'veilDescription'
   | 'jump'
   | 'jumpDescription'
   | 'jumpTo'
@@ -141,10 +142,6 @@ export abstract class Pawn {
   bonusEnergy = 0
   springSince: number | null = null
 
-  // Energy banked at the end of the previous turn. Each class spends it its own way through the
-  // adrenaline hooks below; banking again at the end of a turn replaces it.
-  adrenaline = 0
-
   get maxEnergy(): number {
     return START_ENERGY + this.bonusEnergy
   }
@@ -157,6 +154,7 @@ export abstract class Pawn {
   escapeChance: number
   specialUsed = false
   protectingId: number | null = null
+  veiledBy: number | null = null
 
   get moveCost(): number {
     return 1
@@ -170,33 +168,9 @@ export abstract class Pawn {
     return 3
   }
 
-  // Adrenaline hooks: how many banked points this class adds to its blows, reach, armor or
-  // stride. Zero by default; classes override the ones that define them.
-  adrenalineDamage(): number {
-    return 0
-  }
-
-  adrenalineRange(): number {
-    return 0
-  }
-
-  adrenalineArmor(): number {
-    return 0
-  }
-
-  adrenalineSteps(): number {
-    return 0
-  }
-
   // Flood: how many extra damage this class adds to its basic attacks per adjacent friendly
   // skeleton. Only the skeleton defines it.
   floodDamage(_pawns: readonly Pawn[]): number {
-    return 0
-  }
-
-  // Escape banked at the end of a turn. Only the swordsman keeps the old conversion, and only
-  // while an enemy stands next to it.
-  endTurnEscape(_pawns: readonly Pawn[]): number {
     return 0
   }
 
@@ -230,10 +204,14 @@ export abstract class Pawn {
     this.escapeChance = escapeChance
   }
 
-  endTurn(pawns: readonly Pawn[] = []): void {
-    this.adrenaline = this.energy
-    this.escapeChance = this.endTurnEscape(pawns)
-    this.energy = 0
+  // Leftover energy carries into the next turn on top of the usual refill, without stacking
+  // across several idle turns.
+  get nextTurnEnergy(): number {
+    return START_ENERGY + Math.min(this.energy, START_ENERGY)
+  }
+
+  endTurn(): void {
+    this.energy = this.nextTurnEnergy
   }
 
   clone(): this {

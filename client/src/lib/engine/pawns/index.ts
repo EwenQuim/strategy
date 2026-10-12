@@ -6,6 +6,7 @@ import { Bomber } from './bomber.ts'
 import { Hoplite } from './hoplite.ts'
 import { King } from './king.ts'
 import { Lancer } from './lancer.ts'
+import { Mystic } from './mystic.ts'
 import { Magician } from './magician.ts'
 import { Necromancer } from './necromancer.ts'
 import { Ninja } from './ninja.ts'
@@ -42,6 +43,7 @@ export const PAWN_CLASSES = {
   wolf: Wolf,
   berserker: Berserker,
   lancer: Lancer,
+  mystic: Mystic,
   necromancer: Necromancer,
   beast: Beast,
   skeleton: Skeleton,

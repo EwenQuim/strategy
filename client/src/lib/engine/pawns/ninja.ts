@@ -70,23 +70,12 @@ export class Ninja extends Pawn {
   static override readonly icon =
     'M4 9a8 8 0 0 1 16 0v6a8 8 0 0 1-16 0V9Zm0 0h16M4 15h16M7 12h2m6 0h2M4 9 1 5m3 4L1 12'
   static override readonly aiInstructions =
-    'melee, 5 damage. Jump (2): teleport up to 3 tiles over anything to empty passable ground.'
+    'melee, 4 damage. Jump (2): teleport up to 3 tiles over anything to empty passable ground.'
   readonly kind = 'ninja' as const
   get maxHp(): number {
     return 1
   }
-  readonly attack: AttackProfile = { damage: 5, minRange: 1, maxRange: 1 }
-  // Swift: every banked energy point makes the first tiles of its next move free.
-  override adrenalineSteps(): number {
-    return this.adrenaline
-  }
-  override moveEnergyCost(steps: number): number {
-    return Math.max(0, steps - this.adrenaline)
-  }
-  override payMove(steps: number): void {
-    super.payMove(steps)
-    this.adrenaline -= Math.min(steps, this.adrenaline)
-  }
+  readonly attack: AttackProfile = { damage: 4, minRange: 1, maxRange: 1 }
   get special(): SpecialAbility {
     return jump
   }

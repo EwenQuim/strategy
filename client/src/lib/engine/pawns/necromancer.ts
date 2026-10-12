@@ -64,15 +64,6 @@ export class Necromancer extends Pawn {
     return 3
   }
   readonly attack: AttackProfile = { damage: 1, minRange: 1, maxRange: 2 }
-  // Channel: every banked energy point makes Summon cheaper, down to 1.
-  override get specialCost(): number {
-    return Math.max(1, this.special.cost - this.adrenaline)
-  }
-  override paySpecial(): void {
-    const discount = this.special.cost - this.specialCost
-    super.paySpecial()
-    this.adrenaline -= discount
-  }
   get special(): SpecialAbility {
     return summon
   }

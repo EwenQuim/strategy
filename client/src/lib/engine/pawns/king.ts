@@ -21,7 +21,7 @@ const rally: SpecialAbility = {
     pawn.paySpecial()
     pawn.specialUsed = true
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const healing = 1 + pawn.adrenaline
+    const healing = 1
     for (const ally of allies) {
       ally.hp = Math.min(ally.maxHp, ally.hp + healing)
       log.push(label(ally) + ' recovers ' + healing + ' health.')

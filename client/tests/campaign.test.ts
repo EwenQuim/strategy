@@ -26,9 +26,16 @@ import shatteredLevels from '../src/lib/campaigns/003-shattered.json' with { typ
 
 const CLASSIC_KINDS = Object.keys(PAWN_CLASSES).filter(
   (kind) =>
-    !['hoplite', 'wolf', 'berserker', 'lancer', 'necromancer', 'beast', 'skeleton'].includes(
-      kind,
-    ),
+    ![
+      'hoplite',
+      'wolf',
+      'berserker',
+      'lancer',
+      'mystic',
+      'necromancer',
+      'beast',
+      'skeleton',
+    ].includes(kind),
 )
 
 const tutorial = CAMPAIGNS[0]

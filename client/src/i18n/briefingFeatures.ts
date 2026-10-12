@@ -1,11 +1,11 @@
 import { t } from './locale.ts'
 
-export const adrenalineBrief = t({
-  en: 'Unused energy at end of turn banks as Adrenaline: each class spends it its own way',
-  fr: "L'énergie non dépensée en fin de tour s'accumule en Adrénaline : chaque classe la dépense à sa façon",
-  de: 'Ungenutzte Energie am Zugende wird als Adrenalin gespart: Jede Klasse gibt es auf ihre Weise aus',
-  es: 'La energía sin usar al final del turno se acumula como Adrenalina: cada clase la gasta a su manera',
-  it: "L'energia non spesa a fine turno si accumula come Adrenalina: ogni classe la spende a modo suo",
+export const carryBrief = t({
+  en: 'unused energy carries over to your next turn, up to +3; each hit taken drains 1 of it, each kill gives +1 energy',
+  fr: "l'énergie non dépensée passe au tour suivant, jusqu'à +3 ; chaque coup reçu en retire 1, chaque élimination rapporte +1 énergie",
+  de: 'ungenutzte Energie geht in deinen nächsten Zug über, bis zu +3; jeder erlittene Treffer zieht 1 ab, jeder Sieg gibt +1 Energie',
+  es: 'la energía sin usar pasa a tu siguiente turno, hasta +3; cada golpe recibido quita 1, cada baja da +1 de energía',
+  it: "l'energia non spesa passa al turno successivo, fino a +3; ogni colpo subito ne toglie 1, ogni uccisione dà +1 energia",
 })
 
 export const portalCrossing = t({

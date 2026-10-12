@@ -45,7 +45,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.energy,
       icon: 'energy',
-      points: [b.energyPerRound(START_ENERGY), b.spendEnergy, f.adrenalineBrief],
+      points: [b.energyPerRound(START_ENERGY), b.spendEnergy, f.carryBrief],
     },
     unit('king', b.rallyBrief, b.loseKing),
   ],
@@ -76,6 +76,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     },
   ],
   lancer: [unit('lancer', b.lancerBrief)],
+  mystic: [unit('mystic', b.mysticBrief)],
   lake: [
     {
       name: b.lakes,

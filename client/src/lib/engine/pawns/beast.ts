@@ -41,10 +41,6 @@ export class Beast extends Pawn {
     return 6
   }
   readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
-  // Frenzy: every banked energy point adds 1 damage to the beast's basic attacks.
-  override adrenalineDamage(): number {
-    return this.adrenaline
-  }
   get special(): SpecialAbility {
     return rampage
   }

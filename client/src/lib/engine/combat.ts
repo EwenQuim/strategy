@@ -8,6 +8,7 @@ import {
   type Tile,
 } from './hex.ts'
 import type { AttackProfile, Pawn, PawnSpawner, Side } from './pawns/index.ts'
+import { START_ENERGY } from './pawns/pawn.ts'
 import type { SeededRandom } from './random.ts'
 import type { Action } from './engine.ts'
 
@@ -31,7 +32,7 @@ export function walkingPaths(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
-  maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1 + pawn.adrenalineSteps()),
+  maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1),
   destination?: string,
 ): Map<string, WalkRoute> {
   const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))
@@ -155,10 +156,7 @@ export function inAttackRange(pawn: Pawn, at: Axial, from: Axial = pawn): boolea
   const distance = hexDist(from, at)
   const bonus =
     'feature' in from && from.feature === 'watchtower' ? (pawn.attack.rangeBonus ?? 0) : 0
-  return (
-    distance >= pawn.attack.minRange &&
-    distance <= pawn.attack.maxRange + bonus + pawn.adrenalineRange()
-  )
+  return distance >= pawn.attack.minRange && distance <= pawn.attack.maxRange + bonus
 }
 
 export function canAttack(pawn: Pawn, target: Pawn, from: Axial = pawn): boolean {
@@ -194,21 +192,18 @@ export function strike(
     target.escapeChance > 0 &&
     random.next() * 100 < target.escapeChance
   ) {
-    // A successful dodge spends the whole bank: the same unit cannot dodge twice off one turn.
-    target.escapeChance = 0
     log.push(label(target) + ' escapes the attack.')
     return { q: target.q, r: target.r, damage: 0 }
   }
   const protector = protectorFor(pawns, target)
   if (protector) {
-    protector.protectingId = null
     log.push(label(protector) + ' takes the hit for ' + target.kind + ' #' + target.id + '.')
     target = protector
   }
-  const braced = Math.min(profile.damage - 1, target.adrenalineArmor())
-  const damage = profile.damage - braced
-  if (braced > 0) log.push(label(target) + ' braces: ' + braced + ' damage absorbed.')
+  const damage = profile.damage
   target.hp -= damage
+  // A hit drains the energy a unit holds above its usual refill.
+  if (target.energy > START_ENERGY) target.energy--
   log.push(
     label(attacker) +
       ' strikes ' +
@@ -222,6 +217,10 @@ export function strike(
   if (target.hp <= 0) {
     pawns.splice(pawns.indexOf(target), 1)
     log.push(label(target) + ' has fallen.')
+    if (attacker !== target && attacker.hp > 0) {
+      attacker.energy++
+      log.push(label(attacker) + ' gains 1 energy from the kill.')
+    }
   }
   return { q: target.q, r: target.r, damage }
 }
@@ -261,7 +260,7 @@ export function performAttack(
       target,
       {
         ...pawn.attack,
-        damage: pawn.attack.damage + pawn.adrenalineDamage() + pawn.floodDamage(pawns),
+        damage: pawn.attack.damage + pawn.floodDamage(pawns),
       },
       log,
       random,
