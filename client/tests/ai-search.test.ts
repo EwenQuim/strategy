@@ -11,7 +11,7 @@ import {
 } from '../src/lib/engine/index.ts'
 import { DepthsearchBot, searchStats } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { positionKey, turnPlans } from '../src/lib/engine/ai/turns.ts'
+import { generateTurnPlans, positionKey, turnPlans } from '../src/lib/engine/ai/turns.ts'
 
 function battle(): GameState {
   const state = initialState('signature-search')
@@ -61,4 +61,47 @@ test('Search position identities include collected runes and the random stream',
   other.tiles.get('0,0')!.feature = undefined
   other.randomState++
   assert.notEqual(positionKey(state), positionKey(other))
+})
+
+test('Lazy replies keep every legal outcome, put abilities first, and leave input untouched', () => {
+  const state = battle()
+  const before = structuredClone(state)
+  const replies = [...generateTurnPlans(state, true)]
+  const outcomes = (plans: { state: GameState }[]) =>
+    plans.map((plan) => positionKey(plan.state)).sort()
+  assert.deepEqual(outcomes(replies), outcomes(turnPlans(state)))
+  let quiet = false
+  for (const plan of replies) {
+    if (!plan.actions.some((action) => action.type === 'special')) quiet = true
+    else assert.ok(!quiet, 'Abilities must precede quiet replies')
+    assert.deepEqual(plan.actions.reduce(reducer, state), plan.state)
+  }
+  assert.deepEqual(structuredClone(state), before)
+})
+
+test('Search distinguishes identical armies with different Hellfire warnings or initiative', () => {
+  const state = battle()
+  assert.notEqual(positionKey(state), positionKey({ ...state, hellfire: [{ q: 0, r: 0 }] }))
+  assert.notEqual(
+    positionKey(state),
+    positionKey({ ...state, order: state.order.toReversed() }),
+  )
+})
+
+test('Depth-four analysis respects its evaluation budget through a crowded reply tree', async () => {
+  const state = battle()
+  state.pawns[2].hp = 6
+  const before = structuredClone(state)
+  const bot = new DepthsearchBot({ ...BOT_LEVELS.hard, depth: 4, beamWidth: 32 })
+  const actions = await bot.chooseActions(state)
+  assert.ok(searchStats.budgetBreaks > 0)
+  assert.ok(searchStats.leafEvals <= 1500)
+  let played = state
+  for (const action of actions) {
+    const next = reducer(played, action)
+    assert.notEqual(next, played)
+    played = next
+  }
+  assert.deepEqual(structuredClone(state), before)
+  assert.deepEqual(await bot.chooseActions(state), actions)
 })

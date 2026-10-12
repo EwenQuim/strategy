@@ -10,7 +10,12 @@ import { sidePlan } from '../../lib/engine/ai/plan.ts'
 import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
 import { introductionTurns } from '../introductions.ts'
 import { inHellfire } from '../../lib/engine/hellfire.ts'
-import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
+import {
+  generateTurnPlans,
+  positionKey,
+  turnPlans,
+  type TurnPlan,
+} from '../../lib/engine/ai/turns.ts'
 import type { Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'
 
@@ -159,7 +164,15 @@ function rankedTurns(state: GameState, search: Search): ScoredTurn[] {
   searchStats.plansEnumerated += plans.length
   const kept = shortlist(state, plans)
   searchStats.shortlisted += kept.length
-  return kept.map((plan) => score(plan, search)).sort((a, b) => direction * (a.value - b.value))
+  const ranked: ScoredTurn[] = []
+  for (const plan of kept) {
+    if (search.budget <= 0) {
+      searchStats.budgetBreaks++
+      return []
+    }
+    ranked.push(score(plan, search))
+  }
+  return ranked.sort((a, b) => direction * (a.value - b.value))
 }
 
 function lastReply(
@@ -170,13 +183,11 @@ function lastReply(
   search: Search,
   fallback: number,
 ): number {
-  const plans = shortlist(state, turnPlans(state)).sort(
-    (a, b) => Number(usesAbility(b)) - Number(usesAbility(a)),
-  )
-  searchStats.plansEnumerated += plans.length
-  searchStats.shortlisted += plans.length
+  const plans = generateTurnPlans(state, true)
   let best = maximizing ? -Infinity : Infinity
   for (const plan of plans) {
+    searchStats.plansEnumerated++
+    searchStats.shortlisted++
     if (search.budget <= 0) {
       searchStats.budgetBreaks++
       break

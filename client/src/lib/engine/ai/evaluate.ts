@@ -14,9 +14,17 @@ type Reach = {
 }
 export type ReachCache = Map<string, Reach>
 
-// Reach depends on the current army positions and the map's remaining runes.
+// Other units' health does not affect occupancy. For bounded abilities, blockers outside
+// walking/landing range cannot affect reach either; unbounded custom threats keep all blockers.
 function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCache): Reach {
   const { id, q, r, hp, energy, specialUsed } = attacker
+  const maxSteps = runes.length
+    ? undefined
+    : Math.max(0, attacker.energy - attacker.special.cost - attacker.moveCost + 1)
+  const blockerRange =
+    maxSteps !== undefined && (attacker.special.landingRange || !attacker.special.threat)
+      ? maxSteps + (attacker.special.landingRange ?? 0)
+      : Infinity
   const cacheKey = [
     id,
     q,
@@ -24,14 +32,14 @@ function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCa
     hp,
     energy,
     specialUsed,
-    state.pawns.map((p) => `${p.id}:${p.q}:${p.r}:${p.hp}`).join('|'),
+    state.pawns
+      .filter((p) => p.id !== id && hexDist(attacker, p) <= blockerRange)
+      .map((p) => `${p.id}:${p.q}:${p.r}`)
+      .join('|'),
     runes.map((rune) => key(rune.q, rune.r)).join('|'),
   ].join()
   const cached = cache.get(cacheKey)
   if (cached) return cached
-  const maxSteps = runes.length
-    ? undefined
-    : Math.max(0, attacker.energy - attacker.special.cost - attacker.moveCost + 1)
   const positions = [...walkingPaths(state.tiles, state.pawns, attacker, maxSteps)]
     .filter(([, route]) => route.damage < attacker.hp)
     .map(([position, route]) => ({
@@ -112,7 +120,7 @@ function runeTiles(tiles: Map<string, Tile>): Tile[] {
   return runes
 }
 
-function estimateIncomingDamage(
+export function estimateIncomingDamage(
   state: GameState,
   side: Side,
   cache: ReachCache,
@@ -138,11 +146,21 @@ function estimateIncomingDamage(
       (attacker.energy < attacker.special.cost && !runes.length)
     )
       continue
-    const reach = reachOf(state, attacker, runes, cache)
+    const bounded = attacker.special.landingRange || !attacker.special.threat
+    const threatRange =
+      !runes.length && bounded
+        ? Math.max(0, attacker.energy - attacker.special.cost - attacker.moveCost + 1) +
+          (attacker.special.landingRange ?? 0) +
+          attacker.attack.maxRange +
+          (attacker.attack.rangeBonus ?? 0)
+        : Infinity
+    let reach: Reach | undefined
     // A target that acts before this attacker can move away or strike first, so only attackers
     // acting before the target's next turn threaten it.
     for (const target of targets) {
       if (turnOffset.get(foe.id)! >= turnOffset.get(target.id)!) continue
+      if (hexDist(attacker, target) > threatRange) continue
+      reach ??= reachOf(state, attacker, runes, cache)
       const damage = maxDamage(attacker, reach, target)
       damageByTarget.set(target.id, damageByTarget.get(target.id)! + damage)
       if (damage > 0) {
