@@ -14,7 +14,7 @@ import {
   readClearedLevels,
 } from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
-import { Battlefield, type Targeting } from './Battlefield'
+import { Battlefield } from './Battlefield'
 import { GameHeader } from './GameHeader'
 import { AchievementToast } from './AchievementToast'
 import { UnitUnlockToast } from './UnitUnlockToast'
@@ -22,11 +22,11 @@ import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
 import { useInspection } from './useInspection'
+import { tileChoices, type TileChoice, type Targeting } from '../lib/tileChoices'
 import {
   activePawn,
   BIOMES,
   specialTargetingTiles,
-  targetingTiles,
   key,
   movementDestinations,
   type Aim,
@@ -154,7 +154,7 @@ export function Game({
   }
   const usingSpecial = aim?.action === 'special'
   const destination = usingSpecial ? aim.destination : undefined
-  const targets = aim ? targetingTiles(state, aim) : new Set<string>()
+  const choices = aim ? tileChoices(state, aim) : new Map<string, TileChoice>()
   const targetLabel = resolveTargetLabel(aim, pawn)
   const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
 
@@ -166,11 +166,9 @@ export function Game({
   const onTileClick = (tile: Tile) => {
     if (!myTurn) return
     const at = { q: tile.q, r: tile.r }
-    if (aim && targets.has(key(at.q, at.r))) {
-      if (pawn.special.choosesDestination && !destination)
-        return setAim({ action: 'special', destination: at })
-      return dispatch({ type: 'special', target: at, destination })
-    }
+    const choice = choices.get(key(at.q, at.r))
+    if (choice)
+      return choice.kind === 'landing' ? setAim(choice.nextAim) : dispatch(choice.action)
     // Tapping the chosen landing again steps back to re-choosing it.
     if (aim && destination && key(at.q, at.r) === key(destination.q, destination.r))
       return setAim({ action: 'special' })
@@ -231,7 +229,7 @@ export function Game({
             hellfire={state.hellfire}
             active={state.winner ? undefined : pawn}
             reach={reach}
-            targets={targets}
+            targets={choices}
             targetLabel={targetLabel}
             targeting={targeting}
             preview={inspected ?? destination ?? null}
@@ -280,7 +278,7 @@ export function Game({
         usingSpecial={usingSpecial}
         hasSpecialTargets={hasSpecialTargets}
         destination={destination}
-        targetCount={targets.size}
+        targetCount={choices.size}
         dispatch={dispatch}
         onAim={setAim}
       />

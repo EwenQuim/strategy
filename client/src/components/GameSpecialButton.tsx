@@ -31,7 +31,8 @@ export function GameSpecialButton({
   ...preview
 }: GameSpecialButtonProps) {
   // A landing is chosen and the signature tolerates landing without a target: confirm it.
-  const confirming = usingSpecial && !!destination && !!pawn?.special.targetOptional
+  const confirming =
+    usingSpecial && !!destination && targetCount > 0 && !!pawn?.special.targetOptional
   const buttonProps = usePreviewButton(
     !preview.commanding || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
     () => {
@@ -79,7 +80,8 @@ function specialNote({
   targetCount,
   destination,
 }: SpecialStatus): string {
-  const confirming = usingSpecial && !!destination && !!pawn?.special.targetOptional
+  const confirming =
+    usingSpecial && !!destination && targetCount > 0 && !!pawn?.special.targetOptional
   if (confirming) return targetCount ? m.orChooseEnemy : m.energyCost(pawn?.special.cost ?? 2)
   if (usingSpecial) {
     if (!targetCount) return m.noTargets
