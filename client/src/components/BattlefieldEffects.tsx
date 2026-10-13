@@ -1,7 +1,7 @@
 import type { BattleEffect } from '../lib/engine'
 import { key } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
-import { PawnIcon } from './Icon'
+import { BombBlast, FireballBeam } from './BombBlast'
 import { SupportFeedback } from './SupportFeedback'
 
 export function BattlefieldEffects({
@@ -20,19 +20,24 @@ export function BattlefieldEffects({
           data-kind={effect.kind}
           aria-hidden="true"
         >
-          {effect.kind !== 'rally' && effect.kind !== 'hellfire' && !effect.support && (
-            <line
-              x1={hexX(effect.from.q, effect.from.r)}
-              y1={hexY(effect.from.r)}
-              x2={hexX(effect.to.q, effect.to.r)}
-              y2={hexY(effect.to.r)}
-              pathLength="1"
-              className={
-                'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
-                (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
-              }
-            />
-          )}
+          {effect.kind !== 'rally' &&
+            effect.kind !== 'hellfire' &&
+            !effect.support &&
+            (effect.kind === 'fireball' ? (
+              <FireballBeam from={effect.from} to={effect.to} />
+            ) : (
+              <line
+                x1={hexX(effect.from.q, effect.from.r)}
+                y1={hexY(effect.from.r)}
+                x2={hexX(effect.to.q, effect.to.r)}
+                y2={hexY(effect.to.r)}
+                pathLength="1"
+                className={
+                  'battle-trail stroke-current [stroke-linecap:round] [stroke-dasharray:1] ' +
+                  (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
+                }
+              />
+            ))}
           {(effect.kind === 'bomb' || effect.kind === 'hellfire') &&
             (effect.kind === 'hellfire' ? (effect.centers ?? [effect.to]) : [effect.to]).map(
               (center) => (
@@ -59,14 +64,20 @@ export function BattlefieldEffects({
                       />
                     </g>
                   ) : (
-                    <g transform="translate(-22 -30) scale(2)" className="text-[#ffe1a3]">
-                      <circle cx="11" cy="15" r="7" className="fill-[#25252d]" />
-                      <PawnIcon kind="bomber" />
-                    </g>
+                    <BombBlast />
                   )}
                 </g>
               ),
             )}
+          {effect.kind === 'fireball' && (
+            <g
+              transform={
+                'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+              }
+            >
+              <BombBlast />
+            </g>
+          )}
           {effect.kind !== 'bomb' && effect.kind !== 'hellfire' && !effect.impacts?.length && (
             <g
               transform={

@@ -18,6 +18,10 @@ import type { PlayerNames } from '../lib/game-mode'
 interface TileLayerProps {
   viewBox: string
   tiles: Map<string, Tile>
+  // Tiles rattled by the current bomb or fireball effect, null when none.
+  quakeKeys: Set<string> | null
+  // Alternating class so consecutive effects restart the keyframes.
+  quakeClass: string
   pawns: Pawn[]
   hellfire: readonly Axial[]
   labels: PlayerNames
@@ -40,6 +44,8 @@ interface TileLayerProps {
 export function TileLayer({
   viewBox,
   tiles,
+  quakeKeys,
+  quakeClass,
   pawns,
   hellfire,
   labels,
@@ -132,6 +138,11 @@ export function TileLayer({
             key={key(tile.q, tile.r)}
             transform={'translate(' + hexX(tile.q, tile.r) + ' ' + hexY(tile.r) + ')'}
             points={hexPoints}
+            className={
+              quakeKeys?.has(key(tile.q, tile.r))
+                ? quakeClass + ' motion-reduce:animate-none'
+                : undefined
+            }
           />
         ))}
       </g>
@@ -164,6 +175,7 @@ export function TileLayer({
             rechoosing={!!rechoose && sameHex(rechoose, tile)}
             inRange={range.has(tileKey)}
             threatened={threats.has(tileKey)}
+            quakeClass={quakeKeys?.has(tileKey) ? quakeClass : ''}
             warned={inHellfire(hellfire, tile)}
             impactCenter={hellfire.some((center) => sameHex(center, tile))}
             labels={labels}

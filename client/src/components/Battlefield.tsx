@@ -4,6 +4,7 @@ import type { Axial, BattleEffect, Pawn, Tile } from '../lib/engine'
 import { SupportHalos } from './SupportFeedback'
 import { TileLayer } from './TileLayer'
 import { PawnLayer } from './PawnLayer'
+import { quakeTileKeys } from './battlefield-tile'
 import { SIZE, hexX, hexY } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
 
@@ -58,6 +59,9 @@ export function Battlefield({
     ' ',
   )
   const shake = !!effect?.impacts?.some((hit) => hit.damage > 0)
+  // Alternating keyframe names restart the quake on consecutive effects.
+  const quakeKeys = quakeTileKeys(effect, tiles)
+  const quakeClass = effectId % 2 ? 'tile-quake' : 'tile-quake tile-quake--alt'
 
   return (
     <div
@@ -77,6 +81,8 @@ export function Battlefield({
       <TileLayer
         viewBox={viewBox}
         tiles={tiles}
+        quakeKeys={quakeKeys}
+        quakeClass={quakeClass}
         pawns={pawns}
         hellfire={hellfire}
         labels={labels}
