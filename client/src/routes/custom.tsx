@@ -122,31 +122,33 @@ export const Route = createFileRoute('/custom')({
                   ))}
                 </select>
               </div>
-              {developerPreview && (
-                <div className="grid gap-1.5 text-sm text-muted col-span-full">
-                  <label htmlFor="custom-strategy">
-                    {m.aiStrategy}
-                    {mode === 'local' && m.aiOnly}
-                  </label>
-                  <select
-                    className={menuInputClassName}
-                    id="custom-strategy"
-                    aria-describedby="custom-strategy-hint"
-                    value={strategy}
-                    disabled={mode === 'local'}
-                    onChange={(event) => setStrategy(event.target.value as BotName)}
-                  >
-                    {Object.keys(BOTS).map((name) => (
+              <div className="grid gap-1.5 text-sm text-muted col-span-full">
+                <label htmlFor="custom-strategy">
+                  {m.aiStrategy}
+                  {mode === 'local' && m.aiOnly}
+                </label>
+                <select
+                  className={menuInputClassName}
+                  id="custom-strategy"
+                  aria-describedby="custom-strategy-hint"
+                  value={strategy}
+                  disabled={mode === 'local'}
+                  onChange={(event) => setStrategy(event.target.value as BotName)}
+                >
+                  {Object.keys(BOTS)
+                    .filter(
+                      (name) => developerPreview || (name !== 'mistral' && name !== 'jev'),
+                    )
+                    .map((name) => (
                       <option key={name} value={name}>
                         {m.aiStrategies[name as BotName]}
                       </option>
                     ))}
-                  </select>
-                  <p id="custom-strategy-hint" className="text-xs leading-relaxed">
-                    {bots.strategyHints[strategy]}
-                  </p>
-                </div>
-              )}
+                </select>
+                <p id="custom-strategy-hint" className="text-xs leading-relaxed">
+                  {bots.strategyHints[strategy]}
+                </p>
+              </div>
             </div>
             <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
               <input
