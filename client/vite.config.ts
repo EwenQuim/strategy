@@ -23,6 +23,11 @@ export default defineConfig({
   server: { proxy: { '/api': 'http://localhost:8080' } },
   define: {
     'import.meta.env.VITE_GIT_COMMIT': JSON.stringify(gitCommit()),
+    // Compile the HexTile render counter out of production builds; the perf
+    // gate builds its own bundle with this flag set.
+    'import.meta.env.VITE_TILE_RENDER_COUNTER': JSON.stringify(
+      !!process.env.VITE_TILE_RENDER_COUNTER,
+    ),
   },
   plugins: [
     tailwindcss(),
