@@ -35,6 +35,8 @@ interface BattlefieldProps {
   targetLabel: string
   targeting: Targeting
   preview: Axial | null
+  // The landing already chosen while aiming; tapping it re-opens the choice.
+  rechoose?: Axial | null
   range: Set<string>
   threats: Set<string>
   effect: BattleEffect | null
@@ -54,6 +56,7 @@ export function Battlefield({
   targetLabel,
   targeting,
   preview,
+  rechoose,
   range,
   threats,
   effect,
@@ -154,9 +157,10 @@ export function Battlefield({
           const selected = sameHex(active, tile)
           const target = targets.has(tileKey)
           const previewed = sameHex(preview, tile)
+          const rechoosing = !!rechoose && sameHex(rechoose, tile)
           const cost = reach.get(tileKey)
           const canMove = cost !== undefined && cost > 0
-          const interactive = !!target || canMove
+          const interactive = !!target || canMove || rechoosing
           const feature = tile.feature && featureTexts[tile.feature]
           const damage =
             target && targeting === 'jump'
@@ -181,6 +185,7 @@ export function Battlefield({
             cost,
             inRange,
             threatened,
+            rechoose: rechoosing,
           })
           const fill = tileFill({
             interactive,

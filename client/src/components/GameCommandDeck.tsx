@@ -1,4 +1,4 @@
-import type { Action, Aim, Pawn, Side } from '../lib/engine'
+import type { Action, Aim, Axial, Pawn, Side } from '../lib/engine'
 import * as m from '../i18n/game'
 import { CommandButton } from './CommandAction'
 import { GameCommandSummary } from './GameCommandSummary'
@@ -20,7 +20,7 @@ interface GameCommandDeckProps {
   onCloseFocus: () => void
   usingSpecial: boolean
   hasSpecialTargets: boolean
-  choosingTarget: boolean
+  destination?: Axial
   targetCount: number
   dispatch: (action: Action) => void
   onAim: (aim: Aim | null) => void
@@ -38,7 +38,7 @@ export function GameCommandDeck({
   onCloseFocus,
   usingSpecial,
   hasSpecialTargets,
-  choosingTarget,
+  destination,
   targetCount,
   dispatch,
   onAim,
@@ -63,7 +63,7 @@ export function GameCommandDeck({
               usingSpecial={usingSpecial}
               hasSpecialTargets={hasSpecialTargets}
               targetCount={targetCount}
-              choosingTarget={choosingTarget}
+              destination={destination}
               dispatch={dispatch}
               onAim={onAim}
               onPreview={onPreview}

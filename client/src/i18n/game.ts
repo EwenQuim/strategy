@@ -129,6 +129,20 @@ export const chooseEnemy = t({
   es: 'Elige enemigo',
   it: 'Scegli nemico',
 })
+export const landHere = t({
+  en: 'Land here',
+  fr: 'Atterrir ici',
+  de: 'Hier landen',
+  es: 'Aterrizar aquí',
+  it: 'Atterra qui',
+})
+export const orChooseEnemy = t({
+  en: 'or choose an enemy',
+  fr: 'ou choisissez un ennemi',
+  de: 'oder Gegner wählen',
+  es: 'o elige un enemigo',
+  it: 'o scegli un nemico',
+})
 export const energyCost = t({
   en: (cost: number) => `${cost} energy`,
   fr: (cost: number) => `${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}`,

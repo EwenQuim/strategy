@@ -32,6 +32,7 @@ const jump: SpecialAbility = {
   name: 'jump',
   cost: 2,
   targeted: true,
+  targetOptional: true,
   choosesDestination: true,
   movement: 'jump',
   landingRange: 3,

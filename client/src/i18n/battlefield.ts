@@ -7,6 +7,13 @@ export const moveTo = t({
   es: 'Mover a',
   it: 'Muovi verso',
 })
+export const chooseAgain = t({
+  en: 'Choose again',
+  fr: 'Choisir à nouveau',
+  de: 'Erneut wählen',
+  es: 'Elige de nuevo',
+  it: 'Scegli di nuovo',
+})
 export const healthAmount = t({
   en: (hp: number) => `${hp} health`,
   fr: (hp: number) => `${hp} PV`,

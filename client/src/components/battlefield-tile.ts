@@ -22,6 +22,7 @@ export function tileAriaLabel({
   cost,
   inRange,
   threatened,
+  rechoose,
 }: {
   tile: Tile
   occupant?: Pawn
@@ -38,6 +39,7 @@ export function tileAriaLabel({
   cost?: number
   inRange: boolean
   threatened: boolean
+  rechoose: boolean
 }): string {
   const label =
     (occupant
@@ -66,7 +68,9 @@ export function tileAriaLabel({
           label +
           (damage ? ', ' + bf.lavaDamage(damage, lethal) : '') +
           (cost ? ', ' + energyCost(cost) : '')
-        : label) + warning
+        : rechoose
+          ? bf.chooseAgain + ' ' + label
+          : label) + warning
   )
 }
 

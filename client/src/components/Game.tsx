@@ -171,6 +171,9 @@ export function Game({
         return setAim({ action: 'special', destination: at })
       return dispatch({ type: 'special', target: at, destination })
     }
+    // Tapping the chosen landing again steps back to re-choosing it.
+    if (aim && destination && key(at.q, at.r) === key(destination.q, destination.r))
+      return setAim({ action: 'special' })
     // Own moves produce no effect frame in any mode, so they buzz at dispatch; bot moves buzz from their frames.
     if (reach.has(key(at.q, at.r))) {
       hapticMove()
@@ -232,6 +235,7 @@ export function Game({
             targetLabel={targetLabel}
             targeting={targeting}
             preview={inspected ?? destination ?? null}
+            rechoose={destination}
             range={insight.range}
             threats={insight.threats}
             effect={effect}
@@ -275,7 +279,7 @@ export function Game({
         onCloseFocus={insight.close}
         usingSpecial={usingSpecial}
         hasSpecialTargets={hasSpecialTargets}
-        choosingTarget={!!destination}
+        destination={destination}
         targetCount={targets.size}
         dispatch={dispatch}
         onAim={setAim}
