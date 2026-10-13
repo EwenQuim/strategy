@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { featureTexts } from '../i18n/biomes'
-import { sameHex, type Pawn, type Tile } from '../lib/engine'
+import type { Pawn, Tile } from '../lib/engine'
 import type { PlayerNames } from '../lib/game-mode'
 import { tileAriaLabel, tileFill } from './battlefield-tile'
 import { FeatureArt } from './features/FeatureArt'
@@ -12,11 +12,14 @@ interface HexTileProps {
   tile: Tile
   occupant?: Pawn
   protector?: Pawn
-  active?: Pawn
+  // Whether the active pawn stands on this tile.
+  selected: boolean
   // Energy cost of the cheapest walking route here, when the active pawn can move.
   cost?: number
   // Damage the active pawn takes by entering or landing here.
   damage: number
+  // Whether entering this tile would kill the active pawn.
+  lethal: boolean
   target: boolean
   strike: boolean
   // Label for targeted tiles; empty when the tile is not a target, so re-aiming
@@ -31,6 +34,30 @@ interface HexTileProps {
   labels: PlayerNames
 }
 
+// Playback frames deep-copy tiles and pawns, so their identities churn on
+// every frame; a tile only cares about the values it displays.
+const sameTile = (a: Tile, b: Tile) =>
+  a.q === b.q && a.r === b.r && a.terrain === b.terrain && a.feature === b.feature
+
+const samePawn = (a?: Pawn, b?: Pawn) =>
+  a?.id === b?.id && a?.side === b?.side && a?.kind === b?.kind && a?.hp === b?.hp
+
+// Every prop beyond the three objects is a primitive, so the loop covers any
+// prop added later; only new object props would need an explicit comparison.
+function tilePropsEqual(prev: HexTileProps, next: HexTileProps) {
+  if (
+    !sameTile(prev.tile, next.tile) ||
+    !samePawn(prev.occupant, next.occupant) ||
+    !samePawn(prev.protector, next.protector)
+  )
+    return false
+  for (const key of Object.keys(prev) as (keyof HexTileProps)[]) {
+    if (key !== 'tile' && key !== 'occupant' && key !== 'protector' && prev[key] !== next[key])
+      return false
+  }
+  return true
+}
+
 // One hex of the board. Taps are delegated to the battlefield, so a tile holds
 // no callbacks. The compiler memoizes whole components but not individual list
 // items, so memo lets the many tiles untouched by a tap skip re-rendering.
@@ -38,7 +65,8 @@ export const HexTile = memo(function HexTile({
   tile,
   occupant,
   protector,
-  active,
+  selected,
+  lethal,
   cost,
   damage,
   target,
@@ -54,8 +82,6 @@ export const HexTile = memo(function HexTile({
 }: HexTileProps) {
   const canMove = cost !== undefined && cost > 0
   const interactive = target || canMove || rechoosing
-  const selected = sameHex(active, tile)
-  const lethal = !!active && damage >= active.hp
   const feature = tile.feature && featureTexts[tile.feature]
   const actionLabel = tileAriaLabel({
     tile,
@@ -162,4 +188,4 @@ export const HexTile = memo(function HexTile({
       )}
     </g>
   )
-})
+}, tilePropsEqual)

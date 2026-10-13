@@ -141,19 +141,20 @@ export function TileLayer({
         const target = targets.has(tileKey)
         const strike = targets.get(tileKey)?.kind === 'attack'
         const cost = reach.get(tileKey)
+        const damage =
+          target && !strike && targeting === 'jump'
+            ? Number(tile.terrain === 'lava')
+            : (paths.get(tileKey)?.damage ?? 0)
         return (
           <HexTile
             key={tileKey}
             tile={tile}
             occupant={occupant}
             protector={occupant && protectorFor(pawns, occupant)}
-            active={active}
+            selected={sameHex(active, tile)}
             cost={cost}
-            damage={
-              target && !strike && targeting === 'jump'
-                ? Number(tile.terrain === 'lava')
-                : (paths.get(tileKey)?.damage ?? 0)
-            }
+            damage={damage}
+            lethal={!!active && damage >= active.hp}
             target={target}
             strike={strike}
             targetLabel={
