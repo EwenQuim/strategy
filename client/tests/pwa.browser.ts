@@ -276,6 +276,75 @@ async function playInUi(page: Page, state: GameState, action: Action) {
   assert.fail('Unexpected action: ' + action.type)
 }
 
+test('Enemy focus stays responsive during worker search and the command deck stays inactive', async (t) => {
+  const { page, origin, files } = await fixture(t)
+  const state = field([
+    new King(1, 0, 0, 'player'),
+    new Swordsman(2, 2, 0, 'enemy'),
+    new King(3, 3, 0, 'enemy'),
+  ])
+  state.seed = 'enemy-focus-before-search'
+  await page.evaluate(
+    (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+    {
+      version: BATTLE_SNAPSHOT_VERSION,
+      identity: battleIdentity('ai', state.seed, DEFAULT_BOT_CONFIG, undefined),
+      state: snapshotState(state),
+    },
+  )
+  await page.goto(origin + base + 'game/' + state.seed)
+  await dismissQuickPlayTutorial(page)
+  if (process.env.PR_MEDIA_DIR)
+    await page.screenshot({ path: join(process.env.PR_MEDIA_DIR, 'player-turn.png') })
+  const workerPath = [...files.keys()].find((path) => /\/bot\.worker-.*\.js$/.test(path))!
+  files.set(
+    workerPath,
+    Buffer.from(
+      'const until = Date.now() + 3000; while (Date.now() < until) {}\n' +
+        files.get(workerPath)!.toString(),
+    ),
+  )
+  await page.evaluate(async (path) => {
+    for (const name of await caches.keys()) await (await caches.open(name)).delete(path)
+  }, workerPath)
+  const workerRequest = page.waitForRequest('**/bot.worker-*.js')
+  const workerStarted = page.waitForEvent('worker')
+  await page
+    .getByRole('button', { name: /End turn/ })
+    .evaluate((button: HTMLButtonElement) => button.click())
+  await workerRequest
+  const worker = await workerStarted
+  const workerClosed = worker.waitForEvent('close')
+  const started = Date.now()
+  await page.evaluate(() => new Promise((resolve) => window.setTimeout(resolve, 50)))
+  assert.ok(Date.now() - started < 1000, 'Worker computation must not block the UI thread')
+  assert.equal(
+    await page
+      .locator('[data-testid="initiative-unit"][aria-current="step"]')
+      .getAttribute('data-side'),
+    'enemy',
+  )
+  assert.equal(await page.getByTestId('preview-ability').textContent(), 'Charge2 energy')
+  assert.equal(await page.locator('[data-action="endTurn"]').count(), 0)
+  assert.equal(
+    await page.getByRole('button', { name: 'Stop previewing', exact: true }).count(),
+    0,
+  )
+  assert.equal(await page.getByTestId('unit-focus').getByRole('button').count(), 0)
+  if (process.env.PR_MEDIA_DIR)
+    await page.screenshot({ path: join(process.env.PR_MEDIA_DIR, 'enemy-thinking.png') })
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  await workerClosed
+  const nextWorker = page.waitForEvent('worker')
+  await page.getByRole('button', { name: /End turn/ }).click()
+  const cancelledWorker = await nextWorker
+  const cancelled = cancelledWorker.waitForEvent('close')
+  await page.getByRole('link', { name: 'Hexmate home', exact: true }).click()
+  await cancelled
+  await page.getByTestId('battlefield').waitFor({ state: 'hidden' })
+  assert.equal(await page.getByTestId('battlefield').count(), 0)
+})
+
 async function playTurn(page: Page) {
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   const current = await page

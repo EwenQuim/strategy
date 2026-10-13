@@ -10,8 +10,8 @@ import { HannibalBot, HANNIBAL_LEVELS } from './strategies/hannibal.ts'
 
 const depthsearch = registerBot(DepthsearchBot, undefined, BOT_LEVELS)
 const random = registerBot(RandomBot)
-const mistral = registerBot(MistralBot, new DepthsearchBot())
-const jev = registerBot(JevBot, new DepthsearchBot())
+const mistral = registerBot(MistralBot, new DepthsearchBot(), {}, 'main')
+const jev = registerBot(JevBot, new DepthsearchBot(), {}, 'main')
 const napoleon = registerBot(NapoleonBot, undefined, NAPOLEON_LEVELS)
 const hannibal = registerBot(HannibalBot, undefined, HANNIBAL_LEVELS)
 

@@ -32,6 +32,7 @@ import {
   type Aim,
   type GameState,
   type Pawn,
+  type Side,
   type Tile,
 } from '../lib/engine'
 
@@ -86,6 +87,15 @@ function resolveTargeting(
   return 'special'
 }
 
+function isViewerTurn(
+  pawn: Pawn | undefined,
+  local: boolean,
+  online: boolean,
+  viewerSide: Side | undefined,
+): pawn is Pawn {
+  return !!pawn && (online ? pawn.side === viewerSide : local || pawn.side === 'player')
+}
+
 export function Game({
   seed,
   mode,
@@ -135,17 +145,14 @@ export function Game({
   )
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
+  const viewerTurn = isViewerTurn(pawn, local, isOnline, viewerSide)
+  const opponentActive = !!pawn && !state.winner && !viewerTurn
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
-  const myTurn =
-    !!pawn &&
-    (isOnline ? pawn.side === viewerSide : local || pawn.side === 'player') &&
-    !state.winner &&
-    !paused &&
-    !playing
+  const canCommand = viewerTurn && !state.winner && !paused && !playing
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
-  const aim = myTurn && aiming?.state === state ? aiming.aim : null
+  const aim = canCommand && aiming?.state === state ? aiming.aim : null
   const insight = useInspection(state, viewerSide, local, !!aim)
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
@@ -159,12 +166,12 @@ export function Game({
   const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
 
   const reach =
-    myTurn && pawn.energy > 0 && !aim && !inspected
+    canCommand && pawn.energy > 0 && !aim && !inspected
       ? movementDestinations(state.tiles, state.pawns, pawn)
       : new Map<string, number>()
 
   const onTileClick = (tile: Tile) => {
-    if (!myTurn) return
+    if (!canCommand) return
     const at = { q: tile.q, r: tile.r }
     if (aim && targets.has(key(at.q, at.r))) {
       if (pawn.special.choosesDestination && !destination)
@@ -204,7 +211,6 @@ export function Game({
         online={online}
         pawn={pawn}
         winner={state.winner}
-        playing={playing}
         order={state.order}
         pawns={state.pawns}
         active={state.active}
@@ -268,7 +274,8 @@ export function Game({
         active={pawn}
         winner={state.winner}
         winnerLabel={winnerLabel}
-        myTurn={myTurn}
+        canCommand={canCommand}
+        opponentActive={opponentActive}
         previewed={insight.previewed}
         onPreview={insight.preview}
         onPeek={insight.peek}

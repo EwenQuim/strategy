@@ -12,7 +12,8 @@ import { activePawn } from '../lib/engine/index.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
-import { getBot, DEFAULT_BOT_CONFIG, type BotConfig } from '../bots/catalog.ts'
+import { DEFAULT_BOT_CONFIG, type BotConfig } from '../bots/catalog.ts'
+import { getBrowserBot } from '../bots/worker.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -36,7 +37,7 @@ export function useGame({
   online,
 }: GameOptions) {
   // Routes remount when battle settings change; the bot belongs to that battle's lifetime.
-  const [enemyBot] = useState(() => (mode === 'ai' && !online ? getBot(bot) : null))
+  const [enemyBot] = useState(() => (mode === 'ai' && !online ? getBrowserBot(bot) : null))
   const [playback, dispatch] = useReducer(
     (currentPlayback: Transition, action: PlaybackAction) => {
       const next = playbackReducer(currentPlayback, action, mode)
@@ -90,6 +91,7 @@ export function useGame({
       })
     return () => {
       cancelled = true
+      enemyBot.cancel()
     }
   }, [dispatch, enemyBot, mode, online, paused, playing, state])
 

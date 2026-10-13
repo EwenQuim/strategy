@@ -6,6 +6,7 @@ export function registerBot<B extends Bot>(
   BotClass: new (options?: Partial<B['options']>) => B,
   fallback?: Bot,
   presets: Record<string, B['options']> = {},
+  execution: 'worker' | 'main' = 'worker',
 ) {
   const defaults = new BotClass()
   const defaultConfig: Pick<B, 'name' | 'options'> = {
@@ -15,6 +16,7 @@ export function registerBot<B extends Bot>(
   return {
     name: defaults.name as B['name'],
     presets,
+    execution,
     defaultConfig,
     resolve(value: unknown) {
       const bot = new BotClass(value as Partial<B['options']>)

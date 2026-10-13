@@ -63,9 +63,14 @@ export function restoreState(saved: unknown): GameState | null {
     return {
       ...s,
       tiles: new Map(s.tiles),
-      pawns: s.pawns.map(({ escapeChance: _legacyEscape, ...pawn }) =>
-        Object.assign(new PAWN_CLASSES[pawn.kind](pawn.id, pawn.q, pawn.r, pawn.side), pawn),
-      ),
+      pawns: s.pawns.map(({ escapeChance: _legacyEscape, ...pawn }) => {
+        if (typeof pawn.kind !== 'string' || !Object.hasOwn(PAWN_CLASSES, pawn.kind))
+          throw new Error('Unknown pawn kind')
+        return Object.assign(
+          new PAWN_CLASSES[pawn.kind](pawn.id, pawn.q, pawn.r, pawn.side),
+          pawn,
+        )
+      }),
     }
   } catch {
     // Not a battle this client can read: start a fresh one instead.

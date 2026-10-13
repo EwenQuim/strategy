@@ -60,6 +60,13 @@ test('restoreState rejects unreadable snapshots', () => {
   assert.equal(restoreState({ pawns: [{ kind: 'tank' }] }), null)
 })
 
+test('restoreState rejects unknown, inherited and non-string pawn kinds', () => {
+  const saved = snapshotState(field([new King(1, 0, 0, 'player')]))
+  for (const kind of ['tank', 'constructor', '__proto__', 'toString', null, 1, ['king']]) {
+    assert.equal(restoreState({ ...saved, pawns: [{ ...saved.pawns[0], kind }] }), null)
+  }
+})
+
 test('Legacy Escape chances are discarded on restore and cannot change reliable combat', () => {
   const state = field([new King(1, 0, 0, 'player'), new King(2, 1, 0, 'enemy')])
   state.escapes = Array.from({ length: 3 }, () => ({ kind: 'king', side: 'player' }))
