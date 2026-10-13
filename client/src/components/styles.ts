@@ -1,8 +1,8 @@
 export const buttonClassName =
-  'inline-flex items-center rounded-md border py-3.5 text-[13px] font-semibold shadow-[0_6px_24px_#07180f30] hover:shadow-[0_8px_30px_#07180f50] [&>svg]:size-[19px]'
+  'inline-flex items-center rounded-md border py-3.5 text-[13px] font-semibold shadow-control hover:shadow-control-hover [&>svg]:size-[19px]'
 
 export const iconButtonClassName =
-  'grid h-11 w-10 place-items-center rounded-[10px] border border-transparent bg-transparent text-muted hover:border-line hover:bg-[#ffffff09] hover:text-ink [&>svg]:size-[19px]'
+  'grid h-11 w-10 place-items-center rounded-[10px] border border-transparent bg-transparent text-muted hover:border-line hover:bg-icon-hover hover:text-ink [&>svg]:size-[19px]'
 
 export const primaryButtonClassName =
   buttonClassName +
@@ -12,13 +12,13 @@ const panelClassName =
   'rounded-2xl border border-[#d1cf9b40] bg-[var(--biome-panel,#20362b)] text-ink shadow-[0_25px_90px_#0000008c]'
 
 export const menuCardClassName =
-  'rounded-2xl border border-line bg-gradient-to-br from-white/7 to-white/2 shadow-[0_8px_24px_#0002]'
+  'rounded-2xl border border-line bg-gradient-to-br from-card-start to-card-end shadow-menu-card'
 
 export const menuInputClassName =
   'min-h-12 w-full min-w-0 rounded-xl border border-line bg-[#152b24] px-3 py-2 text-[16px] text-ink [color-scheme:dark] disabled:opacity-50'
 
 export const switchClassName =
-  'relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none'
+  'relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-surface-raised transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-switch-knob motion-reduce:transition-none motion-reduce:after:transition-none'
 
 export const menuPrimaryButtonClassName =
   primaryButtonClassName +
@@ -26,4 +26,4 @@ export const menuPrimaryButtonClassName =
 
 export const dialogClassName =
   panelClassName +
-  ' fixed inset-0 m-auto open:flex max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] flex-col p-0 backdrop:bg-black/50 backdrop:backdrop-blur-[7px]'
+  ' fixed inset-0 m-auto open:flex max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] flex-col p-0 backdrop:bg-scrim/50 backdrop:backdrop-blur-[7px]'

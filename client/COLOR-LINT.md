@@ -4,6 +4,9 @@ The scripts in `package.json` expose a baseline check, a full diagnostic report,
 a strict check, and an explicit baseline refresh. Normal linting runs the baseline
 check, including in CI. No command rewrites application colors.
 
+CI also uploads the full inventory as a review artifact. The pre-push hook runs
+the same baseline guard through lint; it does not print the full debt inventory.
+
 The report prints file, line, column, rule and value. Findings are diagnostics,
 not unique colors: a Tailwind literal can be reported by both the class rule and
 the literal inventory rule.
@@ -56,3 +59,21 @@ The selected Stylelint dependency tree currently inherits
 The runner supplies repository-owned glob patterns, not user input. npm's proposed
 fix downgrades Stylelint to an unsuitable historical release; do not apply it
 blindly. Revisit the dependency when an appropriate upstream fix is available.
+
+## Cleanup decisions still open
+
+The initial cleanup preserves exact values while centralizing repeated control
+surfaces, menu backgrounds, recesses, scrims, switch knobs and shared shadows.
+The remaining baseline is deliberately not treated as an autofix list:
+
+| Area                                            | Decision needed                                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Terrain, feature SVGs and pawn accents          | Are authored artwork palettes valid local data, or must every illustration color become a global token?            |
+| Team, damage, healing and combat-effect colors  | Which distinctions must remain, and which should share semantic feedback tokens?                                   |
+| Destructive-action reds and online error text   | Should these use one danger palette or retain different emphasis levels?                                           |
+| Biome panel fallbacks                           | Different fallback values exist. Which fallback is canonical, and should it vary between menu and battle contexts? |
+| Decorative gradients, masks and one-off shadows | Which are intentional artwork rather than reusable UI styling?                                                     |
+| Gold campaign CTA and other near-match colors   | Which differences are intentional? Do not merge visually similar values without approval.                          |
+
+Use the full report for exact remaining locations. No values in these categories
+were normalized merely to make lint pass.

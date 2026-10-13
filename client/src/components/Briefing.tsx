@@ -36,7 +36,7 @@ function BriefingPopup({
     <dialog
       ref={showBriefing}
       onClose={onClose}
-      className="fixed inset-x-0 top-[env(safe-area-inset-top)] bottom-[env(safe-area-inset-bottom)] isolate m-auto max-h-[min(760px,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-24px))] w-[min(440px,calc(100vw-24px))] flex-col overflow-hidden rounded-[28px] border border-gold/25 bg-[var(--biome-panel,#172a21)] p-0 text-ink shadow-[0_32px_120px_#000b,inset_0_1px_0_#ffffff18] open:flex backdrop:bg-black/65 backdrop:backdrop-blur-[9px]"
+      className="fixed inset-x-0 top-[env(safe-area-inset-top)] bottom-[env(safe-area-inset-bottom)] isolate m-auto max-h-[min(760px,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-24px))] w-[min(440px,calc(100vw-24px))] flex-col overflow-hidden rounded-[28px] border border-gold/25 bg-[var(--biome-panel,#172a21)] p-0 text-ink shadow-[0_32px_120px_#000b,inset_0_1px_0_#ffffff18] open:flex backdrop:bg-scrim/65 backdrop:backdrop-blur-[9px]"
       style={{ ...theme, '--briefing-accent': accent } as CSSProperties}
       aria-labelledby={id + '-title'}
       onClick={(event) => {
@@ -120,7 +120,7 @@ function BriefingPopup({
             </h3>
           </div>
           {element.stats && (
-            <dl className="mb-4 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-black/20 py-3 text-center">
+            <dl className="mb-4 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-recessed py-3 text-center">
               {(
                 [
                   ['heart', m.health, element.stats.hp, 'text-[#e6a38d]'],
@@ -146,7 +146,7 @@ function BriefingPopup({
                   {element.special.name}
                 </h4>
                 <span
-                  className="flex shrink-0 items-center gap-1 rounded-md bg-black/20 px-2 py-1 text-xs font-bold text-gold"
+                  className="flex shrink-0 items-center gap-1 rounded-md bg-recessed px-2 py-1 text-xs font-bold text-gold"
                   aria-label={m.energyCost(element.special.cost)}
                 >
                   <Icon name="energy" className="size-3" />
@@ -161,7 +161,7 @@ function BriefingPopup({
               {element.points.map((point) => (
                 <li
                   key={point}
-                  className="flex items-start gap-2.5 rounded-xl bg-black/15 px-3 py-2.5 text-[13px] leading-relaxed text-ink"
+                  className="flex items-start gap-2.5 rounded-xl bg-recessed-soft px-3 py-2.5 text-[13px] leading-relaxed text-ink"
                 >
                   <Icon name="hex" className="mt-1 size-3 shrink-0 text-gold/60" />
                   {point}
@@ -171,7 +171,7 @@ function BriefingPopup({
           )}
         </section>
       </div>
-      <footer className="shrink-0 border-t border-line bg-black/15 px-5 pt-2 pb-5 max-[360px]:px-4 [@media(max-height:650px)]:pb-3">
+      <footer className="shrink-0 border-t border-line bg-recessed-soft px-5 pt-2 pb-5 max-[360px]:px-4 [@media(max-height:650px)]:pb-3">
         {elements.length > 1 && (
           <nav aria-label={title} className="mb-2 flex items-center justify-between gap-2">
             <button

@@ -128,7 +128,7 @@ export function PawnChip({
           data-testid="killed-message"
           y={topRow ? 48 : -28}
           textAnchor="middle"
-          className="combat-impact-label combat-impact-label--drift fill-[#ff8d75] stroke-[#14271f] stroke-[5] text-[24px] font-black italic uppercase [paint-order:stroke] motion-reduce:animate-none"
+          className="combat-impact-label combat-impact-label--drift fill-[#ff8d75] stroke-page stroke-[5] text-[24px] font-black italic uppercase [paint-order:stroke] motion-reduce:animate-none"
         >
           {m.killed}
         </text>

@@ -69,7 +69,7 @@ export const Route = createFileRoute('/online/$code')({
                   {m.shareCode(doc.namePlayer, doc.nameEnemy || undefined)}
                 </p>
                 <div
-                  className="w-full rounded-2xl border border-gold/25 bg-black/20 px-3 py-5 font-mono text-[30px] tracking-[0.2em] text-gold"
+                  className="w-full rounded-2xl border border-gold/25 bg-recessed px-3 py-5 font-mono text-[30px] tracking-[0.2em] text-gold"
                   data-testid="game-code"
                 >
                   {code}

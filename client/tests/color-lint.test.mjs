@@ -24,7 +24,7 @@ test('CLI permits baseline debt, reports it on demand and fails strict mode', ()
     /0 outside the baseline/,
   )
   const report = execFileSync(process.execPath, [script, '--report'], { encoding: 'utf8' })
-  assert.match(report, /src\/index\.css:\d+:\d+/)
+  assert.match(report, /src\/components\/[^:]+:\d+:\d+/)
   const strict = spawnSync(process.execPath, [script, '--strict'], { encoding: 'utf8' })
   assert.equal(strict.status, 1)
   assert.match(strict.stdout, /color findings/)

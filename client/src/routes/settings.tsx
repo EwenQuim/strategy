@@ -157,7 +157,7 @@ export const Route = createFileRoute('/settings')({
             </button>
             <button
               type="button"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-white/5 px-[25px] text-[15px] font-semibold text-ink hover:bg-white/10"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-surface px-[25px] text-[15px] font-semibold text-ink hover:bg-surface-raised"
               onClick={() => deleteDialogRef.current?.close()}
             >
               {cancel}
