@@ -1,6 +1,7 @@
 import { BIOMES, type Biome } from './biomes/index.ts'
 import {
   MAP_WIDTH,
+  decorateMap,
   hexOf,
   key,
   mapFromRows,
@@ -10,7 +11,6 @@ import {
   type MapSize,
   type Tile,
 } from './hex.ts'
-import { decorateMap } from './decorate.ts'
 import { generateMapShape, rollMapSize } from './shapes.ts'
 import { King, PAWN_CLASSES, RECRUIT_CLASSES, type Pawn, type Side } from './pawns/index.ts'
 import { SeededRandom, seedState } from './random.ts'

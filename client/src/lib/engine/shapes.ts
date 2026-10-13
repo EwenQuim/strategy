@@ -1,4 +1,5 @@
 import {
+  decorateMap,
   hexOf,
   key,
   mirrorAxial,
@@ -7,7 +8,6 @@ import {
   type MapSize,
   type Tile,
 } from './hex.ts'
-import { decorateMap } from './decorate.ts'
 import type { Biome } from './biomes/index.ts'
 import type { SeededRandom } from './random.ts'
 
