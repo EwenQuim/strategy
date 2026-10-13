@@ -7,6 +7,7 @@ export type GameSearch = {
   mode: GameMode
   // Bot configuration is validated by the application, never by the game library.
   bot?: unknown
+  sideBots?: unknown
   setup?: Extract<BattleSetup, { map?: undefined }>
 }
 
@@ -15,6 +16,7 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
     mode: search.mode === 'local' ? 'local' : search.mode === 'online' ? 'online' : 'ai',
   }
   if (search.bot !== undefined) result.bot = search.bot
+  if (search.sideBots !== undefined) result.sideBots = search.sideBots
   if (search.setup && typeof search.setup === 'object' && !('map' in search.setup)) {
     const setup = search.setup as NonNullable<GameSearch['setup']>
     try {

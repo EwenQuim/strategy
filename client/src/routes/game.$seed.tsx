@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { QuickPlayTutorial } from '../components/Briefing'
 import { Game } from '../components/Game'
 import { parseBotConfig } from '../bots/catalog'
+import { parseSideBots } from '../bots/participants'
 
 export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/game/$seed')({
           seed={seed}
           mode={search.mode}
           bot={parseBotConfig(search.bot)}
+          sideBots={parseSideBots(search.sideBots)}
           setup={search.setup}
         />
         {search.mode === 'ai' && !search.setup && <QuickPlayTutorial />}

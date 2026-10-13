@@ -7,10 +7,9 @@ import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
-import type { BotDifficulty } from '../lib/engine/ai'
-import { BOTS, DEFAULT_BOT_CONFIG, parseBotConfig, type BotName } from '../bots/catalog'
+import { ParticipantPanel } from '../components/ParticipantPanel'
+import { defaultParticipant, participantBot } from '../bots/participants'
 import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
-import type { GameMode } from '../lib/game-mode'
 import {
   readDeveloperPreview,
   readSymmetricPreference,
@@ -18,7 +17,6 @@ import {
 } from '../preferences'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
-import * as bots from '../i18n/bots'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
 
@@ -27,9 +25,8 @@ const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 export const Route = createFileRoute('/custom')({
   component: function CustomPlay() {
     const navigate = Route.useNavigate()
-    const [mode, setMode] = useState<GameMode>('ai')
-    const [difficulty, setDifficulty] = useState<BotDifficulty | 'brutal'>('normal')
-    const [strategy, setStrategy] = useState<BotName>(DEFAULT_BOT_CONFIG.name)
+    const [first, setFirst] = useState(() => defaultParticipant(true))
+    const [second, setSecond] = useState(() => defaultParticipant(false))
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [developerPreview] = useState(readDeveloperPreview)
@@ -42,9 +39,13 @@ export const Route = createFileRoute('/custom')({
     ])
     const [enemy, setEnemy] = useState<Pawn['kind'][] | null>(null)
     const enemyRoster = enemy ?? player
-    const labels = mode === 'local' ? m.localSides : m.aiSides
-    const selectedBot = BOTS[strategy]
-    const presets = Object.entries(selectedBot.presets)
+    const labels = m.localSides
+    let sideBots
+    try {
+      sideBots = { player: participantBot(first), enemy: participantBot(second) }
+    } catch {
+      sideBots = undefined
+    }
 
     return (
       <MenuLayout title={common.customPlay} scroll={false}>
@@ -52,208 +53,167 @@ export const Route = createFileRoute('/custom')({
           className="flex min-h-0 w-full max-w-[600px] flex-1 flex-col gap-3 self-center"
           onSubmit={(event) => {
             event.preventDefault()
+            if (!sideBots) return
             void navigate({
               to: '/game',
               search: {
-                mode,
-                bot: parseBotConfig({
-                  name: strategy,
-                  options: selectedBot.presets[difficulty] ?? selectedBot.defaultConfig.options,
-                }),
+                mode: first.human && !second.human ? 'ai' : 'local',
+                bot: sideBots.enemy ?? undefined,
+                sideBots,
                 setup: { biome, player, enemy: enemyRoster },
               },
             })
           }}
         >
-          <div
-            className={
-              menuCardClassName +
-              ' min-h-0 overflow-y-auto overscroll-contain p-3 min-[900px]:p-5'
-            }
-          >
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5 text-sm text-muted">
-                <label htmlFor="custom-mode">{m.mode}</label>
-                <select
-                  className={menuInputClassName}
-                  id="custom-mode"
-                  value={mode}
-                  onChange={(event) => setMode(event.target.value as GameMode)}
-                >
-                  <option value="ai">{common.quickPlay}</option>
-                  <option value="local">{m.twoPlayers}</option>
-                </select>
-              </div>
-              {presets.length > 0 && (
-                <div className="grid gap-1.5 text-sm text-muted">
-                  <label htmlFor="custom-difficulty">
-                    {m.difficulty}
-                    {mode === 'local' && m.aiOnly}
-                  </label>
+          <div className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain">
+            <ParticipantPanel
+              side={0}
+              participant={first}
+              onChange={setFirst}
+              developerPreview={developerPreview}
+              collapsed
+            />
+            <ParticipantPanel
+              side={1}
+              participant={second}
+              onChange={setSecond}
+              developerPreview={developerPreview}
+            />
+            <section
+              className={menuCardClassName + ' shrink-0 p-3 min-[900px]:p-5'}
+              aria-labelledby="custom-config"
+            >
+              <h2 id="custom-config" className="mb-3 font-semibold text-gold">
+                {m.gameConfig}
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5 text-sm text-muted col-span-full">
+                  <label htmlFor="custom-biome">{m.biome}</label>
                   <select
                     className={menuInputClassName}
-                    id="custom-difficulty"
-                    value={difficulty}
-                    disabled={mode === 'local'}
-                    onChange={(event) =>
-                      setDifficulty(event.target.value as BotDifficulty | 'brutal')
-                    }
+                    id="custom-biome"
+                    value={biome}
+                    onChange={(event) => setBiome(event.target.value as Biome)}
                   >
-                    {presets.map(([level]) => (
-                      <option key={level} value={level}>
-                        {m.difficulties[level as keyof typeof m.difficulties]}
+                    {Object.entries(BIOMES).map(([value]) => (
+                      <option key={value} value={value}>
+                        {biomeNames[value as Biome]}
                       </option>
                     ))}
                   </select>
                 </div>
-              )}
-              <div className="grid gap-1.5 text-sm text-muted col-span-full">
-                <label htmlFor="custom-biome">{m.biome}</label>
-                <select
-                  className={menuInputClassName}
-                  id="custom-biome"
-                  value={biome}
-                  onChange={(event) => setBiome(event.target.value as Biome)}
-                >
-                  {Object.entries(BIOMES).map(([value]) => (
-                    <option key={value} value={value}>
-                      {biomeNames[value as Biome]}
-                    </option>
-                  ))}
-                </select>
               </div>
-              <div className="grid gap-1.5 text-sm text-muted col-span-full">
-                <label htmlFor="custom-strategy">
-                  {m.aiStrategy}
-                  {mode === 'local' && m.aiOnly}
-                </label>
-                <select
-                  className={menuInputClassName}
-                  id="custom-strategy"
-                  aria-describedby="custom-strategy-hint"
-                  value={strategy}
-                  disabled={mode === 'local'}
-                  onChange={(event) => setStrategy(event.target.value as BotName)}
-                >
-                  {Object.keys(BOTS)
-                    .filter(
-                      (name) => developerPreview || (name !== 'mistral' && name !== 'jev'),
-                    )
-                    .map((name) => (
-                      <option key={name} value={name}>
-                        {m.aiStrategies[name as BotName]}
-                      </option>
-                    ))}
-                </select>
-                <p id="custom-strategy-hint" className="text-xs leading-relaxed">
-                  {bots.strategyHints[strategy]}
-                </p>
-              </div>
-            </div>
-            <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
-              <input
-                className="size-[18px] accent-gold"
-                type="checkbox"
-                checked={enemy === null}
-                onChange={(event) => setEnemy(event.target.checked ? null : [...player])}
-              />
-              {m.mirrorRoster}
-            </label>
-            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
-              <input
-                className="size-[18px] accent-gold"
-                type="checkbox"
-                checked={symmetric}
-                onChange={(event) => {
-                  setSymmetric(event.target.checked)
-                  saveSymmetricPreference(event.target.checked)
-                }}
-              />
-              {m.symmetricMap}
-            </label>
-            <table className="w-full border-separate border-spacing-2 text-[13px] min-[900px]:text-base [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
-              <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
-              <thead className="text-xs text-muted">
-                <tr>
-                  <th className="text-left font-medium" scope="col">
-                    {m.unit}
-                  </th>
-                  <th className="font-medium w-1/4 text-center" scope="col">
-                    {labels[0]}
-                  </th>
-                  <th className="font-medium w-1/4 text-center" scope="col">
-                    {labels[1]}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th className="text-left font-medium" scope="row">
-                    <span className="flex items-center gap-2 capitalize">
-                      <PawnIcon kind="king" />
-                      {m.king}
-                    </span>
-                  </th>
-                  <td className="w-1/4 text-center">1</td>
-                  <td className="w-1/4 text-center">1</td>
-                </tr>
-                {recruits.map(({ kind }) => (
-                  <tr key={kind}>
+              <label className="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
+                <input
+                  className="size-[18px] accent-gold"
+                  type="checkbox"
+                  checked={enemy === null}
+                  onChange={(event) => setEnemy(event.target.checked ? null : [...player])}
+                />
+                {m.mirrorRoster}
+              </label>
+              <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
+                <input
+                  className="size-[18px] accent-gold"
+                  type="checkbox"
+                  checked={symmetric}
+                  onChange={(event) => {
+                    setSymmetric(event.target.checked)
+                    saveSymmetricPreference(event.target.checked)
+                  }}
+                />
+                {m.symmetricMap}
+              </label>
+              <table className="w-full border-separate border-spacing-2 text-[13px] min-[900px]:text-base [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
+                <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
+                <thead className="text-xs text-muted">
+                  <tr>
+                    <th className="text-left font-medium" scope="col">
+                      {m.unit}
+                    </th>
+                    <th className="font-medium w-1/4 text-center" scope="col">
+                      {labels[0]}
+                    </th>
+                    <th className="font-medium w-1/4 text-center" scope="col">
+                      {labels[1]}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
                     <th className="text-left font-medium" scope="row">
                       <span className="flex items-center gap-2 capitalize">
-                        <PawnIcon kind={kind} />
-                        {unitNames[kind]}
+                        <PawnIcon kind="king" />
+                        {m.king}
                       </span>
                     </th>
-                    {[player, enemyRoster].map((roster, side) => {
-                      const count = roster.filter((unit) => unit === kind).length
-                      const max = Math.min(
-                        MAP_WIDTH * 3 - roster.length + count,
-                        MAP_WIDTH * 3 - 1,
-                      )
-                      return (
-                        <td className="w-1/4 text-center" key={side}>
-                          <input
-                            className={menuInputClassName + ' text-center'}
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            max={max}
-                            step={1}
-                            value={count}
-                            onFocus={(event) => event.target.select()}
-                            aria-label={labels[side] + ' ' + unitNames[kind]}
-                            disabled={side === 1 && enemy === null}
-                            onChange={(event) => {
-                              const value = Number(event.target.value)
-                              if (!Number.isInteger(value) || value < 0 || value > max) return
-                              const next = [
-                                ...roster.filter((unit) => unit !== kind),
-                                ...Array<Pawn['kind']>(value).fill(kind),
-                              ]
-                              if (side === 0) setPlayer(next)
-                              else setEnemy(next)
-                            }}
-                          />
-                        </td>
-                      )
-                    })}
+                    <td className="w-1/4 text-center">1</td>
+                    <td className="w-1/4 text-center">1</td>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot className="text-xs text-muted">
-                <tr>
-                  <th className="text-left font-medium" scope="row">
-                    {m.total}
-                  </th>
-                  <td className="w-1/4 text-center">{player.length}</td>
-                  <td className="w-1/4 text-center">{enemyRoster.length}</td>
-                </tr>
-              </tfoot>
-            </table>
-            <p className="text-xs leading-[1.5] text-muted">{m.rosterLimits(MAP_WIDTH * 3)}</p>
+                  {recruits.map(({ kind }) => (
+                    <tr key={kind}>
+                      <th className="text-left font-medium" scope="row">
+                        <span className="flex items-center gap-2 capitalize">
+                          <PawnIcon kind={kind} />
+                          {unitNames[kind]}
+                        </span>
+                      </th>
+                      {[player, enemyRoster].map((roster, side) => {
+                        const count = roster.filter((unit) => unit === kind).length
+                        const max = Math.min(
+                          MAP_WIDTH * 3 - roster.length + count,
+                          MAP_WIDTH * 3 - 1,
+                        )
+                        return (
+                          <td className="w-1/4 text-center" key={side}>
+                            <input
+                              className={menuInputClassName + ' text-center'}
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              max={max}
+                              step={1}
+                              value={count}
+                              onFocus={(event) => event.target.select()}
+                              aria-label={labels[side] + ' ' + unitNames[kind]}
+                              disabled={side === 1 && enemy === null}
+                              onChange={(event) => {
+                                const value = Number(event.target.value)
+                                if (!Number.isInteger(value) || value < 0 || value > max) return
+                                const next = [
+                                  ...roster.filter((unit) => unit !== kind),
+                                  ...Array<Pawn['kind']>(value).fill(kind),
+                                ]
+                                if (side === 0) setPlayer(next)
+                                else setEnemy(next)
+                              }}
+                            />
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="text-xs text-muted">
+                  <tr>
+                    <th className="text-left font-medium" scope="row">
+                      {m.total}
+                    </th>
+                    <td className="w-1/4 text-center">{player.length}</td>
+                    <td className="w-1/4 text-center">{enemyRoster.length}</td>
+                  </tr>
+                </tfoot>
+              </table>
+              <p className="text-xs leading-[1.5] text-muted">
+                {m.rosterLimits(MAP_WIDTH * 3)}
+              </p>
+            </section>
           </div>
-          <button type="submit" className={menuPrimaryButtonClassName + ' mt-auto shrink-0'}>
+          <button
+            type="submit"
+            disabled={!sideBots}
+            className={menuPrimaryButtonClassName + ' mt-auto shrink-0 disabled:opacity-50'}
+          >
             {m.startBattle}
             <Icon name="arrow" />
           </button>

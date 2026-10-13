@@ -30,20 +30,6 @@ export const quickPlayHint = t({
   es: 'Juega una nueva batalla contra la IA',
   it: "Gioca una nuova battaglia contro l'IA",
 })
-export const twoPlayers = t({
-  en: '2 players',
-  fr: '2 joueurs',
-  de: '2 Spieler',
-  es: '2 jugadores',
-  it: '2 giocatori',
-})
-export const twoPlayersHint = t({
-  en: 'Play together on this device',
-  fr: 'Jouer à deux sur cet appareil',
-  de: 'Zu zweit auf diesem Gerät spielen',
-  es: 'Jugad juntos en este dispositivo',
-  it: 'Giocate insieme su questo dispositivo',
-})
 export const online = t({
   en: 'Online',
   fr: 'En ligne',
@@ -87,20 +73,49 @@ export const madeBy = t({
   it: 'Fatto con ❤️ da EwenQuim',
 })
 
-export const mode = t({ en: 'Mode', fr: 'Mode', de: 'Modus', es: 'Modo', it: 'Modalità' })
+export const human = t({ en: 'Human', fr: 'Humain', de: 'Mensch', es: 'Humano', it: 'Umano' })
+export const ai = t({ en: 'AI', fr: 'IA', de: 'KI', es: 'IA', it: 'IA' })
+export const controller = t({
+  en: 'Controlled by',
+  fr: 'Contrôlé par',
+  de: 'Gesteuert von',
+  es: 'Controlado por',
+  it: 'Controllato da',
+})
+export const gameConfig = t({
+  en: 'Game configuration',
+  fr: 'Configuration de la partie',
+  de: 'Spieleinstellungen',
+  es: 'Configuración de la partida',
+  it: 'Configurazione della partita',
+})
+export const aiOptions = t({
+  en: 'AI options',
+  fr: 'Options IA',
+  de: 'KI-Optionen',
+  es: 'Opciones de IA',
+  it: 'Opzioni IA',
+})
+export const customOptions = t({
+  en: 'Custom',
+  fr: 'Personnalisé',
+  de: 'Benutzerdefiniert',
+  es: 'Personalizado',
+  it: 'Personalizzato',
+})
+export const invalidBotOptions = t({
+  en: 'Invalid AI options. Check the values before starting.',
+  fr: 'Options IA invalides. Vérifiez les valeurs avant de lancer.',
+  de: 'Ungültige KI-Optionen. Werte vor dem Start prüfen.',
+  es: 'Opciones de IA inválidas. Revisa los valores antes de empezar.',
+  it: 'Opzioni IA non valide. Controlla i valori prima di iniziare.',
+})
 export const difficulty = t({
   en: 'Difficulty',
   fr: 'Difficulté',
   de: 'Schwierigkeit',
   es: 'Dificultad',
   it: 'Difficoltà',
-})
-export const aiOnly = t({
-  en: ' (AI only)',
-  fr: ' (IA seulement)',
-  de: ' (nur KI)',
-  es: ' (solo IA)',
-  it: ' (solo IA)',
 })
 export const difficulties = t<Record<BotDifficulty | 'brutal', string>>({
   en: { easy: 'Easy', normal: 'Normal', hard: 'Hard', brutal: 'Brutal' },
@@ -189,13 +204,6 @@ export const localSides = t({
   de: ['Spieler 1', 'Spieler 2'],
   es: ['Jugador 1', 'Jugador 2'],
   it: ['Giocatore 1', 'Giocatore 2'],
-})
-export const aiSides = t({
-  en: ['Player', 'Enemy'],
-  fr: ['Joueur', 'Ennemi'],
-  de: ['Spieler', 'Gegner'],
-  es: ['Jugador', 'Enemigo'],
-  it: ['Giocatore', 'Nemico'],
 })
 export const rosterLimits = t({
   en: (maxUnits: number) => `One king per side. Up to ${maxUnits} units.`,

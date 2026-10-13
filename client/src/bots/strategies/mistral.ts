@@ -68,7 +68,15 @@ export class MistralBot implements Bot<MistralOptions> {
       maxTokens: this.options.maxTokens,
       reasoningEffort: this.options.effort,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        {
+          role: 'system',
+          content:
+            activePawn(state)?.side === 'player'
+              ? SYSTEM_PROMPT.replace(/ENEMY|PLAYER/g, (side) =>
+                  side === 'ENEMY' ? 'PLAYER' : 'ENEMY',
+                )
+              : SYSTEM_PROMPT,
+        },
         { role: 'user', content: battlePrompt(state) },
       ],
     })

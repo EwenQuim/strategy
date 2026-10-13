@@ -14,6 +14,7 @@ import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
 import { DEFAULT_BOT_CONFIG, type BotConfig } from '../bots/catalog.ts'
 import { getBrowserBot } from '../bots/worker.ts'
+import { battleBots, type SideBots } from '../bots/participants.ts'
 
 export type OnlineSession = { code: string; token: string; side: Side }
 
@@ -23,6 +24,7 @@ export interface GameOptions {
   paused?: boolean
   setup?: BattleSetup
   bot?: BotConfig
+  sideBots?: SideBots
   onVictory?: () => void
   online?: OnlineSession
 }
@@ -33,11 +35,18 @@ export function useGame({
   paused = false,
   setup,
   bot = DEFAULT_BOT_CONFIG,
+  sideBots,
   onVictory,
   online,
 }: GameOptions) {
   // Routes remount when battle settings change; the bot belongs to that battle's lifetime.
-  const [enemyBot] = useState(() => (mode === 'ai' && !online ? getBrowserBot(bot) : null))
+  const [bots] = useState(() => {
+    const configs = battleBots(mode, bot, sideBots)
+    return {
+      player: !online && configs.player ? getBrowserBot(configs.player) : null,
+      enemy: !online && configs.enemy ? getBrowserBot(configs.enemy) : null,
+    }
+  })
   const [playback, dispatch] = useReducer(
     (currentPlayback: Transition, action: PlaybackAction) => {
       const next = playbackReducer(currentPlayback, action, mode)
@@ -46,7 +55,9 @@ export function useGame({
     seed,
     (initialSeed) => {
       // Online battles resync from the server snapshot instead of the saved one.
-      const saved = online ? null : readBattleFromLocalStorage(mode, initialSeed, bot, setup)
+      const saved = online
+        ? null
+        : readBattleFromLocalStorage(mode, initialSeed, bot, setup, sideBots)
       return saved ? { state: saved, frames: [] } : initialPlayback(initialSeed, mode, setup)
     },
   )
@@ -57,8 +68,8 @@ export function useGame({
 
   // The current battle lives in one localStorage slot, overwritten on every state change.
   useEffect(() => {
-    if (!online) saveBattleToLocalStorage(mode, seed, bot, setup, playback.state)
-  }, [bot, mode, online, playback.state, seed, setup])
+    if (!online) saveBattleToLocalStorage(mode, seed, bot, setup, playback.state, sideBots)
+  }, [bot, mode, online, playback.state, seed, setup, sideBots])
 
   // Persist victory immediately, even while its final combat animation is playing.
   const previousWinner = useRef(playback.state.winner)
@@ -80,10 +91,12 @@ export function useGame({
   }, [frame, paused])
 
   useEffect(() => {
-    if (!enemyBot || mode !== 'ai' || online || paused || playing || state.winner) return
-    if (activePawn(state)?.side !== 'enemy') return
+    if (online || paused || playing || state.winner) return
+    const side = activePawn(state)?.side
+    const activeBot = side && bots[side]
+    if (!activeBot) return
     let cancelled = false
-    void enemyBot
+    void activeBot
       .chooseActions(state)
       .catch(() => [])
       .then((actions) => {
@@ -91,9 +104,9 @@ export function useGame({
       })
     return () => {
       cancelled = true
-      enemyBot.cancel()
+      activeBot.cancel()
     }
-  }, [dispatch, enemyBot, mode, online, paused, playing, state])
+  }, [dispatch, bots, online, paused, playing, state])
 
   return {
     state,

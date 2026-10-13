@@ -165,6 +165,35 @@ test('Arbitrary search options and Mistral effort use the same config, URL and s
   }
 })
 
+test('Remote bots instruct Player 1 to attack the opposing army', async (t) => {
+  const state = initialState('player-remote', undefined, 'player')
+  assert.equal(activePawn(state)?.side, 'player')
+  t.mock.method(storage, 'getItem', () => 'test-api-key')
+  const bodies: {
+    messages?: { content: string }[]
+    state?: string
+    questions?: { move: { instructions: string } }
+  }[] = []
+  t.mock.method(
+    globalThis,
+    'fetch',
+    async (input: string | URL | Request, init?: RequestInit) => {
+      bodies.push(
+        JSON.parse(input instanceof Request ? await input.text() : String(init?.body)),
+      )
+      return Response.json({}, { status: 400 })
+    },
+  )
+  await getBot(BOTS.mistral.defaultConfig).chooseActions(state)
+  await getBot(BOTS.jev.defaultConfig).chooseActions(state)
+  assert.match(
+    bodies[0].messages![0].content,
+    /kill the ENEMY king while keeping your PLAYER king alive/,
+  )
+  assert.match(bodies[1].state!, /kill the ENEMY king while keeping your PLAYER king alive/)
+  assert.match(bodies[1].questions!.move.instructions, /active PLAYER unit/)
+})
+
 test('Unknown, malformed and out-of-range bot options cannot reach a strategy', () => {
   for (const config of [
     null,

@@ -5,6 +5,7 @@ import * as m from '../i18n/game'
 import { levelName } from '../i18n/campaign'
 import type { GameMode, PlayerNames } from '../lib/game-mode'
 import type { BotConfig } from '../bots/catalog'
+import type { SideBots } from '../bots/participants'
 import { Icon } from './Icon'
 import { primaryButtonClassName } from './styles'
 
@@ -17,6 +18,7 @@ interface GameResultProps {
   winnerLabel: string | null
   mode: GameMode
   bot: BotConfig
+  sideBots?: SideBots
   setup?: BattleSetup
   names: PlayerNames
   campaign?: Campaign
@@ -31,6 +33,7 @@ export function GameResult({
   winnerLabel,
   mode,
   bot,
+  sideBots,
   setup,
   names,
   campaign,
@@ -150,6 +153,7 @@ export function GameResult({
             search={{
               mode,
               bot,
+              sideBots,
               setup: setup?.map === undefined ? setup : undefined,
             }}
             className={resultButtonClassName}

@@ -6,6 +6,7 @@ import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/specialTexts'
 import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
+import { battleControl } from '../bots/participants'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
 import type { Campaign } from '../campaign'
 import {
@@ -92,8 +93,13 @@ function isViewerTurn(
   local: boolean,
   online: boolean,
   viewerSide: Side | undefined,
+  automated: boolean,
 ): pawn is Pawn {
-  return !!pawn && (online ? pawn.side === viewerSide : local || pawn.side === 'player')
+  return (
+    !!pawn &&
+    !automated &&
+    (online ? pawn.side === viewerSide : local || pawn.side === 'player')
+  )
 }
 
 export function Game({
@@ -104,6 +110,7 @@ export function Game({
   campaign,
   campaignLevel,
   bot = DEFAULT_BOT_CONFIG,
+  sideBots,
   onVictory,
   online,
   players,
@@ -116,7 +123,7 @@ export function Game({
   const local = mode === 'local'
   const [levelAlreadyCleared] = useState(() => clearedAtStart(campaign, campaignLevel))
   const isOnline = mode === 'online'
-  const viewerSide = online?.side
+  const { bots, spectator, viewerSide } = battleControl(mode, bot, sideBots, online?.side)
   const names = players ?? playerNames
   const labels = possessiveArmyLabels(mode, names)
   const { state, dispatch, effect, effectId, playing } = useGame({
@@ -125,6 +132,7 @@ export function Game({
     paused,
     setup,
     bot,
+    sideBots,
     onVictory,
     online,
   })
@@ -135,7 +143,7 @@ export function Game({
     state,
     mode,
     viewerSide,
-    campaign?.achievements !== false,
+    campaign?.achievements !== false && !spectator,
   )
   const winnerLabel = resolveWinnerLabel(
     state.winner,
@@ -145,7 +153,13 @@ export function Game({
   )
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
-  const viewerTurn = isViewerTurn(pawn, local, isOnline, viewerSide)
+  const viewerTurn = isViewerTurn(
+    pawn,
+    local,
+    isOnline,
+    viewerSide,
+    !!pawn && !!bots[pawn.side],
+  )
   const opponentActive = !!pawn && !state.winner && !viewerTurn
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
@@ -255,6 +269,7 @@ export function Game({
             winnerLabel={winnerLabel}
             mode={mode}
             bot={bot}
+            sideBots={sideBots}
             setup={setup}
             names={names}
             campaign={campaign}
@@ -294,6 +309,7 @@ export function Game({
         dialogRef={dialog}
         mode={mode}
         bot={bot}
+        sideBots={sideBots}
         setup={setup}
         biome={state.biome}
         campaignLevel={campaignLevel}

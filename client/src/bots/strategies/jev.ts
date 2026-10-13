@@ -34,19 +34,21 @@ export class JevBot implements Bot<JevOptions> {
 
   async chooseActions(state: GameState): Promise<Action[]> {
     const apiKey = readJevApiKey()
-    if (!apiKey || !activePawn(state)) return []
+    const actor = activePawn(state)
+    if (!apiKey || !actor) return []
+    const ownArmy = actor.side.toUpperCase()
+    const opposingArmy = actor.side === 'player' ? 'ENEMY' : 'PLAYER'
     const response = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(30_000),
       body: JSON.stringify({
         model: this.options.model,
-        state: `${RULES_TEXT}\n\nGoal: kill the PLAYER king while keeping your ENEMY king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy — remaining energy is lost the moment the turn ends, so ending the turn early is a wasted turn.\n\n${positionText(state)}`,
+        state: `${RULES_TEXT}\n\nGoal: kill the ${opposingArmy} king while keeping your ${ownArmy} king alive. Be bold and decisive: press the attack, punish exposed units, and never waste the active unit's energy.\n\n${positionText(state)}`,
         questions: {
           move: {
             type: 'choice',
-            instructions:
-              'Which action should the active ENEMY unit take right now? Rank by: can it attack a PLAYER unit now, does it move the unit closer to the PLAYER king, does it use a special to good effect. End the turn only when every other option is worse than passing.',
+            instructions: `Which action should the active ${ownArmy} unit take right now? Rank by: can it attack a ${opposingArmy} unit now, does it move the unit closer to the ${opposingArmy} king, does it use a special to good effect. End the turn only when every other option is worse than passing.`,
             criteria: actionCriteria(state),
           },
         },
@@ -64,7 +66,8 @@ export class JevBot implements Bot<JevOptions> {
 // consequence, not just coordinates.
 export function actionCriteria(state: GameState): Record<string, string> {
   const pawn = activePawn(state)
-  const foes = state.pawns.filter((unit) => unit.side === 'player')
+  const foes = state.pawns.filter((unit) => unit.side !== pawn?.side)
+  const opposingArmy = pawn?.side === 'player' ? 'ENEMY' : 'PLAYER'
   const king = foes.find((unit) => unit.kind === 'king')
   const nearestFoe = (from: Axial) =>
     foes.length ? Math.min(...foes.map((unit) => hexDist(from, unit))) : null
@@ -75,11 +78,11 @@ export function actionCriteria(state: GameState): Record<string, string> {
       const before = pawn ? nearestFoe(pawn) : null
       const after = nearestFoe(at)
       const notes = [
-        king && `${hexDist(at, king)} steps from the PLAYER king`,
+        king && `${hexDist(at, king)} steps from the ${opposingArmy} king`,
         before !== null && after !== null
           ? after < before
-            ? 'closes on the PLAYER army'
-            : 'backs away from the PLAYER army'
+            ? `closes on the ${opposingArmy} army`
+            : `backs away from the ${opposingArmy} army`
           : null,
         tile?.terrain === 'lava' && 'stands in lava',
         tile?.feature === 'watchtower' && 'gains a watchtower',

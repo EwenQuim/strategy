@@ -43,6 +43,13 @@ export const localPlayers = t({
   es: 'Jugador 1 controla las unidades verdes, Jugador 2 las rojas',
   it: 'Giocatore 1 comanda le unità verdi, Giocatore 2 quelle rosse',
 })
+export const customPlayers = t({
+  en: 'Player 1 is green, Player 2 is red. AI-controlled units act automatically',
+  fr: "Le joueur 1 est vert, le joueur 2 est rouge. Les unités contrôlées par l'IA agissent automatiquement",
+  de: 'Spieler 1 ist grün, Spieler 2 ist rot. KI-gesteuerte Einheiten handeln automatisch',
+  es: 'Jugador 1 es verde, Jugador 2 es rojo. Las unidades controladas por IA actúan automáticamente',
+  it: 'Giocatore 1 è verde, Giocatore 2 è rosso. Le unità controllate dalla IA agiscono automaticamente',
+})
 export const onlinePlayers = t({
   en: 'Only your units answer to you; moves sync every few seconds',
   fr: 'Seules vos unités vous obéissent ; les coups se synchronisent toutes les quelques secondes',

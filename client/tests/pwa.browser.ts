@@ -47,7 +47,113 @@ import { DEFAULT_BOT_CONFIG, getBot } from '../src/bots/catalog.ts'
 import { victoryActions } from './campaign-replays.ts'
 
 const base = '/strategy/'
+test(
+  'Three custom panels configure both controllers and run a spectator battle',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    await page.getByRole('link', { name: 'Custom play', exact: true }).click()
+    const first = page
+      .locator('details')
+      .filter({ has: page.locator('#custom-player-0-controller') })
+    assert.equal(await first.getAttribute('open'), null)
+    assert.equal(await page.locator('#custom-player-1-controller').inputValue(), 'ai')
+    assert.equal(await page.getByRole('region', { name: 'Game configuration' }).count(), 1)
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+      { width: 1280, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport)
+      assert.ok(
+        await page.getByRole('button', { name: 'Start battle' }).evaluate((button) => {
+          const box = button.getBoundingClientRect()
+          return (
+            box.top >= 0 &&
+            box.bottom <= innerHeight &&
+            document.documentElement.scrollWidth <= innerWidth &&
+            document.documentElement.scrollHeight <= innerHeight
+          )
+        }),
+      )
+    }
+    await page.setViewportSize({ width: 320, height: 568 })
+    await first.locator('summary').first().click()
+    await page.locator('#custom-player-0-controller').selectOption('ai')
+    await page.locator('#custom-player-0-strategy').selectOption('random')
+    await page.locator('#custom-player-1-strategy').selectOption('random')
+    await page.getByRole('button', { name: 'Start battle' }).click()
+    await page.waitForURL('**/game/**')
+    assert.deepEqual(JSON.parse(new URL(page.url()).searchParams.get('sideBots')!), {
+      player: { name: 'random', options: {} },
+      enemy: { name: 'random', options: {} },
+    })
+    await page.waitForFunction(() => {
+      const saved = JSON.parse(localStorage.getItem('hexmate.battle') ?? 'null')
+      return saved?.state.round >= 2 || saved?.state.winner
+    })
+    assert.equal(await page.locator('[data-action="endTurn"]:not([disabled])').count(), 0)
+    const snapshot = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('hexmate.battle')!),
+    )
+    const before = snapshot.state.round
+    await page.reload()
+    await page.waitForFunction((round) => {
+      const saved = JSON.parse(localStorage.getItem('hexmate.battle') ?? 'null')
+      return saved?.state.round >= round || saved?.state.winner
+    }, before)
+    assert.equal(await page.locator('[data-action="endTurn"]:not([disabled])').count(), 0)
+    await page.goto(origin + base)
+    assert.equal(await page.getByRole('link', { name: '2 players', exact: true }).count(), 0)
+  },
+)
 const timeout = 10_000
+test(
+  'Custom controllers allow two humans or a human on either side, and validate AI options',
+  { timeout: 60_000 },
+  async (t) => {
+    const { page, origin } = await fixture(t)
+    for (const pairing of [
+      ['human', 'human'],
+      ['human', 'ai'],
+      ['ai', 'human'],
+    ] as const) {
+      await page.goto(origin + base + 'custom')
+      await page.locator('summary').filter({ hasText: 'Player 1' }).click()
+      await page.locator('#custom-player-0-controller').selectOption(pairing[0])
+      await page.locator('#custom-player-1-controller').selectOption(pairing[1])
+      for (const side of [0, 1] as const) {
+        if (pairing[side] === 'ai')
+          await page.locator('#custom-player-' + side + '-strategy').selectOption('random')
+      }
+      await page.getByRole('button', { name: 'Start battle' }).click()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      const sides = JSON.parse(new URL(page.url()).searchParams.get('sideBots')!)
+      assert.equal(sides.player === null, pairing[0] === 'human')
+      assert.equal(sides.enemy === null, pairing[1] === 'human')
+      const saved = await page.evaluate(() =>
+        JSON.parse(localStorage.getItem('hexmate.battle')!),
+      )
+      const active = saved.state.pawns.find(
+        (pawn: { id: number }) => pawn.id === saved.state.order[saved.state.active],
+      )
+      assert.equal(sides[active.side], null)
+    }
+    await page.goto(origin + base + 'custom')
+    await page.getByText('AI options', { exact: true }).click()
+    await page.getByLabel('Candidates', { exact: true }).fill('0')
+    assert.ok(await page.getByRole('button', { name: 'Start battle' }).isDisabled())
+    assert.ok(await page.getByRole('alert').isVisible())
+    await page.getByLabel('Candidates', { exact: true }).fill('3')
+    assert.ok(await page.getByRole('button', { name: 'Start battle' }).isEnabled())
+    await page.getByRole('button', { name: 'Start battle' }).click()
+    await page.waitForURL('**/game/**')
+    assert.equal(
+      JSON.parse(new URL(page.url()).searchParams.get('sideBots')!).enemy.options.candidates,
+      3,
+    )
+  },
+)
 const polling = { polling: 100, timeout }
 const versionPattern = /const VERSION\s*=\s*("[^"]+");/
 const assetsPattern = /const ASSETS\s*=\s*(\[[\s\S]*?\]);/

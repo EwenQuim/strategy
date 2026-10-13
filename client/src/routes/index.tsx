@@ -65,21 +65,11 @@ export const Route = createFileRoute('/')({
               title={m.quickPlayHint}
             >
               {common.quickPlay}
-              <Icon name="arrow" />
+              <Icon name="energy" />
             </Link>
             <Link to="/custom" className={homeButtonClassName} preload={false}>
               {common.customPlay}
               <Icon name="hex" />
-            </Link>
-            <Link
-              to="/game"
-              search={{ mode: 'local' }}
-              className={homeButtonClassName}
-              preload={false}
-              title={m.twoPlayersHint}
-            >
-              {m.twoPlayers}
-              <Icon name="arrow" />
             </Link>
             <Link
               to="/online"
@@ -94,7 +84,9 @@ export const Route = createFileRoute('/')({
               title={online ? m.onlineHint : m.serverDown}
             >
               {m.online}
-              <Icon name="arrow" />
+              <span aria-hidden="true" className="text-xs font-bold tracking-wider">
+                VS
+              </span>
             </Link>
           </div>
           <div className="mt-3 flex w-full max-w-[360px] shrink-0 gap-3">
