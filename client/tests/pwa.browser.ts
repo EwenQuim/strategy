@@ -2491,6 +2491,15 @@ test(
           const chips = page.locator('[data-fallen="true"]')
           await chips.first().waitFor()
           assert.equal(await chips.count(), fallen.length)
+          const feedback = page.getByTestId('combat-feedback')
+          const [killVariant, flashName, sweepName] = await feedback.evaluate((element) => [
+            element.className.includes('combat-feedback--kill'),
+            getComputedStyle(element, '::before').animationName,
+            getComputedStyle(element, '::after').animationName,
+          ])
+          assert.ok(killVariant)
+          assert.equal(flashName, 'kill-flash')
+          assert.equal(sweepName, 'feedback-sweep')
           const messages = page.getByTestId('killed-message')
           assert.deepEqual(
             await messages.allTextContents(),
@@ -2499,7 +2508,7 @@ test(
           assert.ok(
             await messages.evaluateAll((elements) =>
               elements.every(
-                (element) => getComputedStyle(element).animationName === 'damage-pop',
+                (element) => getComputedStyle(element).animationName === 'label-drift',
               ),
             ),
           )

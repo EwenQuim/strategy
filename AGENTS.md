@@ -6,6 +6,10 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 
 Every feature must make the game fun and strategic, never static or boring. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
 
+## Pull requests
+
+Each PR aims for the smallest diff that still delivers its behavior; before opening one, cut everything the feature does not need. When a feature would add a lot of lines, ask whether it is really needed before building it. When a change starts stacking patches on patches, refactor the existing code instead of adding another layer.
+
 ## Constraints
 
 - Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.

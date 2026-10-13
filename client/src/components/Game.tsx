@@ -16,6 +16,7 @@ import {
 } from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
 import { Battlefield } from './Battlefield'
+import { CombatFeedback } from './CombatFeedback'
 import { GameHeader } from './GameHeader'
 import { AchievementToast } from './AchievementToast'
 import { UnitUnlockToast } from './UnitUnlockToast'
@@ -161,6 +162,8 @@ export function Game({
     !!pawn && !!bots[pawn.side],
   )
   const opponentActive = !!pawn && !state.winner && !viewerTurn
+  // A frame still shows the pawns that die on it, so a kill is detectable from the state alone.
+  const killed = state.pawns.some((unit) => unit.hp <= 0)
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
   const canCommand = viewerTurn && !state.winner && !paused && !playing
@@ -206,18 +209,8 @@ export function Game({
       data-biome={state.biome}
       style={BIOMES[state.biome].theme}
     >
-      {!!effect?.impacts?.length && (
-        <div
-          key={effectId}
-          data-testid="combat-feedback"
-          className={
-            'pointer-events-none fixed inset-0 z-4 overflow-hidden before:absolute before:inset-0 motion-reduce:hidden ' +
-            (effect.impacts.some((hit) => hit.damage > 0)
-              ? 'combat-feedback--hit before:bg-[radial-gradient(ellipse,transparent_45%,#ffc07966)]'
-              : 'combat-feedback--miss before:bg-[linear-gradient(110deg,transparent_35%,#bce6f433_50%,transparent_65%)]')
-          }
-          aria-hidden="true"
-        />
+      {(killed || !!effect?.impacts?.length) && (
+        <CombatFeedback key={effectId} killed={killed} effect={effect} />
       )}
       <GameHeader
         biome={state.biome}

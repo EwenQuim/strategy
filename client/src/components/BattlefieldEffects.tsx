@@ -114,7 +114,7 @@ export function BattlefieldEffects({
                     'combat-impact-label fill-current stroke-[#14271f] stroke-[5] font-black [paint-order:stroke] ' +
                     (hit.damage > 0
                       ? 'text-[32px]'
-                      : 'combat-impact-label--miss text-[24px] italic')
+                      : 'combat-impact-label--drift text-[24px] italic')
                   }
                 >
                   {hit.damage > 0 ? '-' + hit.damage : 'MISS'}

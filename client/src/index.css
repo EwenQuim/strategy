@@ -75,8 +75,12 @@
   .combat-feedback--hit::before {
     animation: hit-flash 700ms ease-out both;
   }
+  .combat-feedback--kill::before {
+    animation: kill-flash 850ms ease-out both;
+  }
+  .combat-feedback--kill::after,
   .combat-feedback--miss::before {
-    animation: miss-sweep 700ms ease-out both;
+    animation: feedback-sweep 700ms ease-out both;
   }
   .combat-impact-burst {
     animation: impact-burst 450ms ease-out both;
@@ -84,8 +88,8 @@
   .combat-impact-label {
     animation: damage-pop 700ms ease-out both;
   }
-  .combat-impact-label--miss {
-    animation-name: miss-drift;
+  .combat-impact-label--drift {
+    animation-name: label-drift;
   }
   .support-halo-rise {
     animation: support-halo-rise 700ms ease-out both;
@@ -180,7 +184,18 @@
   }
 }
 
-@keyframes miss-sweep {
+@keyframes kill-flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  55% {
+    opacity: 1;
+  }
+}
+
+@keyframes feedback-sweep {
   from {
     transform: translateX(-100%);
     opacity: 0;
@@ -223,7 +238,7 @@
   }
 }
 
-@keyframes miss-drift {
+@keyframes label-drift {
   0% {
     transform: translate(-8px, 4px);
     opacity: 0;
