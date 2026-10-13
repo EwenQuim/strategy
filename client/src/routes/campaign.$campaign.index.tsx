@@ -22,7 +22,7 @@ import {
 import { readDeveloperPreview } from '../preferences'
 
 const levelCardClassName =
-  'relative flex h-full min-h-11 flex-col gap-1 overflow-hidden rounded-xl border border-line bg-(--biome-background) p-1.5 min-[900px]:gap-2 min-[900px]:p-3 [@media(max-height:650px)]:gap-1 [@media(max-height:650px)]:p-1.5 text-center text-[11px] leading-snug text-ink wrap-anywhere shadow-[0_6px_16px_#0002] data-[status=completed]:border-[#89bba4] data-[status=ready]:border-gold/60 disabled:text-muted disabled:opacity-100 [&:disabled>svg]:opacity-35 [&:not(:disabled):hover]:brightness-115'
+  'relative flex h-full min-h-11 flex-col gap-1 overflow-hidden rounded-xl border border-line bg-(--biome-background) p-1.5 min-[900px]:gap-2 min-[900px]:p-3 [@media(max-height:650px)]:gap-1 [@media(max-height:650px)]:p-1.5 text-center text-[11px] leading-snug text-ink wrap-anywhere shadow-[0_6px_16px_#0002] data-[status=completed]:border-campaign-complete data-[status=ready]:border-gold/60 disabled:text-muted disabled:opacity-100 [&:disabled>svg]:opacity-35 [&:not(:disabled):hover]:brightness-115'
 
 export const Route = createFileRoute('/campaign/$campaign/')({
   beforeLoad: ({ params }) => {
@@ -80,7 +80,7 @@ export const Route = createFileRoute('/campaign/$campaign/')({
                     name={cleared ? 'check' : unlocked ? 'arrow' : 'lock'}
                     className={
                       'size-3 min-[900px]:size-4 shrink-0 ' +
-                      (cleared ? 'text-[#89bba4]' : 'text-muted')
+                      (cleared ? 'text-campaign-complete' : 'text-muted')
                     }
                   />
                 </span>

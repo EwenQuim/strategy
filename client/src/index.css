@@ -5,9 +5,26 @@
   --color-muted: var(--muted);
   --color-gold: var(--gold);
   --color-line: var(--line);
+  --color-page: var(--page);
+  --color-menu: var(--menu);
+  --color-control: var(--control);
+  --color-control-hover: var(--control-hover);
+  --color-icon-hover: var(--icon-hover);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-recessed: var(--recessed);
+  --color-recessed-soft: var(--recessed-soft);
+  --color-scrim: var(--scrim);
+  --color-card-start: var(--card-start);
+  --color-card-end: var(--card-end);
+  --color-switch-knob: var(--switch-knob);
+  --color-campaign-complete: var(--campaign-complete);
 }
 
 @theme {
+  --shadow-control: 0 6px 24px #07180f30;
+  --shadow-control-hover: 0 8px 30px #07180f50;
+  --shadow-menu-card: 0 8px 24px #0002;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-serif: Georgia, serif;
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
@@ -16,8 +33,8 @@
 @layer base {
   :root {
     font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
-    color: #eee9d7;
-    background: #14271f;
+    color: var(--ink);
+    background: var(--page);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -25,6 +42,20 @@
     --muted: #a4af99;
     --gold: #dcc48a;
     --line: #c4d1a51c;
+    --page: #14271f;
+    --menu: #101f1b;
+    --control: #ffffff04;
+    --control-hover: #ffffff0c;
+    --icon-hover: #ffffff09;
+    --surface: rgb(255 255 255 / 5%);
+    --surface-raised: rgb(255 255 255 / 10%);
+    --recessed: rgb(0 0 0 / 20%);
+    --recessed-soft: rgb(0 0 0 / 15%);
+    --scrim: #000;
+    --card-start: rgb(255 255 255 / 7%);
+    --card-end: rgb(255 255 255 / 2%);
+    --switch-knob: #172a21;
+    --campaign-complete: #89bba4;
   }
 
   body {

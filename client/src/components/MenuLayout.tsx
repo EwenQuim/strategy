@@ -20,7 +20,7 @@ export function MenuLayout({
 }) {
   const widthClassName = wide ? 'max-w-[1100px]' : 'max-w-[640px]'
   return (
-    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-[#101f1b] text-ink">
+    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-menu text-ink">
       <MenuBackground />
       <header
         className={
@@ -38,7 +38,7 @@ export function MenuLayout({
                 ? common.backToLobby
                 : common.backToHome
           }
-          className="grid size-11 shrink-0 place-items-center rounded-2xl border border-line bg-white/5 text-gold hover:bg-white/10"
+          className="grid size-11 shrink-0 place-items-center rounded-2xl border border-line bg-surface text-gold hover:bg-surface-raised"
         >
           <Icon name="arrow" className="size-5 rotate-180" />
         </Link>

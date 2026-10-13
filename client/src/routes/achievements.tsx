@@ -21,7 +21,7 @@ export const Route = createFileRoute('/achievements')({
               {m.unlockedCount(unlocked.length, ACHIEVEMENTS.length)}
             </p>
             <div
-              className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/20"
+              className="mt-2 h-1.5 overflow-hidden rounded-full bg-recessed"
               aria-hidden="true"
             >
               <div
@@ -46,7 +46,7 @@ export const Route = createFileRoute('/achievements')({
                 aria-label={earned ? title : title + ', ' + m.locked}
               >
                 <span
-                  className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/5 text-[24px] data-[earned=false]:grayscale"
+                  className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface text-[24px] data-[earned=false]:grayscale"
                   data-earned={earned}
                   aria-hidden="true"
                 >

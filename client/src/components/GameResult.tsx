@@ -45,7 +45,7 @@ export function GameResult({
 
   return (
     <div
-      className="battle-result-enter group/result absolute inset-0 isolate grid place-items-center overflow-hidden bg-black/55 p-4 backdrop-blur-[3px] motion-reduce:animate-none"
+      className="battle-result-enter group/result absolute inset-0 isolate grid place-items-center overflow-hidden bg-scrim/55 p-4 backdrop-blur-[3px] motion-reduce:animate-none"
       data-testid="battle-result"
       data-outcome={outcome}
       role="status"
