@@ -1,4 +1,4 @@
-import { plural, t } from './locale'
+import { t } from './locale'
 
 export const battlefield = t({
   en: 'The battlefield',
@@ -145,15 +145,14 @@ export const orChooseEnemy = t({
 })
 export const energyCost = t({
   en: (cost: number) => `${cost} energy`,
-  fr: (cost: number) => `${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}`,
+  fr: (cost: number) => `${cost} d’énergie`,
   de: (cost: number) => `${cost} Energie`,
   es: (cost: number) => `${cost} de energía`,
   it: (cost: number) => `${cost} di energia`,
 })
 export const notEnoughEnergy = t({
   en: (cost: number) => `Needs ${cost} energy`,
-  fr: (cost: number) =>
-    `Il faut ${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}`,
+  fr: (cost: number) => `Il faut ${cost} d’énergie`,
   de: (cost: number) => `${cost} Energie nötig`,
   es: (cost: number) => `Necesita ${cost} de energía`,
   it: (cost: number) => `Richiede ${cost} energia`,
@@ -195,8 +194,7 @@ export const endTurnHint = t({
 })
 export const remainingEnergy = t({
   en: (count: number) => `${count} energy left`,
-  fr: (count: number) =>
-    `${count} ${plural(count, { one: 'énergie restante', other: 'énergies restantes' })}`,
+  fr: (count: number) => `${count} d’énergie restante`,
   de: (count: number) => `${count} Energie übrig`,
   es: (count: number) => `${count} de energía restante`,
   it: (count: number) => `${count} energia rimasta`,

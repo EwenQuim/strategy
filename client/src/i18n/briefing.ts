@@ -172,7 +172,7 @@ export const palmsDecorative = t({
 })
 export const lavaDamage = t({
   en: '-1 HP per tile entered, even on Charge',
-  fr: '-1 PV par case entrée, même en Charge',
+  fr: '-1 PV par case de lave parcourue, même en Charge',
   de: '-1 LP pro betretenem Feld, auch beim Sturmangriff',
   es: '-1 PV por casilla pisada, incluso con Carga',
   it: '-1 PV per casella calpestata, anche in Carica',
@@ -207,7 +207,7 @@ export const springStay = t({
 })
 export const runeEnergy = t({
   en: 'First unit in: +2 energy this round',
-  fr: 'Première unité dessus : +2 énergies cette manche',
+  fr: 'Première unité dessus : +2 d’énergie cette manche',
   de: 'Erste Einheit darauf: +2 Energie in dieser Runde',
   es: 'Primera unidad encima: +2 de energía esta ronda',
   it: 'Prima unità sopra: +2 energia in questo round',
@@ -229,7 +229,7 @@ export const hellfireDamage = t({
 export const bothKingsDraw = t({
   en: 'Both kings down = draw',
   fr: 'Les deux rois tombés = match nul',
-  de: 'Beide Könige down = Unentschieden',
+  de: 'Beide Könige gefallen = Unentschieden',
   es: 'Ambos reyes caídos = empate',
   it: 'Entrambi i re a terra = pareggio',
 })

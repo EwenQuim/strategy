@@ -3,18 +3,18 @@ import type { SpecialTextKey } from '../lib/engine/index.ts'
 
 export const specialTexts: Record<SpecialTextKey, string> = {
   rally: t({
-    en: 'Rallying Blow',
-    fr: 'Frappe ralliée',
-    de: 'Sammelschlag',
-    es: 'Golpe de ánimo',
-    it: 'Colpo di raduno',
+    en: 'Exalting Assault',
+    fr: 'Assaut exaltant',
+    de: 'Begeisternder Angriff',
+    es: 'Asalto exaltante',
+    it: 'Assalto esaltante',
   }),
   rallyDescription: t({
     en: 'When you strike an enemy, every adjacent ally is healed for 1. Cannot heal yourself.',
-    fr: 'Quand vous frappez un ennemi, chaque allié adjacent est soigné de 1. Ne peut pas se soigner.',
-    de: 'Wenn du einen Gegner triffst, wird jeder angrenzende Verbündete um 1 geheilt. Keine Selbstheilung.',
+    fr: 'Quand vous frappez un ennemi, chaque allié adjacent est soigné de 1. Impossible de se soigner soi-même.',
+    de: 'Wenn du einen Gegner triffst, wird jeder angrenzende Verbündete um 1 geheilt. Kann sich nicht selbst heilen.',
     es: 'Cuando golpeas a un enemigo, cada aliado adyacente se cura 1. No puedes curarte.',
-    it: 'Quando colpisci un nemico, ogni alleato adiacente viene curato di 1. Nessuna autocura.',
+    it: 'Quando colpisci un nemico, ogni alleato adiacente viene curato di 1. Non può curare se stesso.',
   }),
   noAlliesToHeal: t({
     en: 'No allies to heal',
@@ -130,7 +130,7 @@ export const specialTexts: Record<SpecialTextKey, string> = {
   }),
   bombDescription: t({
     en: 'Hits every unit on a tile within 2 and its six neighbors.',
-    fr: 'Frappe toutes les unités sur une case à 2 ou moins et ses six voisines.',
+    fr: 'Frappe toutes les unités sur une case à distance 2 ou moins et ses six voisines.',
     de: 'Trifft jede Einheit auf einem Feld innerhalb von 2 und dessen sechs Nachbarn.',
     es: 'Golpea a toda unidad en una casilla a 2 o menos y en sus seis vecinas.',
     it: 'Colpisce ogni unità su una casella entro 2 e sulle sue sei vicine.',
@@ -172,7 +172,7 @@ export const specialTexts: Record<SpecialTextKey, string> = {
   }),
   jumpDescription: t({
     en: 'Jump up to 3 tiles over anything, striking an adjacent enemy for 3 if present. You may stay in place. Land on empty ground.',
-    fr: 'Sautez jusqu’à 3 cases par-dessus tout, frappant un ennemi adjacent pour 3 si présent. Vous pouvez rester sur place. Atterrissez sur un sol libre.',
+    fr: 'Sautez jusqu’à 3 cases par-dessus tout, frappant un ennemi adjacent pour 3 si présent. Vous pouvez rester sur place. Atterrissez sur une case libre.',
     de: 'Springe bis zu 3 Felder über alles, triff einen angrenzenden Gegner für 3 Schaden falls vorhanden. Stehenbleiben ist erlaubt. Landung auf freiem Boden.',
     es: 'Salta hasta 3 casillas por encima de todo, golpeando a un enemigo adyacente por 3 si está presente. Puedes quedarte. Aterriza en suelo libre.',
     it: 'Salta fino a 3 caselle sopra ogni cosa, colpendo un nemico adiacente per 3 danni se presente. Puoi restare. Atterra su terreno libero.',
@@ -207,7 +207,7 @@ export const specialTexts: Record<SpecialTextKey, string> = {
   }),
   cryDescription: t({
     en: 'Bite an adjacent enemy and give every adjacent ally +1 energy this round. Does not restore abilities or completed turns.',
-    fr: 'Mordez un ennemi adjacent et donnez +1 énergie pour ce round à chaque allié adjacent. Ne rétablit ni les capacités ni les tours terminés.',
+    fr: 'Mordez un ennemi adjacent et donnez +1 énergie pour cette manche à chaque allié adjacent. Ne rétablit ni les capacités ni les tours terminés.',
     de: 'Beiße einen angrenzenden Gegner und gib jedem angrenzenden Verbündeten diese Runde +1 Energie. Erneuert keine Fähigkeiten oder beendeten Züge.',
     es: 'Muerde a un enemigo adyacente y da +1 energía esta ronda a cada aliado adyacente. No restaura habilidades ni turnos terminados.',
     it: 'Mordi un nemico adiacente e dai +1 energia per questo round a ogni alleato adiacente. Non ripristina abilità né turni conclusi.',
@@ -221,7 +221,7 @@ export const specialTexts: Record<SpecialTextKey, string> = {
   }),
   furyDescription: t({
     en: 'Spend all your energy to strike an adjacent enemy, harder for each energy spent. No energy remains to retreat.',
-    fr: 'Dépensez toute votre énergie pour frapper un ennemi adjacent, plus fort pour chaque énergie dépensée. Il ne reste rien pour reculer.',
+    fr: 'Dépensez toute votre énergie pour frapper un ennemi adjacent, plus fort pour chaque énergie dépensée. Il ne reste plus d’énergie pour reculer.',
     de: 'Gib deine gesamte Energie aus, um einen angrenzenden Gegner zu treffen, härter für jede ausgegebene Energie. Keine Energie bleibt zum Rückzug.',
     es: 'Gasta toda tu energía para golpear a un enemigo adyacente, más fuerte por cada energía gastada. No queda energía para retirarte.',
     it: 'Spendi tutta la tua energia per colpire un nemico adiacente, più forte per ogni energia spesa. Non resta energia per ritirarti.',
@@ -235,7 +235,7 @@ export const specialTexts: Record<SpecialTextKey, string> = {
   }),
   dashDescription: t({
     en: 'Select an enemy on a clear hex line to stop beside it and strike, or an empty tile to sprint there. Adjacent enemies can be struck without moving. Terrain, gaps and units block movement.',
-    fr: 'Choisissez un ennemi sur une ligne libre pour vous arrêter devant lui et frapper, ou une case vide pour y foncer. Frappe possible sans bouger sur un ennemi adjacent. Terrain, trous et unités bloquent le mouvement.',
+    fr: 'Choisissez un ennemi sur une ligne dégagée pour vous arrêter devant lui et frapper, ou une case vide pour y foncer. Un ennemi adjacent peut être frappé sans bouger. Terrain, trous et unités bloquent le mouvement.',
     de: 'Wähle einen Gegner auf einer freien Hexlinie, um neben ihm anzuhalten und zu treffen, oder ein freies Feld zum Sprinten. Angrenzende Gegner sind ohne Bewegung angreifbar. Gelände, Lücken und Einheiten blockieren.',
     es: 'Elige un enemigo en línea libre para detenerte a su lado y golpear, o una casilla vacía para correr allí. Puedes golpear enemigos adyacentes sin moverte. Terreno, huecos y unidades bloquean.',
     it: 'Scegli un nemico su una linea libera per fermarti accanto e colpire, o una casella vuota per scattare lì. Puoi colpire nemici adiacenti senza muoverti. Terreno, vuoti e unità bloccano.',
@@ -249,7 +249,7 @@ export const specialTexts: Record<SpecialTextKey, string> = {
   }),
   noOpenLine: t({
     en: 'No open line',
-    fr: 'Aucune ligne libre',
+    fr: 'Aucune ligne dégagée',
     de: 'Keine freie Linie',
     es: 'Ninguna línea libre',
     it: 'Nessuna linea libera',

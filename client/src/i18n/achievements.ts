@@ -162,7 +162,7 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     daredevil: {
       title: 'Casse-cou',
       description:
-        "Gagner pendant que votre roi est dans une zone de souffle du feu de l'enfer.",
+        "Gagner pendant que votre roi est dans une zone de flammes du feu de l'enfer.",
     },
   },
   de: {
@@ -228,7 +228,7 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       description: 'Gewinne, nachdem du eine deiner Einheiten in Lava laufen lassen hast.',
     },
     smite: {
-      title: 'Die Götter haben verfehlt',
+      title: 'Die Götter haben danebengegriffen',
       description: 'Gewinne, nachdem Höllenfeuer eine deiner Einheiten verzehrt hat.',
     },
     divineAssist: {
@@ -273,7 +273,7 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Fiesta de uno',
       description: 'Gana con tu rey como único superviviente.',
     },
-    thread: { title: 'Pendiendo de un hilo', description: 'Gana con tu rey a 1 de vida.' },
+    thread: { title: 'Pendiente de un hilo', description: 'Gana con tu rey a 1 de vida.' },
     glassCannon: {
       title: 'Cañón de cristal',
       description: 'Mata a 3 enemigos con el mismo ninja y gana.',
@@ -325,7 +325,7 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     },
     daredevil: {
       title: 'Temerario',
-      description: 'Gana mientras tu rey está en la zona de ráfaga del fuego infernal.',
+      description: 'Gana mientras tu rey está en la zona de llamarada del fuego infernal.',
     },
   },
   it: {
