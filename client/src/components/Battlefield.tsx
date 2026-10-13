@@ -4,7 +4,9 @@ import type { TileChoice, Targeting } from '../lib/tileChoices'
 import {
   key,
   walkingPaths,
+  protectorFor,
   inHellfire,
+  pawnAt,
   sameHex,
   type Axial,
   type BattleEffect,
@@ -71,20 +73,6 @@ export function Battlefield({
   const viewBox = [minX, minY, Math.max(...xs) - minX + pad, Math.max(...ys) - minY + pad].join(
     ' ',
   )
-
-  // These indexes answer every per-tile lookup below in one pass over the army.
-  const occupants = new Map<string, Pawn>()
-  const byId = new Map<number, Pawn>()
-  for (const pawn of pawns) {
-    occupants.set(key(pawn.q, pawn.r), pawn)
-    byId.set(pawn.id, pawn)
-  }
-  const protectors = new Map<number, Pawn>()
-  for (const protector of pawns) {
-    const ally = protector.protectingId === null ? undefined : byId.get(protector.protectingId)
-    if (ally && ally.side === protector.side && ally.id !== protector.id)
-      protectors.set(ally.id, protector)
-  }
 
   // Taps bubble up from the tiles to here, so tiles carry no callbacks and
   // unchanged ones skip rendering entirely. The role attribute mirrors each
@@ -175,7 +163,7 @@ export function Battlefield({
         </g>
         {allTiles.map((tile) => {
           const tileKey = key(tile.q, tile.r)
-          const occupant = occupants.get(tileKey)
+          const occupant = pawnAt(pawns, tile)
           const target = targets.has(tileKey)
           const strike = targets.get(tileKey)?.kind === 'attack'
           const cost = reach.get(tileKey)
@@ -184,7 +172,7 @@ export function Battlefield({
               key={tileKey}
               tile={tile}
               occupant={occupant}
-              protector={occupant && protectors.get(occupant.id)}
+              protector={occupant && protectorFor(pawns, occupant)}
               active={active}
               cost={cost}
               damage={
@@ -222,7 +210,7 @@ export function Battlefield({
             pawn={pawn}
             feature={tiles.get(key(pawn.q, pawn.r))?.feature}
             active={active?.id === pawn.id}
-            protectedAlly={protectors.has(pawn.id)}
+            protectedAlly={!!protectorFor(pawns, pawn)}
             topRow={hexY(pawn.r) === minY + pad}
           />
         ))}
