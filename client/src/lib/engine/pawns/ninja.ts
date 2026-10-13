@@ -1,11 +1,10 @@
 import {
+  advanceAndStrike,
   attackTargets,
   canUseSpecial,
-  enterTiles,
   landingThreatenedTiles,
   pawnAt,
   specialTargets,
-  strike,
 } from '../combat.ts'
 import type { Action } from '../engine.ts'
 import { hexDist, key, passable, sameHex } from '../hex.ts'
@@ -13,7 +12,7 @@ import type { Tile } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
-function jumpLandings(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
+export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
   if (!canUseSpecial(pawn)) return []
   const occupied = new Set(pawns.map((p) => key(p.q, p.r)))
   return [...tiles.values()].filter(
@@ -22,10 +21,6 @@ function jumpLandings(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile
       (!occupied.has(key(tile.q, tile.r)) || hexDist(pawn, tile) === 0) &&
       hexDist(pawn, tile) <= 3,
   )
-}
-
-export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
-  return jumpLandings(tiles, pawns, pawn)
 }
 
 const jump: SpecialAbility = {
@@ -43,7 +38,7 @@ const jump: SpecialAbility = {
   targets: attackTargets,
   threatenedTiles: landingThreatenedTiles,
   candidates: (pawn, { tiles, pawns }) =>
-    jumpLandings(tiles, pawns, pawn).flatMap((destination) => {
+    jumpDestinations(tiles, pawns, pawn).flatMap((destination) => {
       const attacks = attackTargets(pawn, pawns, destination).map((target): Action => ({
         type: 'special',
         target: { q: target.q, r: target.r },
@@ -66,32 +61,25 @@ const jump: SpecialAbility = {
       : 0
   },
   tileTargets: (pawn, tiles, pawns) =>
-    new Set(jumpLandings(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
+    new Set(jumpDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
+  perform: (context) => {
+    const { pawn, tiles, pawns, tile, destination } = context
     const target = tile && pawnAt(pawns, tile)
 
     if (
       !destination ||
-      !jumpLandings(tiles, pawns, pawn).some((land) => sameHex(land, destination))
-    ) {
+      !jumpDestinations(tiles, pawns, pawn).some((land) => sameHex(land, destination)) ||
+      (tile && (!target || !specialTargets(pawns, pawn, destination).includes(target)))
+    )
       return null
-    }
-
-    if (tile && (!target || !specialTargets(pawns, pawn, destination).includes(target))) {
-      return null
-    }
-
-    pawn.energy -= pawn.special.cost
     const path =
       hexDist(pawn, destination) === 0 ? [] : [tiles.get(key(destination.q, destination.r))!]
-    const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
-
-    if (target && pawn.hp > 0) {
-      impacts.push(strike(pawns, pawn, target, pawn.attack, log))
-      return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
+    const impacts = advanceAndStrike(context, path, target)
+    return {
+      kind: target && pawn.hp > 0 ? 'attack' : 'move',
+      to: target && pawn.hp > 0 ? { q: target.q, r: target.r } : destination,
+      ...(impacts.length ? { impacts } : {}),
     }
-
-    return { kind: 'move', to: destination, ...(impacts.length ? { impacts } : {}) }
   },
 }
 

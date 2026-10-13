@@ -1,6 +1,7 @@
 import { hexDist, key, neighborKeys, passable, sameHex, type Axial, type Tile } from './hex.ts'
 import type { AttackProfile, Pawn, Side, ThreatPosition } from './pawns/index.ts'
 import type { Action } from './engine.ts'
+import type { SpecialAbility } from './pawns/pawn.ts'
 
 export type BattleImpact = Axial & { damage: number }
 
@@ -102,6 +103,17 @@ export function movementDestinations(
       pawn.moveEnergyCost(route.steps),
     ]),
   )
+}
+
+export function advanceAndStrike(
+  { pawn, tiles, pawns, round, log }: Parameters<SpecialAbility['perform']>[0],
+  path: Tile[],
+  target?: Pawn,
+): BattleImpact[] {
+  pawn.energy -= pawn.special.cost
+  const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
+  if (pawn.hp > 0 && target) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
+  return impacts
 }
 
 export function protectorFor(pawns: Pawn[], target: Pawn): Pawn | undefined {

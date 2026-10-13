@@ -1,4 +1,4 @@
-import { aimAt, canUseSpecial, enterTiles, pawnAt, strike } from '../combat.ts'
+import { advanceAndStrike, aimAt, canUseSpecial, pawnAt } from '../combat.ts'
 import { hexDist, key, passable, sameHex, type Axial, type Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -103,7 +103,8 @@ const dash: SpecialAbility = {
       ? pawn.attack.damage
       : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, round, log }) => {
+  perform: (context) => {
+    const { pawn, tiles, pawns, tile } = context
     const target = tile && pawnAt(pawns, tile)
     const sprint =
       tile &&
@@ -111,10 +112,7 @@ const dash: SpecialAbility = {
         target ? entry.target === target : sameHex(entry.tile, tile),
       )
     if (!sprint) return null
-    pawn.energy -= pawn.special.cost
-    const impacts = enterTiles(tiles, pawns, pawn, sprint.path, round, log)
-    if (pawn.hp > 0 && sprint.target)
-      impacts.push(strike(pawns, pawn, sprint.target, pawn.attack, log))
+    const impacts = advanceAndStrike(context, sprint.path, sprint.target)
     return {
       kind: sprint.target ? 'attack' : 'move',
       to: sprint.target ?? sprint.tile,
