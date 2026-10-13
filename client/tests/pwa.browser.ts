@@ -1978,7 +1978,12 @@ test(
       if (kind === 'lava') {
         const fallen = page.locator('[data-fallen="true"]')
         await fallen.waitFor()
-        assert.equal(await page.getByTestId('killed-message').count(), 0)
+        const message = page.getByTestId('killed-message')
+        assert.equal(await message.textContent(), 'Killed')
+        assert.equal(
+          await message.evaluate((element) => getComputedStyle(element).animationName),
+          'none',
+        )
         assert.equal(
           await fallen.evaluate((element) => getComputedStyle(element).animationName),
           'none',
@@ -2503,6 +2508,18 @@ test(
               (element) => getComputedStyle(element, '::after').animationName,
             ),
             'feedback-sweep',
+          )
+          const messages = page.getByTestId('killed-message')
+          assert.deepEqual(
+            await messages.allTextContents(),
+            fallen.map(() => 'Killed'),
+          )
+          assert.ok(
+            await messages.evaluateAll((elements) =>
+              elements.every(
+                (element) => getComputedStyle(element).animationName === 'label-drift',
+              ),
+            ),
           )
           assert.ok(
             await chips.evaluateAll((elements) =>

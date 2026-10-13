@@ -90,8 +90,8 @@
   .combat-impact-label {
     animation: damage-pop 700ms ease-out both;
   }
-  .combat-impact-label--miss {
-    animation-name: miss-drift;
+  .combat-impact-label--drift {
+    animation-name: label-drift;
   }
   .support-halo-rise {
     animation: support-halo-rise 700ms ease-out both;
@@ -240,7 +240,7 @@
   }
 }
 
-@keyframes miss-drift {
+@keyframes label-drift {
   0% {
     transform: translate(-8px, 4px);
     opacity: 0;
