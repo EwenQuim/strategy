@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { specialTexts } from '../i18n/specialTexts'
 import type { Targeting, TileChoice } from '../lib/tileChoices'
 import {
@@ -36,9 +35,9 @@ interface TileLayerProps {
 }
 
 // The board itself: the shared defs, the tile bases and the hex tiles, in one
-// stateless svg. Memoized so renders that only touch the pawn layer skip this
-// whole subtree.
-export const TileLayer = memo(function TileLayer({
+// stateless svg. The compiler caches the call site, so renders that only touch
+// the pawn layer skip this whole subtree without memo.
+export function TileLayer({
   viewBox,
   tiles,
   pawns,
@@ -172,4 +171,4 @@ export const TileLayer = memo(function TileLayer({
       })}
     </svg>
   )
-})
+}

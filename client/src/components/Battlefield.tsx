@@ -28,8 +28,8 @@ interface BattlefieldProps {
 }
 
 // Stacks the board from bottom to top: tiles, support halos, then the floating
-// pawn layer. Each svg is its own stateless memoized component, so a render
-// that only changes one layer skips the others entirely.
+// pawn layer. Each svg is its own stateless component, and the compiler caches
+// their call sites, so a render that only changes one layer skips the others.
 export function Battlefield({
   labels,
   tiles,

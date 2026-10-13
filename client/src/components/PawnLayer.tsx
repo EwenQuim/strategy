@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { key, protectorFor, type BattleEffect, type Pawn, type Tile } from '../lib/engine'
 import { BattlefieldEffects } from './BattlefieldEffects'
 import { PawnChip } from './PawnChip'
@@ -15,8 +14,9 @@ interface PawnLayerProps {
 }
 
 // The floating overlay of pawn chips and combat effects, in one stateless svg.
-// Memoized so board-only changes (aiming, inspecting) skip this whole subtree.
-export const PawnLayer = memo(function PawnLayer({
+// The compiler caches the call site, so board-only changes (aiming, inspecting)
+// skip this whole subtree without memo.
+export function PawnLayer({
   viewBox,
   tiles,
   pawns,
@@ -47,4 +47,4 @@ export const PawnLayer = memo(function PawnLayer({
       <BattlefieldEffects effect={effect} effectId={effectId} />
     </svg>
   )
-})
+}
