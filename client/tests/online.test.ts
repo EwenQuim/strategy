@@ -36,7 +36,7 @@ test('Online battles from server seeds are centrally symmetric, live and after r
   let playback = initialPlayback(seed, 'online')
   const actions: OnlineAction[] = []
   for (const tile of playback.state.tiles.values()) {
-    const mirror = mirrorAxial(tile)
+    const mirror = mirrorAxial(tile, playback.state.mapSize)
     const mirrored = playback.state.tiles.get(key(mirror.q, mirror.r))
     assert.ok(mirrored)
     assert.equal(mirrored.terrain, tile.terrain)
@@ -50,7 +50,7 @@ test('Online battles from server seeds are centrally symmetric, live and after r
   }
   const half = playback.state.pawns.length / 2
   for (let i = 0; i < half; i++) {
-    const mirror = mirrorAxial(playback.state.pawns[i])
+    const mirror = mirrorAxial(playback.state.pawns[i], playback.state.mapSize)
     assert.equal(playback.state.pawns[half + i].q, mirror.q)
     assert.equal(playback.state.pawns[half + i].r, mirror.r)
   }
@@ -63,7 +63,7 @@ test('Online battles from server seeds are centrally symmetric, live and after r
     'online',
   )
   for (const tile of resynced.state.tiles.values()) {
-    const mirror = mirrorAxial(tile)
+    const mirror = mirrorAxial(tile, resynced.state.mapSize)
     assert.equal(resynced.state.tiles.get(key(mirror.q, mirror.r))?.terrain, tile.terrain)
   }
 })

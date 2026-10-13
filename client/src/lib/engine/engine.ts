@@ -1,4 +1,4 @@
-import { key, type Axial, type Tile } from './hex.ts'
+import { key, type Axial, type MapSize, type Tile } from './hex.ts'
 import type { Pawn, PawnKind, Side, SpecialResult } from './pawns/index.ts'
 import { prepareBattle, type BattleSetup } from './setup.ts'
 import type { Biome } from './biomes/index.ts'
@@ -42,6 +42,7 @@ export type GameState = {
   biome: Biome
   randomState: number
   tiles: Map<string, Tile>
+  readonly mapSize: MapSize
   hellfire: Axial[]
   pawns: Pawn[]
   order: number[]

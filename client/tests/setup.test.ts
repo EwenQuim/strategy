@@ -9,8 +9,6 @@ import {
   key,
   passable,
   distFrom,
-  MAP_WIDTH,
-  MAP_HEIGHT,
   type BattleSetup,
   type Biome,
   type Pawn,
@@ -47,7 +45,7 @@ test('Authored setups control both army sizes and classes with legal determinist
       assert.deepEqual(setup, before)
       assert.deepEqual(state, initialState(state.seed, JSON.parse(JSON.stringify(setup))))
       assert.equal(state.biome, biome)
-      assert.equal(state.tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      assert.ok(state.tiles.size <= state.mapSize.width * state.mapSize.height)
       assert.equal(state.pawns.length, player + enemy)
       assert.deepEqual(
         state.pawns.map((pawn) => pawn.id).toSorted((a, b) => a - b),
@@ -67,9 +65,11 @@ test('Authored setups control both army sizes and classes with legal determinist
           pawns.map((pawn) => pawn.kind),
           setup[side],
         )
-        const firstRow = side === 'player' ? MAP_HEIGHT - 3 : 0
+        // Spawn zones grow to four rows when carving or maximal armies need room.
+        const zoneHeight = 4
+        const firstRow = side === 'player' ? state.mapSize.height - zoneHeight : 0
         for (const pawn of pawns) {
-          assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
+          assert.ok(pawn.r >= firstRow && pawn.r < firstRow + zoneHeight)
           assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
           assert.equal(pawn.hp, pawn.maxHp)
           assert.equal(pawn.energy, pawn.maxEnergy)
@@ -85,7 +85,7 @@ test('Authored setups control both army sizes and classes with legal determinist
   }
 })
 
-test('Player Bulwarks start on row 10 in seeded games and keep their positions on restart', () => {
+test('Player Bulwarks start on the front row in seeded games and keep their positions on restart', () => {
   const columns = new Set<number>()
   for (const mode of ['ai', 'local'] as const) {
     for (let index = 0; index < 100; index++) {
@@ -94,7 +94,7 @@ test('Player Bulwarks start on row 10 in seeded games and keep their positions o
       for (const pawn of state.pawns.filter(
         (p) => p.side === 'player' && p.kind === 'bulwark',
       )) {
-        assert.equal(pawn.r, 9)
+        assert.equal(pawn.r, state.mapSize.height - 3)
         assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
         columns.add(pawn.q)
       }
@@ -105,7 +105,7 @@ test('Player Bulwarks start on row 10 in seeded games and keep their positions o
   assert.ok(columns.size > 1)
 })
 
-test('Row 10 is reserved for all player Bulwarks before placing the rest of a full army', () => {
+test('The front row is reserved for all player Bulwarks before placing the rest of a full army', () => {
   const setup: BattleSetup = {
     biome: 'desert',
     player: [
@@ -118,7 +118,17 @@ test('Row 10 is reserved for all player Bulwarks before placing the rest of a fu
   const state = initialState('full-bulwark-row', setup)
   const bulwarks = state.pawns.filter((p) => p.kind === 'bulwark')
   assert.equal(bulwarks.length, 8)
-  assert.ok(bulwarks.every((p) => p.r === 9))
+  const frontRow = state.mapSize.height - 3
+  const frontTiles = [...state.tiles.values()].filter((tile) => tile.r === frontRow).length
+  assert.equal(
+    bulwarks.filter((p) => p.r === frontRow).length,
+    Math.min(bulwarks.length, frontTiles),
+  )
+  // Other units only share the front row once every Bulwark sits on it.
+  assert.ok(
+    state.pawns.filter((p) => p.r === frontRow && p.kind !== 'bulwark').length === 0 ||
+      bulwarks.every((p) => p.r === frontRow),
+  )
   assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
   assert.deepEqual(reducer(state, { type: 'restart' }), state)
 })
@@ -146,7 +156,7 @@ test('Setup snapshots survive caller edits, combat changes and restarts without 
 test('Authored encounters replay and restart identically through AI and local playback', async () => {
   const bot = createBotGame()
   const openingSides = new Set<string>()
-  for (let index = 0; index < 10; index++) {
+  for (let index = 0; index < 40; index++) {
     const seed = 'campaign-' + index
     const core = initialState(seed, encounter)
     openingSides.add(activePawn(core)!.side)

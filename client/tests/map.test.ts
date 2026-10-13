@@ -59,12 +59,16 @@ function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][
 }
 
 test('Each biome has deterministic, connected terrain and the intended obstacle shapes', () => {
+  const size = { width: MAP_WIDTH, height: MAP_HEIGHT }
   for (const biome of Object.keys(BIOMES) as Biome[]) {
     for (let index = 0; index < 100; index++) {
       const seed = 'review-' + index
-      const tiles = makeMap(new SeededRandom(seedState(seed)), biome)
-      assert.deepEqual(tiles, makeMap(new SeededRandom(seedState(seed)), biome))
-      assert.equal(tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      const tiles = makeMap(new SeededRandom(seedState(seed)), biome, [], false, size)
+      assert.deepEqual(
+        tiles,
+        makeMap(new SeededRandom(seedState(seed)), biome, [], false, size),
+      )
+      assert.ok(tiles.size <= MAP_WIDTH * MAP_HEIGHT)
       const land = [...tiles.values()].filter(passable)
       assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
       const { features } = BIOMES[biome]
@@ -114,15 +118,19 @@ test('Seeded games cover random biomes without Hell, broken shapes or isolated s
 })
 
 test('Symmetric seeds generate mirrored, connected battlefields with authored obstacle shapes', () => {
+  const size = { width: MAP_WIDTH, height: MAP_HEIGHT }
   const spawns = [new King(1, 0, 10, 'player'), new King(2, 4, 1, 'enemy')]
   for (const biome of Object.keys(BIOMES) as Biome[]) {
     for (let index = 0; index < 30; index++) {
       const seed = symmetricSeed(biome + '-' + index)
-      const tiles = makeMap(new SeededRandom(seedState(seed)), biome, spawns, true)
-      assert.deepEqual(tiles, makeMap(new SeededRandom(seedState(seed)), biome, spawns, true))
-      assert.equal(tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      const tiles = makeMap(new SeededRandom(seedState(seed)), biome, spawns, true, size)
+      assert.deepEqual(
+        tiles,
+        makeMap(new SeededRandom(seedState(seed)), biome, spawns, true, size),
+      )
+      assert.ok(tiles.size <= MAP_WIDTH * MAP_HEIGHT)
       for (const tile of tiles.values()) {
-        const mirror = mirrorAxial(tile)
+        const mirror = mirrorAxial(tile, size)
         const mirrored = tiles.get(key(mirror.q, mirror.r))
         assert.ok(mirrored, biome + ': ' + seed)
         assert.equal(mirrored.terrain, tile.terrain)
@@ -132,7 +140,7 @@ test('Symmetric seeds generate mirrored, connected battlefields with authored ob
       assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
       for (const spawn of spawns) {
         assert.equal(tiles.get(key(spawn.q, spawn.r))?.terrain, BIOMES[biome].ground)
-        const mirror = mirrorAxial(spawn)
+        const mirror = mirrorAxial(spawn, size)
         assert.equal(tiles.get(key(mirror.q, mirror.r))?.terrain, BIOMES[biome].ground)
       }
       for (const { terrain, max, shapes } of BIOMES[biome].features) {
@@ -177,7 +185,7 @@ test('Symmetric seeded battles stay symmetric across restarts and keep kings con
   for (let index = 0; index < 20; index++) {
     const state = initialState(symmetricSeed('battle-' + index))
     for (const tile of state.tiles.values()) {
-      const mirror = mirrorAxial(tile)
+      const mirror = mirrorAxial(tile, state.mapSize)
       const mirrored = state.tiles.get(key(mirror.q, mirror.r))
       assert.ok(mirrored)
       assert.equal(mirrored.terrain, tile.terrain)
@@ -188,7 +196,7 @@ test('Symmetric seeded battles stay symmetric across restarts and keep kings con
     assert.ok(distFrom(state.tiles, [kings[0]]).has(key(kings[1].q, kings[1].r)))
     const half = state.pawns.length / 2
     for (let i = 0; i < half; i++) {
-      const mirror = mirrorAxial(state.pawns[i])
+      const mirror = mirrorAxial(state.pawns[i], state.mapSize)
       const enemy = state.pawns[half + i]
       assert.equal(enemy.q, mirror.q)
       assert.equal(enemy.r, mirror.r)

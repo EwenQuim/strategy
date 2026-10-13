@@ -3,7 +3,7 @@ import { poolShapes, type BiomeDefinition } from './biome.ts'
 export const desert: BiomeDefinition = {
   ground: 'sand',
   scatter: { terrain: 'palm', chance: 0.04 },
-  features: [{ terrain: 'lake', min: 1, max: 3, shapes: poolShapes }],
+  features: [{ terrain: 'lake', min: 1, max: 3, shapes: poolShapes, anchorBias: 'bay' }],
   theme: {
     '--biome-background': '#805537',
     '--biome-glow': '#f4c46e85',

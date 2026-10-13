@@ -23,6 +23,7 @@ function duel(): GameState {
     hellfire: [],
     randomState: 0,
     tiles,
+    mapSize: { width: 7, height: 1 },
     pawns: [
       new Ninja(1, 0, 0, 'player'),
       new King(2, -3, 0, 'player'),

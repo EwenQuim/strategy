@@ -1,4 +1,5 @@
-import { hexDist, key, neighborKeys, passable, sameHex, type Axial, type Tile } from './hex.ts'
+import { hexDist, key, passable, sameHex, type Axial, type Tile } from './hex.ts'
+import { neighborKeys } from './neighborKeys.ts'
 import type { AttackProfile, Pawn, Side, ThreatPosition } from './pawns/index.ts'
 import type { Action } from './engine.ts'
 import type { SpecialAbility } from './pawns/pawn.ts'
