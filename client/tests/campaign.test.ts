@@ -8,6 +8,8 @@ import {
   withUnitUnlocks,
   withBriefings,
   isCampaignUnlocked,
+  visibleCampaigns,
+  totalVictories,
 } from '../src/campaign.ts'
 import { campaignBot } from '../src/bots/campaign.ts'
 import {
@@ -22,6 +24,15 @@ import { turnPlans } from '../src/lib/engine/ai/turns.ts'
 import { getBot } from '../src/bots/catalog.ts'
 import { COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
 import original from '../src/lib/campaigns/001-original.json' with { type: 'json' }
+
+test('Retired campaigns cannot be opened in preview or contribute stale victories to unlocks', () => {
+  for (const preview of [false, true])
+    assert.ok(visibleCampaigns(preview).every((pack) => pack.slug !== 'shattered'))
+  assert.equal(
+    totalVictories((slug) => (slug === 'shattered' ? 10 : 0)),
+    0,
+  )
+})
 
 test('All packs use authored, deterministic, compact maps and validated armies', () => {
   for (const pack of CAMPAIGNS) {
@@ -74,9 +85,15 @@ test('Each unfamiliar recruit debuts enemy-only, unlocks on victory and is playa
     CAMPAIGNS[1].levels.slice(0, 6).map((level) => level.unlocks),
     [['archer'], ['magician'], ['bulwark'], ['bomber'], ['ninja'], ['lancer']],
   )
-  assert.deepEqual(CAMPAIGNS[5].levels[3].unlocks, ['wolf'])
-  assert.deepEqual(CAMPAIGNS[6].levels[0].unlocks, ['hoplite'])
-  assert.deepEqual(CAMPAIGNS[7].levels[0].unlocks, ['berserker'])
+  assert.deepEqual(CAMPAIGNS.find((pack) => pack.slug === 'iron-throne')!.levels[3].unlocks, [
+    'wolf',
+  ])
+  assert.deepEqual(CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!.levels[0].unlocks, [
+    'hoplite',
+  ])
+  assert.deepEqual(CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!.levels[0].unlocks, [
+    'berserker',
+  ])
 })
 
 test('Every introduction allows a non-lethal player opening before the new enemy acts', () => {

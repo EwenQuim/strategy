@@ -15,11 +15,11 @@ export const developerPreview = t({
   it: 'Anteprima sviluppatori',
 })
 export const developerPreviewHint = t({
-  en: 'Shows unfinished content, such as the Shattered Crown campaign.',
-  fr: 'Affiche le contenu en cours, comme la campagne Couronne brisée.',
-  de: 'Zeigt unfertige Inhalte, etwa die Kampagne Zerbrochene Krone.',
-  es: 'Muestra contenido sin terminar, como la campaña Corona rota.',
-  it: 'Mostra contenuti incompleti, come la campagna Corona infranta.',
+  en: 'Unlocks all campaign levels and shows experimental bots.',
+  fr: 'Débloque tous les niveaux de campagne et affiche les bots expérimentaux.',
+  de: 'Schaltet alle Kampagnenlevel frei und zeigt experimentelle Bots.',
+  es: 'Desbloquea todos los niveles de campaña y muestra bots experimentales.',
+  it: 'Sblocca tutti i livelli della campagna e mostra i bot sperimentali.',
 })
 export const haptics = t({
   en: 'Haptic feedback',
