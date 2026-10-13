@@ -3,6 +3,7 @@ import {
   menuCardClassName,
   menuInputClassName,
   menuPrimaryButtonClassName,
+  switchClassName,
 } from '../components/styles'
 import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
@@ -120,7 +121,7 @@ export const Route = createFileRoute('/online/')({
               type="checkbox"
               role="switch"
               aria-describedby="online-public-hint"
-              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
+              className={switchClassName}
               checked={publicHosting}
               onChange={(event) => {
                 setPublicHosting(event.target.checked)

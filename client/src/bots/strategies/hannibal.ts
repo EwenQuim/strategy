@@ -5,8 +5,8 @@ import { hexDist } from '../../lib/engine/hex.ts'
 import { introductionTurns } from '../introductions.ts'
 import { outcome, valueFeatures, type ValueCache } from '../valueFeatures.ts'
 import { predictValue, VALUE_MODELS } from '../valueModel.ts'
-import { readOptions } from '../options.ts'
-import type { Bot } from '../bot.ts'
+import { intInRange, numberInRange, oneOf, optionsMatch, readOptions } from '../options.ts'
+import { turnOpening, type Bot } from '../bot.ts'
 
 type HannibalOptions = {
   model: keyof typeof VALUE_MODELS
@@ -57,6 +57,16 @@ export const HANNIBAL_LEVELS = {
   },
 } as const satisfies Record<string, HannibalOptions>
 
+const HANNIBAL_CHECKS: Record<string, (value: unknown) => boolean> = {
+  model: oneOf(Object.keys(VALUE_MODELS)),
+  simulations: intInRange(1, 16384),
+  candidates: intInRange(2, 96),
+  exploration: numberInRange(0, 5),
+  horizon: intInRange(2, 64),
+  backup: oneOf(['average', 'minimax']),
+  pressure: numberInRange(0, 1),
+}
+
 type Node = {
   state: GameState
   actions: Action[]
@@ -85,38 +95,20 @@ export class HannibalBot implements Bot<HannibalOptions> {
 
   constructor(options: Partial<HannibalOptions> = {}, candidateWeights?: readonly number[]) {
     this.options = readOptions<HannibalOptions>(HANNIBAL_LEVELS.normal, options)
-    const { model, simulations, candidates, exploration, horizon, backup, pressure } =
-      this.options
-    if (
-      !Object.hasOwn(VALUE_MODELS, model) ||
-      !Number.isInteger(simulations) ||
-      simulations < 1 ||
-      simulations > 16384 ||
-      !Number.isInteger(candidates) ||
-      candidates < 2 ||
-      candidates > 96 ||
-      !Number.isFinite(exploration) ||
-      exploration < 0 ||
-      exploration > 5 ||
-      !Number.isInteger(horizon) ||
-      horizon < 2 ||
-      horizon > 64 ||
-      !['average', 'minimax'].includes(backup) ||
-      !Number.isFinite(pressure) ||
-      pressure < 0 ||
-      pressure > 1
-    )
+    if (!optionsMatch(this.options, HANNIBAL_CHECKS))
       throw new RangeError('Invalid Hannibal options')
-    const weights = candidateWeights ?? VALUE_MODELS[model]
-    if (weights.length !== VALUE_MODELS[model].length || !weights.every(Number.isFinite))
+    const weights = candidateWeights ?? VALUE_MODELS[this.options.model]
+    if (
+      weights.length !== VALUE_MODELS[this.options.model].length ||
+      !weights.every(Number.isFinite)
+    )
       throw new RangeError('Invalid learned value weights')
     this.weights = Object.freeze([...weights])
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    const actor = activePawn(state)
-    if (!actor || state.winner) return []
-    if (actor.energy <= 0) return [{ type: 'endTurn' }]
+    const { pawn: actor, forced } = turnOpening(state)
+    if (forced) return forced
     const search: Search = {
       side: actor.side,
       weights: this.weights,

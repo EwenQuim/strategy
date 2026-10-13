@@ -3,6 +3,7 @@ import {
   activePawn,
   hexDist,
   key,
+  pawnAt,
   type Action,
   type Axial,
   type GameState,
@@ -67,7 +68,6 @@ export function actionCriteria(state: GameState): Record<string, string> {
   const king = foes.find((unit) => unit.kind === 'king')
   const nearestFoe = (from: Axial) =>
     foes.length ? Math.min(...foes.map((unit) => hexDist(from, unit))) : null
-  const unitAt = (at: Axial) => state.pawns.find((unit) => unit.q === at.q && unit.r === at.r)
   const annotate = (action: Action): string => {
     if (action.type === 'move') {
       const at = { q: action.q, r: action.r }
@@ -89,7 +89,7 @@ export function actionCriteria(state: GameState): Record<string, string> {
       return `${describeAction(action)} (${notes.join(', ')})`
     }
     if (action.type === 'special' && action.target) {
-      const target = unitAt(action.target)
+      const target = pawnAt(state.pawns, action.target)
       return target
         ? `${describeAction(action)}: ${target.kind} #${target.id} (hp ${target.hp}/${target.maxHp})`
         : describeAction(action)

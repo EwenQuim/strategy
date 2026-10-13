@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { MenuLayout } from '../components/MenuLayout'
-import { dialogClassName, iconButtonClassName, menuCardClassName } from '../components/styles'
+import {
+  dialogClassName,
+  iconButtonClassName,
+  menuCardClassName,
+  switchClassName,
+} from '../components/styles'
 import { Icon } from '../components/Icon'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
@@ -48,7 +53,7 @@ export const Route = createFileRoute('/settings')({
             role="switch"
             aria-label={s.developerPreview}
             aria-describedby="developer-preview-hint"
-            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
+            className={switchClassName + ' mt-1'}
             checked={developerPreview}
             onChange={(event) => {
               setDeveloperPreview(event.target.checked)
@@ -73,7 +78,7 @@ export const Route = createFileRoute('/settings')({
             role="switch"
             aria-label={s.haptics}
             aria-describedby="haptics-hint"
-            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
+            className={switchClassName + ' mt-1'}
             checked={hapticsEnabled}
             onChange={(event) => {
               setHapticsEnabled(event.target.checked)

@@ -4,8 +4,8 @@ import { distancesToAttack, evaluatePosition } from '../../lib/engine/ai/evaluat
 import { introductionTurns } from '../introductions.ts'
 import { evaluateArmy, type ArmyCache } from '../../lib/engine/ai/army.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
-import type { Bot } from '../bot.ts'
-import { readOptions } from '../options.ts'
+import { turnOpening, type Bot } from '../bot.ts'
+import { intInRange, numberInRange, optionsMatch, readOptions } from '../options.ts'
 
 type NapoleonOptions = {
   candidates: number
@@ -20,6 +20,13 @@ export const NAPOLEON_LEVELS = {
   hard: { candidates: 8, replies: 2, aggression: 1, caution: 1 },
   brutal: { candidates: 12, replies: 3, aggression: 1.2, caution: 1 },
 } as const satisfies Record<string, NapoleonOptions>
+
+const NAPOLEON_CHECKS: Record<string, (value: unknown) => boolean> = {
+  candidates: intInRange(1, 24),
+  replies: intInRange(1, 4),
+  aggression: numberInRange(0.25, 3),
+  caution: numberInRange(0, 2),
+}
 
 type ScoredTurn = TurnPlan & { value: number }
 type Analysis = {
@@ -40,28 +47,13 @@ export class NapoleonBot implements Bot<NapoleonOptions> {
 
   constructor(options: Partial<NapoleonOptions> = {}) {
     this.options = readOptions<NapoleonOptions>(NAPOLEON_LEVELS.normal, options)
-    const { candidates, replies, aggression, caution } = this.options
-    if (
-      !Number.isInteger(candidates) ||
-      candidates < 1 ||
-      candidates > 24 ||
-      !Number.isInteger(replies) ||
-      replies < 1 ||
-      replies > 4 ||
-      !Number.isFinite(aggression) ||
-      aggression < 0.25 ||
-      aggression > 3 ||
-      !Number.isFinite(caution) ||
-      caution < 0 ||
-      caution > 2
-    )
+    if (!optionsMatch(this.options, NAPOLEON_CHECKS))
       throw new RangeError('Invalid Napoleon options')
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    const actor = activePawn(state)
-    if (!actor || state.winner) return []
-    if (actor.energy <= 0) return [{ type: 'endTurn' }]
+    const { pawn: actor, forced } = turnOpening(state)
+    if (forced) return forced
     const analysis: Analysis = {
       cache: { reach: new Map(), distances: new WeakMap() },
       scores: new Map(),

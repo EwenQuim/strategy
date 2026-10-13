@@ -4,6 +4,8 @@ import {
   walkingPaths,
   protectorFor,
   inHellfire,
+  pawnAt,
+  sameHex,
   type Axial,
   type BattleEffect,
   type Pawn,
@@ -146,14 +148,12 @@ export function Battlefield({
         {allTiles.map((tile) => {
           const tileKey = key(tile.q, tile.r)
           const warned = inHellfire(hellfire, tile)
-          const impactCenter = hellfire.some(
-            (center) => center.q === tile.q && center.r === tile.r,
-          )
-          const occupant = pawns.find((p) => p.q === tile.q && p.r === tile.r)
+          const impactCenter = hellfire.some((center) => sameHex(center, tile))
+          const occupant = pawnAt(pawns, tile)
           const protector = occupant && protectorFor(pawns, occupant)
-          const selected = active?.q === tile.q && active.r === tile.r
+          const selected = sameHex(active, tile)
           const target = targets.has(tileKey)
-          const previewed = preview?.q === tile.q && preview.r === tile.r
+          const previewed = sameHex(preview, tile)
           const cost = reach.get(tileKey)
           const canMove = cost !== undefined && cost > 0
           const interactive = !!target || canMove

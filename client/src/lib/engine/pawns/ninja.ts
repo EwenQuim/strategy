@@ -8,7 +8,7 @@ import {
   strike,
 } from '../combat.ts'
 import type { Action } from '../engine.ts'
-import { hexDist, key, passable } from '../hex.ts'
+import { hexDist, key, passable, sameHex } from '../hex.ts'
 import type { Tile } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
@@ -55,7 +55,7 @@ const jump: SpecialAbility = {
         hexDist(from, land) <= 3 &&
         hexDist(land, target) === 1 &&
         (land.terrain !== 'lava' || pawn.hp > 1) &&
-        !pawns.some((p) => p.id !== pawn.id && p.q === land.q && p.r === land.r),
+        !pawns.some((p) => p.id !== pawn.id && sameHex(p, land)),
     )
       ? pawn.attack.damage
       : 0
@@ -67,9 +67,7 @@ const jump: SpecialAbility = {
     if (
       !target ||
       !destination ||
-      !jumpDestinations(tiles, pawns, pawn).some(
-        (land) => land.q === destination.q && land.r === destination.r,
-      ) ||
+      !jumpDestinations(tiles, pawns, pawn).some((land) => sameHex(land, destination)) ||
       !specialTargets(pawns, pawn, destination).includes(target)
     )
       return null

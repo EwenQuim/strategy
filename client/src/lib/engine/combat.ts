@@ -1,4 +1,4 @@
-import { hexDist, key, neighborKeys, passable, type Axial, type Tile } from './hex.ts'
+import { hexDist, key, neighborKeys, passable, sameHex, type Axial, type Tile } from './hex.ts'
 import type { AttackProfile, Pawn, Side, ThreatPosition } from './pawns/index.ts'
 import type { Action } from './engine.ts'
 
@@ -141,7 +141,7 @@ export const label = (pawn: Pawn) =>
   (pawn.side === 'player' ? 'Your ' : 'Enemy ') + pawn.kind + ' #' + pawn.id
 
 export const pawnAt = (pawns: Pawn[], at: Axial): Pawn | undefined =>
-  pawns.find((p) => p.q === at.q && p.r === at.r)
+  pawns.find((p) => sameHex(p, at))
 
 export const aimAt = ({ q, r }: Axial): Action => ({ type: 'special', target: { q, r } })
 
@@ -186,7 +186,7 @@ export function strikeArea(
   for (const target of targets) {
     if (!pawns.includes(target)) continue
     const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log)
-    const previous = impacts.find((impact) => impact.q === hit.q && impact.r === hit.r)
+    const previous = impacts.find((impact) => sameHex(impact, hit))
     if (previous) previous.damage += hit.damage
     else impacts.push(hit)
   }
@@ -230,7 +230,7 @@ export function landingThreatenedTiles(
             passable(tile) &&
             hexDist(pawn, tile) <= range &&
             (tile.terrain !== 'lava' || pawn.hp > 1) &&
-            !pawns.some((p) => p.id !== pawn.id && p.q === tile.q && p.r === tile.r),
+            !pawns.some((p) => p.id !== pawn.id && sameHex(p, tile)),
         )
   const threatened = new Set<string>()
   const grid = neighborKeys(tiles)

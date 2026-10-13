@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { readLocal, saveLocal } from './storage.ts'
 import { ACHIEVEMENTS, earnedAchievements, type AchievementId } from './lib/achievements'
 import type { GameState, Side } from './lib/engine/index.ts'
 import type { GameMode } from './lib/game-mode.ts'
@@ -6,26 +7,20 @@ import type { GameMode } from './lib/game-mode.ts'
 const ACHIEVEMENTS_KEY = 'hexmate.achievements'
 
 export function readUnlockedAchievements(): AchievementId[] {
-  try {
-    const stored: unknown = JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY) ?? '[]')
+  return readLocal(ACHIEVEMENTS_KEY, [], (raw) => {
+    const stored: unknown = JSON.parse(raw)
     return Array.isArray(stored)
       ? ACHIEVEMENTS.map(({ id }) => id).filter((id) => stored.includes(id))
       : []
-  } catch {
-    return []
-  }
+  })
 }
 
 function unlockAchievements(earned: readonly AchievementId[]): void {
   if (!earned.length) return
-  try {
-    localStorage.setItem(
-      ACHIEVEMENTS_KEY,
-      JSON.stringify([...new Set([...readUnlockedAchievements(), ...earned])]),
-    )
-  } catch {
-    // localStorage unavailable: achievements only show on this result screen
-  }
+  saveLocal(
+    ACHIEVEMENTS_KEY,
+    JSON.stringify([...new Set([...readUnlockedAchievements(), ...earned])]),
+  )
 }
 
 // Achievements first earned in this battle, compared with those unlocked when it was opened.

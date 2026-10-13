@@ -1,3 +1,4 @@
+import { readLocal, saveLocal } from './storage.ts'
 import type { StoredGame } from './lib/online.ts'
 
 const NAME_KEY = 'hexmate.online.name'
@@ -5,41 +6,23 @@ const GAMES_KEY = 'hexmate.online.games'
 const PUBLIC_KEY = 'hexmate.online.public'
 
 export function readPlayerName(): string {
-  try {
-    return localStorage.getItem(NAME_KEY) ?? ''
-  } catch {
-    return ''
-  }
+  return readLocal(NAME_KEY, '', (raw) => raw)
 }
 
 export function savePlayerName(name: string): void {
-  try {
-    localStorage.setItem(NAME_KEY, name)
-  } catch {
-    // localStorage unavailable: keep working in-memory for the session
-  }
+  saveLocal(NAME_KEY, name)
 }
 
 export function readPublicHosting(): boolean {
-  try {
-    return localStorage.getItem(PUBLIC_KEY) === 'true'
-  } catch {
-    return false
-  }
+  return readLocal(PUBLIC_KEY, false, (raw) => raw === 'true')
 }
 
 export function savePublicHosting(publicHosting: boolean): void {
-  try {
-    localStorage.setItem(PUBLIC_KEY, String(publicHosting))
-  } catch {
-    // localStorage unavailable: keep working in-memory for the session
-  }
+  saveLocal(PUBLIC_KEY, String(publicHosting))
 }
 
 export function readStoredGames(): StoredGame[] {
-  try {
-    const raw = localStorage.getItem(GAMES_KEY)
-    if (!raw) return []
+  return readLocal(GAMES_KEY, [], (raw) => {
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     return parsed.filter(
@@ -50,16 +33,10 @@ export function readStoredGames(): StoredGame[] {
         typeof (game as StoredGame).token === 'string' &&
         ((game as StoredGame).side === 'player' || (game as StoredGame).side === 'enemy'),
     )
-  } catch {
-    return []
-  }
+  })
 }
 
 export function saveStoredGame(game: StoredGame): void {
-  try {
-    const games = readStoredGames().filter((stored) => stored.code !== game.code)
-    localStorage.setItem(GAMES_KEY, JSON.stringify([game, ...games]))
-  } catch {
-    // localStorage unavailable: game only lasts for this tab
-  }
+  const games = readStoredGames().filter((stored) => stored.code !== game.code)
+  saveLocal(GAMES_KEY, JSON.stringify([game, ...games]))
 }

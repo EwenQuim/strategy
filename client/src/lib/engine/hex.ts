@@ -60,6 +60,9 @@ export function hexDist(a: Axial, b: Axial) {
   return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2
 }
 
+export const sameHex = (a: Axial | null | undefined, b: Axial | null | undefined): boolean =>
+  !!a && !!b && a.q === b.q && a.r === b.r
+
 export function mirrorAxial({ q, r }: Axial): Axial {
   return { q: MAP_WIDTH - q - MAP_HEIGHT / 2, r: MAP_HEIGHT - 1 - r }
 }

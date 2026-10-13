@@ -11,7 +11,7 @@ import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
 import { introductionTurns } from '../introductions.ts'
 import { inHellfire } from '../../lib/engine/hellfire.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
-import type { Bot } from '../bot.ts'
+import { turnOpening, type Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'
 
 type ScoredTurn = TurnPlan & { value: number }
@@ -58,9 +58,8 @@ export class DepthsearchBot implements Bot<BotOptions> {
     for (const key of Object.keys(searchStats) as (keyof typeof searchStats)[])
       searchStats[key] = 0
     searchStats.decisions = 1
-    const pawn = activePawn(state)
-    if (!pawn || state.winner) return []
-    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const { pawn, forced } = turnOpening(state)
+    if (forced) return forced
     const distance = distancesToAttack(state, pawn)
     const reach: ReachCache = new Map()
     const plan = sidePlan(state, pawn.side, options)

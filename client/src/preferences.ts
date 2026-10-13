@@ -1,53 +1,31 @@
+import { readLocal, saveLocal } from './storage.ts'
+
 const SYMMETRIC_KEY = 'hexmate.custom.symmetric'
 
 export function readSymmetricPreference(): boolean {
-  try {
-    return localStorage.getItem(SYMMETRIC_KEY) === 'true'
-  } catch {
-    return false
-  }
+  return readLocal(SYMMETRIC_KEY, false, (raw) => raw === 'true')
 }
 
 export function saveSymmetricPreference(symmetric: boolean): void {
-  try {
-    localStorage.setItem(SYMMETRIC_KEY, String(symmetric))
-  } catch {
-    // localStorage unavailable: preference only lasts until the custom screen is left
-  }
+  saveLocal(SYMMETRIC_KEY, String(symmetric))
 }
 
 const HAPTICS_KEY = 'hexmate.haptics'
 
 export function readHapticsEnabled(): boolean {
-  try {
-    return localStorage.getItem(HAPTICS_KEY) !== 'false'
-  } catch {
-    return true
-  }
+  return readLocal(HAPTICS_KEY, true, (raw) => raw !== 'false')
 }
 
 export function saveHapticsEnabled(enabled: boolean): void {
-  try {
-    localStorage.setItem(HAPTICS_KEY, String(enabled))
-  } catch {
-    // localStorage unavailable: the preference only lasts until the page is left
-  }
+  saveLocal(HAPTICS_KEY, String(enabled))
 }
 
 const DEVELOPER_PREVIEW_KEY = 'hexmate.developerPreview'
 
 export function readDeveloperPreview(): boolean {
-  try {
-    return localStorage.getItem(DEVELOPER_PREVIEW_KEY) === 'true'
-  } catch {
-    return false
-  }
+  return readLocal(DEVELOPER_PREVIEW_KEY, false, (raw) => raw === 'true')
 }
 
 export function saveDeveloperPreview(enabled: boolean): void {
-  try {
-    localStorage.setItem(DEVELOPER_PREVIEW_KEY, String(enabled))
-  } catch {
-    // localStorage unavailable: the preview stays off after a reload
-  }
+  saveLocal(DEVELOPER_PREVIEW_KEY, String(enabled))
 }

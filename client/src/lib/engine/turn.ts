@@ -5,11 +5,13 @@ import type { Pawn, Side } from './pawns/index.ts'
 import type { BattleEffect, BattleFrame, GameState } from './engine.ts'
 
 export function winnerFrom(pawns: Pawn[], actingSide: Side): Side | null {
-  if (!pawns.some((p) => p.kind === 'king' && p.side === actingSide))
-    return actingSide === 'player' ? 'enemy' : 'player'
-  if (!pawns.some((p) => p.kind === 'king' && p.side === 'enemy')) return 'player'
-  if (!pawns.some((p) => p.kind === 'king' && p.side === 'player')) return 'enemy'
-  return null
+  const playerKing = pawns.some((p) => p.kind === 'king' && p.side === 'player')
+  const enemyKing = pawns.some((p) => p.kind === 'king' && p.side === 'enemy')
+  if (playerKing && enemyKing) return null
+  if (playerKing) return 'player'
+  if (enemyKing) return 'enemy'
+  // Both crowns fell in the same blow: the side that struck last wins.
+  return actingSide === 'player' ? 'enemy' : 'player'
 }
 
 export function endBattle(
