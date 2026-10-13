@@ -18,7 +18,7 @@ export const storyLevelNames: Record<string, string> = {
   'Broken Company': t({
     en: 'Broken Company',
     fr: 'Compagnie brisée',
-    de: 'Zerbrochene Gefährten',
+    de: 'Zerbrochene Kompanie',
     es: 'Compañía rota',
     it: 'Compagnia spezzata',
   }),
@@ -31,7 +31,7 @@ export const storyLevelNames: Record<string, string> = {
   }),
   'Fallen River City': t({
     en: 'Fallen River City',
-    fr: 'La cité du fleuve déchue',
+    fr: 'La cité déchue du fleuve',
     de: 'Gefallene Flussstadt',
     es: 'La ciudad caída del río',
     it: 'La città caduta sul fiume',
@@ -115,9 +115,9 @@ export const storyLevelNames: Record<string, string> = {
   }),
   'The Agoge': t({
     en: 'The Agoge',
-    fr: "L'Agogè",
+    fr: "L'Agogé",
     de: 'Die Agoge',
-    es: 'La Agogué',
+    es: 'La Agogé',
     it: "L'Agoge",
   }),
   Thermopylae: t({

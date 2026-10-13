@@ -49,11 +49,11 @@ export const hellfireWarning = t({
   en: (center: boolean) =>
     `Hellfire ${center ? 'impact center' : 'blast area'}, 1 unavoidable damage at round end`,
   fr: (center: boolean) =>
-    `Feu de l'enfer ${center ? "centre d'impact" : 'zone de souffle'}, 1 dégât inévitable à la fin de la manche`,
+    `Feu de l'enfer ${center ? "centre d'impact" : 'zone de flammes'}, 1 dégât inévitable à la fin de la manche`,
   de: (center: boolean) =>
     `Höllenfeuer ${center ? 'Einschlagzentrum' : 'Einwirkbereich'}, 1 unvermeidbarer Schaden am Rundenende`,
   es: (center: boolean) =>
-    `Fuego infernal ${center ? 'centro de impacto' : 'zona de ráfaga'}, 1 de daño inevitable al final de la ronda`,
+    `Fuego infernal ${center ? 'centro de impacto' : 'zona de llamarada'}, 1 de daño inevitable al final de la ronda`,
   it: (center: boolean) =>
     `Fuoco infernale ${center ? "centro d'impatto" : 'zona di vampata'}, 1 danno inevitabile a fine round`,
 })
