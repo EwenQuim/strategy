@@ -79,7 +79,7 @@ export async function collectFindings(paths = ['src'], cssFiles = 'src/**/*.css'
 
 async function main() {
   const mode = process.argv[2]
-  if (mode && !['--report', '--strict', '--update-baseline'].includes(mode)) {
+  if (mode && !['--report', '--update-baseline'].includes(mode)) {
     throw new Error(`Unknown color lint option: ${mode}`)
   }
   const findings = await collectFindings()
@@ -99,7 +99,7 @@ async function main() {
     )
   }
   console.log(`${findings.length} color findings, ${newFindings.length} outside the baseline.`)
-  if (mode !== '--report' && (mode === '--strict' ? findings.length : newFindings.length)) {
+  if (mode !== '--report' && newFindings.length) {
     process.exitCode = 1
   }
 }
