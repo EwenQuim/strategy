@@ -9,7 +9,12 @@ import {
   type Side,
 } from '../lib/engine'
 
-export function useInspection(state: GameState, viewerSide: Side | undefined, local: boolean) {
+export function useInspection(
+  state: GameState,
+  viewerSide: Side | undefined,
+  local: boolean,
+  locked = false,
+) {
   const [inspection, setInspection] = useState<number | null>(null)
   const [peek, setPeek] = useState(false)
   const [threatsShown, setThreatsShown] = useState(false)
@@ -18,7 +23,11 @@ export function useInspection(state: GameState, viewerSide: Side | undefined, lo
   const shown = inspected ?? active
   const foeSide =
     viewerSide === 'enemy' || (local && active?.side === 'enemy') ? 'player' : 'enemy'
-  const inspect = (id: number) => setInspection(id === inspected?.id ? null : id)
+  // While locked (an attack is aimed and its targets displayed), no unit can be inspected.
+  const inspect = (id: number) => {
+    if (locked) return
+    setInspection(id === inspected?.id ? null : id)
+  }
   // React Compiler memoizes this board calculation across UI-only renders.
   const threats = threatsShown
     ? threatenedTiles(state.tiles, state.pawns, foeSide)
