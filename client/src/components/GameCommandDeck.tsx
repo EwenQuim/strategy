@@ -13,8 +13,8 @@ interface GameCommandDeckProps {
   active?: Pawn
   winner: Side | 'draw' | null
   winnerLabel: string | null
-  myTurn: boolean
-  opponentTurn: boolean
+  canCommand: boolean
+  opponentActive: boolean
   previewed: boolean
   onPreview: () => void
   onPeek: (shown: boolean) => void
@@ -32,8 +32,8 @@ export function GameCommandDeck({
   active,
   winner,
   winnerLabel,
-  myTurn,
-  opponentTurn,
+  canCommand,
+  opponentActive,
   previewed,
   onPreview,
   onPeek,
@@ -45,7 +45,7 @@ export function GameCommandDeck({
   dispatch,
   onAim,
 }: GameCommandDeckProps) {
-  const showingPreview = previewed || opponentTurn
+  const showingPreview = previewed || opponentActive
   return (
     <footer
       className="relative z-2 border-t border-[#c4d1a530] bg-(--biome-panel) pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_#10201840]"
@@ -61,7 +61,7 @@ export function GameCommandDeck({
           >
             <GameSpecialButton
               pawn={active}
-              commanding={myTurn}
+              commanding={canCommand}
               previewed={previewed}
               usingSpecial={usingSpecial}
               hasSpecialTargets={hasSpecialTargets}
@@ -72,14 +72,14 @@ export function GameCommandDeck({
               onPreview={onPreview}
               onPeek={onPeek}
             />
-            {!opponentTurn && (
+            {!opponentActive && (
               <CommandButton
                 variant="compact"
                 icon="arrow"
                 label={m.endTurn}
                 note={m.remainingEnergy(active?.energy ?? 0)}
                 data-action="endTurn"
-                disabled={!myTurn}
+                disabled={!canCommand}
                 onClick={() => dispatch({ type: 'endTurn' })}
                 title={m.endTurnHint}
               />
@@ -87,7 +87,10 @@ export function GameCommandDeck({
           </div>
           {showingPreview && pawn && !winner && (
             <div className={actionGridClassName + ' absolute inset-0'} data-testid="unit-focus">
-              <GameUnitPreview pawn={pawn} onClose={opponentTurn ? undefined : onCloseFocus} />
+              <GameUnitPreview
+                pawn={pawn}
+                onClose={opponentActive ? undefined : onCloseFocus}
+              />
             </div>
           )}
         </div>
