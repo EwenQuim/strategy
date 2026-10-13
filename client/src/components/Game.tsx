@@ -146,7 +146,7 @@ export function Game({
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
   const aim = myTurn && aiming?.state === state ? aiming.aim : null
-  const insight = useInspection(state, viewerSide, local)
+  const insight = useInspection(state, viewerSide, local, !!aim)
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
@@ -154,7 +154,7 @@ export function Game({
   }
   const usingSpecial = aim?.action === 'special'
   const destination = usingSpecial ? aim.destination : undefined
-  const targets = aim && !inspected ? targetingTiles(state, aim) : new Set<string>()
+  const targets = aim ? targetingTiles(state, aim) : new Set<string>()
   const targetLabel = resolveTargetLabel(aim, pawn)
   const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
 
