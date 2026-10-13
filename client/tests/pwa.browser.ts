@@ -908,8 +908,8 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     await context.setOffline(true)
     await page.getByRole('link', { name: 'Custom play' }).click()
-    const playerArcher = page.getByRole('spinbutton', { name: 'Player Archer', exact: true })
-    const enemyArcher = page.getByRole('spinbutton', { name: 'Enemy Archer', exact: true })
+    const playerArcher = page.getByRole('spinbutton', { name: 'Player 1 Archer', exact: true })
+    const enemyArcher = page.getByRole('spinbutton', { name: 'Player 2 Archer', exact: true })
     const mirror = page.getByRole('checkbox', { name: 'Mirror player roster' })
     assert.equal(await mirror.isChecked(), true)
     assert.equal(await enemyArcher.isDisabled(), true)
@@ -925,8 +925,8 @@ test(
     assert.equal(await enemyArcher.isDisabled(), true)
     await mirror.uncheck()
     await enemyArcher.fill('1')
-    await page.getByLabel('Mode', { exact: true }).selectOption('local')
-    assert.equal(await page.getByLabel('Difficulty', { exact: false }).isDisabled(), true)
+    await page.locator('#custom-player-1-controller').selectOption('human')
+    assert.equal(await page.locator('#custom-player-1-difficulty').count(), 0)
     await page.getByLabel('Biome', { exact: true }).selectOption('mountains')
     await page.getByRole('spinbutton', { name: 'Player 1 Swordsman', exact: true }).fill('17')
     await page.getByRole('spinbutton', { name: 'Player 2 Swordsman', exact: true }).fill('20')
@@ -998,7 +998,7 @@ test(
     await page.getByRole('button', { name: 'Close dialog' }).click()
     for (const difficulty of ['easy', 'normal', 'hard', 'brutal'] as const) {
       await page.goto(origin + base + 'custom')
-      await page.getByLabel('Difficulty', { exact: true }).selectOption(difficulty)
+      await page.locator('#custom-player-1-difficulty').selectOption(difficulty)
       await page.getByLabel('Biome', { exact: true }).selectOption('desert')
       await page.getByRole('button', { name: 'Start battle' }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
@@ -1020,7 +1020,7 @@ test(
       assert.ok(
         (await page.locator('dialog').innerText())
           .toLowerCase()
-          .includes('ai difficulty: ' + difficulty),
+          .includes('ai-controlled units act automatically'),
       )
       await page.getByRole('button', { name: 'Close dialog' }).click()
       await playTurn(page)
@@ -1495,11 +1495,7 @@ test(
       base + 'custom',
     )
     assert.equal(
-      new URL((await modes.nth(3).getAttribute('href'))!, page.url()).searchParams.get('mode'),
-      'local',
-    )
-    assert.equal(
-      new URL((await modes.nth(4).getAttribute('href'))!, page.url()).pathname,
+      new URL((await modes.nth(3).getAttribute('href'))!, page.url()).pathname,
       base + 'online',
     )
     for (const viewport of [
@@ -1525,7 +1521,7 @@ test(
         .boundingBox()
       assert.ok(achievements && settings)
       assert.equal(achievements.y, settings.y)
-      assert.ok(achievements.y > boxes[4].bottom)
+      assert.ok(achievements.y > boxes[3].bottom)
       assert.ok(settings.y + settings.height <= viewport.height)
       assert.equal(
         await modes.first().evaluate((link) => getComputedStyle(link).fontSize),
@@ -1550,13 +1546,10 @@ test(
       }
     }
     await page.setViewportSize({ width: 844, height: 390 })
-    const menu = page.getByTestId('menu-content')
     assert.ok(
       (await page.getByRole('heading', { name: 'Hexmate.', exact: true }).boundingBox())!.y >=
         0,
     )
-    await page.getByRole('link', { name: 'Settings', exact: true }).scrollIntoViewIfNeeded()
-    assert.ok(await menu.evaluate((element) => element.scrollTop > 0))
     const settingsInLandscape = await page
       .getByRole('link', { name: 'Settings', exact: true })
       .boundingBox()
