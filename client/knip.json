@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6.37.0/schema.json",
   "entry": ["generated/sdk.gen.ts", "tests/analyze-ai.ts"],
+  "oxlint": { "config": [".oxlintrc.json", "color-lint.oxlint.json"] },
   "ignore": ["generated/routeTree.gen.ts"]
 }
