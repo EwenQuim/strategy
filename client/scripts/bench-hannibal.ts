@@ -1,7 +1,7 @@
 import { activePawn, reducer } from '../src/lib/engine/index.ts'
 import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
-import { CommanderBot, COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
-import { LearnedBot } from '../src/bots/strategies/learned.ts'
+import { NapoleonBot, NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
+import { HannibalBot } from '../src/bots/strategies/hannibal.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { trainingBattle } from './learned-matches.ts'
 
@@ -24,16 +24,16 @@ for (let pair = 0; pair < pairs; pair++) {
   for (const side of ['player', 'enemy'] as const) {
     const scenario = pair * stride + offset
     let state = trainingBattle(`${prefix}-${scenario}`, scenario)
-    const learned = new LearnedBot({ model, simulations, candidates, backup })
+    const hannibal = new HannibalBot({ model, simulations, candidates, backup })
     const legacy =
-      opponent === 'commander'
-        ? new CommanderBot(COMMANDER_LEVELS.brutal)
+      opponent === 'napoleon'
+        ? new NapoleonBot(NAPOLEON_LEVELS.brutal)
         : new DepthsearchBot({ ...BOT_LEVELS.hard, depth: 4, beamWidth: legacyBeam })
     const started = performance.now()
     for (let turn = 0; turn < 360 && !state.winner; turn++) {
       const ours = activePawn(state)!.side === side
       const before = performance.now()
-      const actions = await (ours ? learned : legacy).chooseActions(state)
+      const actions = await (ours ? hannibal : legacy).chooseActions(state)
       if (ours) times.push(performance.now() - before)
       else opponentTimes.push(performance.now() - before)
       if (!actions.length) throw new Error('Benchmark bot failed to act')
@@ -47,7 +47,7 @@ for (let pair = 0; pair < pairs; pair++) {
     else if (state.winner && state.winner !== 'draw') losses++
     else unfinished++
     console.log(
-      `${prefix}-${scenario} ${state.biome} ${state.setup!.player.length}v${state.setup!.enemy.length} / learned ${side}: ${state.winner ?? 'timeout'}, round ${state.round}, ${((performance.now() - started) / 1000).toFixed(1)}s`,
+      `${prefix}-${scenario} ${state.biome} ${state.setup!.player.length}v${state.setup!.enemy.length} / Hannibal ${side}: ${state.winner ?? 'timeout'}, round ${state.round}, ${((performance.now() - started) / 1000).toFixed(1)}s`,
     )
   }
 }

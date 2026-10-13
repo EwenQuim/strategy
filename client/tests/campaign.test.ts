@@ -8,6 +8,8 @@ import {
   withUnitUnlocks,
   withBriefings,
   isCampaignUnlocked,
+  visibleCampaigns,
+  totalVictories,
 } from '../src/campaign.ts'
 import { campaignBot } from '../src/bots/campaign.ts'
 import {
@@ -20,8 +22,17 @@ import {
 } from '../src/lib/engine/index.ts'
 import { turnPlans } from '../src/lib/engine/ai/turns.ts'
 import { getBot } from '../src/bots/catalog.ts'
-import { COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 import original from '../src/lib/campaigns/001-original.json' with { type: 'json' }
+
+test('Retired campaigns cannot be opened in preview or contribute stale victories to unlocks', () => {
+  for (const preview of [false, true])
+    assert.ok(visibleCampaigns(preview).every((pack) => pack.slug !== 'shattered'))
+  assert.equal(
+    totalVictories((slug) => (slug === 'shattered' ? 10 : 0)),
+    0,
+  )
+})
 
 test('All packs use authored, deterministic, compact maps and validated armies', () => {
   for (const pack of CAMPAIGNS) {
@@ -74,9 +85,15 @@ test('Each unfamiliar recruit debuts enemy-only, unlocks on victory and is playa
     CAMPAIGNS[1].levels.slice(0, 6).map((level) => level.unlocks),
     [['archer'], ['magician'], ['bulwark'], ['bomber'], ['ninja'], ['lancer']],
   )
-  assert.deepEqual(CAMPAIGNS[5].levels[3].unlocks, ['wolf'])
-  assert.deepEqual(CAMPAIGNS[6].levels[0].unlocks, ['hoplite'])
-  assert.deepEqual(CAMPAIGNS[7].levels[0].unlocks, ['berserker'])
+  assert.deepEqual(CAMPAIGNS.find((pack) => pack.slug === 'iron-throne')!.levels[3].unlocks, [
+    'wolf',
+  ])
+  assert.deepEqual(CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!.levels[0].unlocks, [
+    'hoplite',
+  ])
+  assert.deepEqual(CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!.levels[0].unlocks, [
+    'berserker',
+  ])
 })
 
 test('Every introduction allows a non-lethal player opening before the new enemy acts', () => {
@@ -112,16 +129,16 @@ test('Briefings remain global first appearances while unlocks are pack-local', (
   assert.equal(result[1][0].newElements.length, 0)
 })
 
-test('Each level resolves its authored bot through the shared catalog; Brutal uses the strongest Commander preset', () => {
+test('Each level resolves its authored bot through the shared catalog; Brutal uses the strongest Napoleon preset', () => {
   for (const pack of CAMPAIGNS) {
     for (const level of pack.levels) {
       const bot = campaignBot(pack, level)
       const options = getBot(bot).options
       assert.deepEqual(bot, level.bot)
       if (pack.slug === 'brutal') {
-        assert.equal(bot.name, 'commander')
-        assert.equal(bot.options.candidates, COMMANDER_LEVELS.brutal.candidates)
-        assert.equal(bot.options.replies, COMMANDER_LEVELS.brutal.replies)
+        assert.equal(bot.name, 'napoleon')
+        assert.equal(bot.options.candidates, NAPOLEON_LEVELS.brutal.candidates)
+        assert.equal(bot.options.replies, NAPOLEON_LEVELS.brutal.replies)
       }
       assert.deepEqual(getBot(JSON.parse(JSON.stringify(bot))).options, options)
     }

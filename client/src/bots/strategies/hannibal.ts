@@ -8,7 +8,7 @@ import { predictValue, VALUE_MODELS } from '../valueModel.ts'
 import { readOptions } from '../options.ts'
 import type { Bot } from '../bot.ts'
 
-type LearnedOptions = {
+type HannibalOptions = {
   model: keyof typeof VALUE_MODELS
   simulations: number
   candidates: number
@@ -18,7 +18,7 @@ type LearnedOptions = {
   pressure: number
 }
 
-export const LEARNED_LEVELS = {
+export const HANNIBAL_LEVELS = {
   easy: {
     model: 'league-v1',
     simulations: 32,
@@ -55,7 +55,7 @@ export const LEARNED_LEVELS = {
     backup: 'average',
     pressure: 0.1,
   },
-} as const satisfies Record<string, LearnedOptions>
+} as const satisfies Record<string, HannibalOptions>
 
 type Node = {
   state: GameState
@@ -73,18 +73,18 @@ type Search = {
   weights: readonly number[]
   cache: ValueCache
   values: Map<string, number>
-  options: Readonly<LearnedOptions>
+  options: Readonly<HannibalOptions>
 }
 
 // PUCT over complete activations. Values always belong to the root side; selection follows
 // actual initiative ownership, including consecutive activations by the same side.
-export class LearnedBot implements Bot<LearnedOptions> {
-  readonly name = 'learned'
-  readonly options: Readonly<LearnedOptions>
+export class HannibalBot implements Bot<HannibalOptions> {
+  readonly name = 'hannibal'
+  readonly options: Readonly<HannibalOptions>
   private readonly weights: readonly number[]
 
-  constructor(options: Partial<LearnedOptions> = {}, candidateWeights?: readonly number[]) {
-    this.options = readOptions<LearnedOptions>(LEARNED_LEVELS.normal, options)
+  constructor(options: Partial<HannibalOptions> = {}, candidateWeights?: readonly number[]) {
+    this.options = readOptions<HannibalOptions>(HANNIBAL_LEVELS.normal, options)
     const { model, simulations, candidates, exploration, horizon, backup, pressure } =
       this.options
     if (
@@ -106,7 +106,7 @@ export class LearnedBot implements Bot<LearnedOptions> {
       pressure < 0 ||
       pressure > 1
     )
-      throw new RangeError('Invalid learned-search options')
+      throw new RangeError('Invalid Hannibal options')
     const weights = candidateWeights ?? VALUE_MODELS[model]
     if (weights.length !== VALUE_MODELS[model].length || !weights.every(Number.isFinite))
       throw new RangeError('Invalid learned value weights')

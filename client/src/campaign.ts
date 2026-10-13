@@ -1,7 +1,6 @@
 import tutorialLevels from './lib/campaigns/000-tutorial.json' with { type: 'json' }
 import originalLevels from './lib/campaigns/001-original.json' with { type: 'json' }
 import brutalLevels from './lib/campaigns/002-brutal.json' with { type: 'json' }
-import shatteredLevels from './lib/campaigns/003-shattered.json' with { type: 'json' }
 import ringLevels from './lib/campaigns/004-war-of-the-ring.json' with { type: 'json' }
 import throneLevels from './lib/campaigns/005-iron-throne.json' with { type: 'json' }
 import spartaLevels from './lib/campaigns/006-hot-gates.json' with { type: 'json' }
@@ -147,13 +146,6 @@ const packs: AuthoredCampaign[] = [
     startingUnits: ['king', 'swordsman'],
     unlockToasts: false,
     requiredVictories: 10,
-  },
-  {
-    slug: 'shattered',
-    name: 'Shattered Crown',
-    levels: shatteredLevels as AuthoredCampaign['levels'],
-    developerPreview: true,
-    startingUnits: CLASSIC_UNITS,
   },
   {
     slug: 'war-of-the-ring',

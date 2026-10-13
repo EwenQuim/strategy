@@ -6,7 +6,7 @@ import { campaignBot } from '../src/bots/campaign.ts'
 import { activePawn, initialState, reducer, type Action } from '../src/lib/engine/index.ts'
 import { getBot } from '../src/bots/catalog.ts'
 import { campaignActions } from '../tests/campaign-actions.ts'
-import { CommanderBot, COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NapoleonBot, NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 
 // Run locally after authoring encounters; --write updates only solved fixture entries.
 // CI replays these solutions without running a potentially lengthy balancing search.
@@ -39,10 +39,10 @@ for (const pack of packs) {
       1,
       1.5,
       2,
-      'commander',
-      'commander-bold',
-      'commander-careful',
-      'commander-wide',
+      'napoleon',
+      'napoleon-bold',
+      'napoleon-careful',
+      'napoleon-wide',
     ] as const) {
       let state = initialState(level.seed, level.setup, 'player')
       const actions: Action[] = []
@@ -51,12 +51,12 @@ for (const pack of packs) {
           activePawn(state)!.side === 'player'
             ? typeof caution === 'number'
               ? await campaignActions(state, caution)
-              : await new CommanderBot({
-                  ...COMMANDER_LEVELS.brutal,
-                  aggression: caution === 'commander-bold' ? 2 : 1,
-                  caution: caution === 'commander-careful' ? 1.5 : 1,
-                  candidates: caution === 'commander-wide' ? 24 : 12,
-                  replies: caution === 'commander-wide' ? 4 : 3,
+              : await new NapoleonBot({
+                  ...NAPOLEON_LEVELS.brutal,
+                  aggression: caution === 'napoleon-bold' ? 2 : 1,
+                  caution: caution === 'napoleon-careful' ? 1.5 : 1,
+                  candidates: caution === 'napoleon-wide' ? 24 : 12,
+                  replies: caution === 'napoleon-wide' ? 4 : 3,
                 }).chooseActions(state)
             : await enemyBot.chooseActions(state)
         for (const action of next) {
