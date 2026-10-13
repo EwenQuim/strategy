@@ -41,20 +41,16 @@ const jump: SpecialAbility = {
   reaches: (pawn, tile) => passable(tile) && hexDist(pawn, tile) <= 3,
   targets: attackTargets,
   threatenedTiles: landingThreatenedTiles,
-  candidates: (pawn, { tiles, pawns }) => {
-    const landings = jumpLandings(tiles, pawns, pawn)
-    return landings.flatMap((destination) => {
+  candidates: (pawn, { tiles, pawns }) =>
+    jumpLandings(tiles, pawns, pawn).flatMap((destination) => {
       const attacks = attackTargets(pawn, pawns, destination).map((target): Action => ({
         type: 'special',
         target: { q: target.q, r: target.r },
         destination: { q: destination.q, r: destination.r },
       }))
-      if (attacks.length === 0) {
-        return [{ type: 'special', destination: { q: destination.q, r: destination.r } }]
-      }
-      return attacks
-    })
-  },
+      if (attacks.length > 0) return attacks
+      return [{ type: 'special', destination: { q: destination.q, r: destination.r } }]
+    }),
   threat: (pawn, { target, from, movementCost, tiles, pawns }) => {
     if (!tiles || !pawns || pawn.energy - movementCost < pawn.special.cost) return 0
     return [...tiles.values()].some(
@@ -71,23 +67,28 @@ const jump: SpecialAbility = {
   tileTargets: (pawn, tiles, pawns) =>
     new Set(jumpLandings(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
   perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
+    const target = tile && pawnAt(pawns, tile)
+    const hasTarget = !!target
+
     if (
       !destination ||
       !jumpLandings(tiles, pawns, pawn).some((land) => sameHex(land, destination))
     ) {
       return null
     }
+
+    if (hasTarget && !specialTargets(pawns, pawn, destination).includes(target)) {
+      return null
+    }
+
     pawn.energy -= pawn.special.cost
-    const landingTile = tiles.get(key(destination.q, destination.r))
-    const path = hexDist(pawn, destination) === 0 ? [] : landingTile ? [landingTile] : []
+    const path =
+      hexDist(pawn, destination) === 0 ? [] : [tiles.get(key(destination.q, destination.r))!]
     const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
 
-    if (tile) {
-      const target = pawnAt(pawns, tile)
-      if (target && specialTargets(pawns, pawn, destination).includes(target)) {
-        if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
-        return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
-      }
+    if (hasTarget && target && pawn.hp > 0) {
+      impacts.push(strike(pawns, pawn, target, pawn.attack, log))
+      return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
     }
 
     return { kind: 'move', to: destination, ...(impacts.length ? { impacts } : {}) }
