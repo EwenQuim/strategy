@@ -44,7 +44,7 @@ The abbreviated setup above only illustrates field placement. Real authored setu
 
 `client/src/campaign.ts` resolves configurations through the catalog and rejects unknown bots or invalid options. Strategy does not live in `FixedBattleSetup`; `enemyStance`, campaign depth overrides and level difficulty dispatch are removed. New campaign-specific strategies can implement `Bot`, register once in `BOTS`, and be selected by any level. Their internal phases remain their own concern.
 
-Authored campaign bot configurations live in the campaign packs; their options and presets are defined by the strategy implementation. The catalog accepts the former `commander` ID when parsing old URLs, and saved battles retain their identity across the rename.
+Authored campaign bot configurations live in the campaign packs; their options and presets are defined by the strategy implementation.
 
 ## Evidence and acceptance
 

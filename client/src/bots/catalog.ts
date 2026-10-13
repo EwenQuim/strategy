@@ -32,18 +32,13 @@ export function getBot(config: BotConfig): Bot {
   return BOTS[config.name].resolve(config.options)
 }
 
-export function canonicalBotName(name: string): string {
-  return name === 'commander' ? 'napoleon' : name === 'learned' ? 'hannibal' : name
-}
-
 // Validate unknown URL data through the same constructors used by the application.
 export function parseBotConfig(value: unknown): BotConfig {
   try {
     if (typeof value !== 'object' || value === null) return DEFAULT_BOT_CONFIG
-    const { name: savedName, options } = value as Record<string, unknown>
-    if (typeof savedName !== 'string') return DEFAULT_BOT_CONFIG
-    const name = canonicalBotName(savedName)
-    if (!Object.hasOwn(BOTS, name) || options === undefined) return DEFAULT_BOT_CONFIG
+    const { name, options } = value as Record<string, unknown>
+    if (typeof name !== 'string' || !Object.hasOwn(BOTS, name) || options === undefined)
+      return DEFAULT_BOT_CONFIG
     const bot = BOTS[name as BotName].resolve(options)
     return { name: bot.name, options: bot.options } as BotConfig
   } catch {

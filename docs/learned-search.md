@@ -1,7 +1,7 @@
 # Hannibal: learned search experiment
 
 Implementation: `client/src/bots/strategies/hannibal.ts`. Selectable through the normal `BOTS`
-catalog as `hannibal`; old URLs and saved battles using `learned` remain readable.
+catalog as `hannibal`.
 
 ## What is actually learned?
 
