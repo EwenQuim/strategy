@@ -81,6 +81,8 @@ export interface SpecialAbility {
   readonly range?: string
   readonly description: SpecialTextKey
   readonly targeted: boolean
+  // A targeted signature that still works without one: it moves and skips the strike.
+  readonly targetOptional?: boolean
   readonly choosesDestination?: boolean
   readonly movement?: 'walk' | 'jump'
   readonly landingRange?: number

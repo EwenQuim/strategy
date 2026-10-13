@@ -1,14 +1,13 @@
 import {
+  advanceAndStrike,
   attackTargets,
   canAttack,
   canUseSpecial,
-  enterTiles,
   label,
   landingThreatenedTiles,
   pawnAt,
   routePath,
   specialTargets,
-  strike,
   walkingPaths,
 } from '../combat.ts'
 import { hexDist, key, type Tile } from '../hex.ts'
@@ -65,7 +64,8 @@ const charge: SpecialAbility = {
       ? pawn.attack.damage
       : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
+  perform: (context) => {
+    const { pawn, tiles, pawns, tile, destination, log } = context
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -74,13 +74,11 @@ const charge: SpecialAbility = {
       !specialTargets(pawns, pawn, destination).includes(target)
     )
       return null
-    pawn.energy -= pawn.special.cost
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const route = walkingPaths(tiles, pawns, pawn, 2, key(destination.q, destination.r)).get(
       key(destination.q, destination.r),
     )!
-    const impacts = enterTiles(tiles, pawns, pawn, routePath(route), round, log)
-    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
+    const impacts = advanceAndStrike(context, routePath(route), target)
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
 }

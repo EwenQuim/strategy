@@ -1,4 +1,6 @@
 import * as m from '../i18n/game'
+import { specialTexts } from '../i18n/specialTexts'
+import type { TileChoice, Targeting } from '../lib/tileChoices'
 import {
   key,
   walkingPaths,
@@ -22,8 +24,6 @@ import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
 
-export type Targeting = 'strike' | 'charge' | 'jump' | 'special'
-
 interface BattlefieldProps {
   labels: PlayerNames
   tiles: Map<string, Tile>
@@ -31,10 +31,11 @@ interface BattlefieldProps {
   hellfire: readonly Axial[]
   active?: Pawn
   reach: Map<string, number>
-  targets: Set<string>
+  targets: Map<string, TileChoice>
   targetLabel: string
   targeting: Targeting
   preview: Axial | null
+  rechoose?: Axial | null
   range: Set<string>
   threats: Set<string>
   effect: BattleEffect | null
@@ -54,6 +55,7 @@ export function Battlefield({
   targetLabel,
   targeting,
   preview,
+  rechoose,
   range,
   threats,
   effect,
@@ -153,13 +155,15 @@ export function Battlefield({
           const protector = occupant && protectorFor(pawns, occupant)
           const selected = sameHex(active, tile)
           const target = targets.has(tileKey)
+          const strike = targets.get(tileKey)?.kind === 'attack'
           const previewed = sameHex(preview, tile)
+          const rechoosing = !!rechoose && sameHex(rechoose, tile)
           const cost = reach.get(tileKey)
           const canMove = cost !== undefined && cost > 0
-          const interactive = !!target || canMove
+          const interactive = !!target || canMove || rechoosing
           const feature = tile.feature && featureTexts[tile.feature]
           const damage =
-            target && targeting === 'jump'
+            target && !strike && targeting === 'jump'
               ? Number(tile.terrain === 'lava')
               : (paths.get(tileKey)?.damage ?? 0)
           const lethal = !!active && damage >= active.hp
@@ -174,20 +178,21 @@ export function Battlefield({
             warned,
             impactCenter,
             target,
-            targetLabel,
+            targetLabel: strike ? specialTexts[active!.special.name] : targetLabel,
             damage,
             lethal,
             canMove,
             cost,
             inRange,
             threatened,
+            rechoose: rechoosing,
           })
           const fill = tileFill({
             interactive,
             damage,
             occupant,
             target,
-            strike: targeting === 'strike',
+            strike,
             selected,
             previewed,
             canMove,

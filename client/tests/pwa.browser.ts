@@ -22,6 +22,7 @@ import {
   type GameState,
   King,
   Lancer,
+  Ninja,
   Swordsman,
 } from '../src/lib/engine/index.ts'
 import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
@@ -259,6 +260,101 @@ test('Rush targets enemies directly and area support lights the caster hexes', a
   }
 })
 
+test('Ambush lands without a target or strikes beside the landing', async (t) => {
+  const { page, origin } = await fixture(t)
+  for (const [seed, landing, strike] of [
+    ['ninja-land-ui', { q: -2, r: 0 }, false],
+    ['ninja-strike-ui', { q: 3, r: 0 }, true],
+  ] as const) {
+    const state = field([
+      new Ninja(1, 0, 0, 'player'),
+      new King(2, 0, 1, 'player', 4),
+      new King(3, 4, 0, 'enemy', 4),
+    ])
+    state.seed = seed
+    await page.evaluate(
+      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+        state: snapshotState(state),
+      },
+    )
+    await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    const tileAt = (at: Axial) =>
+      page
+        .locator('[data-testid="hex-tile"]')
+        .nth([...state.tiles.values()].findIndex((tile) => tile.q === at.q && tile.r === at.r))
+    const special = page.locator('[data-action="special"]')
+    await special.click()
+    await tileAt(landing).click()
+    // The landing is chosen: the signature confirms it, or an adjacent enemy takes the strike.
+    if (strike) {
+      assert.match(await special.innerText(), /Land here/)
+      assert.match(await special.innerText(), /or choose an enemy/)
+      await tileAt(landing).click()
+      assert.match(await special.innerText(), /Cancel/)
+      await tileAt(landing).click()
+      await tileAt({ q: 4, r: 0 }).click()
+      assert.match((await tileAt({ q: 4, r: 0 }).getAttribute('aria-label'))!, /1 health/)
+    }
+    assert.match((await tileAt(landing).getAttribute('aria-label'))!, /Ninja #1/)
+    assert.equal(
+      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+      '1',
+    )
+    assert.equal(await special.getAttribute('aria-disabled'), 'true')
+  }
+})
+
+test('Ambush and Charge show direct strikes beside violet landing choices', async (t) => {
+  const { page, origin } = await fixture(t)
+  for (const Unit of [Ninja, Swordsman]) {
+    for (const moveFirst of [false, true]) {
+      const state = field([
+        new Unit(1, 0, 0, 'player'),
+        new King(2, -3, -2, 'player', 4),
+        new King(3, 1, 0, 'enemy', 4),
+      ])
+      state.seed = Unit.name + '-direct-' + moveFirst
+      await page.evaluate(
+        (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+        {
+          version: BATTLE_SNAPSHOT_VERSION,
+          identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+          state: snapshotState(state),
+        },
+      )
+      await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      const tileAt = (q: number, r: number) =>
+        page
+          .getByTestId('hex-tile')
+          .nth([...state.tiles.values()].findIndex((tile) => tile.q === q && tile.r === r))
+      await page.locator('[data-action="special"]').click()
+      const enemy = tileAt(1, 0)
+      const landing = tileAt(1, -1)
+      assert.equal(await enemy.getByTestId('tile-face').getAttribute('fill'), '#b98370')
+      assert.equal(await landing.getByTestId('tile-face').getAttribute('fill'), '#b79dce')
+      if (moveFirst) await landing.click()
+      await enemy.click()
+      assert.match(
+        (await tileAt(moveFirst ? 1 : 0, moveFirst ? -1 : 0).getAttribute('aria-label'))!,
+        new RegExp(Unit.name + ' #1'),
+      )
+      assert.match(
+        (await enemy.getAttribute('aria-label'))!,
+        new RegExp(4 - state.pawns[0].attack.damage + ' health'),
+      )
+      assert.equal(
+        await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
+        '1',
+      )
+    }
+  }
+})
+
 async function playInUi(page: Page, state: GameState, action: Action) {
   const clickTile = (at: Axial) =>
     page
@@ -271,6 +367,11 @@ async function playInUi(page: Page, state: GameState, action: Action) {
     await page.locator('[data-action="special"]').click()
     if (action.destination) await clickTile(action.destination)
     if (action.target) await clickTile(action.target)
+    else if (
+      action.destination &&
+      /Land here/.test(await page.locator('[data-action="special"]').innerText())
+    )
+      await page.locator('[data-action="special"]').click()
     return
   }
   assert.fail('Unexpected action: ' + action.type)

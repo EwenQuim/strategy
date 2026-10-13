@@ -201,7 +201,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       const { special } = actor
       if (
         !canUseSpecial(actor) ||
-        special.targeted !== !!action.target ||
+        (!special.targetOptional && special.targeted !== !!action.target) ||
         !!special.choosesDestination !== !!action.destination
       )
         return null

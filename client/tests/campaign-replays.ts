@@ -8,7 +8,8 @@ import { getBot } from '../src/bots/catalog.ts'
 
 // Both armies' commands are recorded. Hashes bind setups and authored bot configurations.
 // Regenerate with make record-campaign ARGS="<pack> [level ...]". Compressed commands:
-// e = end turn; m,q,r = move; s,q,r[,destinationQ,destinationR] = ability.
+// e = end turn; m,q,r = move; s,q,r[,destinationQ,destinationR] = ability; j,q,r = ability to a
+// chosen tile without a target.
 export function victoryActions(level: CampaignLevel): Action[] {
   const pack = CAMPAIGNS.find((candidate) => candidate.levels.includes(level))!
   const entry = (victories as Record<string, string[]>)[`${pack.slug}:${level.id}`]
@@ -26,17 +27,19 @@ export function victoryActions(level: CampaignLevel): Action[] {
   return commands.map((command) => {
     const [kind, ...values] = command.split(',')
     const [q, r, dq, dr] = values.map(Number)
-    assert.ok(['e', 'm', 's'].includes(kind), `Unknown command ${command}`)
+    assert.ok(['e', 'm', 's', 'j'].includes(kind), `Unknown command ${command}`)
     assert.ok(values.every((value) => value !== '' && Number.isInteger(Number(value))))
     return kind === 'e'
       ? { type: 'endTurn' }
       : kind === 'm'
         ? { type: 'move', q, r }
-        : {
-            type: 'special',
-            target: { q, r },
-            ...(values.length > 2 ? { destination: { q: dq, r: dr } } : {}),
-          }
+        : kind === 'j'
+          ? { type: 'special', destination: { q, r } }
+          : {
+              type: 'special',
+              target: { q, r },
+              ...(values.length > 2 ? { destination: { q: dq, r: dr } } : {}),
+            }
   })
 }
 

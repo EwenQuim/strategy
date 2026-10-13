@@ -22,11 +22,17 @@ export function legalActions(state: GameState): Action[] {
     ? [{ type: 'special' }]
     : aimed({ action: 'special' }).flatMap((tile): Action[] =>
         pawn.special.choosesDestination
-          ? aimed({ action: 'special', destination: tile }).map((target) => ({
-              type: 'special',
-              target,
-              destination: tile,
-            }))
+          ? [
+              // A signature that tolerates landing without a target offers it as its own command.
+              ...(pawn.special.targetOptional
+                ? [{ type: 'special', destination: tile } as Action]
+                : []),
+              ...aimed({ action: 'special', destination: tile }).map((target): Action => ({
+                type: 'special',
+                target,
+                destination: tile,
+              })),
+            ]
           : [{ type: 'special', target: tile }],
       )
   const candidates: Action[] = [
