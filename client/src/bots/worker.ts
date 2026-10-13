@@ -8,6 +8,8 @@ export type BotRequest = {
   state: ReturnType<typeof snapshotState>
 }
 
+export type BotResponse = { actions: Action[] } | { error: string }
+
 export function getBrowserBot(config: BotConfig): Bot & { cancel(): void } {
   const bot = getBot(config)
   let cancel = () => {}
@@ -18,23 +20,35 @@ export function getBrowserBot(config: BotConfig): Bot & { cancel(): void } {
     chooseActions(state) {
       if (BOTS[config.name].execution === 'main') return bot.chooseActions(state)
       cancel()
-      return new Promise<Action[]>((resolve, reject) => {
-        const worker = new Worker(new URL('./bot.worker.ts', import.meta.url), {
-          type: 'module',
-        })
+      let cancelled = false
+      let worker: Worker | undefined
+      const decision = new Promise<Action[]>((resolve, reject) => {
         cancel = () => {
-          worker.terminate()
+          cancelled = true
+          worker?.terminate()
           resolve([])
         }
-        worker.onmessage = (event: MessageEvent<Action[]>) => {
-          worker.terminate()
-          resolve(event.data)
+        worker = new Worker(new URL('./bot.worker.ts', import.meta.url), {
+          type: 'module',
+        })
+        worker.onmessage = ({ data }: MessageEvent<BotResponse>) => {
+          worker?.terminate()
+          if ('error' in data) reject(new Error(data.error))
+          else resolve(data.actions)
         }
         worker.onerror = (event) => {
-          worker.terminate()
+          event.preventDefault()
+          worker?.terminate()
           reject(new Error(event.message))
         }
+        worker.onmessageerror = () => reject(new Error('Unreadable bot response'))
         worker.postMessage({ config, state: snapshotState(state) } satisfies BotRequest)
+      })
+      return decision.catch(async () => {
+        worker?.terminate()
+        if (cancelled) return []
+        const actions = await bot.chooseActions(state)
+        return cancelled ? [] : actions
       })
     },
   }

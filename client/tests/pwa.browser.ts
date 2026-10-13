@@ -487,6 +487,71 @@ async function playTurn(page: Page) {
   )
 }
 
+test('Saved battles resume and enemies fight without a service worker, even when web workers fail', async (t) => {
+  const { origin } = await fixture(t)
+  const browser = await sharedBrowser!
+  for (const workers of ['available', 'missing', 'blocked', 'load-failure']) {
+    const context = await browser.newContext({
+      serviceWorkers: 'block',
+      viewport: { width: 320, height: 568 },
+      reducedMotion: 'reduce',
+    })
+    try {
+      if (workers === 'missing')
+        await context.addInitScript(() => Reflect.deleteProperty(globalThis, 'Worker'))
+      if (workers === 'blocked')
+        await context.addInitScript(() => {
+          globalThis.Worker = class {
+            constructor() {
+              throw new DOMException('Workers blocked', 'SecurityError')
+            }
+          } as unknown as typeof Worker
+        })
+      if (workers === 'load-failure')
+        await context.route('**/bot.worker-*.js', (route) => route.abort())
+      const page = await context.newPage()
+      const errors: string[] = []
+      page.on('pageerror', (error) => errors.push(error.message))
+      await page.goto(origin + base)
+      const state = field([
+        new Swordsman(1, 0, 0, 'enemy'),
+        new King(2, 1, 0, 'player'),
+        new King(3, -1, 0, 'enemy'),
+      ])
+      state.seed = 'no-service-worker-' + workers
+      state.pawns[1].hp = 7
+      await page.evaluate(
+        (saved) => {
+          localStorage.setItem('hexmate.tutorial-seen', 'true')
+          localStorage.setItem('hexmate.battle', JSON.stringify(saved))
+        },
+        {
+          version: BATTLE_SNAPSHOT_VERSION,
+          identity: battleIdentity('ai', state.seed, DEFAULT_BOT_CONFIG, undefined),
+          state: snapshotState(state),
+        },
+      )
+      await page.goto(origin + base + 'game/' + state.seed)
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      const saved = await page.evaluate(() =>
+        JSON.parse(localStorage.getItem('hexmate.battle')!),
+      )
+      assert.equal(saved.state.seed, state.seed)
+      assert.ok(saved.state.pawns.find((pawn: { id: number }) => pawn.id === 2).hp < 7, workers)
+      await page.reload()
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+      assert.deepEqual(
+        await page.evaluate(() => JSON.parse(localStorage.getItem('hexmate.battle')!)),
+        saved,
+      )
+      assert.equal(await page.evaluate(() => navigator.serviceWorker.controller), null)
+      assert.deepEqual(errors, [])
+    } finally {
+      await context.close()
+    }
+  }
+})
+
 async function readBuildLabel(page: Page) {
   await page.getByRole('link', { name: 'Settings', exact: true }).click()
   const label = await page.getByTitle('Git commit used for this build').textContent()
