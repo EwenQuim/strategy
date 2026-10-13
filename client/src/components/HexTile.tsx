@@ -22,6 +22,9 @@ interface HexTileProps {
   lethal: boolean
   target: boolean
   strike: boolean
+  // Rattle class during a bomb or fireball effect; empty otherwise, so
+  // unaffected tiles keep their memoized render.
+  quakeClass: string
   // Label for targeted tiles; empty when the tile is not a target, so re-aiming
   // leaves every other tile untouched.
   targetLabel: string
@@ -71,6 +74,7 @@ export const HexTile = memo(function HexTile({
   damage,
   target,
   strike,
+  quakeClass,
   targetLabel,
   previewed,
   rechoosing,
@@ -122,7 +126,10 @@ export const HexTile = memo(function HexTile({
       data-feature={tile.feature}
       data-hellfire={warned || undefined}
       data-hellfire-center={impactCenter || undefined}
-      className="group/tile outline-none [&[role=button]]:cursor-pointer"
+      className={
+        'group/tile outline-none [&[role=button]]:cursor-pointer' +
+        (quakeClass ? ' ' + quakeClass + ' motion-reduce:animate-none' : '')
+      }
       data-testid="hex-tile"
       role={interactive ? 'button' : 'img'}
       tabIndex={interactive ? 0 : undefined}
