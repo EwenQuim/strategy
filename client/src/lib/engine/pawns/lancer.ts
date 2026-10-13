@@ -1,5 +1,5 @@
 import { aimAt, canUseSpecial, enterTiles, pawnAt, strike } from '../combat.ts'
-import { hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
+import { hexDist, key, passable, sameHex, type Axial, type Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const LINES = [
@@ -23,7 +23,7 @@ function sprints(
     for (let q = from.q + dq, r = from.r + dr; ; q += dq, r += dr) {
       const tile = tiles.get(key(q, r))
       if (!tile || !passable(tile)) break
-      const occupant = pawns.find((p) => p.id !== pawn.id && p.q === q && p.r === r)
+      const occupant = pawns.find((p) => p.id !== pawn.id && sameHex(p, { q, r }))
       if (occupant) {
         if (occupant.side !== pawn.side) {
           if (landings.length) landings[landings.length - 1]!.target = occupant
@@ -92,7 +92,7 @@ const dash: SpecialAbility = {
   threat: (pawn, { target, from, tiles, pawns }) => {
     if (!tiles || !pawns) return 0
     const occupants = [
-      ...pawns.filter((p) => p.id !== target.id && (p.q !== target.q || p.r !== target.r)),
+      ...pawns.filter((p) => p.id !== target.id && !sameHex(p, target)),
       target,
     ]
     return sprints(pawn, tiles, occupants, from).some(
@@ -108,7 +108,7 @@ const dash: SpecialAbility = {
     const sprint =
       tile &&
       sprints(pawn, tiles, pawns).find((entry) =>
-        target ? entry.target === target : entry.tile.q === tile.q && entry.tile.r === tile.r,
+        target ? entry.target === target : sameHex(entry.tile, tile),
       )
     if (!sprint) return null
     pawn.energy -= pawn.special.cost

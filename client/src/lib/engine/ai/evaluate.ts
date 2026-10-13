@@ -2,7 +2,7 @@ import { activePawn, reducer, type GameState } from '../engine.ts'
 import { inHellfire } from '../hellfire.ts'
 import { abilityDamage, routePath, walkingPaths, protectorFor } from '../combat.ts'
 import type { SidePlan } from './plan.ts'
-import { distFrom, hexDist, key, passable, type Axial, type Tile } from '../hex.ts'
+import { distFrom, hexDist, key, passable, sameHex, type Axial, type Tile } from '../hex.ts'
 import { START_ENERGY, type Pawn, type Side } from '../pawns/index.ts'
 
 type Reach = {
@@ -57,7 +57,7 @@ function reachOf(state: GameState, attacker: Pawn, runes: Tile[], cache: ReachCa
             passable(tile) &&
             hexDist(position.from, tile) <= range &&
             (tile.terrain !== 'lava' || attacker.hp > 1) &&
-            !state.pawns.some((p) => p.id !== attacker.id && p.q === tile.q && p.r === tile.r)
+            !state.pawns.some((p) => p.id !== attacker.id && sameHex(p, tile))
           )
             landings.set(key(tile.q, tile.r), tile)
       }

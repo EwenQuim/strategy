@@ -1,7 +1,14 @@
 import { legalActions } from '../../lib/engine/ai/options.ts'
 import { activePawn, type Action, type GameState } from '../../lib/engine/index.ts'
 import type { Bot } from '../bot.ts'
-import { readOptions } from '../options.ts'
+import {
+  intInRange,
+  nonEmptyText,
+  numberInRange,
+  oneOf,
+  optionsMatch,
+  readOptions,
+} from '../options.ts'
 import { readMistralApiKey } from '../apiKeys.ts'
 import { acceptedAction, positionText, RULES_TEXT } from '../remoteText.ts'
 
@@ -28,6 +35,13 @@ ${RULES_TEXT}
 
 You always answer with exactly one legal action from the list you are given, as pure JSON, with no other text.`
 
+const MISTRAL_CHECKS: Record<string, (value: unknown) => boolean> = {
+  model: nonEmptyText(),
+  effort: oneOf(['low', 'medium', 'high']),
+  maxTokens: intInRange(1, Infinity),
+  temperature: numberInRange(0, 2),
+}
+
 // Proposes nothing without a key or a usable reply; the catalog falls back to the local search.
 export class MistralBot implements Bot<MistralOptions> {
   readonly name = 'mistral'
@@ -35,15 +49,7 @@ export class MistralBot implements Bot<MistralOptions> {
 
   constructor(options: Partial<MistralOptions> = {}) {
     this.options = readOptions(DEFAULT_OPTIONS, options)
-    if (
-      !this.options.model.trim() ||
-      !['low', 'medium', 'high'].includes(this.options.effort) ||
-      !Number.isInteger(this.options.maxTokens) ||
-      this.options.maxTokens < 1 ||
-      !Number.isFinite(this.options.temperature) ||
-      this.options.temperature < 0 ||
-      this.options.temperature > 2
-    )
+    if (!optionsMatch(this.options, MISTRAL_CHECKS))
       throw new RangeError('Invalid Mistral options')
   }
 

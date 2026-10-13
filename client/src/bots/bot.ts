@@ -1,4 +1,5 @@
-import type { Action, GameState } from '../lib/engine/engine.ts'
+import { activePawn, type Action, type GameState } from '../lib/engine/engine.ts'
+import type { Pawn } from '../lib/engine/pawns/index.ts'
 
 // Anything that can think for the side to act: it proposes actions for the active unit and the
 // engine judges them. The engine only offers the toolbox (legal actions, turn enumeration,
@@ -7,6 +8,17 @@ export interface Bot<Options extends object = object> {
   readonly name: string
   readonly options: Readonly<Options>
   chooseActions(state: GameState): Promise<Action[]>
+}
+
+// The opening every strategy shares: a decided battle or a missing actor proposes nothing,
+// and an exhausted actor can only end its turn. Otherwise the actor is free to play.
+export function turnOpening(
+  state: GameState,
+): { pawn: Pawn; forced: null } | { pawn: null; forced: Action[] } {
+  const pawn = activePawn(state)
+  if (!pawn || state.winner) return { pawn: null, forced: [] }
+  if (pawn.energy <= 0) return { pawn: null, forced: [{ type: 'endTurn' }] }
+  return { pawn, forced: null }
 }
 
 // Plays the primary bot's proposal, or the fallback's when the primary fails or has nothing.

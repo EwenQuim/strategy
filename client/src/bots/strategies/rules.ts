@@ -1,8 +1,8 @@
-import { activePawn, type Action, type GameState } from '../../lib/engine/engine.ts'
+import type { Action, GameState } from '../../lib/engine/engine.ts'
 import { specialTargets } from '../../lib/engine/combat.ts'
 import type { Pawn } from '../../lib/engine/pawns/index.ts'
-import { distFrom, key, neighbors, passable } from '../../lib/engine/hex.ts'
-import type { Bot } from '../bot.ts'
+import { distFrom, key, neighbors, passable, sameHex } from '../../lib/engine/hex.ts'
+import { turnOpening, type Bot } from '../bot.ts'
 import type { TargetPicker } from '../targetPicker.ts'
 
 export class RulesBot implements Bot {
@@ -15,9 +15,8 @@ export class RulesBot implements Bot {
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
-    const pawn = activePawn(state)
-    if (!pawn || state.winner) return []
-    if (pawn.energy <= 0) return [{ type: 'endTurn' }]
+    const { pawn, forced } = turnOpening(state)
+    if (forced) return forced
     const foes = state.pawns.filter((p) => p.side !== pawn.side)
     return ruleAbility(state, pawn, foes, this.picker) ?? ruleApproach(state, pawn)
   }
@@ -56,20 +55,12 @@ function ruleAbility(
   const target = picker.chooseTarget(
     pawn,
     foes.filter((foe) =>
-      candidates.some(
-        (action) =>
-          action.type === 'special' && action.target?.q === foe.q && action.target.r === foe.r,
-      ),
+      candidates.some((action) => action.type === 'special' && sameHex(action.target, foe)),
     ),
   )
   const selected =
     target &&
-    candidates.find(
-      (action) =>
-        action.type === 'special' &&
-        action.target?.q === target.q &&
-        action.target.r === target.r,
-    )
+    candidates.find((action) => action.type === 'special' && sameHex(action.target, target))
   return selected ? [selected] : null
 }
 

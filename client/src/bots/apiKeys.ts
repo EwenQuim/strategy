@@ -1,23 +1,16 @@
+import { readLocal, removeLocal, saveLocal } from '../storage.ts'
+
 export const MISTRAL_KEY_STORAGE = 'hexmate.mistralApiKey'
 export const JEV_KEY_STORAGE = 'hexmate.jevApiKey'
 
 // The player pastes a key in Settings and it lives in localStorage, never in a build.
 function readApiKey(storageKey: string): string | undefined {
-  try {
-    return localStorage.getItem(storageKey) ?? undefined
-  } catch {
-    // localStorage unavailable: the catalog's local fallback takes over.
-  }
-  return undefined
+  return readLocal(storageKey, undefined, (raw) => raw)
 }
 
 function saveApiKey(storageKey: string, key: string): void {
-  try {
-    if (key) localStorage.setItem(storageKey, key)
-    else localStorage.removeItem(storageKey)
-  } catch {
-    // localStorage unavailable: the key only lasts until the page is left.
-  }
+  if (key) saveLocal(storageKey, key)
+  else removeLocal(storageKey)
 }
 
 export const readMistralApiKey = (): string | undefined => readApiKey(MISTRAL_KEY_STORAGE)

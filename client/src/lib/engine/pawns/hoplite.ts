@@ -1,5 +1,5 @@
 import { aimAt, attackTargets, enterTiles, pawnAt, specialTargets, strike } from '../combat.ts'
-import { hexDist, key, passable } from '../hex.ts'
+import { hexDist, key, passable, sameHex } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
 const phalanx: SpecialAbility = {
@@ -22,8 +22,7 @@ const phalanx: SpecialAbility = {
     if (
       (q === 0 || r === 0 || q + r === 0) &&
       pawns.includes(target) &&
-      impacts[0]!.q === target.q &&
-      impacts[0]!.r === target.r
+      sameHex(impacts[0]!, target)
     ) {
       const beyond = tiles.get(
         key(target.q + Math.sign(target.q - pawn.q), target.r + Math.sign(target.r - pawn.r)),

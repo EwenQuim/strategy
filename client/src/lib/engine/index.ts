@@ -10,6 +10,7 @@ export {
   specialTargets,
   movementDestinations,
   walkingPaths,
+  pawnAt,
   protectorFor,
   rangeTiles,
   threatenedTiles,

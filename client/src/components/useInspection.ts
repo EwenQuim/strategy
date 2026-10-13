@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   activePawn,
+  pawnAt,
   rangeTiles,
   threatenedTiles,
   type Axial,
@@ -32,7 +33,7 @@ export function useInspection(state: GameState, viewerSide: Side | undefined, lo
     toggleThreats: () => setThreatsShown(!threatsShown),
     inspect,
     inspectAt: (at: Axial) => {
-      const occupant = state.pawns.find((unit) => unit.q === at.q && unit.r === at.r)
+      const occupant = pawnAt(state.pawns, at)
       if (occupant) inspect(occupant.id)
       else setInspection(null)
     },
