@@ -7,6 +7,8 @@ export type MapFeature = {
   min: number
   max: number
   shapes: Shape[]
+  // Bays anchor pools against carved edges; center keeps ridges on the wide band.
+  anchorBias?: 'bay' | 'center'
 }
 
 export type BiomeDefinition = {

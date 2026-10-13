@@ -127,7 +127,7 @@ test('Symmetric custom battles mirror pawn positions for equal rosters', () => {
   }
   const mirrored = initialState(symmetricSeed('custom-mirror'), equal)
   for (let i = 0; i < 3; i++) {
-    const mirror = mirrorAxial(mirrored.pawns[i])
+    const mirror = mirrorAxial(mirrored.pawns[i], mirrored.mapSize!)
     assert.equal(mirrored.pawns[3 + i].q, mirror.q)
     assert.equal(mirrored.pawns[3 + i].r, mirror.r)
   }

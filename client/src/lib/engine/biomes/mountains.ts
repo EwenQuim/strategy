@@ -7,6 +7,7 @@ export const mountains: BiomeDefinition = {
       terrain: 'mountain',
       min: 3,
       max: 5,
+      anchorBias: 'center',
       shapes: [
         ...[4, 5, 6, 7].map(lineShape),
         ...[2, 3].flatMap((first) => [3, 4].map((second) => bendShape(first, second))),

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   initialState,
+  key,
   reducer,
   transition,
   activePawn,
@@ -52,5 +53,11 @@ test('Restart restores the authored seed and initial deployment', () => {
   const state = initialState('restart-signature')
   const ended = reducer(state, { type: 'endTurn' })
   assert.deepEqual(reducer(ended, { type: 'restart' }), state)
-  assert.deepEqual(initialPlayback('restart-signature', 'ai').state, state)
+  // AI playback opens on the player's rotation of the same deployment.
+  const opening = initialPlayback('restart-signature', 'ai')
+  const deployment = (pawns: typeof state.pawns) =>
+    pawns.map((pawn) => pawn.side + pawn.kind + key(pawn.q, pawn.r)).sort()
+  assert.deepEqual(deployment(opening.state.pawns), deployment(state.pawns))
+  const afterTurn = playbackReducer(opening, { type: 'endTurn' }, 'ai')
+  assert.deepEqual(playbackReducer(afterTurn, { type: 'restart' }, 'ai'), opening)
 })

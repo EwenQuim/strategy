@@ -3,7 +3,7 @@ import { poolShapes, type BiomeDefinition } from './biome.ts'
 export const verdant: BiomeDefinition = {
   ground: 'plain',
   scatter: { terrain: 'forest', chance: 0.25 },
-  features: [{ terrain: 'lake', min: 3, max: 6, shapes: poolShapes }],
+  features: [{ terrain: 'lake', min: 3, max: 6, shapes: poolShapes, anchorBias: 'bay' }],
   theme: {
     '--biome-background': '#1c3025',
     '--biome-glow': '#51634069',

@@ -3,11 +3,12 @@ import { bendShape, lineShape, poolShapes, type BiomeDefinition } from './biome.
 export const hell: BiomeDefinition = {
   ground: 'basalt',
   features: [
-    { terrain: 'lava', min: 2, max: 3, shapes: poolShapes.slice(0, 2) },
+    { terrain: 'lava', min: 2, max: 3, shapes: poolShapes.slice(0, 2), anchorBias: 'bay' },
     {
       terrain: 'mountain',
       min: 2,
       max: 3,
+      anchorBias: 'center',
       shapes: [lineShape(3), lineShape(4), bendShape(2, 3)],
     },
   ],
