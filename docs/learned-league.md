@@ -91,6 +91,8 @@ combat-position filtering were tried. The combat fit used 378 completed non-Rand
 | Combat fit, fresh confirmation vs old Learned | 23 | 21 | 20 | 64 |
 | Combat fit, fresh Commander Brutal | 21 | 7 | 2 | 30 |
 | Combat fit, fresh depth-four beam-6 search | 18 | 8 | 4 | 30 |
+| Old Learned, same Commander Brutal scenarios | 18 | 10 | 2 | 30 |
+| Old Learned, same depth-four search scenarios | 16 | 11 | 3 | 30 |
 | Combat fit, same old maximum search budget (partial) | 6 | 3 | 5 | 14 |
 
 **These results do not establish a generally stronger replacement for `league-v1`.**
@@ -119,3 +121,12 @@ change; do not reuse old outcome labels.
 The next strength work should target missing tactical/initiative information, useful support
 energy versus already-exhausted recipients, and stalling decisions. More epochs on the same
 linear feature set or larger simulation budgets did not solve those limitations in this run.
+
+The combat fit improves scores against the two handwritten opponents on these identical
+scenario sets (70% vs 60% against Commander; 60% vs 53.3% against depthsearch). Samples remain
+small, and neither this comparison nor the direct head-to-head validates a general strength
+upgrade. Candidate weights are retained in the evidence archive for follow-up experiments.
+
+Verification: `make check` passed 203 unit tests, lint, formatting, typecheck and build;
+`make test-integration` passed all 15 tests. Collection and optimizer resume smoke checks
+passed, as did the client/Go push checks and the browser CI job.

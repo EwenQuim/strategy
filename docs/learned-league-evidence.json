@@ -21167,6 +21167,760 @@
       ]
     },
     {
+      "run": "league-v1-opponents-final",
+      "manifest": {
+        "version": 1,
+        "kind": "tournament",
+        "settings": {
+          "evaluation": {
+            "pairs": 15,
+            "maxActivations": 360,
+            "seedPrefix": "league-v2-opponents-confirmation",
+            "offset": 0,
+            "stride": 2,
+            "includeIncumbent": false,
+            "search": {
+              "model": "league-v1",
+              "simulations": 128,
+              "candidates": 16,
+              "exploration": 1.4,
+              "horizon": 16,
+              "backup": "average",
+              "pressure": 0.1
+            },
+            "opponents": [
+              {
+                "name": "commander",
+                "options": {
+                  "candidates": 12,
+                  "replies": 3,
+                  "aggression": 1.2,
+                  "caution": 1
+                }
+              },
+              {
+                "name": "depthsearch",
+                "options": {
+                  "depth": 4,
+                  "beamWidth": 6,
+                  "riskAppetite": 0,
+                  "focus": "best",
+                  "latitude": 0
+                }
+              }
+            ]
+          },
+          "scenarios": {
+            "rosters": [
+              [
+                "king",
+                "swordsman",
+                "archer"
+              ],
+              [
+                "king",
+                "wolf",
+                "swordsman",
+                "lancer",
+                "archer"
+              ],
+              [
+                "king",
+                "bulwark",
+                "bomber",
+                "magician",
+                "archer"
+              ],
+              [
+                "king",
+                "swordsman",
+                "archer",
+                "ninja",
+                "lancer"
+              ],
+              [
+                "king",
+                "wolf",
+                "berserker",
+                "hoplite",
+                "magician"
+              ]
+            ],
+            "biomes": [
+              "verdant",
+              "desert",
+              "mountains",
+              "volcano",
+              "hell"
+            ]
+          },
+          "weights": [
+            1.779104,
+            -0.736072,
+            2.92676,
+            1.287946,
+            -2.322434,
+            -0.635542,
+            -1.439121,
+            -6.279227,
+            0.319343,
+            0.952664,
+            0.472092,
+            0.002508,
+            -0.077458,
+            0.660798,
+            0.70713,
+            -0.253104,
+            0.044197,
+            1.049109,
+            1.286952,
+            0.311662,
+            0.707473,
+            0.219642,
+            1.502323,
+            -1.539527,
+            -0.605477,
+            0,
+            -0.033223
+          ],
+          "referenceOptions": {
+            "model": "league-v1",
+            "simulations": 128,
+            "candidates": 16,
+            "exploration": 1.4,
+            "horizon": 16,
+            "backup": "average",
+            "pressure": 0.1
+          }
+        },
+        "provenance": {
+          "commit": "54de598e8b732db8acf812892fb7e9617a7e5476",
+          "rulesAndBotsSha256": "28d3103d36cba9767c63526cb0bde8a34bac1a836ec0bc4cb04efc841558b811",
+          "toolingSha256": "29cfb83474c99cdcee842b2c7b9e865c7a63df2aaa1be2fa2c03d7f688fa2873",
+          "features": [
+            "kingHealth",
+            "kingCritical",
+            "material",
+            "soldierHealth",
+            "kingExposure",
+            "soldierExposure",
+            "soldierLethal",
+            "kingPressure",
+            "directDamage",
+            "focusFire",
+            "development",
+            "kingDistance",
+            "protection",
+            "energy",
+            "spring",
+            "tower",
+            "hellfire",
+            "units:swordsman",
+            "units:archer",
+            "units:magician",
+            "units:ninja",
+            "units:bulwark",
+            "units:bomber",
+            "units:hoplite",
+            "units:wolf",
+            "units:berserker",
+            "units:lancer"
+          ]
+        }
+      },
+      "artifactsSha256": "7a18671b535df2a3ad350703f980c0b970c4d6ba35285c5319d620b6cc6027b6",
+      "summaries": [
+        {
+          "file": "report.json",
+          "data": {
+            "complete": true,
+            "results": [
+              {
+                "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+                "games": 30,
+                "wins": 18,
+                "losses": 10,
+                "draws": 0,
+                "timeouts": 2,
+                "score": 0.6,
+                "pairedApprox95": [
+                  0.38191133301643876,
+                  0.8180886669835612
+                ],
+                "completedPairs": 15,
+                "timeoutRate": 0.06666666666666667,
+                "p95Ms": 158.09450000000652,
+                "worstMs": 912.2671249999548,
+                "opponentP95Ms": 311.375457999995,
+                "opponentWorstMs": 3513.7721669999883
+              },
+              {
+                "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+                "games": 30,
+                "wins": 16,
+                "losses": 11,
+                "draws": 0,
+                "timeouts": 3,
+                "score": 0.5333333333333333,
+                "pairedApprox95": [
+                  0.331206860274728,
+                  0.7354598063919386
+                ],
+                "completedPairs": 15,
+                "timeoutRate": 0.1,
+                "p95Ms": 130.19662500000413,
+                "worstMs": 603.7661669999943,
+                "opponentP95Ms": 125.54170800000429,
+                "opponentWorstMs": 1530.0714579999913
+              }
+            ]
+          }
+        }
+      ],
+      "matches": [
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 0,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 53,
+          "round": 11,
+          "elapsedMs": 2146.3050409999996
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 0,
+          "side": "player",
+          "winner": "player",
+          "activations": 72,
+          "round": 18,
+          "elapsedMs": 2432.197667
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 0,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 37,
+          "round": 7,
+          "elapsedMs": 617.450167
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 0,
+          "side": "player",
+          "winner": "player",
+          "activations": 69,
+          "round": 14,
+          "elapsedMs": 1133.3753750000005
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 2,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 85,
+          "round": 11,
+          "elapsedMs": 7685.856584000001
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 2,
+          "side": "player",
+          "winner": "player",
+          "activations": 243,
+          "round": 29,
+          "elapsedMs": 17518.479083
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 2,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 138,
+          "round": 16,
+          "elapsedMs": 6892.0075
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 2,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 135,
+          "round": 16,
+          "elapsedMs": 5098.460666999999
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 20,
+          "side": "enemy",
+          "winner": null,
+          "activations": 360,
+          "round": 171,
+          "elapsedMs": 8822.932292000041
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 20,
+          "side": "player",
+          "winner": "player",
+          "activations": 67,
+          "round": 18,
+          "elapsedMs": 2473.2181669999845
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 20,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 64,
+          "round": 20,
+          "elapsedMs": 1250.8583750000107
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 20,
+          "side": "player",
+          "winner": "player",
+          "activations": 48,
+          "round": 10,
+          "elapsedMs": 1571.2442499999888
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 22,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 84,
+          "round": 10,
+          "elapsedMs": 5750.7444160000305
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 22,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 84,
+          "round": 10,
+          "elapsedMs": 6860.997375000035
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 22,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 135,
+          "round": 19,
+          "elapsedMs": 3070.655000000028
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 22,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 101,
+          "round": 16,
+          "elapsedMs": 2481.29574999999
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 24,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 113,
+          "round": 24,
+          "elapsedMs": 5331.404334000021
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 24,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 76,
+          "round": 14,
+          "elapsedMs": 4048.3685839999816
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 24,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 62,
+          "round": 9,
+          "elapsedMs": 1628.3680419999873
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 24,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 62,
+          "round": 8,
+          "elapsedMs": 1833.0230839999858
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 26,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 91,
+          "round": 14,
+          "elapsedMs": 7134.424583999964
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 26,
+          "side": "player",
+          "winner": "player",
+          "activations": 118,
+          "round": 18,
+          "elapsedMs": 7224.454041999998
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 26,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 138,
+          "round": 19,
+          "elapsedMs": 5378.1810410000035
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 26,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 72,
+          "round": 8,
+          "elapsedMs": 2749.6833329999936
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 28,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 70,
+          "round": 10,
+          "elapsedMs": 22592.046124999993
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 28,
+          "side": "player",
+          "winner": "player",
+          "activations": 86,
+          "round": 16,
+          "elapsedMs": 21757.022875000024
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 28,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 104,
+          "round": 15,
+          "elapsedMs": 11529.890333999996
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 28,
+          "side": "player",
+          "winner": "player",
+          "activations": 58,
+          "round": 8,
+          "elapsedMs": 8831.969125000003
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 4,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 172,
+          "round": 26,
+          "elapsedMs": 8323.748999999996
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 4,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 82,
+          "round": 13,
+          "elapsedMs": 5616.729874999997
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 4,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 131,
+          "round": 22,
+          "elapsedMs": 3434.0618749999994
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 4,
+          "side": "player",
+          "winner": null,
+          "activations": 360,
+          "round": 96,
+          "elapsedMs": 7465.387499999997
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 6,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 96,
+          "round": 13,
+          "elapsedMs": 13631.49145799999
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 6,
+          "side": "player",
+          "winner": "player",
+          "activations": 185,
+          "round": 26,
+          "elapsedMs": 26741.450459
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 6,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 115,
+          "round": 14,
+          "elapsedMs": 7924.8898749999935
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 6,
+          "side": "player",
+          "winner": "player",
+          "activations": 184,
+          "round": 27,
+          "elapsedMs": 10241.967250000002
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 8,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 46,
+          "round": 6,
+          "elapsedMs": 7892.591916999983
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 8,
+          "side": "player",
+          "winner": "enemy",
+          "activations": 43,
+          "round": 5,
+          "elapsedMs": 7528.609292000008
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 8,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 43,
+          "round": 5,
+          "elapsedMs": 5283.094708000019
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 8,
+          "side": "player",
+          "winner": "player",
+          "activations": 50,
+          "round": 6,
+          "elapsedMs": 5846.283209000016
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 10,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 17,
+          "round": 3,
+          "elapsedMs": 1087.5693749999919
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 10,
+          "side": "player",
+          "winner": "player",
+          "activations": 43,
+          "round": 9,
+          "elapsedMs": 5292.518250000023
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 10,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 17,
+          "round": 3,
+          "elapsedMs": 489.61866700000246
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 10,
+          "side": "player",
+          "winner": "player",
+          "activations": 46,
+          "round": 10,
+          "elapsedMs": 1418.4156669999938
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 12,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 286,
+          "round": 35,
+          "elapsedMs": 16446.66170800003
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 12,
+          "side": "player",
+          "winner": null,
+          "activations": 360,
+          "round": 63,
+          "elapsedMs": 19683.81812499999
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 12,
+          "side": "enemy",
+          "winner": null,
+          "activations": 360,
+          "round": 44,
+          "elapsedMs": 9031.63295900001
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 12,
+          "side": "player",
+          "winner": "player",
+          "activations": 193,
+          "round": 26,
+          "elapsedMs": 3775.8868749999965
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 14,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 127,
+          "round": 21,
+          "elapsedMs": 6069.242832999997
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 14,
+          "side": "player",
+          "winner": "player",
+          "activations": 104,
+          "round": 17,
+          "elapsedMs": 4587.642583000008
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 14,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 194,
+          "round": 27,
+          "elapsedMs": 4234.585334000003
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 14,
+          "side": "player",
+          "winner": null,
+          "activations": 360,
+          "round": 53,
+          "elapsedMs": 7233.799458000023
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 16,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 114,
+          "round": 14,
+          "elapsedMs": 14149.871042000013
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 16,
+          "side": "player",
+          "winner": "player",
+          "activations": 89,
+          "round": 11,
+          "elapsedMs": 9518.065457999997
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 16,
+          "side": "enemy",
+          "winner": "enemy",
+          "activations": 139,
+          "round": 17,
+          "elapsedMs": 12100.45991700003
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 16,
+          "side": "player",
+          "winner": "player",
+          "activations": 116,
+          "round": 21,
+          "elapsedMs": 7330.684583000024
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 18,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 68,
+          "round": 9,
+          "elapsedMs": 12275.128957999987
+        },
+        {
+          "opponent": "{\"name\":\"commander\",\"options\":{\"candidates\":12,\"replies\":3,\"aggression\":1.2,\"caution\":1}}",
+          "scenario": 18,
+          "side": "player",
+          "winner": "player",
+          "activations": 88,
+          "round": 12,
+          "elapsedMs": 12961.563583999989
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 18,
+          "side": "enemy",
+          "winner": "player",
+          "activations": 41,
+          "round": 5,
+          "elapsedMs": 3637.05237499997
+        },
+        {
+          "opponent": "{\"name\":\"depthsearch\",\"options\":{\"depth\":4,\"beamWidth\":6,\"riskAppetite\":0,\"focus\":\"best\",\"latitude\":0}}",
+          "scenario": 18,
+          "side": "player",
+          "winner": "player",
+          "activations": 80,
+          "round": 10,
+          "elapsedMs": 7605.208207999996
+        }
+      ]
+    },
+    {
       "run": "league-v2-maximum-final",
       "manifest": {
         "version": 1,
