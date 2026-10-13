@@ -123,7 +123,12 @@ test('Taps re-render only the tiles they change', { timeout: 60_000 }, async (t)
   state.seed = 'tile-render-gate'
   await page.goto(origin + base)
   await page.evaluate(
-    (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+    (saved) => {
+      localStorage.setItem('hexmate.battle', JSON.stringify(saved))
+      // Skip the tutorial briefing: on slow runners it can mount after the
+      // first tap attempt and block it.
+      localStorage.setItem('hexmate.tutorial-seen', 'true')
+    },
     {
       version: BATTLE_SNAPSHOT_VERSION,
       identity: battleIdentity('ai', state.seed, DEFAULT_BOT_CONFIG, undefined),
@@ -132,12 +137,6 @@ test('Taps re-render only the tiles they change', { timeout: 60_000 }, async (t)
   )
   await page.goto(origin + base + 'game/' + state.seed)
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-  const tutorial = page.getByRole('dialog', { name: 'Quick play' })
-  if (await tutorial.isVisible()) {
-    await page.getByRole('button', { name: 'Go !', exact: true }).click()
-    await tutorial.waitFor({ state: 'hidden' })
-  }
-  await page.evaluate(() => document.querySelector<HTMLDialogElement>('dialog[open]')?.close())
   await page.waitForTimeout(500)
 
   // Inspecting the enemy swordsman only repaints its range and its own tile.
