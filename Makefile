@@ -3,7 +3,7 @@
 NPM := npm --prefix client
 GO := go -C server
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-commander bench-learned train-value retrain-value value-league bench-web record-campaign
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-commander bench-learned train-value retrain-value value-league value-optimize value-evidence bench-web record-campaign
 
 onboarding: installdeps
 
@@ -62,6 +62,12 @@ retrain-value:
 
 value-league:
 	$(NPM) run value:league -- $(ARGS)
+
+value-optimize:
+	$(NPM) run value:optimize -- $(ARGS)
+
+value-evidence:
+	$(NPM) run value:evidence -- $(ARGS)
 
 record-campaign:
 	$(NPM) run record:campaign -- $(ARGS)

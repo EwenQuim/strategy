@@ -1,17 +1,10 @@
-import { join } from 'node:path'
 import { readPipelineConfig } from './value-config.ts'
-import { collectValueGames, loadValueSamples } from './value-dataset.ts'
-import {
-  digest,
-  openRun,
-  readCheckpoint,
-  trainingProvenance,
-  writeJson,
-} from './value-artifacts.ts'
-import { fitValue } from './value-fit.ts'
+import { collectValueGames } from './value-dataset.ts'
+import { readCheckpoint } from './value-artifacts.ts'
+import { fitValueCandidate } from './value-candidate.ts'
 import { evaluateValueCandidate } from './value-tournament.ts'
-import { VALUE_FEATURES } from '../src/bots/valueFeatures.ts'
 import { BASELINE_WEIGHTS } from '../src/bots/valueModel.ts'
+import { LearnedBot } from '../src/bots/strategies/learned.ts'
 
 const [command, ...args] = process.argv.slice(2)
 const special = new Map<string, string>()
@@ -22,7 +15,10 @@ for (const arg of args) {
     resume = true
     continue
   }
-  const match = /^--(minutes|dataset|initial|candidate|reference|challenger)=(.+)$/.exec(arg)
+  const match =
+    /^--(minutes|dataset|initial|candidate|reference|challenger|referenceOptions|blend|excludeRandom|lastFraction)=(.+)$/.exec(
+      arg,
+    )
   if (match) {
     if (special.has(match[1])) throw new Error(`Duplicate option: ${match[1]}`)
     special.set(match[1], match[2])
@@ -31,40 +27,43 @@ for (const arg of args) {
 const minutes = Number(special.get('minutes') ?? 180)
 if (!Number.isFinite(minutes) || minutes <= 0) throw new Error('Invalid --minutes')
 const deadline = Date.now() + minutes * 60_000
+if (special.has('excludeRandom') && !['true', 'false'].includes(special.get('excludeRandom')!))
+  throw new Error('excludeRandom must be true or false')
 const config = readPipelineConfig(pipeline)
 if (command === 'collect') {
   await collectValueGames(config, resume, deadline, special.get('challenger'))
 } else if (command === 'fit') {
   const paths = special.get('dataset')?.split(',')
   if (!paths?.length) throw new Error('fit needs --dataset=<path[,path]>')
-  const data = loadValueSamples(paths, config.training.validationEvery)
-  if (data.sources[0].provenance.rulesAndBotsSha256 !== trainingProvenance().rulesAndBotsSha256)
-    throw new Error('Dataset rules or bots differ from the current checkout')
   const initial = special.has('initial')
     ? readCheckpoint(special.get('initial')!)
     : BASELINE_WEIGHTS
-  const settings = {
-    sources: data.sources,
-    sampleDigest: digest(data.samples),
+  const fitted = fitValueCandidate(
+    config,
+    paths,
     initial,
-    fit: config.training,
-  }
-  const directory = openRun(config.output, 'fit', settings, resume)
-  const fitted = fitValue(data.samples, initial, config.training)
-  writeJson(join(directory, 'candidate.json'), {
-    version: 1,
-    features: [...VALUE_FEATURES],
-    ...fitted,
-    completedGames: data.completed,
-    timeouts: data.timeouts,
-    positions: data.samples.length,
-    provenance: trainingProvenance(),
-  })
+    resume,
+    Number(special.get('blend') ?? 1),
+    {
+      excludeRandom: special.get('excludeRandom') === 'true',
+      lastFraction: Number(special.get('lastFraction') ?? 1),
+    },
+  )
   console.log(JSON.stringify(fitted, null, 2))
 } else if (command === 'evaluate') {
   const candidate = special.get('candidate')
   if (!candidate) throw new Error('evaluate needs --candidate=<checkpoint.json>')
-  await evaluateValueCandidate(config, candidate, resume, deadline, special.get('reference'))
+  const referenceOptions = special.has('referenceOptions')
+    ? new LearnedBot(JSON.parse(special.get('referenceOptions')!)).options
+    : config.evaluation.search
+  await evaluateValueCandidate(
+    config,
+    candidate,
+    resume,
+    deadline,
+    special.get('reference'),
+    referenceOptions,
+  )
 } else {
   throw new Error(
     'Usage: value-league collect|fit|evaluate [--config=...] [--resume] [--minutes=N]',

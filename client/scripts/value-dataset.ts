@@ -81,7 +81,14 @@ export async function collectValueGames(
   return directory
 }
 
-export function loadValueSamples(directories: readonly string[], validationEvery: number) {
+export function loadValueSamples(
+  directories: readonly string[],
+  validationEvery: number,
+  selection: { excludeRandom?: boolean; lastFraction?: number } = {},
+) {
+  const fraction = selection.lastFraction ?? 1
+  if (!Number.isFinite(fraction) || fraction <= 0 || fraction > 1)
+    throw new Error('Invalid lastFraction')
   const samples: Sample[] = []
   let completed = 0,
     timeouts = 0
@@ -90,7 +97,7 @@ export function loadValueSamples(directories: readonly string[], validationEvery
   const splits = new Map<string, number>()
   for (const directory of directories) {
     const manifest = readJson<{
-      provenance: { rulesAndBotsSha256: string }
+      provenance: { rulesAndBotsSha256: string; features: string[] }
       settings: unknown
     }>(join(directory, 'manifest.json'))
     sources.push({ directory, ...manifest })
@@ -98,9 +105,25 @@ export function loadValueSamples(directories: readonly string[], validationEvery
       .filter((file) => /^game-\d+\.json$/.test(file))
       .sort()) {
       const game = readJson<GameRecord>(join(directory, name))
+      if (
+        !Number.isSafeInteger(game.game) ||
+        typeof game.seed !== 'string' ||
+        ![null, 'player', 'enemy', 'draw'].includes(game.winner) ||
+        !Array.isArray(game.players) ||
+        !Array.isArray(game.positions) ||
+        game.positions.some(
+          (features) =>
+            !Array.isArray(features) ||
+            features.length !== manifest.provenance.features.length ||
+            !features.every(Number.isFinite),
+        )
+      )
+        throw new Error(`Invalid recorded game: ${join(directory, name)}`)
       const identity = digest([manifest.settings, game.game])
       if (seen.has(identity)) continue
       seen.add(identity)
+      if (selection.excludeRandom && game.players.some((player) => player.name === 'random'))
+        continue
       if (!game.winner) {
         timeouts++
         continue
@@ -115,9 +138,11 @@ export function loadValueSamples(directories: readonly string[], validationEvery
       }
       const label = game.winner === 'draw' ? 0.5 : game.winner === 'player' ? 1 : 0
       // Fixed-size deterministic sampling caps long games' influence without altering labels.
-      const count = Math.min(80, game.positions.length)
+      const start = Math.floor(game.positions.length * (1 - fraction))
+      const length = game.positions.length - start
+      const count = Math.min(80, length)
       for (let i = 0; i < count; i++) {
-        const features = game.positions[Math.floor((i * game.positions.length) / count)]
+        const features = game.positions[start + Math.floor((i * length) / count)]
         samples.push({ game: split, features, label })
       }
     }

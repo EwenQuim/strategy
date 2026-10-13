@@ -46,7 +46,8 @@ export function tournamentSummary(matches: readonly MatchRecord[]) {
     draws,
     timeouts,
     score: (wins + draws * 0.5) / Math.max(1, matches.length),
-    pairedApprox95: [Math.max(0, mean - margin), Math.min(1, mean + margin)],
+    pairedApprox95:
+      scores.length >= 2 ? [Math.max(0, mean - margin), Math.min(1, mean + margin)] : null,
     completedPairs: scores.length,
     timeoutRate: timeouts / Math.max(1, matches.length),
     p95Ms: percentile(times, 0.95),
@@ -62,6 +63,7 @@ export async function evaluateValueCandidate(
   resume: boolean,
   deadline: number,
   referencePath?: string,
+  referenceOptions = config.evaluation.search,
 ) {
   const weights = readCheckpoint(candidatePath)
   const reference = referencePath ? readCheckpoint(referencePath) : undefined
@@ -73,7 +75,7 @@ export async function evaluateValueCandidate(
   if (config.evaluation.includeIncumbent)
     opponents.unshift({
       label: 'incumbent',
-      config: { name: 'learned', options: config.evaluation.search },
+      config: { name: 'learned', options: referenceOptions },
       weights: reference,
     })
   const settings = {
@@ -81,6 +83,7 @@ export async function evaluateValueCandidate(
     scenarios: config.scenarios,
     weights,
     reference,
+    referenceOptions,
   }
   const directory = openRun(config.output, 'tournament', settings, resume)
   const matches: MatchRecord[] = []

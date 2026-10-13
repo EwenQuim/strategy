@@ -23,6 +23,24 @@ Pass comma-separated dataset directories to `fit` to retain earlier experience. 
 training prefixes for each generation. `evaluate --reference=<checkpoint.json>` compares
 against a frozen checkpoint instead of the configured incumbent model.
 
+`fit --blend=0.25` archives a conservative blend (25% fitted weights, 75% initialization),
+with validation loss recomputed for the persisted weights. `evaluate --referenceOptions='<JSON>'`
+keeps the reference search fixed when screening candidate search options.
+`fit --excludeRandom=true --lastFraction=0.5` trains on the latter half of completed
+non-Random games. Filtering is explicit in the fit manifest; it never relabels timeouts.
+
+For direct playing-strength optimization, `make value-optimize` evolves weight populations
+against a frozen reference using the same search budget and common seeds within a generation:
+
+```sh
+make value-optimize ARGS="--config=scripts/value-league.example.json --initial=src/bots/value-model.json --output=training-runs/evolution-001 --population=8 --generations=3 --sigma=0.3 --minutes=45"
+```
+
+Every mutation, tournament and generation winner is saved. `--resume` reuses completed matches.
+The fitness is wins minus losses per game; censored games get neither a win nor a loss, and
+their rate remains visible. Evolution results still require fresh held-out evaluation, including
+completion and latency gates; selection fitness alone does not promote a released checkpoint.
+
 ## Evidence and interruption handling
 
 - Collection writes each completed game atomically, including censored outcomes.

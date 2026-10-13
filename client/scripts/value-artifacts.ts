@@ -31,9 +31,24 @@ export function trainingProvenance() {
     .sort()
   const hash = createHash('sha256')
   for (const path of files) hash.update(path).update(readFileSync(join(root, path)))
+  const toolingFiles = execFileSync(
+    'git',
+    ['ls-files', '--cached', '--others', '--exclude-standard', 'client/scripts'],
+    {
+      cwd: root,
+      encoding: 'utf8',
+    },
+  )
+    .trim()
+    .split('\n')
+    .sort()
+  const toolingHash = createHash('sha256')
+  for (const path of toolingFiles)
+    toolingHash.update(path).update(readFileSync(join(root, path)))
   return {
     commit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     rulesAndBotsSha256: hash.digest('hex'),
+    toolingSha256: toolingHash.digest('hex'),
     features: [...VALUE_FEATURES],
   }
 }
@@ -54,7 +69,9 @@ export function openRun(
       existing.kind !== kind ||
       existing.version !== manifest.version ||
       digest(existing.settings) !== digest(settings) ||
-      existing.provenance.rulesAndBotsSha256 !== manifest.provenance.rulesAndBotsSha256
+      existing.provenance.rulesAndBotsSha256 !== manifest.provenance.rulesAndBotsSha256 ||
+      (existing.provenance.toolingSha256 !== undefined &&
+        existing.provenance.toolingSha256 !== manifest.provenance.toolingSha256)
     )
       throw new Error('Resume rejected: configuration, checkpoint, rules or bots changed')
   } else {
