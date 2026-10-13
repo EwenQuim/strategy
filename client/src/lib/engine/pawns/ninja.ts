@@ -69,7 +69,6 @@ const jump: SpecialAbility = {
     new Set(jumpLandings(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
   perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
     const target = tile && pawnAt(pawns, tile)
-    const hasTarget = !!target
 
     if (
       !destination ||
@@ -78,7 +77,7 @@ const jump: SpecialAbility = {
       return null
     }
 
-    if (hasTarget && !specialTargets(pawns, pawn, destination).includes(target)) {
+    if (tile && (!target || !specialTargets(pawns, pawn, destination).includes(target))) {
       return null
     }
 
@@ -87,7 +86,7 @@ const jump: SpecialAbility = {
       hexDist(pawn, destination) === 0 ? [] : [tiles.get(key(destination.q, destination.r))!]
     const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
 
-    if (hasTarget && target && pawn.hp > 0) {
+    if (target && pawn.hp > 0) {
       impacts.push(strike(pawns, pawn, target, pawn.attack, log))
       return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
     }

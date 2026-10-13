@@ -40,11 +40,7 @@ func (a EngineAction) Validate() error {
 		if a.Q == nil || a.R == nil {
 			return fmt.Errorf("%w: %s requires q and r", ErrInvalidAction, a.Type)
 		}
-	case ActionSpecial:
-		if a.Destination != nil && a.Target == nil {
-			return fmt.Errorf("%w: special with a destination requires a target", ErrInvalidAction)
-		}
-	case ActionEndTurn:
+	case ActionSpecial, ActionEndTurn:
 	default:
 		return fmt.Errorf("%w: unsupported action type %q", ErrInvalidAction, a.Type)
 	}
