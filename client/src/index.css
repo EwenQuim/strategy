@@ -75,6 +75,9 @@
   .combat-feedback--hit::before {
     animation: hit-flash 700ms ease-out both;
   }
+  .combat-feedback--kill::before {
+    animation: kill-flash 850ms ease-out both;
+  }
   .combat-feedback--miss::before {
     animation: miss-sweep 700ms ease-out both;
   }
@@ -177,6 +180,25 @@
   }
   15% {
     opacity: 1;
+  }
+}
+
+@keyframes kill-flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.35;
+  }
+  42% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.2;
   }
 }
 
