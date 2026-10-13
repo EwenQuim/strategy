@@ -32,7 +32,7 @@ export function tileAriaLabel({
   warned: boolean
   impactCenter: boolean
   target: boolean
-  targetLabel: string
+  targetLabel?: string
   damage: number
   lethal: boolean
   canMove: boolean
@@ -61,7 +61,7 @@ export function tileAriaLabel({
     (warned ? ', ' + bf.hellfireWarning(impactCenter) : '')
   return (
     (target
-      ? targetLabel + ' ' + label + (damage ? ', ' + bf.lavaDamage(damage, lethal) : '')
+      ? (targetLabel ?? '') + ' ' + label + (damage ? ', ' + bf.lavaDamage(damage, lethal) : '')
       : canMove
         ? bf.moveTo +
           ' ' +
