@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { createServer } from 'node:http'
-import { readFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { after, test, type TestContext } from 'node:test'
@@ -40,23 +41,26 @@ let sharedBrowser: Promise<Browser> | undefined
 after(async () => (await sharedBrowser)?.close())
 
 // The render counter is compiled out of production builds, so the gate builds
-// its own bundle with the flag on. The output stays outside dist: the PWA
-// tests assert the precache manifest covers every file under dist.
-function buildCounterDist() {
+// its own throwaway bundle with the flag on, in a temp directory outside the
+// repo: no second dist to ignore anywhere, and the PWA tests' precache
+// assertions never see it.
+async function buildCounterDist() {
+  const dist = await mkdtemp(join(tmpdir(), 'hexmate-tile-counter-'))
   execFileSync(
     process.execPath,
-    ['node_modules/vite/bin/vite.js', 'build', '--outDir', 'dist-tile-counter'],
+    ['node_modules/vite/bin/vite.js', 'build', '--outDir', dist, '--emptyOutDir'],
     {
       cwd: fileURLToPath(new URL('../', import.meta.url)),
       env: { ...process.env, VITE_TILE_RENDER_COUNTER: '1' },
       stdio: 'inherit',
     },
   )
-  return fileURLToPath(new URL('../dist-tile-counter/', import.meta.url))
+  return dist
 }
 
 async function fixture(t: TestContext) {
-  const dist = buildCounterDist()
+  const dist = await buildCounterDist()
+  t.after(() => rm(dist, { recursive: true, force: true }))
   const server = createServer(async (request, response) => {
     const path = new URL(request.url!, 'http://127.0.0.1').pathname
     const navigation = path.startsWith(base) && request.headers.accept?.includes('text/html')
