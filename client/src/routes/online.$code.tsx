@@ -6,12 +6,11 @@ import {
 import { MenuLayout } from '../components/MenuLayout'
 import { Icon } from '../components/Icon'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useState } from 'react'
-import { ApiError, health, useJoinOnlineGame, useOnlineGame } from '../api/online.ts'
+import { ApiError, health, useOnlineGame } from '../api/online.ts'
 import { Game } from '../components/Game'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
-import { readPlayerNameOrDefault, readStoredGames, saveStoredGame } from '../onlineSession.ts'
+import { readStoredGames } from '../onlineSession.ts'
 
 const statusClassName =
   menuCardClassName +
@@ -25,16 +24,17 @@ export const Route = createFileRoute('/online/$code')({
     } catch {
       throw redirect({ to: '/' })
     }
+    if (!readStoredGames().some((game) => game.code === params.code)) {
+      throw redirect({ to: '/online', search: { join: params.code } })
+    }
   },
   component: function OnlineBattle() {
     const { code } = Route.useParams()
-    const [stored, setStored] = useState(() =>
-      readStoredGames().find((game) => game.code === code),
-    )
+    const stored = readStoredGames().find((game) => game.code === code)
     const game = useOnlineGame(code, !!stored)
-    const joinGame = useJoinOnlineGame()
-    const [playerName] = useState(readPlayerNameOrDefault)
-    const [error, setError] = useState('')
+
+    // beforeLoad redirects non-players to the lobby invite flow
+    if (!stored) return null
 
     if (game.isError) {
       const status = game.error instanceof ApiError ? game.error.status : 0
@@ -45,66 +45,6 @@ export const Route = createFileRoute('/online/$code')({
             <h2 className="text-2xl font-bold tracking-tight">
               {status === 404 ? m.gameGone : common.serverUnreachable}
             </h2>
-          </div>
-        </MenuLayout>
-      )
-    }
-
-    if (!stored) {
-      const doc = game.data
-      return (
-        <MenuLayout title={m.onlineGame} backTo="/online">
-          <div className={statusClassName}>
-            <span className="grid size-20 place-items-center rounded-3xl border border-gold/20 bg-[radial-gradient(circle,#dcc48a20,transparent)] text-gold">
-              <Icon name="hex" className="size-10" />
-            </span>
-            <h2 className="text-2xl leading-tight font-bold tracking-tight">{m.joinTitle}</h2>
-            {!doc ? (
-              <p className="text-sm text-muted">{m.loading}</p>
-            ) : doc.status === 'waiting' ? (
-              <>
-                <p className="text-sm leading-relaxed text-muted">
-                  {m.hostedBy(doc.namePlayer)}
-                </p>
-                <p className="text-sm leading-relaxed text-muted">{m.joinAs(playerName)}</p>
-                <button
-                  type="button"
-                  disabled={joinGame.isPending}
-                  className={menuPrimaryButtonClassName + ' w-full'}
-                  onClick={() => {
-                    if (joinGame.isPending) return
-                    void joinGame.mutateAsync(code, playerName).then(
-                      (joined) => {
-                        saveStoredGame(joined)
-                        setStored(joined)
-                      },
-                      (cause) => {
-                        const status = cause instanceof ApiError ? cause.status : 0
-                        setError(
-                          status === 404
-                            ? m.gameGone
-                            : status === 409
-                              ? m.gameFull
-                              : common.serverUnreachable,
-                        )
-                      },
-                    )
-                  }}
-                >
-                  {m.joinGame}
-                  <Icon name="arrow" />
-                </button>
-              </>
-            ) : (
-              <p className="text-sm leading-relaxed text-muted">
-                {doc.status === 'finished' ? m.finished : m.gameFull}
-              </p>
-            )}
-            {error && (
-              <p role="alert" className="text-sm text-[#e0a586]">
-                {error}
-              </p>
-            )}
           </div>
         </MenuLayout>
       )
@@ -143,7 +83,7 @@ export const Route = createFileRoute('/online/$code')({
                         .share({
                           title: 'Hexmate',
                           text: m.shareText(doc.namePlayer),
-                          url: `${window.location.origin}/online/${code}`,
+                          url: `${window.location.origin}/online?join=${code}`,
                         })
                         .catch(() => {})
                     }}

@@ -5,12 +5,8 @@ const NAME_KEY = 'hexmate.online.name'
 const GAMES_KEY = 'hexmate.online.games'
 const PUBLIC_KEY = 'hexmate.online.public'
 
-export function readPlayerName(): string {
-  return readLocal(NAME_KEY, '', (raw) => raw)
-}
-
 export function readPlayerNameOrDefault(): string {
-  const name = readPlayerName()
+  const name = readLocal(NAME_KEY, '', (raw) => raw)
   if (name) return name
   const generated = `Player ${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`
   savePlayerName(generated)

@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import {
   getGame,
   getGetGameQueryKey,
+  joinGame,
   useCreateGame,
   useGetGame,
   useJoinGame,
@@ -58,25 +59,26 @@ export const useListOnlineGames = () => useListGames({ query: { refetchInterval:
 
 export const useCreateOnlineGame = () => {
   const mutation = useCreateGame()
-  const client = useQueryClient()
   return {
     ...mutation,
     mutateAsync: async (name: string, publicGame: boolean): Promise<StoredGame> => {
       const creds = await mutation.mutateAsync({ data: { name, public: publicGame } })
-      client.setQueryData(getGetGameQueryKey(creds.game.code), creds.game)
       return { code: creds.game.code, token: creds.token, side: 'player' }
     },
   }
 }
 
+export async function joinOnlineGame(code: string, name: string): Promise<StoredGame> {
+  const creds = await joinGame(code, { name })
+  return { code: creds.game.code, token: creds.token, side: 'enemy' }
+}
+
 export const useJoinOnlineGame = () => {
   const mutation = useJoinGame()
-  const client = useQueryClient()
   return {
     ...mutation,
     mutateAsync: async (code: string, name: string): Promise<StoredGame> => {
       const creds = await mutation.mutateAsync({ code, data: { name } })
-      client.setQueryData(getGetGameQueryKey(code), creds.game)
       return { code: creds.game.code, token: creds.token, side: 'enemy' }
     },
   }
