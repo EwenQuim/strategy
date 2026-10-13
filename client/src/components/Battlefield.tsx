@@ -13,14 +13,10 @@ import {
   type Pawn,
   type Tile,
 } from '../lib/engine'
-import { featureTexts } from '../i18n/biomes'
-import { Icon } from './Icon'
-import { tileAriaLabel, tileFill } from './battlefield-tile'
 import { SupportHalos } from './SupportFeedback'
 import { BattlefieldEffects } from './BattlefieldEffects'
+import { HexTile } from './HexTile'
 import { PawnChip } from './PawnChip'
-import { TerrainArt } from './terrains/TerrainArt'
-import { FeatureArt } from './features/FeatureArt'
 import { SIZE, hexPoints, hexX, hexY } from './hex-art'
 import type { PlayerNames } from '../lib/game-mode'
 
@@ -78,6 +74,23 @@ export function Battlefield({
     ' ',
   )
 
+  // Taps bubble up from the tiles to here, so tiles carry no callbacks and
+  // unchanged ones skip rendering entirely. The role attribute mirrors each
+  // tile's own interactive decision.
+  const onTileTap = (event: React.MouseEvent | React.KeyboardEvent) => {
+    const el =
+      event.target instanceof Element ? event.target.closest<SVGElement>('[data-q]') : null
+    const tile = el && tiles.get(key(Number(el.dataset.q), Number(el.dataset.r)))
+    if (!el || !tile) return
+    if (el.getAttribute('role') === 'button') onTileClick(tile)
+    else onInspect(tile)
+  }
+  const onTileKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    onTileTap(event)
+  }
+
   return (
     <div
       className={
@@ -97,6 +110,8 @@ export function Battlefield({
         viewBox={viewBox}
         preserveAspectRatio="xMidYMid meet"
         className="absolute inset-0 size-full drop-shadow-[0_18px_20px_#0a211b60]"
+        onClick={onTileTap}
+        onKeyDown={onTileKeyDown}
       >
         <defs>
           <pattern id="hellfire-hatch" width="9" height="9" patternUnits="userSpaceOnUse">
@@ -148,150 +163,36 @@ export function Battlefield({
         </g>
         {allTiles.map((tile) => {
           const tileKey = key(tile.q, tile.r)
-          const warned = inHellfire(hellfire, tile)
-          const impactCenter = hellfire.some((center) => sameHex(center, tile))
           const occupant = pawnAt(pawns, tile)
-          const protector = occupant && protectorFor(pawns, occupant)
-          const selected = sameHex(active, tile)
           const target = targets.has(tileKey)
           const strike = targets.get(tileKey)?.kind === 'attack'
-          const previewed = sameHex(preview, tile)
-          const rechoosing = !!rechoose && sameHex(rechoose, tile)
           const cost = reach.get(tileKey)
-          const canMove = cost !== undefined && cost > 0
-          const interactive = !!target || canMove || rechoosing
-          const feature = tile.feature && featureTexts[tile.feature]
-          const damage =
-            target && !strike && targeting === 'jump'
-              ? Number(tile.terrain === 'lava')
-              : (paths.get(tileKey)?.damage ?? 0)
-          const lethal = !!active && damage >= active.hp
-          const inRange = range.has(tileKey)
-          const threatened = threats.has(tileKey)
-          const actionLabel = tileAriaLabel({
-            tile,
-            occupant,
-            protector,
-            feature,
-            labels,
-            warned,
-            impactCenter,
-            target,
-            targetLabel: strike ? specialTexts[active!.special.name] : targetLabel,
-            damage,
-            lethal,
-            canMove,
-            cost,
-            inRange,
-            threatened,
-            rechoose: rechoosing,
-          })
-          const fill = tileFill({
-            interactive,
-            damage,
-            occupant,
-            target,
-            strike,
-            selected,
-            previewed,
-            canMove,
-            terrain: tile.terrain,
-            inRange,
-          })
           return (
-            <g
+            <HexTile
               key={tileKey}
-              transform={'translate(' + hexX(tile.q, tile.r) + ' ' + hexY(tile.r) + ')'}
-              data-terrain={tile.terrain}
-              data-feature={tile.feature}
-              data-hellfire={warned || undefined}
-              data-hellfire-center={impactCenter || undefined}
-              className="group/tile outline-none [&[role=button]]:cursor-pointer"
-              data-testid="hex-tile"
-              role={interactive ? 'button' : 'img'}
-              tabIndex={interactive ? 0 : undefined}
-              aria-label={actionLabel}
-              onClick={() => (interactive ? onTileClick(tile) : onInspect(tile))}
-              onKeyDown={
-                interactive
-                  ? (event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        onTileClick(tile)
-                      }
-                    }
-                  : undefined
+              tile={tile}
+              occupant={occupant}
+              protector={occupant && protectorFor(pawns, occupant)}
+              active={active}
+              cost={cost}
+              damage={
+                target && !strike && targeting === 'jump'
+                  ? Number(tile.terrain === 'lava')
+                  : (paths.get(tileKey)?.damage ?? 0)
               }
-            >
-              <title>{actionLabel}</title>
-              <polygon
-                data-testid="tile-face"
-                className={
-                  'group-focus-visible/tile:fill-[#f1db9c] group-focus-visible/tile:brightness-120' +
-                  (interactive ? ' group-hover/tile:brightness-120' : '')
-                }
-                points={hexPoints}
-                fill={fill}
-                stroke="#ecedcc"
-                strokeOpacity="var(--tile-stroke-opacity, .13)"
-                strokeWidth="1"
-              />
-              <polygon
-                points={hexPoints}
-                fill="url(#tile-light)"
-                className="pointer-events-none opacity-[var(--tile-light-opacity,1)]"
-              />
-              {(tile.terrain === 'lava' || (!occupant && !tile.feature)) && (
-                <TerrainArt terrain={tile.terrain} variant={Math.abs(tile.q + tile.r) % 3} />
-              )}
-              {!occupant && tile.feature && <FeatureArt feature={tile.feature} />}
-              {warned && (
-                <g className="pointer-events-none" aria-hidden="true">
-                  <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
-                </g>
-              )}
-              {threatened && (
-                <polygon
-                  points={hexPoints}
-                  fill="url(#threat-hatch)"
-                  className="pointer-events-none"
-                  aria-hidden="true"
-                />
-              )}
-              {canMove && !occupant && (
-                <g className="pointer-events-none">
-                  <circle cy="20" r="7" fill="#213f30" fillOpacity=".8" />
-                  <text
-                    y="23.4"
-                    textAnchor="middle"
-                    fill="#f0edcc"
-                    fontSize="10"
-                    fontWeight="600"
-                  >
-                    {cost}
-                  </text>
-                </g>
-              )}
-              {previewed && !occupant && (
-                <g
-                  transform="translate(-12 -12)"
-                  color="#fff4cb"
-                  className="pointer-events-none"
-                >
-                  <Icon name="arrow" />
-                </g>
-              )}
-              {target && (
-                <circle
-                  r="26"
-                  fill="none"
-                  stroke="#f8d4b0"
-                  strokeWidth="1.3"
-                  strokeDasharray="3 4"
-                  className="pointer-events-none"
-                />
-              )}
-            </g>
+              target={target}
+              strike={strike}
+              targetLabel={
+                target ? (strike ? specialTexts[active!.special.name] : targetLabel) : ''
+              }
+              previewed={sameHex(preview, tile)}
+              rechoosing={!!rechoose && sameHex(rechoose, tile)}
+              inRange={range.has(tileKey)}
+              threatened={threats.has(tileKey)}
+              warned={inHellfire(hellfire, tile)}
+              impactCenter={hellfire.some((center) => sameHex(center, tile))}
+              labels={labels}
+            />
           )
         })}
       </svg>
