@@ -62,12 +62,16 @@ function tilePropsEqual(prev: HexTileProps, next: HexTileProps) {
 }
 
 // Render counter read by tests/perf.browser.ts: taps must not re-render the
-// whole board, and this regression is invisible to timing metrics. The
-// increment lives outside the component so neither lint nor the React
-// Compiler sees a mutation of outer-scope state in the render path.
+// whole board, and this regression is invisible to timing metrics. The flag is
+// false in production builds, so the whole branch is dead-code eliminated and
+// clients ship no counter. The increment lives outside the component so
+// neither lint nor the React Compiler sees a mutation of outer-scope state in
+// the render path.
 function countTileRender() {
-  const counter = window as { __hexmateTileRenders?: number }
-  counter.__hexmateTileRenders = (counter.__hexmateTileRenders ?? 0) + 1
+  if (import.meta.env.VITE_TILE_RENDER_COUNTER) {
+    const counter = window as { __hexmateTileRenders?: number }
+    counter.__hexmateTileRenders = (counter.__hexmateTileRenders ?? 0) + 1
+  }
 }
 
 // One hex of the board. Taps are delegated to the battlefield, so a tile holds

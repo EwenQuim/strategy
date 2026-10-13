@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
@@ -38,8 +39,24 @@ let sharedBrowser: Promise<Browser> | undefined
 
 after(async () => (await sharedBrowser)?.close())
 
+// The render counter is compiled out of production builds, so the gate builds
+// its own bundle with the flag on. The output stays outside dist: the PWA
+// tests assert the precache manifest covers every file under dist.
+function buildCounterDist() {
+  execFileSync(
+    process.execPath,
+    ['node_modules/vite/bin/vite.js', 'build', '--outDir', 'dist-tile-counter'],
+    {
+      cwd: fileURLToPath(new URL('../', import.meta.url)),
+      env: { ...process.env, VITE_TILE_RENDER_COUNTER: '1' },
+      stdio: 'inherit',
+    },
+  )
+  return fileURLToPath(new URL('../dist-tile-counter/', import.meta.url))
+}
+
 async function fixture(t: TestContext) {
-  const dist = fileURLToPath(new URL('../dist/', import.meta.url))
+  const dist = buildCounterDist()
   const server = createServer(async (request, response) => {
     const path = new URL(request.url!, 'http://127.0.0.1').pathname
     const navigation = path.startsWith(base) && request.headers.accept?.includes('text/html')
