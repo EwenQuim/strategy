@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fitValue } from '../scripts/value-fit.ts'
 import { acceptanceFailures } from '../scripts/value-pipeline.ts'
-import { LearnedBot } from '../src/bots/strategies/learned.ts'
+import { HannibalBot } from '../src/bots/strategies/hannibal.ts'
 
 test('Retraining overrides are typed, independent and reject unknown fields before starting work', () => {
   const config = readPipelineConfig([
@@ -111,6 +111,6 @@ test('Candidate acceptance needs predictive improvement, match strength, complet
 })
 
 test('Candidate weights are validated and copied into an independent bot', () => {
-  assert.throws(() => new LearnedBot({}, [NaN]), RangeError)
-  assert.throws(() => new LearnedBot({}, [1]), RangeError)
+  assert.throws(() => new HannibalBot({}, [NaN]), RangeError)
+  assert.throws(() => new HannibalBot({}, [1]), RangeError)
 })

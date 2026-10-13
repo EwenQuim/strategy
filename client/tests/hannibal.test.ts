@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { LearnedBot, LEARNED_LEVELS } from '../src/bots/strategies/learned.ts'
+import { HannibalBot, HANNIBAL_LEVELS } from '../src/bots/strategies/hannibal.ts'
 import { VALUE_FEATURES, valueFeatures, outcome } from '../src/bots/valueFeatures.ts'
 import { VALUE_MODELS, predictValue } from '../src/bots/valueModel.ts'
 import { getBot, parseBotConfig } from '../src/bots/catalog.ts'
@@ -39,8 +39,8 @@ test('Learned features and probabilities swap perspective exactly without encodi
 })
 
 test('Every preset round trips through the shared catalog with owned immutable options', () => {
-  for (const options of Object.values(LEARNED_LEVELS)) {
-    const config = { name: 'learned', options } as const
+  for (const options of Object.values(HANNIBAL_LEVELS)) {
+    const config = { name: 'hannibal', options } as const
     assert.deepEqual(parseBotConfig(JSON.parse(JSON.stringify(config))), config)
     assert.deepEqual(getBot(config).options, options)
     assert.notEqual(getBot(config), getBot(config))
@@ -52,7 +52,7 @@ test('Every preset round trips through the shared catalog with owned immutable o
     { model: 'missing' },
     { horizon: 65 },
   ])
-    assert.throws(() => new LearnedBot(options as never), RangeError)
+    assert.throws(() => new HannibalBot(options as never), RangeError)
 })
 
 test('A winning signature is selected even with one simulation and dense alternate plans', async () => {
@@ -63,7 +63,7 @@ test('A winning signature is selected even with one simulation and dense alterna
     new Swordsman(4, 2, 1, 'enemy'),
   ])
   const before = structuredClone(state)
-  const actions = await new LearnedBot({ simulations: 1 }).chooseActions(state)
+  const actions = await new HannibalBot({ simulations: 1 }).chooseActions(state)
   const result = actions.reduce(reducer, state)
   assert.equal(result.winner, 'player')
   assert.equal(outcome(result, 'player'), 1)
@@ -78,10 +78,10 @@ test('Enemy initiative can repeat; the learned search defends against a direct w
     new Swordsman(3, 5, -3, 'player'),
     new King(4, 5, 5, 'player'),
   ])
-  const actions = await new LearnedBot({ simulations: 32 }).chooseActions(state)
+  const actions = await new HannibalBot({ simulations: 32 }).chooseActions(state)
   const next = actions.reduce(reducer, state)
   if (next.winner === 'enemy') return
-  const enemyReply = await new LearnedBot({ simulations: 64 }).chooseActions(next)
+  const enemyReply = await new HannibalBot({ simulations: 64 }).chooseActions(next)
   assert.notEqual(enemyReply.reduce(reducer, next).winner, 'player')
 })
 
@@ -93,7 +93,7 @@ test('Search proposes a legal complete activation, is deterministic and ignores 
     new King(4, 4, 0, 'enemy'),
   ])
   const before = structuredClone(state)
-  const bot = new LearnedBot({ simulations: 32 })
+  const bot = new HannibalBot({ simulations: 32 })
   const actions = await bot.chooseActions(state)
   assert.deepEqual(await bot.chooseActions({ ...state, randomState: 12345 }), actions)
   let next = state

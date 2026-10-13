@@ -1,7 +1,7 @@
-# Commander: a new default local bot
+# Napoleon: the default local bot
 
 Built on the signature rules of PR #114 and the merged #117/#118 follow-ups. Implementation:
-`client/src/bots/strategies/commander.ts`, registered through `BOTS` and implementing `Bot<Options>`.
+`client/src/bots/strategies/napoleon.ts`, registered through `BOTS` and implementing `Bot<Options>`.
 
 ## Decision model
 
@@ -33,7 +33,7 @@ Every level authors the same configuration used by custom play, URLs and battle 
 ```json
 {
   "bot": {
-    "name": "commander",
+    "name": "napoleon",
     "options": { "candidates": 12, "replies": 3, "aggression": 2, "caution": 1 }
   },
   "setup": { "biome": "volcano", "map": ["..."], "player": [], "enemy": [] }
@@ -44,14 +44,14 @@ The abbreviated setup above only illustrates field placement. Real authored setu
 
 `client/src/campaign.ts` resolves configurations through the catalog and rejects unknown bots or invalid options. Strategy does not live in `FixedBattleSetup`; `enemyStance`, campaign depth overrides and level difficulty dispatch are removed. New campaign-specific strategies can implement `Bot`, register once in `BOTS`, and be selected by any level. Their internal phases remain their own concern.
 
-Tutorial and Original use Commander Easy/Normal. Brutal uses its strongest candidate/reply settings throughout. Ember Spring uses aggression 2: a committed assault remains difficult but gives a reproducible counterattack, whereas its balanced play defeated every tested player policy. Story packs retain their explicitly authored legacy search configurations; Three Against the Horde selects an aggressive Commander configuration.
+Authored campaign bot configurations live in the campaign packs; their options and presets are defined by the strategy implementation.
 
 ## Evidence and acceptance
 
-- `make bench-commander`: six symmetric 5v5 seeds, both Commander sides, against legacy depth-four Hard. Latest run on the merged baseline: **6 wins, 5 losses, 1 unfinished**. This is a small regression benchmark, not evidence of overwhelming general superiority.
+- The Napoleon benchmark target in the Makefile runs symmetric 5v5 seeds on both sides against legacy depth-four Hard. Latest run on the merged baseline: **6 wins, 5 losses, 1 unfinished**. This is a small regression benchmark, not evidence of overwhelming general superiority.
 - Latest native run after #118: p95 **361 ms**, worst **810 ms**. At 6× browser CPU throttling, the earlier measured Brutal sample had a worst main-thread bot task of **508 ms**, with **zero idle paints**. A deterministic evaluation budget is not a wall-clock guarantee.
 - `make record-campaign ARGS="--write"`: freshly solved all **78** levels against their authored bots. Re-recording updates only solved entries and includes the bot configuration in fixture identity.
-- Brutal: five recorded victories finish with a **1-HP king** (levels 1, 2, 5, 14, 19); level 4 required the Commander assault player policy instead of the existing scripted search player. No maps or armies were weakened.
+- Brutal: five recorded victories finish with a **1-HP king** (levels 1, 2, 5, 14, 19); level 4 required the Napoleon assault player policy instead of the existing scripted search player. No maps or armies were weakened.
 - Integration replays recorded human decisions against **fresh live bots**, in addition to replaying engine commands. Historical enemy commands alone cannot establish that a level remains beatable.
 
 The requested “Brutal feels hard to win” is a playtest acceptance criterion. Tight victories and benchmark results are useful proxies, not a substitute for human play. Check focus fire, king pressure, useful repositioning and whether repeated retreat can force a stalemate. One benchmark remained unfinished; anti-stall strength is a follow-up target.
@@ -59,7 +59,7 @@ The requested “Brutal feels hard to win” is a playtest acceptance criterion.
 ## Reproduction
 
 ```sh
-make bench-commander
+make bench-napoleon
 make record-campaign ARGS="brutal 14 --write"
 make lint
 make check

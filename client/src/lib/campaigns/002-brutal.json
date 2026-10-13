@@ -4,7 +4,7 @@
     "name": "First Watch",
     "seed": "brutal-v2-1",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -28,7 +28,7 @@
     "name": "Bowmen",
     "seed": "brutal-v2-2",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -54,7 +54,7 @@
     "name": "River Guard",
     "seed": "brutal-v2-3",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -89,7 +89,7 @@
     "name": "Forest Magic",
     "seed": "brutal-v2-4",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -126,7 +126,7 @@
     "name": "Highland Keep",
     "seed": "brutal-v2-5",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -163,7 +163,7 @@
     "name": "High Pass",
     "seed": "brutal-v2-6",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -200,7 +200,7 @@
     "name": "Stone Wall",
     "seed": "brutal-v2-7",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -238,7 +238,7 @@
     "name": "Powder Lesson",
     "seed": "brutal-v2-8",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -274,7 +274,7 @@
     "name": "Split Battery",
     "seed": "brutal-v2-9",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -310,7 +310,7 @@
     "name": "Dune Patrol",
     "seed": "brutal-v2-10",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -348,7 +348,7 @@
     "name": "Twin Daggers",
     "seed": "brutal-v2-11",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -386,7 +386,7 @@
     "name": "Iron Caravan",
     "seed": "brutal-v2-12",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -424,7 +424,7 @@
     "name": "Ember Crossing",
     "seed": "brutal-v2-13",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -460,7 +460,7 @@
     "name": "Ember Spring",
     "seed": "brutal-v2-14",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 2, "caution": 1 }
     },
     "setup": {
@@ -498,7 +498,7 @@
     "name": "Cinder Keep",
     "seed": "brutal-v2-15",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -536,7 +536,7 @@
     "name": "Wizard Curtain",
     "seed": "brutal-v2-16",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -574,7 +574,7 @@
     "name": "Hell's Gate",
     "seed": "brutal-v2-17",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -615,7 +615,7 @@
     "name": "Caldera Run",
     "seed": "brutal-v2-18",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -653,7 +653,7 @@
     "name": "Royal Guard",
     "seed": "brutal-v2-19",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {
@@ -693,7 +693,7 @@
     "name": "Last Crown",
     "seed": "brutal-v2-20",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 12, "replies": 3, "aggression": 1.2, "caution": 1 }
     },
     "setup": {

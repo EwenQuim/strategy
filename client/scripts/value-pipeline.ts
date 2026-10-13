@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { activePawn, reducer } from '../src/lib/engine/index.ts'
 import { getBot } from '../src/bots/catalog.ts'
-import { LearnedBot } from '../src/bots/strategies/learned.ts'
+import { HannibalBot } from '../src/bots/strategies/hannibal.ts'
 import { BASELINE_WEIGHTS } from '../src/bots/valueModel.ts'
 import { valueFeatures, VALUE_FEATURES } from '../src/bots/valueFeatures.ts'
 import type { Bot } from '../src/bots/bot.ts'
@@ -64,7 +64,7 @@ async function evaluate(
         config.scenarios.rosters,
         config.scenarios.biomes,
       )
-      const bot = new LearnedBot(options.search, weights)
+      const bot = new HannibalBot(options.search, weights)
       for (let turn = 0; turn < options.maxActivations && !state.winner; turn++) {
         const ours = activePawn(state)!.side === side
         const before = performance.now()
@@ -183,7 +183,7 @@ export async function runValuePipeline(config: PipelineConfig) {
       await evaluate(
         config,
         candidate.weights,
-        new LearnedBot(config.evaluation.search),
+        new HannibalBot(config.evaluation.search),
         'incumbent',
       ),
     )

@@ -1,4 +1,4 @@
-import { CommanderBot, COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NapoleonBot, NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import {
@@ -27,12 +27,12 @@ for (const seed of seeds) {
       },
       'player',
     )
-    const commander = new CommanderBot(COMMANDER_LEVELS.brutal)
+    const napoleon = new NapoleonBot(NAPOLEON_LEVELS.brutal)
     const legacy = new DepthsearchBot({ ...BOT_LEVELS.hard, depth: 4 })
     for (let turn = 0; turn < 240 && !state.winner; turn++) {
       const acting: Side = activePawn(state)!.side
       const start = performance.now()
-      const actions = await (acting === side ? commander : legacy).chooseActions(state)
+      const actions = await (acting === side ? napoleon : legacy).chooseActions(state)
       if (acting === side) times.push(performance.now() - start)
       for (const action of actions) {
         const next = reducer(state, action)
@@ -44,13 +44,13 @@ for (const seed of seeds) {
     else if (state.winner && state.winner !== 'draw') losses++
     else unfinished++
     console.log(
-      `${seed} / Commander ${side}: ${state.winner ?? 'unfinished'}, round ${state.round}`,
+      `${seed} / Napoleon ${side}: ${state.winner ?? 'unfinished'}, round ${state.round}`,
     )
   }
 }
 times.sort((a, b) => a - b)
 console.log(
-  `Commander Brutal vs depth-four Hard: ${wins} wins, ${losses} losses, ${unfinished} draws/unfinished`,
+  `Napoleon Brutal vs depth-four Hard: ${wins} wins, ${losses} losses, ${unfinished} draws/unfinished`,
 )
 console.log(
   `Decisions: p95 ${times[Math.ceil(times.length * 0.95) - 1].toFixed(1)} ms, worst ${times.at(-1)!.toFixed(1)} ms`,

@@ -1,6 +1,6 @@
-import type { BotDifficulty } from '../lib/engine/ai'
-import type { BotName } from '../bots/catalog'
-import { plural, t } from './locale'
+import type { BotDifficulty } from '../lib/engine/ai.ts'
+import type { BotName } from '../bots/catalog.ts'
+import { plural, t } from './locale.ts'
 
 export const chooseMode = t({
   en: 'Choose game mode',
@@ -118,44 +118,44 @@ export const aiStrategy = t({
 })
 export const aiStrategies = t<Record<BotName, string>>({
   en: {
-    commander: 'Commander AI',
-    learned: 'Learned search AI',
-    depthsearch: 'Depth search AI',
-    random: 'Random AI',
-    mistral: 'Mistral AI',
-    jev: 'Jev AI',
+    napoleon: 'Napoleon',
+    hannibal: 'Hannibal',
+    depthsearch: 'Sun Tzu',
+    random: 'Pyrrhus',
+    mistral: 'Alexander',
+    jev: 'Scipio',
   },
   fr: {
-    commander: 'IA Commandant',
-    learned: 'IA Recherche apprise',
-    depthsearch: 'IA Recherche',
-    random: 'Aléatoire',
-    mistral: 'IA Mistral',
-    jev: 'IA Jev',
+    napoleon: 'Napoléon',
+    hannibal: 'Hannibal',
+    depthsearch: 'Sun Tzu',
+    random: 'Pyrrhus',
+    mistral: 'Alexandre',
+    jev: 'Scipion',
   },
   de: {
-    commander: 'Kommandant KI',
-    learned: 'Lernende Such-KI',
-    depthsearch: 'Such-KI',
-    random: 'Zufall',
-    mistral: 'Mistral KI',
-    jev: 'Jev KI',
+    napoleon: 'Napoleon',
+    hannibal: 'Hannibal',
+    depthsearch: 'Sun Tzu',
+    random: 'Pyrrhos',
+    mistral: 'Alexander',
+    jev: 'Scipio',
   },
   es: {
-    commander: 'IA Comandante',
-    learned: 'IA Búsqueda aprendida',
-    depthsearch: 'IA Búsqueda',
-    random: 'Aleatoria',
-    mistral: 'IA Mistral',
-    jev: 'IA Jev',
+    napoleon: 'Napoleón',
+    hannibal: 'Aníbal',
+    depthsearch: 'Sun Tzu',
+    random: 'Pirro',
+    mistral: 'Alejandro',
+    jev: 'Escipión',
   },
   it: {
-    commander: 'IA Comandante',
-    learned: 'IA Ricerca appresa',
-    depthsearch: 'IA Ricerca',
-    random: 'Casuale',
-    mistral: 'IA Mistral',
-    jev: 'IA Jev',
+    napoleon: 'Napoleone',
+    hannibal: 'Annibale',
+    depthsearch: 'Sun Tzu',
+    random: 'Pirro',
+    mistral: 'Alessandro',
+    jev: 'Scipione',
   },
 })
 export const biome = t({ en: 'Biome', fr: 'Biome', de: 'Biom', es: 'Bioma', it: 'Bioma' })

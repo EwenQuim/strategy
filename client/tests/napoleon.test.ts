@@ -1,31 +1,31 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { CommanderBot, COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NapoleonBot, NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 import { BOTS, DEFAULT_BOT_CONFIG, getBot, parseBotConfig } from '../src/bots/catalog.ts'
 import { evaluateArmy } from '../src/lib/engine/ai/army.ts'
 import { Archer, King, Ninja, Swordsman, activePawn, reducer } from '../src/lib/engine/index.ts'
 import { field } from './field.ts'
 
-test('Commander is the default and all presets retain independent options through URL serialization', () => {
-  assert.equal(DEFAULT_BOT_CONFIG.name, 'commander')
-  for (const options of Object.values(COMMANDER_LEVELS)) {
-    const config = { name: 'commander', options } as const
+test('Napoleon is the default and all presets retain independent options through URL serialization', () => {
+  assert.equal(DEFAULT_BOT_CONFIG.name, 'napoleon')
+  for (const options of Object.values(NAPOLEON_LEVELS)) {
+    const config = { name: 'napoleon', options } as const
     const restored = parseBotConfig(JSON.parse(JSON.stringify(config)))
     assert.deepEqual(restored, config)
     assert.deepEqual(getBot(restored).options, options)
     assert.notEqual(getBot(restored), getBot(restored))
   }
-  assert.deepEqual(BOTS.commander.presets.brutal, COMMANDER_LEVELS.brutal)
+  assert.deepEqual(BOTS.napoleon.presets.brutal, NAPOLEON_LEVELS.brutal)
   for (const options of [
     { candidates: 0 },
     { replies: 5 },
     { caution: NaN },
     { aggression: -1 },
   ])
-    assert.throws(() => new CommanderBot(options), RangeError)
+    assert.throws(() => new NapoleonBot(options), RangeError)
 })
 
-test('Every Commander preset takes a winning signature and leaves the input untouched', async () => {
+test('Every Napoleon preset takes a winning signature and leaves the input untouched', async () => {
   const state = field([
     new Archer(1, 0, 0, 'player'),
     new King(2, -3, 0, 'player'),
@@ -33,15 +33,15 @@ test('Every Commander preset takes a winning signature and leaves the input unto
     new Swordsman(4, 2, 1, 'enemy'),
   ])
   const before = structuredClone(state)
-  for (const options of Object.values(COMMANDER_LEVELS)) {
-    const actions = await new CommanderBot(options).chooseActions(state)
+  for (const options of Object.values(NAPOLEON_LEVELS)) {
+    const actions = await new NapoleonBot(options).chooseActions(state)
     assert.equal(actions.reduce(reducer, state).winner, 'player')
     assert.ok(actions.filter((action) => action.type === 'special').length <= 1)
   }
   assert.deepEqual(structuredClone(state), before)
 })
 
-test('Commander saves a threatened king when the threatening enemy acts beyond depth four', async () => {
+test('Napoleon saves a threatened king when the threatening enemy acts beyond depth four', async () => {
   const king = new King(1, 0, 0, 'enemy', 3)
   const ninja = new Ninja(6, 2, 0, 'player')
   const state = field([
@@ -53,7 +53,7 @@ test('Commander saves a threatened king when the threatening enemy acts beyond d
     ninja,
     new King(7, 5, 5, 'player'),
   ])
-  const actions = await new CommanderBot(COMMANDER_LEVELS.brutal).chooseActions(state)
+  const actions = await new NapoleonBot(NAPOLEON_LEVELS.brutal).chooseActions(state)
   const next = actions.reduce(reducer, state)
   const survivor = next.pawns.find((pawn) => pawn.id === king.id)!
   assert.ok(survivor)
@@ -63,7 +63,7 @@ test('Commander saves a threatened king when the threatening enemy acts beyond d
   let threatened = next
   while (activePawn(threatened)?.id !== ninja.id)
     threatened = reducer(threatened, { type: 'endTurn' })
-  const response = await new CommanderBot(COMMANDER_LEVELS.brutal).chooseActions(threatened)
+  const response = await new NapoleonBot(NAPOLEON_LEVELS.brutal).chooseActions(threatened)
   assert.notEqual(response.reduce(reducer, threatened).winner, 'player')
 })
 
@@ -90,14 +90,14 @@ test('Army evaluation rewards another ally gaining a productive position and rec
   )
 })
 
-test('Commander is deterministic, ends its activation and does not peek at future Hellfire randomness', async () => {
+test('Napoleon is deterministic, ends its activation and does not peek at future Hellfire randomness', async () => {
   const state = field([
     new Swordsman(1, 0, 0, 'player'),
     new King(2, -4, 0, 'player'),
     new Swordsman(3, 2, 0, 'enemy'),
     new King(4, 4, 0, 'enemy'),
   ])
-  const bot = new CommanderBot()
+  const bot = new NapoleonBot()
   const expected = await bot.chooseActions(state)
   for (const randomState of [1, 23, 54321])
     assert.deepEqual(await bot.chooseActions({ ...state, randomState }), expected)

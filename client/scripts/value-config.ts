@@ -6,7 +6,7 @@ import { validateSetup } from '../src/lib/engine/setup.ts'
 import type { PawnKind } from '../src/lib/engine/pawns/index.ts'
 import { TRAINING_ROSTERS, TRAINING_BIOMES } from './learned-matches.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
-import { LEARNED_LEVELS, LearnedBot } from '../src/bots/strategies/learned.ts'
+import { HANNIBAL_LEVELS, HannibalBot } from '../src/bots/strategies/hannibal.ts'
 import type { FitOptions } from './value-fit.ts'
 
 function readBotConfigs(value: unknown): BotConfig[] {
@@ -40,7 +40,7 @@ export type PipelineConfig = {
     stride: number
     opponents: BotConfig[]
     includeIncumbent: boolean
-    search: LearnedBot['options']
+    search: HannibalBot['options']
   }
   acceptance: {
     minScore: number
@@ -67,7 +67,7 @@ const PIPELINE_DEFAULTS: PipelineConfig = {
       { name: 'depthsearch', options: BOT_LEVELS.easy },
       { name: 'depthsearch', options: BOT_LEVELS.normal },
       { name: 'depthsearch', options: BOT_LEVELS.hard },
-      BOTS.commander.defaultConfig,
+      BOTS.napoleon.defaultConfig,
       BOTS.random.defaultConfig,
     ],
   },
@@ -78,7 +78,7 @@ const PIPELINE_DEFAULTS: PipelineConfig = {
     offset: 0,
     stride: 2,
     includeIncumbent: true,
-    search: LEARNED_LEVELS.normal,
+    search: HANNIBAL_LEVELS.normal,
     opponents: [{ name: 'depthsearch', options: { ...BOT_LEVELS.hard, depth: 4 } }],
   },
   acceptance: {
@@ -170,7 +170,7 @@ function validatePipeline(config: PipelineConfig): void {
   for (const league of [config.training.league, config.evaluation.opponents]) {
     readBotConfigs(league)
   }
-  new LearnedBot(config.evaluation.search)
+  new HannibalBot(config.evaluation.search)
 }
 
 // --section.field=value overrides any scalar; arrays/objects are supplied through --config.

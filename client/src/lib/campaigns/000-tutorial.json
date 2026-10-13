@@ -4,7 +4,7 @@
     "name": "First Steps",
     "seed": "tutorial-v2-1",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 3, "replies": 1, "aggression": 1.2, "caution": 0.35 }
     },
     "setup": {
