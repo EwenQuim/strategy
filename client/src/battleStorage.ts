@@ -6,7 +6,7 @@ import {
   snapshotState,
 } from './lib/battleSnapshot.ts'
 import type { BattleSetup, GameState } from './lib/engine/index.ts'
-import type { BotConfig } from './bots/catalog.ts'
+import { canonicalBotName, type BotConfig } from './bots/catalog.ts'
 import type { GameMode } from './lib/game-mode.ts'
 
 // A single slot for the current battle: every save overwrites the previous game.
@@ -23,7 +23,16 @@ export function readBattleFromLocalStorage(
     if (typeof saved !== 'object' || saved === null) return null
     const { version, identity, state } = saved as Record<string, unknown>
     if (version !== BATTLE_SNAPSHOT_VERSION) return null
-    if (!isSameBattle(identity, battleIdentity(mode, seed, bot, setup))) return null
+    if (typeof identity !== 'object' || identity === null) return null
+    const savedIdentity = identity as Record<string, unknown>
+    if (typeof savedIdentity.bot !== 'string') return null
+    const savedBot = JSON.parse(savedIdentity.bot) as Record<string, unknown>
+    if (typeof savedBot.name !== 'string') return null
+    const migratedIdentity = {
+      ...savedIdentity,
+      bot: JSON.stringify({ ...savedBot, name: canonicalBotName(savedBot.name) }),
+    }
+    if (!isSameBattle(migratedIdentity, battleIdentity(mode, seed, bot, setup))) return null
     return restoreState(state)
   } catch {
     return null

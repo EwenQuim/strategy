@@ -875,7 +875,7 @@
     "name": "Three Against the Horde",
     "seed": "ring-v1-9",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 2, "caution": 0.5 }
     },
     "setup": {

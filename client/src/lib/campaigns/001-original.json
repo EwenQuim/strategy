@@ -4,7 +4,7 @@
     "name": "First Watch",
     "seed": "campaign-v2-1",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -27,7 +27,7 @@
     "name": "Bowmen",
     "seed": "campaign-v2-2",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -52,7 +52,7 @@
     "name": "River Guard",
     "seed": "campaign-v2-3",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -86,7 +86,7 @@
     "name": "Forest Magic",
     "seed": "campaign-v2-4",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -122,7 +122,7 @@
     "name": "Highland Keep",
     "seed": "campaign-v2-5",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -158,7 +158,7 @@
     "name": "High Pass",
     "seed": "campaign-v2-6",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -194,7 +194,7 @@
     "name": "Stone Wall",
     "seed": "campaign-v2-7",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -230,7 +230,7 @@
     "name": "Powder Lesson",
     "seed": "campaign-v2-8",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -266,7 +266,7 @@
     "name": "Split Battery",
     "seed": "campaign-v2-9",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -301,7 +301,7 @@
     "name": "Dune Patrol",
     "seed": "campaign-v2-10",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -338,7 +338,7 @@
     "name": "Twin Daggers",
     "seed": "campaign-v2-11",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -374,7 +374,7 @@
     "name": "Iron Caravan",
     "seed": "campaign-v2-12",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -411,7 +411,7 @@
     "name": "Ember Crossing",
     "seed": "campaign-v2-13",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -446,7 +446,7 @@
     "name": "Ember Spring",
     "seed": "campaign-v2-14",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -483,7 +483,7 @@
     "name": "Cinder Keep",
     "seed": "campaign-v2-15",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -520,7 +520,7 @@
     "name": "Wizard Curtain",
     "seed": "campaign-v2-16",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -557,7 +557,7 @@
     "name": "Hell's Gate",
     "seed": "campaign-v2-17",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -596,7 +596,7 @@
     "name": "Caldera Run",
     "seed": "campaign-v2-18",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -633,7 +633,7 @@
     "name": "Royal Guard",
     "seed": "campaign-v2-19",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {
@@ -672,7 +672,7 @@
     "name": "Last Crown",
     "seed": "campaign-v2-20",
     "bot": {
-      "name": "commander",
+      "name": "napoleon",
       "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
     },
     "setup": {

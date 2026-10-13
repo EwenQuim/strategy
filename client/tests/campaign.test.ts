@@ -20,7 +20,7 @@ import {
 } from '../src/lib/engine/index.ts'
 import { turnPlans } from '../src/lib/engine/ai/turns.ts'
 import { getBot } from '../src/bots/catalog.ts'
-import { COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 import original from '../src/lib/campaigns/001-original.json' with { type: 'json' }
 
 test('All packs use authored, deterministic, compact maps and validated armies', () => {
@@ -112,16 +112,16 @@ test('Briefings remain global first appearances while unlocks are pack-local', (
   assert.equal(result[1][0].newElements.length, 0)
 })
 
-test('Each level resolves its authored bot through the shared catalog; Brutal uses the strongest Commander preset', () => {
+test('Each level resolves its authored bot through the shared catalog; Brutal uses the strongest Napoleon preset', () => {
   for (const pack of CAMPAIGNS) {
     for (const level of pack.levels) {
       const bot = campaignBot(pack, level)
       const options = getBot(bot).options
       assert.deepEqual(bot, level.bot)
       if (pack.slug === 'brutal') {
-        assert.equal(bot.name, 'commander')
-        assert.equal(bot.options.candidates, COMMANDER_LEVELS.brutal.candidates)
-        assert.equal(bot.options.replies, COMMANDER_LEVELS.brutal.replies)
+        assert.equal(bot.name, 'napoleon')
+        assert.equal(bot.options.candidates, NAPOLEON_LEVELS.brutal.candidates)
+        assert.equal(bot.options.replies, NAPOLEON_LEVELS.brutal.replies)
       }
       assert.deepEqual(getBot(JSON.parse(JSON.stringify(bot))).options, options)
     }

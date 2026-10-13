@@ -36,7 +36,7 @@ import { unitNames } from '../src/i18n/units.ts'
 import { CAMPAIGNS, CAMPAIGN_STORAGE_KEY } from '../src/campaign.ts'
 import { campaignBot } from '../src/bots/campaign.ts'
 import { campaignActions } from './campaign-actions.ts'
-import { COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 import {
   battleIdentity,
   BATTLE_SNAPSHOT_VERSION,
@@ -623,8 +623,8 @@ test(
       await page.getByRole('button', { name: 'Start battle' }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.deepEqual(JSON.parse(new URL(page.url()).searchParams.get('bot')!), {
-        name: 'commander',
-        options: COMMANDER_LEVELS[difficulty],
+        name: 'napoleon',
+        options: NAPOLEON_LEVELS[difficulty],
       })
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'desert')
       assert.equal(

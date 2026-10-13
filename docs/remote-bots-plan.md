@@ -1,6 +1,6 @@
 # Mistral / Jev: deferred improvement plan
 
-Goal: let remote models select strategic plans using accurate engine facts. This work is separate from Commander and requires no provider changes in the local-bot implementation.
+Goal: let remote models select strategic plans using accurate engine facts. This work is separate from Napoleon and requires no provider changes in the local-bot implementation.
 
 ## 1. Make the position description accurate
 
@@ -26,4 +26,4 @@ For Jev, each criterion should describe these consequences, rather than predomin
 
 Track provider success, invalid replies, timeout/truncation, fallback rate, latency and cost. Evaluate actual remote decisions separately from local fallback games. Compare on the same tactical-position set and mirrored matches used for local bots.
 
-Do not feed only Commander's scalar score: offer engine-derived facts and competing plans so models can contribute reasoning instead of copying the local evaluator's biases.
+Do not feed only Napoleon's scalar score: offer engine-derived facts and competing plans so models can contribute reasoning instead of copying the local evaluator's biases.

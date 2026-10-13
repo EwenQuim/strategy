@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs'
 import { activePawn, reducer } from '../src/lib/engine/index.ts'
 import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
-import { CommanderBot, COMMANDER_LEVELS } from '../src/bots/strategies/commander.ts'
+import { NapoleonBot, NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
 import { RandomBot } from '../src/bots/strategies/random.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { valueFeatures, VALUE_FEATURES } from '../src/bots/valueFeatures.ts'
@@ -16,7 +16,7 @@ const league = [
   new DepthsearchBot(BOT_LEVELS.easy),
   new DepthsearchBot(BOT_LEVELS.normal),
   new DepthsearchBot(BOT_LEVELS.hard),
-  new CommanderBot(COMMANDER_LEVELS.normal),
+  new NapoleonBot(NAPOLEON_LEVELS.normal),
   new RandomBot(),
 ]
 let completed = 0

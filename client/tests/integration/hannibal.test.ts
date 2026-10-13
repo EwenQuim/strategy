@@ -2,16 +2,16 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { initialState, activePawn, reducer } from '../../src/lib/engine/index.ts'
 import { PAWN_CLASSES } from '../../src/lib/engine/pawns/index.ts'
-import { LearnedBot } from '../../src/bots/strategies/learned.ts'
+import { HannibalBot } from '../../src/bots/strategies/hannibal.ts'
 
-test('Learned search supports all signature classes on either side without mutating the state', async () => {
+test('Hannibal supports all signature classes on either side without mutating the state', async () => {
   const kinds = Object.keys(PAWN_CLASSES) as (keyof typeof PAWN_CLASSES)[]
   const opening = initialState('learned-all-classes', {
     biome: 'desert',
     player: kinds,
     enemy: kinds,
   })
-  const bot = new LearnedBot({ simulations: 32 })
+  const bot = new HannibalBot({ simulations: 32 })
   for (const [active] of opening.order.entries()) {
     const state = { ...opening, active }
     const before = structuredClone(state)

@@ -1,6 +1,6 @@
 # AI plan
 
-The current default and per-level strategy contract are documented in [Commander](commander.md). The stance-based design below records earlier experiments and is superseded by authored `{ name, options }` bot configurations.
+The current default and per-level strategy contract are documented in [Napoleon](napoleon.md). The stance-based design below records earlier experiments and is superseded by authored `{ name, options }` bot configurations.
 
 Goal: an AI that reads the board accurately at every difficulty, whose behaviour comes from small per-unit and per-side pieces instead of `kind === 'king'` checks, and whose difficulty comes from risks it chooses on purpose. It must never look like it blundered.
 

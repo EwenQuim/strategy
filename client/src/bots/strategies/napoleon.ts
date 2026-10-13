@@ -7,26 +7,26 @@ import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns
 import type { Bot } from '../bot.ts'
 import { readOptions } from '../options.ts'
 
-type CommanderOptions = {
+type NapoleonOptions = {
   candidates: number
   replies: number
   aggression: number
   caution: number
 }
 
-export const COMMANDER_LEVELS = {
+export const NAPOLEON_LEVELS = {
   easy: { candidates: 3, replies: 1, aggression: 1.2, caution: 0.35 },
   normal: { candidates: 6, replies: 1, aggression: 1, caution: 0.8 },
   hard: { candidates: 8, replies: 2, aggression: 1, caution: 1 },
   brutal: { candidates: 12, replies: 3, aggression: 1.2, caution: 1 },
-} as const satisfies Record<string, CommanderOptions>
+} as const satisfies Record<string, NapoleonOptions>
 
 type ScoredTurn = TurnPlan & { value: number }
 type Analysis = {
   cache: ArmyCache
   scores: Map<string, number>
   turns: Map<string, ScoredTurn[]>
-  options: Readonly<CommanderOptions>
+  options: Readonly<NapoleonOptions>
   actor: Pawn
   distance: Map<string, number>
   budget: number
@@ -34,12 +34,12 @@ type Analysis = {
 
 // Complete iterations give every candidate the same tactical horizon. A full initiative-cycle
 // forecast breaks close ties without letting an optimistic rollout overrule a tactical loss.
-export class CommanderBot implements Bot<CommanderOptions> {
-  readonly name = 'commander'
-  readonly options: Readonly<CommanderOptions>
+export class NapoleonBot implements Bot<NapoleonOptions> {
+  readonly name = 'napoleon'
+  readonly options: Readonly<NapoleonOptions>
 
-  constructor(options: Partial<CommanderOptions> = {}) {
-    this.options = readOptions<CommanderOptions>(COMMANDER_LEVELS.normal, options)
+  constructor(options: Partial<NapoleonOptions> = {}) {
+    this.options = readOptions<NapoleonOptions>(NAPOLEON_LEVELS.normal, options)
     const { candidates, replies, aggression, caution } = this.options
     if (
       !Number.isInteger(candidates) ||
@@ -55,7 +55,7 @@ export class CommanderBot implements Bot<CommanderOptions> {
       caution < 0 ||
       caution > 2
     )
-      throw new RangeError('Invalid Commander options')
+      throw new RangeError('Invalid Napoleon options')
   }
 
   async chooseActions(state: GameState): Promise<Action[]> {
