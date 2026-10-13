@@ -3,7 +3,7 @@ import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/specialTexts'
 import { CommandButton, CommandPanel } from './CommandAction'
 
-export function GameUnitPreview({ pawn, onClose }: { pawn: Pawn; onClose: () => void }) {
+export function GameUnitPreview({ pawn, onClose }: { pawn: Pawn; onClose?: () => void }) {
   return (
     <>
       <CommandPanel
@@ -13,14 +13,16 @@ export function GameUnitPreview({ pawn, onClose }: { pawn: Pawn; onClose: () => 
         data-testid="preview-ability"
         title={specialTexts[pawn.special.description]}
       />
-      <CommandButton
-        variant="compact"
-        icon="close"
-        label={m.stopPreviewing}
-        onClick={onClose}
-        aria-label={m.stopPreviewing}
-        title={m.stopPreviewing}
-      />
+      {onClose && (
+        <CommandButton
+          variant="compact"
+          icon="close"
+          label={m.stopPreviewing}
+          onClick={onClose}
+          aria-label={m.stopPreviewing}
+          title={m.stopPreviewing}
+        />
+      )}
     </>
   )
 }

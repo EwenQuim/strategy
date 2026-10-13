@@ -22,7 +22,6 @@ interface GameHeaderProps {
   online?: OnlineSession
   pawn?: Pawn
   winner: Side | 'draw' | null
-  playing: boolean
   order: readonly number[]
   pawns: readonly Pawn[]
   active: number
@@ -41,7 +40,6 @@ export function GameHeader({
   online,
   pawn,
   winner,
-  playing,
   order,
   pawns,
   active,
@@ -78,7 +76,7 @@ export function GameHeader({
           <span className="flex min-w-0 items-baseline gap-2">
             <span className="truncate">{campaign ? campaignName(campaign) : 'Hexmate'}</span>
             <span
-              className="shrink-0 text-xs font-semibold tabular-nums text-muted"
+              className="min-w-0 truncate text-xs font-semibold tabular-nums text-muted"
               data-testid="battle-subtitle"
             >
               {campaign && campaignLevel
@@ -100,7 +98,7 @@ export function GameHeader({
                 : m.playerTurn(names[pawn.side])}
             </span>
           )}
-          {mode === 'ai' && playing && pawn?.side === 'enemy' && (
+          {mode === 'ai' && !winner && pawn?.side === 'enemy' && (
             <span
               className="mr-2.5 self-center text-[10px] text-[#d69b81]"
               data-testid="enemy-turn"

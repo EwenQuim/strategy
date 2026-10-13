@@ -82,14 +82,20 @@ export function useGame({
     if (!enemyBot || mode !== 'ai' || online || paused || playing || state.winner) return
     if (activePawn(state)?.side !== 'enemy') return
     let cancelled = false
-    void enemyBot
-      .chooseActions(state)
-      .catch(() => [])
-      .then((actions) => {
-        if (!cancelled) dispatch({ type: 'botActions', actions })
+    // The first frame paints the enemy focus before synchronous bot search can block it.
+    let animationFrame = window.requestAnimationFrame(() => {
+      animationFrame = window.requestAnimationFrame(() => {
+        void enemyBot
+          .chooseActions(state)
+          .catch(() => [])
+          .then((actions) => {
+            if (!cancelled) dispatch({ type: 'botActions', actions })
+          })
       })
+    })
     return () => {
       cancelled = true
+      window.cancelAnimationFrame(animationFrame)
     }
   }, [dispatch, enemyBot, mode, online, paused, playing, state])
 

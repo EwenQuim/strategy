@@ -14,6 +14,7 @@ interface GameCommandDeckProps {
   winner: Side | 'draw' | null
   winnerLabel: string | null
   myTurn: boolean
+  opponentTurn: boolean
   previewed: boolean
   onPreview: () => void
   onPeek: (shown: boolean) => void
@@ -32,6 +33,7 @@ export function GameCommandDeck({
   winner,
   winnerLabel,
   myTurn,
+  opponentTurn,
   previewed,
   onPreview,
   onPeek,
@@ -43,6 +45,7 @@ export function GameCommandDeck({
   dispatch,
   onAim,
 }: GameCommandDeckProps) {
+  const showingPreview = previewed || opponentTurn
   return (
     <footer
       className="relative z-2 border-t border-[#c4d1a530] bg-(--biome-panel) pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_#10201840]"
@@ -53,8 +56,8 @@ export function GameCommandDeck({
         <div className="relative min-w-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-1">
           <div
             className={actionGridClassName + ' data-[previewed=true]:invisible'}
-            data-previewed={previewed}
-            inert={previewed}
+            data-previewed={showingPreview}
+            inert={showingPreview}
           >
             <GameSpecialButton
               pawn={active}
@@ -69,20 +72,22 @@ export function GameCommandDeck({
               onPreview={onPreview}
               onPeek={onPeek}
             />
-            <CommandButton
-              variant="compact"
-              icon="arrow"
-              label={m.endTurn}
-              note={m.remainingEnergy(active?.energy ?? 0)}
-              data-action="endTurn"
-              disabled={!myTurn}
-              onClick={() => dispatch({ type: 'endTurn' })}
-              title={m.endTurnHint}
-            />
+            {!opponentTurn && (
+              <CommandButton
+                variant="compact"
+                icon="arrow"
+                label={m.endTurn}
+                note={m.remainingEnergy(active?.energy ?? 0)}
+                data-action="endTurn"
+                disabled={!myTurn}
+                onClick={() => dispatch({ type: 'endTurn' })}
+                title={m.endTurnHint}
+              />
+            )}
           </div>
-          {previewed && pawn && !winner && (
+          {showingPreview && pawn && !winner && (
             <div className={actionGridClassName + ' absolute inset-0'} data-testid="unit-focus">
-              <GameUnitPreview pawn={pawn} onClose={onCloseFocus} />
+              <GameUnitPreview pawn={pawn} onClose={opponentTurn ? undefined : onCloseFocus} />
             </div>
           )}
         </div>
