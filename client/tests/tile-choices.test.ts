@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { King, Lancer, Ninja, Swordsman, reducer } from '../src/lib/engine/index.ts'
+import {
+  Archer,
+  Bomber,
+  Bulwark,
+  King,
+  Lancer,
+  Magician,
+  Ninja,
+  Swordsman,
+  reducer,
+} from '../src/lib/engine/index.ts'
+import { Berserker } from '../src/lib/engine/pawns/berserker.ts'
+import { Hoplite } from '../src/lib/engine/pawns/hoplite.ts'
+import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
 import { tileChoices } from '../src/lib/tileChoices.ts'
 import { field } from './field.ts'
 
@@ -63,4 +76,35 @@ test('Lancer retains direct move and enemy choices', () => {
   const choices = tileChoices(state, { action: 'special' })
   assert.equal(choices.get('2,0')!.kind, 'move')
   assert.equal(choices.get('4,0')!.kind, 'attack')
+})
+
+for (const Unit of [Archer, Berserker, Hoplite, King, Wolf, Magician, Bomber]) {
+  test(`${Unit.name}: damaging special targets are attack choices without changing commands`, () => {
+    const state = field([
+      new Unit(1, 0, 0, 'player'),
+      new King(2, -3, -2, 'player'),
+      new King(3, Unit === Archer ? 2 : 1, 0, 'enemy', 4),
+    ])
+    const before = structuredClone(state)
+    const choices = tileChoices(state, { action: 'special' })
+    assert.ok(choices.size > 0)
+    for (const [position, choice] of choices) {
+      assert.equal(choice.kind, 'attack')
+      assert.ok('action' in choice)
+      const tile = state.tiles.get(position)!
+      assert.deepEqual(choice.action, { type: 'special', target: { q: tile.q, r: tile.r } })
+    }
+    if (Unit === Magician || Unit === Bomber)
+      assert.equal(choices.get('2,0')?.kind, 'attack', 'empty area target is still offensive')
+    assert.deepEqual(structuredClone(state), before)
+  })
+}
+
+test('Protect is not highlighted as a damaging attack', () => {
+  const state = field([
+    new Bulwark(1, 0, 0, 'player'),
+    new King(2, 1, 0, 'player'),
+    new King(3, 4, 0, 'enemy'),
+  ])
+  assert.notEqual(tileChoices(state, { action: 'special' }).get('1,0')?.kind, 'attack')
 })
