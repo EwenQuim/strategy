@@ -7,7 +7,10 @@ import { mkdtempSync, rmSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { collectValueGames, loadValueSamples } from '../scripts/value-dataset.ts'
-import { readJson } from '../scripts/value-artifacts.ts'
+import { readJson, writeJson, trainingProvenance } from '../scripts/value-artifacts.ts'
+import { fitValueCandidate } from '../scripts/value-candidate.ts'
+import { VALUE_FEATURES } from '../src/bots/valueFeatures.ts'
+import { valueLoss } from '../scripts/value-fit.ts'
 
 test('League example resolves every bot and covers all scenario indices', () => {
   const config = readPipelineConfig(['--config=scripts/value-league.example.json'])
@@ -83,6 +86,52 @@ test('Collection resumes without replacing completed games and rejects changed r
         Date.now() + 1000,
       ),
       /Resume rejected/,
+    )
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('Persisted blended candidates report their own held-out loss and keep paired seeds in one split', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'league-fitting-'))
+  try {
+    writeJson(join(directory, 'manifest.json'), {
+      kind: 'dataset',
+      settings: {},
+      provenance: trainingProvenance(),
+    })
+    for (let game = 0; game < 40; game++) {
+      const value = Math.floor(game / 2) % 2 ? 1 : -1
+      writeJson(join(directory, `game-${String(game).padStart(6, '0')}.json`), {
+        game,
+        seed: `fit-pair-${Math.floor(game / 2)}`,
+        scenario: Math.floor(game / 2),
+        players: [
+          { name: 'learned', options: {} },
+          { name: 'commander', options: {} },
+        ],
+        winner: value > 0 ? 'player' : 'enemy',
+        positions: [VALUE_FEATURES.map((_, index) => (index === 0 ? value : 0))],
+        elapsedMs: 1,
+      })
+    }
+    const config = readPipelineConfig(['--training.epochs=20', '--training.learningRate=0.1'])
+    config.output = join(directory, 'fit')
+    const initial = VALUE_FEATURES.map(() => 0)
+    const candidate = fitValueCandidate(config, [directory], initial, false, 0.25)
+    const data = loadValueSamples([directory], 5)
+    const heldout = data.samples.filter((sample) => sample.game % 5 === 0)
+    assert.ok(heldout.length > 0 && heldout.length < data.samples.length)
+    assert.equal(candidate.validationLoss, valueLoss(heldout, candidate.weights))
+    assert.deepEqual(
+      readJson<{ weights: number[] }>(join(config.output, 'candidate.json')).weights,
+      candidate.weights,
+    )
+    for (let i = 0; i < data.samples.length; i += 2)
+      assert.equal(data.samples[i].game, data.samples[i + 1].game)
+    assert.deepEqual(
+      initial,
+      VALUE_FEATURES.map(() => 0),
     )
   } finally {
     rmSync(directory, { recursive: true, force: true })

@@ -41,6 +41,14 @@ The fitness is wins minus losses per game; censored games get neither a win nor 
 their rate remains visible. Evolution results still require fresh held-out evaluation, including
 completion and latency gates; selection fitness alone does not promote a released checkpoint.
 
+`make value-compose` creates a separately archived candidate by transferring named features
+between two checkpoints. `make value-evidence` exports compact publishable run evidence:
+
+```sh
+make value-compose ARGS="--base=src/bots/value-model.json --source=training-runs/fit-001/candidate.json --features=energy,units:wolf,units:lancer --blend=0.5 --output=training-runs/transfer-001.json"
+make value-evidence ARGS="--runs=training-runs/fit-001,training-runs/selection-001 --output=training-runs/evidence-001.json"
+```
+
 ## Evidence and interruption handling
 
 - Collection writes each completed game atomically, including censored outcomes.
@@ -64,4 +72,50 @@ Started from engine revision `8866d03`: area King healing, adjacent Wolf energy 
 direct/adjacent Lancer Rush. The immutable reference is `league-v1`. Candidate comparisons
 start with identical 128-simulation, 16-candidate, horizon-16 search; no longer thinking time
 is purchased to claim a training improvement. Training, selection and final seed identities
-are distinct. Measured checkpoint and final results will be added here once complete.
+are distinct.
+
+### Results
+
+500 first-generation games and 143 second-generation games were saved. The second generation
+included a screened evolved challenger. Models were fitted from fresh completed games only;
+several regularization strengths, conservative blends, direct weight evolution and explicit
+combat-position filtering were tried. The combat fit used 378 completed non-Random games,
+16,848 sampled positions; held-out log loss improved from **0.2598 to 0.1865**.
+
+| Candidate / evaluation | Wins | Losses | Timeouts | Games |
+| --- | ---: | ---: | ---: | ---: |
+| Larger-data fit, selection vs old Learned | 20 | 14 | 16 | 50 |
+| Evolved weights, selection vs old Learned | 24 | 13 | 13 | 50 |
+| Evolved weights, untouched final vs old Learned | 20 | 17 | 27 | 64 |
+| Combat fit, selection vs old Learned | 24 | 10 | 16 | 50 |
+| Combat fit, fresh confirmation vs old Learned | 23 | 21 | 20 | 64 |
+| Combat fit, fresh Commander Brutal | 21 | 7 | 2 | 30 |
+| Combat fit, fresh depth-four beam-6 search | 18 | 8 | 4 | 30 |
+| Combat fit, same old maximum search budget (partial) | 6 | 3 | 5 | 14 |
+
+**These results do not establish a generally stronger replacement for `league-v1`.**
+Frozen head-to-head leads did not survive with a meaningful margin, and the timeout rates
+failed the intended completion gate. Normal difficulty, model identity and existing presets
+therefore retain the incumbent. The evolved final p95 was 93.2 ms versus 91.4 ms; combat-fit
+confirmation p95 was 99.5 ms versus 107.7 ms. They spend the same search budget, but timing
+alone does not justify promotion. Concurrent-run timings are provisional; no mobile-speed
+claim is made.
+
+The maximum-budget run stopped at its 25-minute boundary after 14/20 requested games. Both
+bots used 2,048 simulations, 32 candidates and horizon 32. P95 was approximately 2.26 s on
+both sides; the partial 6–3–5 result cannot establish a higher maximum difficulty. Its
+completion flag remains false in the evidence archive.
+
+The larger-data fit was a snapshot while collection was still running (434 recorded games,
+372 completed); the combat fit used both completed generation directories. This distinction
+is retained in the fit manifests rather than retrospectively claiming every fit used all 643 games.
+
+The compact [evidence archive](learned-league-evidence.json) preserves manifests, candidate
+weights, dataset summaries, exact scenario outcomes and artifact digests. Full position data
+and every intermediate mutation remain in ignored `client/training-runs/`. Re-run the saved
+configuration with the reference weights to establish fresh comparisons after another rule
+change; do not reuse old outcome labels.
+
+The next strength work should target missing tactical/initiative information, useful support
+energy versus already-exhausted recipients, and stalling decisions. More epochs on the same
+linear feature set or larger simulation budgets did not solve those limitations in this run.

@@ -1,11 +1,12 @@
-import { readdirSync } from 'node:fs'
+import { readdirSync, existsSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { digest, readJson, writeJson } from './value-artifacts.ts'
 
 // Compact, publishable evidence; bulky per-position datasets remain in ignored run directories.
 const args = process.argv.slice(2)
+const replace = args.includes('--replace')
 const options = Object.fromEntries(
-  args.map((arg) => {
+  args.filter(arg => arg !== '--replace').map((arg) => {
     const match = /^--(runs|output)=(.+)$/.exec(arg)
     if (!match) throw new Error('Use --runs=<path[,path]> --output=<file>')
     return [match[1], match[2]]
@@ -51,5 +52,7 @@ const runs = options.runs.split(',').map((path) => {
     ...(games.length ? { games } : {}),
   }
 })
+if (existsSync(resolve(options.output)) && !replace)
+  throw new Error('Evidence output exists; use a fresh path or --replace')
 writeJson(resolve(options.output), { version: 1, runs })
 console.log(`Archived ${runs.length} runs to ${options.output}`)

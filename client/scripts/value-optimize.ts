@@ -138,5 +138,5 @@ for (let generation = 0; generation < generations && Date.now() < deadline; gene
       weights: champion,
       fitness: bestScore,
     })
-  }
+  } else break
 }
