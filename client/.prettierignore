@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-tile-counter
 .tanstack
 src/routeTree.gen.ts
 package-lock.json
