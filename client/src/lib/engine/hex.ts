@@ -13,7 +13,6 @@ export const MAP_HEIGHT = 12
 
 // Generated maps roll their dimensions; authored maps derive them from their rows.
 export type MapSize = { readonly width: number; readonly height: number }
-const DEFAULT_MAP_SIZE: MapSize = { width: MAP_WIDTH, height: MAP_HEIGHT }
 
 export const key = (q: number, r: number) => `${q},${r}`
 export const hexOf = (col: number, row: number): Axial => ({
@@ -162,7 +161,7 @@ function placeFeature(
   feature: MapFeature,
   random: SeededRandom,
   symmetric = false,
-  size: MapSize = DEFAULT_MAP_SIZE,
+  size: MapSize,
 ) {
   const ordered = orderAnchors(tiles, size, feature, random, anchors)
   const count = roll(feature.min, feature.max, random)
@@ -249,7 +248,7 @@ export function decorateMap(
   tiles: Map<string, Tile>,
   protectedTiles: readonly Axial[] = [],
   symmetric = false,
-  size: MapSize = DEFAULT_MAP_SIZE,
+  size: MapSize,
 ): Map<string, Tile> {
   const { ground, scatter, features: terrainFeatures } = BIOMES[biome]
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))

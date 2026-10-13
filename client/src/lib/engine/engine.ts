@@ -42,8 +42,7 @@ export type GameState = {
   biome: Biome
   randomState: number
   tiles: Map<string, Tile>
-  // Dimensions of the battle map; absent only in battles restored from old snapshots.
-  readonly mapSize?: MapSize
+  readonly mapSize: MapSize
   hellfire: Axial[]
   pawns: Pawn[]
   order: number[]

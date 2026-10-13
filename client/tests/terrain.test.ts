@@ -77,9 +77,7 @@ test('Random special tiles follow 50/40/10 odds, are distinct, and stay in the c
     assert.equal(new Set(features.map((tile) => tile.feature)).size, features.length)
     for (const tile of features) {
       kinds.add(tile.feature!)
-      assert.ok(
-        tile.r === state.mapSize!.height / 2 - 1 || tile.r === state.mapSize!.height / 2,
-      )
+      assert.ok(tile.r === state.mapSize.height / 2 - 1 || tile.r === state.mapSize.height / 2)
       assert.ok(passable(tile))
       assert.notEqual(tile.terrain, 'lava')
       assert.ok(!state.pawns.some((pawn) => pawn.q === tile.q && pawn.r === tile.r))

@@ -185,7 +185,7 @@ test('Symmetric seeded battles stay symmetric across restarts and keep kings con
   for (let index = 0; index < 20; index++) {
     const state = initialState(symmetricSeed('battle-' + index))
     for (const tile of state.tiles.values()) {
-      const mirror = mirrorAxial(tile, state.mapSize!)
+      const mirror = mirrorAxial(tile, state.mapSize)
       const mirrored = state.tiles.get(key(mirror.q, mirror.r))
       assert.ok(mirrored)
       assert.equal(mirrored.terrain, tile.terrain)
@@ -196,7 +196,7 @@ test('Symmetric seeded battles stay symmetric across restarts and keep kings con
     assert.ok(distFrom(state.tiles, [kings[0]]).has(key(kings[1].q, kings[1].r)))
     const half = state.pawns.length / 2
     for (let i = 0; i < half; i++) {
-      const mirror = mirrorAxial(state.pawns[i], state.mapSize!)
+      const mirror = mirrorAxial(state.pawns[i], state.mapSize)
       const enemy = state.pawns[half + i]
       assert.equal(enemy.q, mirror.q)
       assert.equal(enemy.r, mirror.r)

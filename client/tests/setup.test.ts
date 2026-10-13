@@ -45,7 +45,7 @@ test('Authored setups control both army sizes and classes with legal determinist
       assert.deepEqual(setup, before)
       assert.deepEqual(state, initialState(state.seed, JSON.parse(JSON.stringify(setup))))
       assert.equal(state.biome, biome)
-      assert.ok(state.tiles.size <= state.mapSize!.width * state.mapSize!.height)
+      assert.ok(state.tiles.size <= state.mapSize.width * state.mapSize.height)
       assert.equal(state.pawns.length, player + enemy)
       assert.deepEqual(
         state.pawns.map((pawn) => pawn.id).toSorted((a, b) => a - b),
@@ -67,7 +67,7 @@ test('Authored setups control both army sizes and classes with legal determinist
         )
         // Spawn zones grow to four rows when carving or maximal armies need room.
         const zoneHeight = 4
-        const firstRow = side === 'player' ? state.mapSize!.height - zoneHeight : 0
+        const firstRow = side === 'player' ? state.mapSize.height - zoneHeight : 0
         for (const pawn of pawns) {
           assert.ok(pawn.r >= firstRow && pawn.r < firstRow + zoneHeight)
           assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
@@ -94,7 +94,7 @@ test('Player Bulwarks start on the front row in seeded games and keep their posi
       for (const pawn of state.pawns.filter(
         (p) => p.side === 'player' && p.kind === 'bulwark',
       )) {
-        assert.equal(pawn.r, state.mapSize!.height - 3)
+        assert.equal(pawn.r, state.mapSize.height - 3)
         assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
         columns.add(pawn.q)
       }
@@ -118,7 +118,7 @@ test('The front row is reserved for all player Bulwarks before placing the rest 
   const state = initialState('full-bulwark-row', setup)
   const bulwarks = state.pawns.filter((p) => p.kind === 'bulwark')
   assert.equal(bulwarks.length, 8)
-  const frontRow = state.mapSize!.height - 3
+  const frontRow = state.mapSize.height - 3
   const frontTiles = [...state.tiles.values()].filter((tile) => tile.r === frontRow).length
   assert.equal(
     bulwarks.filter((p) => p.r === frontRow).length,
