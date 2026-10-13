@@ -33,7 +33,12 @@ export function tileChoices(state: GameState, aim: Aim): Map<string, TileChoice>
     } else {
       const occupant = pawnAt(state.pawns, at)
       choices.set(position, {
-        kind: aim.destination || (occupant && occupant.side !== pawn.side) ? 'attack' : 'move',
+        kind:
+          aim.destination ||
+          ((pawn.special.damage ?? pawn.attack.damage) > 0 &&
+            (pawn.special.areaTargets || (occupant && occupant.side !== pawn.side)))
+            ? 'attack'
+            : 'move',
         action: {
           type: 'special',
           target: at,

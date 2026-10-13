@@ -97,8 +97,9 @@ export function tileFill({
   terrain: Tile['terrain']
   inRange: boolean
 }): string {
+  if (target && strike) return '#b98370'
   if (interactive && damage > 0 && !occupant) return '#94716d'
-  if (target) return strike ? '#b98370' : '#b79dce'
+  if (target) return '#b79dce'
   if (selected || previewed) return 'var(--selected-tint, #c9b77f)'
   if (inRange) return '#b79dce'
   return canMove ? 'var(--move-tint)' : terrainColors[terrain]

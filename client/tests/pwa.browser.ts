@@ -24,6 +24,9 @@ import {
   Lancer,
   Ninja,
   Swordsman,
+  Archer,
+  Magician,
+  Bomber,
 } from '../src/lib/engine/index.ts'
 import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
 import { field } from './field.ts'
@@ -411,6 +414,42 @@ test('Ambush lands without a target or strikes beside the landing', async (t) =>
       '1',
     )
     assert.equal(await special.getAttribute('aria-disabled'), 'true')
+  }
+})
+
+test('Stationary damaging specials highlight enemy and empty area targets orange', async (t) => {
+  const { page, origin } = await fixture(t)
+  for (const Unit of [Archer, Magician, Bomber]) {
+    const state = field([
+      new Unit(1, 0, 0, 'player'),
+      new King(2, -3, -2, 'player'),
+      new King(3, Unit === Archer ? 2 : 1, 0, 'enemy', 4),
+    ])
+    state.seed = Unit.name + '-orange'
+    // Empty lava centers/directions must retain the offensive target color too.
+    state.tiles.get('2,0')!.terrain = 'lava'
+    await page.evaluate(
+      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+        state: snapshotState(state),
+      },
+    )
+    await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+    await page.locator('[data-action="special"]').click()
+    for (const position of Unit === Archer ? ['2,0'] : ['1,0', '2,0']) {
+      const index = [...state.tiles.keys()].indexOf(position)
+      assert.equal(
+        await page
+          .getByTestId('hex-tile')
+          .nth(index)
+          .getByTestId('tile-face')
+          .getAttribute('fill'),
+        '#b98370',
+      )
+    }
   }
 })
 
