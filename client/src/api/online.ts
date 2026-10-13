@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import {
   getGame,
   getGetGameQueryKey,
+  joinGame,
   useCreateGame,
   useGetGame,
   useJoinGame,
@@ -65,6 +66,11 @@ export const useCreateOnlineGame = () => {
       return { code: creds.game.code, token: creds.token, side: 'player' }
     },
   }
+}
+
+export async function joinOnlineGame(code: string, name: string): Promise<StoredGame> {
+  const creds = await joinGame(code, { name })
+  return { code: creds.game.code, token: creds.token, side: 'enemy' }
 }
 
 export const useJoinOnlineGame = () => {

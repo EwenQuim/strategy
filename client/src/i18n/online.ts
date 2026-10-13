@@ -141,20 +141,6 @@ export const lobbyNote = t({
   it: 'Le battaglie online sono a turni, senza timer. Le mosse si sincronizzano da sole, quindi puoi chiudere la scheda e riprendere più tardi.',
 })
 
-export const notAPlayer = t({
-  en: 'You are not a player in this game.',
-  fr: "Vous n'êtes pas joueur dans cette partie.",
-  de: 'Du spielst in diesem Spiel nicht mit.',
-  es: 'No eres jugador de esta partida.',
-  it: 'Non sei un giocatore di questa partita.',
-})
-export const joinFromLobby = t({
-  en: 'Join it from the lobby with the game code, then come back.',
-  fr: 'Rejoignez-la depuis le salon avec le code de la partie, puis revenez.',
-  de: 'Tritt ihm in der Lobby mit dem Spielcode bei und komm dann zurück.',
-  es: 'Únete desde la sala con el código de partida y luego vuelve.',
-  it: 'Unisciti dalla lobby con il codice partita, poi torna qui.',
-})
 export const gameGone = t({
   en: 'This game does not exist anymore.',
   fr: "Cette partie n'existe plus.",
@@ -194,4 +180,18 @@ export const copyCode = t({
   de: 'Code kopieren',
   es: 'Copiar código',
   it: 'Copia codice',
+})
+export const shareInvite = t({
+  en: 'Share invite',
+  fr: "Partager l'invitation",
+  de: 'Einladung teilen',
+  es: 'Compartir invitación',
+  it: 'Condividi invito',
+})
+export const shareText = t({
+  en: (host: string) => `Join ${host} in a Hexmate battle!`,
+  fr: (host: string) => `Rejoignez ${host} dans une bataille Hexmate !`,
+  de: (host: string) => `Kämpfe gegen ${host} in einer Hexmate-Schlacht!`,
+  es: (host: string) => `¡Únete a la batalla de ${host} en Hexmate!`,
+  it: (host: string) => `Unisciti alla battaglia Hexmate contro ${host}!`,
 })

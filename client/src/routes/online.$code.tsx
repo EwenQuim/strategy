@@ -1,4 +1,8 @@
-import { menuCardClassName, menuPrimaryButtonClassName } from '../components/styles'
+import {
+  buttonClassName,
+  menuCardClassName,
+  menuPrimaryButtonClassName,
+} from '../components/styles'
 import { MenuLayout } from '../components/MenuLayout'
 import { Icon } from '../components/Icon'
 import { createFileRoute, redirect } from '@tanstack/react-router'
@@ -20,23 +24,17 @@ export const Route = createFileRoute('/online/$code')({
     } catch {
       throw redirect({ to: '/' })
     }
+    if (!readStoredGames().some((game) => game.code === params.code)) {
+      throw redirect({ to: '/online', search: { join: params.code } })
+    }
   },
   component: function OnlineBattle() {
     const { code } = Route.useParams()
     const stored = readStoredGames().find((game) => game.code === code)
     const game = useOnlineGame(code, !!stored)
 
-    if (!stored) {
-      return (
-        <MenuLayout title={m.onlineGame} backTo="/online">
-          <div className={statusClassName}>
-            <Icon name="lock" className="size-10 text-gold" />
-            <h2 className="text-2xl font-bold tracking-tight">{m.notAPlayer}</h2>
-            <p className="text-sm leading-relaxed text-muted">{m.joinFromLobby}</p>
-          </div>
-        </MenuLayout>
-      )
-    }
+    // beforeLoad redirects non-players to the lobby invite flow
+    if (!stored) return null
 
     if (game.isError) {
       const status = game.error instanceof ApiError ? game.error.status : 0
@@ -76,9 +74,32 @@ export const Route = createFileRoute('/online/$code')({
                 >
                   {code}
                 </div>
+                {typeof navigator.share === 'function' && (
+                  <button
+                    type="button"
+                    className={menuPrimaryButtonClassName + ' w-full'}
+                    onClick={() => {
+                      navigator
+                        .share({
+                          title: 'Hexmate',
+                          text: m.shareText(doc.namePlayer),
+                          url: `${window.location.origin}/online?join=${code}`,
+                        })
+                        .catch(() => {})
+                    }}
+                  >
+                    {m.shareInvite}
+                    <Icon name="arrow" />
+                  </button>
+                )}
                 <button
                   type="button"
-                  className={menuPrimaryButtonClassName + ' w-full'}
+                  className={
+                    typeof navigator.share === 'function'
+                      ? buttonClassName +
+                        ' min-h-13 w-full justify-center gap-3 rounded-xl border-line px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
+                      : menuPrimaryButtonClassName + ' w-full'
+                  }
                   onClick={() => void navigator.clipboard?.writeText(code)}
                 >
                   {m.copyCode}

@@ -14,6 +14,7 @@ import * as m from '../i18n/online'
 import {
   ApiError,
   health,
+  joinOnlineGame,
   onlineGameQueryOptions,
   useCreateOnlineGame,
   useJoinOnlineGame,
@@ -21,7 +22,7 @@ import {
 } from '../api/online.ts'
 import { Icon } from '../components/Icon'
 import {
-  readPlayerName,
+  readPlayerNameOrDefault,
   readPublicHosting,
   readStoredGames,
   savePlayerName,
@@ -33,19 +34,53 @@ import type { StoredGame } from '../lib/online.ts'
 const onlineButtonClassName =
   buttonClassName + ' min-h-13 justify-center gap-3 rounded-xl border-line'
 
+type OnlineSearch = { join?: string; failed?: number }
+
+function parseOnlineSearch(search: Record<string, unknown>): OnlineSearch {
+  const result: OnlineSearch = {
+    join: typeof search.join === 'string' ? search.join.toUpperCase() : undefined,
+  }
+  const failed = typeof search.failed === 'string' ? Number(search.failed) : search.failed
+  if (typeof failed === 'number' && Number.isInteger(failed)) result.failed = failed
+  return result
+}
+
+const inviteError = (status: number | undefined) =>
+  status === undefined
+    ? ''
+    : status === 404
+      ? m.noGame
+      : status === 409
+        ? m.gameFull
+        : common.serverUnreachable
+
 export const Route = createFileRoute('/online/')({
-  beforeLoad: async () => {
+  validateSearch: parseOnlineSearch,
+  beforeLoad: async ({ search }) => {
     try {
       await health()
     } catch {
       throw redirect({ to: '/' })
     }
+    const code = search.join
+    if (!code || search.failed !== undefined || !/^[A-Z0-9]{6}$/.test(code)) return
+    if (readStoredGames().some((game) => game.code === code)) {
+      throw redirect({ to: '/online/$code', params: { code } })
+    }
+    try {
+      saveStoredGame(await joinOnlineGame(code, readPlayerNameOrDefault()))
+    } catch (cause) {
+      const status = cause instanceof ApiError ? cause.status : 0
+      throw redirect({ to: '/online', search: { join: code, failed: status } })
+    }
+    throw redirect({ to: '/online/$code', params: { code } })
   },
   component: function OnlineLobby() {
     const navigate = useNavigate()
-    const [name, setName] = useState(readPlayerName())
-    const [code, setCode] = useState('')
-    const [error, setError] = useState('')
+    const search = Route.useSearch()
+    const [name, setName] = useState(readPlayerNameOrDefault)
+    const [code, setCode] = useState(search.join ?? '')
+    const [error, setError] = useState(() => inviteError(search.failed))
     const [games] = useState<StoredGame[]>(readStoredGames)
     const [publicHosting, setPublicHosting] = useState(readPublicHosting)
     const [showGames, setShowGames] = useState(false)
