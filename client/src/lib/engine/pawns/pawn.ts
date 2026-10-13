@@ -48,6 +48,8 @@ export type SpecialTextKey =
   | 'aimedShot'
   | 'aimedShotDescription'
   | 'noEnemiesInRange'
+  | 'snipe'
+  | 'snipeDescription'
   | 'fireball'
   | 'fireballDescription'
   | 'fireballToward'
@@ -139,20 +141,13 @@ export abstract class Pawn {
     return 3
   }
 
-  constructor(
-    id: number,
-    q: number,
-    r: number,
-    side: Side,
-    hp?: number,
-    energy = START_ENERGY,
-  ) {
+  constructor(id: number, q: number, r: number, side: Side, hp?: number, energy?: number) {
     this.id = id
     this.q = q
     this.r = r
     this.side = side
     this.hp = hp ?? this.maxHp
-    this.energy = energy
+    this.energy = energy ?? this.maxEnergy
   }
 
   endTurn(): void {

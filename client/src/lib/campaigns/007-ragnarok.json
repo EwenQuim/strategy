@@ -138,6 +138,7 @@
     },
     "setup": {
       "biome": "mountains",
+      "firstEnemyKinds": ["marksman"],
       "map": [
         "__....__",
         "_..~~.._",
@@ -161,7 +162,8 @@
         { "kind": "ninja", "col": 1, "row": 1 },
         { "kind": "ninja", "col": 6, "row": 1 },
         { "kind": "wolf", "col": 5, "row": 2 },
-        { "kind": "magician", "col": 2, "row": 2, "hp": 2 }
+        { "kind": "magician", "col": 2, "row": 2, "hp": 2 },
+        { "kind": "marksman", "col": 6, "row": 2 }
       ]
     }
   },
@@ -197,7 +199,7 @@
         { "kind": "berserker", "col": 2, "row": 6 },
         { "kind": "berserker", "col": 4, "row": 6 },
         { "kind": "wolf", "col": 3, "row": 6 },
-        { "kind": "archer", "col": 1, "row": 6 },
+        { "kind": "marksman", "col": 1, "row": 6 },
         { "kind": "archer", "col": 5, "row": 6 },
         { "kind": "magician", "col": 4, "row": 7 }
       ],

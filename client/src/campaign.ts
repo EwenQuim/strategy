@@ -50,6 +50,7 @@ const INTRODUCED_ELEMENTS: readonly IntroducedElement[] = [
   'wolf',
   'berserker',
   'lancer',
+  'marksman',
   'lake',
   'mountain',
   'sand',

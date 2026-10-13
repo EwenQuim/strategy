@@ -79,4 +79,11 @@ export const unitNames: Record<PawnKind, string> = {
     es: 'Lancero',
     it: 'Lanciere',
   }),
+  marksman: t({
+    en: 'Marksman',
+    fr: 'Tireur d’élite',
+    de: 'Scharfschütze',
+    es: 'Tirador de élite',
+    it: 'Tiratore scelto',
+  }),
 }
