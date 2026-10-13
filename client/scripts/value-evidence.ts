@@ -6,11 +6,13 @@ import { digest, readJson, writeJson } from './value-artifacts.ts'
 const args = process.argv.slice(2)
 const replace = args.includes('--replace')
 const options = Object.fromEntries(
-  args.filter((arg) => arg !== '--replace').map((arg) => {
-    const match = /^--(runs|output)=(.+)$/.exec(arg)
-    if (!match) throw new Error('Use --runs=<path[,path]> --output=<file>')
-    return [match[1], match[2]]
-  }),
+  args
+    .filter((arg) => arg !== '--replace')
+    .map((arg) => {
+      const match = /^--(runs|output)=(.+)$/.exec(arg)
+      if (!match) throw new Error('Use --runs=<path[,path]> --output=<file>')
+      return [match[1], match[2]]
+    }),
 )
 if (!options.runs || !options.output) throw new Error('runs and output are required')
 const runs = options.runs.split(',').map((path) => {
