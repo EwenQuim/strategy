@@ -30,7 +30,7 @@ jobs:
       - run: npm run test:ci
       - name: Report existing color debt
         if: always()
-        run: npm run lint:colors:report > color-lint-report.txt
+        run: npm run lint:colors -- --report > color-lint-report.txt
       - uses: actions/upload-artifact@v6
         if: always()
         with:
