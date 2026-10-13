@@ -14,6 +14,7 @@ import {
   movementDestinations,
   specialTargetingTiles,
   specialTargets,
+  walkingPaths,
   hexDist,
   passable,
   type Action,
@@ -1583,7 +1584,10 @@ test(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
         biomeNames[biome],
       )
-      assert.equal(await page.locator('[data-testid="hex-tile"]').count(), 96)
+      assert.equal(
+        await page.locator('[data-testid="hex-tile"]').count(),
+        initialState(seed).tiles.size,
+      )
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), biome)
       backgrounds.add(
         await page
@@ -1897,8 +1901,9 @@ test(
         state = initialState('interactive-ui-' + kind + '-' + index)
         const pawn = activePawn(state)!
         if (kind === 'lava' && pawn.kind !== 'ninja') continue
-        if (kind === 'watchtower' && pawn.kind !== 'archer' && pawn.kind !== 'magician')
-          continue
+        // The aimed-shot assertion below is archer-specific: only its special
+        // targets map one button per enemy.
+        if (kind === 'watchtower' && pawn.kind !== 'archer') continue
         position = [...movementDestinations(state.tiles, state.pawns, pawn)].find(
           ([k, cost]) => {
             if (!cost) return false
@@ -1914,11 +1919,19 @@ test(
       const tile = state.tiles.get(position)!
       const index = [...state.tiles.keys()].indexOf(position)
       if (kind === 'lava') {
-        // Ambush needs a victim beside the landing. Bring one into this lava-warning scenario.
+        // Ambush needs a victim beside the landing, off the walking path so the
+        // lava tile keeps its lethal move warning.
+        const path = new Set<string>()
+        let step = walkingPaths(state.tiles, state.pawns, pawn).get(position)
+        while (step) {
+          if (step.tile) path.add(step.key)
+          step = step.parent ?? undefined
+        }
         const victimAt = [...state.tiles.values()].find(
           (at) =>
             hexDist(at, tile) === 1 &&
             passable(at) &&
+            !path.has(at.q + ',' + at.r) &&
             !state.pawns.some((p) => p.q === at.q && p.r === at.r),
         )!
         assert.ok(victimAt)
