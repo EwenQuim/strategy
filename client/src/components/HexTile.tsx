@@ -61,6 +61,15 @@ function tilePropsEqual(prev: HexTileProps, next: HexTileProps) {
   return true
 }
 
+// Render counter read by tests/perf.browser.ts: taps must not re-render the
+// whole board, and this regression is invisible to timing metrics. The
+// increment lives outside the component so neither lint nor the React
+// Compiler sees a mutation of outer-scope state in the render path.
+function countTileRender() {
+  const counter = window as { __hexmateTileRenders?: number }
+  counter.__hexmateTileRenders = (counter.__hexmateTileRenders ?? 0) + 1
+}
+
 // One hex of the board. Taps are delegated to the battlefield, so a tile holds
 // no callbacks. The compiler memoizes whole components but not individual list
 // items, so memo lets the many tiles untouched by a tap skip re-rendering.
@@ -84,6 +93,7 @@ export const HexTile = memo(function HexTile({
   impactCenter,
   labels,
 }: HexTileProps) {
+  countTileRender()
   const canMove = cost !== undefined && cost > 0
   const interactive = target || canMove || rechoosing
   const feature = tile.feature && featureTexts[tile.feature]
