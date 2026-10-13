@@ -73,8 +73,7 @@ export function Battlefield({
   const xs = allTiles.map((t) => hexX(t.q, t.r))
   const ys = allTiles.map((t) => hexY(t.r))
   const pad = SIZE * 1.35
-  const minX = Math.min(...xs) - pad
-  const minY = Math.min(...ys) - pad
+  const [minX, minY] = [Math.min(...xs) - pad, Math.min(...ys) - pad]
   const viewBox = [minX, minY, Math.max(...xs) - minX + pad, Math.max(...ys) - minY + pad].join(
     ' ',
   )
@@ -311,6 +310,7 @@ export function Battlefield({
             feature={tiles.get(key(pawn.q, pawn.r))?.feature}
             active={active?.id === pawn.id}
             protectedAlly={!!protectorFor(pawns, pawn)}
+            topRow={hexY(pawn.r) === minY + pad}
           />
         ))}
         <BattlefieldEffects effect={effect} effectId={effectId} />
