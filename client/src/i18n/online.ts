@@ -148,6 +148,13 @@ export const joinTitle = t({
   es: 'Únete a la batalla',
   it: 'Unisciti alla battaglia',
 })
+export const joinAs = t({
+  en: (name: string) => `You will join as ${name}.`,
+  fr: (name: string) => `Vous rejoindrez en tant que ${name}.`,
+  de: (name: string) => `Du trittst als ${name} bei.`,
+  es: (name: string) => `Te unirás como ${name}.`,
+  it: (name: string) => `Ti unirai come ${name}.`,
+})
 export const gameGone = t({
   en: 'This game does not exist anymore.',
   fr: "Cette partie n'existe plus.",

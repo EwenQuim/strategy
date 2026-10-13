@@ -1,7 +1,6 @@
 import {
   buttonClassName,
   menuCardClassName,
-  menuInputClassName,
   menuPrimaryButtonClassName,
 } from '../components/styles'
 import { MenuLayout } from '../components/MenuLayout'
@@ -12,12 +11,7 @@ import { ApiError, health, useJoinOnlineGame, useOnlineGame } from '../api/onlin
 import { Game } from '../components/Game'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
-import {
-  readPlayerName,
-  readStoredGames,
-  savePlayerName,
-  saveStoredGame,
-} from '../onlineSession.ts'
+import { readPlayerNameOrDefault, readStoredGames, saveStoredGame } from '../onlineSession.ts'
 
 const statusClassName =
   menuCardClassName +
@@ -39,7 +33,7 @@ export const Route = createFileRoute('/online/$code')({
     )
     const game = useOnlineGame(code, !!stored)
     const joinGame = useJoinOnlineGame()
-    const [name, setName] = useState(readPlayerName)
+    const [playerName] = useState(readPlayerNameOrDefault)
     const [error, setError] = useState('')
 
     if (game.isError) {
@@ -72,14 +66,14 @@ export const Route = createFileRoute('/online/$code')({
                 <p className="text-sm leading-relaxed text-muted">
                   {m.hostedBy(doc.namePlayer)}
                 </p>
-                <form
-                  className="grid w-full gap-3"
-                  onSubmit={(event) => {
-                    event.preventDefault()
-                    const trimmed = name.trim()
-                    if (!trimmed || joinGame.isPending) return
-                    savePlayerName(trimmed)
-                    void joinGame.mutateAsync(code, trimmed).then(
+                <p className="text-sm leading-relaxed text-muted">{m.joinAs(playerName)}</p>
+                <button
+                  type="button"
+                  disabled={joinGame.isPending}
+                  className={menuPrimaryButtonClassName + ' w-full'}
+                  onClick={() => {
+                    if (joinGame.isPending) return
+                    void joinGame.mutateAsync(code, playerName).then(
                       (joined) => {
                         saveStoredGame(joined)
                         setStored(joined)
@@ -97,27 +91,9 @@ export const Route = createFileRoute('/online/$code')({
                     )
                   }}
                 >
-                  <label htmlFor="join-name" className="grid gap-1.5 text-sm text-muted">
-                    {m.yourName}
-                    <input
-                      className={menuInputClassName}
-                      id="join-name"
-                      value={name}
-                      maxLength={20}
-                      autoComplete="nickname"
-                      required
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={!name.trim() || joinGame.isPending}
-                    className={menuPrimaryButtonClassName + ' w-full'}
-                  >
-                    {m.joinGame}
-                    <Icon name="arrow" />
-                  </button>
-                </form>
+                  {m.joinGame}
+                  <Icon name="arrow" />
+                </button>
               </>
             ) : (
               <p className="text-sm leading-relaxed text-muted">

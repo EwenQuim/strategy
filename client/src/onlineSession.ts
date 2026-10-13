@@ -9,6 +9,14 @@ export function readPlayerName(): string {
   return readLocal(NAME_KEY, '', (raw) => raw)
 }
 
+export function readPlayerNameOrDefault(): string {
+  const name = readPlayerName()
+  if (name) return name
+  const generated = `Player ${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`
+  savePlayerName(generated)
+  return generated
+}
+
 export function savePlayerName(name: string): void {
   saveLocal(NAME_KEY, name)
 }
