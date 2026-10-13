@@ -276,8 +276,8 @@ async function playInUi(page: Page, state: GameState, action: Action) {
   assert.fail('Unexpected action: ' + action.type)
 }
 
-test('Enemy focus paints before bot search and the command deck stays inactive', async (t) => {
-  const { page, origin } = await fixture(t)
+test('Enemy focus stays responsive during worker search and the command deck stays inactive', async (t) => {
+  const { page, origin, files } = await fixture(t)
   const state = field([
     new King(1, 0, 0, 'player'),
     new Swordsman(2, 2, 0, 'enemy'),
@@ -296,25 +296,28 @@ test('Enemy focus paints before bot search and the command deck stays inactive',
   await dismissQuickPlayTutorial(page)
   if (process.env.PR_MEDIA_DIR)
     await page.screenshot({ path: join(process.env.PR_MEDIA_DIR, 'player-turn.png') })
-  await page.evaluate(() => {
-    const browser = window as typeof window & { resumeBotSearch?: () => void }
-    const requestFrame = window.requestAnimationFrame.bind(window)
-    let enemyFrames = 0
-    window.requestAnimationFrame = (callback) =>
-      requestFrame((timestamp) => {
-        if (document.querySelector('[data-testid="enemy-turn"]') && ++enemyFrames === 2)
-          browser.resumeBotSearch = () => callback(timestamp)
-        else callback(timestamp)
-      })
-  })
+  const workerPath = [...files.keys()].find((path) => /\/bot\.worker-.*\.js$/.test(path))!
+  files.set(
+    workerPath,
+    Buffer.from(
+      'const until = Date.now() + 3000; while (Date.now() < until) {}\n' +
+        files.get(workerPath)!.toString(),
+    ),
+  )
+  await page.evaluate(async (path) => {
+    for (const name of await caches.keys()) await (await caches.open(name)).delete(path)
+  }, workerPath)
+  const workerRequest = page.waitForRequest('**/bot.worker-*.js')
+  const workerStarted = page.waitForEvent('worker')
   await page
     .getByRole('button', { name: /End turn/ })
     .evaluate((button: HTMLButtonElement) => button.click())
-  await page.waitForFunction(
-    () => !!(window as typeof window & { resumeBotSearch?: () => void }).resumeBotSearch,
-    undefined,
-    polling,
-  )
+  await workerRequest
+  const worker = await workerStarted
+  const workerClosed = worker.waitForEvent('close')
+  const started = Date.now()
+  await page.evaluate(() => new Promise((resolve) => window.setTimeout(resolve, 50)))
+  assert.ok(Date.now() - started < 1000, 'Worker computation must not block the UI thread')
   assert.equal(
     await page
       .locator('[data-testid="initiative-unit"][aria-current="step"]')
@@ -330,10 +333,16 @@ test('Enemy focus paints before bot search and the command deck stays inactive',
   assert.equal(await page.getByTestId('unit-focus').getByRole('button').count(), 0)
   if (process.env.PR_MEDIA_DIR)
     await page.screenshot({ path: join(process.env.PR_MEDIA_DIR, 'enemy-thinking.png') })
-  await page.evaluate(() => {
-    ;(window as typeof window & { resumeBotSearch?: () => void }).resumeBotSearch?.()
-  })
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  await workerClosed
+  const nextWorker = page.waitForEvent('worker')
+  await page.getByRole('button', { name: /End turn/ }).click()
+  const cancelledWorker = await nextWorker
+  const cancelled = cancelledWorker.waitForEvent('close')
+  await page.getByRole('link', { name: 'Hexmate home', exact: true }).click()
+  await cancelled
+  await page.getByTestId('battlefield').waitFor({ state: 'hidden' })
+  assert.equal(await page.getByTestId('battlefield').count(), 0)
 })
 
 async function playTurn(page: Page) {
