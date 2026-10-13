@@ -19,8 +19,9 @@ interface HexTileProps {
   damage: number
   target: boolean
   strike: boolean
-  // Only passed to targeted tiles, so re-aiming leaves every other tile untouched.
-  targetLabel?: string
+  // Label for targeted tiles; empty when the tile is not a target, so re-aiming
+  // leaves every other tile untouched.
+  targetLabel: string
   previewed: boolean
   rechoosing: boolean
   inRange: boolean

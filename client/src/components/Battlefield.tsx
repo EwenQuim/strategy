@@ -195,7 +195,7 @@ export function Battlefield({
               target={target}
               strike={strike}
               targetLabel={
-                target ? (strike ? specialTexts[active!.special.name] : targetLabel) : undefined
+                target ? (strike ? specialTexts[active!.special.name] : targetLabel) : ''
               }
               previewed={sameHex(preview, tile)}
               rechoosing={!!rechoose && sameHex(rechoose, tile)}
