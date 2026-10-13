@@ -13,16 +13,19 @@ import type { Tile } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
-export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
-  if (pawn.special !== jump || !canUseSpecial(pawn)) return []
+function jumpLandings(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
+  if (!canUseSpecial(pawn)) return []
   const occupied = new Set(pawns.map((p) => key(p.q, p.r)))
   return [...tiles.values()].filter(
     (tile) =>
       passable(tile) &&
       (!occupied.has(key(tile.q, tile.r)) || hexDist(pawn, tile) === 0) &&
-      hexDist(pawn, tile) <= 3 &&
-      attackTargets(pawn, pawns, tile).length > 0,
+      hexDist(pawn, tile) <= 3,
   )
+}
+
+export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: Pawn): Tile[] {
+  return jumpLandings(tiles, pawns, pawn)
 }
 
 const jump: SpecialAbility = {
@@ -32,21 +35,26 @@ const jump: SpecialAbility = {
   choosesDestination: true,
   movement: 'jump',
   landingRange: 3,
-  noTargets: 'noEnemiesWithinReach',
   targetLabel: 'jumpTo',
   prompt: 'chooseTile',
   description: 'jumpDescription',
   reaches: (pawn, tile) => passable(tile) && hexDist(pawn, tile) <= 3,
   targets: attackTargets,
   threatenedTiles: landingThreatenedTiles,
-  candidates: (pawn, { tiles, pawns }) =>
-    jumpDestinations(tiles, pawns, pawn).flatMap((destination) =>
-      attackTargets(pawn, pawns, destination).map((target): Action => ({
+  candidates: (pawn, { tiles, pawns }) => {
+    const landings = jumpLandings(tiles, pawns, pawn)
+    return landings.flatMap((destination) => {
+      const attacks = attackTargets(pawn, pawns, destination).map((target): Action => ({
         type: 'special',
         target: { q: target.q, r: target.r },
         destination: { q: destination.q, r: destination.r },
-      })),
-    ),
+      }))
+      if (attacks.length === 0) {
+        return [{ type: 'special', destination: { q: destination.q, r: destination.r } }]
+      }
+      return attacks
+    })
+  },
   threat: (pawn, { target, from, movementCost, tiles, pawns }) => {
     if (!tiles || !pawns || pawn.energy - movementCost < pawn.special.cost) return 0
     return [...tiles.values()].some(
@@ -61,27 +69,28 @@ const jump: SpecialAbility = {
       : 0
   },
   tileTargets: (pawn, tiles, pawns) =>
-    new Set(jumpDestinations(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
+    new Set(jumpLandings(tiles, pawns, pawn).map((tile) => key(tile.q, tile.r))),
   perform: ({ pawn, tiles, pawns, tile, destination, round, log }) => {
-    const target = tile && pawnAt(pawns, tile)
     if (
-      !target ||
       !destination ||
-      !jumpDestinations(tiles, pawns, pawn).some((land) => sameHex(land, destination)) ||
-      !specialTargets(pawns, pawn, destination).includes(target)
-    )
+      !jumpLandings(tiles, pawns, pawn).some((land) => sameHex(land, destination))
+    ) {
       return null
+    }
     pawn.energy -= pawn.special.cost
-    const impacts = enterTiles(
-      tiles,
-      pawns,
-      pawn,
-      hexDist(pawn, destination) === 0 ? [] : [tiles.get(key(destination.q, destination.r))!],
-      round,
-      log,
-    )
-    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
-    return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
+    const landingTile = tiles.get(key(destination.q, destination.r))
+    const path = hexDist(pawn, destination) === 0 ? [] : landingTile ? [landingTile] : []
+    const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
+
+    if (tile) {
+      const target = pawnAt(pawns, tile)
+      if (target && specialTargets(pawns, pawn, destination).includes(target)) {
+        if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
+        return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
+      }
+    }
+
+    return { kind: 'move', to: destination, ...(impacts.length ? { impacts } : {}) }
   },
 }
 
@@ -107,7 +116,7 @@ export class Ninja extends Pawn {
   static override readonly icon =
     'M4 9a8 8 0 0 1 16 0v6a8 8 0 0 1-16 0V9Zm0 0h16M4 15h16M7 12h2m6 0h2M4 9 1 5m3 4L1 12'
   static override readonly aiInstructions =
-    'Ambush (2): jump up to 3 tiles over terrain and units to empty passable ground, then choose an adjacent enemy and strike for 3. May stay in place. 1 hp; once per activation.'
+    'Ambush (2): jump up to 3 tiles over terrain and units to empty passable ground, striking an adjacent enemy for 3 if present. May stay in place. 1 hp; once per activation.'
   readonly kind = 'ninja' as const
   get maxHp(): number {
     return 1

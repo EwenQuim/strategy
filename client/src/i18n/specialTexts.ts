@@ -171,11 +171,11 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     it: 'Imboscata',
   }),
   jumpDescription: t({
-    en: 'Jump up to 3 tiles over anything, then strike an adjacent enemy. You may stay in place. Land on empty ground.',
-    fr: 'Sautez jusqu’à 3 cases par-dessus tout, puis frappez un ennemi adjacent. Vous pouvez rester sur place. Atterrissez sur un sol libre.',
-    de: 'Springe bis zu 3 Felder über alles, dann triff einen angrenzenden Gegner. Stehenbleiben ist erlaubt. Landung auf freiem Boden.',
-    es: 'Salta hasta 3 casillas por encima de todo, luego golpea a un enemigo adyacente. Puedes quedarte. Aterriza en suelo libre.',
-    it: 'Salta fino a 3 caselle sopra ogni cosa, poi colpisci un nemico adiacente. Puoi restare. Atterra su terreno libero.',
+    en: 'Jump up to 3 tiles over anything, striking an adjacent enemy for 3 if present. You may stay in place. Land on empty ground.',
+    fr: 'Sautez jusqu’à 3 cases par-dessus tout, frappant un ennemi adjacent pour 3 si présent. Vous pouvez rester sur place. Atterrissez sur un sol libre.',
+    de: 'Springe bis zu 3 Felder über alles, triff einen angrenzenden Gegner für 3 Schaden falls vorhanden. Stehenbleiben ist erlaubt. Landung auf freiem Boden.',
+    es: 'Salta hasta 3 casillas por encima de todo, golpeando a un enemigo adyacente por 3 si está presente. Puedes quedarte. Aterriza en suelo libre.',
+    it: 'Salta fino a 3 caselle sopra ogni cosa, colpendo un nemico adiacente per 3 danni se presente. Puoi restare. Atterra su terreno libero.',
   }),
   jumpTo: t({
     en: 'Jump to',
