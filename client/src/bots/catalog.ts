@@ -16,10 +16,10 @@ const napoleon = registerBot(NapoleonBot, undefined, NAPOLEON_LEVELS)
 const hannibal = registerBot(HannibalBot, undefined, HANNIBAL_LEVELS)
 
 export const BOTS = {
-  [hannibal.name]: hannibal,
-  [napoleon.name]: napoleon,
-  [depthsearch.name]: depthsearch,
   [random.name]: random,
+  [depthsearch.name]: depthsearch,
+  [napoleon.name]: napoleon,
+  [hannibal.name]: hannibal,
   [mistral.name]: mistral,
   [jev.name]: jev,
 }
