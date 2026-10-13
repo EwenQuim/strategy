@@ -8,7 +8,7 @@ export type FitOptions = {
   validationEvery: number
 }
 
-function crossEntropy(data: readonly Sample[], weights: readonly number[]): number {
+export function valueLoss(data: readonly Sample[], weights: readonly number[]): number {
   if (!data.length) throw new RangeError('Training and validation need completed game samples')
   return (
     data.reduce((sum, sample) => {
@@ -26,8 +26,8 @@ export function fitValue(
 ) {
   const train = samples.filter((sample) => sample.game % options.validationEvery !== 0)
   const validation = samples.filter((sample) => sample.game % options.validationEvery === 0)
-  crossEntropy(train, initial)
-  const baselineValidationLoss = crossEntropy(validation, initial)
+  valueLoss(train, initial)
+  const baselineValidationLoss = valueLoss(validation, initial)
   const weights = [...initial],
     first = initial.map(() => 0),
     second = initial.map(() => 0)
@@ -49,7 +49,7 @@ export function fitValue(
         (options.learningRate * (first[feature] / (1 - 0.9 ** epoch))) /
         (Math.sqrt(second[feature] / (1 - 0.999 ** epoch)) + 1e-8)
     }
-    const heldout = crossEntropy(validation, weights)
+    const heldout = valueLoss(validation, weights)
     if (heldout < bestLoss) {
       bestLoss = heldout
       best = [...weights]
@@ -61,7 +61,7 @@ export function fitValue(
   return {
     weights: rounded,
     baselineValidationLoss,
-    validationLoss: crossEntropy(validation, rounded),
+    validationLoss: valueLoss(validation, rounded),
     bestEpoch,
     trainingSamples: train.length,
     validationSamples: validation.length,
