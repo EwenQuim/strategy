@@ -120,7 +120,7 @@ export const Route = createFileRoute('/online/')({
               type="checkbox"
               role="switch"
               aria-describedby="online-public-hint"
-              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
+              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-surface-raised transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-switch-knob motion-reduce:transition-none motion-reduce:after:transition-none"
               checked={publicHosting}
               onChange={(event) => {
                 setPublicHosting(event.target.checked)
@@ -172,7 +172,7 @@ export const Route = createFileRoute('/online/')({
             disabled={!trimmedName || joinCode.length !== 6 || busy}
             className={
               onlineButtonClassName +
-              ' gap-3 px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
+              ' gap-3 px-[25px] bg-control text-ink hover:bg-control-hover'
             }
           >
             {m.joinGame}
@@ -206,7 +206,7 @@ export const Route = createFileRoute('/online/')({
                 }
                 className={
                   onlineButtonClassName +
-                  ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c] disabled:opacity-50'
+                  ' justify-between px-4 py-3 text-left bg-control hover:bg-control-hover disabled:opacity-50'
                 }
               >
                 <span className="font-mono tracking-[0.2em]">{open.code}</span>
@@ -250,7 +250,7 @@ export const Route = createFileRoute('/online/')({
                     params={{ code: game.code }}
                     className={
                       onlineButtonClassName +
-                      ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c]'
+                      ' justify-between px-4 py-3 text-left bg-control hover:bg-control-hover'
                     }
                     preload={false}
                   >

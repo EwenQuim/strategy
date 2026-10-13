@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-# Fast guard: format + lint + typecheck + the unit suite.
+# Lint includes the baseline color guard; the full inventory remains available on demand.
 # Slow exhaustive sweeps live in tests/integration and run in CI's dedicated ai job, not here.
 npm --prefix client run format:check
 npm --prefix client run lint

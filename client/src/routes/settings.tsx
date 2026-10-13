@@ -48,7 +48,7 @@ export const Route = createFileRoute('/settings')({
             role="switch"
             aria-label={s.developerPreview}
             aria-describedby="developer-preview-hint"
-            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
+            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-surface-raised transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-switch-knob motion-reduce:transition-none motion-reduce:after:transition-none"
             checked={developerPreview}
             onChange={(event) => {
               setDeveloperPreview(event.target.checked)
@@ -73,7 +73,7 @@ export const Route = createFileRoute('/settings')({
             role="switch"
             aria-label={s.haptics}
             aria-describedby="haptics-hint"
-            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none"
+            className="relative mt-1 h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-surface-raised transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-switch-knob motion-reduce:transition-none motion-reduce:after:transition-none"
             checked={hapticsEnabled}
             onChange={(event) => {
               setHapticsEnabled(event.target.checked)
@@ -152,7 +152,7 @@ export const Route = createFileRoute('/settings')({
             </button>
             <button
               type="button"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-white/5 px-[25px] text-[15px] font-semibold text-ink hover:bg-white/10"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-surface px-[25px] text-[15px] font-semibold text-ink hover:bg-surface-raised"
               onClick={() => deleteDialogRef.current?.close()}
             >
               {cancel}

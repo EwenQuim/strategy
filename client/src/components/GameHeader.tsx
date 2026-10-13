@@ -13,7 +13,7 @@ import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
 
 const headerButtonClassName =
-  'grid size-9 place-items-center rounded-xl border border-line bg-white/5 text-muted hover:bg-[#ffffff09] hover:text-ink [&>svg]:size-[19px]'
+  'grid size-9 place-items-center rounded-xl border border-line bg-surface text-muted hover:bg-icon-hover hover:text-ink [&>svg]:size-[19px]'
 
 interface GameHeaderProps {
   biome: Biome
@@ -72,7 +72,7 @@ export function GameHeader({
           className="flex min-h-11 min-w-0 items-center gap-2.5 text-base leading-none font-bold tracking-tight"
           aria-label={campaign ? common.campaignLevels : isOnline ? m.onlineLobby : m.home}
         >
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-white/5 text-gold">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-surface text-gold">
             <Icon name="arrow" className="size-[18px] rotate-180" />
           </span>
           <span className="flex min-w-0 items-baseline gap-2">
