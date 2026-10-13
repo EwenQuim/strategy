@@ -78,8 +78,11 @@
   .combat-feedback--kill::before {
     animation: kill-flash 850ms ease-out both;
   }
+  .combat-feedback--kill::after {
+    animation: feedback-sweep 700ms ease-out both;
+  }
   .combat-feedback--miss::before {
-    animation: miss-sweep 700ms ease-out both;
+    animation: feedback-sweep 700ms ease-out both;
   }
   .combat-impact-burst {
     animation: impact-burst 450ms ease-out both;
@@ -188,21 +191,13 @@
   100% {
     opacity: 0;
   }
-  12% {
+  20%,
+  55% {
     opacity: 1;
-  }
-  30% {
-    opacity: 0.35;
-  }
-  42% {
-    opacity: 0.85;
-  }
-  70% {
-    opacity: 0.2;
   }
 }
 
-@keyframes miss-sweep {
+@keyframes feedback-sweep {
   from {
     transform: translateX(-100%);
     opacity: 0;

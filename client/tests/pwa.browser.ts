@@ -1978,12 +1978,7 @@ test(
       if (kind === 'lava') {
         const fallen = page.locator('[data-fallen="true"]')
         await fallen.waitFor()
-        const message = page.getByTestId('killed-message')
-        assert.equal(await message.textContent(), 'Killed')
-        assert.equal(
-          await message.evaluate((element) => getComputedStyle(element).animationName),
-          'none',
-        )
+        assert.equal(await page.getByTestId('killed-message').count(), 0)
         assert.equal(
           await fallen.evaluate((element) => getComputedStyle(element).animationName),
           'none',
@@ -2491,17 +2486,23 @@ test(
           const chips = page.locator('[data-fallen="true"]')
           await chips.first().waitFor()
           assert.equal(await chips.count(), fallen.length)
-          const messages = page.getByTestId('killed-message')
-          assert.deepEqual(
-            await messages.allTextContents(),
-            fallen.map(() => 'Killed'),
-          )
+          const feedback = page.getByTestId('combat-feedback')
           assert.ok(
-            await messages.evaluateAll((elements) =>
-              elements.every(
-                (element) => getComputedStyle(element).animationName === 'damage-pop',
-              ),
+            await feedback.evaluate((element) =>
+              element.className.includes('combat-feedback--kill'),
             ),
+          )
+          assert.equal(
+            await feedback.evaluate(
+              (element) => getComputedStyle(element, '::before').animationName,
+            ),
+            'kill-flash',
+          )
+          assert.equal(
+            await feedback.evaluate(
+              (element) => getComputedStyle(element, '::after').animationName,
+            ),
+            'feedback-sweep',
           )
           assert.ok(
             await chips.evaluateAll((elements) =>

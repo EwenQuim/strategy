@@ -1,5 +1,4 @@
 import { hexX, hexY } from './hex-art'
-import * as m from '../i18n/combat'
 import type { Pawn, Tile } from '../lib/engine'
 import { FeatureArt } from './features/FeatureArt'
 import { Icon, PawnIcon } from './Icon'
@@ -82,16 +81,6 @@ export function PawnChip({
         ))}
         {active && <path d="m0-35 4-5h-8Z" fill="#f2df9e" />}
       </g>
-      {pawn.hp <= 0 && (
-        <text
-          data-testid="killed-message"
-          y="-28"
-          textAnchor="middle"
-          className="combat-impact-label fill-[#ffe1a3] stroke-[#14271f] stroke-[5] text-[24px] font-black uppercase [paint-order:stroke] motion-reduce:animate-none"
-        >
-          {m.killed}
-        </text>
-      )}
     </g>
   )
 }
