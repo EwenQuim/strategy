@@ -78,9 +78,7 @@
   .combat-feedback--kill::before {
     animation: kill-flash 850ms ease-out both;
   }
-  .combat-feedback--kill::after {
-    animation: feedback-sweep 700ms ease-out both;
-  }
+  .combat-feedback--kill::after,
   .combat-feedback--miss::before {
     animation: feedback-sweep 700ms ease-out both;
   }

@@ -2492,23 +2492,14 @@ test(
           await chips.first().waitFor()
           assert.equal(await chips.count(), fallen.length)
           const feedback = page.getByTestId('combat-feedback')
-          assert.ok(
-            await feedback.evaluate((element) =>
-              element.className.includes('combat-feedback--kill'),
-            ),
-          )
-          assert.equal(
-            await feedback.evaluate(
-              (element) => getComputedStyle(element, '::before').animationName,
-            ),
-            'kill-flash',
-          )
-          assert.equal(
-            await feedback.evaluate(
-              (element) => getComputedStyle(element, '::after').animationName,
-            ),
-            'feedback-sweep',
-          )
+          const [killVariant, flashName, sweepName] = await feedback.evaluate((element) => [
+            element.className.includes('combat-feedback--kill'),
+            getComputedStyle(element, '::before').animationName,
+            getComputedStyle(element, '::after').animationName,
+          ])
+          assert.ok(killVariant)
+          assert.equal(flashName, 'kill-flash')
+          assert.equal(sweepName, 'feedback-sweep')
           const messages = page.getByTestId('killed-message')
           assert.deepEqual(
             await messages.allTextContents(),
