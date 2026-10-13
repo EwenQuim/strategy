@@ -25,6 +25,8 @@ const command = (action: Action): string => {
       `s,${action.target.q},${action.target.r}` +
       (action.destination ? `,${action.destination.q},${action.destination.r}` : '')
     )
+  if (action.type === 'special' && action.destination)
+    return `j,${action.destination.q},${action.destination.r}`
   throw new Error('Cannot record ' + JSON.stringify(action))
 }
 for (const pack of packs) {

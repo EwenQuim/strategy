@@ -199,9 +199,11 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     }
     case 'special': {
       const { special } = actor
+      // A signature that picks a landing tile may strike from it without a target.
+      const optionalTarget = special.targeted && special.choosesDestination
       if (
         !canUseSpecial(actor) ||
-        special.targeted !== !!action.target ||
+        (!optionalTarget && special.targeted !== !!action.target) ||
         !!special.choosesDestination !== !!action.destination
       )
         return null
