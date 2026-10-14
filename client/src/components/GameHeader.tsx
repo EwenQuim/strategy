@@ -112,7 +112,7 @@ export function GameHeader({
             onClick={onToggleThreats}
             aria-pressed={threatsShown}
             aria-label={threatZone}
-            title={threatZone}
+            title={`${threatZone} (T)`}
           >
             <Icon name="target" />
           </button>
@@ -120,7 +120,7 @@ export function GameHeader({
             className={headerButtonClassName}
             onClick={onHelp}
             aria-label={m.howToPlay}
-            title={m.howToPlay}
+            title={`${m.howToPlay} (H)`}
           >
             <Icon name="help" />
           </button>

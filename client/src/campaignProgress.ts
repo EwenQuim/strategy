@@ -4,6 +4,7 @@ import {
   campaignStorageKey,
   completeCampaignLevel,
   parseCampaignProgress,
+  type Campaign,
 } from './campaign'
 
 const NONE: readonly number[] = []
@@ -40,6 +41,11 @@ export function readClearedLevels(slug: string): readonly number[] {
 
 export function readCampaignProgress(slug: string): number {
   return readClearedLevels(slug).length
+}
+
+// Whether the level was already cleared when the battle started, so a replay unlocks nothing.
+export function clearedAtStart(campaign: Campaign | undefined, level: number | undefined) {
+  return !!campaign && !!level && readClearedLevels(campaign.slug).includes(level)
 }
 
 export function recordCampaignVictory(slug: string, level: number): void {

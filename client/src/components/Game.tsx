@@ -8,11 +8,11 @@ import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
 import { battleControl } from '../bots/participants'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
-import type { Campaign } from '../campaign'
+import { campaignUnlocks, type Campaign } from '../campaign'
 import {
   subscribeCampaignProgress,
   campaignProgressSaved,
-  readClearedLevels,
+  clearedAtStart,
 } from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
 import { Battlefield } from './Battlefield'
@@ -24,6 +24,7 @@ import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
 import { useInspection } from './useInspection'
+import { useGameShortcuts } from './useGameShortcuts'
 import { tileChoices, type TileChoice, type Targeting } from '../lib/tileChoices'
 import {
   activePawn,
@@ -39,25 +40,6 @@ import {
   type Side,
   type Tile,
 } from '../lib/engine'
-
-function campaignUnlocks(
-  campaign: Campaign | undefined,
-  level: number | undefined,
-  alreadyCleared: boolean,
-  winner: GameState['winner'],
-) {
-  return winner === 'player' &&
-    campaign &&
-    campaign.unlockToasts !== false &&
-    level &&
-    !alreadyCleared
-    ? campaign.levels[level - 1].unlocks
-    : []
-}
-
-function clearedAtStart(campaign: Campaign | undefined, level: number | undefined) {
-  return !!campaign && !!level && readClearedLevels(campaign.slug).includes(level)
-}
 
 function resolveWinnerLabel(
   winner: GameState['winner'],
@@ -201,15 +183,25 @@ export function Game({
     }
   }
 
-  // Tapping the active character toggles between moving and attacking, never previewing.
+  // Tapping the active character or pressing A toggles between moving and attacking, never previewing.
+  const toggleAim = () => {
+    if (!canCommand || !pawn) return
+    if (aim) setAim(null)
+    else if (canUseSpecial(pawn) && hasSpecialTargets) setAim({ action: 'special' })
+  }
+
   const onInspectTile = (tile: Tile) => {
-    if (canCommand && pawn && sameHex(pawn, tile)) {
-      if (aim) setAim(null)
-      else if (canUseSpecial(pawn) && hasSpecialTargets) setAim({ action: 'special' })
-      return
-    }
+    if (canCommand && pawn && sameHex(pawn, tile)) return toggleAim()
     insight.inspectAt(tile)
   }
+
+  useGameShortcuts({
+    endTurn: () => canCommand && dispatch({ type: 'endTurn' }),
+    toggleAim,
+    cancel: () => setAim(null),
+    toggleThreats: insight.toggleThreats,
+    help: () => dialog.current?.showModal(),
+  })
 
   return (
     <main
@@ -306,15 +298,7 @@ export function Game({
         onAim={setAim}
       />
 
-      <GameHelpDialog
-        dialogRef={dialog}
-        mode={mode}
-        bot={bot}
-        sideBots={sideBots}
-        setup={setup}
-        biome={state.biome}
-        campaignLevel={campaignLevel}
-      />
+      <GameHelpDialog dialogRef={dialog} biome={state.biome} />
     </main>
   )
 }

@@ -1,40 +1,29 @@
 import type { RefObject } from 'react'
-import type { BattleSetup, Biome } from '../lib/engine'
-import type { GameMode } from '../lib/game-mode'
-import { BOTS, type BotConfig } from '../bots/catalog'
-import type { SideBots } from '../bots/participants'
+import type { Biome } from '../lib/engine'
 import { INTRODUCTIONS } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
 import * as m from '../i18n/help'
-import * as menus from '../i18n/menus'
+import { threatZone } from '../i18n/battlefield'
 import { BriefingElements } from './BriefingElements'
 import { Icon } from './Icon'
 import { dialogClassName, iconButtonClassName } from './styles'
 
+const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
+  ['E', game.endTurn],
+  ['A', game.special],
+  ['Esc', game.cancel],
+  ['T', threatZone],
+  ['H', game.howToPlay],
+]
+
 interface GameHelpDialogProps {
   dialogRef: RefObject<HTMLDialogElement | null>
-  mode: GameMode
-  bot: BotConfig
-  sideBots?: SideBots
-  setup?: BattleSetup
   biome: Biome
-  campaignLevel?: number
 }
 
-export function GameHelpDialog({
-  dialogRef,
-  mode,
-  bot,
-  sideBots,
-  setup,
-  biome,
-  campaignLevel,
-}: GameHelpDialogProps) {
+export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
   const { hell, ...elements } = INTRODUCTIONS
-  const preset = Object.entries(BOTS[bot.name].presets).find(
-    ([, options]) => JSON.stringify(options) === JSON.stringify(bot.options),
-  )?.[0]
   return (
     <dialog
       ref={dialogRef}
@@ -56,28 +45,29 @@ export function GameHelpDialog({
           <Icon name="close" />
         </button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6">
-        <p className="pt-5 text-[14px] leading-normal text-muted">
-          {campaignLevel ? m.campaignIntro : setup ? m.customIntro : m.randomIntro}
-          {!sideBots &&
-            setup &&
-            mode !== 'local' &&
-            ' ' +
-              (preset
-                ? m.aiDifficulty(menus.difficulties[preset as keyof typeof menus.difficulties])
-                : m.aiStrategy(menus.aiStrategies[bot.name]))}{' '}
-          {sideBots
-            ? m.customPlayers
-            : mode === 'local'
-              ? m.localPlayers
-              : mode === 'online'
-                ? m.onlinePlayers
-                : m.aiPlayers}
-          . {m.turnOrder}.
-        </p>
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
         <BriefingElements
           elements={[...Object.values(elements).flat(), ...(biome === 'hell' ? hell : [])]}
         />
+        {/* Shortcuts need a keyboard, so touch-only players never see this section. */}
+        <section
+          className="mt-5 hidden border-t border-line pt-4 [@media(pointer:fine)]:block"
+          aria-labelledby="shortcuts-title"
+        >
+          <h3 className="font-serif text-[19px] leading-snug text-gold" id="shortcuts-title">
+            {m.shortcutsTitle}
+          </h3>
+          <ul className="mt-2 flex list-none flex-col gap-1.5 p-0 text-[13px] text-muted">
+            {SHORTCUTS.map(([keys, label]) => (
+              <li key={keys} className="flex items-center gap-3">
+                <kbd className="inline-flex min-w-7 justify-center rounded-md border border-line bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-ink">
+                  {keys}
+                </kbd>
+                {label}
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </dialog>
   )

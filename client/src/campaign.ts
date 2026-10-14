@@ -9,7 +9,7 @@ import { mapFromRows, type Terrain, type TileFeature } from './lib/engine/hex.ts
 import { validateSetup } from './lib/engine/setup.ts'
 import { BOTS, type BotConfig } from './bots/catalog.ts'
 import type { PawnKind } from './lib/engine/pawns/index.ts'
-import type { Biome, FixedBattleSetup } from './lib/engine/index.ts'
+import type { Biome, FixedBattleSetup, GameState } from './lib/engine/index.ts'
 
 export type IntroducedElement =
   | PawnKind
@@ -123,6 +123,22 @@ export function withUnitUnlocks<Level extends { setup: FixedBattleSetup }>(
 
 type AuthoredCampaign = Omit<Campaign, 'levels'> & {
   levels: Omit<CampaignLevel, 'newElements' | 'unlocks'>[]
+}
+
+// The recruits a first victory at this level unlocks, shown as toasts.
+export function campaignUnlocks(
+  campaign: Campaign | undefined,
+  level: number | undefined,
+  alreadyCleared: boolean,
+  winner: GameState['winner'],
+) {
+  return winner === 'player' &&
+    campaign &&
+    campaign.unlockToasts !== false &&
+    level &&
+    !alreadyCleared
+    ? campaign.levels[level - 1].unlocks
+    : []
 }
 
 const packs: AuthoredCampaign[] = [

@@ -66,7 +66,7 @@ export function GameSpecialButton({
       })}
       data-action="special"
       {...buttonProps}
-      title={pawn ? specialTexts[pawn.special.description] : undefined}
+      title={pawn ? `${specialTexts[pawn.special.description]} (A)` : undefined}
       aria-pressed={usingSpecial && !confirming}
     />
   )
