@@ -18,8 +18,10 @@ export function jumpDestinations(tiles: Map<string, Tile>, pawns: Pawn[], pawn: 
   return [...tiles.values()].filter(
     (tile) =>
       passable(tile) &&
-      (!occupied.has(key(tile.q, tile.r)) || hexDist(pawn, tile) === 0) &&
-      hexDist(pawn, tile) <= 3,
+      hexDist(pawn, tile) <= 3 &&
+      // Staying in place is a landing only to strike from it: a jump onto itself does nothing.
+      (!occupied.has(key(tile.q, tile.r)) ||
+        (hexDist(pawn, tile) === 0 && attackTargets(pawn, pawns, tile).length > 0)),
   )
 }
 
@@ -68,6 +70,7 @@ const jump: SpecialAbility = {
 
     if (
       !destination ||
+      (sameHex(pawn, destination) && !tile) ||
       !jumpDestinations(tiles, pawns, pawn).some((land) => sameHex(land, destination)) ||
       (tile && (!target || !specialTargets(pawns, pawn, destination).includes(target)))
     )
@@ -105,7 +108,7 @@ export class Ninja extends Pawn {
   static override readonly icon =
     'M4 9a8 8 0 0 1 16 0v6a8 8 0 0 1-16 0V9Zm0 0h16M4 15h16M7 12h2m6 0h2M4 9 1 5m3 4L1 12'
   static override readonly aiInstructions =
-    'Ambush (2): jump up to 3 tiles over terrain and units to empty passable ground, striking an adjacent enemy for 3 if present. May stay in place. 1 hp; once per activation.'
+    'Ambush (2): jump up to 3 tiles over terrain and units to empty passable ground, striking an adjacent enemy for 3 if present. May stay in place to strike. 1 hp; once per activation.'
   readonly kind = 'ninja' as const
   get maxHp(): number {
     return 1
