@@ -12,7 +12,6 @@ for (const side of ['player', 'enemy'] as const) {
     for (const destination of [
       { q: -2, r: 0 },
       { q: 3, r: 0 },
-      { q: 0, r: 0 },
     ]) {
       const state = setup()
       const before = structuredClone(state)
@@ -28,6 +27,22 @@ for (const side of ['player', 'enemy'] as const) {
       assert.equal(reducer(next, action), next)
       assert.deepEqual(structuredClone(state), before)
     }
+  })
+
+  test(`${side}: Ambush never jumps in place without striking`, () => {
+    const state = setup()
+    const before = structuredClone(state)
+    assert.equal(reducer(state, { type: 'special', destination: { q: 0, r: 0 } }), state)
+    const adjacent = field([new Ninja(1, 0, 0, side), new King(3, 1, 0, other, 4)])
+    assert.equal(reducer(adjacent, { type: 'special', destination: { q: 0, r: 0 } }), adjacent)
+    const strike = reducer(adjacent, {
+      type: 'special',
+      destination: { q: 0, r: 0 },
+      target: { q: 1, r: 0 },
+    })
+    assert.equal(strike.pawns.find((pawn) => pawn.id === 1)!.energy, 1)
+    assert.equal(strike.pawns.find((pawn) => pawn.id === 3)!.hp, 1)
+    assert.deepEqual(structuredClone(state), before)
   })
 
   test(`${side}: Ambush rejects explicit invalid targets without spending its signature`, () => {
