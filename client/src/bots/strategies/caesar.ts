@@ -56,6 +56,15 @@ export class CaesarBot extends LearnedSearchBot {
   }
 
   protected select(children: SearchNode[], actor: Pawn, state: GameState): SearchNode {
+    // The crown plays the patient game: soldiers lead the charge, the king follows the search.
+    if (actor.kind === 'king')
+      return children.toSorted(
+        (a, b) =>
+          (b.solved === 1 ? 1 : 0) - (a.solved === 1 ? 1 : 0) ||
+          (a.solved === 0 ? 1 : 0) - (b.solved === 0 ? 1 : 0) ||
+          b.visits - a.visits ||
+          b.value - a.value,
+      )[0]
     const target = state.pawns.find((p) => p.side !== actor.side && p.kind === 'king')!
     const enemyBlood = (s: GameState) =>
       s.pawns.filter((p) => p.side !== actor.side).reduce((sum, p) => sum + p.hp, 0)
