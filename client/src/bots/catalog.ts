@@ -7,6 +7,7 @@ import { MistralBot } from './strategies/mistral.ts'
 import { JevBot } from './strategies/jev.ts'
 import { NapoleonBot, NAPOLEON_LEVELS } from './strategies/napoleon.ts'
 import { HannibalBot, HANNIBAL_LEVELS } from './strategies/hannibal.ts'
+import { CaesarBot, CAESAR_LEVELS } from './strategies/caesar.ts'
 
 const depthsearch = registerBot(DepthsearchBot, undefined, BOT_LEVELS)
 const random = registerBot(RandomBot)
@@ -14,12 +15,14 @@ const mistral = registerBot(MistralBot, new DepthsearchBot(), {}, 'main')
 const jev = registerBot(JevBot, new DepthsearchBot(), {}, 'main')
 const napoleon = registerBot(NapoleonBot, undefined, NAPOLEON_LEVELS)
 const hannibal = registerBot(HannibalBot, undefined, HANNIBAL_LEVELS)
+const caesar = registerBot(CaesarBot, undefined, CAESAR_LEVELS)
 
 export const BOTS = {
   [random.name]: random,
   [depthsearch.name]: depthsearch,
   [napoleon.name]: napoleon,
   [hannibal.name]: hannibal,
+  [caesar.name]: caesar,
   [mistral.name]: mistral,
   [jev.name]: jev,
 }
