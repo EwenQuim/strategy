@@ -4,7 +4,6 @@ import { INTRODUCTIONS } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
 import * as m from '../i18n/help'
-import { threatZone } from '../i18n/battlefield'
 import { BriefingElements } from './BriefingElements'
 import { Icon } from './Icon'
 import { dialogClassName, iconButtonClassName } from './styles'
@@ -13,7 +12,6 @@ const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
   ['E', game.endTurn],
   ['A', game.special],
   ['Esc', game.cancel],
-  ['T', threatZone],
   ['H', game.howToPlay],
 ]
 

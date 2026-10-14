@@ -7,7 +7,7 @@ import * as m from '../i18n/game'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
 import { campaignName } from '../i18n/campaign'
-import { alreadyActed, inspect, threatZone } from '../i18n/battlefield'
+import { alreadyActed, inspect } from '../i18n/battlefield'
 import type { GameMode, PlayerNames } from '../lib/game-mode'
 import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
@@ -27,9 +27,7 @@ interface GameHeaderProps {
   active: number
   campaign?: Campaign
   campaignLevel?: number
-  threatsShown: boolean
   onHelp: () => void
-  onToggleThreats: () => void
   onInspect: (id: number) => void
 }
 
@@ -45,9 +43,7 @@ export function GameHeader({
   active,
   campaign,
   campaignLevel,
-  threatsShown,
   onHelp,
-  onToggleThreats,
   onInspect,
 }: GameHeaderProps) {
   const local = mode === 'local'
@@ -108,19 +104,10 @@ export function GameHeader({
             </span>
           )}
           <button
-            className={headerButtonClassName + ' aria-pressed:text-[#ff8a6e]'}
-            onClick={onToggleThreats}
-            aria-pressed={threatsShown}
-            aria-label={threatZone}
-            title={`${threatZone} (T)`}
-          >
-            <Icon name="target" />
-          </button>
-          <button
             className={headerButtonClassName}
             onClick={onHelp}
             aria-label={m.howToPlay}
-            title={`${m.howToPlay} (H)`}
+            title={m.howToPlay}
           >
             <Icon name="help" />
           </button>

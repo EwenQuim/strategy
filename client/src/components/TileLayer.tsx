@@ -33,7 +33,6 @@ interface TileLayerProps {
   preview: Axial | null
   rechoose?: Axial | null
   range: Set<string>
-  threats: Set<string>
   onTileClick: (tile: Tile) => void
   onInspect: (tile: Tile) => void
 }
@@ -57,7 +56,6 @@ export function TileLayer({
   preview,
   rechoose,
   range,
-  threats,
   onTileClick,
   onInspect,
 }: TileLayerProps) {
@@ -102,9 +100,6 @@ export function TileLayer({
             strokeWidth="1.5"
             opacity=".6"
           />
-        </pattern>
-        <pattern id="threat-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
-          <circle cx="3.5" cy="3.5" r="1.1" fill="#ff8a6e" opacity=".75" />
         </pattern>
         <linearGradient id="lava-melt" x1="0" y1="0" x2=".8" y2="1">
           <stop stopColor="#815c51" />
@@ -174,7 +169,6 @@ export function TileLayer({
             previewed={sameHex(preview, tile)}
             rechoosing={!!rechoose && sameHex(rechoose, tile)}
             inRange={range.has(tileKey)}
-            threatened={threats.has(tileKey)}
             quakeClass={quakeKeys?.has(tileKey) ? quakeClass : ''}
             warned={inHellfire(hellfire, tile)}
             impactCenter={hellfire.some((center) => sameHex(center, tile))}

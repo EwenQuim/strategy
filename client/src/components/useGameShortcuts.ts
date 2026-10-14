@@ -4,18 +4,11 @@ export interface GameShortcuts {
   endTurn: () => void
   toggleAim: () => void
   cancel: () => void
-  toggleThreats: () => void
   help: () => void
 }
 
 // Keyboard shortcuts mirror the tap controls; the help dialog lists them.
-export function useGameShortcuts({
-  endTurn,
-  toggleAim,
-  cancel,
-  toggleThreats,
-  help,
-}: GameShortcuts) {
+export function useGameShortcuts({ endTurn, toggleAim, cancel, help }: GameShortcuts) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return
@@ -27,7 +20,6 @@ export function useGameShortcuts({
         e: endTurn,
         a: toggleAim,
         escape: cancel,
-        t: toggleThreats,
         h: help,
         '?': help,
       }
@@ -38,5 +30,5 @@ export function useGameShortcuts({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [endTurn, toggleAim, cancel, toggleThreats, help])
+  }, [endTurn, toggleAim, cancel, help])
 }

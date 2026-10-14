@@ -31,7 +31,6 @@ interface HexTileProps {
   previewed: boolean
   rechoosing: boolean
   inRange: boolean
-  threatened: boolean
   warned: boolean
   impactCenter: boolean
   labels: PlayerNames
@@ -92,7 +91,6 @@ export const HexTile = memo(function HexTile({
   previewed,
   rechoosing,
   inRange,
-  threatened,
   warned,
   impactCenter,
   labels,
@@ -116,7 +114,6 @@ export const HexTile = memo(function HexTile({
     canMove,
     cost,
     inRange,
-    threatened,
     rechoose: rechoosing,
   })
   const fill = tileFill({
@@ -175,14 +172,6 @@ export const HexTile = memo(function HexTile({
         <g className="pointer-events-none" aria-hidden="true">
           <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
         </g>
-      )}
-      {threatened && (
-        <polygon
-          points={hexPoints}
-          fill="url(#threat-hatch)"
-          className="pointer-events-none"
-          aria-hidden="true"
-        />
       )}
       {canMove && !occupant && (
         <g className="pointer-events-none">

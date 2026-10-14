@@ -21,7 +21,6 @@ interface BattlefieldProps {
   preview: Axial | null
   rechoose?: Axial | null
   range: Set<string>
-  threats: Set<string>
   effect: BattleEffect | null
   effectId: number
   onTileClick: (tile: Tile) => void
@@ -44,7 +43,6 @@ export function Battlefield({
   preview,
   rechoose,
   range,
-  threats,
   effect,
   effectId,
   onTileClick,
@@ -94,7 +92,6 @@ export function Battlefield({
         preview={preview}
         rechoose={rechoose}
         range={range}
-        threats={threats}
         onTileClick={onTileClick}
         onInspect={onInspect}
       />

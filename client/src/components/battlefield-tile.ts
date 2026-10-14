@@ -48,7 +48,6 @@ export function tileAriaLabel({
   canMove,
   cost,
   inRange,
-  threatened,
   rechoose,
 }: {
   tile: Tile
@@ -65,7 +64,6 @@ export function tileAriaLabel({
   canMove: boolean
   cost?: number
   inRange: boolean
-  threatened: boolean
   rechoose: boolean
 }): string {
   const label =
@@ -83,9 +81,7 @@ export function tileAriaLabel({
         bf.tilePosition(tile.q + Math.floor(tile.r / 2) + 1, tile.r + 1)) +
     (feature ? ', ' + feature.name + '. ' + feature.description : '')
   const warning =
-    (inRange ? ', ' + bf.inRange : '') +
-    (threatened ? ', ' + bf.threatened : '') +
-    (warned ? ', ' + bf.hellfireWarning(impactCenter) : '')
+    (inRange ? ', ' + bf.inRange : '') + (warned ? ', ' + bf.hellfireWarning(impactCenter) : '')
   return (
     (target
       ? targetLabel + ' ' + label + (damage ? ', ' + bf.lavaDamage(damage, lethal) : '')
