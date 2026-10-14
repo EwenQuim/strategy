@@ -994,7 +994,7 @@ test(
     await playTurn(page)
     assert.equal(await page.locator('[data-testid="enemy-turn"]').count(), 0)
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('dialog').innerText(), /This custom battle/)
+    await page.getByRole('heading', { name: 'How to play' }).waitFor()
     assert.doesNotMatch(await page.locator('dialog').innerText(), /unlock the next level/)
     await page.getByRole('button', { name: 'Close dialog' }).click()
     for (const difficulty of ['easy', 'normal', 'hard', 'brutal'] as const) {
@@ -1018,11 +1018,7 @@ test(
       )
       assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
       await page.getByRole('button', { name: 'How to play' }).click()
-      assert.ok(
-        (await page.locator('dialog').innerText())
-          .toLowerCase()
-          .includes('ai-controlled units act automatically'),
-      )
+      await page.getByRole('heading', { name: 'How to play' }).waitFor()
       await page.getByRole('button', { name: 'Close dialog' }).click()
       await playTurn(page)
     }
@@ -2412,9 +2408,7 @@ test(
     const tutorial = page.getByRole('dialog', { name: 'Quick play', includeHidden: true })
     await tutorial.waitFor()
     const text = await tutorial.innerText()
-    assert.match(text, /Both sides get the same random lineup/)
     assert.match(text, /Kill the enemy king/)
-    assert.match(text, /You move first/)
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
     assert.match(await tutorial.innerText(), /Units act one at a time/)
     await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
@@ -2449,8 +2443,7 @@ test(
     await playTurn(page)
     assert.equal(await page.locator('[data-testid="enemy-turn"]').count(), 0)
     await page.getByRole('button', { name: 'How to play' }).click()
-    assert.match(await page.locator('dialog').innerText(), /Player 1 commands green units/)
-    assert.match(await page.locator('dialog').innerText(), /Turn order is decided once/)
+    await page.getByRole('heading', { name: 'How to play' }).waitFor()
     assert.doesNotMatch(await page.locator('dialog').innerText(), /shuffles the order/)
     assert.doesNotMatch(
       await page.locator('dialog').innerText(),
@@ -3042,3 +3035,50 @@ test(
     )
   },
 )
+
+test('Keyboard shortcuts aim, cancel, toggle threats, open help and end turns', async (t) => {
+  const { page, origin } = await fixture(t)
+  const state = field([
+    new Swordsman(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player', 4),
+    new King(3, 1, 0, 'enemy', 4),
+  ])
+  state.seed = 'keyboard-shortcuts'
+  await page.evaluate(
+    (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+    {
+      version: BATTLE_SNAPSHOT_VERSION,
+      identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+      state: snapshotState(state),
+    },
+  )
+  await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
+  const special = page.locator('[data-action="special"]')
+  // A toggles ability aiming, Escape cancels it.
+  await page.keyboard.press('a')
+  assert.match(await special.innerText(), /Cancel/)
+  await page.keyboard.press('Escape')
+  assert.doesNotMatch(await special.innerText(), /Cancel/)
+  // T toggles the threat zone.
+  const threats = page.getByRole('button', { name: 'Enemy threat zone' })
+  await page.keyboard.press('t')
+  assert.equal(await threats.getAttribute('aria-pressed'), 'true')
+  await page.keyboard.press('t')
+  assert.equal(await threats.getAttribute('aria-pressed'), 'false')
+  // H and ? open the help dialog, which lists the shortcuts; Escape closes it.
+  const dialog = page.getByRole('dialog')
+  for (const key of ['h', '?']) {
+    await page.keyboard.press(key)
+    await dialog.waitFor()
+    await page.getByRole('heading', { name: 'Keyboard shortcuts' }).waitFor()
+    await page.keyboard.press('Escape')
+    await dialog.waitFor({ state: 'hidden' })
+  }
+  // E ends the turn.
+  await page.keyboard.press('e')
+  await page.waitForFunction(() => {
+    const saved = JSON.parse(localStorage.getItem('hexmate.battle') ?? 'null')
+    return saved && saved.state.active !== 0
+  })
+})

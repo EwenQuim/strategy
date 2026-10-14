@@ -81,7 +81,7 @@ export function GameCommandDeck({
                 data-action="endTurn"
                 disabled={!canCommand}
                 onClick={() => dispatch({ type: 'endTurn' })}
-                title={m.endTurnHint}
+                title={`${m.endTurnHint} (E)`}
               />
             )}
           </div>

@@ -7,7 +7,6 @@ import type { CampaignLevel } from '../campaign'
 import { ELEMENT_ACCENTS, INTRODUCTIONS, type BriefingElement } from '../briefings'
 import { BIOMES } from '../lib/engine'
 import * as common from '../i18n/common'
-import * as h from '../i18n/help'
 import * as m from '../i18n/game'
 import * as b from '../i18n/briefing-popup'
 
@@ -20,13 +19,11 @@ function BriefingPopup({
   title,
   elements,
   theme,
-  intro,
   onClose,
 }: {
   title: string
   elements: readonly BriefingElement[]
   theme?: CSSProperties
-  intro?: string
   onClose?: () => void
 }) {
   const [page, setPage] = useState(0)
@@ -172,9 +169,6 @@ function BriefingPopup({
               ))}
             </ul>
           )}
-          {intro && page === 0 && (
-            <p className="mt-4 text-xs leading-relaxed text-muted">{intro}</p>
-          )}
         </section>
       </div>
       <footer className="shrink-0 border-t border-line bg-black/15 px-5 pt-2 pb-5 max-[360px]:px-4 [@media(max-height:650px)]:pb-3">
@@ -256,7 +250,6 @@ export function QuickPlayTutorial() {
     <BriefingPopup
       title={common.quickPlay}
       elements={INTRODUCTIONS.king}
-      intro={h.randomIntro + ' ' + h.aiPlayers + '. ' + h.turnOrder + '.'}
       onClose={markTutorialSeen}
     />
   )
