@@ -28,6 +28,8 @@ import { tileChoices, type TileChoice, type Targeting } from '../lib/tileChoices
 import {
   activePawn,
   BIOMES,
+  canUseSpecial,
+  sameHex,
   specialTargetingTiles,
   key,
   movementDestinations,
@@ -37,10 +39,6 @@ import {
   type Side,
   type Tile,
 } from '../lib/engine'
-
-function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: number | undefined) {
-  return !!campaign && campaignLevel === campaign.levels.length
-}
 
 function campaignUnlocks(
   campaign: Campaign | undefined,
@@ -148,7 +146,7 @@ export function Game({
   )
   const winnerLabel = resolveWinnerLabel(
     state.winner,
-    isCampaignComplete(campaign, campaignLevel),
+    !!campaign && campaignLevel === campaign.levels.length,
     local || isOnline,
     names,
   )
@@ -203,6 +201,16 @@ export function Game({
     }
   }
 
+  // Tapping the active character toggles between moving and attacking, never previewing.
+  const onInspectTile = (tile: Tile) => {
+    if (canCommand && pawn && sameHex(pawn, tile)) {
+      if (aim) setAim(null)
+      else if (canUseSpecial(pawn) && hasSpecialTargets) setAim({ action: 'special' })
+      return
+    }
+    insight.inspectAt(tile)
+  }
+
   return (
     <main
       className="grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background) text-ink"
@@ -252,7 +260,7 @@ export function Game({
             effect={effect}
             effectId={effectId}
             onTileClick={onTileClick}
-            onInspect={insight.inspectAt}
+            onInspect={onInspectTile}
           />
         </div>
         {state.winner && (
