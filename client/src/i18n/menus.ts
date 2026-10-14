@@ -135,6 +135,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   en: {
     napoleon: 'Napoleon',
     hannibal: 'Hannibal',
+    caesar: 'Caesar',
     depthsearch: 'Sun Tzu',
     random: 'Pyrrhus',
     mistral: 'Alexander',
@@ -143,6 +144,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   fr: {
     napoleon: 'Napoléon',
     hannibal: 'Hannibal',
+    caesar: 'César',
     depthsearch: 'Sun Tzu',
     random: 'Pyrrhus',
     mistral: 'Alexandre',
@@ -151,6 +153,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   de: {
     napoleon: 'Napoleon',
     hannibal: 'Hannibal',
+    caesar: 'Cäsar',
     depthsearch: 'Sun Tzu',
     random: 'Pyrrhos',
     mistral: 'Alexander',
@@ -159,6 +162,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   es: {
     napoleon: 'Napoleón',
     hannibal: 'Aníbal',
+    caesar: 'César',
     depthsearch: 'Sun Tzu',
     random: 'Pirro',
     mistral: 'Alejandro',
@@ -167,6 +171,7 @@ export const aiStrategies = t<Record<BotName, string>>({
   it: {
     napoleon: 'Napoleone',
     hannibal: 'Annibale',
+    caesar: 'Cesare',
     depthsearch: 'Sun Tzu',
     random: 'Pirro',
     mistral: 'Alessandro',
