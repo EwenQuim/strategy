@@ -1071,8 +1071,8 @@ test(
     )
     await firstRequest
     try {
-      await page.getByRole('button', { name: 'Enemy threat zone' }).click()
-      await page.getByRole('button', { name: 'Enemy threat zone' }).click()
+      await page.getByRole('button', { name: 'How to play' }).click()
+      await page.getByRole('button', { name: 'Close dialog', exact: true }).click()
       await page.getByRole('button', { name: 'How to play' }).click()
       await page.getByRole('button', { name: 'Close dialog', exact: true }).click()
       assert.equal(requests, 1, 'UI rerenders must keep the pending decision')
@@ -3036,7 +3036,7 @@ test(
   },
 )
 
-test('Keyboard shortcuts aim, cancel, toggle threats, open help and end turns', async (t) => {
+test('Keyboard shortcuts aim, cancel, open help and end turns', async (t) => {
   const { page, origin } = await fixture(t)
   const state = field([
     new Swordsman(1, 0, 0, 'player'),
@@ -3060,12 +3060,6 @@ test('Keyboard shortcuts aim, cancel, toggle threats, open help and end turns', 
   assert.match(await special.innerText(), /Cancel/)
   await page.keyboard.press('Escape')
   assert.doesNotMatch(await special.innerText(), /Cancel/)
-  // T toggles the threat zone.
-  const threats = page.getByRole('button', { name: 'Enemy threat zone' })
-  await page.keyboard.press('t')
-  assert.equal(await threats.getAttribute('aria-pressed'), 'true')
-  await page.keyboard.press('t')
-  assert.equal(await threats.getAttribute('aria-pressed'), 'false')
   // H and ? open the help dialog, which lists the shortcuts; Escape closes it.
   const dialog = page.getByRole('dialog')
   for (const key of ['h', '?']) {
