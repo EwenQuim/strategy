@@ -71,20 +71,6 @@ export const inRange = t({
   es: 'a su alcance',
   it: 'a portata',
 })
-export const threatened = t({
-  en: 'enemies can strike here next turn',
-  fr: 'les ennemis peuvent frapper ici au prochain tour',
-  de: 'Gegner können hier im nächsten Zug zuschlagen',
-  es: 'los enemigos pueden atacar aquí el próximo turno',
-  it: 'i nemici possono colpire qui al prossimo turno',
-})
-export const threatZone = t({
-  en: 'Enemy threat zone',
-  fr: 'Zone de menace ennemie',
-  de: 'Gegnerische Bedrohungszone',
-  es: 'Zona de amenaza enemiga',
-  it: 'Zona di minaccia nemica',
-})
 export const inspect = t({
   en: (name: string) => `Inspect ${name}`,
   fr: (name: string) => `Inspecter ${name}`,

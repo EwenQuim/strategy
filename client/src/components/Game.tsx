@@ -150,7 +150,7 @@ export function Game({
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
   const aim = canCommand && aiming?.state === state ? aiming.aim : null
-  const insight = useInspection(state, viewerSide, local, !!aim)
+  const insight = useInspection(state, !!aim)
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
@@ -199,7 +199,6 @@ export function Game({
     endTurn: () => canCommand && dispatch({ type: 'endTurn' }),
     toggleAim,
     cancel: () => setAim(null),
-    toggleThreats: insight.toggleThreats,
     help: () => dialog.current?.showModal(),
   })
 
@@ -224,9 +223,7 @@ export function Game({
         active={state.active}
         campaign={campaign}
         campaignLevel={campaignLevel}
-        threatsShown={insight.threatsShown}
         onHelp={() => dialog.current?.showModal()}
-        onToggleThreats={insight.toggleThreats}
         onInspect={insight.inspect}
       />
 
@@ -248,7 +245,6 @@ export function Game({
             preview={inspected ?? destination ?? null}
             rechoose={destination}
             range={insight.range}
-            threats={insight.threats}
             effect={effect}
             effectId={effectId}
             onTileClick={onTileClick}
