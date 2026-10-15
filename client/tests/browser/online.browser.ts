@@ -5,9 +5,9 @@ import { extname } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
 import { test } from 'node:test'
 import { chromium } from 'playwright-core'
-import { activePawn } from '../src/lib/engine/index.ts'
-import { replay } from '../src/lib/playback.ts'
-import type { OnlineGame } from '../src/lib/online.ts'
+import { activePawn } from '../../src/lib/engine/index.ts'
+import { replay } from '../../src/lib/playback.ts'
+import type { OnlineGame } from '../../src/lib/online.ts'
 
 const timeout = 10_000
 
@@ -82,7 +82,7 @@ test(
               ? 'text/css'
               : 'text/html'
         response.setHeader('Content-Type', mime)
-        response.end(await readFile(new URL('../dist/' + file, import.meta.url)))
+        response.end(await readFile(new URL('../../dist/' + file, import.meta.url)))
       }
     })
     t.after(async () => {
