@@ -7,14 +7,14 @@ import { extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { after, test, type TestContext } from 'node:test'
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright-core'
-import { King, Swordsman } from '../src/lib/engine/index.ts'
-import { field } from './field.ts'
+import { King, Swordsman } from '../../src/lib/engine/index.ts'
+import { field } from '../field.ts'
 import {
   battleIdentity,
   BATTLE_SNAPSHOT_VERSION,
   snapshotState,
-} from '../src/lib/battleSnapshot.ts'
-import { DEFAULT_BOT_CONFIG } from '../src/bots/catalog.ts'
+} from '../../src/lib/battleSnapshot.ts'
+import { DEFAULT_BOT_CONFIG } from '../../src/bots/catalog.ts'
 
 // A tap must not re-render the whole board: memo on HexTile is what skips
 // untouched tiles, and engine actions and playback frames re-create every tile
@@ -50,7 +50,7 @@ async function buildCounterDist() {
     process.execPath,
     ['node_modules/vite/bin/vite.js', 'build', '--outDir', dist, '--emptyOutDir'],
     {
-      cwd: fileURLToPath(new URL('../', import.meta.url)),
+      cwd: fileURLToPath(new URL('../../', import.meta.url)),
       env: { ...process.env, VITE_TILE_RENDER_COUNTER: '1' },
       stdio: 'inherit',
     },

@@ -8,7 +8,7 @@ GO := go -C server
 onboarding: installdeps
 
 installdeps:
-	$(NPM) install
+	$(NPM) ci
 	$(NPM) run prepare
 
 dev:

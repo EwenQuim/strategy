@@ -36,6 +36,10 @@ Each PR aims for the smallest diff that still delivers its behavior; before open
 
 Use the `Makefile` targets; it is the source of truth for setup, dev, format, lint, typecheck, and tests. Toolchain versions are pinned in `.github/workflows/ci.yml`. The pre-push hook (`.githooks/pre-push`) only runs fast checks; slow bot sweeps in `client/tests/integration` run in CI.
 
+Add tests only when asked or when an engine rule changes; never add browser tests for UI tweaks or tests that only restate names, labels or wiring.
+
+A prototype is local edits only: no new tests, no commit, no push. Run `make format` and `make lint`, then hand over with `make dev`.
+
 Tests encode gameplay. Editing an existing test to make a change pass is a red flag: it may hide an unintended gameplay change, so flag it and get the change confirmed instead of adjusting the test silently.
 
 Assert observable rules and outcomes rather than opaque hashes of whole game states or bot decisions. Keep fixed references when they protect a real compatibility contract, such as seeded maps and the PRNG stream. Remove redundant coverage only after identifying the behavioral tests that remain.
