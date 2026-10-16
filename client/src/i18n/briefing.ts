@@ -106,6 +106,20 @@ export const jumpNoAttack = t({
   es: 'Frágil: planea tu retirada',
   it: 'Fragile: pianifica la ritirata',
 })
+export const marksmanRooted = t({
+  en: 'Cannot move and shoot in the same turn',
+  fr: 'Ne peut pas se déplacer et tirer dans le même tour',
+  de: 'Kann sich nicht bewegen und im selben Zug schießen',
+  es: 'No puede moverse y disparar en el mismo turno',
+  it: 'Non può muoversi e sparare nello stesso turno',
+})
+export const marksmanSiege = t({
+  en: 'Long range reaches past the enemy line, even to a sheltered king',
+  fr: 'Sa longue portée dépasse la ligne ennemie, jusqu’à un roi à l’abri',
+  de: 'Die große Reichweite reicht über die feindliche Linie, bis zu einem geschützten König',
+  es: 'Su largo alcance supera la línea enemiga, incluso a un rey protegido',
+  it: 'Il lungo raggio supera la linea nemica, persino a un re al riparo',
+})
 
 export const lakes = t({
   en: 'Lakes',
