@@ -4,5 +4,7 @@ dist
 .DS_Store
 client/training-runs/
 android.keystore
+*.jks
+.gradle
 *.aab
 twa-manifest.json
