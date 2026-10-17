@@ -12,8 +12,8 @@ import type { Biome } from './biomes/index.ts'
 import type { SeededRandom } from './random.ts'
 
 export const MIN_MAP_WIDTH = 6
-export const MAX_MAP_WIDTH = 10
-export const MAP_HEIGHTS = [8, 10] as const
+export const MAX_MAP_WIDTH = 8
+export const MAP_HEIGHTS = [8] as const
 
 // Frontier carving reshapes most map outlines; interior gaps stay rare because
 // mountains and lakes already break up the middle of the battlefield.

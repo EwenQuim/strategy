@@ -253,7 +253,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     size = rollMapSize(random)
     const playerArmy = setup
       ? setup.player.map((kind) => PAWN_CLASSES[kind])
-      : [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
+      : [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 6)]
     const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
     // The shape exists before armies spawn on it, then decoration protects them.
     const shape = generateMapShape(random, size, symmetric)
