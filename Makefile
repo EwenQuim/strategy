@@ -3,7 +3,7 @@
 NPM := npm --prefix client
 GO := go -C server
 BUBBLEWRAP := npx --yes @bubblewrap/cli
-WEB_MANIFEST := https://ewen.quimerch.com/strategy/manifest.webmanifest
+WEB_MANIFEST := https://strategy.glenan.quimerch.com/strategy/manifest.webmanifest
 
 .PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-napoleon bench-hannibal train-value retrain-value bench-web record-campaign android-init android-build android-doctor
 
