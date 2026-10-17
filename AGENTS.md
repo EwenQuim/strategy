@@ -4,7 +4,7 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 
 ## Design goals
 
-Every feature must make the game fun and strategic, never static or boring. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
+Every feature must make the game fun and strategic, never static or boring. The guiding philosophy is "Easy to learn, hard to master": a small rule surface with deep, emergent play. Antiyoy is a great inspiration for this. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
 
 ## Pull requests
 
@@ -38,7 +38,7 @@ Use the `Makefile` targets; it is the source of truth for setup, dev, format, li
 
 Add tests only when asked or when an engine rule changes; never add browser tests for UI tweaks or tests that only restate names, labels or wiring.
 
-A prototype is local edits only: no new tests, no commit, no push. Run `make format` and `make lint`, then hand over with `make dev`.
+A prototype is local edits only: no new tests, no commit, no push. Run `make format` and `make lint`, then hand over with `make dev`: always run the app and send the local link for testing.
 
 Tests encode gameplay. Editing an existing test to make a change pass is a red flag: it may hide an unintended gameplay change, so flag it and get the change confirmed instead of adjusting the test silently.
 
