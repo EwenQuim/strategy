@@ -12,7 +12,7 @@ interface CommandActionContentProps {
 
 type CommandButtonProps = CommandActionContentProps &
   Omit<ComponentProps<'button'>, 'children'> & {
-    variant: 'special' | 'compact'
+    variant: 'special' | 'ability' | 'compact'
   }
 
 export function CommandButton({
@@ -24,9 +24,11 @@ export function CommandButton({
   ...props
 }: CommandButtonProps) {
   const variantClassName =
-    variant === 'special'
-      ? 'text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
-      : 'px-3 text-[#e6e7d4] max-[601px]:px-2'
+    variant === 'ability'
+      ? 'text-[#ffc079] aria-pressed:border-[#e8a05c] aria-pressed:bg-[#ffc07926]'
+      : variant === 'special'
+        ? 'text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
+        : 'px-3 text-[#e6e7d4] max-[601px]:px-2'
   return (
     <button
       {...props}

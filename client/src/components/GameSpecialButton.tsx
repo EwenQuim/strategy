@@ -45,17 +45,11 @@ export function GameSpecialButton({
   )
   return (
     <CommandButton
-      variant="special"
-      icon={confirming ? 'check' : usingSpecial ? 'close' : 'spark'}
-      label={
-        confirming
-          ? m.landHere
-          : usingSpecial
-            ? m.cancel
-            : pawn
-              ? specialTexts[pawn.special.name]
-              : m.special
-      }
+      variant="ability"
+      // Like the Move toggle, the button keeps its name and icon while active: the
+      // pressed state and the note carry the status, and clicking again leaves the mode.
+      icon={confirming ? 'check' : 'spark'}
+      label={confirming ? m.landHere : pawn ? specialTexts[pawn.special.name] : m.special}
       note={specialNote({
         pawn,
         commanding: preview.commanding,
@@ -92,7 +86,10 @@ function specialNote({
     if (pawn?.specialUsed) return m.usedThisRound
     if (!hasSpecialTargets) {
       if (pawn && pawn.energy < pawn.special.cost) return m.notEnoughEnergy(pawn.special.cost)
-      return pawn?.special.noTargets ? specialTexts[pawn.special.noTargets] : m.noTargets
+      // The price stays visible next to the hint: a player may walk first, then strike,
+      // and must be able to budget the ability before committing to the move.
+      const hint = pawn?.special.noTargets ? specialTexts[pawn.special.noTargets] : m.noTargets
+      return `${hint} · ${m.energyCost(pawn?.special.cost ?? 2)}`
     }
   }
   return m.energyCost(pawn?.special.cost ?? 2)

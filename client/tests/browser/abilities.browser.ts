@@ -93,7 +93,8 @@ test('Ambush lands without a target or strikes beside the landing', async (t) =>
       assert.match(await special.innerText(), /Land here/)
       assert.match(await special.innerText(), /or choose an enemy/)
       await tileAt(landing).click()
-      assert.match(await special.innerText(), /Cancel/)
+      // Back to choosing an enemy: the button stays pressed, like the Move toggle.
+      assert.equal(await special.getAttribute('aria-pressed'), 'true')
       await tileAt(landing).click()
       await tileAt({ q: 4, r: 0 }).click()
       assert.match((await tileAt({ q: 4, r: 0 }).getAttribute('aria-label'))!, /1 health/)
@@ -231,7 +232,8 @@ test(
     )
     await page.locator('[data-action="special"]').click()
     assert.match(await page.locator('[data-action="special"]').innerText(), /Choose ally/)
-    const allies = page.getByRole('button', { name: /^Protect / })
+    // The ability button keeps its name while aiming, so count only board tiles.
+    const allies = page.getByTestId('battlefield').getByRole('button', { name: /^Protect / })
     assert.equal(await allies.count(), specialTargets(state.pawns, pawn).length)
     await page.locator('[data-action="special"]').click()
     assert.match(await page.locator('[data-action="endTurn"]').innerText(), /3 energy left/)

@@ -194,7 +194,12 @@ export async function playInUi(page: Page, state: GameState, action: Action) {
       .nth([...state.tiles.values()].findIndex((tile) => tile.q === at.q && tile.r === at.r))
       .click()
   if (action.type === 'endTurn') return page.locator('[data-action="endTurn"]').click()
-  if (action.type === 'move') return clickTile(action)
+  if (action.type === 'move') {
+    // Move tiles only appear in Move mode, which stays on for the whole activation.
+    const moveButton = page.locator('[data-action="move"]')
+    if ((await moveButton.getAttribute('aria-pressed')) !== 'true') await moveButton.click()
+    return clickTile(action)
+  }
   if (action.type === 'special') {
     await page.locator('[data-action="special"]').click()
     if (action.destination) await clickTile(action.destination)

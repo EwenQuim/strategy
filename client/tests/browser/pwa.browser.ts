@@ -367,7 +367,7 @@ test(
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(new URL(page.url()).pathname, base + 'game/' + seed)
       assert.equal(await page.locator('[data-action="special"]').isVisible(), true)
-      assert.equal(await page.locator('[data-action]').count(), 2)
+      assert.equal(await page.locator('[data-action]').count(), 3)
       assert.equal(
         await page.locator('[data-testid="battle-subtitle"]').textContent(),
         biomeNames[biome],

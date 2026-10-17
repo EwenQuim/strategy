@@ -2,7 +2,6 @@ import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { specialTexts } from '../i18n/specialTexts'
 import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
 import { battleControl } from '../bots/participants'
@@ -22,18 +21,13 @@ import { UnitUnlockToast } from './UnitUnlockToast'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
-import { useInspection } from './useInspection'
+import { useCommanding } from './useCommanding'
 import { useGameShortcuts } from './useGameShortcuts'
-import { tileChoices, type TileChoice, type Targeting } from '../lib/tileChoices'
 import {
   activePawn,
   BIOMES,
-  canUseSpecial,
   sameHex,
-  specialTargetingTiles,
   key,
-  movementDestinations,
-  type Aim,
   type GameState,
   type Pawn,
   type Side,
@@ -49,23 +43,6 @@ function resolveWinnerLabel(
   if (winner === 'draw') return m.draw
   if (campaignComplete && winner === 'player') return common.campaignComplete
   return winner && versus ? m.wins(names[winner]) : null
-}
-
-function resolveTargetLabel(aim: Aim | null, pawn: Pawn | undefined) {
-  if (aim?.action === 'special' && !aim.destination && pawn?.special.targetLabel)
-    return specialTexts[pawn.special.targetLabel]
-  return pawn ? specialTexts[pawn.special.name] : m.special
-}
-
-function resolveTargeting(
-  usingSpecial: boolean,
-  pawn: Pawn | undefined,
-  choosingEnemy: boolean,
-): Targeting {
-  if (choosingEnemy) return 'strike'
-  if (usingSpecial && pawn?.special.movement === 'walk') return 'charge'
-  if (usingSpecial && pawn?.special.movement === 'jump') return 'jump'
-  return 'special'
 }
 
 function isViewerTurn(
@@ -143,31 +120,25 @@ export function Game({
   const opponentActive = !!pawn && !state.winner && !viewerTurn
   // A frame still shows the pawns that die on it, so a kill is detectable from the state alone.
   const killed = state.pawns.some((unit) => unit.hp <= 0)
-  const hasSpecialTargets =
-    !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
   const commanding = viewerTurn && !state.winner && !paused
   const canCommand = commanding && !playing
-  // Aiming belongs to the state it started on: any new state, ours or not, drops it.
-  const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
-  const aim = canCommand && aiming?.state === state ? aiming.aim : null
-  const insight = useInspection(state, !!aim)
+  const {
+    aim,
+    moveMode,
+    usingSpecial,
+    destination,
+    choices,
+    targetLabel,
+    targeting,
+    reach,
+    hasSpecialTargets,
+    insight,
+    setAim,
+    setMoveMode,
+    toggleAim,
+    cycleCommand,
+  } = useCommanding(state, pawn, commanding, canCommand)
   const { inspected } = insight
-  const setAim = (next: Aim | null) => {
-    insight.close()
-    setAiming(next && { state, aim: next })
-  }
-  const usingSpecial = aim?.action === 'special'
-  const destination = usingSpecial ? aim.destination : undefined
-  const choices = aim ? tileChoices(state, aim) : new Map<string, TileChoice>()
-  const targetLabel = resolveTargetLabel(aim, pawn)
-  const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
-
-  // Reach stays up while an own action's effect frame plays: it is computed from the
-  // post-action state, so the playback-end render changes no tile costs.
-  const reach =
-    commanding && pawn.energy > 0 && !aim && !inspected
-      ? movementDestinations(state.tiles, state.pawns, pawn)
-      : new Map<string, number>()
 
   const onTileClick = (tile: Tile) => {
     if (!canCommand) return
@@ -182,21 +153,15 @@ export function Game({
     if (reach.has(key(at.q, at.r))) dispatch({ type: 'move', ...at })
   }
 
-  // Tapping the active character or pressing A toggles between moving and attacking, never previewing.
-  const toggleAim = () => {
-    if (!canCommand || !pawn) return
-    if (aim) setAim(null)
-    else if (canUseSpecial(pawn) && hasSpecialTargets) setAim({ action: 'special' })
-  }
-
   const onInspectTile = (tile: Tile) => {
-    if (canCommand && pawn && sameHex(pawn, tile)) return toggleAim()
+    if (canCommand && pawn && sameHex(pawn, tile)) return cycleCommand()
     insight.inspectAt(tile)
   }
 
   useGameShortcuts({
     endTurn: () => canCommand && dispatch({ type: 'endTurn' }),
     toggleAim,
+    toggleMove: () => canCommand && setMoveMode(!moveMode),
     cancel: () => setAim(null),
     help: () => dialog.current?.showModal(),
   })
@@ -289,6 +254,8 @@ export function Game({
         hasSpecialTargets={hasSpecialTargets}
         destination={destination}
         targetCount={choices.size}
+        moveMode={moveMode}
+        onToggleMove={() => setMoveMode(!moveMode)}
         dispatch={dispatch}
         onAim={setAim}
       />

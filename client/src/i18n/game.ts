@@ -35,7 +35,13 @@ export const special = t({
   es: 'Habilidad',
   it: 'Abilità',
 })
-
+export const move = t({
+  en: 'Move',
+  fr: 'Déplacer',
+  de: 'Bewegen',
+  es: 'Mover',
+  it: 'Muovi',
+})
 export const onlineLobby = t({
   en: 'Online lobby',
   fr: 'Salon en ligne',
