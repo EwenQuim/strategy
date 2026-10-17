@@ -389,12 +389,14 @@ test(
         if (kind === 'rune') {
           assert.equal(activePawn(state)?.id, pawn.id)
           assert.equal(
-            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
-            '5',
+            await page.locator(`[data-pawn="${pawn.id}"] [data-kind="energy"]`).count(),
+            5,
           )
           assert.equal(
-            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-            String(activePawn(state)!.energy),
+            await page
+              .locator(`[data-pawn="${pawn.id}"] [data-kind="energy"][data-filled="true"]`)
+              .count(),
+            activePawn(state)!.energy,
           )
         }
         const round = state.round
@@ -402,9 +404,10 @@ test(
           await page.locator('[data-action="endTurn"]:not([disabled])').click()
           state = transition(state, { type: 'endTurn' }).state
         }
+        // The rune buff expires with the round: the active pawn is back to three pips.
         assert.equal(
-          await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
-          '3',
+          await page.locator(`[data-pawn="${pawn.id}"] [data-kind="energy"]`).count(),
+          3,
         )
         if (kind === 'watchtower') {
           const targets = specialTargets(state.pawns, activePawn(state)!)

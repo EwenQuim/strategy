@@ -175,10 +175,20 @@ export const HexTile = memo(function HexTile({
       )}
       {canMove && !occupant && (
         <g className="pointer-events-none">
-          <circle cy="20" r="7" fill="#213f30" fillOpacity=".8" />
-          <text y="23.4" textAnchor="middle" fill="#f0edcc" fontSize="10" fontWeight="600">
+          <rect x="-11" y="13" width="22" height="14" rx="7" fill="#213f30" fillOpacity=".8" />
+          <text
+            x="-2.5"
+            y="23.4"
+            textAnchor="middle"
+            fill="#f0edcc"
+            fontSize="10"
+            fontWeight="600"
+          >
             {cost}
           </text>
+          <g transform="translate(2.5 16.4) scale(.3)" color="#f0edcc">
+            <Icon name="energy" className="fill-current" />
+          </g>
         </g>
       )}
       {previewed && !occupant && (

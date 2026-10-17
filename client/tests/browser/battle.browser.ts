@@ -245,10 +245,7 @@ test(
       await page.locator('[data-testid="player-turn"]').textContent(),
       playerNames[first.side] + ' turn',
     )
-    assert.equal(
-      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '3',
-    )
+    assert.match(await page.locator('[data-action="endTurn"]').innerText(), /3 energy left/)
     const opening = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()

@@ -21,6 +21,7 @@ export function PawnChip({
   return (
     <g
       data-testid="pawn-chip"
+      data-pawn={pawn.id}
       className="pointer-events-none transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{ transform: 'translate(' + hexX(pawn.q, pawn.r) + 'px, ' + hexY(pawn.r) + 'px)' }}
       aria-hidden="true"
@@ -74,6 +75,8 @@ export function PawnChip({
         {Array.from({ length: pawn.maxHp }, (_, i) => (
           <rect
             key={i}
+            data-kind="hp"
+            data-filled={i < pawn.hp}
             x={-13 + (i * 26) / pawn.maxHp}
             y="25"
             width={26 / pawn.maxHp - 1}
@@ -82,6 +85,29 @@ export function PawnChip({
             fill={i < pawn.hp ? (enemy ? '#db9b7e' : '#d5deb0') : '#47614c'}
           />
         ))}
+        {(active || pawn.bonusEnergy > 0) && (
+          <g opacity={active ? 1 : 0.5}>
+            <rect
+              x={-(pawn.maxEnergy * 7 + 6) / 2}
+              y="30"
+              width={pawn.maxEnergy * 7 + 6}
+              height="7"
+              rx="3.5"
+              fill="#17362b"
+            />
+            {Array.from({ length: pawn.maxEnergy }, (_, i) => (
+              <path
+                key={'energy-' + i}
+                data-kind="energy"
+                data-filled={i < pawn.energy}
+                d="M0-2.6 2.6 0 0 2.6-2.6 0Z"
+                transform={'translate(' + (-((pawn.maxEnergy - 1) * 3.5) + i * 7) + ' 33.5)'}
+                className="transition-[fill] duration-300 motion-reduce:transition-none"
+                fill={i < pawn.energy ? '#ffdf9e' : '#41584b'}
+              />
+            ))}
+          </g>
+        )}
         {active && <path d="m0-35 4-5h-8Z" fill="#f2df9e" />}
       </g>
       {pawn.hp <= 0 && (

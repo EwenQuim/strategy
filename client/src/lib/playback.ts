@@ -34,7 +34,23 @@ export function playbackReducer(
   if (action.type === 'botActions') return playBotActions(playback.state, action.actions)
   if (mode === 'ai' && activePawn(playback.state)?.side === 'enemy') return playback
   const result = applyAction(playback.state, action)
-  return { ...result, frames: result.frames.filter(isImpactFrame) }
+  // Own actions keep impact frames and any frame that spends or grants energy, so the
+  // player sees the cost of their own moves and specials instead of only the bots' ones.
+  // A kept frame without impacts shows no deaths, so the last one can display the final
+  // state itself: the frame's defensive clones would break the tile memo across the board.
+  // Earlier ones keep their captured state so a following frame (round-end hellfire)
+  // never rewinds to pawns the final state has already buried.
+  const kept = result.frames.filter(
+    (frame) => isImpactFrame(frame) || !!frame.effect?.energyDelta,
+  )
+  return {
+    ...result,
+    frames: kept.map((frame, index) =>
+      isImpactFrame(frame) || index < kept.length - 1
+        ? frame
+        : { ...frame, state: result.state },
+    ),
+  }
 }
 
 // A bot's whole proposal plays as one animated transition, opening on the unit it moves; a

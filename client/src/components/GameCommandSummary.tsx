@@ -2,7 +2,6 @@ import type { Pawn, Side } from '../lib/engine'
 import * as m from '../i18n/game'
 import { unitNames } from '../i18n/units'
 import { PawnIcon } from './Icon'
-import { UnitStats } from './UnitStats'
 
 interface GameCommandSummaryProps {
   pawn?: Pawn
@@ -18,7 +17,7 @@ export function GameCommandSummary({ pawn, winner, winnerLabel }: GameCommandSum
       : m.yourGuard
 
   return (
-    <div className="mb-3.5 flex items-center justify-between gap-[15px] min-[900px]:mb-[17px] max-[601px]:mb-3 max-[601px]:gap-2.5 [@media(max-height:650px)]:mb-2 [@media(min-width:600px)_and_(max-height:480px)]:m-0 [@media(min-width:600px)_and_(max-height:480px)]:flex-col [@media(min-width:600px)_and_(max-height:480px)]:items-start [@media(min-width:600px)_and_(max-height:480px)]:gap-1.5 [@media(min-width:600px)_and_(max-height:480px)]:w-48 [@media(min-width:600px)_and_(max-height:480px)]:shrink-0">
+    <div className="mb-3.5 flex items-center min-[900px]:mb-[17px] max-[601px]:mb-3 [@media(max-height:650px)]:mb-2 [@media(min-width:600px)_and_(max-height:480px)]:m-0 [@media(min-width:600px)_and_(max-height:480px)]:w-48 [@media(min-width:600px)_and_(max-height:480px)]:shrink-0">
       <div className="flex min-w-0 items-center gap-2.5">
         <div className="grid h-[46px] w-[42px] shrink-0 place-items-center rounded-[10px_10px_16px_16px] border border-[#c4d1a53b] bg-[linear-gradient(135deg,#4c604038,#203d3077)] text-gold [&>svg]:size-[26px] min-[900px]:h-[49px] min-[900px]:w-[47px] max-[601px]:hidden [@media(min-width:600px)_and_(max-height:480px)]:hidden">
           <PawnIcon kind={pawn?.kind ?? 'swordsman'} />
@@ -35,7 +34,6 @@ export function GameCommandSummary({ pawn, winner, winnerLabel }: GameCommandSum
           </h2>
         </div>
       </div>
-      {pawn && !winner && <UnitStats pawn={pawn} />}
     </div>
   )
 }

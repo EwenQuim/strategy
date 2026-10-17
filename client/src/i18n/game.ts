@@ -108,13 +108,6 @@ export const yourGuard = t({
   it: 'La tua guardia',
 })
 export const health = t({ en: 'Health', fr: 'Vie', de: 'Leben', es: 'Vida', it: 'Vita' })
-export const energy = t({
-  en: 'Energy',
-  fr: 'Énergie',
-  de: 'Energie',
-  es: 'Energía',
-  it: 'Energia',
-})
 export const cancel = t({
   en: 'Cancel',
   fr: 'Annuler',
