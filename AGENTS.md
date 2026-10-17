@@ -4,7 +4,7 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 
 ## Design goals
 
-Every feature must make the game fun and strategic, never static or boring. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
+Every feature must make the game fun and strategic, never static or boring. The guiding philosophy is "Easy to learn, hard to master": a small rule surface with deep, emergent play. Antiyoy is a great inspiration for this. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. Gameplay should always encourage aggression and boldness instead of stillness and temporisation. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
 
 ## Pull requests
 
