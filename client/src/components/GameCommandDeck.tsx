@@ -1,12 +1,14 @@
 import type { Action, Aim, Axial, Pawn, Side } from '../lib/engine'
+import { maxWalkSteps } from '../lib/engine'
 import * as m from '../i18n/game'
+import { specialTexts } from '../i18n/specialTexts'
 import { CommandButton } from './CommandAction'
 import { GameCommandSummary } from './GameCommandSummary'
 import { GameSpecialButton } from './GameSpecialButton'
 import { GameUnitPreview } from './GameUnitPreview'
 
 const actionGridClassName =
-  'grid grid-cols-[minmax(0,1fr)_10rem] gap-2 min-[900px]:gap-3 max-[601px]:grid-cols-[minmax(0,1fr)_7rem] max-[601px]:gap-1.5'
+  'grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_10rem] gap-2 min-[900px]:gap-3 max-[601px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem] max-[601px]:gap-1.5'
 
 interface GameCommandDeckProps {
   pawn?: Pawn
@@ -23,6 +25,8 @@ interface GameCommandDeckProps {
   hasSpecialTargets: boolean
   destination?: Axial
   targetCount: number
+  moveMode: boolean
+  onToggleMove: () => void
   dispatch: (action: Action) => void
   onAim: (aim: Aim | null) => void
 }
@@ -42,6 +46,8 @@ export function GameCommandDeck({
   hasSpecialTargets,
   destination,
   targetCount,
+  moveMode,
+  onToggleMove,
   dispatch,
   onAim,
 }: GameCommandDeckProps) {
@@ -59,6 +65,17 @@ export function GameCommandDeck({
             data-previewed={showingPreview}
             inert={showingPreview}
           >
+            <CommandButton
+              variant="special"
+              icon="hex"
+              label={m.move}
+              note={specialTexts.chooseTile}
+              data-action="move"
+              disabled={!canCommand || !active || maxWalkSteps(active) < 1}
+              onClick={onToggleMove}
+              title={`${specialTexts.chooseTile} (M)`}
+              aria-pressed={moveMode}
+            />
             <GameSpecialButton
               pawn={active}
               commanding={canCommand}

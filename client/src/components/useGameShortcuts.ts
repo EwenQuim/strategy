@@ -3,12 +3,19 @@ import { useEffect } from 'react'
 export interface GameShortcuts {
   endTurn: () => void
   toggleAim: () => void
+  toggleMove: () => void
   cancel: () => void
   help: () => void
 }
 
 // Keyboard shortcuts mirror the tap controls; the help dialog lists them.
-export function useGameShortcuts({ endTurn, toggleAim, cancel, help }: GameShortcuts) {
+export function useGameShortcuts({
+  endTurn,
+  toggleAim,
+  toggleMove,
+  cancel,
+  help,
+}: GameShortcuts) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return
@@ -19,6 +26,7 @@ export function useGameShortcuts({ endTurn, toggleAim, cancel, help }: GameShort
       const shortcuts: Record<string, () => void> = {
         e: endTurn,
         a: toggleAim,
+        m: toggleMove,
         escape: cancel,
         h: help,
         '?': help,
@@ -30,5 +38,5 @@ export function useGameShortcuts({ endTurn, toggleAim, cancel, help }: GameShort
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [endTurn, toggleAim, cancel, help])
+  }, [endTurn, toggleAim, toggleMove, cancel, help])
 }

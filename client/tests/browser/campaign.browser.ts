@@ -841,7 +841,7 @@ test(
       await page.goto(origin + base + 'campaign/' + slug + '/1')
       await page.getByRole('button', { name: 'Go !', exact: true }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-      assert.equal(await page.locator('[data-action]').count(), 2)
+      assert.equal(await page.locator('[data-action]').count(), 3)
       assert.equal(
         await page.evaluate(() => localStorage.getItem('hexmate.achievements')),
         null,

@@ -10,6 +10,7 @@ import { dialogClassName, iconButtonClassName } from './styles'
 
 const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
   ['E', game.endTurn],
+  ['M', game.move],
   ['A', game.special],
   ['Esc', game.cancel],
   ['H', game.howToPlay],

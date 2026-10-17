@@ -453,11 +453,11 @@ test('Keyboard shortcuts aim, cancel, open help and end turns', async (t) => {
   await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
   await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
   const special = page.locator('[data-action="special"]')
-  // A toggles ability aiming, Escape cancels it.
+  // A toggles ability aiming, Escape cancels it: the pressed state, never a label swap.
   await page.keyboard.press('a')
-  assert.match(await special.innerText(), /Cancel/)
+  assert.equal(await special.getAttribute('aria-pressed'), 'true')
   await page.keyboard.press('Escape')
-  assert.doesNotMatch(await special.innerText(), /Cancel/)
+  assert.equal(await special.getAttribute('aria-pressed'), 'false')
   // H and ? open the help dialog, which lists the shortcuts; Escape closes it.
   const dialog = page.getByRole('dialog')
   for (const key of ['h', '?']) {

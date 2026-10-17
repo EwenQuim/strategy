@@ -12,7 +12,7 @@ interface CommandActionContentProps {
 
 type CommandButtonProps = CommandActionContentProps &
   Omit<ComponentProps<'button'>, 'children'> & {
-    variant: 'special' | 'compact'
+    variant: 'special' | 'ability' | 'compact'
   }
 
 export function CommandButton({
@@ -24,9 +24,11 @@ export function CommandButton({
   ...props
 }: CommandButtonProps) {
   const variantClassName =
-    variant === 'special'
-      ? 'text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
-      : 'px-3 text-[#e6e7d4] max-[601px]:px-2'
+    variant === 'ability'
+      ? 'text-[#ffc079] aria-pressed:border-[#e8a05c] aria-pressed:bg-[#ffc07926]'
+      : variant === 'special'
+        ? 'text-[#d0b6e7] aria-pressed:border-[#c4a6db] aria-pressed:bg-[#9f82b933]'
+        : 'px-3 text-[#e6e7d4] max-[601px]:px-2'
   return (
     <button
       {...props}
@@ -65,7 +67,10 @@ function CommandActionContent({ icon, label, note }: CommandActionContentProps) 
       <span
         className={
           'text-[13px] font-semibold max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px] ' +
-          (note === undefined ? 'row-span-2 min-w-0 max-[601px]:row-auto' : 'whitespace-nowrap')
+          // Long signature names (e.g. German) must wrap rather than clip on narrow phones.
+          (note === undefined
+            ? 'row-span-2 min-w-0 max-[601px]:row-auto'
+            : 'whitespace-nowrap max-[360px]:whitespace-normal')
         }
       >
         {label}
