@@ -404,6 +404,7 @@ test(
           await page.locator('[data-action="endTurn"]:not([disabled])').click()
           state = transition(state, { type: 'endTurn' }).state
         }
+        // The rune buff expires with the round: the active pawn is back to three pips.
         assert.equal(
           await page.locator(`[data-pawn="${pawn.id}"] [data-kind="energy"]`).count(),
           3,

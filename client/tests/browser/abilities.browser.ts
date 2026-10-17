@@ -99,10 +99,7 @@ test('Ambush lands without a target or strikes beside the landing', async (t) =>
       assert.match((await tileAt({ q: 4, r: 0 }).getAttribute('aria-label'))!, /1 health/)
     }
     assert.match((await tileAt(landing).getAttribute('aria-label'))!, /Ninja #1/)
-    assert.equal(
-      await page.locator('[data-pawn="1"] [data-kind="energy"][data-filled="true"]').count(),
-      1,
-    )
+    assert.match(await page.locator('[data-action="endTurn"]').innerText(), /1 energy left/)
     assert.equal(await special.getAttribute('aria-disabled'), 'true')
   }
 })
@@ -182,10 +179,7 @@ test('Ambush and Charge show direct strikes beside violet landing choices', asyn
         (await enemy.getAttribute('aria-label'))!,
         new RegExp(4 - state.pawns[0].attack.damage + ' health'),
       )
-      assert.equal(
-        await page.locator('[data-pawn="1"] [data-kind="energy"][data-filled="true"]').count(),
-        1,
-      )
+      assert.match(await page.locator('[data-action="endTurn"]').innerText(), /1 energy left/)
     }
   }
 })
@@ -237,10 +231,10 @@ test(
     const allies = page.getByRole('button', { name: /^Protect / })
     assert.equal(await allies.count(), specialTargets(state.pawns, pawn).length)
     await page.locator('[data-action="special"]').click()
-    assert.equal(await pips.locator('[data-kind="energy"][data-filled="true"]').count(), 3)
+    assert.match(await page.locator('[data-action="endTurn"]').innerText(), /3 energy left/)
     await page.locator('[data-action="special"]').click()
     await page.locator('[data-testid="hex-tile"]').nth(tileIndex).click()
-    assert.equal(await pips.locator('[data-kind="energy"][data-filled="true"]').count(), 2)
+    assert.match(await page.locator('[data-action="endTurn"]').innerText(), /2 energy left/)
     assert.match(
       (await page
         .locator('[data-testid="hex-tile"]')
@@ -255,7 +249,7 @@ test(
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     // Reloading resumes the recorded battle instead of resetting it.
-    assert.equal(await pips.locator('[data-kind="energy"][data-filled="true"]').count(), 2)
+    assert.match(await page.locator('[data-action="endTurn"]').innerText(), /2 energy left/)
     assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
     assert.match(
       (await page
