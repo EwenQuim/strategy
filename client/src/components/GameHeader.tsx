@@ -53,8 +53,11 @@ export function GameHeader({
     const unit = pawns.find((p) => p.id === id)
     return unit ? [{ unit, index }] : []
   })
+  const activePosition = turnOrder.findIndex((entry) => entry.index === active)
   const visibleOrder =
-    active > 0 ? [...turnOrder.slice(active), ...turnOrder.slice(0, active)] : turnOrder
+    activePosition > 0
+      ? [...turnOrder.slice(activePosition), ...turnOrder.slice(0, activePosition)]
+      : turnOrder
 
   return (
     <header
