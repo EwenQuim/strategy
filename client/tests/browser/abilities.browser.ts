@@ -215,6 +215,9 @@ test(
     const pips = page.locator(`[data-pawn="${pawn.id}"]`)
     assert.equal(await pips.locator('[data-kind="hp"]').count(), 10)
     assert.equal(await pips.locator('[data-kind="hp"][data-filled="true"]').count(), 10)
+    // Energy shows on the active pawn and hides on idle unbuffed pawns.
+    assert.equal(await pips.locator('[data-kind="energy"]').count(), 3)
+    assert.equal(await page.locator(`[data-pawn="${ally.id}"] [data-kind="energy"]`).count(), 0)
     const moves = page.getByRole('button', { name: /^Move to / })
     assert.ok(await moves.count())
     const moveCosts = await moves.evaluateAll((tiles) =>

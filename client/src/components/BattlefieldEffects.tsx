@@ -136,22 +136,26 @@ export function BattlefieldEffects({
           ))}
         </g>
       )}
-      {!!effect?.energyDelta && (
+      {effect?.energyDelta && effect.energyAt && (
         <g
           key={'energy-' + effectId}
           data-testid="energy-delta"
           className="text-[#ffd98f]"
           transform={
-            'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+            'translate(' +
+            hexX(effect.energyAt.q, effect.energyAt.r) +
+            ' ' +
+            hexY(effect.energyAt.r) +
+            ')'
           }
           aria-hidden="true"
         >
           <g transform="translate(0 -40)">
             <circle
               r="16"
-              className="combat-impact-burst origin-center fill-none stroke-current stroke-[3] [transform-box:fill-box]"
+              className="combat-impact-burst origin-center fill-none stroke-current stroke-[3] [transform-box:fill-box] motion-reduce:hidden"
             />
-            <g className="combat-impact-label">
+            <g className="combat-impact-label motion-reduce:animate-none">
               <text
                 x="-4"
                 y="7"

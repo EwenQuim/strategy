@@ -15,6 +15,7 @@ function battle() {
 test('Moves and specials report the acting pawn energy delta on their effect', () => {
   const move = transition(battle(), { type: 'move', q: 2, r: 0 })
   assert.equal(move.frames[0].effect?.energyDelta, -2)
+  assert.deepEqual(move.frames[0].effect?.energyAt, { q: 2, r: 0 })
   assert.equal(move.state.pawns[0].energy, 1)
 
   const charge = transition(battle(), {
@@ -23,6 +24,8 @@ test('Moves and specials report the acting pawn energy delta on their effect', (
     destination: { q: 2, r: 0 },
   })
   assert.equal(charge.frames[0].effect?.energyDelta, -2)
+  // The spend feedback anchors at the acting pawn, never at the special's target.
+  assert.deepEqual(charge.frames[0].effect?.energyAt, { q: 2, r: 0 })
   assert.equal(charge.state.pawns[0].energy, 1)
 })
 
@@ -31,6 +34,7 @@ test('A rune pickup nets into the energy delta of the move that collects it', ()
   state.tiles.set(key(1, 0), { q: 1, r: 0, terrain: 'plain', feature: 'rune' })
   const move = transition(state, { type: 'move', q: 1, r: 0 })
   assert.equal(move.frames[0].effect?.energyDelta, 1)
+  assert.deepEqual(move.frames[0].effect?.energyAt, { q: 1, r: 0 })
   assert.equal(move.state.pawns[0].energy, 4)
 })
 

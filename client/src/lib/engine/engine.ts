@@ -64,8 +64,10 @@ export type BattleEffect = {
   centers?: Axial[]
   impacts?: BattleImpact[]
   support?: { kind: 'heal' | 'energy'; recipients: Axial[] }
-  // Net energy change of the acting pawn over this action (move or special cost, rune pickup).
+  // Net energy change of the acting pawn over this action (move or special cost, rune pickup),
+  // with the pawn's position after the action, where the spend feedback belongs.
   energyDelta?: number
+  energyAt?: Axial
 }
 
 export type BattleFrame = { state: GameState; effect: BattleEffect | null }
@@ -225,7 +227,11 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       return null
   }
   if (effect && actor.energy !== energyBefore)
-    effect = { ...effect, energyDelta: actor.energy - energyBefore }
+    effect = {
+      ...effect,
+      energyDelta: actor.energy - energyBefore,
+      energyAt: { q: actor.q, r: actor.r },
+    }
   return {
     tiles,
     pawns,

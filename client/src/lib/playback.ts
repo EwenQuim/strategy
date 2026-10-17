@@ -36,13 +36,20 @@ export function playbackReducer(
   const result = applyAction(playback.state, action)
   // Own actions keep impact frames and any frame that spends or grants energy, so the
   // player sees the cost of their own moves and specials instead of only the bots' ones.
-  // A kept frame without impacts shows no deaths, so it can display the final state
-  // itself: the frame's defensive clones would break the tile memo across the board.
+  // A kept frame without impacts shows no deaths, so the last one can display the final
+  // state itself: the frame's defensive clones would break the tile memo across the board.
+  // Earlier ones keep their captured state so a following frame (round-end hellfire)
+  // never rewinds to pawns the final state has already buried.
+  const kept = result.frames.filter(
+    (frame) => isImpactFrame(frame) || !!frame.effect?.energyDelta,
+  )
   return {
     ...result,
-    frames: result.frames
-      .filter((frame) => isImpactFrame(frame) || !!frame.effect?.energyDelta)
-      .map((frame) => (isImpactFrame(frame) ? frame : { ...frame, state: result.state })),
+    frames: kept.map((frame, index) =>
+      isImpactFrame(frame) || index < kept.length - 1
+        ? frame
+        : { ...frame, state: result.state },
+    ),
   }
 }
 
