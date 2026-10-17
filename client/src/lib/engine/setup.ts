@@ -132,8 +132,8 @@ function mirroredRosters(pawns: Pawn[]): boolean {
   return [...counts.values()].every((count) => count === 0)
 }
 
-// Symmetric battles alternate sides within pairs of matching units: the kings open,
-// then every pair trades the lead, so neither side can stack consecutive turns.
+// Symmetric battles group matching units into pairs: the kings open, then each pair
+// follows in seeded order with a seeded lead, so tempo stays fair between mirrored sides.
 function pairedInitiative(pawns: Pawn[], random: SeededRandom, startingSide?: Side): Pawn[] {
   const groups = new Map<Pawn['kind'], { player: Pawn[]; enemy: Pawn[] }>()
   for (const pawn of pawns) {
@@ -141,14 +141,14 @@ function pairedInitiative(pawns: Pawn[], random: SeededRandom, startingSide?: Si
     group[pawn.side].push(pawn)
     groups.set(pawn.kind, group)
   }
-  const kings = groups.get('king')!
+  const kings = groups.get('king')
   groups.delete('king')
   const order: Pawn[] = []
   const pair = (player: Pawn, enemy: Pawn, lead?: Side) => {
     const first = lead ?? (random.next() < 0.5 ? 'player' : 'enemy')
     order.push(first === 'player' ? player : enemy, first === 'player' ? enemy : player)
   }
-  pair(kings.player[0]!, kings.enemy[0]!, startingSide)
+  if (kings) pair(kings.player[0]!, kings.enemy[0]!, startingSide)
   for (const kind of shuffle([...groups.keys()], random)) {
     const group = groups.get(kind)!
     const player = shuffle(group.player, random)
