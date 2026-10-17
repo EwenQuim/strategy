@@ -8,6 +8,7 @@ export { symmetricSeed } from './setup.ts'
 export {
   canAttack,
   canUseSpecial,
+  maxWalkSteps,
   specialTargets,
   movementDestinations,
   walkingPaths,

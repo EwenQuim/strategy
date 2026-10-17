@@ -20,11 +20,14 @@ export function routePath(route: WalkRoute): Tile[] {
   return path.reverse()
 }
 
+// Walking steps the pawn's energy still pays for.
+export const maxWalkSteps = (pawn: Pawn): number => Math.max(0, pawn.energy - pawn.moveCost + 1)
+
 export function walkingPaths(
   tiles: Map<string, Tile>,
   pawns: Pawn[],
   pawn: Pawn,
-  maxSteps = Math.max(0, pawn.energy - pawn.moveCost + 1),
+  maxSteps = maxWalkSteps(pawn),
   destination?: string,
 ): Map<string, WalkRoute> {
   const occupied = new Set(pawns.filter((p) => p.id !== pawn.id).map((p) => key(p.q, p.r)))

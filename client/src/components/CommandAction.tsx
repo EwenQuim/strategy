@@ -67,7 +67,10 @@ function CommandActionContent({ icon, label, note }: CommandActionContentProps) 
       <span
         className={
           'text-[13px] font-semibold max-[601px]:text-[11px] max-[360px]:text-[10px] [@media(min-width:600px)_and_(max-height:480px)]:text-[11px] ' +
-          (note === undefined ? 'row-span-2 min-w-0 max-[601px]:row-auto' : 'whitespace-nowrap')
+          // Long signature names (e.g. German) must wrap rather than clip on narrow phones.
+          (note === undefined
+            ? 'row-span-2 min-w-0 max-[601px]:row-auto'
+            : 'whitespace-nowrap max-[360px]:whitespace-normal')
         }
       >
         {label}

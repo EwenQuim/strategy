@@ -79,7 +79,7 @@ export function useCommanding(
     else if (canUseSpecial(pawn) && hasSpecialTargets) setAim({ action: 'special' })
   }
 
-  // Tapping the active character cycles the command modes: none, move, ability.
+  // Tapping the active character cycles the command modes: none, then move and ability.
   const cycleCommand = () => {
     if (!canCommand || !pawn) return
     if (aim) return setAim(null)
