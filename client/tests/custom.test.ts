@@ -136,3 +136,36 @@ test('Symmetric custom battles mirror pawn positions for equal rosters', () => {
   assert.equal(spots.size, uneven.pawns.length)
   for (const pawn of uneven.pawns) assert.ok(passable(uneven.tiles.get(key(pawn.q, pawn.r))))
 })
+
+test('Symmetric battles pair matching units in the initiative, kings opening', () => {
+  const equal: BattleSetup = {
+    biome: 'desert',
+    player: ['king', 'archer', 'bulwark', 'swordsman'],
+    enemy: ['swordsman', 'bulwark', 'archer', 'king'],
+  }
+  const assertPaired = (state: ReturnType<typeof initialState>, seed: string) => {
+    const sequence = state.order.map((id) => state.pawns.find((pawn) => pawn.id === id)!)
+    assert.equal(sequence[0].kind, 'king', seed)
+    assert.equal(sequence[1].kind, 'king', seed)
+    for (let i = 0; i < sequence.length; i += 2) {
+      assert.equal(sequence[i + 1].kind, sequence[i].kind, seed)
+      assert.notEqual(sequence[i + 1].side, sequence[i].side, seed)
+    }
+  }
+  for (const seed of ['paired-a', 'paired-b', 'paired-c']) {
+    assertPaired(initialState(symmetricSeed(seed), equal), seed)
+    assertPaired(initialState(symmetricSeed(seed)), seed)
+    for (const side of ['player', 'enemy'] as const) {
+      const opening = initialState(symmetricSeed(seed), equal, side)
+      const opener = opening.order.map((id) =>
+        opening.pawns.find((pawn) => pawn.id === id)!,
+      )![0]
+      assert.equal(opener.side, side, seed)
+      assert.equal(opener.kind, 'king', seed)
+    }
+  }
+  // Uneven rosters keep the shuffle: the battle does not open on a king.
+  const uneven = initialState(symmetricSeed('paired-uneven'), setup)
+  const sequence = uneven.order.map((id) => uneven.pawns.find((pawn) => pawn.id === id)!)
+  assert.notEqual(sequence[0].kind, 'king')
+})
