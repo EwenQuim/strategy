@@ -32,7 +32,7 @@ function hapticHellfire(): void {
 }
 
 /** A unit moved (light feedback). */
-export function hapticMove(): void {
+function hapticMove(): void {
   vibrate(4)
 }
 

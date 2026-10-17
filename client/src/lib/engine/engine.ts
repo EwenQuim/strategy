@@ -64,6 +64,8 @@ export type BattleEffect = {
   centers?: Axial[]
   impacts?: BattleImpact[]
   support?: { kind: 'heal' | 'energy'; recipients: Axial[] }
+  // Net energy change of the acting pawn over this action (move or special cost, rune pickup).
+  energyDelta?: number
 }
 
 export type BattleFrame = { state: GameState; effect: BattleEffect | null }
@@ -172,6 +174,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   const actor = pawns.find((pawn) => pawn.id === state.order[state.active])!
   const log: string[] = []
   const from = { q: actor.q, r: actor.r }
+  const energyBefore = actor.energy
   const context = {
     pawn: actor,
     tiles,
@@ -221,6 +224,8 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     default:
       return null
   }
+  if (effect && actor.energy !== energyBefore)
+    effect = { ...effect, energyDelta: actor.energy - energyBefore }
   return {
     tiles,
     pawns,

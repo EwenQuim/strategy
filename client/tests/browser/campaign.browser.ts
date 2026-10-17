@@ -389,12 +389,14 @@ test(
         if (kind === 'rune') {
           assert.equal(activePawn(state)?.id, pawn.id)
           assert.equal(
-            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
-            '5',
+            await page.locator(`[data-pawn="${pawn.id}"] [data-kind="energy"]`).count(),
+            5,
           )
           assert.equal(
-            await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-            String(activePawn(state)!.energy),
+            await page
+              .locator(`[data-pawn="${pawn.id}"] [data-kind="energy"][data-filled="true"]`)
+              .count(),
+            activePawn(state)!.energy,
           )
         }
         const round = state.round
@@ -403,8 +405,8 @@ test(
           state = transition(state, { type: 'endTurn' }).state
         }
         assert.equal(
-          await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuemax'),
-          '3',
+          await page.locator(`[data-pawn="${pawn.id}"] [data-kind="energy"]`).count(),
+          3,
         )
         if (kind === 'watchtower') {
           const targets = specialTargets(state.pawns, activePawn(state)!)

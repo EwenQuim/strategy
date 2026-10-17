@@ -1,6 +1,5 @@
 import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
-import { hapticMove } from '../haptics'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/specialTexts'
@@ -146,7 +145,8 @@ export function Game({
   const killed = state.pawns.some((unit) => unit.hp <= 0)
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
-  const canCommand = viewerTurn && !state.winner && !paused && !playing
+  const commanding = viewerTurn && !state.winner && !paused
+  const canCommand = commanding && !playing
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
   const aim = canCommand && aiming?.state === state ? aiming.aim : null
@@ -162,8 +162,10 @@ export function Game({
   const targetLabel = resolveTargetLabel(aim, pawn)
   const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
 
+  // Reach stays up while an own action's effect frame plays: it is computed from the
+  // post-action state, so the playback-end render changes no tile costs.
   const reach =
-    canCommand && pawn.energy > 0 && !aim && !inspected
+    commanding && pawn.energy > 0 && !aim && !inspected
       ? movementDestinations(state.tiles, state.pawns, pawn)
       : new Map<string, number>()
 
@@ -176,11 +178,8 @@ export function Game({
     // Tapping the chosen landing again steps back to re-choosing it.
     if (aim && destination && key(at.q, at.r) === key(destination.q, destination.r))
       return setAim({ action: 'special' })
-    // Own moves produce no effect frame in any mode, so they buzz at dispatch; bot moves buzz from their frames.
-    if (reach.has(key(at.q, at.r))) {
-      hapticMove()
-      dispatch({ type: 'move', ...at })
-    }
+    // Own moves now play their effect frame, so their buzz comes from the frame like bot moves.
+    if (reach.has(key(at.q, at.r))) dispatch({ type: 'move', ...at })
   }
 
   // Tapping the active character or pressing A toggles between moving and attacking, never previewing.

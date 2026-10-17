@@ -2,7 +2,6 @@ import type { Pawn, Side } from '../lib/engine'
 import * as m from '../i18n/game'
 import { unitNames } from '../i18n/units'
 import { PawnIcon } from './Icon'
-import { UnitStats } from './UnitStats'
 
 interface GameCommandSummaryProps {
   pawn?: Pawn
@@ -35,7 +34,6 @@ export function GameCommandSummary({ pawn, winner, winnerLabel }: GameCommandSum
           </h2>
         </div>
       </div>
-      {pawn && !winner && <UnitStats pawn={pawn} />}
     </div>
   )
 }

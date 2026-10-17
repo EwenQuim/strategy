@@ -246,8 +246,10 @@ test(
       playerNames[first.side] + ' turn',
     )
     assert.equal(
-      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '3',
+      await page
+        .locator(`[data-pawn="${first.id}"] [data-kind="energy"][data-filled="true"]`)
+        .count(),
+      3,
     )
     const opening = await page.locator('ol[aria-label="Round turn order"]').innerHTML()
     await page.reload()

@@ -100,8 +100,8 @@ test('Ambush lands without a target or strikes beside the landing', async (t) =>
     }
     assert.match((await tileAt(landing).getAttribute('aria-label'))!, /Ninja #1/)
     assert.equal(
-      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '1',
+      await page.locator('[data-pawn="1"] [data-kind="energy"][data-filled="true"]').count(),
+      1,
     )
     assert.equal(await special.getAttribute('aria-disabled'), 'true')
   }
@@ -183,8 +183,8 @@ test('Ambush and Charge show direct strikes beside violet landing choices', asyn
         new RegExp(4 - state.pawns[0].attack.damage + ' health'),
       )
       assert.equal(
-        await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-        '1',
+        await page.locator('[data-pawn="1"] [data-kind="energy"][data-filled="true"]').count(),
+        1,
       )
     }
   }
@@ -218,11 +218,9 @@ test(
     await context.setOffline(true)
     await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    assert.equal(
-      await page.getByRole('meter', { name: 'Health' }).getAttribute('aria-valuemax'),
-      '10',
-    )
-    assert.equal(await page.locator('[aria-label="Health"] [data-filled="true"]').count(), 10)
+    const pips = page.locator(`[data-pawn="${pawn.id}"]`)
+    assert.equal(await pips.locator('[data-kind="hp"]').count(), 10)
+    assert.equal(await pips.locator('[data-kind="hp"][data-filled="true"]').count(), 10)
     const moves = page.getByRole('button', { name: /^Move to / })
     assert.ok(await moves.count())
     const moveCosts = await moves.evaluateAll((tiles) =>
@@ -239,16 +237,10 @@ test(
     const allies = page.getByRole('button', { name: /^Protect / })
     assert.equal(await allies.count(), specialTargets(state.pawns, pawn).length)
     await page.locator('[data-action="special"]').click()
-    assert.equal(
-      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '3',
-    )
+    assert.equal(await pips.locator('[data-kind="energy"][data-filled="true"]').count(), 3)
     await page.locator('[data-action="special"]').click()
     await page.locator('[data-testid="hex-tile"]').nth(tileIndex).click()
-    assert.equal(
-      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '2',
-    )
+    assert.equal(await pips.locator('[data-kind="energy"][data-filled="true"]').count(), 2)
     assert.match(
       (await page
         .locator('[data-testid="hex-tile"]')
@@ -257,14 +249,13 @@ test(
       /protected by Bulwark/,
     )
     assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
+    // The protect frame finishes playing before the bulwark can move again.
+    await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     assert.ok((await moves.count()) > 0)
     await page.reload()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     // Reloading resumes the recorded battle instead of resetting it.
-    assert.equal(
-      await page.getByRole('meter', { name: 'Energy' }).getAttribute('aria-valuenow'),
-      '2',
-    )
+    assert.equal(await pips.locator('[data-kind="energy"][data-filled="true"]').count(), 2)
     assert.equal(await page.locator('[data-art="protection-badge"]').count(), 1)
     assert.match(
       (await page
@@ -284,20 +275,17 @@ test(
         return (
           root.scrollWidth <= innerWidth &&
           root.scrollHeight <= innerHeight &&
-          [
-            '[data-biome]',
-            '[data-testid="battlefield"]',
-            '[data-testid="command-deck"]',
-            '[data-testid="unit-stats"]',
-          ].every((selector) => {
-            const rect = document.querySelector(selector)!.getBoundingClientRect()
-            return (
-              rect.left >= 0 &&
-              rect.top >= 0 &&
-              rect.right <= innerWidth &&
-              rect.bottom <= innerHeight
-            )
-          })
+          ['[data-biome]', '[data-testid="battlefield"]', '[data-testid="command-deck"]'].every(
+            (selector) => {
+              const rect = document.querySelector(selector)!.getBoundingClientRect()
+              return (
+                rect.left >= 0 &&
+                rect.top >= 0 &&
+                rect.right <= innerWidth &&
+                rect.bottom <= innerHeight
+              )
+            },
+          )
         )
       }),
       true,

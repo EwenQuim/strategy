@@ -2,6 +2,7 @@ import type { BattleEffect } from '../lib/engine'
 import { key } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
 import { BombBlast, FireballBeam } from './BombBlast'
+import { Icon } from './Icon'
 import { SupportFeedback } from './SupportFeedback'
 
 export function BattlefieldEffects({
@@ -133,6 +134,40 @@ export function BattlefieldEffects({
               </g>
             </g>
           ))}
+        </g>
+      )}
+      {!!effect?.energyDelta && (
+        <g
+          key={'energy-' + effectId}
+          data-testid="energy-delta"
+          className="text-[#ffd98f]"
+          transform={
+            'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+          }
+          aria-hidden="true"
+        >
+          <g transform="translate(0 -40)">
+            <circle
+              r="16"
+              className="combat-impact-burst origin-center fill-none stroke-current stroke-[3] [transform-box:fill-box]"
+            />
+            <g className="combat-impact-label">
+              <text
+                x="-4"
+                y="7"
+                textAnchor="middle"
+                className="fill-current stroke-[#14271f] stroke-[5] text-[24px] font-black [paint-order:stroke]"
+              >
+                {effect.energyDelta > 0 ? '+' + effect.energyDelta : effect.energyDelta}
+              </text>
+              <g transform="translate(7 -7) scale(.45)">
+                <Icon
+                  name="energy"
+                  className="fill-current stroke-[#14271f] stroke-[3] [paint-order:stroke]"
+                />
+              </g>
+            </g>
+          </g>
         </g>
       )}
       <SupportFeedback key={'support-' + effectId} effect={effect} />
