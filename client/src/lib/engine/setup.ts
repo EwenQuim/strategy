@@ -124,6 +124,40 @@ function shuffle<T>(items: T[], random: SeededRandom): T[] {
   return out
 }
 
+// Mirrored rosters can pair every unit with its counterpart on the other side.
+function mirroredRosters(pawns: Pawn[]): boolean {
+  const counts = new Map<Pawn['kind'], number>()
+  for (const pawn of pawns)
+    counts.set(pawn.kind, (counts.get(pawn.kind) ?? 0) + (pawn.side === 'player' ? 1 : -1))
+  return [...counts.values()].every((count) => count === 0)
+}
+
+// Symmetric battles alternate sides within pairs of matching units: the kings open,
+// then every pair trades the lead, so neither side can stack consecutive turns.
+function pairedInitiative(pawns: Pawn[], random: SeededRandom, startingSide?: Side): Pawn[] {
+  const groups = new Map<Pawn['kind'], { player: Pawn[]; enemy: Pawn[] }>()
+  for (const pawn of pawns) {
+    const group = groups.get(pawn.kind) ?? { player: [], enemy: [] }
+    group[pawn.side].push(pawn)
+    groups.set(pawn.kind, group)
+  }
+  const kings = groups.get('king')!
+  groups.delete('king')
+  const order: Pawn[] = []
+  const pair = (player: Pawn, enemy: Pawn, lead?: Side) => {
+    const first = lead ?? (random.next() < 0.5 ? 'player' : 'enemy')
+    order.push(first === 'player' ? player : enemy, first === 'player' ? enemy : player)
+  }
+  pair(kings.player[0]!, kings.enemy[0]!, startingSide)
+  for (const kind of shuffle([...groups.keys()], random)) {
+    const group = groups.get(kind)!
+    const player = shuffle(group.player, random)
+    const enemy = shuffle(group.enemy, random)
+    player.forEach((pawn, index) => pair(pawn, enemy[index]!))
+  }
+  return order
+}
+
 function spawnPlacedArmy(army: readonly PawnPlacement[], side: Side, firstId: number): Pawn[] {
   return army.map((unit, index) => {
     const { q, r } = hexOf(unit.col, unit.row)
@@ -196,6 +230,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
   const authoredTiles = setup?.map === undefined ? undefined : mapFromRows(setup.map)
   if (setup !== undefined) validateSetup(setup, authoredTiles)
   const random = new SeededRandom(seedState(seed))
+  const symmetric = isSymmetricSeed(seed)
   let biome: Biome
   let pawns: Pawn[]
   let tiles: Map<string, Tile>
@@ -220,7 +255,6 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
       ? setup.player.map((kind) => PAWN_CLASSES[kind])
       : [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
     const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
-    const symmetric = isSymmetricSeed(seed)
     // The shape exists before armies spawn on it, then decoration protects them.
     const shape = generateMapShape(random, size, symmetric)
     const playerPawns = spawnRandomArmy(playerArmy, 'player', 1, random, shape, size)
@@ -235,8 +269,11 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     tiles = decorateMap(random, biome, shape, pawns, symmetric, size)
   }
   const savedSetup = copySetup(setup)
-  const initiative = shuffle(pawns, random)
-  if (startingSide) {
+  const paired = symmetric && setup?.map === undefined && mirroredRosters(pawns)
+  const initiative = paired
+    ? pairedInitiative(pawns, random, startingSide)
+    : shuffle(pawns, random)
+  if (!paired && startingSide) {
     const first = initiative.findIndex((pawn) => pawn.side === startingSide)
     initiative.push(...initiative.splice(0, first))
   }

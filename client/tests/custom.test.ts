@@ -136,3 +136,30 @@ test('Symmetric custom battles mirror pawn positions for equal rosters', () => {
   assert.equal(spots.size, uneven.pawns.length)
   for (const pawn of uneven.pawns) assert.ok(passable(uneven.tiles.get(key(pawn.q, pawn.r))))
 })
+
+test('Symmetric battles pair matching units in the initiative, kings opening', () => {
+  const equal: BattleSetup = {
+    biome: 'desert',
+    player: ['king', 'archer', 'bulwark', 'swordsman'],
+    enemy: ['king', 'archer', 'bulwark', 'swordsman'],
+  }
+  for (const seed of ['paired-a', 'paired-b', 'paired-c']) {
+    const state = initialState(symmetricSeed(seed), equal)
+    const sequence = state.order.map((id) => state.pawns.find((pawn) => pawn.id === id)!)
+    assert.equal(sequence[0].kind, 'king', seed)
+    assert.equal(sequence[1].kind, 'king', seed)
+    for (let i = 0; i < sequence.length; i += 2) {
+      assert.equal(sequence[i + 1].kind, sequence[i].kind, seed)
+      assert.notEqual(sequence[i + 1].side, sequence[i].side, seed)
+    }
+    const opening = initialState(symmetricSeed(seed), equal, 'player')
+    const opener = opening.order.map((id) => opening.pawns.find((pawn) => pawn.id === id)!)![0]
+    assert.equal(opener.side, 'player', seed)
+    assert.equal(opener.kind, 'king', seed)
+  }
+  const uneven = initialState(symmetricSeed('paired-uneven'), setup)
+  assert.deepEqual(
+    [...uneven.order].sort((a, b) => a - b),
+    uneven.pawns.map((_, index) => index + 1),
+  )
+})
