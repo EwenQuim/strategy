@@ -53,6 +53,8 @@ export function GameHeader({
     const unit = pawns.find((p) => p.id === id)
     return unit ? [{ unit, index }] : []
   })
+  const visibleOrder =
+    active > 0 ? [...turnOrder.slice(active), ...turnOrder.slice(0, active)] : turnOrder
 
   return (
     <header
@@ -118,7 +120,7 @@ export function GameHeader({
           className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
           aria-label={m.turnOrder}
         >
-          {turnOrder.map(({ unit, index }) => (
+          {visibleOrder.map(({ unit, index }) => (
             <li
               key={unit.id}
               className="relative flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[11px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
