@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { MenuLayout } from '../components/MenuLayout'
 import {
@@ -167,6 +167,11 @@ export const Route = createFileRoute('/settings')({
         <div className="mt-auto py-3 text-center text-xs leading-relaxed text-muted">
           <p title={m.buildHint}>{m.build(import.meta.env.VITE_GIT_COMMIT)}</p>
           <p>{m.madeBy}</p>
+          <p>
+            <Link to="/privacy" preload={false} className="underline underline-offset-4">
+              {s.privacyPolicy}
+            </Link>
+          </p>
         </div>
       </MenuLayout>
     )

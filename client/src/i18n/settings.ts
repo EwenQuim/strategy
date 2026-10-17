@@ -98,3 +98,10 @@ export const deleteDataConfirm = t({
   es: 'Borrar todo',
   it: 'Elimina tutto',
 })
+export const privacyPolicy = t({
+  en: 'Privacy policy',
+  fr: 'Règles de confidentialité',
+  de: 'Datenschutzerklärung',
+  es: 'Política de privacidad',
+  it: 'Informativa sulla privacy',
+})
