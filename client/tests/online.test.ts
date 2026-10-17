@@ -3,8 +3,13 @@ import { test } from 'node:test'
 import { battleMessage } from '../src/lib/game-mode.ts'
 import type { OnlineAction, StoredGame } from '../src/lib/online.ts'
 import { initialPlayback, playbackReducer, replay } from '../src/lib/playback.ts'
-import { readStoredGames, saveStoredGame } from '../src/onlineSession.ts'
-import { activePawn } from '../src/lib/engine/index.ts'
+import {
+  readPublicHosting,
+  readStoredGames,
+  savePublicHosting,
+  saveStoredGame,
+} from '../src/onlineSession.ts'
+import { activePawn, key, mirrorAxial, symmetricSeed } from '../src/lib/engine/index.ts'
 
 test('Online mode applies actions like local mode, without a bot', () => {
   const seed = 'online-seed-1'
@@ -24,6 +29,43 @@ test('Online mode applies actions like local mode, without a bot', () => {
   )
   assert.deepEqual(resynced.state, playback.state)
   assert.equal(resynced.frames.length, 0)
+})
+
+test('Online battles from server seeds are centrally symmetric, live and after resync', () => {
+  const seed = symmetricSeed('online-seed-3')
+  let playback = initialPlayback(seed, 'online')
+  const actions: OnlineAction[] = []
+  for (const tile of playback.state.tiles.values()) {
+    const mirror = mirrorAxial(tile, playback.state.mapSize)
+    const mirrored = playback.state.tiles.get(key(mirror.q, mirror.r))
+    assert.ok(mirrored)
+    assert.equal(mirrored.terrain, tile.terrain)
+    assert.equal(mirrored.feature, tile.feature)
+  }
+  for (let turn = 0; turn < 4; turn++) {
+    const pawn = activePawn(playback.state)
+    if (!pawn) throw new Error('no active pawn')
+    actions.push({ side: pawn.side, action: { type: 'endTurn' } })
+    playback = playbackReducer(playback, { type: 'endTurn' }, 'online')
+  }
+  const half = playback.state.pawns.length / 2
+  for (let i = 0; i < half; i++) {
+    const mirror = mirrorAxial(playback.state.pawns[i], playback.state.mapSize)
+    assert.equal(playback.state.pawns[half + i].q, mirror.q)
+    assert.equal(playback.state.pawns[half + i].r, mirror.r)
+  }
+  const resynced = playbackReducer(
+    initialPlayback(seed, 'online'),
+    {
+      type: 'resync',
+      actions,
+    },
+    'online',
+  )
+  for (const tile of resynced.state.tiles.values()) {
+    const mirror = mirrorAxial(tile, resynced.state.mapSize)
+    assert.equal(resynced.state.tiles.get(key(mirror.q, mirror.r))?.terrain, tile.terrain)
+  }
 })
 
 test('Resync replaces a stale local move with the server action log', () => {
@@ -58,9 +100,9 @@ test('Online battle messages use the two player names', () => {
 
 const storage = new Map<string, string>()
 const localStorageStub = {
-  getItem: (key: string) => storage.get(key) ?? null,
-  setItem: (key: string, value: string) => void storage.set(key, value),
-  removeItem: (key: string) => void storage.delete(key),
+  getItem: (storageKey: string) => storage.get(storageKey) ?? null,
+  setItem: (storageKey: string, value: string) => void storage.set(storageKey, value),
+  removeItem: (storageKey: string) => void storage.delete(storageKey),
 }
 Object.assign(globalThis, { localStorage: localStorageStub })
 
@@ -76,4 +118,12 @@ test('Stored online games round-trip and ignore corrupted entries', () => {
   assert.deepEqual(readStoredGames(), [game])
   storage.set('hexmate.online.games', 'not json')
   assert.deepEqual(readStoredGames(), [])
+})
+
+test('Public game setting defaults to private and round-trips', () => {
+  assert.equal(readPublicHosting(), false)
+  savePublicHosting(true)
+  assert.equal(readPublicHosting(), true)
+  savePublicHosting(false)
+  assert.equal(readPublicHosting(), false)
 })

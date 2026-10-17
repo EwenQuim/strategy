@@ -19,9 +19,12 @@ import {
   type Pawn,
   type Side,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
-import { nearestTarget } from '../src/lib/engine/bot.ts'
+
+import { nearestTarget } from '../src/bots/targetPicker.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function battle(pawn: Pawn): GameState {
   const tiles: GameState['tiles'] = new Map()
@@ -60,11 +63,10 @@ for (const side of ['player', 'enemy'] as const) {
         state.tiles.get(key(q, r))!.terrain = 'mountain'
         state.tiles.get(key(q * 4, r * 4))!.terrain = 'lake'
         const original = structuredClone(state)
-        const preview = reducer(state, { type: 'act', action: 'special' })
-        assert.equal(targetingTiles(preview).size, 48)
-        assert.ok(targetingTiles(preview).has(key(q * 7, r * 7)))
-        assert.deepEqual(reducer(preview, { type: 'cancelTargeting' }), state)
-        const result = transition(preview, { type: 'specialAt', q, r })
+        const aimed = targetingTiles(state, { action: 'special' })
+        assert.equal(aimed.size, 48)
+        assert.ok(aimed.has(key(q * 7, r * 7)))
+        const result = transition(state, { type: 'special', target: { q, r } })
         assert.equal(result.state.pawns[0].energy, 1)
         assert.deepEqual(
           result.state.pawns.slice(3).map((pawn) => pawn.hp),
@@ -75,7 +77,7 @@ for (const side of ['player', 'enemy'] as const) {
           { q: q * 2, r: r * 2, damage: 1 },
           { q: q * 7, r: r * 7, damage: 1 },
         ])
-        assert.deepEqual(result, transition(preview, { type: 'specialAt', q, r }))
+        assert.deepEqual(result, transition(state, { type: 'special', target: { q, r } }))
         assert.deepEqual(structuredClone(state), original)
       }
     },
@@ -93,9 +95,8 @@ for (const side of ['player', 'enemy'] as const) {
           ...area.map((tile, index) => new Swordsman(4 + index, tile.q, tile.r, other)),
         )
         state.tiles.get('2,0')!.terrain = 'mountain'
-        const preview = reducer(state, { type: 'act', action: 'special' })
-        assert.equal(targetingTiles(preview).size, 19)
-        const result = transition(preview, { type: 'specialAt', ...center })
+        assert.equal(targetingTiles(state, { action: 'special' }).size, 19)
+        const result = transition(state, { type: 'special', target: center })
         assert.equal(result.state.pawns[0].energy, 1)
         assert.ok(result.state.pawns.slice(3).every((pawn) => pawn.hp === 4))
         assert.equal(result.frames[0].effect?.impacts?.length, area.length)
@@ -110,29 +111,30 @@ for (const side of ['player', 'enemy'] as const) {
     () => {
       for (const Unit of [Magician, Bomber]) {
         const state = battle(new Unit(1, 0, 0, side))
-        const preview = reducer(state, { type: 'act', action: 'special' })
         for (const tile of [
           { q: 99, r: 0 },
           Unit === Magician ? { q: 1, r: 1 } : { q: 3, r: 0 },
         ]) {
-          assert.equal(transition(preview, { type: 'specialAt', ...tile }).state, preview)
+          assert.equal(transition(state, { type: 'special', target: tile }).state, state)
         }
-        const result = transition(preview, { type: 'specialAt', q: 0, r: -2 })
+        const result = transition(state, { type: 'special', target: { q: 0, r: -2 } })
         assert.equal(result.state.pawns[0].energy, 1)
         assert.equal(result.state.randomState, state.randomState)
         assert.deepEqual(result.frames[0].effect?.impacts, [])
-        assert.equal(reducer(result.state, { type: 'act', action: 'special' }), result.state)
-        const exhausted = { ...preview, pawns: preview.pawns.map((pawn) => pawn.clone()) }
+        assert.equal(
+          reducer(result.state, { type: 'special', target: { q: 0, r: -1 } }),
+          result.state,
+        )
+        const exhausted = { ...state, pawns: state.pawns.map((pawn) => pawn.clone()) }
         exhausted.pawns[0].energy = 1
-        assert.equal(reducer(exhausted, { type: 'specialAt', q: 0, r: -1 }), exhausted)
-        assert.equal(targetingTiles(exhausted).size, 0)
+        assert.equal(
+          reducer(exhausted, { type: 'special', target: { q: 0, r: -1 } }),
+          exhausted,
+        )
+        assert.equal(targetingTiles(exhausted, { action: 'special' }).size, 0)
       }
       const state = battle(new Bomber(1, 0, 0, side))
-      const result = transition(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 0,
-        r: 0,
-      })
+      const result = transition(state, { type: 'special', target: { q: 0, r: 0 } })
       assert.equal(result.state.pawns[0].hp, 2)
     },
   )
@@ -148,17 +150,13 @@ for (const side of ['player', 'enemy'] as const) {
         specialTargets(state.pawns, state.pawns[0]).map((pawn) => pawn.id),
         [2],
       )
-      let next = reducer(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 2,
-        r: 0,
-      })
+      let next = reducer(state, { type: 'special', target: { q: 2, r: 0 } })
       assert.equal(protectorFor(next.pawns, next.pawns[1])?.id, 1)
       next = reducer(next, { type: 'endTurn' })
-      next = reducer(reducer(next, { type: 'act', action: 'attack' }), {
-        type: 'attackAt',
-        q: 2,
-        r: 0,
+      next = reducer(next, {
+        type: 'special',
+        target: { q: 2, r: 0 },
+        destination: { q: 2, r: 1 },
       })
       assert.equal(next.pawns[0].hp, 8)
       assert.equal(next.pawns[1].hp, 7)
@@ -167,17 +165,22 @@ for (const side of ['player', 'enemy'] as const) {
   )
 }
 
-test('Bots use long-range rays and bombs centered on empty tiles', () => {
+test('Bots use long-range rays and bombs centered on empty tiles', async () => {
   for (const Unit of [Magician, Bomber]) {
     const state = battle(new Unit(1, 0, 0, 'player'))
     state.pawns[2] = new King(3, Unit === Magician ? 7 : 3, 0, 'enemy', 1)
-    for (const level of ['easy', 'normal', 'hard', nearestTarget] as const) {
-      const actions = chooseBotActions(state, level)
+    for (const level of [
+      new DepthsearchBot(BOT_LEVELS.easy),
+      new DepthsearchBot(BOT_LEVELS.normal),
+      new DepthsearchBot(BOT_LEVELS.hard),
+      new RulesBot(nearestTarget),
+    ]) {
+      const actions = await level.chooseActions(state)
       const next = actions.reduce(reducer, state)
       assert.equal(next.winner, 'player')
     }
     for (const candidate of state.pawns[0].special.candidates(state.pawns[0], state)) {
-      const result = candidate.reduce(reducer, state)
+      const result = reducer(state, candidate)
       assert.equal(result.pawns[0].energy, 1)
     }
   }
@@ -200,8 +203,7 @@ test('Bomb friendly fire hits allies, enemies and the caster, even if the caster
     const state = battle(new Bomber(1, 0, 0, side, 1))
     state.pawns.push(new Swordsman(4, 1, 0, side), new Swordsman(5, 0, 1, other))
     const original = structuredClone(state)
-    const preview = reducer(state, { type: 'act', action: 'special' })
-    const result = transition(preview, { type: 'specialAt', q: 0, r: 0 })
+    const result = transition(state, { type: 'special', target: { q: 0, r: 0 } })
     assert.equal(
       result.state.pawns.find((pawn) => pawn.id === 1),
       undefined,
@@ -215,39 +217,26 @@ test('Bomb friendly fire hits allies, enemies and the caster, even if the caster
       { q: 0, r: 1, damage: 1 },
     ])
     assert.deepEqual(structuredClone(state), original)
-    assert.deepEqual(transition(preview, { type: 'specialAt', q: 0, r: 0 }), result)
+    assert.deepEqual(transition(state, { type: 'special', target: { q: 0, r: 0 } }), result)
   }
 })
 
-test('Bomb friendly fire respects Escape and killing your own king loses, including mutual king kills', () => {
+test('Bomb friendly fire is reliable and killing your own king loses, including mutual king kills', () => {
   for (const side of ['player', 'enemy'] as const) {
     const state = battle(new Bomber(1, 0, 0, side))
     state.pawns[1].q = 1
     state.pawns[1].r = 0
     state.pawns[1].hp = 1
-    state.pawns[1].escapeChance = 60
     state.randomState = 0
-    const preview = reducer(state, { type: 'act', action: 'special' })
-    const missed = transition(preview, { type: 'specialAt', q: 1, r: 0 })
-    assert.equal(missed.state.pawns[1].hp, 1)
-    assert.equal(missed.state.winner, null)
-    assert.ok(
-      missed.frames[0].effect?.impacts?.some(
-        (hit) => hit.q === 1 && hit.r === 0 && hit.damage === 0,
-      ),
-    )
-    state.pawns[1].escapeChance = 0
+    const hit = transition(state, { type: 'special', target: { q: 1, r: 0 } })
+    assert.equal(hit.state.winner, side === 'player' ? 'enemy' : 'player')
     for (const mutual of [false, true]) {
       if (mutual) {
         state.pawns[2].q = 2
         state.pawns[2].r = 0
         state.pawns[2].hp = 1
       }
-      const fired = reducer(reducer(state, { type: 'act', action: 'special' }), {
-        type: 'specialAt',
-        q: 1,
-        r: 0,
-      })
+      const fired = reducer(state, { type: 'special', target: { q: 1, r: 0 } })
       assert.equal(fired.winner, side === 'player' ? 'enemy' : 'player')
     }
   }
@@ -256,12 +245,11 @@ test('Bomb friendly fire respects Escape and killing your own king loses, includ
 test('Empty bombs keep a visible playback frame in local, online and AI games', () => {
   const state = battle(new Bomber(1, 0, 0, 'player'))
   for (const mode of ['local', 'online', 'ai'] as const) {
-    const preview = playbackReducer(
+    const result = playbackReducer(
       { state, frames: [] },
-      { type: 'act', action: 'special' },
+      { type: 'special', target: { q: 2, r: 0 } },
       mode,
     )
-    const result = playbackReducer(preview, { type: 'specialAt', q: 2, r: 0 }, mode)
     assert.equal(result.frames.length, 1)
     assert.equal(result.frames[0].effect?.kind, 'bomb')
     assert.deepEqual(result.frames[0].effect?.to, { q: 2, r: 0 })
@@ -271,12 +259,17 @@ test('Empty bombs keep a visible playback frame in local, online and AI games', 
   }
 })
 
-test('Bots avoid bombing their own king and do not target ally-only groups', () => {
+test('Bots avoid bombing their own king and do not target ally-only groups', async () => {
   const state = battle(new Bomber(1, 0, 0, 'player'))
   state.pawns[1] = new King(2, 2, 0, 'player', 1)
   state.pawns[2] = new King(3, 3, 0, 'enemy', 1)
-  for (const strategy of ['easy', 'normal', 'hard', nearestTarget] as const) {
-    const next = chooseBotActions(state, strategy).reduce(reducer, state)
+  for (const strategy of [
+    new DepthsearchBot(BOT_LEVELS.easy),
+    new DepthsearchBot(BOT_LEVELS.normal),
+    new DepthsearchBot(BOT_LEVELS.hard),
+    new RulesBot(nearestTarget),
+  ]) {
+    const next = (await strategy.chooseActions(state)).reduce(reducer, state)
     assert.equal(next.pawns.find((pawn) => pawn.id === 2)?.hp, 1)
     assert.notEqual(next.winner, 'enemy')
   }

@@ -16,9 +16,13 @@ import (
 const codeAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 const tokenAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
 
+// Must stay in sync with SYMMETRIC_SEED_PREFIX in client/src/lib/engine/setup.ts.
+const symmetricSeedPrefix = "sym-"
+
 type Store interface {
 	Create(ctx context.Context, g game.Game) error
 	Game(ctx context.Context, code string) (game.Game, error)
+	PublicWaiting(ctx context.Context) ([]game.Game, error)
 	Join(ctx context.Context, code, name, tokenHash string) (game.Game, error)
 	Append(ctx context.Context, code string, version int, action game.Action) (game.Game, error)
 }
@@ -40,7 +44,7 @@ type PlayerCredentials struct {
 	Game  game.Game
 }
 
-func (s *Service) Create(ctx context.Context, name string) (PlayerCredentials, error) {
+func (s *Service) Create(ctx context.Context, name string, public bool) (PlayerCredentials, error) {
 	token, err := randomString(32, tokenAlphabet)
 	if err != nil {
 		return PlayerCredentials{}, err
@@ -56,9 +60,10 @@ func (s *Service) Create(ctx context.Context, name string) (PlayerCredentials, e
 		}
 		g := game.Game{
 			Code:        code,
-			Seed:        seed,
+			Seed:        symmetricSeedPrefix + seed,
 			NamePlayer:  name,
 			TokenPlayer: hash(token),
+			Public:      public,
 			Status:      game.Waiting,
 			CreatedAt:   s.now(),
 			UpdatedAt:   s.now(),
@@ -89,6 +94,10 @@ func (s *Service) Join(ctx context.Context, code, name string) (PlayerCredential
 
 func (s *Service) Game(ctx context.Context, code string) (game.Game, error) {
 	return s.store.Game(ctx, code)
+}
+
+func (s *Service) PublicWaiting(ctx context.Context) ([]game.Game, error) {
+	return s.store.PublicWaiting(ctx)
 }
 
 func (s *Service) Play(ctx context.Context, code, token string, version int, action game.EngineAction, winner *game.Side) (game.Game, error) {

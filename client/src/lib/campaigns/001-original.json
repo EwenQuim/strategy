@@ -2,386 +2,237 @@
   {
     "id": 1,
     "name": "First Watch",
-    "seed": "campaign-v1-1",
-    "difficulty": "normal",
+    "seed": "campaign-v2-1",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
+      "firstEnemyKinds": ["archer"],
       "map": ["__..__", "_...._", "......", "......", "......", "_...._", "__..__"],
       "player": [
-        {
-          "kind": "king",
-          "col": 2,
-          "row": 5
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 4
-        }
+        { "kind": "king", "col": 2, "row": 5 },
+        { "kind": "swordsman", "col": 3, "row": 4 },
+        { "kind": "swordsman", "col": 2, "row": 4 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 2,
-          "row": 0
-        }
+        { "kind": "king", "col": 2, "row": 0 },
+        { "kind": "archer", "col": 3, "row": 1 }
       ]
     }
   },
   {
     "id": 2,
     "name": "Bowmen",
-    "seed": "campaign-v1-2",
-    "difficulty": "normal",
+    "seed": "campaign-v2-2",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
+      "firstEnemyKinds": ["magician"],
       "map": ["__...__", "_....._", "ff....f", "_....._", "__.....", "_....._", "__...__"],
       "player": [
-        {
-          "kind": "king",
-          "col": 2,
-          "row": 5
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 4
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 5
-        }
+        { "kind": "king", "col": 3, "row": 6 },
+        { "kind": "swordsman", "col": 3, "row": 3 },
+        { "kind": "archer", "col": 4, "row": 4 },
+        { "kind": "swordsman", "col": 4, "row": 5 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 2
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "magician", "col": 3, "row": 2 },
+        { "kind": "swordsman", "col": 4, "row": 1 }
       ]
     }
   },
   {
     "id": 3,
     "name": "River Guard",
-    "seed": "campaign-v1-3",
-    "difficulty": "normal",
+    "seed": "campaign-v2-3",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
+      "firstEnemyKinds": ["bulwark"],
       "map": [
         "__....__",
         "_......_",
-        "_......_",
+        "........",
         "..~~....",
-        "_.~~..._",
-        "__....__",
-        "__..~~__",
-        "_...~~._",
+        "..~~....",
         "........",
         "_......_",
-        "__....__",
-        "___..___"
+        "__....__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 1,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 3
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "bulwark", "col": 3, "row": 1 },
+        { "kind": "swordsman", "col": 4, "row": 2 }
       ]
     }
   },
   {
     "id": 4,
     "name": "Forest Magic",
-    "seed": "campaign-v1-4-23",
-    "difficulty": "normal",
+    "seed": "campaign-v2-4",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "verdant",
+      "firstEnemyKinds": ["bomber"],
       "map": [
         "_....___",
-        ".f....__",
         "......__",
-        "......__",
-        ".~~...._",
-        "__~..~..",
-        "__...~~.",
-        "__...~~.",
+        "..ff....",
+        "........",
+        "....ff..",
         "__......",
         "__......",
-        "__....f.",
         "___...._"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 8
-        },
-        {
-          "kind": "archer",
-          "col": 6,
-          "row": 11
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 9
-        }
+        { "kind": "king", "col": 4, "row": 7 },
+        { "kind": "swordsman", "col": 4, "row": 6 },
+        { "kind": "magician", "col": 2, "row": 5 },
+        { "kind": "bulwark", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 5, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "magician",
-          "col": 2,
-          "row": 2
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "bomber", "col": 4, "row": 3 },
+        { "kind": "archer", "col": 4, "row": 1 },
+        { "kind": "swordsman", "col": 2, "row": 2 }
       ]
     }
   },
   {
     "id": 5,
     "name": "Highland Keep",
-    "seed": "campaign-v1-5",
-    "difficulty": "normal",
+    "seed": "campaign-v2-5",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
+      "firstEnemyKinds": ["ninja"],
       "map": [
-        "_._.._._",
+        "__....__",
         "_......_",
+        ".^....^.",
+        "...W....",
         "........",
-        ".~....~.",
-        "_~....~_",
-        "__.W..__",
-        "__....__",
+        ".^....^.",
         "_......_",
-        "_......_",
-        "_......_",
-        "__....__",
         "__....__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 8
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 10
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "bomber", "col": 4, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "archer",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 6,
-          "row": 2
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "ninja", "col": 5, "row": 2 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "archer", "col": 2, "row": 1 }
       ]
     }
   },
   {
     "id": 6,
     "name": "High Pass",
-    "seed": "campaign-v1-6",
-    "difficulty": "normal",
+    "seed": "campaign-v2-6",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
+      "firstEnemyKinds": ["lancer"],
       "map": [
         "__....__",
         "_......_",
         "........",
-        "........",
-        "_......_",
-        "__^.^___",
-        "__^.^___",
-        "_......_",
-        "........",
+        "^^....^^",
+        "^^....^^",
         "........",
         "_......_",
         "__....__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 7
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 7
-        },
-        {
-          "kind": "magician",
-          "col": 4,
-          "row": 8
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "ninja", "col": 5, "row": 5 },
+        { "kind": "magician", "col": 4, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 4
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 4
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "lancer", "col": 2, "row": 5 },
+        { "kind": "archer", "col": 5, "row": 1 },
+        { "kind": "swordsman", "col": 4, "row": 2 }
       ]
     }
   },
   {
     "id": 7,
     "name": "Stone Wall",
-    "seed": "campaign-v1-7",
-    "difficulty": "normal",
+    "seed": "campaign-v2-7",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
         "__....__",
         "__....__",
-        "__....__",
-        "_......_",
         "_.^..^._",
-        "..^..^..",
+        "........",
         "........",
         "_.^..^._",
-        "_.^..^._",
-        "__....__",
         "__....__",
         "__....__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 8
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 10
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "bulwark", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 7 },
+        { "kind": "swordsman", "col": 4, "row": 6 },
+        { "kind": "lancer", "col": 4, "row": 5 },
+        { "kind": "magician", "col": 5, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 3,
-          "row": 2
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "bulwark", "col": 3, "row": 1 },
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "archer", "col": 2, "row": 1 }
       ]
     }
   },
   {
     "id": 8,
     "name": "Powder Lesson",
-    "seed": "campaign-v1-8",
-    "difficulty": "normal",
+    "seed": "campaign-v2-8",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "mountains",
       "map": [
@@ -389,148 +240,70 @@
         "_......_",
         "........",
         ".^....^.",
-        "_^....^_",
-        "_^....^_",
-        "__....__",
-        "__....__",
-        "__....__",
+        "_......_",
         "........",
-        "........",
-        "........"
+        "__....__",
+        "__....__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 9
-        },
-        {
-          "kind": "bomber",
-          "col": 3,
-          "row": 8
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "bomber", "col": 3, "row": 5 },
+        { "kind": "swordsman", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "lancer", "col": 5, "row": 5 },
+        { "kind": "swordsman", "col": 2, "row": 5 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 5
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 5
-        },
-        {
-          "kind": "archer",
-          "col": 3,
-          "row": 4
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 4
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "archer", "col": 3, "row": 2 },
+        { "kind": "archer", "col": 4, "row": 2 },
+        { "kind": "swordsman", "col": 3, "row": 3 }
       ]
     }
   },
   {
     "id": 9,
     "name": "Split Battery",
-    "seed": "campaign-v1-10",
-    "difficulty": "normal",
+    "seed": "campaign-v2-9",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
-        "___sss__",
-        "__sssss_",
-        "_ss~~sss",
-        "sss__sss",
-        "sss__sss",
-        "ssssssss",
-        "ssssssss",
-        "ss~~sss_",
-        "ss~~sss_",
-        "ssssssss",
+        "__ssss__",
         "_ssssss_",
-        "___sss__"
+        "sss__sss",
+        "sss__sss",
+        "ssssssss",
+        "ss~~ssss",
+        "_ssssss_",
+        "__ssss__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 10
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 10
-        },
-        {
-          "kind": "bomber",
-          "col": 5,
-          "row": 9
-        }
+        { "kind": "king", "col": 4, "row": 7 },
+        { "kind": "archer", "col": 1, "row": 6 },
+        { "kind": "magician", "col": 6, "row": 6 },
+        { "kind": "swordsman", "col": 4, "row": 6 },
+        { "kind": "bomber", "col": 5, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 5,
-          "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 5,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 2
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "archer", "col": 1, "row": 2 },
+        { "kind": "magician", "col": 6, "row": 2 },
+        { "kind": "swordsman", "col": 4, "row": 4 }
       ]
     }
   },
   {
     "id": 10,
     "name": "Dune Patrol",
-    "seed": "campaign-v1-11",
-    "difficulty": "normal",
+    "seed": "campaign-v2-10",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
@@ -540,931 +313,398 @@
         "ssssssss",
         "_ssssss_",
         "__ssss__",
-        "__ssss__",
-        "__ssss__",
-        "__ssss__",
         "_ssssss_",
         "__ssss__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "lancer", "col": 5, "row": 6 },
+        { "kind": "bulwark", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 4, "row": 7 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 2
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 2
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "lancer", "col": 2, "row": 2 },
+        { "kind": "lancer", "col": 5, "row": 2 },
+        { "kind": "archer", "col": 4, "row": 1 },
+        { "kind": "swordsman", "col": 3, "row": 2 }
       ]
     }
   },
   {
     "id": 11,
     "name": "Twin Daggers",
-    "seed": "campaign-v1-12",
-    "difficulty": "normal",
+    "seed": "campaign-v2-11",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
-        "___ss___",
+        "__ssss__",
         "_ssssss_",
         "ssssssss",
-        "ss~~ssss",
-        "ss___sss",
-        "sss__sss",
-        "sss__pss",
+        "ss__ssss",
         "ssss__ss",
-        "ssss~~ss",
         "ssssssss",
         "_ssssss_",
         "__ssss__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 10
-        },
-        {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "ninja", "col": 5, "row": 5 },
+        { "kind": "bulwark", "col": 4, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "ninja",
-          "col": 1,
-          "row": 3
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 2
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "ninja", "col": 1, "row": 2 },
+        { "kind": "ninja", "col": 6, "row": 2 },
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "archer", "col": 3, "row": 1 }
       ]
     }
   },
   {
     "id": 12,
     "name": "Iron Caravan",
-    "seed": "campaign-v1-13",
-    "difficulty": "normal",
+    "seed": "campaign-v2-12",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "desert",
       "map": [
-        "___ss___",
         "__ssss__",
         "_ssssss_",
         "s~ssss~s",
         "s~ssss~s",
-        "s~ssss~s",
         "ssssssss",
-        "ssssssss",
-        "s~ssss~s",
         "s~ssss~s",
         "_ssssss_",
         "__ssss__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "bomber",
-          "col": 2,
-          "row": 5
-        },
-        {
-          "kind": "bomber",
-          "col": 5,
-          "row": 5
-        },
-        {
-          "kind": "archer",
-          "col": 3,
-          "row": 6
-        },
-        {
-          "kind": "ninja",
-          "col": 7,
-          "row": 5
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "bomber", "col": 2, "row": 5 },
+        { "kind": "bomber", "col": 5, "row": 5 },
+        { "kind": "archer", "col": 3, "row": 6 },
+        { "kind": "swordsman", "col": 4, "row": 6 },
+        { "kind": "ninja", "col": 6, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 1
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 4
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "bulwark", "col": 3, "row": 2 },
+        { "kind": "bulwark", "col": 4, "row": 2 },
+        { "kind": "archer", "col": 3, "row": 1 },
+        { "kind": "swordsman", "col": 4, "row": 3 }
       ]
     }
   },
   {
     "id": 13,
     "name": "Ember Crossing",
-    "seed": "campaign-v1-9",
-    "difficulty": "normal",
+    "seed": "campaign-v2-13",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
-        "_bbbbbb_",
-        "bllbbbb_",
-        "bllbbbl_",
-        "_bbbbllb",
-        "_bllbllb",
-        "_bllbbbb",
-        "bbbbbbb_",
-        "bbbbbbb_",
+        "bllbbbbb",
+        "bllbbblb",
+        "bbbbbbll",
+        "bbbbbbbb",
         "_bbbbbb_",
         "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 2,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "lancer", "col": 5, "row": 6 },
+        { "kind": "bomber", "col": 4, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "bomber",
-          "col": 2,
-          "row": 2
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "archer", "col": 5, "row": 1 },
+        { "kind": "bomber", "col": 4, "row": 2 }
       ]
     }
   },
   {
     "id": 14,
     "name": "Ember Spring",
-    "seed": "campaign-v1-14",
-    "difficulty": "normal",
+    "seed": "campaign-v2-14",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
         "bbbbbbbb",
-        "bbbbbbbb",
-        "bllbbbl_",
-        "bllbbl__",
-        "bbbbH___",
-        "bbbbbb__",
-        "bbbbbbb_",
+        "bllbHbbb",
+        "bllbbblb",
         "bbbbbbbb",
         "_bbbbbb_",
         "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 2,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 9
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "bulwark",
-          "col": 2,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 },
+        { "kind": "bulwark", "col": 4, "row": 6 },
+        { "kind": "bomber", "col": 5, "row": 5 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 4,
-          "row": 2
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 2
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "bomber",
-          "col": 5,
-          "row": 3
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "magician", "col": 5, "row": 2 },
+        { "kind": "bulwark", "col": 4, "row": 1 },
+        { "kind": "archer", "col": 2, "row": 1 }
       ]
     }
   },
   {
     "id": 15,
     "name": "Cinder Keep",
-    "seed": "campaign-v1-15",
-    "difficulty": "normal",
+    "seed": "campaign-v2-15",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
-        "bbbbbbbb",
         "bbbb__bb",
-        "_llb__b_",
         "bllRbbbb",
         "bbbb__lb",
-        "_bbbblb_",
-        "bbbl_lbb",
         "bbbbbbbb",
         "_bbbbbb_",
-        "____bbb_"
+        "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 6,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 10
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "bomber",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 },
+        { "kind": "bomber", "col": 4, "row": 5 },
+        { "kind": "ninja", "col": 6, "row": 5 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "bomber",
-          "col": 1,
-          "row": 2
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 2
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "bulwark", "col": 3, "row": 1 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "magician", "col": 5, "row": 1 },
+        { "kind": "ninja", "col": 6, "row": 2 }
       ]
     }
   },
   {
     "id": 16,
     "name": "Wizard Curtain",
-    "seed": "campaign-v1-16",
-    "difficulty": "normal",
+    "seed": "campaign-v2-16",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "volcano",
       "map": [
         "__bbbb__",
-        "__bbbb__",
         "_lbbbbl_",
-        "blbbbblb",
         "bbbbbbbb",
         "bbbbbbbb",
         "_bbbbbb_",
         "__bbbb__",
         "__bbbb__",
-        "__bbbb__",
-        "___bb___",
         "___bb___"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "magician",
-          "col": 0,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 0,
-          "row": 5
-        },
-        {
-          "kind": "bomber",
-          "col": 5,
-          "row": 7
-        },
-        {
-          "kind": "ninja",
-          "col": 7,
-          "row": 5
-        }
+        { "kind": "king", "col": 4, "row": 7 },
+        { "kind": "magician", "col": 0, "row": 3 },
+        { "kind": "bulwark", "col": 1, "row": 4 },
+        { "kind": "swordsman", "col": 3, "row": 5 },
+        { "kind": "bomber", "col": 5, "row": 4 },
+        { "kind": "ninja", "col": 6, "row": 4 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 1
-        },
-        {
-          "kind": "magician",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "magician",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "magician",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 3
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "magician", "col": 2, "row": 3 },
+        { "kind": "magician", "col": 3, "row": 3 },
+        { "kind": "magician", "col": 4, "row": 3 },
+        { "kind": "magician", "col": 5, "row": 3 }
       ]
     }
   },
   {
     "id": 17,
     "name": "Hell's Gate",
-    "seed": "campaign-v1-17",
-    "difficulty": "normal",
+    "seed": "campaign-v2-17",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
+      "hellfireCount": 1,
       "map": [
-        "__bbb___",
+        "__bbbb__",
         "_bbbbbb_",
         "bbbbbbbb",
-        "llbbbbbb",
+        "^^WbbH^^",
+        "^^bbbb^^",
+        "bbbbbbbb",
         "_bbbbbb_",
-        "__Wb_bb_",
-        "__bb_Hb_",
-        "bbbbbbbb",
-        "bbbbbbll",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "bbbbbbbb"
+        "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 10
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "bomber",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "bulwark", "col": 4, "row": 6 },
+        { "kind": "bomber", "col": 5, "row": 6 },
+        { "kind": "ninja", "col": 6, "row": 5 },
+        { "kind": "magician", "col": 1, "row": 5 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 0
-        },
-        {
-          "kind": "bulwark",
-          "col": 5,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "archer",
-          "col": 2,
-          "row": 4
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 4
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 2
-        }
-      ],
-      "hellfireCount": 1
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "archer", "col": 2, "row": 1 },
+        { "kind": "magician", "col": 5, "row": 1 },
+        { "kind": "bomber", "col": 4, "row": 2 }
+      ]
     }
   },
   {
     "id": 18,
     "name": "Caldera Run",
-    "seed": "campaign-v1-18",
-    "difficulty": "normal",
+    "seed": "campaign-v2-18",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "map": [
         "__bbbb__",
         "_bbbbbb_",
-        "bbbbbbbb",
-        "bllbblbb",
-        "b__bllb_",
-        "bbbW__b_",
-        "_lllRbbb",
-        "_b__bllb",
-        "_bbbbllb",
-        "bbbbbbbb",
-        "bbbbbbbb",
-        "_bbbbbb_"
+        "bllbbbbb",
+        "bbbW__bb",
+        "bb__Rbbb",
+        "bbbbbbll",
+        "_bbbbbb_",
+        "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 11
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 11
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 10
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 9
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 },
+        { "kind": "lancer", "col": 4, "row": 5 },
+        { "kind": "ninja", "col": 6, "row": 4 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 1
-        },
-        {
-          "kind": "ninja",
-          "col": 1,
-          "row": 2
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 3,
-          "row": 2
-        },
-        {
-          "kind": "magician",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 3
-        }
+        { "kind": "king", "col": 4, "row": 0 },
+        { "kind": "ninja", "col": 1, "row": 3 },
+        { "kind": "archer", "col": 3, "row": 1 },
+        { "kind": "magician", "col": 5, "row": 2 },
+        { "kind": "swordsman", "col": 4, "row": 2 }
       ]
     }
   },
   {
     "id": 19,
     "name": "Royal Guard",
-    "seed": "campaign-v1-19",
-    "difficulty": "normal",
+    "seed": "campaign-v2-19",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "map": [
-        "_b_bb_b_",
+        "__bbbb__",
         "bbbbbbbb",
-        "bbbbbbll",
-        "bbbbbbbl",
-        "b_^bb^_b",
-        "b__bb__b",
+        "bb^bb^bb",
         "bbbbHbbb",
-        "b_^bb^_b",
-        "l__bb__b",
-        "llbbbbbb",
+        "bb^bb^bb",
         "bbbbbbbb",
+        "_bbbbbb_",
         "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 11
-        },
-        {
-          "kind": "swordsman",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "archer",
-          "col": 0,
-          "row": 10
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 10
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 9
-        },
-        {
-          "kind": "bomber",
-          "col": 5,
-          "row": 10
-        },
-        {
-          "kind": "ninja",
-          "col": 7,
-          "row": 9
-        }
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 1, "row": 5 },
+        { "kind": "magician", "col": 6, "row": 5 },
+        { "kind": "bulwark", "col": 4, "row": 6 },
+        { "kind": "bomber", "col": 5, "row": 6 },
+        { "kind": "ninja", "col": 6, "row": 6 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 1
-        },
-        {
-          "kind": "bulwark",
-          "col": 2,
-          "row": 3
-        },
-        {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "swordsman",
-          "col": 5,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 2
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 2
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "bulwark", "col": 2, "row": 1 },
+        { "kind": "bulwark", "col": 4, "row": 1 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "archer", "col": 5, "row": 1 },
+        { "kind": "bomber", "col": 4, "row": 2 }
       ]
     }
   },
   {
     "id": 20,
     "name": "Last Crown",
-    "seed": "campaign-v1-20",
-    "difficulty": "normal",
+    "seed": "campaign-v2-20",
+    "bot": {
+      "name": "napoleon",
+      "options": { "candidates": 6, "replies": 1, "aggression": 1, "caution": 0.8 }
+    },
     "setup": {
       "biome": "hell",
       "map": [
-        "_b_bb_b_",
+        "__bbbb__",
         "bbbbbbbb",
         "bb^bb^bb",
-        "bb^bb^bb",
-        "lb_bb_b_",
-        "_bRbb^b_",
-        "_b^bbHb_",
-        "_b_bb_bl",
-        "_b^bb^b_",
+        "_bRbbHb_",
         "_bbbbbb_",
-        "__bbbb__",
+        "bb^bb^bb",
+        "bbbbbbbb",
         "__bbbb__"
       ],
       "player": [
-        {
-          "kind": "king",
-          "col": 4,
-          "row": 10
-        },
-        {
-          "kind": "swordsman",
-          "col": 3,
-          "row": 8
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 8
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 8
-        },
-        {
-          "kind": "bulwark",
-          "col": 4,
-          "row": 9
-        },
-        {
-          "kind": "bomber",
-          "col": 2,
-          "row": 9
-        },
-        {
-          "kind": "ninja",
-          "col": 6,
-          "row": 7
-        }
+        { "kind": "king", "col": 4, "row": 7 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 1, "row": 6 },
+        { "kind": "magician", "col": 6, "row": 6 },
+        { "kind": "bulwark", "col": 4, "row": 6 },
+        { "kind": "bomber", "col": 2, "row": 6 },
+        { "kind": "ninja", "col": 5, "row": 6 },
+        { "kind": "lancer", "col": 4, "row": 5 }
       ],
       "enemy": [
-        {
-          "kind": "king",
-          "col": 3,
-          "row": 1
-        },
-        {
-          "kind": "swordsman",
-          "col": 4,
-          "row": 2
-        },
-        {
-          "kind": "archer",
-          "col": 1,
-          "row": 2
-        },
-        {
-          "kind": "magician",
-          "col": 6,
-          "row": 2
-        },
-        {
-          "kind": "bulwark",
-          "col": 3,
-          "row": 3
-        },
-        {
-          "kind": "bomber",
-          "col": 4,
-          "row": 3
-        },
-        {
-          "kind": "ninja",
-          "col": 1,
-          "row": 3
-        }
+        { "kind": "king", "col": 3, "row": 0 },
+        { "kind": "swordsman", "col": 4, "row": 1 },
+        { "kind": "archer", "col": 1, "row": 1 },
+        { "kind": "magician", "col": 6, "row": 1 },
+        { "kind": "bulwark", "col": 3, "row": 1 },
+        { "kind": "bomber", "col": 5, "row": 1 },
+        { "kind": "ninja", "col": 2, "row": 1 }
       ]
     }
   }

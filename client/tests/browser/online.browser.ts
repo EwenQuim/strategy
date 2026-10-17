@@ -5,9 +5,9 @@ import { extname } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
 import { test } from 'node:test'
 import { chromium } from 'playwright-core'
-import { activePawn } from '../src/lib/engine/index.ts'
-import { replay } from '../src/lib/playback.ts'
-import type { OnlineGame } from '../src/lib/online.ts'
+import { activePawn } from '../../src/lib/engine/index.ts'
+import { replay } from '../../src/lib/playback.ts'
+import type { OnlineGame } from '../../src/lib/online.ts'
 
 const timeout = 10_000
 
@@ -82,7 +82,7 @@ test(
               ? 'text/css'
               : 'text/html'
         response.setHeader('Content-Type', mime)
-        response.end(await readFile(new URL('../dist/' + file, import.meta.url)))
+        response.end(await readFile(new URL('../../dist/' + file, import.meta.url)))
       }
     })
     t.after(async () => {
@@ -118,10 +118,18 @@ test(
     await page.getByRole('heading', { name: 'Waiting for an opponent' }).waitFor()
     await connected
     assert.equal(streams.size, 1)
+    assert.equal(await page.getByRole('navigation').count(), 0)
+    assert.equal(
+      await page
+        .getByTestId('menu-content')
+        .evaluate((content) => content.scrollWidth <= content.clientWidth),
+      true,
+    )
     game.status = 'active'
     game.nameEnemy = 'Bob'
     broadcast()
     await page.getByTestId('game-header').waitFor()
+    assert.equal(await page.getByRole('navigation', { name: 'Main navigation' }).count(), 0)
     assert.equal(connections, 1, 'The route and game must share one stream')
 
     const waitForState = async () => {

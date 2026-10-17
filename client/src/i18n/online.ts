@@ -1,4 +1,4 @@
-import { t } from './locale'
+import { plural, t } from './locale'
 
 export const noGame = t({
   en: 'No game with this code.',
@@ -34,6 +34,41 @@ export const createGame = t({
   de: 'Neues Spiel erstellen',
   es: 'Crear partida',
   it: 'Crea partita',
+})
+export const publicGame = t({
+  en: 'Public game',
+  fr: 'Partie publique',
+  de: 'Öffentliches Spiel',
+  es: 'Partida pública',
+  it: 'Partita pubblica',
+})
+export const publicGameHint = t({
+  en: 'Private by default. Turn on to list the game in the lobby so anyone can join.',
+  fr: 'Privée par défaut. Activez pour afficher la partie dans le salon et que chacun puisse la rejoindre.',
+  de: 'Standardmäßig privat. Aktivieren, um das Spiel in der Lobby aufzulisten, damit jeder beitreten kann.',
+  es: 'Privada por defecto. Actívala para mostrar la partida en la sala y que cualquiera pueda unirse.',
+  it: 'Privata per impostazione predefinita. Attivala per mostrare la partita nella sala, così chiunque può unirsi.',
+})
+export const availableGames = t({
+  en: 'Open games',
+  fr: 'Parties ouvertes',
+  de: 'Offene Spiele',
+  es: 'Partidas abiertas',
+  it: 'Partite aperte',
+})
+export const hostedBy = t({
+  en: (host: string) => `Hosted by ${host}`,
+  fr: (host: string) => `Hébergée par ${host}`,
+  de: (host: string) => `Gehostet von ${host}`,
+  es: (host: string) => `Creada por ${host}`,
+  it: (host: string) => `Ospitata da ${host}`,
+})
+export const yourGamesCount = t({
+  en: (count: number) => `${count} ${plural(count, { one: 'game', other: 'games' })}`,
+  fr: (count: number) => `${count} ${plural(count, { one: 'partie', other: 'parties' })}`,
+  de: (count: number) => `${count} ${plural(count, { one: 'Spiel', other: 'Spiele' })}`,
+  es: (count: number) => `${count} ${plural(count, { one: 'partida', other: 'partidas' })}`,
+  it: (count: number) => `${count} ${plural(count, { one: 'partita', other: 'partite' })}`,
 })
 export const gameCode = t({
   en: 'Game code',
@@ -106,20 +141,6 @@ export const lobbyNote = t({
   it: 'Le battaglie online sono a turni, senza timer. Le mosse si sincronizzano da sole, quindi puoi chiudere la scheda e riprendere più tardi.',
 })
 
-export const notAPlayer = t({
-  en: 'You are not a player in this game.',
-  fr: "Vous n'êtes pas joueur dans cette partie.",
-  de: 'Du spielst in diesem Spiel nicht mit.',
-  es: 'No eres jugador de esta partida.',
-  it: 'Non sei un giocatore di questa partita.',
-})
-export const joinFromLobby = t({
-  en: 'Join it from the lobby with the game code, then come back.',
-  fr: 'Rejoignez-la depuis le salon avec le code de la partie, puis revenez.',
-  de: 'Tritt ihm in der Lobby mit dem Spielcode bei und komm dann zurück.',
-  es: 'Únete desde la sala con el código de partida y luego vuelve.',
-  it: 'Unisciti dalla lobby con il codice partita, poi torna qui.',
-})
 export const gameGone = t({
   en: 'This game does not exist anymore.',
   fr: "Cette partie n'existe plus.",
@@ -159,4 +180,18 @@ export const copyCode = t({
   de: 'Code kopieren',
   es: 'Copiar código',
   it: 'Copia codice',
+})
+export const shareInvite = t({
+  en: 'Share invite',
+  fr: "Partager l'invitation",
+  de: 'Einladung teilen',
+  es: 'Compartir invitación',
+  it: 'Condividi invito',
+})
+export const shareText = t({
+  en: (host: string) => `Join ${host} in a Hexmate battle!`,
+  fr: (host: string) => `Rejoignez ${host} dans une bataille Hexmate !`,
+  de: (host: string) => `Kämpfe gegen ${host} in einer Hexmate-Schlacht!`,
+  es: (host: string) => `¡Únete a la batalla de ${host} en Hexmate!`,
+  it: (host: string) => `Unisciti alla battaglia Hexmate contro ${host}!`,
 })

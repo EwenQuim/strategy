@@ -1,63 +1,97 @@
-import { useRef, useSyncExternalStore } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { useGame, type GameOptions, type OnlineSession } from '../api/useGame'
+import { hapticMove } from '../haptics'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
-import { specialTexts } from '../i18n/units'
+import { specialTexts } from '../i18n/specialTexts'
 import type { PlayerNames } from '../lib/game-mode'
+import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
+import { battleControl } from '../bots/participants'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
-import type { Campaign } from '../lib/campaign'
-import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
-import { Battlefield, type Targeting } from './Battlefield'
+import { campaignUnlocks, type Campaign } from '../campaign'
+import {
+  subscribeCampaignProgress,
+  campaignProgressSaved,
+  clearedAtStart,
+} from '../campaignProgress'
+import { useFreshAchievements } from '../achievementProgress'
+import { Battlefield } from './Battlefield'
+import { CombatFeedback } from './CombatFeedback'
 import { GameHeader } from './GameHeader'
+import { AchievementToast } from './AchievementToast'
+import { UnitUnlockToast } from './UnitUnlockToast'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
+import { useInspection } from './useInspection'
+import { useGameShortcuts } from './useGameShortcuts'
+import { tileChoices, type TileChoice, type Targeting } from '../lib/tileChoices'
 import {
   activePawn,
   BIOMES,
-  canAttack,
+  canUseSpecial,
+  sameHex,
   specialTargetingTiles,
-  targetingTiles,
   key,
   movementDestinations,
+  type Aim,
   type GameState,
   type Pawn,
+  type Side,
   type Tile,
 } from '../lib/engine'
 
-function isCampaignComplete(campaign: Campaign | undefined, campaignLevel: number | undefined) {
-  return !!campaign && campaignLevel === campaign.levels.length
+function resolveWinnerLabel(
+  winner: GameState['winner'],
+  campaignComplete: boolean,
+  versus: boolean,
+  names: PlayerNames,
+) {
+  if (winner === 'draw') return m.draw
+  if (campaignComplete && winner === 'player') return common.campaignComplete
+  return winner && versus ? m.wins(names[winner]) : null
 }
 
-function resolveTargetLabel(
-  attacking: boolean,
-  phase: GameState['phase'],
-  pawn: Pawn | undefined,
-) {
-  if (attacking) return m.attack
-  if (phase === 'special' && pawn?.special.targetLabel)
+function resolveTargetLabel(aim: Aim | null, pawn: Pawn | undefined) {
+  if (aim?.action === 'special' && !aim.destination && pawn?.special.targetLabel)
     return specialTexts[pawn.special.targetLabel]
   return pawn ? specialTexts[pawn.special.name] : m.special
 }
 
 function resolveTargeting(
-  attacking: boolean,
   usingSpecial: boolean,
   pawn: Pawn | undefined,
+  choosingEnemy: boolean,
 ): Targeting {
-  if (attacking) return 'attack'
-  if (usingSpecial && pawn?.special.name === 'charge') return 'charge'
-  if (usingSpecial && pawn?.special.name === 'jump') return 'jump'
+  if (choosingEnemy) return 'strike'
+  if (usingSpecial && pawn?.special.movement === 'walk') return 'charge'
+  if (usingSpecial && pawn?.special.movement === 'jump') return 'jump'
   return 'special'
+}
+
+function isViewerTurn(
+  pawn: Pawn | undefined,
+  local: boolean,
+  online: boolean,
+  viewerSide: Side | undefined,
+  automated: boolean,
+): pawn is Pawn {
+  return (
+    !!pawn &&
+    !automated &&
+    (online ? pawn.side === viewerSide : local || pawn.side === 'player')
+  )
 }
 
 export function Game({
   seed,
   mode,
+  paused,
   setup,
   campaign,
   campaignLevel,
-  difficulty = 'normal',
+  bot = DEFAULT_BOT_CONFIG,
+  sideBots,
   onVictory,
   online,
   players,
@@ -68,58 +102,105 @@ export function Game({
   players?: PlayerNames
 }) {
   const local = mode === 'local'
+  const [levelAlreadyCleared] = useState(() => clearedAtStart(campaign, campaignLevel))
   const isOnline = mode === 'online'
-  const viewerSide = online?.side
+  const { bots, spectator, viewerSide } = battleControl(mode, bot, sideBots, online?.side)
   const names = players ?? playerNames
   const labels = possessiveArmyLabels(mode, names)
   const { state, dispatch, effect, effectId, playing } = useGame({
     seed,
     mode,
+    paused,
     setup,
-    difficulty,
+    bot,
+    sideBots,
     onVictory,
     online,
   })
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
-  const winnerLabel =
-    state.winner === 'draw'
-      ? m.draw
-      : isCampaignComplete(campaign, campaignLevel) && state.winner === 'player'
-        ? common.campaignComplete
-        : state.winner && (local || isOnline)
-          ? m.wins(names[state.winner])
-          : null
+  const freshAchievements = useFreshAchievements(
+    state,
+    mode,
+    viewerSide,
+    campaign?.achievements !== false && !spectator,
+  )
+  const winnerLabel = resolveWinnerLabel(
+    state.winner,
+    !!campaign && campaignLevel === campaign.levels.length,
+    local || isOnline,
+    names,
+  )
   const dialog = useRef<HTMLDialogElement>(null)
   const pawn = activePawn(state)
+  const viewerTurn = isViewerTurn(
+    pawn,
+    local,
+    isOnline,
+    viewerSide,
+    !!pawn && !!bots[pawn.side],
+  )
+  const opponentActive = !!pawn && !state.winner && !viewerTurn
+  // A frame still shows the pawns that die on it, so a kill is detectable from the state alone.
+  const killed = state.pawns.some((unit) => unit.hp <= 0)
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
-  const hasFoes =
-    !!pawn &&
-    state.pawns.some((target) => canAttack(pawn, target, state.tiles.get(key(pawn.q, pawn.r))))
-  const myTurn =
-    !!pawn &&
-    (isOnline ? pawn.side === viewerSide : local || pawn.side === 'player') &&
-    !state.winner &&
-    !playing
-  const attacking = myTurn && state.phase === 'attack'
-  const usingSpecial = myTurn && (state.phase === 'special' || state.phase === 'charge')
-  const targets = targetingTiles(state)
-  const targetLabel = resolveTargetLabel(attacking, state.phase, pawn)
-  const targeting = resolveTargeting(attacking, usingSpecial, pawn)
+  const canCommand = viewerTurn && !state.winner && !paused && !playing
+  // Aiming belongs to the state it started on: any new state, ours or not, drops it.
+  const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
+  const aim = canCommand && aiming?.state === state ? aiming.aim : null
+  const insight = useInspection(state, !!aim)
+  const { inspected } = insight
+  const setAim = (next: Aim | null) => {
+    insight.close()
+    setAiming(next && { state, aim: next })
+  }
+  const usingSpecial = aim?.action === 'special'
+  const destination = usingSpecial ? aim.destination : undefined
+  const choices = aim ? tileChoices(state, aim) : new Map<string, TileChoice>()
+  const targetLabel = resolveTargetLabel(aim, pawn)
+  const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
 
   const reach =
-    myTurn && pawn.energy > 0 && state.phase === 'move'
+    canCommand && pawn.energy > 0 && !aim && !inspected
       ? movementDestinations(state.tiles, state.pawns, pawn)
       : new Map<string, number>()
 
   const onTileClick = (tile: Tile) => {
-    if (!myTurn) return
-    if (targets.has(key(tile.q, tile.r)))
-      return dispatch({ type: attacking ? 'attackAt' : 'specialAt', q: tile.q, r: tile.r })
-    if (reach.has(key(tile.q, tile.r))) dispatch({ type: 'move', q: tile.q, r: tile.r })
+    if (!canCommand) return
+    const at = { q: tile.q, r: tile.r }
+    const choice = choices.get(key(at.q, at.r))
+    if (choice)
+      return choice.kind === 'landing' ? setAim(choice.nextAim) : dispatch(choice.action)
+    // Tapping the chosen landing again steps back to re-choosing it.
+    if (aim && destination && key(at.q, at.r) === key(destination.q, destination.r))
+      return setAim({ action: 'special' })
+    // Own moves produce no effect frame in any mode, so they buzz at dispatch; bot moves buzz from their frames.
+    if (reach.has(key(at.q, at.r))) {
+      hapticMove()
+      dispatch({ type: 'move', ...at })
+    }
   }
+
+  // Tapping the active character or pressing A toggles between moving and attacking, never previewing.
+  const toggleAim = () => {
+    if (!canCommand || !pawn) return
+    if (aim) setAim(null)
+    else if (canUseSpecial(pawn) && hasSpecialTargets) setAim({ action: 'special' })
+  }
+
+  const onInspectTile = (tile: Tile) => {
+    if (canCommand && pawn && sameHex(pawn, tile)) return toggleAim()
+    insight.inspectAt(tile)
+  }
+
+  useGameShortcuts({
+    endTurn: () => canCommand && dispatch({ type: 'endTurn' }),
+    toggleAim,
+    cancel: () => setAim(null),
+    help: () => dialog.current?.showModal(),
+  })
 
   return (
     <main
@@ -127,18 +208,8 @@ export function Game({
       data-biome={state.biome}
       style={BIOMES[state.biome].theme}
     >
-      {!!effect?.impacts?.length && (
-        <div
-          key={effectId}
-          data-testid="combat-feedback"
-          className={
-            'pointer-events-none fixed inset-0 z-4 overflow-hidden before:absolute before:inset-0 motion-reduce:hidden ' +
-            (effect.impacts.some((hit) => hit.damage > 0)
-              ? 'combat-feedback--hit before:bg-[radial-gradient(ellipse,transparent_45%,#ffc07966)]'
-              : 'combat-feedback--miss before:bg-[linear-gradient(110deg,transparent_35%,#bce6f433_50%,transparent_65%)]')
-          }
-          aria-hidden="true"
-        />
+      {(killed || !!effect?.impacts?.length) && (
+        <CombatFeedback key={effectId} killed={killed} effect={effect} />
       )}
       <GameHeader
         biome={state.biome}
@@ -147,13 +218,13 @@ export function Game({
         online={online}
         pawn={pawn}
         winner={state.winner}
-        playing={playing}
         order={state.order}
         pawns={state.pawns}
         active={state.active}
         campaign={campaign}
         campaignLevel={campaignLevel}
         onHelp={() => dialog.current?.showModal()}
+        onInspect={insight.inspect}
       />
 
       <section
@@ -168,13 +239,16 @@ export function Game({
             hellfire={state.hellfire}
             active={state.winner ? undefined : pawn}
             reach={reach}
-            targets={targets}
+            targets={choices}
             targetLabel={targetLabel}
             targeting={targeting}
-            preview={state.chargeDestination}
+            preview={inspected ?? destination ?? null}
+            rechoose={destination}
+            range={insight.range}
             effect={effect}
             effectId={effectId}
             onTileClick={onTileClick}
+            onInspect={onInspectTile}
           />
         </div>
         {state.winner && (
@@ -183,7 +257,8 @@ export function Game({
             viewerSide={viewerSide}
             winnerLabel={winnerLabel}
             mode={mode}
-            difficulty={difficulty}
+            bot={bot}
+            sideBots={sideBots}
             setup={setup}
             names={names}
             campaign={campaign}
@@ -192,30 +267,34 @@ export function Game({
             onRestart={() => dispatch({ type: 'restart' })}
           />
         )}
+        {state.winner && freshAchievements.length > 0 && (
+          <AchievementToast achievements={freshAchievements} />
+        )}
+        <UnitUnlockToast
+          units={campaignUnlocks(campaign, campaignLevel, levelAlreadyCleared, state.winner)}
+        />
       </section>
 
       <GameCommandDeck
-        pawn={pawn}
+        pawn={insight.shown}
+        active={pawn}
         winner={state.winner}
         winnerLabel={winnerLabel}
-        myTurn={myTurn}
-        attacking={attacking}
+        canCommand={canCommand}
+        opponentActive={opponentActive}
+        previewed={insight.previewed}
+        onPreview={insight.preview}
+        onPeek={insight.peek}
+        onCloseFocus={insight.close}
         usingSpecial={usingSpecial}
-        hasFoes={hasFoes}
         hasSpecialTargets={hasSpecialTargets}
-        phase={state.phase}
-        targetCount={targets.size}
+        destination={destination}
+        targetCount={choices.size}
         dispatch={dispatch}
+        onAim={setAim}
       />
 
-      <GameHelpDialog
-        dialogRef={dialog}
-        mode={mode}
-        difficulty={difficulty}
-        setup={setup}
-        biome={state.biome}
-        campaignLevel={campaignLevel}
-      />
+      <GameHelpDialog dialogRef={dialog} biome={state.biome} />
     </main>
   )
 }

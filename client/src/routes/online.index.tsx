@@ -1,50 +1,93 @@
-import { buttonClassName, iconButtonClassName } from '../components/styles'
+import {
+  buttonClassName,
+  menuCardClassName,
+  menuInputClassName,
+  menuPrimaryButtonClassName,
+  switchClassName,
+} from '../components/styles'
+import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
 import {
   ApiError,
   health,
+  joinOnlineGame,
   onlineGameQueryOptions,
   useCreateOnlineGame,
   useJoinOnlineGame,
+  useListOnlineGames,
 } from '../api/online.ts'
 import { Icon } from '../components/Icon'
 import {
-  readPlayerName,
+  readPlayerNameOrDefault,
+  readPublicHosting,
   readStoredGames,
   savePlayerName,
+  savePublicHosting,
   saveStoredGame,
 } from '../onlineSession.ts'
 import type { StoredGame } from '../lib/online.ts'
 
-const inputClassName =
-  'w-full min-w-0 min-h-13 rounded-md border border-line bg-[#20362b] p-2 font-[inherit] text-[16px] text-ink [color-scheme:dark]'
-const onlineButtonClassName = buttonClassName + ' min-h-13 justify-center border-line'
+const onlineButtonClassName =
+  buttonClassName + ' min-h-13 justify-center gap-3 rounded-xl border-line'
+
+type OnlineSearch = { join?: string; failed?: number }
+
+function parseOnlineSearch(search: Record<string, unknown>): OnlineSearch {
+  const result: OnlineSearch = {
+    join: typeof search.join === 'string' ? search.join.toUpperCase() : undefined,
+  }
+  const failed = typeof search.failed === 'string' ? Number(search.failed) : search.failed
+  if (typeof failed === 'number' && Number.isInteger(failed)) result.failed = failed
+  return result
+}
+
+const inviteError = (status: number | undefined) =>
+  status === undefined
+    ? ''
+    : status === 404
+      ? m.noGame
+      : status === 409
+        ? m.gameFull
+        : common.serverUnreachable
 
 export const Route = createFileRoute('/online/')({
-  beforeLoad: async () => {
+  validateSearch: parseOnlineSearch,
+  beforeLoad: async ({ search }) => {
     try {
       await health()
     } catch {
       throw redirect({ to: '/' })
     }
+    const code = search.join
+    if (!code || search.failed !== undefined || !/^[A-Z0-9]{6}$/.test(code)) return
+    if (readStoredGames().some((game) => game.code === code)) {
+      throw redirect({ to: '/online/$code', params: { code } })
+    }
+    try {
+      saveStoredGame(await joinOnlineGame(code, readPlayerNameOrDefault()))
+    } catch (cause) {
+      const status = cause instanceof ApiError ? cause.status : 0
+      throw redirect({ to: '/online', search: { join: code, failed: status } })
+    }
+    throw redirect({ to: '/online/$code', params: { code } })
   },
   component: function OnlineLobby() {
     const navigate = useNavigate()
-    const [name, setName] = useState(readPlayerName())
-    const [code, setCode] = useState('')
-    const [error, setError] = useState('')
-    const [games, setGames] = useState<StoredGame[]>([])
+    const search = Route.useSearch()
+    const [name, setName] = useState(readPlayerNameOrDefault)
+    const [code, setCode] = useState(search.join ?? '')
+    const [error, setError] = useState(() => inviteError(search.failed))
+    const [games] = useState<StoredGame[]>(readStoredGames)
+    const [publicHosting, setPublicHosting] = useState(readPublicHosting)
+    const [showGames, setShowGames] = useState(false)
     const createGame = useCreateOnlineGame()
     const joinGame = useJoinOnlineGame()
+    const listQuery = useListOnlineGames()
     const busy = createGame.isPending || joinGame.isPending
-
-    useEffect(() => {
-      setGames(readStoredGames())
-    }, [])
 
     const docs = useQueries({
       queries: games.map((game) => onlineGameQueryOptions(game.code)),
@@ -52,6 +95,9 @@ export const Route = createFileRoute('/online/')({
 
     const trimmedName = name.trim()
     const joinCode = code.trim().toUpperCase()
+    const openGames = (listQuery.data ?? []).filter(
+      (open) => !games.some((mine) => mine.code === open.code),
+    )
 
     const start = async (run: () => Promise<string>) => {
       setError('')
@@ -67,29 +113,26 @@ export const Route = createFileRoute('/online/')({
     }
 
     return (
-      <main className="m-auto flex h-dvh max-w-[520px] flex-col gap-4 pt-[max(12px,env(safe-area-inset-top))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(12px,env(safe-area-inset-bottom))] pl-[max(16px,env(safe-area-inset-left))] [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-1 [&_input:focus-visible]:outline-gold [&:disabled]:opacity-50">
-        <header className="flex items-center justify-between gap-3">
-          <h1 className="mt-1 font-serif text-[32px] leading-[normal]">{m.title}</h1>
-          <Link to="/" className={iconButtonClassName} aria-label={common.backToHome}>
-            <Icon name="close" />
-          </Link>
-        </header>
+      <MenuLayout title={m.title}>
         <form
-          className="grid gap-3"
+          className={
+            menuCardClassName +
+            ' grid w-full max-w-[600px] gap-3 self-center p-4 min-[900px]:gap-4 min-[900px]:p-6'
+          }
           onSubmit={(event) => {
             event.preventDefault()
             if (!trimmedName || busy) return
             void start(async () => {
-              const game = await createGame.mutateAsync(trimmedName)
+              const game = await createGame.mutateAsync(trimmedName, publicHosting)
               saveStoredGame(game)
               return game.code
             })
           }}
         >
-          <label htmlFor="online-name" className="grid gap-1.5 text-[12px] text-muted">
+          <label htmlFor="online-name" className="grid gap-1.5 text-sm text-muted">
             {m.yourName}
             <input
-              className={inputClassName}
+              className={menuInputClassName}
               id="online-name"
               value={name}
               maxLength={20}
@@ -98,20 +141,43 @@ export const Route = createFileRoute('/online/')({
               onChange={(event) => setName(event.target.value)}
             />
           </label>
+          <label
+            htmlFor="online-public"
+            className="flex cursor-pointer items-center gap-3 pt-1"
+          >
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <strong className="text-sm">{m.publicGame}</strong>
+              <small id="online-public-hint" className="text-xs leading-relaxed text-muted">
+                {m.publicGameHint}
+              </small>
+            </span>
+            <input
+              id="online-public"
+              type="checkbox"
+              role="switch"
+              aria-describedby="online-public-hint"
+              className={switchClassName}
+              checked={publicHosting}
+              onChange={(event) => {
+                setPublicHosting(event.target.checked)
+                savePublicHosting(event.target.checked)
+              }}
+            />
+          </label>
           <button
             type="submit"
             disabled={!trimmedName || busy}
-            className={
-              onlineButtonClassName +
-              ' gap-3 border-[#e5d19a] bg-[#d8c38a] px-[25px] text-[#24392a] hover:bg-[#ecdaa3]'
-            }
+            className={menuPrimaryButtonClassName}
           >
             {m.createGame}
             <Icon name="arrow" />
           </button>
         </form>
         <form
-          className="grid gap-3"
+          className={
+            menuCardClassName +
+            ' grid w-full max-w-[600px] gap-3 self-center p-4 min-[900px]:gap-4 min-[900px]:p-6'
+          }
           onSubmit={(event) => {
             event.preventDefault()
             if (!trimmedName || joinCode.length !== 6 || busy) return
@@ -122,10 +188,12 @@ export const Route = createFileRoute('/online/')({
             })
           }}
         >
-          <label htmlFor="online-code" className="grid gap-1.5 text-[12px] text-muted">
+          <label htmlFor="online-code" className="grid gap-1.5 text-sm text-muted">
             {m.gameCode}
             <input
-              className={inputClassName + ' text-center font-mono tracking-[0.3em] uppercase'}
+              className={
+                menuInputClassName + ' text-center font-mono tracking-[0.3em] uppercase'
+              }
               id="online-code"
               value={code}
               placeholder="AB3F9K"
@@ -148,51 +216,99 @@ export const Route = createFileRoute('/online/')({
           </button>
         </form>
         {error && (
-          <p role="alert" className="text-[12px] text-[#e0a586]">
+          <p role="alert" className="text-sm text-[#e0a586]">
             {error}
           </p>
         )}
-        {games.length > 0 && (
+        {openGames.length > 0 && (
           <section
-            className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto"
-            aria-label={m.resumeGame}
+            className="grid w-full max-w-[600px] content-start gap-2 self-center"
+            aria-label={m.availableGames}
           >
-            <h2 className="text-[12px] font-semibold tracking-[0.17em] text-muted uppercase">
-              {m.yourGames}
+            <h2 className="text-sm font-semibold tracking-[0.17em] text-muted uppercase">
+              {m.availableGames}
             </h2>
-            {games.map((game, index) => {
-              const doc = docs[index]?.data
-              const missing = docs[index]?.isError
-              return (
-                <Link
-                  key={game.code}
-                  to="/online/$code"
-                  params={{ code: game.code }}
-                  className={
-                    onlineButtonClassName +
-                    ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c]'
-                  }
-                  preload={false}
-                >
-                  <span className="font-mono tracking-[0.2em]">{game.code}</span>
-                  <span className="text-[11px] text-muted">
-                    {!doc
-                      ? missing
-                        ? m.notFound
-                        : m.loading
-                      : doc.status === 'waiting'
-                        ? m.waitingForOpponent
-                        : doc.status === 'finished'
-                          ? m.finished
-                          : m.versus(doc.namePlayer, doc.nameEnemy)}
-                  </span>
-                </Link>
-              )
-            })}
+            {openGames.map((open) => (
+              <button
+                key={open.code}
+                type="button"
+                disabled={!trimmedName || busy}
+                onClick={() =>
+                  void start(async () => {
+                    const game = await joinGame.mutateAsync(open.code, trimmedName)
+                    saveStoredGame(game)
+                    return game.code
+                  })
+                }
+                className={
+                  onlineButtonClassName +
+                  ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c] disabled:opacity-50'
+                }
+              >
+                <span className="font-mono tracking-[0.2em]">{open.code}</span>
+                <span className="min-w-0 text-xs text-muted wrap-anywhere">
+                  {m.hostedBy(open.namePlayer)}
+                </span>
+              </button>
+            ))}
           </section>
         )}
-        <p className="mt-auto text-[11px] leading-[1.5] text-muted">{m.lobbyNote}</p>
-      </main>
+        {games.length > 0 && (
+          <section
+            className="grid w-full max-w-[600px] content-start gap-2 self-center"
+            aria-label={m.resumeGame}
+          >
+            <button
+              type="button"
+              aria-expanded={showGames}
+              onClick={() => setShowGames(!showGames)}
+              className="flex w-full items-center justify-between text-sm font-semibold tracking-[0.17em] text-muted uppercase"
+            >
+              <span>
+                {m.yourGames}
+                <span className="ml-2 font-sans tracking-normal normal-case">
+                  ({m.yourGamesCount(games.length)})
+                </span>
+              </span>
+              <Icon
+                name="arrow"
+                className={'size-4 transition-transform ' + (showGames ? 'rotate-90' : '')}
+              />
+            </button>
+            {showGames &&
+              games.map((game, index) => {
+                const doc = docs[index]?.data
+                const missing = docs[index]?.isError
+                return (
+                  <Link
+                    key={game.code}
+                    to="/online/$code"
+                    params={{ code: game.code }}
+                    className={
+                      onlineButtonClassName +
+                      ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c]'
+                    }
+                    preload={false}
+                  >
+                    <span className="font-mono tracking-[0.2em]">{game.code}</span>
+                    <span className="min-w-0 text-xs text-muted wrap-anywhere">
+                      {!doc
+                        ? missing
+                          ? m.notFound
+                          : m.loading
+                        : doc.status === 'waiting'
+                          ? m.waitingForOpponent
+                          : doc.status === 'finished'
+                            ? m.finished
+                            : m.versus(doc.namePlayer, doc.nameEnemy)}
+                    </span>
+                  </Link>
+                )
+              })}
+          </section>
+        )}
+        <p className="mt-auto text-xs leading-[1.5] text-muted">{m.lobbyNote}</p>
+      </MenuLayout>
     )
   },
 })

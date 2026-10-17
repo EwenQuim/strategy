@@ -1,4 +1,4 @@
-import { plural, t } from './locale'
+import { t } from './locale'
 
 export const battlefield = t({
   en: 'The battlefield',
@@ -28,19 +28,12 @@ export const wins = t({
   es: (name: string) => `¡${name} gana!`,
   it: (name: string) => `${name} vince!`,
 })
-export const attack = t({
-  en: 'Attack',
-  fr: 'Attaque',
-  de: 'Angriff',
-  es: 'Ataque',
-  it: 'Attacco',
-})
 export const special = t({
-  en: 'Special',
-  fr: 'Spécial',
-  de: 'Spezial',
-  es: 'Especial',
-  it: 'Speciale',
+  en: 'Ability',
+  fr: 'Capacité',
+  de: 'Fähigkeit',
+  es: 'Habilidad',
+  it: 'Abilità',
 })
 
 export const onlineLobby = t({
@@ -56,13 +49,6 @@ export const home = t({
   de: 'Hexmate-Startseite',
   es: 'Inicio de Hexmate',
   it: 'Home di Hexmate',
-})
-export const levelProgress = t({
-  en: (level: number, total: number) => `Level ${level} / ${total}`,
-  fr: (level: number, total: number) => `Niveau ${level} / ${total}`,
-  de: (level: number, total: number) => `Level ${level} / ${total}`,
-  es: (level: number, total: number) => `Nivel ${level} / ${total}`,
-  it: (level: number, total: number) => `Livello ${level} / ${total}`,
 })
 export const yourTurn = t({
   en: 'Your turn',
@@ -129,13 +115,6 @@ export const energy = t({
   es: 'Energía',
   it: 'Energia',
 })
-export const escape = t({
-  en: 'Escape',
-  fr: 'Esquive',
-  de: 'Ausweichen',
-  es: 'Esquiva',
-  it: 'Schivata',
-})
 export const cancel = t({
   en: 'Cancel',
   fr: 'Annuler',
@@ -150,12 +129,33 @@ export const chooseEnemy = t({
   es: 'Elige enemigo',
   it: 'Scegli nemico',
 })
+export const landHere = t({
+  en: 'Land here',
+  fr: 'Atterrir ici',
+  de: 'Hier landen',
+  es: 'Aterrizar aquí',
+  it: 'Atterra qui',
+})
+export const orChooseEnemy = t({
+  en: 'or choose an enemy',
+  fr: 'ou choisissez un ennemi',
+  de: 'oder Gegner wählen',
+  es: 'o elige un enemigo',
+  it: 'o scegli un nemico',
+})
 export const energyCost = t({
   en: (cost: number) => `${cost} energy`,
-  fr: (cost: number) => `${cost} ${plural(cost, { one: 'énergie', other: 'énergies' })}`,
+  fr: (cost: number) => `${cost} d’énergie`,
   de: (cost: number) => `${cost} Energie`,
   es: (cost: number) => `${cost} de energía`,
   it: (cost: number) => `${cost} di energia`,
+})
+export const notEnoughEnergy = t({
+  en: (cost: number) => `Needs ${cost} energy`,
+  fr: (cost: number) => `Il faut ${cost} d’énergie`,
+  de: (cost: number) => `${cost} Energie nötig`,
+  es: (cost: number) => `Necesita ${cost} de energía`,
+  it: (cost: number) => `Richiede ${cost} energia`,
 })
 export const noTargets = t({
   en: 'No targets',
@@ -171,6 +171,13 @@ export const usedThisRound = t({
   es: 'Ya usado',
   it: 'Già usato',
 })
+export const stopPreviewing = t({
+  en: 'Stop previewing',
+  fr: 'Quitter l’aperçu',
+  de: 'Vorschau beenden',
+  es: 'Cerrar la vista previa',
+  it: 'Chiudi l’anteprima',
+})
 export const endTurn = t({
   en: 'End turn',
   fr: 'Finir le tour',
@@ -179,23 +186,18 @@ export const endTurn = t({
   it: 'Fine turno',
 })
 export const endTurnHint = t({
-  en: (escape: number) =>
-    `Spend all remaining energy and end this turn. Escape: ${escape}% until the round ends.`,
-  fr: (escape: number) =>
-    `Dépense toute l'énergie restante et termine ce tour. Esquive : ${escape} % jusqu'à la fin de la manche.`,
-  de: (escape: number) =>
-    `Verbrauche alle restliche Energie und beende diesen Zug. Ausweichen: ${escape} % bis zum Ende der Runde.`,
-  es: (escape: number) =>
-    `Gasta toda la energía restante y termina este turno. Esquiva: ${escape} % hasta el final de la ronda.`,
-  it: (escape: number) =>
-    `Spendi tutta l'energia rimasta e termina questo turno. Schivata: ${escape}% fino alla fine del round.`,
+  en: 'End this turn. Unused energy expires; move to safety before finishing.',
+  fr: 'Terminez ce tour. L’énergie inutilisée est perdue ; déplacez-vous à l’abri avant de finir.',
+  de: 'Beende diesen Zug. Ungenutzte Energie verfällt; ziehe vorher in Sicherheit.',
+  es: 'Termina este turno. La energía sin usar se pierde; muévete a un lugar seguro antes.',
+  it: 'Termina il turno. L’energia inutilizzata si perde; mettiti al sicuro prima.',
 })
-export const escapeGain = t({
-  en: (gain: number) => `+${gain}% escape`,
-  fr: (gain: number) => `+${gain} % esquive`,
-  de: (gain: number) => `+${gain} % Ausweichen`,
-  es: (gain: number) => `+${gain} % esquiva`,
-  it: (gain: number) => `+${gain}% schivata`,
+export const remainingEnergy = t({
+  en: (count: number) => `${count} energy left`,
+  fr: (count: number) => `${count} d’énergie restante`,
+  de: (count: number) => `${count} Energie übrig`,
+  es: (count: number) => `${count} de energía restante`,
+  it: (count: number) => `${count} energia rimasta`,
 })
 
 export const resultLevel = t({
@@ -304,13 +306,6 @@ export const newGame = t({
   it: 'Nuova partita',
 })
 
-export const levelNumber = t({
-  en: (level: string) => `Level ${level}`,
-  fr: (level: string) => `Niveau ${level}`,
-  de: (level: string) => `Level ${level}`,
-  es: (level: string) => `Nivel ${level}`,
-  it: (level: string) => `Livello ${level}`,
-})
 export const go = t({
   en: 'Go !',
   fr: 'En avant !',

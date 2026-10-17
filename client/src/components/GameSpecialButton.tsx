@@ -1,0 +1,99 @@
+import type { Action, Aim, Axial, Pawn } from '../lib/engine'
+import { canUseSpecial } from '../lib/engine'
+import * as m from '../i18n/game'
+import { specialTexts } from '../i18n/specialTexts'
+import { CommandButton } from './CommandAction'
+import { usePreviewButton, type PreviewProps } from './usePreviewButton'
+
+interface SpecialStatus {
+  pawn?: Pawn
+  commanding: boolean
+  usingSpecial: boolean
+  hasSpecialTargets: boolean
+  targetCount: number
+  destination?: Axial
+}
+
+type GameSpecialButtonProps = SpecialStatus &
+  PreviewProps & {
+    dispatch: (action: Action) => void
+    onAim: (aim: Aim | null) => void
+  }
+
+export function GameSpecialButton({
+  pawn,
+  usingSpecial,
+  hasSpecialTargets,
+  targetCount,
+  destination,
+  dispatch,
+  onAim,
+  ...preview
+}: GameSpecialButtonProps) {
+  // A landing is chosen and the signature tolerates landing without a target: confirm it.
+  const confirming =
+    usingSpecial && !!destination && targetCount > 0 && !!pawn?.special.targetOptional
+  const buttonProps = usePreviewButton(
+    !preview.commanding || !pawn || !canUseSpecial(pawn) || !hasSpecialTargets,
+    () => {
+      if (confirming) dispatch({ type: 'special', destination })
+      else if (usingSpecial) onAim(null)
+      else if (pawn?.special.targeted) onAim({ action: 'special' })
+      else dispatch({ type: 'special' })
+    },
+    preview,
+  )
+  return (
+    <CommandButton
+      variant="special"
+      icon={confirming ? 'check' : usingSpecial ? 'close' : 'spark'}
+      label={
+        confirming
+          ? m.landHere
+          : usingSpecial
+            ? m.cancel
+            : pawn
+              ? specialTexts[pawn.special.name]
+              : m.special
+      }
+      note={specialNote({
+        pawn,
+        commanding: preview.commanding,
+        usingSpecial,
+        hasSpecialTargets,
+        targetCount,
+        destination,
+      })}
+      data-action="special"
+      {...buttonProps}
+      title={pawn ? `${specialTexts[pawn.special.description]} (A)` : undefined}
+      aria-pressed={usingSpecial && !confirming}
+    />
+  )
+}
+
+function specialNote({
+  pawn,
+  commanding,
+  usingSpecial,
+  hasSpecialTargets,
+  targetCount,
+  destination,
+}: SpecialStatus): string {
+  const confirming =
+    usingSpecial && !!destination && targetCount > 0 && !!pawn?.special.targetOptional
+  if (confirming) return targetCount ? m.orChooseEnemy : m.energyCost(pawn?.special.cost ?? 2)
+  if (usingSpecial) {
+    if (!targetCount) return m.noTargets
+    if (destination) return m.chooseEnemy
+    return pawn?.special.prompt ? specialTexts[pawn.special.prompt] : m.chooseEnemy
+  }
+  if (commanding) {
+    if (pawn?.specialUsed) return m.usedThisRound
+    if (!hasSpecialTargets) {
+      if (pawn && pawn.energy < pawn.special.cost) return m.notEnoughEnergy(pawn.special.cost)
+      return pawn?.special.noTargets ? specialTexts[pawn.special.noTargets] : m.noTargets
+    }
+  }
+  return m.energyCost(pawn?.special.cost ?? 2)
+}

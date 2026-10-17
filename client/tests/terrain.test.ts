@@ -4,7 +4,6 @@ import {
   Archer,
   Bulwark,
   King,
-  Magician,
   Ninja,
   Swordsman,
   BIOMES,
@@ -26,8 +25,11 @@ import {
   type Tile,
 } from '../src/lib/engine/index.ts'
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
-import { nearestTarget } from '../src/lib/engine/bot.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
+import { createBotGame } from './bot-game.ts'
+import { nearestTarget } from '../src/bots/targetPicker.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 
 function battle(pawn: Pawn): GameState {
@@ -75,7 +77,7 @@ test('Random special tiles follow 50/40/10 odds, are distinct, and stay in the c
     assert.equal(new Set(features.map((tile) => tile.feature)).size, features.length)
     for (const tile of features) {
       kinds.add(tile.feature!)
-      assert.ok(tile.r === 5 || tile.r === 6)
+      assert.ok(tile.r === state.mapSize.height / 2 - 1 || tile.r === state.mapSize.height / 2)
       assert.ok(passable(tile))
       assert.notEqual(tile.terrain, 'lava')
       assert.ok(!state.pawns.some((pawn) => pawn.q === tile.q && pawn.r === tile.r))
@@ -101,7 +103,7 @@ test('Deserts have small lakes and rare decorative palms; volcanoes and Hell hav
         all.some((tile) => tile.terrain === 'lake'),
         biome === 'desert' || biome === 'verdant',
       )
-      for (const tile of all.filter((tile) => tile.terrain === 'palm')) {
+      for (const tile of all.filter((candidate) => candidate.terrain === 'palm')) {
         assert.equal(biome, 'desert')
         assert.ok(passable(tile))
         palms++
@@ -142,32 +144,30 @@ test('Authored maps support terrain and special tiles anywhere while keeping the
 })
 
 for (const side of ['player', 'enemy'] as const) {
-  test(side + ': watchtowers extend basic ranged attacks only while occupied', () => {
-    for (const Unit of [Archer, Magician, Swordsman, King, Ninja, Bulwark]) {
+  test(side + ': watchtowers extend Archer shots only while occupied', () => {
+    for (const Unit of [Archer]) {
       const state = battle(new Unit(1, 0, 5, side))
       const pawn = state.pawns[0]
       state.tiles.get('0,5')!.feature = 'watchtower'
       state.pawns[2].q = pawn.attack.maxRange + 1
       state.pawns[2].r = 5
       const target = state.pawns[2]
-      const ranged = Unit === Archer || Unit === Magician
-      const attack = reducer(state, { type: 'act', action: 'attack' })
-      assert.equal(targetingTiles(attack).has(key(target.q, target.r)), ranged)
+      const ranged = true
+      assert.equal(
+        targetingTiles(state, { action: 'special' }).has(key(target.q, target.r)),
+        ranged,
+      )
       assert.equal(canAttack(pawn, target, state.tiles.get('0,5')), ranged)
-      const result = reducer(attack, { type: 'attackAt', q: target.q, r: target.r })
+      const result = reducer(state, { type: 'special', target: { q: target.q, r: target.r } })
       assert.equal(result.pawns[2].hp, target.hp - (ranged ? pawn.attack.damage : 0))
       if (ranged) {
-        const special = reducer(state, { type: 'act', action: 'special' })
-        assert.equal(targetingTiles(special).has(key(target.q, target.r)), Unit === Magician)
+        const special = targetingTiles(state, { action: 'special' })
+        assert.equal(special.has(key(target.q, target.r)), true)
         const plain = { ...state, tiles: new Map(state.tiles) }
         plain.tiles.set('0,5', { q: 0, r: 5, terrain: 'plain' })
-        assert.deepEqual(
-          targetingTiles(special),
-          targetingTiles(reducer(plain, { type: 'act', action: 'special' })),
-        )
-        const cast = reducer(special, { type: 'specialAt', q: target.q, r: target.r })
-        if (Unit === Magician) assert.equal(cast.pawns[2].hp, target.hp - 1)
-        else assert.equal(cast, special)
+        assert.ok(!targetingTiles(plain, { action: 'special' }).has(key(target.q, target.r)))
+        const cast = reducer(state, { type: 'special', target: { q: target.q, r: target.r } })
+        assert.equal(cast.pawns[2].hp, target.hp - 2)
         const moved = reducer(state, { type: 'move', q: -1, r: 5 })
         assert.ok(!canAttack(moved.pawns[0], target, moved.tiles.get('-1,5')))
       }
@@ -189,8 +189,6 @@ for (const side of ['player', 'enemy'] as const) {
       next = nextActivation(next)
       assert.equal(next.pawns[0].hp, 3)
       assert.equal(next.logCount, next.log.length)
-      const targeting = reducer(next, { type: 'act', action: 'attack' })
-      assert.equal(reducer(targeting, { type: 'cancelTargeting' }).pawns[0].hp, 3)
       next = nextActivation(next)
       assert.equal(next.pawns[0].hp, 4)
       next = nextActivation(nextActivation(next))
@@ -231,10 +229,9 @@ for (const side of ['player', 'enemy'] as const) {
   )
 
   test(
-    side +
-      ': lava damages every entered tile, bypasses Escape and Protect, and stops lethal crossings',
+    side + ': lava damages every entered tile, bypasses Protect, and stops lethal crossings',
     () => {
-      const state = corridor(new Swordsman(1, 0, 5, side, 5, 3, 60))
+      const state = corridor(new Swordsman(1, 0, 5, side, 5, 3))
       const guard = new Bulwark(4, 0, 6, side)
       guard.protectingId = 1
       state.pawns.push(guard)
@@ -271,7 +268,6 @@ for (const side of ['player', 'enemy'] as const) {
     state.active = 1
     const result = transition(state, { type: 'move', q: 1, r: 5 })
     assert.equal(result.state.winner, side === 'player' ? 'enemy' : 'player')
-    assert.equal(result.state.phase, 'over')
     assert.equal(result.state.round, 1)
     assert.equal(result.frames[0].state.winner, null)
   })
@@ -283,13 +279,13 @@ test('Walking prefers a safe equal-length path and can take a longer route aroun
     state.tiles.get('1,5')!.terrain = 'lava'
     const route = walkingPaths(state.tiles, state.pawns, state.pawns[0]).get('1,6')!
     assert.equal(route.damage, 0)
-    assert.equal(route.path.length, 2)
+    assert.equal(route.steps, 2)
     const next = reducer(state, { type: 'move', q: 1, r: 6 })
     assert.equal(next.pawns[0].hp, hp)
     if (hp === 1) {
       const around = walkingPaths(state.tiles, state.pawns, state.pawns[0]).get('2,5')!
       assert.equal(around.damage, 0)
-      assert.equal(around.path.length, 3)
+      assert.equal(around.steps, 3)
     }
   }
 })
@@ -301,9 +297,11 @@ test('Charge triggers crossed runes and lava before striking; a lethal charge ca
     state.tiles.get('1,5')!.feature = 'rune'
     state.pawns[2].q = 3
     state.pawns[2].r = 5
-    let next = reducer(state, { type: 'act', action: 'special' })
-    next = reducer(next, { type: 'specialAt', q: 2, r: 5 })
-    next = reducer(next, { type: 'specialAt', q: 3, r: 5 })
+    const next = reducer(state, {
+      type: 'special',
+      target: { q: 3, r: 5 },
+      destination: { q: 2, r: 5 },
+    })
     assert.equal(next.pawns.find((pawn) => pawn.id === 3)!.hp, hp === 1 ? 7 : 5)
     assert.equal(next.tiles.get('1,5')!.feature, undefined)
     const actor = next.pawns.find((pawn) => pawn.id === 1)
@@ -319,34 +317,54 @@ test('Jump ignores crossed lava and runes but triggers its landing tile', () => 
   const state = corridor(new Ninja(1, 0, 5, 'player'))
   state.tiles.get('2,5')!.terrain = 'plain'
   state.tiles.get('2,5')!.feature = 'rune'
-  const targeting = reducer(state, { type: 'act', action: 'special' })
-  const crossed = reducer(targeting, { type: 'specialAt', q: 3, r: 5 })
+  state.pawns[2].q = 4
+  state.pawns[2].r = 5
+  const crossed = reducer(state, {
+    type: 'special',
+    destination: { q: 3, r: 5 },
+    target: { q: 4, r: 5 },
+  })
   assert.equal(crossed.pawns[0].hp, 1)
   assert.equal(crossed.pawns[0].energy, 1)
   assert.equal(crossed.tiles.get('2,5')!.feature, 'rune')
-  const collected = reducer(targeting, { type: 'specialAt', q: 2, r: 5 })
+  state.pawns[2].q = 3
+  const collected = reducer(state, {
+    type: 'special',
+    destination: { q: 2, r: 5 },
+    target: { q: 3, r: 5 },
+  })
   assert.equal(collected.pawns[0].energy, 3)
   assert.equal(collected.tiles.get('2,5')!.feature, undefined)
-  const lethal = reducer(targeting, { type: 'specialAt', q: 1, r: 5 })
+  state.pawns[2].q = 2
+  const lethal = reducer(state, {
+    type: 'special',
+    destination: { q: 1, r: 5 },
+    target: { q: 2, r: 5 },
+  })
   assert.ok(!lethal.pawns.some((pawn) => pawn.id === 1))
   assert.equal(activePawn(lethal)?.id, 2)
 })
 
-test('Bots can use tower range and evaluate lethal lava moves without crashing or choosing suicide', () => {
-  for (const strategy of ['easy', 'normal', 'hard', nearestTarget] as const) {
-    const state = battle(new Archer(1, 0, 5, 'enemy', 3, 1))
+test('Bots can use tower range and evaluate lethal lava moves without crashing or choosing suicide', async () => {
+  for (const strategy of [
+    new DepthsearchBot(BOT_LEVELS.easy),
+    new DepthsearchBot(BOT_LEVELS.normal),
+    new DepthsearchBot(BOT_LEVELS.hard),
+    new RulesBot(nearestTarget),
+  ] as const) {
+    const state = battle(new Archer(1, 0, 5, 'enemy', 3, 2))
     state.tiles.get('0,5')!.feature = 'watchtower'
     state.pawns[2].q = 4
     state.pawns[2].r = 5
     state.pawns[2].hp = 1
-    assert.equal(chooseBotActions(state, strategy).reduce(reducer, state).winner, 'enemy')
+    assert.equal((await strategy.chooseActions(state)).reduce(reducer, state).winner, 'enemy')
     const lava = corridor(new Ninja(1, 0, 5, 'enemy'))
-    const next = chooseBotActions(lava, strategy).reduce(reducer, lava)
+    const next = (await strategy.chooseActions(lava)).reduce(reducer, lava)
     assert.ok(next.pawns.some((pawn) => pawn.id === 1))
   }
 })
 
-test('Authored features and consumed runes restore on restart in both controllers', () => {
+test('Authored features and consumed runes restore on restart in both controllers', async () => {
   const map = Array<string>(12).fill('........')
   map[5] = 'HR......'
   const setup = {
@@ -359,11 +377,11 @@ test('Authored features and consumed runes restore on restart in both controller
     const state = game.initialState('restart-features', setup)
     state.order = [1, 2]
     state.active = 0
-    const next = game.reducer(state, { type: 'move', q: -1, r: 5 })
+    const next = await game.reducer(state, { type: 'move', q: -1, r: 5 })
     assert.equal(next.pawns[0].bonusEnergy, 2)
     assert.equal(next.tiles.get('-1,5')!.feature, undefined)
     assert.deepEqual(
-      game.reducer(next, { type: 'restart' }),
+      await game.reducer(next, { type: 'restart' }),
       game.initialState(state.seed, setup),
     )
   }

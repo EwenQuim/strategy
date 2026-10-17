@@ -1,15 +1,27 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { useState } from 'react'
 import { Briefing } from '../components/Briefing'
 import { Game } from '../components/Game'
-import { CAMPAIGNS, isLevelUnlocked } from '../lib/campaign'
-import { readCampaignProgress, recordCampaignVictory } from '../campaignProgress'
+import { isCampaignUnlocked, visibleCampaigns, isLevelUnlocked } from '../campaign'
+import { campaignBot } from '../bots/campaign'
+import {
+  readCampaignProgress,
+  readClearedLevels,
+  recordCampaignVictory,
+} from '../campaignProgress'
+import { readDeveloperPreview } from '../preferences'
 
 export const Route = createFileRoute('/campaign/$campaign/$level')({
   beforeLoad: ({ params }) => {
-    const campaign = CAMPAIGNS.find((pack) => pack.slug === params.campaign)
+    const developerPreview = readDeveloperPreview()
+    const campaign = visibleCampaigns(developerPreview).find(
+      (pack) => pack.slug === params.campaign,
+    )
     if (!campaign) throw redirect({ to: '/', replace: true })
+    if (!isCampaignUnlocked(campaign, readCampaignProgress))
+      throw redirect({ to: '/campaign', replace: true })
     const id = Number(params.level)
-    if (!isLevelUnlocked(campaign, id, readCampaignProgress(campaign.slug)))
+    if (!isLevelUnlocked(campaign, id, readClearedLevels(campaign.slug), developerPreview))
       throw redirect({
         to: '/campaign/$campaign',
         params: { campaign: campaign.slug },
@@ -20,18 +32,22 @@ export const Route = createFileRoute('/campaign/$campaign/$level')({
   remountDeps: ({ params }) => [params.campaign, params.level],
   component: function CampaignBattle() {
     const { campaign, level } = Route.useRouteContext()
+    const [briefingOpen, setBriefingOpen] = useState(level.newElements.length > 0)
     return (
       <>
         <Game
           seed={level.seed}
           mode="ai"
+          paused={briefingOpen}
           setup={level.setup}
-          difficulty={level.difficulty}
+          bot={campaignBot(campaign, level)}
           campaign={campaign}
           campaignLevel={level.id}
           onVictory={() => recordCampaignVictory(campaign.slug, level.id)}
         />
-        {level.newElements.length > 0 && <Briefing level={level} />}
+        {level.newElements.length > 0 && (
+          <Briefing level={level} onClose={() => setBriefingOpen(false)} />
+        )}
       </>
     )
   },

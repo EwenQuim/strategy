@@ -7,6 +7,13 @@ export const moveTo = t({
   es: 'Mover a',
   it: 'Muovi verso',
 })
+export const chooseAgain = t({
+  en: 'Choose again',
+  fr: 'Choisir à nouveau',
+  de: 'Erneut wählen',
+  es: 'Elige de nuevo',
+  it: 'Scegli di nuovo',
+})
 export const healthAmount = t({
   en: (hp: number) => `${hp} health`,
   fr: (hp: number) => `${hp} PV`,
@@ -42,11 +49,11 @@ export const hellfireWarning = t({
   en: (center: boolean) =>
     `Hellfire ${center ? 'impact center' : 'blast area'}, 1 unavoidable damage at round end`,
   fr: (center: boolean) =>
-    `Feu de l'enfer ${center ? "centre d'impact" : 'zone de souffle'}, 1 dégât inévitable à la fin de la manche`,
+    `Feu de l'enfer ${center ? "centre d'impact" : 'zone de flammes'}, 1 dégât inévitable à la fin de la manche`,
   de: (center: boolean) =>
     `Höllenfeuer ${center ? 'Einschlagzentrum' : 'Einwirkbereich'}, 1 unvermeidbarer Schaden am Rundenende`,
   es: (center: boolean) =>
-    `Fuego infernal ${center ? 'centro de impacto' : 'zona de ráfaga'}, 1 de daño inevitable al final de la ronda`,
+    `Fuego infernal ${center ? 'centro de impacto' : 'zona de llamarada'}, 1 de daño inevitable al final de la ronda`,
   it: (center: boolean) =>
     `Fuoco infernale ${center ? "centro d'impatto" : 'zona di vampata'}, 1 danno inevitabile a fine round`,
 })
@@ -56,4 +63,18 @@ export const alreadyActed = t({
   de: 'hat schon gehandelt',
   es: 'ya actuó',
   it: 'ha già agito',
+})
+export const inRange = t({
+  en: 'in range',
+  fr: 'à portée',
+  de: 'in Reichweite',
+  es: 'a su alcance',
+  it: 'a portata',
+})
+export const inspect = t({
+  en: (name: string) => `Inspect ${name}`,
+  fr: (name: string) => `Inspecter ${name}`,
+  de: (name: string) => `${name} ansehen`,
+  es: (name: string) => `Inspeccionar ${name}`,
+  it: (name: string) => `Ispeziona ${name}`,
 })

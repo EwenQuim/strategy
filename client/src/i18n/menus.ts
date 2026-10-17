@@ -1,5 +1,6 @@
-import type { BotDifficulty } from '../lib/engine/ai'
-import { plural, t } from './locale'
+import type { BotDifficulty } from '../lib/engine/ai.ts'
+import type { BotName } from '../bots/catalog.ts'
+import { plural, t } from './locale.ts'
 
 export const chooseMode = t({
   en: 'Choose game mode',
@@ -28,20 +29,6 @@ export const quickPlayHint = t({
   de: 'Eine neue Schlacht gegen die KI spielen',
   es: 'Juega una nueva batalla contra la IA',
   it: "Gioca una nuova battaglia contro l'IA",
-})
-export const twoPlayers = t({
-  en: '2 players',
-  fr: '2 joueurs',
-  de: '2 Spieler',
-  es: '2 jugadores',
-  it: '2 giocatori',
-})
-export const twoPlayersHint = t({
-  en: 'Play together on this device',
-  fr: 'Jouer à deux sur cet appareil',
-  de: 'Zu zweit auf diesem Gerät spielen',
-  es: 'Jugad juntos en este dispositivo',
-  it: 'Giocate insieme su questo dispositivo',
 })
 export const online = t({
   en: 'Online',
@@ -86,7 +73,43 @@ export const madeBy = t({
   it: 'Fatto con ❤️ da EwenQuim',
 })
 
-export const mode = t({ en: 'Mode', fr: 'Mode', de: 'Modus', es: 'Modo', it: 'Modalità' })
+export const human = t({ en: 'Human', fr: 'Humain', de: 'Mensch', es: 'Humano', it: 'Umano' })
+export const ai = t({ en: 'AI', fr: 'IA', de: 'KI', es: 'IA', it: 'IA' })
+export const controller = t({
+  en: 'Controlled by',
+  fr: 'Contrôlé par',
+  de: 'Gesteuert von',
+  es: 'Controlado por',
+  it: 'Controllato da',
+})
+export const gameConfig = t({
+  en: 'Game configuration',
+  fr: 'Configuration de la partie',
+  de: 'Spieleinstellungen',
+  es: 'Configuración de la partida',
+  it: 'Configurazione della partita',
+})
+export const aiOptions = t({
+  en: 'AI options',
+  fr: 'Options IA',
+  de: 'KI-Optionen',
+  es: 'Opciones de IA',
+  it: 'Opzioni IA',
+})
+export const customOptions = t({
+  en: 'Custom',
+  fr: 'Personnalisé',
+  de: 'Benutzerdefiniert',
+  es: 'Personalizado',
+  it: 'Personalizzato',
+})
+export const invalidBotOptions = t({
+  en: 'Invalid AI options. Check the values before starting.',
+  fr: 'Options IA invalides. Vérifiez les valeurs avant de lancer.',
+  de: 'Ungültige KI-Optionen. Werte vor dem Start prüfen.',
+  es: 'Opciones de IA inválidas. Revisa los valores antes de empezar.',
+  it: 'Opzioni IA non valide. Controlla i valori prima di iniziare.',
+})
 export const difficulty = t({
   en: 'Difficulty',
   fr: 'Difficulté',
@@ -94,19 +117,66 @@ export const difficulty = t({
   es: 'Dificultad',
   it: 'Difficoltà',
 })
-export const aiOnly = t({
-  en: ' (AI only)',
-  fr: ' (IA seulement)',
-  de: ' (nur KI)',
-  es: ' (solo IA)',
-  it: ' (solo IA)',
+export const difficulties = t<Record<BotDifficulty | 'brutal', string>>({
+  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard', brutal: 'Brutal' },
+  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile', brutal: 'Brutale' },
+  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer', brutal: 'Brutal' },
+  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil', brutal: 'Brutal' },
+  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile', brutal: 'Brutale' },
 })
-export const difficulties = t<Record<BotDifficulty, string>>({
-  en: { easy: 'Easy', normal: 'Normal', hard: 'Hard' },
-  fr: { easy: 'Facile', normal: 'Normal', hard: 'Difficile' },
-  de: { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' },
-  es: { easy: 'Fácil', normal: 'Normal', hard: 'Difícil' },
-  it: { easy: 'Facile', normal: 'Normale', hard: 'Difficile' },
+export const aiStrategy = t({
+  en: 'AI strategy',
+  fr: 'Stratégie IA',
+  de: 'KI-Strategie',
+  es: 'Estrategia IA',
+  it: 'Strategia IA',
+})
+export const aiStrategies = t<Record<BotName, string>>({
+  en: {
+    napoleon: 'Napoleon',
+    hannibal: 'Hannibal',
+    caesar: 'Caesar',
+    depthsearch: 'Sun Tzu',
+    random: 'Pyrrhus',
+    mistral: 'Alexander',
+    jev: 'Scipio',
+  },
+  fr: {
+    napoleon: 'Napoléon',
+    hannibal: 'Hannibal',
+    caesar: 'César',
+    depthsearch: 'Sun Tzu',
+    random: 'Pyrrhus',
+    mistral: 'Alexandre',
+    jev: 'Scipion',
+  },
+  de: {
+    napoleon: 'Napoleon',
+    hannibal: 'Hannibal',
+    caesar: 'Cäsar',
+    depthsearch: 'Sun Tzu',
+    random: 'Pyrrhos',
+    mistral: 'Alexander',
+    jev: 'Scipio',
+  },
+  es: {
+    napoleon: 'Napoleón',
+    hannibal: 'Aníbal',
+    caesar: 'César',
+    depthsearch: 'Sun Tzu',
+    random: 'Pirro',
+    mistral: 'Alejandro',
+    jev: 'Escipión',
+  },
+  it: {
+    napoleon: 'Napoleone',
+    hannibal: 'Annibale',
+    caesar: 'Cesare',
+    depthsearch: 'Sun Tzu',
+    random: 'Pirro',
+    mistral: 'Alessandro',
+    jev: 'Scipione',
+  },
 })
 export const biome = t({ en: 'Biome', fr: 'Biome', de: 'Biom', es: 'Bioma', it: 'Bioma' })
 export const mirrorRoster = t({
@@ -115,6 +185,13 @@ export const mirrorRoster = t({
   de: 'Aufstellung des Spielers spiegeln',
   es: 'Copiar la alineación del jugador',
   it: 'Copia la formazione del giocatore',
+})
+export const symmetricMap = t({
+  en: 'Mirror the battlefield (central symmetry)',
+  fr: 'Symétrie centrale du champ de bataille',
+  de: 'Punktsymmetrisches Schlachtfeld',
+  es: 'Simetría central del campo de batalla',
+  it: 'Simmetria centrale del campo di battaglia',
 })
 export const rosters = t({
   en: 'Rosters',
@@ -133,13 +210,6 @@ export const localSides = t({
   es: ['Jugador 1', 'Jugador 2'],
   it: ['Giocatore 1', 'Giocatore 2'],
 })
-export const aiSides = t({
-  en: ['Player', 'Enemy'],
-  fr: ['Joueur', 'Ennemi'],
-  de: ['Spieler', 'Gegner'],
-  es: ['Jugador', 'Enemigo'],
-  it: ['Giocatore', 'Nemico'],
-})
 export const rosterLimits = t({
   en: (maxUnits: number) => `One king per side. Up to ${maxUnits} units.`,
   fr: (maxUnits: number) => `Un roi par camp. Jusqu'à ${maxUnits} unités.`,
@@ -156,26 +226,49 @@ export const startBattle = t({
 })
 
 export const levelsCompleted = t({
-  en: (completed: number, total: number) => `${completed} / ${total} completed`,
-  fr: (completed: number, total: number) =>
-    `${completed} / ${total} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
-  de: (completed: number, total: number) => `${completed} / ${total} abgeschlossen`,
-  es: (completed: number, total: number) =>
-    `${completed} / ${total} ${plural(completed, { one: 'completado', other: 'completados' })}`,
-  it: (completed: number, total: number) =>
-    `${completed} / ${total} ${plural(completed, { one: 'completato', other: 'completati' })}`,
+  en: (completed: number, levelCount: number) => `${completed} / ${levelCount} completed`,
+  fr: (completed: number, levelCount: number) =>
+    `${completed} / ${levelCount} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
+  de: (completed: number, levelCount: number) => `${completed} / ${levelCount} abgeschlossen`,
+  es: (completed: number, levelCount: number) =>
+    `${completed} / ${levelCount} ${plural(completed, { one: 'completado', other: 'completados' })}`,
+  it: (completed: number, levelCount: number) =>
+    `${completed} / ${levelCount} ${plural(completed, { one: 'completato', other: 'completati' })}`,
 })
 export const campaignCard = t({
-  en: (name: string, completed: number, total: number) =>
-    `${name} campaign, ${completed} / ${total} completed`,
-  fr: (name: string, completed: number, total: number) =>
-    `Campagne ${name}, ${completed} / ${total} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
-  de: (name: string, completed: number, total: number) =>
-    `Kampagne ${name}, ${completed} / ${total} abgeschlossen`,
-  es: (name: string, completed: number, total: number) =>
-    `Campaña ${name}, ${completed} / ${total} ${plural(completed, { one: 'completado', other: 'completados' })}`,
-  it: (name: string, completed: number, total: number) =>
-    `Campagna ${name}, ${completed} / ${total} ${plural(completed, { one: 'completato', other: 'completati' })}`,
+  en: (name: string, completed: number, levelCount: number) =>
+    `${name} campaign, ${completed} / ${levelCount} completed`,
+  fr: (name: string, completed: number, levelCount: number) =>
+    `Campagne ${name}, ${completed} / ${levelCount} ${plural(completed, { one: 'terminé', other: 'terminés' })}`,
+  de: (name: string, completed: number, levelCount: number) =>
+    `Kampagne ${name}, ${completed} / ${levelCount} abgeschlossen`,
+  es: (name: string, completed: number, levelCount: number) =>
+    `Campaña ${name}, ${completed} / ${levelCount} ${plural(completed, { one: 'completado', other: 'completados' })}`,
+  it: (name: string, completed: number, levelCount: number) =>
+    `Campagna ${name}, ${completed} / ${levelCount} ${plural(completed, { one: 'completato', other: 'completati' })}`,
+})
+export const lockedCampaignCard = t({
+  en: (name: string, victories: number, required: number) =>
+    `${name} campaign, locked, ${victories} / ${required} victories to unlock`,
+  fr: (name: string, victories: number, required: number) =>
+    `Campagne ${name}, verrouillée, ${victories} / ${required} victoires pour débloquer`,
+  de: (name: string, victories: number, required: number) =>
+    `Kampagne ${name}, gesperrt, ${victories} / ${required} Siege zum Freischalten`,
+  es: (name: string, victories: number, required: number) =>
+    `Campaña ${name}, bloqueada, ${victories} / ${required} victorias para desbloquear`,
+  it: (name: string, victories: number, required: number) =>
+    `Campagna ${name}, bloccata, ${victories} / ${required} vittorie per sbloccare`,
+})
+export const victoriesToUnlock = t({
+  en: (victories: number, required: number) => `${victories} / ${required} victories to unlock`,
+  fr: (victories: number, required: number) =>
+    `${victories} / ${required} victoires pour débloquer`,
+  de: (victories: number, required: number) =>
+    `${victories} / ${required} Siege zum Freischalten`,
+  es: (victories: number, required: number) =>
+    `${victories} / ${required} victorias para desbloquear`,
+  it: (victories: number, required: number) =>
+    `${victories} / ${required} vittorie per sbloccare`,
 })
 export const levelStatus = t({
   en: { completed: 'Completed', ready: 'Ready', locked: 'Locked' },
@@ -190,4 +283,18 @@ export const levelCard = t({
   de: (id: number, name: string, status: string) => `Level ${id}: ${name}, ${status}`,
   es: (id: number, name: string, status: string) => `Nivel ${id}: ${name}, ${status}`,
   it: (id: number, name: string, status: string) => `Livello ${id}: ${name}, ${status}`,
+})
+export const achievements = t({
+  en: 'Achievements',
+  fr: 'Succès',
+  de: 'Erfolge',
+  es: 'Logros',
+  it: 'Obiettivi',
+})
+export const achievementsEarnedIn = t({
+  en: 'Earned by winning against the AI, in campaigns or online.',
+  fr: "Obtenus en gagnant contre l'IA, en campagne ou en ligne.",
+  de: 'Durch Siege gegen die KI, in Kampagnen oder online.',
+  es: 'Se consiguen ganando contra la IA, en campañas o en línea.',
+  it: "Si ottengono vincendo contro l'IA, in campagna o online.",
 })

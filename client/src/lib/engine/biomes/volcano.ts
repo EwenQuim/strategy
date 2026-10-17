@@ -2,7 +2,7 @@ import { poolShapes, type BiomeDefinition } from './biome.ts'
 
 export const volcano: BiomeDefinition = {
   ground: 'basalt',
-  features: [{ terrain: 'lava', min: 3, max: 6, shapes: poolShapes }],
+  features: [{ terrain: 'lava', min: 3, max: 6, shapes: poolShapes, anchorBias: 'bay' }],
   theme: {
     '--biome-background': '#2b202b',
     '--biome-glow': '#d56b3b55',

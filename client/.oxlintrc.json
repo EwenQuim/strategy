@@ -1,8 +1,20 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc"],
-  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts", "generated"],
+  "ignorePatterns": ["dist", ".tanstack", "src/routeTree.gen.ts", "generated", "training-runs"],
   "rules": {
+    "no-shadow": "error",
+    "no-restricted-properties": [
+      "error",
+      {
+        "property": "useMemo",
+        "message": "React Compiler handles memoization; use a plain expression instead."
+      },
+      {
+        "property": "useCallback",
+        "message": "React Compiler handles memoization; use a plain function instead."
+      }
+    ],
     "react/rules-of-hooks": "error",
     "react/only-export-components": [
       "warn",
@@ -20,11 +32,24 @@
       }
     },
     {
+      "files": ["src/i18n/briefing.ts", "src/i18n/achievements.ts"],
+      "rules": {
+        "max-lines": "off"
+      }
+    },
+    {
       "files": ["src/**"],
       "rules": {
         "no-restricted-imports": [
           "error",
           {
+            "paths": [
+              {
+                "name": "react",
+                "importNames": ["useMemo", "useCallback"],
+                "message": "React Compiler handles memoization; use plain expressions and functions instead."
+              }
+            ],
             "patterns": [
               {
                 "group": ["**/generated/sdk.gen", "**/generated/sdk.gen.ts"],
@@ -38,7 +63,18 @@
     {
       "files": ["src/api/**"],
       "rules": {
-        "no-restricted-imports": "off"
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "importNames": ["useMemo", "useCallback"],
+                "message": "React Compiler handles memoization; use plain expressions and functions instead."
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -66,6 +102,50 @@
     {
       "files": ["src/lib/engine/**"],
       "rules": {
+        "no-restricted-globals": [
+          "error",
+          {
+            "checkGlobalObject": true,
+            "globals": [
+              {
+                "name": "Date",
+                "message": "Engine rules must not read clocks."
+              },
+              {
+                "name": "performance",
+                "message": "Engine rules must not read clocks."
+              },
+              {
+                "name": "crypto",
+                "message": "Use the seeded randomness stored in game state."
+              },
+              {
+                "name": "fetch",
+                "message": "Networking belongs in adapters."
+              },
+              {
+                "name": "WebSocket",
+                "message": "Networking belongs in adapters."
+              },
+              {
+                "name": "EventSource",
+                "message": "Networking belongs in adapters."
+              },
+              {
+                "name": "XMLHttpRequest",
+                "message": "Networking belongs in adapters."
+              }
+            ]
+          }
+        ],
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "Use the seeded randomness stored in game state instead of Math.random."
+          }
+        ],
         "no-restricted-imports": [
           "error",
           {
@@ -87,6 +167,31 @@
             "patterns": [
               {
                 "group": ["*", "!./**", "!../*.ts"]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/engine/ai/*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*",
+                  "!./**",
+                  "!../engine.ts",
+                  "!../ai.ts",
+                  "!../combat.ts",
+                  "!../hex.ts",
+                  "!../hellfire.ts",
+                  "!../setup.ts",
+                  "!../pawns/index.ts"
+                ]
               }
             ]
           }

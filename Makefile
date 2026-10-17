@@ -5,12 +5,12 @@ GO := go -C server
 BUBBLEWRAP := npx --yes @bubblewrap/cli
 WEB_MANIFEST := https://ewen.quimerch.com/strategy/manifest.webmanifest
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp android-init android-build android-doctor
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-napoleon bench-hannibal train-value retrain-value bench-web record-campaign android-init android-build android-doctor
 
 onboarding: installdeps
 
 installdeps:
-	$(NPM) install
+	$(NPM) ci
 	$(NPM) run prepare
 
 dev:
@@ -46,6 +46,27 @@ test:
 
 test-integration:
 	$(NPM) run test:integration
+
+bench-ai:
+	$(NPM) run bench:ai -- $(ARGS)
+
+bench-napoleon:
+	$(NPM) run bench:napoleon
+
+bench-hannibal:
+	$(NPM) run bench:hannibal
+
+train-value:
+	$(NPM) run train:value
+
+retrain-value:
+	$(NPM) run retrain:value -- $(ARGS)
+
+record-campaign:
+	$(NPM) run record:campaign -- $(ARGS)
+
+bench-web:
+	$(NPM) run bench:web
 
 build:
 	$(NPM) run build

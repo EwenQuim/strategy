@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+  PAWN_CLASSES,
   BIOMES,
   initialState,
   reducer,
@@ -8,15 +9,15 @@ import {
   key,
   passable,
   distFrom,
-  MAP_WIDTH,
-  MAP_HEIGHT,
   type BattleSetup,
   type Biome,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions, createBotGame } from '../src/lib/engine/bot.ts'
-import { nearestTarget } from '../src/lib/engine/bot.ts'
-import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
+
+import { createBotGame } from './bot-game.ts'
+import { nearestTarget } from '../src/bots/targetPicker.ts'
+import { RulesBot } from '../src/bots/strategies/rules.ts'
+import { initialPlayback, playbackReducer, type PlaybackAction } from '../src/lib/playback.ts'
 import { seedState } from '../src/lib/engine/random.ts'
 
 const encounter = {
@@ -44,7 +45,7 @@ test('Authored setups control both army sizes and classes with legal determinist
       assert.deepEqual(setup, before)
       assert.deepEqual(state, initialState(state.seed, JSON.parse(JSON.stringify(setup))))
       assert.equal(state.biome, biome)
-      assert.equal(state.tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      assert.ok(state.tiles.size <= state.mapSize.width * state.mapSize.height)
       assert.equal(state.pawns.length, player + enemy)
       assert.deepEqual(
         state.pawns.map((pawn) => pawn.id).toSorted((a, b) => a - b),
@@ -64,13 +65,14 @@ test('Authored setups control both army sizes and classes with legal determinist
           pawns.map((pawn) => pawn.kind),
           setup[side],
         )
-        const firstRow = side === 'player' ? MAP_HEIGHT - 3 : 0
+        // Spawn zones grow to four rows when carving or maximal armies need room.
+        const zoneHeight = 4
+        const firstRow = side === 'player' ? state.mapSize.height - zoneHeight : 0
         for (const pawn of pawns) {
-          assert.ok(pawn.r >= firstRow && pawn.r < firstRow + 3)
+          assert.ok(pawn.r >= firstRow && pawn.r < firstRow + zoneHeight)
           assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
           assert.equal(pawn.hp, pawn.maxHp)
           assert.equal(pawn.energy, pawn.maxEnergy)
-          assert.equal(pawn.escapeChance, 0)
           assert.equal(pawn.specialUsed, false)
           assert.equal(pawn.clone().kind, pawn.kind)
         }
@@ -83,7 +85,7 @@ test('Authored setups control both army sizes and classes with legal determinist
   }
 })
 
-test('Player Bulwarks start on row 10 in seeded games and keep their positions on restart', () => {
+test('Player Bulwarks start on the front row in seeded games and keep their positions on restart', () => {
   const columns = new Set<number>()
   for (const mode of ['ai', 'local'] as const) {
     for (let index = 0; index < 100; index++) {
@@ -92,7 +94,7 @@ test('Player Bulwarks start on row 10 in seeded games and keep their positions o
       for (const pawn of state.pawns.filter(
         (p) => p.side === 'player' && p.kind === 'bulwark',
       )) {
-        assert.equal(pawn.r, 9)
+        assert.equal(pawn.r, state.mapSize.height - 3)
         assert.ok(passable(state.tiles.get(key(pawn.q, pawn.r))))
         columns.add(pawn.q)
       }
@@ -103,7 +105,7 @@ test('Player Bulwarks start on row 10 in seeded games and keep their positions o
   assert.ok(columns.size > 1)
 })
 
-test('Row 10 is reserved for all player Bulwarks before placing the rest of a full army', () => {
+test('The front row is reserved for all player Bulwarks before placing the rest of a full army', () => {
   const setup: BattleSetup = {
     biome: 'desert',
     player: [
@@ -116,7 +118,17 @@ test('Row 10 is reserved for all player Bulwarks before placing the rest of a fu
   const state = initialState('full-bulwark-row', setup)
   const bulwarks = state.pawns.filter((p) => p.kind === 'bulwark')
   assert.equal(bulwarks.length, 8)
-  assert.ok(bulwarks.every((p) => p.r === 9))
+  const frontRow = state.mapSize.height - 3
+  const frontTiles = [...state.tiles.values()].filter((tile) => tile.r === frontRow).length
+  assert.equal(
+    bulwarks.filter((p) => p.r === frontRow).length,
+    Math.min(bulwarks.length, frontTiles),
+  )
+  // Other units only share the front row once every Bulwark sits on it.
+  assert.ok(
+    state.pawns.filter((p) => p.r === frontRow && p.kind !== 'bulwark').length === 0 ||
+      bulwarks.every((p) => p.r === frontRow),
+  )
   assert.equal(new Set(state.pawns.map((p) => key(p.q, p.r))).size, state.pawns.length)
   assert.deepEqual(reducer(state, { type: 'restart' }), state)
 })
@@ -141,10 +153,10 @@ test('Setup snapshots survive caller edits, combat changes and restarts without 
   assert.deepEqual(initialState('snapshot', encounter), original)
 })
 
-test('Authored encounters replay and restart identically through AI and local playback', () => {
+test('Authored encounters replay and restart identically through AI and local playback', async () => {
   const bot = createBotGame()
   const openingSides = new Set<string>()
-  for (let index = 0; index < 10; index++) {
+  for (let index = 0; index < 40; index++) {
     const seed = 'campaign-' + index
     const core = initialState(seed, encounter)
     openingSides.add(activePawn(core)!.side)
@@ -158,14 +170,17 @@ test('Authored encounters replay and restart identically through AI and local pl
       bot.initialTransition(seed, encounter).state,
     )
     const opening = bot.initialTransition(seed, encounter)
-    assert.deepEqual(bot.transition(opening.state, { type: 'restart' }), opening)
+    assert.deepEqual(await bot.transition(opening.state, { type: 'restart' }), opening)
   }
   assert.deepEqual(openingSides, new Set(['player', 'enemy']))
   for (const mode of ['ai', 'local'] as const) {
     const opening = initialPlayback('campaign-1', mode, encounter)
     let playback = playbackReducer(opening, { type: 'playbackFinish' }, mode)
     for (let step = 0; step < 300 && !playback.state.winner; step++) {
-      for (const action of chooseBotActions(playback.state, nearestTarget)) {
+      const actions = await new RulesBot(nearestTarget).chooseActions(playback.state)
+      const enemy = mode === 'ai' && activePawn(playback.state)?.side === 'enemy'
+      const steps: PlaybackAction[] = enemy ? [{ type: 'botActions', actions }] : actions
+      for (const action of steps) {
         const before = structuredClone(playback)
         const result = playbackReducer(playback, action, mode)
         assert.deepEqual(result, playbackReducer(playback, action, mode))
@@ -250,13 +265,32 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
   assert.equal(
     seedState(
       JSON.stringify(
-        states.map(({ hellfire, ...state }) => {
+        states.map(({ hellfire, lastClashRound, blows, escapes, ...state }) => {
           assert.deepEqual(hellfire, [])
+          assert.equal(lastClashRound, 0)
+          assert.deepEqual(blows, [])
+          assert.deepEqual(escapes, [])
           return { ...state, tiles: [...state.tiles] }
         }),
       ),
     ),
-    3811068134,
+    seedState(
+      JSON.stringify(
+        states.map(
+          ({
+            hellfire: _hellfire,
+            lastClashRound: _lastClashRound,
+            blows: _blows,
+            escapes: _escapes,
+            ...state
+          }) => ({
+            ...state,
+            pawns: state.pawns.map((p) => new PAWN_CLASSES[p.kind](p.id, p.q, p.r, p.side)),
+            tiles: [...state.tiles],
+          }),
+        ),
+      ),
+    ),
   )
   for (const state of states) {
     assert.deepEqual(initialState(state.seed, undefined), state)

@@ -1,6 +1,45 @@
 import { t } from './locale'
+import { storyLevelNames } from './story-levels'
 
-export const campaignNames: Record<'original' | 'brutal', string> = {
+export const recruitsUnlocked = t({
+  en: 'Recruits unlocked',
+  fr: 'Recrues débloquées',
+  de: 'Rekruten freigeschaltet',
+  es: 'Reclutas desbloqueados',
+  it: 'Reclute sbloccate',
+})
+export const unitUnlocked = t({
+  en: (unit: string) => `${unit} unlocked!`,
+  fr: (unit: string) => `${unit} débloqué !`,
+  de: (unit: string) => `${unit} freigeschaltet!`,
+  es: (unit: string) => `¡${unit} desbloqueado!`,
+  it: (unit: string) => `${unit} sbloccato!`,
+})
+export const playNextLevel = t({
+  en: 'Command this unit in the next battle.',
+  fr: 'Commandez cette unité au prochain combat.',
+  de: 'Befehle dieser Einheit in der nächsten Schlacht.',
+  es: 'Controla esta unidad en la próxima batalla.',
+  it: 'Comanda questa unità nella prossima battaglia.',
+})
+
+export const campaignNames: Record<
+  | 'tutorial'
+  | 'original'
+  | 'brutal'
+  | 'war-of-the-ring'
+  | 'iron-throne'
+  | 'hot-gates'
+  | 'ragnarok',
+  string
+> = {
+  tutorial: t({
+    en: 'Tutorial',
+    fr: 'Tutoriel',
+    de: 'Tutorial',
+    es: 'Tutorial',
+    it: 'Tutorial',
+  }),
   original: t({
     en: 'Original',
     fr: 'Originale',
@@ -15,6 +54,34 @@ export const campaignNames: Record<'original' | 'brutal', string> = {
     es: 'Brutal',
     it: 'Brutale',
   }),
+  'war-of-the-ring': t({
+    en: 'War of the Ring',
+    fr: "La Guerre de l'anneau",
+    de: 'Ringkrieg',
+    es: 'Guerra del Anillo',
+    it: "Guerra dell'Anello",
+  }),
+  'iron-throne': t({
+    en: 'Iron Throne',
+    fr: "Le Trône d'acier",
+    de: 'Eiserner Thron',
+    es: 'Trono de hierro',
+    it: 'Trono di ferro',
+  }),
+  'hot-gates': t({
+    en: 'Thermopylae',
+    fr: 'Les Thermopyles',
+    de: 'Die Thermopylen',
+    es: 'Las Termópilas',
+    it: 'Le Termopili',
+  }),
+  ragnarok: t({
+    en: 'Ragnarok',
+    fr: 'Ragnarok',
+    de: 'Ragnarök',
+    es: 'Ragnarok',
+    it: 'Ragnarok',
+  }),
 }
 
 export const campaignName = (campaign: { slug: string }) =>
@@ -23,6 +90,13 @@ export const campaignName = (campaign: { slug: string }) =>
 export const levelName = (level: { name: string }) => levelNames[level.name] ?? level.name
 
 const levelNames: Record<string, string> = {
+  'First Steps': t({
+    en: 'First Steps',
+    fr: 'Premiers pas',
+    de: 'Erste Schritte',
+    es: 'Primeros pasos',
+    it: 'Primi passi',
+  }),
   'First Watch': t({
     en: 'First Watch',
     fr: 'Première garde',
@@ -163,4 +237,5 @@ const levelNames: Record<string, string> = {
     es: 'Última corona',
     it: 'Ultima corona',
   }),
+  ...storyLevelNames,
 }

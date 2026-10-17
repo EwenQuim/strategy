@@ -1,4 +1,3 @@
-import { BOT_LEVELS, type BotDifficulty } from './engine/ai.ts'
 import { validateSetup } from './engine/setup.ts'
 import type { BattleSetup } from './engine/index.ts'
 
@@ -6,7 +5,9 @@ export type GameMode = 'ai' | 'local' | 'online'
 
 export type GameSearch = {
   mode: GameMode
-  difficulty?: BotDifficulty
+  // Bot configuration is validated by the application, never by the game library.
+  bot?: unknown
+  sideBots?: unknown
   setup?: Extract<BattleSetup, { map?: undefined }>
 }
 
@@ -14,8 +15,8 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   const result: GameSearch = {
     mode: search.mode === 'local' ? 'local' : search.mode === 'online' ? 'online' : 'ai',
   }
-  if (typeof search.difficulty === 'string' && Object.hasOwn(BOT_LEVELS, search.difficulty))
-    result.difficulty = search.difficulty as BotDifficulty
+  if (search.bot !== undefined) result.bot = search.bot
+  if (search.sideBots !== undefined) result.sideBots = search.sideBots
   if (search.setup && typeof search.setup === 'object' && !('map' in search.setup)) {
     const setup = search.setup as NonNullable<GameSearch['setup']>
     try {
@@ -27,6 +28,12 @@ export function parseGameSearch(search: Record<string, unknown>): GameSearch {
   }
   return result
 }
+
+const isQuickLocalGame = (search: GameSearch): boolean =>
+  search.mode === 'local' && search.setup === undefined
+
+export const usesSymmetricField = (search: GameSearch, prefersSymmetric: boolean): boolean =>
+  isQuickLocalGame(search) || (search.setup !== undefined && prefersSymmetric)
 
 export type PlayerNames = { player: string; enemy: string }
 

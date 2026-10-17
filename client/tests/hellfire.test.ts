@@ -17,7 +17,8 @@ import {
   type GameState,
   type Pawn,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { playbackReducer } from '../src/lib/playback.ts'
 
 const encounter = {
@@ -117,13 +118,13 @@ test('Warnings stay fixed through movement and resolve once when the last actor 
   ])
 })
 
-test('Overlap damages once through Escape and Protect, cleans up deaths, and preserves prior states and frames', () => {
+test('Overlap damages once through Protect, cleans up deaths, and preserves prior states and frames', () => {
   const guard = new Bulwark(3, 2, 0, 'player')
   guard.protectingId = 2
   const state = battle(
     [
-      new Swordsman(1, -1, 1, 'player', 5, 0, 60),
-      new Ninja(2, 0, 0, 'player', 1, 0, 60),
+      new Swordsman(1, -1, 1, 'player', 5, 0),
+      new Ninja(2, 0, 0, 'player', 1, 0),
       guard,
       new King(4, -5, 0, 'player'),
       new King(5, 5, 0, 'enemy'),
@@ -163,7 +164,7 @@ test('A killed final initiative entry or a final actor dying on lava still resol
       [
         new King(1, -5, 0, 'player'),
         new King(2, 5, 0, 'enemy'),
-        ...(diesOnLava ? [] : [new Swordsman(3, 0, 0, 'player', 5, 1)]),
+        ...(diesOnLava ? [] : [new Swordsman(3, 0, 0, 'player', 5, 2)]),
         new Ninja(4, diesOnLava ? 0 : 1, 0, 'enemy'),
       ],
       [{ q: -5, r: 0 }],
@@ -171,8 +172,12 @@ test('A killed final initiative entry or a final actor dying on lava still resol
     state.active = 2
     state.order.push(99)
     state.tiles.get('1,0')!.terrain = diesOnLava ? 'lava' : 'basalt'
-    state.phase = diesOnLava ? 'move' : 'attack'
-    const result = transition(state, { type: diesOnLava ? 'move' : 'attackAt', q: 1, r: 0 })
+    const result = transition(
+      state,
+      diesOnLava
+        ? { type: 'move', q: 1, r: 0 }
+        : { type: 'special', target: { q: 1, r: 0 }, destination: { q: 0, r: 0 } },
+    )
     assert.equal(result.state.round, 2)
     assert.deepEqual(result.state.order, diesOnLava ? [1, 2] : [1, 2, 3])
     assert.equal(activePawn(result.state)?.id, 1)
@@ -197,7 +202,6 @@ test('Either king can lose to a blast; simultaneous deaths are a terminal draw w
     state.active = 1
     const result = transition(state, { type: 'endTurn' })
     assert.equal(result.state.winner, winner)
-    assert.equal(result.state.phase, 'over')
     assert.equal(result.state.round, 1)
     assert.equal(result.state.randomState, state.randomState)
     assert.deepEqual(
@@ -243,7 +247,7 @@ test('An empty blast survives local and player-controlled playback filtering', (
   }
 })
 
-test('AI evades with a healthy soldier on easy and saves a doomed king on normal to win after the blast', () => {
+test('AI evades with a healthy soldier on easy and saves a doomed king on normal to win after the blast', async () => {
   for (const [difficulty, actor] of [
     ['easy', new Swordsman(1, 0, 0, 'enemy')],
     ['normal', new King(1, 0, 0, 'enemy', 1)],
@@ -266,7 +270,10 @@ test('AI evades with a healthy soldier on easy and saves a doomed king on normal
     if (king) assert.equal(reducer(state, { type: 'endTurn' }).winner, 'draw')
     let next = state
     for (let step = 0; step < 4 && next.round === 1 && !next.winner; step++)
-      next = chooseBotActions(next, difficulty).reduce(reducer, next)
+      next = (await new DepthsearchBot(BOT_LEVELS[difficulty]).chooseActions(next)).reduce(
+        reducer,
+        next,
+      )
     const survivor = next.pawns.find((p) => p.id === actor.id)!
     assert.ok(survivor, difficulty)
     assert.equal(inHellfire(state.hellfire, survivor), false, difficulty)
@@ -276,10 +283,10 @@ test('AI evades with a healthy soldier on easy and saves a doomed king on normal
   }
 })
 
-test('AI leaves already-doomed enemies to Hellfire instead of wasting its last attack', () => {
+test('AI leaves already-doomed enemies to Hellfire instead of wasting its last attack', async () => {
   const state = battle(
     [
-      new Swordsman(1, 0, 0, 'enemy', 5, 1),
+      new Swordsman(1, 0, 0, 'enemy', 5, 2),
       new King(2, 0, 1, 'enemy', 4, 0),
       new Bulwark(3, -1, 0, 'player', 1, 0),
       new Ninja(4, 1, 0, 'player', 1, 0),
@@ -289,11 +296,8 @@ test('AI leaves already-doomed enemies to Hellfire instead of wasting its last a
   )
   state.order = [4, 3, 2, 1, 5]
   state.active = 3
-  const actions = chooseBotActions(state, 'normal')
-  assert.deepEqual(actions, [
-    { type: 'act', action: 'attack' },
-    { type: 'attackAt', q: -1, r: 0 },
-  ])
+  const actions = await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)
+  assert.ok(actions.some((action) => action.type === 'special' && action.target?.q === -1))
   const next = finishRound(actions.reduce(reducer, state))
   assert.ok(!next.pawns.some((pawn) => pawn.id === 3 || pawn.id === 4))
 })

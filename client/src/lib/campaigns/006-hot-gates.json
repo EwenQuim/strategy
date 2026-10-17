@@ -1,0 +1,214 @@
+[
+  {
+    "id": 1,
+    "name": "The Agoge",
+    "seed": "sparta-v2-1",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
+    "setup": {
+      "biome": "verdant",
+      "firstEnemyKinds": ["hoplite"],
+      "map": [
+        "__....__",
+        "_......_",
+        "........",
+        "..ff....",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 6 },
+        { "kind": "swordsman", "col": 3, "row": 5 },
+        { "kind": "archer", "col": 2, "row": 5 },
+        { "kind": "swordsman", "col": 4, "row": 5 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "hoplite", "col": 3, "row": 2 },
+        { "kind": "archer", "col": 4, "row": 1, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Thermopylae",
+    "seed": "sparta-v2-2",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "_......_",
+        "^^....^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^....^^",
+        "_......_"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "hoplite", "col": 3, "row": 6 },
+        { "kind": "hoplite", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 7 },
+        { "kind": "magician", "col": 4, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "swordsman", "col": 3, "row": 1, "hp": 3 },
+        { "kind": "swordsman", "col": 4, "row": 1, "hp": 3 },
+        { "kind": "swordsman", "col": 3, "row": 2, "hp": 3 },
+        { "kind": "archer", "col": 2, "row": 0, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "The Immortals",
+    "seed": "sparta-v2-3",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "_......_",
+        "^^....^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^^..^^^",
+        "^^....^^",
+        "_......_"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "hoplite", "col": 3, "row": 6 },
+        { "kind": "swordsman", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 7 },
+        { "kind": "magician", "col": 4, "row": 7 },
+        { "kind": "bomber", "col": 5, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "ninja", "col": 3, "row": 1 },
+        { "kind": "ninja", "col": 4, "row": 1 },
+        { "kind": "swordsman", "col": 3, "row": 2, "hp": 3 },
+        { "kind": "archer", "col": 2, "row": 0, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Athenian Shores",
+    "seed": "sparta-v2-4",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        "..~~....",
+        "..~~....",
+        "........",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "hoplite", "col": 3, "row": 6 },
+        { "kind": "hoplite", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 },
+        { "kind": "swordsman", "col": 4, "row": 5 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 4, "row": 0, "hp": 5 },
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "archer", "col": 5, "row": 2 },
+        { "kind": "ninja", "col": 6, "row": 1 },
+        { "kind": "bulwark", "col": 4, "row": 1, "hp": 6 }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Plataea",
+    "seed": "sparta-v2-5",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_......_",
+        "^^....^^",
+        "........",
+        "........",
+        "^^....^^",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "hoplite", "col": 2, "row": 6 },
+        { "kind": "hoplite", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 3, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 },
+        { "kind": "swordsman", "col": 3, "row": 5 },
+        { "kind": "bulwark", "col": 4, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 4, "row": 0, "hp": 5 },
+        { "kind": "swordsman", "col": 3, "row": 2 },
+        { "kind": "swordsman", "col": 4, "row": 2 },
+        { "kind": "archer", "col": 2, "row": 1 },
+        { "kind": "magician", "col": 5, "row": 1 },
+        { "kind": "bulwark", "col": 4, "row": 1, "hp": 6 }
+      ]
+    }
+  }
+]

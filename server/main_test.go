@@ -21,7 +21,7 @@ func TestSPAFallback(t *testing.T) {
 	write("index.html", "<!doctype html>app")
 	write("app.js", "code")
 
-	h := spa(dir)
+	h := spa(dir, []byte("<!doctype html>app"))
 	for _, tc := range []struct{ path, want string }{
 		{"/app.js", "code"},                   // real file served
 		{"/deep/route", "<!doctype html>app"}, // unknown path falls back to index
@@ -47,7 +47,7 @@ func TestSPAAssetCachingAndGzip(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	h := spa(dir)
+	h := spa(dir, []byte("<!doctype html>app"))
 
 	plain := httptest.NewRecorder()
 	h.ServeHTTP(plain, httptest.NewRequest(http.MethodGet, "/assets/app-abc123.js", nil))
@@ -136,7 +136,7 @@ func TestNewServiceStoreSelection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.Create(context.Background(), "Ewen"); err != nil {
+	if _, err := svc.Create(context.Background(), "Ewen", false); err != nil {
 		t.Fatalf("memory store: %v", err)
 	}
 
@@ -145,7 +145,7 @@ func TestNewServiceStoreSelection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	creds, err := svc.Create(context.Background(), "Ewen")
+	creds, err := svc.Create(context.Background(), "Ewen", false)
 	if err != nil {
 		t.Fatalf("sqlite store: %v", err)
 	}

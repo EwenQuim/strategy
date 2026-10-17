@@ -5,20 +5,13 @@ import type { Pawn, Side } from './pawns/index.ts'
 import type { BattleEffect, BattleFrame, GameState } from './engine.ts'
 
 export function winnerFrom(pawns: Pawn[], actingSide: Side): Side | null {
-  if (!pawns.some((p) => p.kind === 'king' && p.side === actingSide))
-    return actingSide === 'player' ? 'enemy' : 'player'
-  if (!pawns.some((p) => p.kind === 'king' && p.side === 'enemy')) return 'player'
-  if (!pawns.some((p) => p.kind === 'king' && p.side === 'player')) return 'enemy'
-  return null
-}
-
-export function finishTurn(pawn: Pawn, log: string[]): boolean {
-  const previousEscape = pawn.escapeChance
-  pawn.endTurn()
-  const gained = pawn.escapeChance - previousEscape
-  if (gained <= 0) return false
-  log.push(`${label(pawn)} ends turn: +${gained}% escape (${pawn.escapeChance}% total).`)
-  return true
+  const playerKing = pawns.some((p) => p.kind === 'king' && p.side === 'player')
+  const enemyKing = pawns.some((p) => p.kind === 'king' && p.side === 'enemy')
+  if (playerKing && enemyKing) return null
+  if (playerKing) return 'player'
+  if (enemyKing) return 'enemy'
+  // Both crowns fell in the same blow: the side that struck last wins.
+  return actingSide === 'player' ? 'enemy' : 'player'
 }
 
 export function endBattle(
@@ -34,7 +27,6 @@ export function endBattle(
   return {
     ...state,
     winner,
-    phase: 'over',
     log: [...state.log, message].slice(-40),
     logCount: state.logCount + 1,
   }
@@ -46,7 +38,7 @@ export function advanceTurn(
 ): GameState {
   let { pawns, hellfire, randomState } = state
   const log = [...state.log]
-  let { order, round, logCount } = state
+  let { order, round, logCount, blows } = state
   let active = state.active + 1
   while (true) {
     if (active >= order.length) {
@@ -63,7 +55,11 @@ export function advanceTurn(
             }
             return { q: pawn.q, r: pawn.r, damage: 1 }
           })
-        const burned = { ...state, pawns, log, logCount }
+        const fallen = pawns
+          .filter((pawn) => pawn.hp <= 0)
+          .map(({ kind, side }) => ({ kind, side }))
+        if (fallen.length) blows = [...blows, { fallen }]
+        const burned = { ...state, pawns, log, logCount, blows }
         record?.(
           captureFrame(burned, {
             kind: 'hellfire',
@@ -74,7 +70,7 @@ export function advanceTurn(
           }),
         )
         pawns = pawns.filter((pawn) => pawn.hp > 0)
-        clearBrokenProtection(pawns)
+        clearFallenProtection(pawns)
         const winner = pawns.some((pawn) => pawn.kind === 'king')
           ? winnerFrom(pawns, 'player')
           : 'draw'
@@ -85,12 +81,11 @@ export function advanceTurn(
       for (const pawn of pawns) {
         pawn.bonusEnergy = 0
         pawn.energy = pawn.maxEnergy
-        pawn.escapeChance = 0
         pawn.specialUsed = false
       }
       ;({ hellfire, randomState } = markHellfire({ ...state, pawns, round, randomState }))
       active = 0
-      log.push('Round ' + round + '. Energy restored; escape chances reset.')
+      log.push('Round ' + round + '. Energy and abilities restored.')
       logCount++
     }
     const next = pawns.find((p) => p.id === order[active])
@@ -120,15 +115,13 @@ export function advanceTurn(
     round,
     log: log.slice(-40),
     logCount,
+    blows,
   }
 }
 
-export function clearBrokenProtection(pawns: Pawn[]): void {
+export function clearFallenProtection(pawns: Pawn[]): void {
   for (const protector of pawns) {
-    if (protector.protectingId === null) continue
-    const ally = pawns.find((pawn) => pawn.id === protector.protectingId)
-    if (!ally || !protector.special.targets(protector, [ally]).length)
-      protector.protectingId = null
+    if (!pawns.some((pawn) => pawn.id === protector.protectingId)) protector.protectingId = null
   }
 }
 
@@ -146,7 +139,6 @@ export function captureFrame(
       order: [...state.order],
       log: [...state.log],
       winner: null,
-      phase: 'move',
     },
     effect,
   }

@@ -9,11 +9,13 @@ export function PawnChip({
   active,
   protectedAlly,
   feature,
+  topRow,
 }: {
   pawn: Pawn
   active: boolean
   protectedAlly: boolean
   feature?: Tile['feature']
+  topRow: boolean
 }) {
   const enemy = pawn.side === 'enemy'
   return (
@@ -33,17 +35,7 @@ export function PawnChip({
       >
         <ellipse cy="17" rx="23" ry="9" fill="#10281e" opacity=".5" />
         {active && (
-          <circle
-            r="28"
-            fill="#ead695"
-            fillOpacity=".18"
-            stroke="#f2df9e"
-            strokeWidth="1.5"
-            className="pawn-active-halo"
-          />
-        )}
-        {pawn.escapeChance > 0 && (
-          <circle r="25" fill="none" stroke="#b7e5de" strokeWidth="2" strokeDasharray="4 4" />
+          <circle r="28" fill="#ead695" fillOpacity=".18" stroke="#f2df9e" strokeWidth="1.5" />
         )}
         {enemy ? (
           <path
@@ -95,9 +87,9 @@ export function PawnChip({
       {pawn.hp <= 0 && (
         <text
           data-testid="killed-message"
-          y="-28"
+          y={topRow ? 48 : -28}
           textAnchor="middle"
-          className="combat-impact-label fill-[#ffe1a3] stroke-[#14271f] stroke-[5] text-[24px] font-black uppercase [paint-order:stroke] motion-reduce:animate-none"
+          className="combat-impact-label combat-impact-label--drift fill-[#ff8d75] stroke-[#14271f] stroke-[5] text-[24px] font-black italic uppercase [paint-order:stroke] motion-reduce:animate-none"
         >
           {m.killed}
         </text>

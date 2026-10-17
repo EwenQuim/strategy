@@ -1,16 +1,16 @@
 import {
+  advanceAndStrike,
   attackTargets,
-  aimAt,
   canAttack,
   canUseSpecial,
-  enterTiles,
   label,
+  landingThreatenedTiles,
   pawnAt,
+  routePath,
   specialTargets,
-  strike,
   walkingPaths,
 } from '../combat.ts'
-import { key, type Tile } from '../hex.ts'
+import { hexDist, key, type Tile } from '../hex.ts'
 import type { Action } from '../engine.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -23,7 +23,7 @@ export function chargeDestinations(
   return new Map(
     [...walkingPaths(tiles, pawns, pawn, 2)]
       .filter(([k]) => specialTargets(pawns, pawn, tiles.get(k)!).length > 0)
-      .map(([k, route]) => [k, route.path.length]),
+      .map(([k, route]) => [k, route.steps]),
   )
 }
 
@@ -33,27 +33,39 @@ const charge: SpecialAbility = {
   targeted: true,
   noTargets: 'noEnemiesWithinReach',
   choosesDestination: true,
+  movement: 'walk',
+  landingRange: 2,
   targetLabel: 'chargeTo',
   prompt: 'chooseTile',
   description: 'chargeDescription',
+  reaches: (pawn, tile) => hexDist(pawn, tile) <= 2 + pawn.attack.maxRange,
   targets: attackTargets,
+  threatenedTiles: landingThreatenedTiles,
   tileTargets: (pawn, tiles, pawns) => new Set(chargeDestinations(tiles, pawns, pawn).keys()),
   candidates: (pawn, { tiles, pawns }) =>
     [...chargeDestinations(tiles, pawns, pawn).keys()].flatMap((position) => {
       const tile = tiles.get(position)!
       return pawns
         .filter((target) => canAttack(pawn, target, tile))
-        .map((target): Action[] => [
-          ...aimAt(tile),
-          { type: 'specialAt', q: target.q, r: target.r },
-        ])
+        .map((target): Action => ({
+          type: 'special',
+          target: { q: target.q, r: target.r },
+          destination: { q: tile.q, r: tile.r },
+        }))
     }),
-  threat: (pawn, { target, from, movementCost }) => {
-    if (!canAttack(pawn, target, from)) return 0
-    const chargeCost = Math.max(0, movementCost - 2) + pawn.special.cost
-    return pawn.energy >= chargeCost ? (1 + pawn.energy - chargeCost) * pawn.attack.damage : 0
+  threat: (pawn, { target, from, movementCost, tiles, pawns }) => {
+    if (!tiles || !pawns || pawn.energy < movementCost + pawn.special.cost) return 0
+    const actor = pawn.clone()
+    actor.q = from.q
+    actor.r = from.r
+    return [...walkingPaths(tiles, [...pawns], actor, 2).values()].some(
+      (route) => route.damage < pawn.hp && canAttack(pawn, target, route.tile ?? from),
+    )
+      ? pawn.attack.damage
+      : 0
   },
-  perform: ({ pawn, tiles, pawns, tile, destination, round, log, random }) => {
+  perform: (context) => {
+    const { pawn, tiles, pawns, tile, destination, log } = context
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -62,18 +74,21 @@ const charge: SpecialAbility = {
       !specialTargets(pawns, pawn, destination).includes(target)
     )
       return null
-    pawn.energy -= pawn.special.cost
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const route = walkingPaths(tiles, pawns, pawn, 2).get(key(destination.q, destination.r))!
-    const impacts = enterTiles(tiles, pawns, pawn, route.path, round, log)
-    if (pawn.hp > 0) impacts.push(strike(pawns, pawn, target, pawn.attack, log, random))
+    const route = walkingPaths(tiles, pawns, pawn, 2, key(destination.q, destination.r)).get(
+      key(destination.q, destination.r),
+    )!
+    const impacts = advanceAndStrike(context, routePath(route), target)
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }
   },
 }
 
 export class Swordsman extends Pawn {
+  static override readonly accent = '#7a9bb5'
   static override readonly icon =
     'M20 3.5 9.5 14M20 3.5h-3.2L7.5 12.8M20 3.5v3.2l-9.3 9.3M5.5 11.5l7 7M8 16.5 3.5 21'
+  static override readonly aiInstructions =
+    'Charge (2): pick a tile up to 2 walking steps away (or stay), then choose an adjacent enemy and strike for 2. Once per activation.'
   readonly kind = 'swordsman' as const
   get maxHp(): number {
     return 5

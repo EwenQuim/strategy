@@ -145,7 +145,7 @@ func TestGameEventsHeartbeatDoesNotReadStorage(t *testing.T) {
 	_, creator := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]string{"name": "Ewen"})
 	_, stream := openEvents(t, ts, creator.Game.Code)
 	readSnapshot(t, stream)
-	if event := readEvent(t, stream); event != "event: heartbeat\ndata: {}\n" {
+	if event := readEvent(t, stream); event != "event: heartbeat\ndata: {\"version\":0}\n" {
 		t.Fatalf("idle stream: %q", event)
 	}
 	if reads := store.reads.Load(); reads != 1 {
@@ -156,7 +156,7 @@ func TestGameEventsHeartbeatDoesNotReadStorage(t *testing.T) {
 func TestGameEventsSubscribeBeforeSnapshot(t *testing.T) {
 	store := &observedStore{Store: memory.New()}
 	svc := service.New(store)
-	creator, err := svc.Create(t.Context(), "Ewen")
+	creator, err := svc.Create(t.Context(), "Ewen", false)
 	if err != nil {
 		t.Fatal(err)
 	}

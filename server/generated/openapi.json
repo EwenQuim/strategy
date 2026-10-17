@@ -20,11 +20,25 @@
         ],
         "type": "object"
       },
+      "Axial": {
+        "properties": {
+          "q": {
+            "type": "integer"
+          },
+          "r": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "q",
+          "r"
+        ],
+        "type": "object"
+      },
       "EngineAction": {
         "properties": {
-          "action": {
-            "nullable": true,
-            "type": "string"
+          "destination": {
+            "$ref": "#/components/schemas/Axial"
           },
           "q": {
             "nullable": true,
@@ -33,6 +47,9 @@
           "r": {
             "nullable": true,
             "type": "integer"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Axial"
           },
           "type": {
             "type": "string"
@@ -111,10 +128,15 @@
           "name": {
             "description": "Player name, 1 to 20 characters",
             "type": "string"
+          },
+          "public": {
+            "description": "List the game publicly so anyone can join",
+            "type": "boolean"
           }
         },
         "required": [
-          "name"
+          "name",
+          "public"
         ],
         "type": "object"
       },
@@ -249,6 +271,22 @@
         ],
         "type": "object"
       },
+      "publicWaitingGame": {
+        "description": "publicWaitingGame schema",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "namePlayer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "namePlayer"
+        ],
+        "type": "object"
+      },
       "unknown-interface": {
         "description": "unknown-interface schema"
       }
@@ -262,6 +300,77 @@
   "openapi": "3.1.0",
   "paths": {
     "/api/games": {
+      "get": {
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).listGames`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "operationId": "listGames",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/publicWaitingGame"
+                  },
+                  "type": "array"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/publicWaitingGame"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Bad Request _(validation or deserialization error)_"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Internal Server Error _(panics)_"
+          }
+        },
+        "summary": "List public games waiting for an opponent",
+        "tags": [
+          "api",
+          "games"
+        ]
+      },
       "post": {
         "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).createGame`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
         "operationId": "createGame",

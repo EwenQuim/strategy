@@ -6,14 +6,14 @@ import {
   MAP_HEIGHT,
   key,
   makeMap,
+  mirrorAxial,
   neighbors,
   passable,
   distFrom,
   initialState,
   reducer,
+  symmetricSeed,
   targetingTiles,
-  chargeDestinations,
-  jumpDestinations,
   King,
   Swordsman,
   Archer,
@@ -25,8 +25,12 @@ import {
   type Side,
   type Tile,
 } from '../src/lib/engine/index.ts'
-import { chooseBotActions } from '../src/lib/engine/bot.ts'
+
 import { SeededRandom, seedState } from '../src/lib/engine/random.ts'
+import { chargeDestinations } from '../src/lib/engine/pawns/swordsman.ts'
+import { jumpDestinations } from '../src/lib/engine/pawns/ninja.ts'
+import { DepthsearchBot } from '../src/bots/strategies/depthsearch.ts'
+import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 
 function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][] {
   const seen = new Set<string>()
@@ -55,12 +59,16 @@ function components(tiles: Map<string, Tile>, terrain: Tile['terrain']): Tile[][
 }
 
 test('Each biome has deterministic, connected terrain and the intended obstacle shapes', () => {
+  const size = { width: MAP_WIDTH, height: MAP_HEIGHT }
   for (const biome of Object.keys(BIOMES) as Biome[]) {
     for (let index = 0; index < 100; index++) {
       const seed = 'review-' + index
-      const tiles = makeMap(new SeededRandom(seedState(seed)), biome)
-      assert.deepEqual(tiles, makeMap(new SeededRandom(seedState(seed)), biome))
-      assert.equal(tiles.size, MAP_WIDTH * MAP_HEIGHT)
+      const tiles = makeMap(new SeededRandom(seedState(seed)), biome, [], false, size)
+      assert.deepEqual(
+        tiles,
+        makeMap(new SeededRandom(seedState(seed)), biome, [], false, size),
+      )
+      assert.ok(tiles.size <= MAP_WIDTH * MAP_HEIGHT)
       const land = [...tiles.values()].filter(passable)
       assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
       const { features } = BIOMES[biome]
@@ -109,6 +117,95 @@ test('Seeded games cover random biomes without Hell, broken shapes or isolated s
   assert.deepEqual(biomes, new Set(Object.keys(BIOMES).filter((biome) => biome !== 'hell')))
 })
 
+test('Symmetric seeds generate mirrored, connected battlefields with authored obstacle shapes', () => {
+  const size = { width: MAP_WIDTH, height: MAP_HEIGHT }
+  const spawns = [new King(1, 0, 10, 'player'), new King(2, 4, 1, 'enemy')]
+  for (const biome of Object.keys(BIOMES) as Biome[]) {
+    for (let index = 0; index < 30; index++) {
+      const seed = symmetricSeed(biome + '-' + index)
+      const tiles = makeMap(new SeededRandom(seedState(seed)), biome, spawns, true, size)
+      assert.deepEqual(
+        tiles,
+        makeMap(new SeededRandom(seedState(seed)), biome, spawns, true, size),
+      )
+      assert.ok(tiles.size <= MAP_WIDTH * MAP_HEIGHT)
+      for (const tile of tiles.values()) {
+        const mirror = mirrorAxial(tile, size)
+        const mirrored = tiles.get(key(mirror.q, mirror.r))
+        assert.ok(mirrored, biome + ': ' + seed)
+        assert.equal(mirrored.terrain, tile.terrain)
+        assert.equal(mirrored.feature, tile.feature)
+      }
+      const land = [...tiles.values()].filter(passable)
+      assert.equal(distFrom(tiles, [land[0]]).size, land.length, biome + ': ' + seed)
+      for (const spawn of spawns) {
+        assert.equal(tiles.get(key(spawn.q, spawn.r))?.terrain, BIOMES[biome].ground)
+        const mirror = mirrorAxial(spawn, size)
+        assert.equal(tiles.get(key(mirror.q, mirror.r))?.terrain, BIOMES[biome].ground)
+      }
+      for (const { terrain, max, shapes } of BIOMES[biome].features) {
+        const groups = components(tiles, terrain)
+        assert.ok(groups.length <= 2 * Math.ceil(max / 2), biome + ': ' + seed)
+        assert.equal(groups.length % 2, 0, biome + ': ' + seed)
+        for (const group of groups)
+          assert.ok(
+            shapes.some((shape) => shape.length === group.length),
+            biome + ': ' + seed,
+          )
+      }
+    }
+  }
+})
+
+test('Symmetric maps keep special terrain density close to asymmetric ones', () => {
+  for (const biome of Object.keys(BIOMES) as Biome[]) {
+    const terrains = BIOMES[biome].features.map((feature) => feature.terrain)
+    const specialCells = (symmetric: boolean) => {
+      let cells = 0
+      for (let index = 0; index < 50; index++) {
+        const tiles = makeMap(
+          new SeededRandom(seedState('density-' + index)),
+          biome,
+          [],
+          symmetric,
+        )
+        cells += [...tiles.values()].filter((tile) => terrains.includes(tile.terrain)).length
+      }
+      return cells
+    }
+    const asymmetric = specialCells(false)
+    assert.ok(
+      specialCells(true) <= asymmetric * 1.5,
+      biome + ' doubles its special terrain in symmetric mode',
+    )
+  }
+})
+
+test('Symmetric seeded battles stay symmetric across restarts and keep kings connected', () => {
+  for (let index = 0; index < 20; index++) {
+    const state = initialState(symmetricSeed('battle-' + index))
+    for (const tile of state.tiles.values()) {
+      const mirror = mirrorAxial(tile, state.mapSize)
+      const mirrored = state.tiles.get(key(mirror.q, mirror.r))
+      assert.ok(mirrored)
+      assert.equal(mirrored.terrain, tile.terrain)
+      assert.equal(mirrored.feature, tile.feature)
+    }
+    const kings = state.pawns.filter((pawn) => pawn.kind === 'king')
+    assert.equal(kings.length, 2)
+    assert.ok(distFrom(state.tiles, [kings[0]]).has(key(kings[1].q, kings[1].r)))
+    const half = state.pawns.length / 2
+    for (let i = 0; i < half; i++) {
+      const mirror = mirrorAxial(state.pawns[i], state.mapSize)
+      const enemy = state.pawns[half + i]
+      assert.equal(enemy.q, mirror.q)
+      assert.equal(enemy.r, mirror.r)
+      assert.equal(enemy.kind, state.pawns[i].kind)
+    }
+    assert.deepEqual(reducer(state, { type: 'restart' }), state)
+  }
+})
+
 function lakeBattle(side: Side): GameState {
   const other = side === 'player' ? 'enemy' : 'player'
   return {
@@ -127,7 +224,7 @@ function lakeBattle(side: Side): GameState {
   }
 }
 
-test('Lakes block walking and Charge for both sides, and cannot be Ninja landing tiles', () => {
+test('Lakes block walking and Charge for both sides, and cannot be Ninja landing tiles', async () => {
   for (const side of ['player', 'enemy'] as const) {
     for (const Unit of [King, ...RECRUIT_CLASSES]) {
       const state = lakeBattle(side)
@@ -143,12 +240,11 @@ test('Lakes block walking and Charge for both sides, and cannot be Ninja landing
             (t) => t.terrain === 'lake',
           ),
         )
-        const targeting = reducer(state, { type: 'act', action: 'special' })
-        assert.ok(!targetingTiles(targeting).has('2,0'))
-        assert.equal(reducer(targeting, { type: 'specialAt', q: 2, r: 0 }), targeting)
+        assert.ok(!targetingTiles(state, { action: 'special' }).has('2,0'))
+        assert.equal(reducer(state, { type: 'special', target: { q: 2, r: 0 } }), state)
       }
       let next = state
-      for (const action of chooseBotActions(state)) {
+      for (const action of await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)) {
         const result = reducer(next, action)
         assert.notEqual(result, next)
         next = result
@@ -164,14 +260,9 @@ test('Arrows, Aimed shot, magic, and Fireball cross lakes for both sides', () =>
       const state = lakeBattle(side)
       state.pawns[0] = new Unit(1, 1, 0, side)
       state.pawns[2].q = 3
-      for (const action of ['attack', 'special'] as const) {
-        const targeting = reducer(state, { type: 'act', action })
-        assert.ok(targetingTiles(targeting).has('3,0'))
-        const next = reducer(targeting, {
-          type: action === 'attack' ? 'attackAt' : 'specialAt',
-          q: 3,
-          r: 0,
-        })
+      for (const action of ['special'] as const) {
+        assert.ok(targetingTiles(state, { action }).has('3,0'))
+        const next = reducer(state, { type: 'special', target: { q: 3, r: 0 } })
         assert.equal(next.pawns[2].hp, 7 - (Unit === Archer && action === 'special' ? 2 : 1))
         assert.equal(state.pawns[2].hp, 7)
         assert.equal(next.tiles.get('2,0')?.terrain, 'lake')

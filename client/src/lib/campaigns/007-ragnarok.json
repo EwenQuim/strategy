@@ -1,0 +1,214 @@
+[
+  {
+    "id": 1,
+    "name": "Raids on the Coast",
+    "seed": "ragnarok-v2-1",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 2,
+        "beamWidth": 4,
+        "riskAppetite": 0.65,
+        "focus": "weakest",
+        "latitude": 25
+      }
+    },
+    "setup": {
+      "biome": "verdant",
+      "firstEnemyKinds": ["berserker"],
+      "map": [
+        "__....__",
+        "_......_",
+        "........",
+        "..f..f..",
+        "........",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 6 },
+        { "kind": "swordsman", "col": 2, "row": 5 },
+        { "kind": "swordsman", "col": 4, "row": 5 },
+        { "kind": "archer", "col": 3, "row": 5 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "berserker", "col": 4, "row": 4 },
+        { "kind": "archer", "col": 4, "row": 1, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Wolf Pack",
+    "seed": "ragnarok-v2-2",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "verdant",
+      "map": [
+        "__....__",
+        "_......_",
+        ".f....f.",
+        "........",
+        "........",
+        ".f....f.",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "berserker", "col": 2, "row": 6 },
+        { "kind": "wolf", "col": 4, "row": 6 },
+        { "kind": "swordsman", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "wolf", "col": 2, "row": 2 },
+        { "kind": "swordsman", "col": 3, "row": 2, "hp": 3 },
+        { "kind": "archer", "col": 4, "row": 1, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Hall of the Skalds",
+    "seed": "ragnarok-v2-3",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_......_",
+        "_^^..^^_",
+        "_......_",
+        "_......_",
+        "_^^..^^_",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "berserker", "col": 3, "row": 6 },
+        { "kind": "berserker", "col": 4, "row": 6 },
+        { "kind": "wolf", "col": 5, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 4, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 4, "row": 0, "hp": 5 },
+        { "kind": "swordsman", "col": 3, "row": 3, "hp": 3 },
+        { "kind": "swordsman", "col": 4, "row": 3, "hp": 3 },
+        { "kind": "archer", "col": 2, "row": 1, "hp": 2 },
+        { "kind": "magician", "col": 5, "row": 1, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Fimbulwinter",
+    "seed": "ragnarok-v2-4",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "mountains",
+      "map": [
+        "__....__",
+        "_..~~.._",
+        "_..~~.._",
+        "__....__",
+        "_......_",
+        "_......_",
+        "_......_",
+        "__....__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "berserker", "col": 3, "row": 6 },
+        { "kind": "wolf", "col": 4, "row": 6 },
+        { "kind": "archer", "col": 2, "row": 6 },
+        { "kind": "magician", "col": 5, "row": 6 },
+        { "kind": "bulwark", "col": 4, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "ninja", "col": 1, "row": 1 },
+        { "kind": "ninja", "col": 6, "row": 1 },
+        { "kind": "wolf", "col": 5, "row": 2 },
+        { "kind": "magician", "col": 2, "row": 2, "hp": 2 }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Ragnarok",
+    "seed": "ragnarok-v2-5",
+    "bot": {
+      "name": "depthsearch",
+      "options": {
+        "depth": 3,
+        "beamWidth": 6,
+        "riskAppetite": 0,
+        "focus": "best",
+        "latitude": 0
+      }
+    },
+    "setup": {
+      "biome": "hell",
+      "hellfireCount": 2,
+      "map": [
+        "_bbbbbb_",
+        "bbbbbbbb",
+        "bl....lb",
+        "b..bb..b",
+        "b..bb..b",
+        "bl....lb",
+        "bbbbbbbb",
+        "__bbbb__"
+      ],
+      "player": [
+        { "kind": "king", "col": 3, "row": 7 },
+        { "kind": "berserker", "col": 2, "row": 6 },
+        { "kind": "berserker", "col": 4, "row": 6 },
+        { "kind": "wolf", "col": 3, "row": 6 },
+        { "kind": "archer", "col": 1, "row": 6 },
+        { "kind": "archer", "col": 5, "row": 6 },
+        { "kind": "magician", "col": 4, "row": 7 }
+      ],
+      "enemy": [
+        { "kind": "king", "col": 3, "row": 0, "hp": 5 },
+        { "kind": "swordsman", "col": 2, "row": 2, "hp": 3 },
+        { "kind": "swordsman", "col": 4, "row": 2, "hp": 3 },
+        { "kind": "wolf", "col": 3, "row": 2 },
+        { "kind": "magician", "col": 5, "row": 1 },
+        { "kind": "bulwark", "col": 4, "row": 1, "hp": 6 }
+      ]
+    }
+  }
+]

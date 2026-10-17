@@ -1,12 +1,14 @@
+import { readLocal, saveLocal } from './storage.ts'
 import {
   CAMPAIGNS,
   campaignStorageKey,
   completeCampaignLevel,
   parseCampaignProgress,
   type Campaign,
-} from './lib/campaign'
+} from './campaign'
 
-const sessionCompleted = new Map<string, number>()
+const NONE: readonly number[] = []
+const sessionCleared = new Map<string, readonly number[]>()
 const unsaved = new Set<string>()
 const listeners = new Set<() => void>()
 
@@ -23,35 +25,35 @@ export function campaignProgressSaved(slug: string): boolean {
   return !unsaved.has(slug)
 }
 
-export function readCampaignProgress(slug: string): number {
+export function readClearedLevels(slug: string): readonly number[] {
   const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)
-  if (!campaign) return 0
-  try {
-    sessionCompleted.set(
-      slug,
-      Math.max(
-        sessionCompleted.get(slug) ?? 0,
-        parseCampaignProgress(
-          localStorage.getItem(campaignStorageKey(slug)),
-          campaign.levels.length,
-        ),
-      ),
-    )
-  } catch {
-    return sessionCompleted.get(slug) ?? 0
-  }
-  return sessionCompleted.get(slug)!
+  if (!campaign) return NONE
+  const known = sessionCleared.get(slug) ?? NONE
+  const stored = readLocal(campaignStorageKey(slug), NONE, (raw) =>
+    parseCampaignProgress(raw, campaign.levels.length),
+  )
+  const merged = [...new Set([...known, ...stored])].sort((a, b) => a - b)
+  // Keep the same array while nothing changed so useSyncExternalStore snapshots stay stable.
+  if (merged.length === known.length) return known
+  sessionCleared.set(slug, merged)
+  return merged
+}
+
+export function readCampaignProgress(slug: string): number {
+  return readClearedLevels(slug).length
+}
+
+// Whether the level was already cleared when the battle started, so a replay unlocks nothing.
+export function clearedAtStart(campaign: Campaign | undefined, level: number | undefined) {
+  return !!campaign && !!level && readClearedLevels(campaign.slug).includes(level)
 }
 
 export function recordCampaignVictory(slug: string, level: number): void {
-  const campaign: Campaign | undefined = CAMPAIGNS.find((pack) => pack.slug === slug)
+  const campaign = CAMPAIGNS.find((pack) => pack.slug === slug)
   if (!campaign) return
-  sessionCompleted.set(slug, completeCampaignLevel(campaign, readCampaignProgress(slug), level))
-  try {
-    localStorage.setItem(campaignStorageKey(slug), String(sessionCompleted.get(slug)))
-    unsaved.delete(slug)
-  } catch {
-    unsaved.add(slug)
-  }
+  const cleared = completeCampaignLevel(campaign, readClearedLevels(slug), level)
+  sessionCleared.set(slug, cleared)
+  if (saveLocal(campaignStorageKey(slug), JSON.stringify(cleared))) unsaved.delete(slug)
+  else unsaved.add(slug)
   for (const listener of listeners) listener()
 }

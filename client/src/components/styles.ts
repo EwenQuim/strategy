@@ -8,8 +8,21 @@ export const primaryButtonClassName =
   buttonClassName +
   ' justify-center gap-[30px] border-transparent bg-gold px-[25px] text-[15px] text-[var(--biome-panel,#20362b)] hover:brightness-110'
 
-export const panelClassName =
+const panelClassName =
   'rounded-2xl border border-[#d1cf9b40] bg-[var(--biome-panel,#20362b)] text-ink shadow-[0_25px_90px_#0000008c]'
+
+export const menuCardClassName =
+  'rounded-2xl border border-line bg-gradient-to-br from-white/7 to-white/2 shadow-[0_8px_24px_#0002]'
+
+export const menuInputClassName =
+  'min-h-12 w-full min-w-0 rounded-xl border border-line bg-[#152b24] px-3 py-2 text-[16px] text-ink [color-scheme:dark] disabled:opacity-50'
+
+export const switchClassName =
+  'relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none'
+
+export const menuPrimaryButtonClassName =
+  primaryButtonClassName +
+  ' min-h-12 rounded-xl bg-gradient-to-b from-[#eddbab] to-gold shadow-[0_3px_0_#0003,inset_0_1px_0_#fff5] active:translate-y-px'
 
 export const dialogClassName =
   panelClassName +

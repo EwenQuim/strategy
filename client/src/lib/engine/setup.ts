@@ -1,34 +1,37 @@
 import { BIOMES, type Biome } from './biomes/index.ts'
 import {
   MAP_WIDTH,
-  MAP_HEIGHT,
+  decorateMap,
   hexOf,
   key,
-  makeMap,
   mapFromRows,
+  mirrorAxial,
   passable,
+  type Axial,
+  type MapSize,
   type Tile,
 } from './hex.ts'
-import {
-  King,
-  PAWN_CLASSES,
-  RECRUIT_CLASSES,
-  Swordsman,
-  type Pawn,
-  type Side,
-} from './pawns/index.ts'
+import { generateMapShape, rollMapSize } from './shapes.ts'
+import { King, PAWN_CLASSES, RECRUIT_CLASSES, type Pawn, type Side } from './pawns/index.ts'
 import { SeededRandom, seedState } from './random.ts'
+
+const SYMMETRIC_SEED_PREFIX = 'sym-'
+
+export const symmetricSeed = (seed: string) => SYMMETRIC_SEED_PREFIX + seed
+const isSymmetricSeed = (seed: string) => seed.startsWith(SYMMETRIC_SEED_PREFIX)
 
 type PawnPlacement = {
   readonly kind: Pawn['kind']
   readonly col: number
   readonly row: number
+  readonly hp?: number
 }
 
 export type FixedBattleSetup = {
   readonly biome: Biome
   readonly map: readonly string[]
   readonly hellfireCount?: 1 | 2
+  readonly firstEnemyKinds?: readonly Pawn['kind'][]
   readonly player: readonly PawnPlacement[]
   readonly enemy: readonly PawnPlacement[]
 }
@@ -42,6 +45,29 @@ export type BattleSetup =
       readonly enemy: readonly Pawn['kind'][]
     }
 
+function validateInitiative(setup: BattleSetup): void {
+  if (
+    setup.map !== undefined &&
+    setup.firstEnemyKinds !== undefined &&
+    (!Array.isArray(setup.firstEnemyKinds) ||
+      setup.firstEnemyKinds.some(
+        (kind) =>
+          !Object.hasOwn(PAWN_CLASSES, kind) || !setup.enemy.some((p) => p.kind === kind),
+      ))
+  )
+    throw new Error('Early enemy initiative must name a unit in the enemy army')
+}
+
+function validateHealth(unit: PawnPlacement, side: Side): void {
+  if (
+    unit.hp !== undefined &&
+    (!Number.isInteger(unit.hp) ||
+      unit.hp < 1 ||
+      unit.hp > new PAWN_CLASSES[unit.kind](0, 0, 0, side).maxHp)
+  )
+    throw new Error(side + ' army must specify health within the unit maximum')
+}
+
 export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): void {
   if (!setup || !Object.hasOwn(BIOMES, setup.biome))
     throw new Error('Battle setup must specify a valid biome')
@@ -51,6 +77,7 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
     (setup.biome !== 'hell' || ![1, 2].includes(setup.hellfireCount))
   )
     throw new Error('Hellfire count must be 1 or 2 in a Hell battle')
+  validateInitiative(setup)
   const maxUnits = tiles ? [...tiles.values()].filter(passable).length : MAP_WIDTH * 3
   const occupied = new Set<string>()
   for (const side of ['player', 'enemy'] as const) {
@@ -63,6 +90,7 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
       if (typeof kind !== 'string' || !Object.hasOwn(PAWN_CLASSES, kind))
         throw new Error(side + ' army contains an unknown pawn kind')
       if (kind === 'king') kings++
+      if (typeof unit === 'object') validateHealth(unit, side)
       if (tiles) {
         if (
           typeof unit !== 'object' ||
@@ -100,8 +128,28 @@ function spawnPlacedArmy(army: readonly PawnPlacement[], side: Side, firstId: nu
   return army.map((unit, index) => {
     const { q, r } = hexOf(unit.col, unit.row)
     const Unit = PAWN_CLASSES[unit.kind]
-    return new Unit(firstId + index, q, r, side)
+    return new Unit(firstId + index, q, r, side, unit.hp)
   })
+}
+
+// Spawn zones always cover the three rows at the map end and only grow deeper
+// when carving or a maximal army needs room.
+function spawnZone(
+  tiles: Map<string, Tile>,
+  size: MapSize,
+  side: Side,
+  count: number,
+): Axial[] {
+  const out: Axial[] = []
+  for (let row = 0; row < size.height; row++) {
+    const r = side === 'player' ? size.height - 1 - row : row
+    for (let col = 0; col < size.width; col++) {
+      const { q } = hexOf(col, r)
+      if (passable(tiles.get(key(q, r)))) out.push({ q, r })
+    }
+    if (row >= 2 && out.length >= count) break
+  }
+  return out
 }
 
 function spawnRandomArmy(
@@ -109,27 +157,20 @@ function spawnRandomArmy(
   side: Side,
   firstId: number,
   random: SeededRandom,
+  tiles: Map<string, Tile>,
+  size: MapSize,
 ): Pawn[] {
-  const firstRow = side === 'player' ? MAP_HEIGHT - 3 : 0
-  const positions = shuffle(
-    Array.from({ length: MAP_WIDTH * 3 }, (_, index) =>
-      hexOf(index % MAP_WIDTH, firstRow + Math.floor(index / MAP_WIDTH)),
-    ),
-    random,
-  )
-  const frontPositions =
-    side === 'player'
-      ? positions
-          .filter((tile) => tile.r === firstRow)
-          .slice(0, army.filter((Unit) => Unit.startsOnFrontRow).length)
-      : []
-  const otherPositions = positions.filter((tile) => !frontPositions.includes(tile))
+  const positions = shuffle(spawnZone(tiles, size, side, army.length), random)
+  const frontRow = side === 'player' ? size.height - 3 : 0
+  const frontPositions = positions
+    .filter((tile) => tile.r === frontRow)
+    .slice(0, side === 'player' ? army.filter((Unit) => Unit.startsOnFrontRow).length : 0)
+  const frontSet = new Set(frontPositions.map((tile) => key(tile.q, tile.r)))
+  const otherPositions = positions.filter((tile) => !frontSet.has(key(tile.q, tile.r)))
   return army.map((Unit, index) => {
-    const available =
-      side === 'player' && Unit.startsOnFrontRow && frontPositions.length
-        ? frontPositions
-        : otherPositions
-    const tile = available.shift()!
+    const wantsFront = side === 'player' && Unit.startsOnFrontRow
+    const pool = wantsFront && frontPositions.length ? frontPositions : otherPositions
+    const tile = pool.shift()!
     return new Unit(firstId + index, tile.q, tile.r, side)
   })
 }
@@ -141,6 +182,9 @@ function copySetup(setup: BattleSetup | undefined): BattleSetup | undefined {
       biome: setup.biome,
       map: [...setup.map],
       ...(setup.hellfireCount !== undefined ? { hellfireCount: setup.hellfireCount } : {}),
+      ...(setup.firstEnemyKinds !== undefined
+        ? { firstEnemyKinds: [...setup.firstEnemyKinds] }
+        : {}),
       player: setup.player.map((unit) => ({ ...unit })),
       enemy: setup.enemy.map((unit) => ({ ...unit })),
     }
@@ -155,8 +199,13 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
   let biome: Biome
   let pawns: Pawn[]
   let tiles: Map<string, Tile>
+  let size: MapSize
   if (setup?.map !== undefined) {
     biome = setup.biome
+    size = {
+      width: Math.max(...setup.map.map((line) => line.length)),
+      height: setup.map.length,
+    }
     tiles = authoredTiles!
     pawns = [
       ...spawnPlacedArmy(setup.player, 'player', 1),
@@ -164,30 +213,46 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     ]
   } else {
     // Keep existing seeded and online battles stable; Hell is an explicit setup choice.
-    const biomes = (Object.keys(BIOMES) as Biome[]).filter((biome) => biome !== 'hell')
+    const biomes = (Object.keys(BIOMES) as Biome[]).filter((name) => name !== 'hell')
     biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
+    size = rollMapSize(random)
     const playerArmy = setup
       ? setup.player.map((kind) => PAWN_CLASSES[kind])
-      : [
-          Swordsman,
-          King,
-          ...Array.from(
-            { length: 3 },
-            () => RECRUIT_CLASSES[Math.floor(random.next() * RECRUIT_CLASSES.length)],
-          ),
-        ]
+      : [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
     const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
-    pawns = [
-      ...spawnRandomArmy(playerArmy, 'player', 1, random),
-      ...spawnRandomArmy(enemyArmy, 'enemy', playerArmy.length + 1, random),
-    ]
-    tiles = makeMap(random, biome, pawns)
+    const symmetric = isSymmetricSeed(seed)
+    // The shape exists before armies spawn on it, then decoration protects them.
+    const shape = generateMapShape(random, size, symmetric)
+    const playerPawns = spawnRandomArmy(playerArmy, 'player', 1, random, shape, size)
+    const enemyPawns =
+      symmetric && enemyArmy.length === playerArmy.length
+        ? enemyArmy.map((Unit, index) => {
+            const mirror = mirrorAxial(playerPawns[index], size)
+            return new Unit(playerArmy.length + 1 + index, mirror.q, mirror.r, 'enemy')
+          })
+        : spawnRandomArmy(enemyArmy, 'enemy', playerArmy.length + 1, random, shape, size)
+    pawns = [...playerPawns, ...enemyPawns]
+    tiles = decorateMap(random, biome, shape, pawns, symmetric, size)
   }
   const savedSetup = copySetup(setup)
   const initiative = shuffle(pawns, random)
   if (startingSide) {
     const first = initiative.findIndex((pawn) => pawn.side === startingSide)
     initiative.push(...initiative.splice(0, first))
+  }
+  // Introductions follow a safe opening by the player King, before any other unit acts.
+  if (setup?.map !== undefined && setup.firstEnemyKinds?.length) {
+    const opening = initiative.find((p) => p.side === 'player' && p.kind === 'king')!
+    const first = initiative.filter(
+      (p) => p.side === 'enemy' && setup.firstEnemyKinds!.includes(p.kind),
+    )
+    initiative.splice(
+      0,
+      initiative.length,
+      opening,
+      ...first,
+      ...initiative.filter((p) => p !== opening && !first.includes(p)),
+    )
   }
   // Number the finalized initiative, including any starting-side rotation.
   initiative.forEach((pawn, index) => {
@@ -199,6 +264,7 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     pawns,
     order: initiative.map((_, index) => index + 1),
     seed,
+    mapSize: size,
     ...(savedSetup ? { setup: savedSetup } : {}),
     randomState: random.state,
   }

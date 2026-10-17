@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS games (
 	name_enemy    TEXT CHECK (name_enemy IS NULL OR length(name_enemy) BETWEEN 1 AND 20),
 	token_player TEXT NOT NULL,
 	token_enemy  TEXT,
+	public       INTEGER NOT NULL CHECK (public IN (0, 1)),
 	status       TEXT NOT NULL CHECK (status IN ('waiting', 'active', 'finished')),
 	winner       TEXT CHECK (winner IS NULL OR winner IN ('player', 'enemy')),
 	version      INTEGER NOT NULL CHECK (version >= 0),
@@ -48,6 +49,11 @@ type Store struct {
 	mu sync.Mutex
 }
 
+const lobbyIndex = `
+CREATE INDEX IF NOT EXISTS games_public_waiting
+ON games(created_at DESC)
+WHERE public = 1 AND status = 'waiting'`
+
 func Open(path string) (*Store, error) {
 	db, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)")
 	if err != nil {
@@ -59,7 +65,30 @@ func Open(path string) (*Store, error) {
 			return nil, fmt.Errorf("create schema: %w", err)
 		}
 	}
+	if err := addPublicColumn(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	if _, err := db.Exec(lobbyIndex); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("create schema: %w", err)
+	}
 	return &Store{db: db}, nil
+}
+
+// Databases created before the public flag lack the column.
+func addPublicColumn(db *sql.DB) error {
+	var present int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('games') WHERE name = 'public'`).Scan(&present); err != nil {
+		return err
+	}
+	if present > 0 {
+		return nil
+	}
+	if _, err := db.Exec(`ALTER TABLE games ADD COLUMN public INTEGER NOT NULL DEFAULT 0`); err != nil {
+		return fmt.Errorf("add public column: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) Close() error {
@@ -77,9 +106,9 @@ func (s *Store) Create(ctx context.Context, g game.Game) error {
 		return err
 	}
 	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO games (code, seed, name_player, token_player, status, version, created_at, updated_at)
-		 VALUES (?, ?, ?, ?, 'waiting', 0, ?, ?)`,
-		g.Code, g.Seed, g.NamePlayer, g.TokenPlayer, unix(g.CreatedAt), unix(g.UpdatedAt))
+		`INSERT INTO games (code, seed, name_player, token_player, public, status, version, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, 'waiting', 0, ?, ?)`,
+		g.Code, g.Seed, g.NamePlayer, g.TokenPlayer, g.Public, unix(g.CreatedAt), unix(g.UpdatedAt))
 	return err
 }
 
@@ -111,6 +140,31 @@ func (s *Store) Game(ctx context.Context, code string) (game.Game, error) {
 		g.Actions = append(g.Actions, a)
 	}
 	return g, rows.Err()
+}
+
+func (s *Store) PublicWaiting(ctx context.Context) ([]game.Game, error) {
+	cutoff := time.Now().Add(-game.PublicLobbyWindow).Unix()
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT code, name_player, public, created_at FROM games
+		 WHERE public = 1 AND status = 'waiting' AND created_at >= ? ORDER BY created_at DESC LIMIT ?`,
+		cutoff, game.PublicLobbyLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var waiting []game.Game
+	for rows.Next() {
+		var g game.Game
+		var public, createdAt int64
+		if err := rows.Scan(&g.Code, &g.NamePlayer, &public, &createdAt); err != nil {
+			return nil, err
+		}
+		g.Public = public == 1
+		g.Status = game.Waiting
+		g.CreatedAt = time.Unix(createdAt, 0).UTC()
+		waiting = append(waiting, g)
+	}
+	return waiting, rows.Err()
 }
 
 func (s *Store) Join(ctx context.Context, code, name, tokenHash string) (game.Game, error) {
@@ -202,12 +256,13 @@ func (s *Store) Append(ctx context.Context, code string, version int, action gam
 
 func (s *Store) read(ctx context.Context, code string) (game.Game, error) {
 	var g game.Game
+	var public int
 	var nameEnemy, tokenEnemy, winner sql.NullString
 	var createdAt, updatedAt int64
 	err := s.db.QueryRowContext(ctx,
-		`SELECT code, seed, name_player, name_enemy, token_player, token_enemy, status, winner, version, created_at, updated_at
+		`SELECT code, seed, name_player, name_enemy, token_player, token_enemy, public, status, winner, version, created_at, updated_at
 		 FROM games WHERE code = ?`, code).
-		Scan(&g.Code, &g.Seed, &g.NamePlayer, &nameEnemy, &g.TokenPlayer, &tokenEnemy, &g.Status, &winner, &g.Version, &createdAt, &updatedAt)
+		Scan(&g.Code, &g.Seed, &g.NamePlayer, &nameEnemy, &g.TokenPlayer, &tokenEnemy, &public, &g.Status, &winner, &g.Version, &createdAt, &updatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return game.Game{}, game.ErrNotFound
 	}
@@ -216,6 +271,7 @@ func (s *Store) read(ctx context.Context, code string) (game.Game, error) {
 	}
 	g.NameEnemy = nameEnemy.String
 	g.TokenEnemy = tokenEnemy.String
+	g.Public = public == 1
 	if winner.Valid {
 		side := game.Side(winner.String)
 		g.Winner = &side

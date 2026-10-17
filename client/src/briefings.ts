@@ -1,57 +1,64 @@
 import * as b from './i18n/briefing.ts'
-import { specialTexts, unitNames } from './i18n/units.ts'
+import { unitNames } from './i18n/units.ts'
+import { specialTexts } from './i18n/specialTexts.ts'
 import { featureTexts } from './i18n/biomes.ts'
-import {
-  ESCAPE_BONUS,
-  MAX_ESCAPE,
-  PAWN_CLASSES,
-  START_ENERGY,
-  type PawnKind,
-} from './lib/engine/index.ts'
-import type { IntroducedElement } from './lib/campaign.ts'
+import { PAWN_CLASSES, START_ENERGY, type PawnKind } from './lib/engine/index.ts'
+import type { IntroducedElement } from './campaign.ts'
+
+export const ELEMENT_ACCENTS: Partial<Record<IntroducedElement, string>> = Object.fromEntries(
+  Object.entries(PAWN_CLASSES).map(([kind, pawnClass]) => [kind, pawnClass.accent]),
+)
 
 export interface BriefingElement {
   readonly name: string
   readonly points: readonly string[]
   readonly art?: IntroducedElement
+  readonly icon?: 'crown' | 'energy' | 'history'
+  readonly stats?: { hp: number; damage: number; range: string }
+  readonly special?: { name: string; cost: number; description: string }
 }
 
-function unit(kind: PawnKind, ...specialPoints: string[]): BriefingElement {
+function unit(kind: PawnKind, ...points: string[]): BriefingElement {
   const { maxHp, attack, special } = new PAWN_CLASSES[kind](0, 0, 0, 'player')
   const range =
-    attack.minRange === attack.maxRange
+    special.range ??
+    (attack.minRange === attack.maxRange
       ? String(attack.maxRange)
-      : attack.minRange + '-' + attack.maxRange
+      : attack.minRange + '-' + attack.maxRange)
   return {
     name: unitNames[kind],
     art: kind,
-    points: [
-      b.statLine(maxHp, attack.damage, range),
-      b.specialLine(specialTexts[special.name], special.cost, specialPoints[0]),
-      ...specialPoints.slice(1),
-    ],
+    stats: { hp: maxHp, damage: special.damage ?? attack.damage, range },
+    special: {
+      name: specialTexts[special.name],
+      cost: special.cost,
+      description: specialTexts[special.description],
+    },
+    points,
   }
 }
 
 export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]> = {
   king: [
-    { name: b.goal, points: [b.killEnemyKing] },
+    { name: b.goal, icon: 'crown', points: [b.killEnemyKing] },
+    { name: b.turnOrder, icon: 'history', points: [b.unitByUnit, b.fixedOrder] },
     {
       name: b.energy,
-      points: [
-        b.energyPerRound(START_ENERGY),
-        b.spendEnergy,
-        b.unusedEnergy(ESCAPE_BONUS, MAX_ESCAPE),
-      ],
+      icon: 'energy',
+      points: [b.energyPerRound(START_ENERGY), b.spendEnergy, b.unusedEnergy],
     },
-    unit('king', b.rallyBrief, b.loseKing),
+    unit('king', b.loseKing),
   ],
-  swordsman: [unit('swordsman', b.chargeBrief)],
-  archer: [unit('archer', b.aimedShotBrief, b.archerMinRange)],
-  magician: [unit('magician', b.fireballBrief, b.fireballPasses)],
-  bulwark: [unit('bulwark', b.protectBrief, b.bulwarkSlow)],
-  bomber: [unit('bomber', b.bombBrief, b.bombFriendly)],
-  ninja: [unit('ninja', b.jumpBrief, b.jumpNoAttack)],
+  swordsman: [unit('swordsman')],
+  archer: [unit('archer', b.archerMinRange)],
+  magician: [unit('magician', b.fireballPasses)],
+  bulwark: [unit('bulwark', b.bulwarkSlow)],
+  bomber: [unit('bomber', b.bombFriendly)],
+  ninja: [unit('ninja', b.jumpNoAttack)],
+  hoplite: [unit('hoplite')],
+  wolf: [unit('wolf')],
+  berserker: [unit('berserker')],
+  lancer: [unit('lancer')],
   lake: [
     {
       name: b.lakes,
@@ -77,7 +84,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.lava,
       art: 'lava',
-      points: [b.lavaDamage, b.ignoresEscapeProtect, b.basaltSafe],
+      points: [b.lavaDamage, b.ignoresProtection, b.basaltSafe],
     },
   ],
   watchtower: [
@@ -105,7 +112,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
     {
       name: b.hellfire,
       art: 'hell',
-      points: [b.hellfireDamage, b.ignoresEscapeProtect, b.bothKingsDraw],
+      points: [b.hellfireDamage, b.ignoresProtection, b.bothKingsDraw],
     },
   ],
 }

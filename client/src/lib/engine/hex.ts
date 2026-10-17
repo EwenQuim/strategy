@@ -11,6 +11,9 @@ export type Tile = { q: number; r: number; terrain: Terrain; feature?: TileFeatu
 export const MAP_WIDTH = 8
 export const MAP_HEIGHT = 12
 
+// Generated maps roll their dimensions; authored maps derive them from their rows.
+export type MapSize = { readonly width: number; readonly height: number }
+
 export const key = (q: number, r: number) => `${q},${r}`
 export const hexOf = (col: number, row: number): Axial => ({
   q: col - Math.floor(row / 2),
@@ -32,6 +35,13 @@ export function neighbors(q: number, r: number): Axial[] {
 
 export function hexDist(a: Axial, b: Axial) {
   return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2
+}
+
+export const sameHex = (a: Axial | null | undefined, b: Axial | null | undefined): boolean =>
+  !!a && !!b && a.q === b.q && a.r === b.r
+
+export function mirrorAxial({ q, r }: Axial, size: MapSize): Axial {
+  return { q: size.width - q - size.height / 2, r: size.height - 1 - r }
 }
 
 export function passable(tile: Tile | undefined): boolean {
@@ -87,24 +97,100 @@ function tryPlaceConnectedTerrain(
   return false
 }
 
+type Placement = { anchor: Axial; shape: Shape }
+
+const placementCells = ({ anchor, shape }: Placement): Axial[] =>
+  shape.map(([q, r]) => ({ q: anchor.q + q, r: anchor.r + r }))
+
+function placementsTouch(a: Placement, b: Placement): boolean {
+  const aKeys = new Set(placementCells(a).map((cell) => key(cell.q, cell.r)))
+  const bKeys = new Set(placementCells(b).map((cell) => key(cell.q, cell.r)))
+  return placementCells(a).some(
+    (cell) =>
+      bKeys.has(key(cell.q, cell.r)) ||
+      neighbors(cell.q, cell.r).some((n) => {
+        const k = key(n.q, n.r)
+        return bKeys.has(k) && !aKeys.has(k)
+      }),
+  )
+}
+
+const inRectangle = (axial: Axial, size: MapSize): boolean => {
+  const col = axial.q + Math.floor(axial.r / 2)
+  return axial.r >= 0 && axial.r < size.height && col >= 0 && col < size.width
+}
+
+function anchorScore(
+  tiles: Map<string, Tile>,
+  size: MapSize,
+  bias: NonNullable<MapFeature['anchorBias']>,
+  tile: Tile,
+): number {
+  if (bias === 'bay')
+    // Carved gaps inside the map outline read as bays that pools of water or lava extend.
+    return -neighbors(tile.q, tile.r).filter(
+      (n) => !tiles.has(key(n.q, n.r)) && inRectangle(n, size),
+    ).length
+  const center = hexOf((size.width - 1) >> 1, (size.height - 1) >> 1)
+  return hexDist(tile, center)
+}
+
+function orderAnchors(
+  tiles: Map<string, Tile>,
+  size: MapSize,
+  feature: MapFeature,
+  random: SeededRandom,
+  anchors: Tile[],
+): Tile[] {
+  const offset = Math.floor(random.next() * anchors.length)
+  const rotated = [...anchors.slice(offset), ...anchors.slice(0, offset)]
+  if (!feature.anchorBias) return rotated
+  const scored = rotated.map((tile, index) => ({
+    tile,
+    index,
+    score: anchorScore(tiles, size, feature.anchorBias!, tile),
+  }))
+  scored.sort((a, b) => a.score - b.score || a.index - b.index)
+  return scored.map((entry) => entry.tile)
+}
+
 function placeFeature(
   tiles: Map<string, Tile>,
   anchors: Tile[],
   reserved: Set<string>,
   feature: MapFeature,
   random: SeededRandom,
+  symmetric = false,
+  size: MapSize,
 ) {
+  const ordered = orderAnchors(tiles, size, feature, random, anchors)
   const count = roll(feature.min, feature.max, random)
-  for (let i = 0; i < count; i++) {
+  const placementsWanted = symmetric ? Math.ceil(count / 2) : count
+  for (let i = 0; i < placementsWanted; i++) {
     const first = Math.floor(random.next() * feature.shapes.length)
     let placed = false
     for (let s = 0; s < feature.shapes.length && !placed; s++) {
       const shape = orient(feature.shapes[(first + s) % feature.shapes.length], random)
-      const offset = Math.floor(random.next() * anchors.length)
-      for (let a = 0; a < anchors.length; a++) {
-        const anchor = anchors[(offset + a) % anchors.length]
-        if (!shapeFits(tiles, reserved, anchor, shape, feature.terrain)) continue
-        const placedTiles = shape.map(([q, r]) => tiles.get(key(anchor.q + q, anchor.r + r))!)
+      for (const anchor of ordered) {
+        const placements: Placement[] = symmetric
+          ? [
+              { anchor, shape },
+              {
+                anchor: mirrorAxial(anchor, size),
+                shape: shape.map(([q, r]) => [-q, -r] as [number, number]),
+              },
+            ]
+          : [{ anchor, shape }]
+        if (
+          !placements.every((p) =>
+            shapeFits(tiles, reserved, p.anchor, p.shape, feature.terrain),
+          )
+        )
+          continue
+        if (symmetric && placementsTouch(placements[0], placements[1])) continue
+        const placedTiles = placements.flatMap((p) =>
+          placementCells(p).map((cell) => tiles.get(key(cell.q, cell.r))!),
+        )
         if (!tryPlaceConnectedTerrain(tiles, anchors, placedTiles, feature.terrain)) continue
         for (const tile of placedTiles) reserved.add(key(tile.q, tile.r))
         placed = true
@@ -154,31 +240,43 @@ export function mapFromRows(rows: readonly string[]): Map<string, Tile> {
   return tiles
 }
 
-export function makeMap(
+// Applies biome ground, scatter and features to an existing map shape, never
+// touching the protected spawn tiles.
+export function decorateMap(
   random: SeededRandom,
   biome: Biome,
-  protectedTiles: Axial[] = [],
+  tiles: Map<string, Tile>,
+  protectedTiles: readonly Axial[] = [],
+  symmetric = false,
+  size: MapSize,
 ): Map<string, Tile> {
   const { ground, scatter, features: terrainFeatures } = BIOMES[biome]
-  const tiles = new Map<string, Tile>()
   const reserved = new Set(protectedTiles.map((p) => key(p.q, p.r)))
-  for (let row = 0; row < MAP_HEIGHT; row++) {
-    for (let col = 0; col < MAP_WIDTH; col++) {
+  if (symmetric)
+    for (const p of protectedTiles) {
+      const mirror = mirrorAxial(p, size)
+      reserved.add(key(mirror.q, mirror.r))
+    }
+  const rows = symmetric ? size.height / 2 : size.height
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < size.width; col++) {
       const { q, r } = hexOf(col, row)
+      if (!tiles.has(key(q, r))) continue
+      const pair: Axial[] = symmetric ? [{ q, r }, mirrorAxial({ q, r }, size)] : [{ q, r }]
+      const blocked = pair.some((t) => reserved.has(key(t.q, t.r)))
       const terrain =
-        scatter && !reserved.has(key(q, r)) && random.next() < scatter.chance
-          ? scatter.terrain
-          : ground
-      tiles.set(key(q, r), { q, r, terrain })
+        scatter && !blocked && random.next() < scatter.chance ? scatter.terrain : ground
+      for (const t of pair) tiles.get(key(t.q, t.r))!.terrain = terrain
     }
   }
   for (const feature of terrainFeatures)
-    placeFeature(tiles, [...tiles.values()], reserved, feature, random)
-  const roll = random.next()
-  const count = roll < 0.5 ? 0 : roll < 0.9 ? 1 : 2
+    placeFeature(tiles, [...tiles.values()], reserved, feature, random, symmetric, size)
+  const featureRoll = random.next()
+  const drawn = featureRoll < 0.5 ? 0 : featureRoll < 0.9 ? 1 : 2
+  const count = symmetric ? Math.ceil(drawn / 2) : drawn
   const candidates = [...tiles.values()].filter(
     (tile) =>
-      (tile.r === MAP_HEIGHT / 2 - 1 || tile.r === MAP_HEIGHT / 2) &&
+      (tile.r === size.height / 2 - 1 || tile.r === size.height / 2) &&
       passable(tile) &&
       tile.terrain !== 'lava' &&
       !reserved.has(key(tile.q, tile.r)),
@@ -188,32 +286,14 @@ export function makeMap(
     const [tile] = candidates.splice(Math.floor(random.next() * candidates.length), 1)
     const [feature] = features.splice(Math.floor(random.next() * features.length), 1)
     tile.feature = feature
+    if (symmetric) {
+      const mirror = mirrorAxial(tile, size)
+      const mirrorTile = tiles.get(key(mirror.q, mirror.r))!
+      mirrorTile.feature = feature
+      candidates.splice(candidates.indexOf(mirrorTile), 1)
+    }
   }
   return tiles
-}
-
-export function reachable(
-  tiles: Map<string, Tile>,
-  occupied: Set<string>,
-  start: Axial,
-  maxSteps: number,
-): Map<string, number> {
-  const dist = new Map([[key(start.q, start.r), 0]])
-  let frontier: Axial[] = [start]
-  for (let step = 1; step <= maxSteps; step++) {
-    const next: Axial[] = []
-    for (const cur of frontier) {
-      for (const n of neighbors(cur.q, cur.r)) {
-        const k = key(n.q, n.r)
-        const tile = tiles.get(k)
-        if (!passable(tile) || occupied.has(k) || dist.has(k)) continue
-        dist.set(k, step)
-        next.push(n)
-      }
-    }
-    frontier = next
-  }
-  return dist
 }
 
 export function distFrom(tiles: Map<string, Tile>, sources: Axial[]): Map<string, number> {

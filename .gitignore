@@ -2,6 +2,7 @@ node_modules
 dist
 *.local
 .DS_Store
+client/training-runs/
 android.keystore
 *.aab
 twa-manifest.json

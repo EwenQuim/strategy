@@ -1,11 +1,13 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   getGame,
   getGetGameQueryKey,
+  joinGame,
   useCreateGame,
   useGetGame,
   useJoinGame,
+  useListGames,
 } from '../../generated/sdk.gen.ts'
 import { watchOnlineGame } from './events.ts'
 import type { PublicGame } from '../../generated/sdk.gen.ts'
@@ -45,7 +47,7 @@ export function useOnlineGame(code: string, stream = false) {
     })
   }, [client, code, live])
 
-  const data = useMemo(() => (query.data ? toOnlineGame(query.data) : undefined), [query.data])
+  const data = query.data ? toOnlineGame(query.data) : undefined
   return { ...query, data }
 }
 
@@ -53,15 +55,22 @@ export async function fetchOnlineGame(code: string): Promise<OnlineGame> {
   return toOnlineGame(await getGame(code))
 }
 
+export const useListOnlineGames = () => useListGames({ query: { refetchInterval: 5000 } })
+
 export const useCreateOnlineGame = () => {
   const mutation = useCreateGame()
   return {
     ...mutation,
-    mutateAsync: async (name: string): Promise<StoredGame> => {
-      const creds = await mutation.mutateAsync({ data: { name } })
+    mutateAsync: async (name: string, publicGame: boolean): Promise<StoredGame> => {
+      const creds = await mutation.mutateAsync({ data: { name, public: publicGame } })
       return { code: creds.game.code, token: creds.token, side: 'player' }
     },
   }
+}
+
+export async function joinOnlineGame(code: string, name: string): Promise<StoredGame> {
+  const creds = await joinGame(code, { name })
+  return { code: creds.game.code, token: creds.token, side: 'enemy' }
 }
 
 export const useJoinOnlineGame = () => {

@@ -1,7 +1,8 @@
 import type { BattleEffect } from '../lib/engine'
 import { key } from '../lib/engine'
 import { hexX, hexY } from './hex-art'
-import { PawnIcon } from './Icon'
+import { BombBlast, FireballBeam } from './BombBlast'
+import { SupportFeedback } from './SupportFeedback'
 
 export function BattlefieldEffects({
   effect,
@@ -15,13 +16,16 @@ export function BattlefieldEffects({
       {effect && (
         <g
           key={effectId}
-          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=escape]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
+          className="battle-effect pointer-events-none text-[#ffd4a1] data-[kind=move]:text-[#ead695] data-[kind=rally]:text-[#b7e5c8] data-[kind=fireball]:text-[#ffab78] data-[kind=bomb]:text-[#ffab78] data-[kind=hellfire]:text-[var(--hellfire-impact,#ff805e)] motion-reduce:animate-none"
           data-kind={effect.kind}
           aria-hidden="true"
         >
-          {effect.kind !== 'escape' &&
-            effect.kind !== 'rally' &&
-            effect.kind !== 'hellfire' && (
+          {effect.kind !== 'rally' &&
+            effect.kind !== 'hellfire' &&
+            !effect.support &&
+            (effect.kind === 'fireball' ? (
+              <FireballBeam from={effect.from} to={effect.to} />
+            ) : (
               <line
                 x1={hexX(effect.from.q, effect.from.r)}
                 y1={hexY(effect.from.r)}
@@ -33,7 +37,7 @@ export function BattlefieldEffects({
                   (effect.kind === 'move' ? 'stroke-2' : 'stroke-[4]')
                 }
               />
-            )}
+            ))}
           {(effect.kind === 'bomb' || effect.kind === 'hellfire') &&
             (effect.kind === 'hellfire' ? (effect.centers ?? [effect.to]) : [effect.to]).map(
               (center) => (
@@ -60,14 +64,20 @@ export function BattlefieldEffects({
                       />
                     </g>
                   ) : (
-                    <g transform="translate(-22 -30) scale(2)" className="text-[#ffe1a3]">
-                      <circle cx="11" cy="15" r="7" className="fill-[#25252d]" />
-                      <PawnIcon kind="bomber" />
-                    </g>
+                    <BombBlast />
                   )}
                 </g>
               ),
             )}
+          {effect.kind === 'fireball' && (
+            <g
+              transform={
+                'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'
+              }
+            >
+              <BombBlast />
+            </g>
+          )}
           {effect.kind !== 'bomb' && effect.kind !== 'hellfire' && !effect.impacts?.length && (
             <g
               transform={
@@ -115,7 +125,7 @@ export function BattlefieldEffects({
                     'combat-impact-label fill-current stroke-[#14271f] stroke-[5] font-black [paint-order:stroke] ' +
                     (hit.damage > 0
                       ? 'text-[32px]'
-                      : 'combat-impact-label--miss text-[24px] italic')
+                      : 'combat-impact-label--drift text-[24px] italic')
                   }
                 >
                   {hit.damage > 0 ? '-' + hit.damage : 'MISS'}
@@ -125,6 +135,7 @@ export function BattlefieldEffects({
           ))}
         </g>
       )}
+      <SupportFeedback key={'support-' + effectId} effect={effect} />
     </>
   )
 }

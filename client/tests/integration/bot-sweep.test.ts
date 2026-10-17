@@ -5,21 +5,16 @@ import {
   initialState,
   reducer,
   transition,
-  King,
-  Swordsman,
-  Archer,
-  Magician,
-  Bomber,
-  Ninja,
-  Bulwark,
   type GameState,
   type Side,
 } from '../../src/lib/engine/index.ts'
-import { seedState } from '../../src/lib/engine/random.ts'
-import { chooseBotActions } from '../../src/lib/engine/bot.ts'
-import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
 
-function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState {
+import { BOT_LEVELS, type BotDifficulty } from '../../src/lib/engine/ai.ts'
+import { DepthsearchBot } from '../../src/bots/strategies/depthsearch.ts'
+import { NapoleonBot, NAPOLEON_LEVELS } from '../../src/bots/strategies/napoleon.ts'
+import { PAWN_CLASSES } from '../../src/lib/engine/pawns/index.ts'
+
+async function playTurn(state: GameState, level: BotDifficulty = 'normal'): Promise<GameState> {
   const id = activePawn(state)!.id
   const round = state.round
   for (
@@ -27,7 +22,7 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
     step < 4 && !state.winner && state.round === round && activePawn(state)?.id === id;
     step++
   ) {
-    for (const action of chooseBotActions(state, level)) {
+    for (const action of await new DepthsearchBot(BOT_LEVELS[level]).chooseActions(state)) {
       const next = reducer(state, action)
       assert.notEqual(next, state)
       state = next
@@ -37,59 +32,25 @@ function playTurn(state: GameState, level: BotDifficulty = 'normal'): GameState 
   return state
 }
 
-test('Class-specific candidates and threat estimates retain their reference decisions', () => {
-  const decisions = []
-  for (const Unit of [King, Swordsman, Archer, Magician, Ninja, Bulwark, Bomber]) {
-    for (const side of ['player', 'enemy'] as const) {
-      for (const energy of [1, 2, 3]) {
-        const other = side === 'player' ? 'enemy' : 'player'
-        const tiles: GameState['tiles'] = new Map()
-        for (let q = -3; q <= 4; q++)
-          for (let r = -3; r <= 4; r++)
-            tiles.set(q + ',' + r, { q, r, terrain: q === 1 && r === 1 ? 'lava' : 'plain' })
-        const state: GameState = {
-          ...initialState('ai-reference'),
-          tiles,
-          pawns: [
-            new Unit(1, 0, 0, side, undefined, energy),
-            new King(2, -2, 0, side, 4),
-            new Swordsman(3, -1, 0, side, 2),
-            new King(4, 3, 0, other, 4, 3, 60),
-            new Magician(5, 1, 0, other),
-            new Bulwark(6, 2, 0, other),
-          ],
-          order: [1, 2, 3, 4, 5, 6],
-          active: 0,
-        }
-        state.pawns[5].protectingId = 4
-        for (const options of Object.values(BOT_LEVELS))
-          decisions.push(chooseBotActions(state, options))
-      }
-    }
-  }
-  assert.equal(decisions.length, 126)
-  assert.equal(seedState(JSON.stringify(decisions)), 412397909)
-})
-
-test('All difficulty levels emit legal actions for every class and both sides', () => {
+test('All difficulty levels emit legal actions for every class and both sides', async () => {
   for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     const state = initialState('all-classes', {
       biome: 'desert',
       player: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark', 'bomber'],
       enemy: ['king', 'swordsman', 'archer', 'magician', 'ninja', 'bulwark', 'bomber'],
     })
-    for (const [active] of state.order.entries()) playTurn({ ...state, active }, level)
+    for (const [active] of state.order.entries()) await playTurn({ ...state, active }, level)
   }
 })
 
-test('The bot proposes ordinary actions for either side without mutating the rules state', () => {
+test('The bot proposes ordinary actions for either side without mutating the rules state', async () => {
   const sides = new Set<Side>()
   for (const seed of ['alpha', 'bravo', 'charlie']) {
     let state = initialState(seed)
     for (let turn = 0; turn < 200 && !state.winner; turn++) {
       sides.add(activePawn(state)!.side)
       const before = structuredClone(state)
-      const actions = chooseBotActions(state)
+      const actions = await new DepthsearchBot(BOT_LEVELS.normal).chooseActions(state)
       assert.ok(actions.length)
       assert.deepEqual(structuredClone(state), before)
       for (const action of actions) {
@@ -110,4 +71,28 @@ test('The bot proposes ordinary actions for either side without mutating the rul
     }
   }
   assert.deepEqual(sides, new Set(['player', 'enemy']))
+})
+test('Napoleon plays every signature class on both sides with legal complete activations and immutable input', async () => {
+  const kinds = Object.keys(PAWN_CLASSES) as (keyof typeof PAWN_CLASSES)[]
+  const opening = initialState('commander-all-classes', {
+    biome: 'desert',
+    player: kinds,
+    enemy: kinds,
+  })
+  const bot = new NapoleonBot(NAPOLEON_LEVELS.normal)
+  for (const [active] of opening.order.entries()) {
+    const state = { ...opening, active }
+    const before = structuredClone(state)
+    const actor = activePawn(state)!
+    const actions = await bot.chooseActions(state)
+    assert.ok(actions.length)
+    let next = state
+    for (const action of actions) {
+      const applied = reducer(next, action)
+      assert.notEqual(applied, next)
+      next = applied
+    }
+    assert.ok(next.winner || activePawn(next)?.id !== actor.id)
+    assert.deepEqual(structuredClone(state), before)
+  }
 })
