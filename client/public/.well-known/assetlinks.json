@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.amethysts.hexmate",
       "sha256_cert_fingerprints": [
-        "310128d20b371d73660b9e374e5ac0eb3e3794bc4e44f8b12cf5aace20237cbe"
+        "310128d20b371d73660b9e374e5ac0eb3e3794bc4e44f8b12cf5aace20237cbe",
+        "5e5e2d8a78b8f8c18b9e2cb2c0e40d2812b3a6f512458590989c4c98a7af3bb4"
       ]
     }
   }
