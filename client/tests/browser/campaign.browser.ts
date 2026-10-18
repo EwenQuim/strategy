@@ -268,22 +268,28 @@ test(
     for (const kind of ['watchtower', 'spring', 'rune', 'lava'] as const) {
       let state = initialState('interactive-ui')
       let position: string | undefined
-      for (let index = 0; index < 10_000; index++) {
-        state = initialState('interactive-ui-' + kind + '-' + index)
-        const pawn = activePawn(state)!
-        if (kind === 'lava' && pawn.kind !== 'ninja') continue
-        // The aimed-shot assertion below is archer-specific: only its special
-        // targets map one button per enemy.
-        if (kind === 'watchtower' && pawn.kind !== 'archer') continue
-        position = [...movementDestinations(state.tiles, state.pawns, pawn)].find(
-          ([k, cost]) => {
-            if (!cost) return false
-            const tile = state.tiles.get(k)!
-            if (kind === 'lava') return tile.terrain === 'lava'
-            return tile.feature === kind
-          },
-        )?.[0]
-        if (position) break
+      for (let index = 0; index < 10_000 && !position; index++) {
+        // Mirrored rosters open on the kings, so walk the first round until a
+        // matching pawn can reach the tile.
+        let candidate = initialState('interactive-ui-' + kind + '-' + index)
+        for (let turn = 0; turn < candidate.order.length && !position; turn++) {
+          const pawn = activePawn(candidate)!
+          // The aimed-shot assertion below is archer-specific: only its special
+          // targets map one button per enemy.
+          const wanted = kind === 'lava' ? 'ninja' : kind === 'watchtower' ? 'archer' : null
+          if (wanted === null || pawn.kind === wanted) {
+            position = [...movementDestinations(candidate.tiles, candidate.pawns, pawn)].find(
+              ([k, cost]) => {
+                if (!cost) return false
+                const tile = candidate.tiles.get(k)!
+                if (kind === 'lava') return tile.terrain === 'lava'
+                return tile.feature === kind
+              },
+            )?.[0]
+            if (position) state = candidate
+          }
+          if (!position) candidate = transition(candidate, { type: 'endTurn' }).state
+        }
       }
       assert.ok(position, 'Find a reachable ' + kind)
       const pawn = activePawn(state)!
@@ -309,15 +315,17 @@ test(
         const victim = state.pawns.find((p) => p.side !== pawn.side)!
         Object.assign(victim, { q: victimAt.q, r: victimAt.r })
         assert.ok(specialTargetingTiles(pawn, state.tiles, state.pawns).has(position))
-        await page.evaluate(
-          (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
-          {
-            version: BATTLE_SNAPSHOT_VERSION,
-            identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
-            state: snapshotState(state),
-          },
-        )
       }
+      // The battle opens on the kings, so restore the advanced state instead of
+      // a fresh one that would not start on the acting pawn.
+      await page.evaluate(
+        (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+        {
+          version: BATTLE_SNAPSHOT_VERSION,
+          identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+          state: snapshotState(state),
+        },
+      )
       await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       const destination = page.locator('[data-testid="hex-tile"]').nth(index)
@@ -410,11 +418,21 @@ test(
           3,
         )
         if (kind === 'watchtower') {
-          const targets = specialTargets(state.pawns, activePawn(state)!)
+          // The archer shoots from the watchtower, so its range bonus applies.
+          const archer = activePawn(state)!
+          const targets = specialTargets(
+            state.pawns,
+            archer,
+            state.tiles.get(archer.q + ',' + archer.r)!,
+          )
           if (targets.length) {
             await page.locator('[data-action="special"]').click()
+            // The ability button keeps its name while aiming, so count only board tiles.
             assert.equal(
-              await page.getByRole('button', { name: /^Aimed shot / }).count(),
+              await page
+                .getByTestId('battlefield')
+                .getByRole('button', { name: /^Shot / })
+                .count(),
               targets.length,
             )
             await page.locator('[data-action="special"]').click()
