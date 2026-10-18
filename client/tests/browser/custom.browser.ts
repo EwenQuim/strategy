@@ -131,6 +131,10 @@ test(
     const mirror = page.getByRole('checkbox', { name: 'Mirror player roster' })
     assert.equal(await mirror.isChecked(), true)
     assert.equal(await enemyArcher.isDisabled(), true)
+    // The default roster is random, so start from a bare king to make the counts below deterministic.
+    for (const input of await page.getByRole('spinbutton', { name: /^Player 1 / }).all()) {
+      await input.fill('0')
+    }
     await playerArcher.fill('3')
     assert.equal(await enemyArcher.inputValue(), '3')
     await mirror.uncheck()
@@ -146,8 +150,8 @@ test(
     await page.locator('#custom-player-1-controller').selectOption('human')
     assert.equal(await page.locator('#custom-player-1-difficulty').count(), 0)
     await page.getByLabel('Biome', { exact: true }).selectOption('mountains')
-    await page.getByRole('spinbutton', { name: 'Player 1 Swordsman', exact: true }).fill('17')
-    await page.getByRole('spinbutton', { name: 'Player 2 Swordsman', exact: true }).fill('20')
+    await page.getByRole('spinbutton', { name: 'Player 1 Swordsman', exact: true }).fill('19')
+    await page.getByRole('spinbutton', { name: 'Player 2 Swordsman', exact: true }).fill('22')
     for (const viewport of [
       { width: 320, height: 568 },
       { width: 390, height: 844 },
