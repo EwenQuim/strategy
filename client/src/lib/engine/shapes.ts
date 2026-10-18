@@ -13,13 +13,13 @@ import type { SeededRandom } from './random.ts'
 
 export const MIN_MAP_WIDTH = 7
 export const MAX_MAP_WIDTH = 8
-export const MAP_HEIGHTS = [8] as const
+export const MAP_HEIGHTS = [8, 10] as const
 
-// Rolled maps are width 7-8 by height 8: frontier carving raggeds the coasts
-// of most rolls, and only the uncarved minority stays rectangular. Interior
-// gaps need rows between the spawn zones, so they never open on rolled maps;
-// the branch only serves taller direct generateMapShape calls. Mountains and
-// lakes still break up the middle of the battlefield.
+// Rolled maps are width 7-8 by height 8 or 10: frontier carving raggeds the
+// coasts of most rolls, and only the uncarved minority stays rectangular.
+// Interior gaps need rows between the spawn zones, so they only open on
+// height-10 rolls. Mountains and lakes still break up the middle of the
+// battlefield.
 const FRONTIER_CARVE_CHANCE = 0.8
 const INTERIOR_CARVE_CHANCE = 0.25
 const MAX_INTERIOR_CARVES = 3
