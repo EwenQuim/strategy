@@ -112,7 +112,7 @@ export const Route = createFileRoute('/settings')({
           type="button"
           className={
             menuCardClassName +
-            ' flex w-full flex-col gap-1.5 p-4 text-left min-[900px]:p-6 [&:hover>strong]:text-red-200'
+            ' flex w-full flex-col gap-1.5 p-4 text-left min-[900px]:p-6 hover:[&>strong]:text-red-200'
           }
           onClick={() => deleteDialogRef.current?.showModal()}
         >
