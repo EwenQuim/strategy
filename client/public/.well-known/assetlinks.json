@@ -9,5 +9,15 @@
         "5e5e2d8a78b8f8c18b9e2cb2c0e40d2812b3a6f512458590989c4c98a7af3bb4"
       ]
     }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.amethysts.hexmate.debug",
+      "sha256_cert_fingerprints": [
+        "e6b084b244734f9f4a595a058ba3184cb42e99d2b3be4f1861f113847e781665"
+      ]
+    }
   }
 ]
