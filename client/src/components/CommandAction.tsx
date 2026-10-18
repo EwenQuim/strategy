@@ -76,7 +76,11 @@ function CommandActionContent({ icon, label, note }: CommandActionContentProps) 
         {label}
       </span>
       {note !== undefined && (
-        <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+        // Two lines are always reserved, and the hint can never exceed them, so
+        // the deck keeps one height whether the text wraps (long "no targets ·
+        // cost" states, German and Spanish) or not: the fixed viewport must not
+        // jump between turns or actions.
+        <small className="mt-0.5 min-h-[2.7em] line-clamp-2 text-[9px] leading-[1.35] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
           {note}
         </small>
       )}
