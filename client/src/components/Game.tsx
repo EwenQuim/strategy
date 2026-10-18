@@ -22,6 +22,7 @@ import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
 import { useCommanding } from './useCommanding'
+import { pounceLanding } from '../lib/tileChoices'
 import { useGameShortcuts } from './useGameShortcuts'
 import {
   activePawn,
@@ -146,8 +147,15 @@ export function Game({
     if (!canCommand) return
     const at = { q: tile.q, r: tile.r }
     const choice = choices.get(key(at.q, at.r))
-    if (choice)
-      return choice.kind === 'landing' ? setAim(choice.nextAim) : dispatch(choice.action)
+    if (choice) {
+      if (choice.kind === 'landing') return setAim(choice.nextAim)
+      if (choice.kind === 'pounce') {
+        const landing = pounceLanding(state, choice.target)
+        if (landing) dispatch({ type: 'special', target: at, destination: landing })
+        return
+      }
+      return dispatch(choice.action)
+    }
     // Tapping the chosen landing again steps back to re-choosing it.
     if (aim && destination && key(at.q, at.r) === key(destination.q, destination.r))
       return setAim({ action: 'special' })

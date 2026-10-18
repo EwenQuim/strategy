@@ -14,7 +14,7 @@ import {
 import { Berserker } from '../src/lib/engine/pawns/berserker.ts'
 import { Hoplite } from '../src/lib/engine/pawns/hoplite.ts'
 import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
-import { tileChoices } from '../src/lib/tileChoices.ts'
+import { tileChoices, pounceLanding } from '../src/lib/tileChoices.ts'
 import { field } from './field.ts'
 
 for (const Unit of [Ninja, Swordsman]) {
@@ -107,4 +107,60 @@ test('Protect is not highlighted as a damaging attack', () => {
     new King(3, 4, 0, 'enemy'),
   ])
   assert.notEqual(tileChoices(state, { action: 'special' }).get('1,0')?.kind, 'attack')
+})
+
+test('A pounce enemy strikes from the nearest landing a charge can reach', () => {
+  const state = field([
+    new Swordsman(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player'),
+    new King(3, 2, 0, 'enemy', 4),
+  ])
+  const choices = tileChoices(state, { action: 'special' })
+  assert.equal(choices.get('2,0')?.kind, 'pounce')
+  assert.equal(choices.get('1,0')?.kind, 'landing')
+  const landing = pounceLanding(state, { q: 2, r: 0 })!
+  assert.deepEqual(landing, { q: 1, r: 0 })
+  const next = reducer(state, { type: 'special', target: { q: 2, r: 0 }, destination: landing })
+  assert.equal(next.pawns[0].q, 1)
+  assert.equal(next.pawns[0].r, 0)
+  assert.equal(next.pawns[2].hp, 4 - state.pawns[0].attack.damage)
+})
+
+test('A pounce enemy strikes from the nearest landing an ambush can reach', () => {
+  const state = field([
+    new Ninja(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player'),
+    new King(3, 3, 0, 'enemy', 4),
+  ])
+  assert.equal(tileChoices(state, { action: 'special' }).get('3,0')?.kind, 'pounce')
+  assert.deepEqual(pounceLanding(state, { q: 3, r: 0 }), { q: 2, r: 0 })
+})
+
+test('Equally near pounce landings keep a stable order', () => {
+  const state = field([
+    new Swordsman(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player'),
+    new King(3, 1, 1, 'enemy', 4),
+  ])
+  const first = pounceLanding(state, { q: 1, r: 1 })
+  assert.deepEqual(pounceLanding(state, { q: 1, r: 1 }), first)
+  assert.ok(
+    first && ((first.q === 1 && first.r === 0) || (first.q === 0 && first.r === 1)),
+    'the tie-break picks one of the two nearest landings',
+  )
+})
+
+test('A pounce landing exists only where a move-and-attack reaches', () => {
+  const beyond = field([
+    new Swordsman(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player'),
+    new King(3, 4, 0, 'enemy', 4),
+  ])
+  assert.equal(pounceLanding(beyond, { q: 4, r: 0 }), null)
+  const lancer = field([
+    new Lancer(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player'),
+    new King(3, 1, 0, 'enemy', 4),
+  ])
+  assert.equal(pounceLanding(lancer, { q: 1, r: 0 }), null)
 })

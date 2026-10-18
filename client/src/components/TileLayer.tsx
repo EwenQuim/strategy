@@ -149,8 +149,9 @@ export function TileLayer({
       {allTiles.map((tile) => {
         const tileKey = key(tile.q, tile.r)
         const occupant = pawnAt(pawns, tile)
-        const target = targets.has(tileKey)
-        const strike = targets.get(tileKey)?.kind === 'attack'
+        const choice = targets.get(tileKey)
+        const target = !!choice
+        const strike = choice?.kind === 'attack' || choice?.kind === 'pounce'
         const cost = reach.get(tileKey)
         const damage =
           target && !strike && targeting === 'jump'
