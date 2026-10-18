@@ -15,8 +15,11 @@ export const MIN_MAP_WIDTH = 6
 export const MAX_MAP_WIDTH = 8
 export const MAP_HEIGHTS = [8] as const
 
-// Frontier carving reshapes most map outlines; interior gaps stay rare because
-// mountains and lakes already break up the middle of the battlefield.
+// Rolled maps are width 6-8 by height 8: frontier carving trims at most one
+// column per side, and only on width-8 rolls. Interior gaps need rows between
+// the spawn zones, so they never open on rolled maps; the branch only serves
+// taller direct generateMapShape calls. Mountains and lakes still break up the
+// middle of the battlefield.
 const FRONTIER_CARVE_CHANCE = 0.8
 const INTERIOR_CARVE_CHANCE = 0.25
 const MAX_INTERIOR_CARVES = 3
