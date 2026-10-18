@@ -40,6 +40,7 @@ export function PawnLayer({
           pawn={pawn}
           feature={tiles.get(key(pawn.q, pawn.r))?.feature}
           active={active?.id === pawn.id}
+          dimmed={!!active && active.id !== pawn.id}
           protectedAlly={!!protectorFor(pawns, pawn)}
           topRow={hexY(pawn.r) === topRowY}
         />

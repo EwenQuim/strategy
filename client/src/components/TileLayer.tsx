@@ -114,6 +114,11 @@ export function TileLayer({
         <clipPath id="lava-hex">
           <polygon points={hexPoints} />
         </clipPath>
+        <radialGradient id="active-halo">
+          <stop stopColor="#ffe9a8" stopOpacity=".7" />
+          <stop offset=".4" stopColor="#f2df9e" stopOpacity=".35" />
+          <stop offset="1" stopColor="#f2df9e" stopOpacity="0" />
+        </radialGradient>
         <linearGradient id="player-chip" x2="0" y2="1">
           <stop stopColor="#407265" />
           <stop offset="1" stopColor="#193e35" />
