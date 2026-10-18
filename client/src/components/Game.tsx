@@ -140,7 +140,7 @@ export function Game({
     toggleAim,
     cycleCommand,
     commandedMove,
-  } = useCommanding(state, pawn, commanding, canCommand)
+  } = useCommanding(state, pawn, commanding, canCommand, opponentActive)
   const { inspected } = insight
 
   const onTileClick = (tile: Tile) => {

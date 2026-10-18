@@ -37,6 +37,7 @@ export function useCommanding(
   pawn: Pawn | undefined,
   commanding: boolean,
   canCommand: boolean,
+  opponentActive: boolean,
 ) {
   // Aiming belongs to the state it started on: any new state, ours or not, drops it.
   const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
@@ -81,7 +82,7 @@ export function useCommanding(
       ? { mode: 'ability' as const, label: bf.abilityMode(specialTexts[pawn.special.name]) }
       : commanding && moveMode
         ? { mode: 'move' as const, label: bf.moveMode }
-        : { mode: 'none' as const, label: bf.noMode }
+        : { mode: 'none' as const, label: opponentActive ? m.enemyTurn : bf.noMode }
 
   // Reach stays up while an own action's effect frame plays: it is computed from the
   // post-action state, so the playback-end render changes no tile costs.
