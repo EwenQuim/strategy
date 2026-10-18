@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.amethysts.hexmate",
+      "sha256_cert_fingerprints": [
+        "310128d20b371d73660b9e374e5ac0eb3e3794bc4e44f8b12cf5aace20237cbe"
+      ]
+    }
+  }
+]

@@ -51,6 +51,7 @@ func main() {
 	)
 	handlers.Register(s, svc)
 	s.Mux.Handle("GET "+appBase, http.StripPrefix(appBase, spa(dist, index)))
+	s.Mux.HandleFunc("GET /.well-known/assetlinks.json", assetlinks(dist))
 	s.Mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, appBase, http.StatusFound)
 	})
@@ -90,6 +91,13 @@ func loadIndex(dir string) ([]byte, error) {
 	}
 	log.Print("injecting HEAD_HTML into index.html")
 	return bytes.Replace(index, []byte(headPlaceholder), []byte(head), 1), nil
+}
+
+// assetlinks serves the Digital Asset Links statement that binds the Play Store app to this origin.
+func assetlinks(dist string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(dist, ".well-known", "assetlinks.json"))
+	}
 }
 
 const hashedAssetCache = "public, max-age=2592000, immutable"

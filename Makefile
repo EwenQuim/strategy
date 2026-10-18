@@ -2,8 +2,11 @@
 
 NPM := npm --prefix client
 GO := go -C server
+BUBBLEWRAP := npx --yes @bubblewrap/cli
+WEB_MANIFEST := https://strategy.glenan.quimerch.com/strategy/manifest.webmanifest
+ANDROID_KEYS_DIR := $(HOME)/Developer/keys/hexmate-android
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-napoleon bench-hannibal train-value retrain-value bench-web record-campaign
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-napoleon bench-hannibal train-value retrain-value bench-web record-campaign android-init android-build android-doctor
 
 onboarding: installdeps
 
@@ -77,6 +80,22 @@ docker:
 
 pvp:
 	docker compose --profile 2players up --build
+
+android-init:
+	$(BUBBLEWRAP) init --manifest $(WEB_MANIFEST)
+	mkdir -p $(ANDROID_KEYS_DIR)
+	if [ -f android.keystore ]; then mv android.keystore $(ANDROID_KEYS_DIR)/hexmate-upload.keystore; ln -s $(ANDROID_KEYS_DIR)/hexmate-upload.keystore android.keystore; fi
+	perl -0pi -e 's/("signingKey":\s*\{[^{}]*?"path":\s*)"[^"]*"/$$1"android.keystore"/' twa-manifest.json
+	cp twa-manifest.json $(ANDROID_KEYS_DIR)/twa-manifest.json
+	ln -s $(ANDROID_KEYS_DIR)/hexmate-upload.keystore android.keystore
+
+android-build:
+	if [ ! -f twa-manifest.json ]; then cp $(ANDROID_KEYS_DIR)/twa-manifest.json .; fi
+	if [ ! -e android.keystore ]; then ln -s $(ANDROID_KEYS_DIR)/hexmate-upload.keystore android.keystore; fi
+	$(BUBBLEWRAP) build
+
+android-doctor:
+	$(BUBBLEWRAP) doctor
 
 run: build
 	$(GO) run .
