@@ -38,7 +38,7 @@ export type SearchNode = {
   solved?: number
   complete?: boolean
 }
-type Search = {
+export type Search = {
   side: Side
   weights: readonly number[]
   cache: ValueCache
@@ -81,25 +81,30 @@ export abstract class LearnedSearchBot implements Bot<LearnedSearchOptions> {
       options: this.options,
     }
     const root = node({ ...state, randomState: 0 }, [], 1, search)
-    expand(root, search)
-    const victory = root.children!.find((child) => child.state.winner === actor.side)
+    const children = this.expandRoot(root, search)
+    const victory = children.find((child) => child.state.winner === actor.side)
     if (victory) return victory.actions
     for (let i = 0; i < this.options.simulations; i++) simulate(root, search)
     const king = state.pawns.find((p) => p.side === actor.side && p.kind === 'king')!
     // Reject an immediately demonstrated regicide by the next enemy actor; do not trust a learned
     // probability to average away an available winning enemy reply.
-    const candidates = root.children!.filter(
-      (child) => !losesKing(child.state, king.id, actor.side),
-    )
-    const choices = candidates.length ? candidates : root.children!
+    const candidates = children.filter((child) => !losesKing(child.state, king.id, actor.side))
+    const choices = candidates.length ? candidates : children
     return this.select(choices, actor, state).actions
+  }
+
+  // Root candidates the simulations refine. Subclasses may prune or rescore them, but must keep
+  // every immediate victory and keep root.children in sync for the simulation walk.
+  protected expandRoot(root: SearchNode, search: Search): SearchNode[] {
+    expand(root, search)
+    return root.children!
   }
 
   // Each learned searcher owns its final pick among the searched candidates.
   protected abstract select(children: SearchNode[], actor: Pawn, state: GameState): SearchNode
 }
 
-function value(state: GameState, search: Search, tactical = true): number {
+export function value(state: GameState, search: Search, tactical = true): number {
   const ended = outcome(state, search.side)
   if (ended !== null) return ended
   const signature = `${positionKey(state)}:${tactical}`
