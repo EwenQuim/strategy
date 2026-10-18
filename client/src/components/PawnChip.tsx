@@ -7,12 +7,14 @@ import { Icon, PawnIcon } from './Icon'
 export function PawnChip({
   pawn,
   active,
+  dimmed,
   protectedAlly,
   feature,
   topRow,
 }: {
   pawn: Pawn
   active: boolean
+  dimmed: boolean
   protectedAlly: boolean
   feature?: Tile['feature']
   topRow: boolean
@@ -24,10 +26,12 @@ export function PawnChip({
       data-pawn={pawn.id}
       className="pointer-events-none transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{ transform: 'translate(' + hexX(pawn.q, pawn.r) + 'px, ' + hexY(pawn.r) + 'px)' }}
+      opacity={dimmed ? 0.9 : undefined}
       aria-hidden="true"
     >
       <g
         data-fallen={pawn.hp <= 0 || undefined}
+        transform={active ? 'scale(1.15)' : undefined}
         className={
           pawn.hp <= 0
             ? 'pawn-fall motion-reduce:animate-none motion-reduce:opacity-40'
@@ -36,17 +40,24 @@ export function PawnChip({
       >
         <ellipse cy="17" rx="23" ry="9" fill="#10281e" opacity=".5" />
         {active && (
-          <circle r="28" fill="#ead695" fillOpacity=".18" stroke="#f2df9e" strokeWidth="1.5" />
+          <g data-art="active-halo" className="active-halo-pop motion-reduce:animate-none">
+            <circle r="46" fill="url(#active-halo)" />
+          </g>
         )}
         {enemy ? (
           <path
             d="m0-23 20 11v24L0 23-20 12v-24Z"
             fill="url(#enemy-chip)"
-            stroke="#d59d81"
-            strokeWidth="1.5"
+            stroke={active ? '#ffe9a8' : '#d59d81'}
+            strokeWidth={active ? 2.5 : 1.5}
           />
         ) : (
-          <circle r="22" fill="url(#player-chip)" stroke="#b2ceaa" strokeWidth="1.5" />
+          <circle
+            r="22"
+            fill="url(#player-chip)"
+            stroke={active ? '#ffe9a8' : '#b2ceaa'}
+            strokeWidth={active ? 2.5 : 1.5}
+          />
         )}
         <circle r="17.5" fill="none" stroke="#f5e5bf" strokeOpacity=".15" />
         <g transform="translate(-12 -15)" color={pawn.kind === 'king' ? '#f0d38e' : '#f1e8d2'}>
@@ -108,7 +119,7 @@ export function PawnChip({
             ))}
           </g>
         )}
-        {active && <path d="m0-35 4-5h-8Z" fill="#f2df9e" />}
+        {active && <path d="m0-35 4-5h-8Z" fill="#ffe9a8" />}
       </g>
       {pawn.hp <= 0 && (
         <text
