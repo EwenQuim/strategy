@@ -78,10 +78,17 @@ export const inspect = t({
   es: (name: string) => `Inspeccionar ${name}`,
   it: (name: string) => `Ispeziona ${name}`,
 })
-export const moving = t({
-  en: 'Moving',
-  fr: 'Déplacement',
-  de: 'Bewegung',
-  es: 'Movimiento',
-  it: 'Movimento',
+export const moveMode = t({
+  en: 'Move mode',
+  fr: 'Mode déplacement',
+  de: 'Bewegungsmodus',
+  es: 'Modo movimiento',
+  it: 'Modalità movimento',
+})
+export const abilityMode = t({
+  en: (name: string) => `${name} mode`,
+  fr: (name: string) => `Mode ${name}`,
+  de: (name: string) => `${name}-Modus`,
+  es: (name: string) => `Modo ${name}`,
+  it: (name: string) => `Modalità ${name}`,
 })

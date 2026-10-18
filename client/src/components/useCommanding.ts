@@ -55,16 +55,17 @@ export function useCommanding(
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
-    // Entering the ability announces its name; canceling it drops every mode instead
-    // of falling back to moving — the player left the mode, not switched to another.
-    if (next && !aim && pawn) announce(specialTexts[pawn.special.name])
+    // Entering a mode announces it — the ability's name or Move — and canceling the
+    // ability drops every mode instead of falling back to moving: the player left
+    // the mode, not switched to another.
+    if (next && !aim && pawn) announce(bf.abilityMode(specialTexts[pawn.special.name]))
     if (!next && aim && pawn) setDismissed({ pawnId: pawn.id, round: state.round })
     setAiming(next && { state, aim: next })
   }
   const setMoveMode = (on: boolean) => {
     if (!pawn) return
     insight.close()
-    if (on && !moveMode) announce(bf.moving)
+    if (on && !moveMode) announce(bf.moveMode)
     setAiming(null)
     setDismissed(on ? null : { pawnId: pawn.id, round: state.round })
   }
