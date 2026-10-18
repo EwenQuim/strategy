@@ -5,6 +5,7 @@ import {
   activePawn,
   movementDestinations,
   specialTargets,
+  transition,
   type Axial,
   King,
   Lancer,
@@ -193,15 +194,24 @@ test(
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     let state = initialState('bulwark-ui')
-    for (let index = 0; index < 1000; index++) {
-      state = initialState('bulwark-ui-' + index)
-      const pawn = activePawn(state)!
-      if (
-        pawn.kind === 'bulwark' &&
-        specialTargets(state.pawns, pawn).length &&
-        movementDestinations(state.tiles, state.pawns, pawn).size > 1
-      )
-        break
+    let found = false
+    for (let index = 0; index < 1000 && !found; index++) {
+      // Mirrored rosters open on the kings, so walk the first round until the
+      // bulwark's own turn comes up.
+      let candidate = initialState('bulwark-ui-' + index)
+      for (let turn = 0; turn < candidate.order.length; turn++) {
+        const pawn = activePawn(candidate)!
+        if (
+          pawn.kind === 'bulwark' &&
+          specialTargets(candidate.pawns, pawn).length &&
+          movementDestinations(candidate.tiles, candidate.pawns, pawn).size > 1
+        ) {
+          state = candidate
+          found = true
+          break
+        }
+        candidate = transition(candidate, { type: 'endTurn' }).state
+      }
     }
     const pawn = activePawn(state)!
     assert.equal(pawn.kind, 'bulwark')
@@ -211,6 +221,16 @@ test(
       (tile) => tile.q === ally.q && tile.r === ally.r,
     )
     await context.setOffline(true)
+    // The battle opens on the kings, so restore the advanced state instead of a
+    // fresh one that would not start on the bulwark.
+    await page.evaluate(
+      (saved) => localStorage.setItem('hexmate.battle', JSON.stringify(saved)),
+      {
+        version: BATTLE_SNAPSHOT_VERSION,
+        identity: battleIdentity('local', state.seed, DEFAULT_BOT_CONFIG, undefined),
+        state: snapshotState(state),
+      },
+    )
     await page.goto(origin + base + 'game/' + state.seed + '?mode=local')
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     const pips = page.locator(`[data-pawn="${pawn.id}"]`)
