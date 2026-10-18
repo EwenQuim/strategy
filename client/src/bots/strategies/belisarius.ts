@@ -42,7 +42,7 @@ export const BELISARIUS_LEVELS = {
     exploration: 1.4,
     horizon: 12,
     backup: 'average',
-    pressure: 0,
+    pressure: 0.1,
     slack: 0.3,
     plies: 1,
   },
@@ -53,7 +53,7 @@ export const BELISARIUS_LEVELS = {
     exploration: 1.4,
     horizon: 16,
     backup: 'average',
-    pressure: 0,
+    pressure: 0.15,
     slack: 0.15,
     plies: 2,
   },
@@ -64,7 +64,7 @@ export const BELISARIUS_LEVELS = {
     exploration: 1.4,
     horizon: 20,
     backup: 'average',
-    pressure: 0,
+    pressure: 0.2,
     slack: 0.07,
     plies: 2,
   },
@@ -75,7 +75,7 @@ export const BELISARIUS_LEVELS = {
     exploration: 1.4,
     horizon: 24,
     backup: 'average',
-    pressure: 0,
+    pressure: 0.2,
     slack: 0,
     plies: 3,
   },
@@ -116,10 +116,21 @@ export class BelisariusBot extends LearnedSearchBot {
   }
 
   // Difficulty as a relative gap: within `slack` of the best plan, play the most damaging or
-  // advancing candidate. Proven wins are always taken, proven losses never.
+  // advancing candidate. Caesar's pressure bends the ranking toward enemy blood and ground so
+  // it does not sit in its lines; proven wins are always taken, proven losses never.
   protected select(children: SearchNode[], actor: Pawn, state: GameState): SearchNode {
+    const target = state.pawns.find((p) => p.side !== actor.side && p.kind === 'king')!
+    const enemyBlood = (s: GameState) =>
+      s.pawns.filter((p) => p.side !== actor.side).reduce((sum, p) => sum + p.hp, 0)
+    const before = enemyBlood(state)
+    const aggression = (child: SearchNode) => {
+      const pawn = child.state.pawns.find((p) => p.id === actor.id)
+      const progress = pawn ? (hexDist(actor, target) - hexDist(pawn, target)) / 12 : 0
+      return progress + Math.max(0, before - enemyBlood(child.state)) / 6
+    }
     const utility = (child: SearchNode) =>
-      child.solved ?? (child.visits ? child.total / child.visits : child.value)
+      (child.solved ?? (child.visits ? child.total / child.visits : child.value)) +
+      this.options.pressure * aggression(child)
     const ranked = children.toSorted(
       (a, b) =>
         (b.solved === 1 ? 1 : 0) - (a.solved === 1 ? 1 : 0) ||
@@ -131,16 +142,9 @@ export class BelisariusBot extends LearnedSearchBot {
     const window = ranked.filter(
       (child) => child.solved !== 0 && utility(child) >= utility(best) - this.options.slack,
     )
-    const target = state.pawns.find((p) => p.side !== actor.side && p.kind === 'king')!
-    const enemyBlood = (s: GameState) =>
-      s.pawns.filter((p) => p.side !== actor.side).reduce((sum, p) => sum + p.hp, 0)
-    const before = enemyBlood(state)
-    const appeal = (child: SearchNode) => {
-      const pawn = child.state.pawns.find((p) => p.id === actor.id)
-      const progress = pawn ? (hexDist(actor, target) - hexDist(pawn, target)) / 12 : 0
-      return (before - enemyBlood(child.state)) / 6 + progress / 12
-    }
-    return (window.length ? window : [best]).toSorted((a, b) => appeal(b) - appeal(a))[0]
+    return (window.length ? window : [best]).toSorted(
+      (a, b) => aggression(b) - aggression(a),
+    )[0]
   }
 }
 
