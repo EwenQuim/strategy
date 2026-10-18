@@ -118,7 +118,7 @@ function ElementCard({ element, index }: { element: BriefingElement; index: numb
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             <StatChip icon="heart" value={element.stats.hp} color="text-[#d59d81]" />
             <StatChip icon="sword" value={element.stats.damage} color="text-[#c4d1a5]" />
-            <StatChip icon="target" value={element.stats.range} color="text-[#a4af99]" />
+            <StatChip icon="target" value={element.stats.range} color="text-muted" />
           </div>
         )}
 

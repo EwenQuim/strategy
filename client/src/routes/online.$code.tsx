@@ -97,7 +97,7 @@ export const Route = createFileRoute('/online/$code')({
                   className={
                     typeof navigator.share === 'function'
                       ? buttonClassName +
-                        ' min-h-13 w-full justify-center gap-3 rounded-xl border-line px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
+                        ' min-h-13 w-full justify-center gap-3 rounded-xl border-line px-[25px] bg-control text-ink hover:bg-control-hover'
                       : menuPrimaryButtonClassName + ' w-full'
                   }
                   onClick={() => void navigator.clipboard?.writeText(code)}
