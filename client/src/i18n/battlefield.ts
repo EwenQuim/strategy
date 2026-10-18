@@ -92,3 +92,10 @@ export const abilityMode = t({
   es: (name: string) => `Modo ${name}`,
   it: (name: string) => `Modalità ${name}`,
 })
+export const noMode = t({
+  en: 'No mode',
+  fr: 'Aucun mode',
+  de: 'Kein Modus',
+  es: 'Sin modo',
+  it: 'Nessuna modalità',
+})
