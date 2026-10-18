@@ -132,11 +132,13 @@ export function Game({
     targeting,
     reach,
     hasSpecialTargets,
+    announced,
     insight,
     setAim,
     setMoveMode,
     toggleAim,
     cycleCommand,
+    commandedMove,
   } = useCommanding(state, pawn, commanding, canCommand)
   const { inspected } = insight
 
@@ -150,7 +152,10 @@ export function Game({
     if (aim && destination && key(at.q, at.r) === key(destination.q, destination.r))
       return setAim({ action: 'special' })
     // Own moves now play their effect frame, so their buzz comes from the frame like bot moves.
-    if (reach.has(key(at.q, at.r))) dispatch({ type: 'move', ...at })
+    if (reach.has(key(at.q, at.r))) {
+      commandedMove()
+      dispatch({ type: 'move', ...at })
+    }
   }
 
   const onInspectTile = (tile: Tile) => {
@@ -215,6 +220,19 @@ export function Game({
             onInspect={onInspectTile}
           />
         </div>
+        {announced && (
+          // The label fades out on its own; the key replays the animation per mode switch.
+          <div
+            key={announced.id}
+            aria-hidden="true"
+            data-testid="mode-announcement"
+            className="pointer-events-none absolute inset-0 z-2 flex items-center justify-center motion-reduce:hidden"
+          >
+            <span className="mode-announce rounded-full border border-line bg-[#102018d9] px-4 py-1.5 text-[13px] font-semibold tracking-wide text-ink shadow-[0_6px_20px_#10201880]">
+              {announced.label}
+            </span>
+          </div>
+        )}
         {state.winner && (
           <GameResult
             winner={state.winner}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import * as bf from '../i18n/battlefield'
 import * as m from '../i18n/game'
 import { specialTexts } from '../i18n/specialTexts'
 import {
@@ -43,18 +44,36 @@ export function useCommanding(
   // A dismissal belongs to one activation: it survives that pawn's own actions and
   // expires when its next activation comes around.
   const [dismissed, setDismissed] = useState<{ pawnId: number; round: number } | null>(null)
+  // An aim cancellation belongs to one state: it quiets the board until the pawn or
+  // the battle moves on, unlike a dismissal, which lasts the whole activation.
+  const [canceled, setCanceled] = useState<{ state: GameState; pawnId: number } | null>(null)
+  // Every mode activation announces itself once; the rising id remounts the overlay,
+  // replaying its animation.
+  const [announced, setAnnounced] = useState<{ id: number; label: string } | null>(null)
+  const announce = (label: string) =>
+    setAnnounced((current) => ({ id: (current?.id ?? 0) + 1, label }))
   const moveMode =
-    !!pawn && !aim && !(dismissed?.pawnId === pawn.id && dismissed.round === state.round)
+    !!pawn &&
+    !aim &&
+    !(canceled?.state === state && canceled.pawnId === pawn.id) &&
+    !(dismissed?.pawnId === pawn.id && dismissed.round === state.round)
   const insight = useInspection(state, !!aim)
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
+    // Entering a mode announces it — the ability's name or Move — and canceling the
+    // ability quiets the board instead of falling back to moving: the player left
+    // the mode, not switched to another.
+    if (next && !aim && pawn) announce(bf.abilityMode(specialTexts[pawn.special.name]))
+    if (!next && aim && pawn) setCanceled({ state, pawnId: pawn.id })
     setAiming(next && { state, aim: next })
   }
   const setMoveMode = (on: boolean) => {
     if (!pawn) return
     insight.close()
+    if (on && !moveMode) announce(bf.moveMode)
     setAiming(null)
+    setCanceled(null)
     setDismissed(on ? null : { pawnId: pawn.id, round: state.round })
   }
   const hasSpecialTargets =
@@ -72,7 +91,7 @@ export function useCommanding(
       ? movementDestinations(state.tiles, state.pawns, pawn)
       : new Map<string, number>()
 
-  // Pressing A toggles between moving and attacking, never previewing.
+  // Pressing A aims the ability, and aiming again drops every mode; it never previews.
   const toggleAim = () => {
     if (!canCommand || !pawn) return
     if (aim) setAim(null)
@@ -87,6 +106,22 @@ export function useCommanding(
     setMoveMode(true)
   }
 
+  // A commanded move keeps the turn, and attacking is the most probable next action:
+  // like an aim, the expectation belongs to the state it started on and lands only on
+  // the moved state.
+  const [attackAfterMove, setAttackAfterMove] = useState<{
+    state: GameState
+    pawnId: number
+  } | null>(null)
+  if (attackAfterMove && attackAfterMove.state !== state && canCommand) {
+    if (pawn && pawn.id === attackAfterMove.pawnId && canUseSpecial(pawn) && hasSpecialTargets)
+      setAim({ action: 'special' })
+    setAttackAfterMove(null)
+  }
+  const commandedMove = () => {
+    if (pawn) setAttackAfterMove({ state, pawnId: pawn.id })
+  }
+
   return {
     aim,
     moveMode,
@@ -97,10 +132,12 @@ export function useCommanding(
     targeting,
     reach,
     hasSpecialTargets,
+    announced,
     insight,
     setAim,
     setMoveMode,
     toggleAim,
     cycleCommand,
+    commandedMove,
   }
 }
