@@ -45,7 +45,7 @@ function BriefingPopup({
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_15%,color-mix(in_srgb,var(--briefing-accent)_28%,transparent),transparent_60%),linear-gradient(160deg,#ffffff08,transparent_40%,#0006)]"
+        className="pointer-events-none absolute inset-0 -z-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_15%,color-mix(in_srgb,var(--briefing-accent)_28%,transparent),transparent_60%),linear-gradient(160deg,var(--icon-hover),transparent_40%,#0006)]"
       >
         <svg className="absolute inset-x-0 top-0 h-[360px] w-full text-gold/10 mask-[linear-gradient(#000,transparent)]">
           <defs>
@@ -108,7 +108,7 @@ function BriefingPopup({
             {element.art ? (
               <ElementArt art={element.art} index={0} hero />
             ) : (
-              <div className="briefing-art-icon grid size-[164px] place-items-center text-gold drop-shadow-[0_8px_24px_#0006] motion-reduce:animate-none max-[360px]:size-[136px] [@media(max-height:650px)]:size-[112px]">
+              <div className="briefing-art-icon grid size-[164px] place-items-center text-gold drop-shadow-art motion-reduce:animate-none max-[360px]:size-[136px] [@media(max-height:650px)]:size-[112px]">
                 <Icon
                   name={element.icon ?? 'hex'}
                   className="size-[76px] [@media(max-height:650px)]:size-14"

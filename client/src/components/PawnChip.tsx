@@ -50,19 +50,22 @@ export function PawnChip({
           <path
             d="m0-23 20 11v24L0 23-20 12v-24Z"
             fill="url(#enemy-chip)"
-            stroke={active ? '#ffe9a8' : '#d59d81'}
+            stroke={active ? 'var(--active-gold)' : 'var(--hp)'}
             strokeWidth={active ? 2.5 : 1.5}
           />
         ) : (
           <circle
             r="22"
             fill="url(#player-chip)"
-            stroke={active ? '#ffe9a8' : '#b2ceaa'}
+            stroke={active ? 'var(--active-gold)' : '#b2ceaa'}
             strokeWidth={active ? 2.5 : 1.5}
           />
         )}
         <circle r="17.5" fill="none" stroke="#f5e5bf" strokeOpacity=".15" />
-        <g transform="translate(-12 -15)" color={pawn.kind === 'king' ? '#f0d38e' : '#f1e8d2'}>
+        <g
+          transform="translate(-12 -15)"
+          color={pawn.kind === 'king' ? 'var(--king)' : '#f1e8d2'}
+        >
           <PawnIcon kind={pawn.kind} />
         </g>
         <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill="#e9e5ce">
@@ -80,11 +83,11 @@ export function PawnChip({
             transform="translate(10 -26) scale(.65)"
             color="#f6e5a6"
           >
-            <circle cx="12" cy="12" r="14" fill="#17362b" />
+            <circle cx="12" cy="12" r="14" fill="var(--plate)" />
             <Icon name="shield" />
           </g>
         )}
-        <rect x="-15" y="24" width="30" height="5" rx="2.5" fill="#17362b" />
+        <rect x="-15" y="24" width="30" height="5" rx="2.5" fill="var(--plate)" />
         {Array.from({ length: pawn.maxHp }, (_, i) => (
           <rect
             key={i}
@@ -106,7 +109,7 @@ export function PawnChip({
               width={pawn.maxEnergy * 7 + 6}
               height="7"
               rx="3.5"
-              fill="#17362b"
+              fill="var(--plate)"
             />
             {Array.from({ length: pawn.maxEnergy }, (_, i) => (
               <path
@@ -121,7 +124,7 @@ export function PawnChip({
             ))}
           </g>
         )}
-        {active && <path d="m0-35 4-5h-8Z" fill="#ffe9a8" />}
+        {active && <path d="m0-35 4-5h-8Z" fill="var(--active-gold)" />}
       </g>
       {pawn.hp <= 0 && (
         <text

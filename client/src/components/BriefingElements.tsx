@@ -39,7 +39,7 @@ export function ElementArt({
         }}
       />
       <svg
-        className="briefing-art-icon relative size-full drop-shadow-[0_4px_8px_#0006] motion-reduce:animate-none"
+        className="briefing-art-icon relative size-full drop-shadow-art-soft motion-reduce:animate-none"
         viewBox="-38 -38 76 76"
         aria-hidden="true"
         style={{ animationDelay: delay }}
@@ -57,7 +57,10 @@ export function ElementArt({
             />
             <circle r="22" fill="url(#player-chip)" stroke="#b2ceaa" strokeWidth="1.5" />
             <circle r="17.5" fill="none" stroke="#f5e5bf" strokeOpacity=".12" />
-            <g transform="translate(-12 -12)" color={art === 'king' ? '#f0d38e' : '#f1e8d2'}>
+            <g
+              transform="translate(-12 -12)"
+              color={art === 'king' ? 'var(--king)' : '#f1e8d2'}
+            >
               <PawnIcon kind={art} />
             </g>
           </>
@@ -92,7 +95,7 @@ function StatChip({
   color: string
 }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-line bg-[#ffffff08] px-1.5 py-0.5 text-[12px] font-semibold leading-none text-ink">
+    <span className="inline-flex items-center gap-1 rounded-md border border-line bg-icon-hover px-1.5 py-0.5 text-[12px] font-semibold leading-none text-ink">
       <Icon name={icon} className={'size-[11px] ' + color} />
       {value}
     </span>
@@ -105,7 +108,7 @@ function ElementCard({ element, index }: { element: BriefingElement; index: numb
 
   return (
     <li
-      className="briefing-card motion-reduce:animate-none flex items-start gap-3.5 rounded-xl border border-line bg-[#ffffff06] px-3.5 py-3.5"
+      className="briefing-card motion-reduce:animate-none flex items-start gap-3.5 rounded-xl border border-line bg-control px-3.5 py-3.5"
       style={{ animationDelay: delay }}
     >
       {hasArt && <ElementArt art={element.art} index={index} />}
@@ -116,7 +119,7 @@ function ElementCard({ element, index }: { element: BriefingElement; index: numb
 
         {element.stats && (
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            <StatChip icon="heart" value={element.stats.hp} color="text-[#d59d81]" />
+            <StatChip icon="heart" value={element.stats.hp} color="text-hp" />
             <StatChip icon="sword" value={element.stats.damage} color="text-[#c4d1a5]" />
             <StatChip icon="target" value={element.stats.range} color="text-muted" />
           </div>
@@ -125,7 +128,7 @@ function ElementCard({ element, index }: { element: BriefingElement; index: numb
         {element.special && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-snug">
             <span className="font-semibold text-gold">{element.special.name}</span>
-            <span className="inline-flex items-center gap-0.5 rounded bg-[#ffffff0d] px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
+            <span className="inline-flex items-center gap-0.5 rounded bg-control-hover px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
               <Icon name="energy" className="size-2.5" />
               {element.special.cost}
             </span>

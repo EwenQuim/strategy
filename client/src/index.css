@@ -19,12 +19,26 @@
   --color-card-end: var(--card-end);
   --color-switch-knob: var(--switch-knob);
   --color-campaign-complete: var(--campaign-complete);
+  --color-impact: var(--impact);
+  --color-hp: var(--hp);
+  --color-enemy: var(--enemy);
+  --color-player: var(--player);
+  --color-panel: var(--panel);
+  --color-active-gold: var(--active-gold);
+  --color-king: var(--king);
+  --color-feature-shade: var(--feature-shade);
+  --color-plate: var(--plate);
+  --color-input: var(--input);
 }
 
 @theme {
   --shadow-control: 0 6px 24px #07180f30;
   --shadow-control-hover: 0 8px 30px #07180f50;
   --shadow-menu-card: 0 8px 24px #0002;
+  --shadow-campaign-card: 0 8px 28px #0003;
+  --shadow-press: 0 3px 0 #0003, inset 0 1px 0 #fff5;
+  --drop-shadow-art: 0 8px 24px #0006;
+  --drop-shadow-art-soft: 0 4px 8px #0006;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-serif: Georgia, serif;
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
@@ -56,6 +70,16 @@
     --card-end: rgb(255 255 255 / 2%);
     --switch-knob: #172a21;
     --campaign-complete: #89bba4;
+    --impact: #ffe1a3;
+    --hp: #d59d81;
+    --enemy: #d69b81;
+    --player: #b6d2b5;
+    --panel: #20362b;
+    --active-gold: #ffe9a8;
+    --king: #f0d38e;
+    --feature-shade: #1b1418;
+    --plate: #17362b;
+    --input: #152b24;
   }
 
   body {

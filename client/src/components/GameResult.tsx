@@ -82,11 +82,11 @@ export function GameResult({
             : outcome === 'defeat'
               ? 'battle-result-defeat '
               : '') +
-          'w-full max-w-[300px] rounded-2xl border border-gold/45 bg-[var(--biome-panel,#20362b)] bg-[image:linear-gradient(#ffffff14,transparent_45%)] px-6 py-6 text-center text-ink shadow-[0_0_0_1px_#0008,0_25px_90px_#000c] motion-reduce:animate-none [&_h1]:mt-1.5 [&_h1]:mb-2 [&_h1]:font-serif [&_h1]:text-[26px] [&_h1]:leading-tight [&_p]:text-[14px] [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[22px]'
+          'w-full max-w-[300px] rounded-2xl border border-gold/45 bg-[var(--biome-panel,var(--panel))] bg-[image:linear-gradient(#ffffff14,transparent_45%)] px-6 py-6 text-center text-ink shadow-[0_0_0_1px_#0008,0_25px_90px_#000c] motion-reduce:animate-none [&_h1]:mt-1.5 [&_h1]:mb-2 [&_h1]:font-serif [&_h1]:text-[26px] [&_h1]:leading-tight [&_p]:text-[14px] [&_p]:leading-normal [&_p]:text-muted [@media(max-height:650px)]:px-5 [@media(max-height:650px)]:py-4 [@media(max-height:650px)]:[&_h1]:text-[22px]'
         }
         data-testid="result-card"
       >
-        <div className="mx-auto mb-3 grid size-11 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-[#d59d81] [&>svg]:size-[24px] [@media(max-height:650px)]:hidden">
+        <div className="mx-auto mb-3 grid size-11 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-hp [&>svg]:size-[24px] [@media(max-height:650px)]:hidden">
           <Icon name="crown" />
         </div>
         <span className="text-xs font-semibold text-muted tracking-[0.17em] uppercase">

@@ -47,7 +47,7 @@ export const Route = createFileRoute('/')({
               params={started ? undefined : { campaign: TUTORIAL.slug, level: '1' }}
               className={
                 homeControlClassName +
-                ' border-[#e5d19a] bg-[#d8c38a] text-[#24392a] hover:bg-[#ecdaa3]'
+                ' border-[#e5d19a] bg-gold text-[#24392a] hover:bg-[#ecdaa3]'
               }
               preload={false}
             >

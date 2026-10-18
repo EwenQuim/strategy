@@ -61,7 +61,7 @@ export function BattlefieldEffects({
                       />
                       <path
                         d="M1-9C8 0 11 4 11 9a11 11 0 0 1-22 0c0-6 7-10 12-18Z"
-                        fill="#ffe1a3"
+                        fill="var(--impact)"
                       />
                     </g>
                   ) : (
@@ -105,7 +105,7 @@ export function BattlefieldEffects({
               key={key(hit.q, hit.r)}
               transform={'translate(' + hexX(hit.q, hit.r) + ' ' + hexY(hit.r) + ')'}
             >
-              <g className={hit.damage > 0 ? 'text-[#ffe1a3]' : 'text-[#c9eaf4]'}>
+              <g className={hit.damage > 0 ? 'text-impact' : 'text-[#c9eaf4]'}>
                 <circle
                   r="28"
                   className={

@@ -115,7 +115,7 @@ export function TileLayer({
           <polygon points={hexPoints} />
         </clipPath>
         <radialGradient id="active-halo">
-          <stop stopColor="#ffe9a8" stopOpacity=".7" />
+          <stop stopColor="var(--active-gold)" stopOpacity=".7" />
           <stop offset=".4" stopColor="#f2df9e" stopOpacity=".35" />
           <stop offset="1" stopColor="#f2df9e" stopOpacity="0" />
         </radialGradient>
