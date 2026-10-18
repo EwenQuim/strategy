@@ -41,7 +41,9 @@ export function PawnChip({
         <ellipse cy="17" rx="23" ry="9" fill="#10281e" opacity=".5" />
         {active && (
           <g data-art="active-halo" className="active-halo-pop motion-reduce:animate-none">
-            <circle r="46" fill="url(#active-halo)" />
+            {/* The board keeps SIZE * 1.35 (45.9) of viewBox around tile centers; scaled
+                1.15 with the pawn, 39 reaches 44.85 so edge tiles never cut the glow. */}
+            <circle r="39" fill="url(#active-halo)" />
           </g>
         )}
         {enemy ? (
