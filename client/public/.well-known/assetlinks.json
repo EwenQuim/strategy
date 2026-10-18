@@ -5,7 +5,9 @@
       "namespace": "android_app",
       "package_name": "com.amethysts.hexmate",
       "sha256_cert_fingerprints": [
+        "31:01:28:D2:0B:37:1D:73:66:0B:9E:37:4E:5A:C0:EB:3E:37:94:BC:4E:44:F8:B1:2C:F5:AA:CE:20:23:7C:BE",
         "310128d20b371d73660b9e374e5ac0eb3e3794bc4e44f8b12cf5aace20237cbe",
+        "5E:5E:2D:8A:78:B8:F8:C1:8B:9E:2C:B2:C0:E4:0D:28:12:B3:A6:F5:12:45:85:90:98:9C:4C:98:A7:AF:3B:B4",
         "5e5e2d8a78b8f8c18b9e2cb2c0e40d2812b3a6f512458590989c4c98a7af3bb4"
       ]
     }
@@ -16,6 +18,7 @@
       "namespace": "android_app",
       "package_name": "com.amethysts.hexmate.debug",
       "sha256_cert_fingerprints": [
+        "E6:B0:84:B2:44:73:4F:9F:4A:59:5A:05:8B:A3:18:4C:B4:2E:99:D2:B3:BE:4F:18:61:F1:13:84:7E:78:16:65",
         "e6b084b244734f9f4a595a058ba3184cb42e99d2b3be4f1861f113847e781665"
       ]
     }
