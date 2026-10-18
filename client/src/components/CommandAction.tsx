@@ -76,7 +76,10 @@ function CommandActionContent({ icon, label, note }: CommandActionContentProps) 
         {label}
       </span>
       {note !== undefined && (
-        <small className="mt-0.5 block text-[9px] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
+        // Two lines are always reserved and no hint exceeds them, so the deck keeps
+        // one height whether the note wraps or not: the fixed viewport must not jump
+        // between turns or while a move plays and the buttons sit disabled.
+        <small className="mt-0.5 block min-h-[2.7em] line-clamp-2 text-[9px] leading-[1.35] text-[#a1b29b] max-[601px]:mt-0 max-[601px]:text-[8px]">
           {note}
         </small>
       )}
