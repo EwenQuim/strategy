@@ -208,6 +208,20 @@ export const rosters = t({
 export const unit = t({ en: 'Unit', fr: 'Unité', de: 'Einheit', es: 'Unidad', it: 'Unità' })
 export const king = t({ en: 'King', fr: 'Roi', de: 'König', es: 'Rey', it: 'Re' })
 export const total = t({ en: 'Total', fr: 'Total', de: 'Gesamt', es: 'Total', it: 'Totale' })
+export const removeOne = t({
+  en: 'Remove one',
+  fr: 'Retirer un',
+  de: 'Eines entfernen',
+  es: 'Quitar uno',
+  it: 'Rimuovi uno',
+})
+export const addOne = t({
+  en: 'Add one',
+  fr: 'Ajouter un',
+  de: 'Eines hinzufügen',
+  es: 'Añadir uno',
+  it: 'Aggiungi uno',
+})
 export const localSides = t({
   en: ['Player 1', 'Player 2'],
   fr: ['Joueur 1', 'Joueur 2'],

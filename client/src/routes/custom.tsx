@@ -22,6 +22,17 @@ import { biomeNames } from '../i18n/biomes'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
+// The default roster rolls fresh on every visit, like quick play, so players
+// start from a new random army instead of editing their way to one.
+function randomDefaultRoster(): Pawn['kind'][] {
+  const kinds = recruits.map(({ kind }) => kind)
+  for (let i = kinds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[kinds[i], kinds[j]] = [kinds[j], kinds[i]]
+  }
+  return ['king', ...kinds.slice(0, 4)]
+}
+
 export const Route = createFileRoute('/custom')({
   component: function CustomPlay() {
     const navigate = Route.useNavigate()
@@ -30,13 +41,7 @@ export const Route = createFileRoute('/custom')({
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [developerPreview] = useState(readDeveloperPreview)
-    const [player, setPlayer] = useState<Pawn['kind'][]>([
-      'king',
-      'swordsman',
-      'archer',
-      'magician',
-      'ninja',
-    ])
+    const [player, setPlayer] = useState<Pawn['kind'][]>(randomDefaultRoster)
     const [enemy, setEnemy] = useState<Pawn['kind'][] | null>(null)
     const enemyRoster = enemy ?? player
     const labels = m.localSides
@@ -124,17 +129,17 @@ export const Route = createFileRoute('/custom')({
                 />
                 {m.symmetricMap}
               </label>
-              <table className="w-full border-separate border-spacing-2 text-[13px] min-[900px]:text-base [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
+              <table className="mt-3 w-full border-separate border-spacing-2 text-[13px] min-[900px]:text-base [&_svg]:size-[18px] [&_svg]:text-gold [&_tfoot_th]:py-2 [&_tfoot_td]:py-2">
                 <caption className="text-left font-semibold text-gold">{m.rosters}</caption>
                 <thead className="text-xs text-muted">
                   <tr>
                     <th className="text-left font-medium" scope="col">
                       {m.unit}
                     </th>
-                    <th className="font-medium w-1/4 text-center" scope="col">
+                    <th className="font-medium w-[30%] text-center" scope="col">
                       {labels[0]}
                     </th>
-                    <th className="font-medium w-1/4 text-center" scope="col">
+                    <th className="font-medium w-[30%] text-center" scope="col">
                       {labels[1]}
                     </th>
                   </tr>
@@ -147,8 +152,8 @@ export const Route = createFileRoute('/custom')({
                         {m.king}
                       </span>
                     </th>
-                    <td className="w-1/4 text-center">1</td>
-                    <td className="w-1/4 text-center">1</td>
+                    <td className="w-[30%] text-center">1</td>
+                    <td className="w-[30%] text-center">1</td>
                   </tr>
                   {recruits.map(({ kind }) => (
                     <tr key={kind}>
@@ -164,30 +169,57 @@ export const Route = createFileRoute('/custom')({
                           MAP_WIDTH * 3 - roster.length + count,
                           MAP_WIDTH * 3 - 1,
                         )
+                        const locked = side === 1 && enemy === null
+                        const setCount = (value: number) => {
+                          if (!Number.isInteger(value) || value < 0 || value > max) return
+                          const next = [
+                            ...roster.filter((unit) => unit !== kind),
+                            ...Array<Pawn['kind']>(value).fill(kind),
+                          ]
+                          if (side === 0) setPlayer(next)
+                          else setEnemy(next)
+                        }
+                        const stepperButtonClassName =
+                          'flex h-11 w-8 shrink-0 items-center justify-center text-lg leading-none text-muted hover:bg-white/10 hover:text-ink active:bg-white/15 disabled:opacity-50'
                         return (
-                          <td className="w-1/4 text-center" key={side}>
-                            <input
-                              className={menuInputClassName + ' text-center'}
-                              type="number"
-                              inputMode="numeric"
-                              min={0}
-                              max={max}
-                              step={1}
-                              value={count}
-                              onFocus={(event) => event.target.select()}
-                              aria-label={labels[side] + ' ' + unitNames[kind]}
-                              disabled={side === 1 && enemy === null}
-                              onChange={(event) => {
-                                const value = Number(event.target.value)
-                                if (!Number.isInteger(value) || value < 0 || value > max) return
-                                const next = [
-                                  ...roster.filter((unit) => unit !== kind),
-                                  ...Array<Pawn['kind']>(value).fill(kind),
-                                ]
-                                if (side === 0) setPlayer(next)
-                                else setEnemy(next)
-                              }}
-                            />
+                          <td className="w-[30%] text-center" key={side}>
+                            <div className="flex w-full items-center overflow-hidden rounded-xl border border-line bg-[#152b24]">
+                              <button
+                                type="button"
+                                className={stepperButtonClassName}
+                                disabled={locked || count === 0}
+                                onClick={() => setCount(count - 1)}
+                                aria-label={
+                                  m.removeOne + ' — ' + labels[side] + ' ' + unitNames[kind]
+                                }
+                              >
+                                −
+                              </button>
+                              <input
+                                className="h-11 min-h-0 w-full min-w-0 border-0 bg-transparent px-0 text-center text-[16px] text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"
+                                type="number"
+                                inputMode="numeric"
+                                min={0}
+                                max={max}
+                                step={1}
+                                value={count}
+                                onFocus={(event) => event.target.select()}
+                                aria-label={labels[side] + ' ' + unitNames[kind]}
+                                disabled={locked}
+                                onChange={(event) => setCount(Number(event.target.value))}
+                              />
+                              <button
+                                type="button"
+                                className={stepperButtonClassName}
+                                disabled={locked || count === max}
+                                onClick={() => setCount(count + 1)}
+                                aria-label={
+                                  m.addOne + ' — ' + labels[side] + ' ' + unitNames[kind]
+                                }
+                              >
+                                +
+                              </button>
+                            </div>
                           </td>
                         )
                       })}
@@ -199,8 +231,8 @@ export const Route = createFileRoute('/custom')({
                     <th className="text-left font-medium" scope="row">
                       {m.total}
                     </th>
-                    <td className="w-1/4 text-center">{player.length}</td>
-                    <td className="w-1/4 text-center">{enemyRoster.length}</td>
+                    <td className="w-[30%] text-center">{player.length}</td>
+                    <td className="w-[30%] text-center">{enemyRoster.length}</td>
                   </tr>
                 </tfoot>
               </table>
