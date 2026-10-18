@@ -78,3 +78,10 @@ export const inspect = t({
   es: (name: string) => `Inspeccionar ${name}`,
   it: (name: string) => `Ispeziona ${name}`,
 })
+export const moving = t({
+  en: 'Moving',
+  fr: 'Déplacement',
+  de: 'Bewegung',
+  es: 'Movimiento',
+  it: 'Movimento',
+})

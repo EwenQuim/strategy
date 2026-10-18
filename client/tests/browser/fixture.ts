@@ -209,14 +209,13 @@ export async function playInUi(page: Page, state: GameState, action: Action) {
     return clickTile(action)
   }
   if (action.type === 'special') {
-    await page.locator('[data-action="special"]').click()
+    // A move that keeps the turn leaves the ability aimed, so press it only when it is not.
+    const special = page.locator('[data-action="special"]')
+    if ((await special.getAttribute('aria-pressed')) !== 'true') await special.click()
     if (action.destination) await clickTile(action.destination)
     if (action.target) await clickTile(action.target)
-    else if (
-      action.destination &&
-      /Land here/.test(await page.locator('[data-action="special"]').innerText())
-    )
-      await page.locator('[data-action="special"]').click()
+    else if (action.destination && /Land here/.test(await special.innerText()))
+      await special.click()
     return
   }
   assert.fail('Unexpected action: ' + action.type)

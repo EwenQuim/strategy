@@ -130,6 +130,9 @@
   .unit-unlock-toast {
     animation: unit-unlock-toast 7s ease-out both;
   }
+  .mode-announce {
+    animation: mode-announce 1300ms ease-out both;
+  }
   .briefing-card {
     animation: briefing-card-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -480,6 +483,22 @@
   to {
     opacity: 0;
     transform: translateY(-40%);
+    visibility: hidden;
+  }
+}
+
+@keyframes mode-announce {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  15%,
+  75% {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
     visibility: hidden;
   }
 }
