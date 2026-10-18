@@ -47,11 +47,6 @@ export function useCommanding(
   // An aim cancellation belongs to one state: it quiets the board until the pawn or
   // the battle moves on, unlike a dismissal, which lasts the whole activation.
   const [canceled, setCanceled] = useState<{ state: GameState; pawnId: number } | null>(null)
-  // Every mode activation announces itself once; the rising id remounts the overlay,
-  // replaying its animation.
-  const [announced, setAnnounced] = useState<{ id: number; label: string } | null>(null)
-  const announce = (label: string) =>
-    setAnnounced((current) => ({ id: (current?.id ?? 0) + 1, label }))
   const moveMode =
     !!pawn &&
     !aim &&
@@ -61,17 +56,14 @@ export function useCommanding(
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
-    // Entering a mode announces it — the ability's name or Move — and canceling the
-    // ability quiets the board instead of falling back to moving: the player left
-    // the mode, not switched to another.
-    if (next && !aim && pawn) announce(bf.abilityMode(specialTexts[pawn.special.name]))
+    // Canceling the ability quiets the board instead of falling back to moving:
+    // the player left the mode, not switched to another.
     if (!next && aim && pawn) setCanceled({ state, pawnId: pawn.id })
     setAiming(next && { state, aim: next })
   }
   const setMoveMode = (on: boolean) => {
     if (!pawn) return
     insight.close()
-    if (on && !moveMode) announce(bf.moveMode)
     setAiming(null)
     setCanceled(null)
     setDismissed(on ? null : { pawnId: pawn.id, round: state.round })
@@ -83,6 +75,13 @@ export function useCommanding(
   const choices = aim ? tileChoices(state, aim) : new Map<string, TileChoice>()
   const targetLabel = resolveTargetLabel(aim, pawn)
   const targeting = resolveTargeting(usingSpecial, pawn, !!destination)
+  // The top banner always shows the side's current command mode; it never announces.
+  const commandMode =
+    commanding && usingSpecial && pawn
+      ? { mode: 'ability' as const, label: bf.abilityMode(specialTexts[pawn.special.name]) }
+      : commanding && moveMode
+        ? { mode: 'move' as const, label: bf.moveMode }
+        : { mode: 'none' as const, label: bf.noMode }
 
   // Reach stays up while an own action's effect frame plays: it is computed from the
   // post-action state, so the playback-end render changes no tile costs.
@@ -132,7 +131,7 @@ export function useCommanding(
     targeting,
     reach,
     hasSpecialTargets,
-    announced,
+    commandMode,
     insight,
     setAim,
     setMoveMode,

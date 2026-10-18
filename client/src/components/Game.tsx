@@ -133,7 +133,7 @@ export function Game({
     targeting,
     reach,
     hasSpecialTargets,
-    announced,
+    commandMode,
     insight,
     setAim,
     setMoveMode,
@@ -205,9 +205,23 @@ export function Game({
       />
 
       <section
-        className="bg-(--biome-background) bg-[image:var(--battlefield-image,radial-gradient(ellipse_at_50%_45%,var(--biome-glow),transparent_66%),radial-gradient(#d7d8b308_1px,transparent_1px),none)] bg-[size:var(--battlefield-size,auto,8px_8px,auto)] before:pointer-events-none before:absolute before:inset-x-1/5 before:inset-y-[10%] before:-z-1 before:rounded-[50%] before:border before:border-[#c5d09c08] before:shadow-[0_0_0_50px_#c5d09c03,0_0_0_100px_#c5d09c02] relative isolate grid min-h-0 grid-rows-[minmax(0,1fr)]"
+        className="bg-(--biome-background) bg-[image:var(--battlefield-image,radial-gradient(ellipse_at_50%_45%,var(--biome-glow),transparent_66%),radial-gradient(#d7d8b308_1px,transparent_1px),none)] bg-[size:var(--battlefield-size,auto,8px_8px,auto)] before:pointer-events-none before:absolute before:inset-x-1/5 before:inset-y-[10%] before:-z-1 before:rounded-[50%] before:border before:border-[#c5d09c08] before:shadow-[0_0_0_50px_#c5d09c03,0_0_0_100px_#c5d09c02] relative isolate grid min-h-0 grid-rows-[auto_minmax(0,1fr)]"
         aria-label={m.battlefield}
       >
+        <div
+          className="flex items-center justify-center border-b border-line py-[3px] data-[mode=ability]:border-[#b9837040] data-[mode=ability]:bg-[#b9837017] data-[mode=move]:border-[#b79dce40] data-[mode=move]:bg-[#b79dce17]"
+          data-testid="mode-banner"
+          data-mode={commandMode.mode}
+        >
+          {/* The key replays the slide animation on each mode switch. */}
+          <span
+            key={commandMode.label}
+            className="mode-banner-slide motion-reduce:animate-none text-[11px] font-semibold tracking-[0.06em] uppercase text-muted data-[mode=ability]:text-[#e0a987] data-[mode=move]:text-[#c9bce4]"
+            data-mode={commandMode.mode}
+          >
+            {commandMode.label}
+          </span>
+        </div>
         <div className="flex min-h-0 items-center justify-center px-2.5 py-[3px] max-[601px]:px-[3px]">
           <Battlefield
             labels={labels}
@@ -228,19 +242,6 @@ export function Game({
             onInspect={onInspectTile}
           />
         </div>
-        {announced && (
-          // The label fades out on its own; the key replays the animation per mode switch.
-          <div
-            key={announced.id}
-            aria-hidden="true"
-            data-testid="mode-announcement"
-            className="pointer-events-none absolute inset-0 z-2 flex items-center justify-center motion-reduce:hidden"
-          >
-            <span className="mode-announce rounded-full border border-line bg-[#102018d9] px-4 py-1.5 text-[13px] font-semibold tracking-wide text-ink shadow-[0_6px_20px_#10201880]">
-              {announced.label}
-            </span>
-          </div>
-        )}
         {state.winner && (
           <GameResult
             winner={state.winner}
