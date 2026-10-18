@@ -137,7 +137,7 @@ test('Symmetric custom battles mirror pawn positions for equal rosters', () => {
   for (const pawn of uneven.pawns) assert.ok(passable(uneven.tiles.get(key(pawn.q, pawn.r))))
 })
 
-test('Symmetric battles pair matching units in the initiative, kings opening', () => {
+test('Mirrored rosters pair matching units in the initiative, kings opening', () => {
   const equal: BattleSetup = {
     biome: 'desert',
     player: ['king', 'archer', 'bulwark', 'swordsman'],
@@ -155,6 +155,9 @@ test('Symmetric battles pair matching units in the initiative, kings opening', (
   for (const seed of ['paired-a', 'paired-b', 'paired-c']) {
     assertPaired(initialState(symmetricSeed(seed), equal), seed)
     assertPaired(initialState(symmetricSeed(seed)), seed)
+    // Plain seeds pair too: bot battles field mirrored rosters without a sym- seed.
+    assertPaired(initialState(seed), seed)
+    assertPaired(initialState(seed, equal), seed)
     for (const side of ['player', 'enemy'] as const) {
       const opening = initialState(symmetricSeed(seed), equal, side)
       const opener = opening.order.map((id) =>
@@ -164,8 +167,10 @@ test('Symmetric battles pair matching units in the initiative, kings opening', (
       assert.equal(opener.kind, 'king', seed)
     }
   }
-  // Uneven rosters keep the shuffle: the battle does not open on a king.
-  const uneven = initialState(symmetricSeed('paired-uneven'), setup)
-  const sequence = uneven.order.map((id) => uneven.pawns.find((pawn) => pawn.id === id)!)
-  assert.notEqual(sequence[0].kind, 'king')
+  // Uneven rosters keep the shuffle, on plain seeds as well: the battle does not open on a king.
+  for (const unevenSeed of [symmetricSeed('paired-uneven'), 'paired-uneven-plain']) {
+    const uneven = initialState(unevenSeed, setup)
+    const sequence = uneven.order.map((id) => uneven.pawns.find((pawn) => pawn.id === id)!)
+    assert.notEqual(sequence[0].kind, 'king')
+  }
 })

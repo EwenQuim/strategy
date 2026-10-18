@@ -132,9 +132,9 @@ function mirroredRosters(pawns: Pawn[]): boolean {
   return [...counts.values()].every((count) => count === 0)
 }
 
-// Symmetric battles group matching units into pairs: the kings open, then each pair
+// Mirrored rosters group matching units into pairs: the kings open, then each pair
 // follows in seeded order with a seeded lead, so tempo stays fair between mirrored sides.
-function pairedInitiative(pawns: Pawn[], random: SeededRandom, startingSide?: Side): Pawn[] {
+function pairedInitiative(pawns: Pawn[], random: SeededRandom): Pawn[] {
   const groups = new Map<Pawn['kind'], { player: Pawn[]; enemy: Pawn[] }>()
   for (const pawn of pawns) {
     const group = groups.get(pawn.kind) ?? { player: [], enemy: [] }
@@ -144,11 +144,11 @@ function pairedInitiative(pawns: Pawn[], random: SeededRandom, startingSide?: Si
   const kings = groups.get('king')
   groups.delete('king')
   const order: Pawn[] = []
-  const pair = (player: Pawn, enemy: Pawn, lead?: Side) => {
-    const first = lead ?? (random.next() < 0.5 ? 'player' : 'enemy')
+  const pair = (player: Pawn, enemy: Pawn) => {
+    const first = random.next() < 0.5 ? 'player' : 'enemy'
     order.push(first === 'player' ? player : enemy, first === 'player' ? enemy : player)
   }
-  if (kings) pair(kings.player[0]!, kings.enemy[0]!, startingSide)
+  if (kings) pair(kings.player[0]!, kings.enemy[0]!)
   for (const kind of shuffle([...groups.keys()], random)) {
     const group = groups.get(kind)!
     const player = shuffle(group.player, random)
@@ -269,11 +269,11 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     tiles = decorateMap(random, biome, shape, pawns, symmetric, size)
   }
   const savedSetup = copySetup(setup)
-  const paired = symmetric && setup?.map === undefined && mirroredRosters(pawns)
-  const initiative = paired
-    ? pairedInitiative(pawns, random, startingSide)
-    : shuffle(pawns, random)
-  if (!paired && startingSide) {
+  // Mirrored rosters pair the initiative in every generated battle, whatever the
+  // seed: the seed only marks mirrored battlefields, not army symmetry.
+  const paired = setup?.map === undefined && mirroredRosters(pawns)
+  const initiative = paired ? pairedInitiative(pawns, random) : shuffle(pawns, random)
+  if (startingSide) {
     const first = initiative.findIndex((pawn) => pawn.side === startingSide)
     initiative.push(...initiative.splice(0, first))
   }
