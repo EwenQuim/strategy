@@ -353,6 +353,8 @@ test(
           'rgb(148, 113, 109)',
         )
         await page.locator('[data-action="special"]').click()
+        // Canceling the aim quiets the board, so walking into the lava needs Move back.
+        await page.locator('[data-action="move"]').click()
       } else {
         assert.match(
           (await destination.getAttribute('aria-label'))!,
