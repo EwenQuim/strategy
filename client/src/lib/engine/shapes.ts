@@ -11,15 +11,15 @@ import {
 import type { Biome } from './biomes/index.ts'
 import type { SeededRandom } from './random.ts'
 
-export const MIN_MAP_WIDTH = 6
+export const MIN_MAP_WIDTH = 7
 export const MAX_MAP_WIDTH = 8
 export const MAP_HEIGHTS = [8] as const
 
-// Rolled maps are width 6-8 by height 8: frontier carving trims at most one
-// column per side, and only on width-8 rolls. Interior gaps need rows between
-// the spawn zones, so they never open on rolled maps; the branch only serves
-// taller direct generateMapShape calls. Mountains and lakes still break up the
-// middle of the battlefield.
+// Rolled maps are width 7-8 by height 8: frontier carving raggeds the coasts
+// of most rolls, and only the uncarved minority stays rectangular. Interior
+// gaps need rows between the spawn zones, so they never open on rolled maps;
+// the branch only serves taller direct generateMapShape calls. Mountains and
+// lakes still break up the middle of the battlefield.
 const FRONTIER_CARVE_CHANCE = 0.8
 const INTERIOR_CARVE_CHANCE = 0.25
 const MAX_INTERIOR_CARVES = 3
@@ -116,28 +116,28 @@ function carveFrontier(
   symmetric: boolean,
   carve: (q: number, r: number) => void,
 ) {
-  // Narrow maps stay rectangular: carving below the minimum row span would
-  // shrink spawn zones below the maximal army size.
-  const maxDepth = Math.max(0, Math.floor((size.width - MIN_ROW_SPAN) / 2))
+  // Carving never cuts a row below the minimum span, so spawn zones always fit
+  // the maximal army size: both coasts share one depth budget per row.
+  const budget = Math.max(0, size.width - MIN_ROW_SPAN)
   const rawLeft: number[] = []
   const rawRight: number[] = []
   for (let row = 0; row < size.height; row++) {
     rawLeft.push(random.next())
     if (!symmetric) rawRight.push(random.next())
   }
-  const depth = (values: number[], row: number) => {
-    const smooth =
-      (values[Math.max(0, row - 1)] +
-        2 * values[row] +
-        values[Math.min(values.length - 1, row + 1)]) /
-      4
-    return Math.min(maxDepth, Math.round(smooth * maxDepth))
-  }
+  // Independent per-row depths keep coasts ragged at the small rolled budgets:
+  // smoothing made neighboring rows carve alike, reshaping maps into smaller
+  // clean rectangles instead of varying the outline.
+  const depth = (values: number[], row: number) =>
+    Math.min(budget, Math.round(values[row] * budget))
   for (let row = 0; row < size.height; row++) {
-    const left = depth(rawLeft, row)
     // The 180° mirror maps column c to width - 1 - c, so symmetric maps only
-    // carve the left depths and let the pair-aware carve open the right side.
-    const right = symmetric ? 0 : depth(rawRight, row)
+    // carve the left depths and let the pair-aware carve open the right side;
+    // the mirror removal counts against the same row budget.
+    const left = symmetric
+      ? Math.min(depth(rawLeft, row), Math.floor(budget / 2))
+      : depth(rawLeft, row)
+    const right = symmetric ? 0 : Math.min(depth(rawRight, row), budget - left)
     for (let d = 0; d < left; d++) carve(hexOf(d, row).q, row)
     for (let d = 0; d < right; d++) carve(hexOf(size.width - 1 - d, row).q, row)
   }
