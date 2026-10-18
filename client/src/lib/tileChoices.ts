@@ -80,9 +80,8 @@ export function tileChoices(state: GameState, aim: Aim): Map<string, TileChoice>
   return choices
 }
 
-// Tapping a pounce enemy strikes from a landing the player never picked: several
-// may reach it, so chance decides between the nearest two, and a single candidate
-// is the landing.
+// Tapping a pounce enemy strikes from a landing the player never picked: the
+// nearest one wins, and equal distances keep the landing set's order.
 export function pounceLanding(state: GameState, target: Axial): Axial | null {
   const pawn = activePawn(state)
   if (!pawn || !pawn.special.choosesDestination) return null
@@ -102,7 +101,6 @@ export function pounceLanding(state: GameState, target: Axial): Axial | null {
         : hexDist(pawn, tile),
     }))
     .sort((a, b) => a.distance - b.distance)
-    .slice(0, 2)
-  const picked = landings[Math.floor(Math.random() * landings.length)]
+  const picked = landings[0]
   return picked ? { q: picked.tile.q, r: picked.tile.r } : null
 }
