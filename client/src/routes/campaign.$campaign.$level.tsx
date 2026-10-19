@@ -32,7 +32,9 @@ export const Route = createFileRoute('/campaign/$campaign/$level')({
   remountDeps: ({ params }) => [params.campaign, params.level],
   component: function CampaignBattle() {
     const { campaign, level } = Route.useRouteContext()
-    const [briefingOpen, setBriefingOpen] = useState(level.newElements.length > 0)
+    // The tutorial pack teaches through the in-battle tour instead of briefing panels.
+    const tour = campaign.slug === 'tutorial'
+    const [briefingOpen, setBriefingOpen] = useState(!tour && level.newElements.length > 0)
     return (
       <>
         <Game
@@ -43,9 +45,10 @@ export const Route = createFileRoute('/campaign/$campaign/$level')({
           bot={campaignBot(campaign, level)}
           campaign={campaign}
           campaignLevel={level.id}
+          tour={tour}
           onVictory={() => recordCampaignVictory(campaign.slug, level.id)}
         />
-        {level.newElements.length > 0 && (
+        {!tour && level.newElements.length > 0 && (
           <Briefing level={level} onClose={() => setBriefingOpen(false)} />
         )}
       </>

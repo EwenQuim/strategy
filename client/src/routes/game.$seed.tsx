@@ -1,8 +1,9 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { QuickPlayTutorial } from '../components/Briefing'
+import { useState } from 'react'
 import { Game } from '../components/Game'
 import { parseBotConfig } from '../bots/catalog'
 import { parseSideBots } from '../bots/participants'
+import { markTutorialSeen, readTutorialSeen } from '../tutorial'
 
 export const Route = createFileRoute('/game/$seed')({
   beforeLoad: ({ params }) => {
@@ -12,17 +13,17 @@ export const Route = createFileRoute('/game/$seed')({
   component: function RandomBattle() {
     const { seed } = Route.useParams()
     const search = Route.useSearch()
+    const [tutorialSeen] = useState(readTutorialSeen)
     return (
-      <>
-        <Game
-          seed={seed}
-          mode={search.mode}
-          bot={parseBotConfig(search.bot)}
-          sideBots={parseSideBots(search.sideBots)}
-          setup={search.setup}
-        />
-        {search.mode === 'ai' && !search.setup && <QuickPlayTutorial />}
-      </>
+      <Game
+        seed={seed}
+        mode={search.mode}
+        bot={parseBotConfig(search.bot)}
+        sideBots={parseSideBots(search.sideBots)}
+        setup={search.setup}
+        tour={search.mode === 'ai' && !search.setup && !tutorialSeen}
+        onTourDone={markTutorialSeen}
+      />
     )
   },
 })

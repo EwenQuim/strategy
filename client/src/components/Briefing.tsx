@@ -2,7 +2,6 @@ import { useId, useRef, useState, type CSSProperties } from 'react'
 import { iconButtonClassName, primaryButtonClassName } from './styles'
 import { Icon } from './Icon'
 import { ElementArt } from './BriefingElements'
-import { markTutorialSeen, readTutorialSeen } from '../tutorial'
 import type { CampaignLevel } from '../campaign'
 import { ELEMENT_ACCENTS, INTRODUCTIONS, type BriefingElement } from '../briefings'
 import { BIOMES } from '../lib/engine'
@@ -239,18 +238,6 @@ export function Briefing({ level, onClose }: { level: CampaignLevel; onClose: ()
       theme={BIOMES[level.setup.biome].theme}
       elements={level.newElements.flatMap((element) => INTRODUCTIONS[element])}
       onClose={onClose}
-    />
-  )
-}
-
-export function QuickPlayTutorial() {
-  const [seen] = useState(readTutorialSeen)
-  if (seen) return null
-  return (
-    <BriefingPopup
-      title={common.quickPlay}
-      elements={INTRODUCTIONS.king}
-      onClose={markTutorialSeen}
     />
   )
 }
