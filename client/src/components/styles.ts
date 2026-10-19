@@ -14,6 +14,9 @@ const panelClassName =
 export const menuCardClassName =
   'rounded-2xl border border-line bg-gradient-to-br from-white/7 to-white/2 shadow-[0_8px_24px_#0002]'
 
+// Flat reference lists: rows breathe through padding, hairlines separate them.
+export const dividedListClassName = 'm-0 flex list-none flex-col divide-y divide-line/60 p-0'
+
 export const menuInputClassName =
   'min-h-12 w-full min-w-0 rounded-xl border border-line bg-[#152b24] px-3 py-2 text-[16px] text-ink [color-scheme:dark] disabled:opacity-50'
 
