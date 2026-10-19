@@ -8,8 +8,16 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { ParticipantPanel } from '../components/ParticipantPanel'
+import { RosterStepper } from '../components/RosterStepper'
 import { defaultParticipant, participantBot } from '../bots/participants'
-import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
+import {
+  BIOMES,
+  MAP_WIDTH,
+  RECRUIT_CLASSES,
+  randomArmy,
+  type Biome,
+  type Pawn,
+} from '../lib/engine'
 import {
   readDeveloperPreview,
   readSymmetricPreference,
@@ -24,14 +32,8 @@ const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
 // The default roster rolls fresh on every visit, like quick play, so players
 // start from a new random army instead of editing their way to one.
-function randomDefaultRoster(): Pawn['kind'][] {
-  const kinds = recruits.map(({ kind }) => kind)
-  for (let i = kinds.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[kinds[i], kinds[j]] = [kinds[j], kinds[i]]
-  }
-  return ['king', ...kinds.slice(0, 4)]
-}
+const randomDefaultRoster = () =>
+  randomArmy({ next: Math.random }).map((Unit) => new Unit(0, 0, 0, 'player').kind)
 
 export const Route = createFileRoute('/custom')({
   component: function CustomPlay() {
@@ -169,57 +171,22 @@ export const Route = createFileRoute('/custom')({
                           MAP_WIDTH * 3 - roster.length + count,
                           MAP_WIDTH * 3 - 1,
                         )
-                        const locked = side === 1 && enemy === null
-                        const setCount = (value: number) => {
-                          if (!Number.isInteger(value) || value < 0 || value > max) return
-                          const next = [
-                            ...roster.filter((unit) => unit !== kind),
-                            ...Array<Pawn['kind']>(value).fill(kind),
-                          ]
-                          if (side === 0) setPlayer(next)
-                          else setEnemy(next)
-                        }
-                        const stepperButtonClassName =
-                          'flex h-11 w-8 shrink-0 items-center justify-center text-lg leading-none text-muted hover:bg-white/10 hover:text-ink active:bg-white/15 disabled:opacity-50'
                         return (
                           <td className="w-[30%] text-center" key={side}>
-                            <div className="flex w-full items-center overflow-hidden rounded-xl border border-line bg-[#152b24]">
-                              <button
-                                type="button"
-                                className={stepperButtonClassName}
-                                disabled={locked || count === 0}
-                                onClick={() => setCount(count - 1)}
-                                aria-label={
-                                  m.removeOne + ' — ' + labels[side] + ' ' + unitNames[kind]
-                                }
-                              >
-                                −
-                              </button>
-                              <input
-                                className="h-11 min-h-0 w-full min-w-0 border-0 bg-transparent px-0 text-center text-[16px] text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-50"
-                                type="number"
-                                inputMode="numeric"
-                                min={0}
-                                max={max}
-                                step={1}
-                                value={count}
-                                onFocus={(event) => event.target.select()}
-                                aria-label={labels[side] + ' ' + unitNames[kind]}
-                                disabled={locked}
-                                onChange={(event) => setCount(Number(event.target.value))}
-                              />
-                              <button
-                                type="button"
-                                className={stepperButtonClassName}
-                                disabled={locked || count === max}
-                                onClick={() => setCount(count + 1)}
-                                aria-label={
-                                  m.addOne + ' — ' + labels[side] + ' ' + unitNames[kind]
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
+                            <RosterStepper
+                              count={count}
+                              max={max}
+                              label={labels[side] + ' ' + unitNames[kind]}
+                              disabled={side === 1 && enemy === null}
+                              onChange={(value) => {
+                                const next = [
+                                  ...roster.filter((unit) => unit !== kind),
+                                  ...Array<Pawn['kind']>(value).fill(kind),
+                                ]
+                                if (side === 0) setPlayer(next)
+                                else setEnemy(next)
+                              }}
+                            />
                           </td>
                         )
                       })}

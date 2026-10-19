@@ -10,6 +10,7 @@ import {
   type GameState,
   type Pawn,
 } from '../lib/engine'
+import { recall, remember, type CommandMemory } from '../lib/commandMemory'
 import { tileChoices, type Targeting, type TileChoice } from '../lib/tileChoices'
 import { useInspection } from './useInspection'
 
@@ -30,7 +31,7 @@ function resolveTargeting(
   return 'special'
 }
 
-// The active side's command modes. Move opens each activation by default — the board is
+// The active side's command modes. Move opens each activation by default, so the board is
 // alive immediately — and the player can drop it for a quieter board until the next one.
 export function useCommanding(
   state: GameState,
@@ -39,35 +40,22 @@ export function useCommanding(
   canCommand: boolean,
   opponentActive: boolean,
 ) {
-  // Aiming belongs to the state it started on: any new state, ours or not, drops it.
-  const [aiming, setAiming] = useState<{ state: GameState; aim: Aim } | null>(null)
-  const aim = canCommand && aiming?.state === state ? aiming.aim : null
-  // A dismissal belongs to one activation: it survives that pawn's own actions and
-  // expires when its next activation comes around.
-  const [dismissed, setDismissed] = useState<{ pawnId: number; round: number } | null>(null)
-  // An aim cancellation belongs to one state: it quiets the board until the pawn or
-  // the battle moves on, unlike a dismissal, which lasts the whole activation.
-  const [canceled, setCanceled] = useState<{ state: GameState; pawnId: number } | null>(null)
-  const moveMode =
-    !!pawn &&
-    !aim &&
-    !(canceled?.state === state && canceled.pawnId === pawn.id) &&
-    !(dismissed?.pawnId === pawn.id && dismissed.round === state.round)
+  const [memory, setMemory] = useState<CommandMemory | null>(null)
+  const { aim, moveMode, dismissed } = recall(memory, state, pawn, canCommand)
   const insight = useInspection(state, !!aim)
   const { inspected } = insight
   const setAim = (next: Aim | null) => {
     insight.close()
-    // Canceling the ability quiets the board instead of falling back to moving:
-    // the player left the mode, not switched to another.
-    if (!next && aim && pawn) setCanceled({ state, pawnId: pawn.id })
-    setAiming(next && { state, aim: next })
+    if (!pawn) return setMemory(null)
+    // Canceling the ability quiets the board instead of falling back to moving: the player
+    // left the mode, not switched to another. A dismissed Move mode outlives the aim.
+    const quiet = dismissed ? 'activation' : !next && aim ? 'state' : undefined
+    setMemory(remember(state, pawn, { aim: next ?? undefined, quiet }))
   }
   const setMoveMode = (on: boolean) => {
     if (!pawn) return
     insight.close()
-    setAiming(null)
-    setCanceled(null)
-    setDismissed(on ? null : { pawnId: pawn.id, round: state.round })
+    setMemory(on ? null : remember(state, pawn, { quiet: 'activation' }))
   }
   const hasSpecialTargets =
     !!pawn && specialTargetingTiles(pawn, state.tiles, state.pawns).size > 0
@@ -106,20 +94,16 @@ export function useCommanding(
     setMoveMode(true)
   }
 
-  // A commanded move keeps the turn, and attacking is the most probable next action:
-  // like an aim, the expectation belongs to the state it started on and lands only on
-  // the moved state.
-  const [attackAfterMove, setAttackAfterMove] = useState<{
-    state: GameState
-    pawnId: number
-  } | null>(null)
-  if (attackAfterMove && attackAfterMove.state !== state && canCommand) {
-    if (pawn && pawn.id === attackAfterMove.pawnId && canUseSpecial(pawn) && hasSpecialTargets)
-      setAim({ action: 'special' })
-    setAttackAfterMove(null)
-  }
+  // A commanded move keeps the turn, and attacking is the most probable next action: the
+  // expectation lands as an aim on the moved state, once the player can command it.
+  if (memory?.attackNext && memory.state !== state && canCommand)
+    setMemory(
+      pawn?.id === memory.pawnId && canUseSpecial(pawn) && hasSpecialTargets
+        ? remember(state, pawn, { aim: { action: 'special' } })
+        : null,
+    )
   const commandedMove = () => {
-    if (pawn) setAttackAfterMove({ state, pawnId: pawn.id })
+    if (pawn) setMemory(remember(state, pawn, { attackNext: true }))
   }
 
   return {
