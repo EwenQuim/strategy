@@ -12,11 +12,11 @@ const phalanx: SpecialAbility = {
   reaches: (pawn, tile) => hexDist(pawn, tile) >= 1 && hexDist(pawn, tile) <= 2,
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
-  perform: ({ pawn, pawns, tiles, tile, round, log }) => {
+  perform: ({ pawn, pawns, tiles, tile, round }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
-    const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
+    const impacts = [strike(pawns, target, pawn.attack)]
     const q = target.q - pawn.q
     const r = target.r - pawn.r
     if (
@@ -34,7 +34,7 @@ const phalanx: SpecialAbility = {
         hexDist(pawn, beyond) === hexDist(pawn, target) + 1 &&
         !pawnAt(pawns, beyond)
       ) {
-        impacts.push(...enterTiles(tiles, pawns, target, [beyond], round, log))
+        impacts.push(...enterTiles(tiles, pawns, target, [beyond], round))
       }
     }
     return { kind: 'attack', to: { q: target.q, r: target.r }, impacts }

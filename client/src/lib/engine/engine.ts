@@ -50,8 +50,6 @@ export type GameState = {
   round: number
   lastClashRound: number
   winner: Side | 'draw' | null
-  log: string[]
-  logCount: number
   blows: Blow[]
   // Historical achievement evidence retained when restoring older battles; no new escapes occur.
   escapes: Unit[]
@@ -99,8 +97,6 @@ export function initialState(
     round: 1,
     lastClashRound: 0,
     winner: null,
-    log: ['The battle begins. Protect your crown.'],
-    logCount: 1,
     blows: [],
     escapes: [],
   }
@@ -148,7 +144,6 @@ type ActionResult = {
   pawns: Pawn[]
   actor: Pawn
   fallen: Pawn[]
-  log: string[]
   effect: BattleEffect | null
 }
 
@@ -174,7 +169,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
   const participants = state.pawns.map((pawn) => pawn.clone())
   const pawns = [...participants]
   const actor = pawns.find((pawn) => pawn.id === state.order[state.active])!
-  const log: string[] = []
   const from = { q: actor.q, r: actor.r }
   const energyBefore = actor.energy
   const context = {
@@ -182,7 +176,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     tiles,
     pawns,
     round: state.round,
-    log,
   }
   let effect: BattleEffect | null = null
 
@@ -194,7 +187,7 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
       )
       if (!route?.steps) return null
       actor.energy -= actor.moveEnergyCost(route.steps)
-      const impacts = enterTiles(tiles, pawns, actor, routePath(route), state.round, log)
+      const impacts = enterTiles(tiles, pawns, actor, routePath(route), state.round)
       effect = {
         kind: 'move',
         from,
@@ -237,7 +230,6 @@ function executeAction(state: GameState, action: Action): ActionResult | null {
     pawns,
     actor,
     fallen: participants.filter((pawn) => pawn.hp <= 0),
-    log,
     effect,
   }
 }
@@ -253,7 +245,7 @@ function reduce(
 
   const result = executeAction(state, action)
   if (!result) return state
-  const { tiles, pawns, actor, fallen, log, effect } = result
+  const { tiles, pawns, actor, fallen, effect } = result
   clearFallenProtection(pawns)
   const winner = winnerFrom(pawns, actor.side)
   const turnEnded =
@@ -278,8 +270,6 @@ function reduce(
       ? state.round
       : state.lastClashRound,
     winner,
-    log: log.length ? [...state.log, ...log].slice(-40) : state.log,
-    logCount: state.logCount + log.length,
     blows: fallen.length ? [...state.blows, blow] : state.blows,
   }
   if (effect) record?.(captureFrame(next, effect, fallen))

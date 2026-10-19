@@ -116,7 +116,6 @@ test('Deserts have small lakes and rare decorative palms; volcanoes and Hell hav
   const moved = reducer(state, { type: 'move', q: 1, r: 5 })
   assert.equal(moved.pawns[0].hp, 5)
   assert.equal(moved.pawns[0].energy, 2)
-  assert.deepEqual(moved.log, state.log)
 })
 
 test('Authored maps support terrain and special tiles anywhere while keeping the two-tile cap', () => {
@@ -188,7 +187,6 @@ for (const side of ['player', 'enemy'] as const) {
       assert.equal(next.pawns[0].hp, 2)
       next = nextActivation(next)
       assert.equal(next.pawns[0].hp, 3)
-      assert.equal(next.logCount, next.log.length)
       next = nextActivation(next)
       assert.equal(next.pawns[0].hp, 4)
       next = nextActivation(nextActivation(next))

@@ -19,5 +19,5 @@ async function randomBattle(seed: string): Promise<GameState> {
 test('The random strategy plays whole battles with legal actions, deterministically', async () => {
   const battle = await randomBattle('random-ai')
   assert.ok(battle.winner)
-  assert.deepEqual((await randomBattle('random-ai')).log, battle.log)
+  assert.deepEqual(await randomBattle('random-ai'), battle)
 })

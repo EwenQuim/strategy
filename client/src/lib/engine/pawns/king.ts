@@ -1,12 +1,4 @@
-import {
-  aimAt,
-  allyTargets,
-  attackTargets,
-  label,
-  pawnAt,
-  specialTargets,
-  strike,
-} from '../combat.ts'
+import { aimAt, allyTargets, attackTargets, pawnAt, specialTargets, strike } from '../combat.ts'
 import { hexDist } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
@@ -21,16 +13,14 @@ const rally: SpecialAbility = {
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
-  perform: ({ pawn, pawns, tile, log }) => {
+  perform: ({ pawn, pawns, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
+    const impacts = [strike(pawns, target, pawn.attack)]
     const allies = allyTargets(pawn, pawns, true)
     for (const ally of allies) {
       ally.hp = Math.min(ally.maxHp, ally.hp + 1)
-      log.push(label(ally) + ' recovers 1 health.')
     }
     return {
       kind: 'attack',

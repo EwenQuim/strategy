@@ -1,4 +1,4 @@
-import { aimAt, canAttack, label, pawnAt, protectorFor, specialTargets } from '../combat.ts'
+import { aimAt, canAttack, pawnAt, protectorFor, specialTargets } from '../combat.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 import { hexDist, key } from '../hex.ts'
@@ -23,13 +23,11 @@ const protect: SpecialAbility = {
     specialTargets(pawns, pawn)
       .filter((target) => !protectorFor(pawns, target))
       .map(aimAt),
-  perform: ({ pawn, pawns, log, tile }) => {
+  perform: ({ pawn, pawns, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     pawn.protectingId = target.id
-    log.push(label(pawn) + ' protects ' + target.kind + ' #' + target.id + '.')
     return { kind: 'protect', to: { q: target.q, r: target.r }, impacts: [] }
   },
 }

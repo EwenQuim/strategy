@@ -1,5 +1,5 @@
 import { hexDist, key, neighbors } from '../hex.ts'
-import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
+import { aimAt, canUseSpecial, strikeArea } from '../combat.ts'
 import type { Axial } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
@@ -50,7 +50,7 @@ const fireball: SpecialAbility = {
       : [],
   threat: (pawn, { target, from, movementCost }) =>
     direction(from, target) ? Number(pawn.energy - movementCost >= pawn.special.cost) : 0,
-  perform: ({ pawn, tiles, pawns, log, tile }) => {
+  perform: ({ pawn, tiles, pawns, tile }) => {
     if (!tile || !canUseSpecial(pawn) || !tiles.has(key(tile.q, tile.r))) return null
     const ray = direction(pawn, tile)
     if (!ray) return null
@@ -59,12 +59,11 @@ const fireball: SpecialAbility = {
       hexDist(pawn, position) > hexDist(pawn, furthest) ? position : furthest,
     )
     pawn.energy -= pawn.special.cost
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const targets = fireball.areaTargets!(pawns, tile, pawn)
     return {
       kind: 'fireball',
       to: { q: end.q, r: end.r },
-      impacts: strikeArea(pawns, pawn, targets, log),
+      impacts: strikeArea(pawns, pawn, targets),
     }
   },
 }

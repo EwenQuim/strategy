@@ -78,7 +78,6 @@ test('AI battles start with an untouched human turn and restart with the same or
     assert.equal(activePawn(opening.state)?.side, 'player')
     assert.equal(opening.state.active, 0)
     assert.equal(opening.state.round, 1)
-    assert.equal(opening.state.logCount, 1)
     assert.deepEqual(opening.frames, [])
     assert.ok(opening.state.pawns.every((p) => p.energy === p.maxEnergy && p.hp === p.maxHp))
     assert.deepEqual(

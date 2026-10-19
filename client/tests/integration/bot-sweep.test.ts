@@ -58,7 +58,6 @@ test('The bot proposes ordinary actions for either side without mutating the rul
         Object.freeze(state)
         Object.freeze(state.pawns)
         Object.freeze(state.order)
-        Object.freeze(state.log)
         state.pawns.forEach(Object.freeze)
         for (const tile of state.tiles.values()) Object.freeze(tile)
         const result = transition(state, action)

@@ -69,7 +69,6 @@ export function enterTiles(
   pawn: Pawn,
   path: Tile[],
   round: number,
-  log: string[],
 ): BattleImpact[] {
   const impacts: BattleImpact[] = []
   for (const tile of path) {
@@ -79,10 +78,8 @@ export function enterTiles(
     if (tile.terrain === 'lava') {
       pawn.hp--
       impacts.push({ q: tile.q, r: tile.r, damage: 1 })
-      log.push(label(pawn) + ' takes 1 lava damage.')
       if (pawn.hp <= 0) {
         pawns.splice(pawns.indexOf(pawn), 1)
-        log.push(label(pawn) + ' has fallen.')
         break
       }
     }
@@ -90,7 +87,6 @@ export function enterTiles(
       pawn.energy += 2
       pawn.bonusEnergy += 2
       tiles.set(key(tile.q, tile.r), { q: tile.q, r: tile.r, terrain: tile.terrain })
-      log.push(label(pawn) + ' collects a power rune: +2 energy this round.')
     }
   }
   return impacts
@@ -110,13 +106,13 @@ export function movementDestinations(
 }
 
 export function advanceAndStrike(
-  { pawn, tiles, pawns, round, log }: Parameters<SpecialAbility['perform']>[0],
+  { pawn, tiles, pawns, round }: Parameters<SpecialAbility['perform']>[0],
   path: Tile[],
   target?: Pawn,
 ): BattleImpact[] {
   pawn.energy -= pawn.special.cost
-  const impacts = enterTiles(tiles, pawns, pawn, path, round, log)
-  if (pawn.hp > 0 && target) impacts.push(strike(pawns, pawn, target, pawn.attack, log))
+  const impacts = enterTiles(tiles, pawns, pawn, path, round)
+  if (pawn.hp > 0 && target) impacts.push(strike(pawns, target, pawn.attack))
   return impacts
 }
 
@@ -153,55 +149,27 @@ export function specialTargets(pawns: Pawn[], pawn: Pawn, from: Axial = pawn): P
   return canUseSpecial(pawn) ? pawn.special.targets(pawn, pawns, from) : []
 }
 
-export const label = (pawn: Pawn) =>
-  (pawn.side === 'player' ? 'Your ' : 'Enemy ') + pawn.kind + ' #' + pawn.id
-
 export const pawnAt = (pawns: Pawn[], at: Axial): Pawn | undefined =>
   pawns.find((p) => sameHex(p, at))
 
 export const aimAt = ({ q, r }: Axial): Action => ({ type: 'special', target: { q, r } })
 
-export function strike(
-  pawns: Pawn[],
-  attacker: Pawn,
-  target: Pawn,
-  profile: AttackProfile,
-  log: string[],
-): BattleImpact {
+export function strike(pawns: Pawn[], target: Pawn, profile: AttackProfile): BattleImpact {
   const protector = protectorFor(pawns, target)
   if (protector) {
     protector.protectingId = null
-    log.push(label(protector) + ' takes the hit for ' + target.kind + ' #' + target.id + '.')
     target = protector
   }
   target.hp -= profile.damage
-  log.push(
-    label(attacker) +
-      ' strikes ' +
-      target.kind +
-      ' #' +
-      target.id +
-      ' for ' +
-      profile.damage +
-      ' damage.',
-  )
-  if (target.hp <= 0) {
-    pawns.splice(pawns.indexOf(target), 1)
-    log.push(label(target) + ' has fallen.')
-  }
+  if (target.hp <= 0) pawns.splice(pawns.indexOf(target), 1)
   return { q: target.q, r: target.r, damage: profile.damage }
 }
 
-export function strikeArea(
-  pawns: Pawn[],
-  attacker: Pawn,
-  targets: Pawn[],
-  log: string[],
-): BattleImpact[] {
+export function strikeArea(pawns: Pawn[], attacker: Pawn, targets: Pawn[]): BattleImpact[] {
   const impacts: BattleImpact[] = []
   for (const target of targets) {
     if (!pawns.includes(target)) continue
-    const hit = strike(pawns, attacker, target, { ...attacker.attack, damage: 1 }, log)
+    const hit = strike(pawns, target, { ...attacker.attack, damage: 1 })
     const previous = impacts.find((impact) => sameHex(impact, hit))
     if (previous) previous.damage += hit.damage
     else impacts.push(hit)
