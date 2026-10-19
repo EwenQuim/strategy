@@ -3,7 +3,7 @@ module hexmate/server
 go 1.27
 
 require (
-	github.com/getkin/kin-openapi v0.149.0
+	github.com/getkin/kin-openapi v0.151.0
 	github.com/go-fuego/fuego v0.21.0
 	modernc.org/sqlite v1.60.1
 )
