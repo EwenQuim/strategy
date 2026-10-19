@@ -6,7 +6,7 @@ export const hexPoints = Array.from({ length: 6 }, (_, i) => {
   return [SIZE * 0.95 * Math.cos(angle), SIZE * 0.95 * Math.sin(angle)].join(',')
 }).join(' ')
 
-export const terrainColors = {
+export const terrainPalette = {
   plain: 'var(--plain-tile, #7d8963)',
   forest: '#536e51',
   mountain: 'var(--mountain-tile, #737c69)',

@@ -5,7 +5,7 @@ import { energyCost } from '../i18n/game'
 import * as bf from '../i18n/battlefield'
 import { unitNames } from '../i18n/units'
 import { terrainNames } from '../i18n/biomes'
-import { terrainColors } from './hex-art'
+import { terrainPalette } from './hex-art'
 
 // A tile is on the fireball beam when it lies on the straight hex line from the caster to the line end.
 function onBeam(from: Axial, to: Axial, tile: Tile): boolean {
@@ -125,5 +125,5 @@ export function tileFill({
   if (target) return '#b79dce'
   if (selected || previewed) return 'var(--selected-tint, #c9b77f)'
   if (inRange) return '#b79dce'
-  return canMove ? 'var(--move-tint)' : terrainColors[terrain]
+  return canMove ? 'var(--move-tint)' : terrainPalette[terrain]
 }

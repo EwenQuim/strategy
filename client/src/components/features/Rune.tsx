@@ -1,7 +1,9 @@
+import { featurePalette } from '../art-palette'
+
 export function Rune() {
   return (
     <>
-      <ellipse cy="13" rx="17" ry="4.5" fill="var(--feature-shade)" opacity=".45" />
+      <ellipse cy="13" rx="17" ry="4.5" fill={featurePalette.shade} opacity=".45" />
       <ellipse cy="12" rx="13" ry="3.5" fill="#6c6480" />
       <path d="M-9 12-11-3-6-10-3 12Z" fill="#a47fd0" />
       <path d="M-6-10-3 12h-2Z" fill="#d9bdf5" />

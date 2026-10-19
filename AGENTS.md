@@ -30,6 +30,7 @@ Each PR aims for the smallest diff that still delivers its behavior; before open
 - Do not wrap simple components in semantic CSS classes or `@apply` rules. Reuse small Tailwind class strings when the same control styling is repeated. Keep full utility names literal so Tailwind can detect them.
 - Use Tailwind responsive and `motion-reduce:` variants, not hand-written CSS media queries or custom viewport aliases. Preserve existing width thresholds with `min-[900px]:`, `max-[601px]:`, and `max-[360px]:`; use arbitrary media variants for height and compound conditions. Test overlapping width/height conditions when changing responsive styles.
 - Reuse the theme colors (`text-ink`, `text-muted`, `text-gold`, `border-line`). Preserve safe-area insets, reduced-motion behavior, and the fixed game viewport.
+- Color lint guards UI literals with a shrink-only baseline. Artwork may own colors in `*Palette` constants, pawn accents, or the terrain/feature illustration modules; keep UI chrome outside those exceptions. The detection policy lives in `client/scripts/color-literals-plugin.mjs`. Prefer tokens for reusable UI roles, not a global token for every artistic shade. Tailwind palette classes and named colors are outside this lightweight guard, but still prefer the theme for UI.
 - Keep inline styles for runtime-computed values such as pawn coordinates. Browser tests should use roles/accessible names or stable data attributes, not Tailwind utility strings or obsolete CSS classes.
 
 ## Commands

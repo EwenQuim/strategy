@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { globSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { literalColor } from './color-literals-plugin.mjs'
+import { colorLiterals } from './color-literals-plugin.mjs'
 
 const client = fileURLToPath(new URL('../', import.meta.url))
 const baselinePath = new URL('../color-lint-baseline.json', import.meta.url)
@@ -39,9 +39,9 @@ function lintStyles(file) {
   for (const declaration of source.matchAll(/([\w-]+)\s*:([^;{}]*)/g)) {
     if (declaration[1].startsWith('--')) continue
     const valueOffset = declaration.index + declaration[0].length - declaration[2].length
-    for (const match of declaration[2].matchAll(literalColor)) {
-      const line = source.slice(0, valueOffset + match.index).split('\n').length
-      findings.push({ file, line, color: match[0] })
+    for (const { color, index } of colorLiterals(declaration[2])) {
+      const line = source.slice(0, valueOffset + index).split('\n').length
+      findings.push({ file, line, color })
     }
   }
   return findings
@@ -84,21 +84,31 @@ export function compareFindings(findings, baseline) {
   return { added, stale }
 }
 
+export function updateBaseline(findings, baseline) {
+  if (compareFindings(findings, baseline).added.length) {
+    throw new Error(
+      'Baseline updates cannot add color literals. Use a UI token or an artwork palette.',
+    )
+  }
+  return countFindings(findings)
+}
+
 function main() {
   const mode = process.argv[2]
   if (mode && !['--report', '--update-baseline'].includes(mode)) {
     throw new Error(`Unknown color lint option: ${mode}`)
   }
   const findings = collectFindings()
+  const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
   if (mode === '--update-baseline') {
-    writeFileSync(baselinePath, JSON.stringify(countFindings(findings), null, 2) + '\n')
+    writeFileSync(
+      baselinePath,
+      JSON.stringify(updateBaseline(findings, baseline), null, 2) + '\n',
+    )
     console.log(`Recorded ${findings.length} color literals. Review the baseline diff.`)
     return
   }
-  const { added, stale } = compareFindings(
-    findings,
-    JSON.parse(readFileSync(baselinePath, 'utf8')),
-  )
+  const { added, stale } = compareFindings(findings, baseline)
   for (const { file, line, color } of mode === '--report' ? findings : added) {
     console.log(`${file}:${line} color literal ${color}`)
   }

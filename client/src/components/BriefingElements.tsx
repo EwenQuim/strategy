@@ -1,5 +1,6 @@
 import { Icon, PawnIcon, type IconName } from './Icon'
-import { hexPoints, terrainColors } from './hex-art'
+import { pawnPalette, tilePalette } from './art-palette'
+import { hexPoints, terrainPalette } from './hex-art'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
 import type { IntroducedElement } from '../campaign'
@@ -46,7 +47,7 @@ export function ElementArt({
       >
         {isPawn(art) ? (
           <>
-            <polygon points={hexPoints} fill="var(--tile-base, #263f30)" />
+            <polygon points={hexPoints} fill={tilePalette.base} />
             <polygon
               points={hexPoints}
               fill="none"
@@ -55,28 +56,33 @@ export function ElementArt({
               strokeWidth="1"
               transform="scale(1.1)"
             />
-            <circle r="22" fill="url(#player-chip)" stroke="#b2ceaa" strokeWidth="1.5" />
-            <circle r="17.5" fill="none" stroke="#f5e5bf" strokeOpacity=".12" />
+            <circle
+              r="22"
+              fill="url(#player-chip)"
+              stroke={pawnPalette.playerStroke}
+              strokeWidth="1.5"
+            />
+            <circle r="17.5" fill="none" stroke={pawnPalette.ring} strokeOpacity=".12" />
             <g
               transform="translate(-12 -12)"
-              color={art === 'king' ? 'var(--king)' : '#f1e8d2'}
+              color={art === 'king' ? pawnPalette.king : pawnPalette.icon}
             >
               <PawnIcon kind={art} />
             </g>
           </>
         ) : isFeature(art) ? (
           <>
-            <polygon points={hexPoints} fill={terrainColors.plain} />
+            <polygon points={hexPoints} fill={terrainPalette.plain} />
             <FeatureArt feature={art} />
           </>
         ) : art === 'hell' ? (
           <>
-            <polygon points={hexPoints} fill={terrainColors.basalt} />
+            <polygon points={hexPoints} fill={terrainPalette.basalt} />
             <polygon points={hexPoints} fill="url(#hellfire-hatch)" />
           </>
         ) : (
           <>
-            <polygon points={hexPoints} fill={terrainColors[art]} />
+            <polygon points={hexPoints} fill={terrainPalette[art]} />
             <TerrainArt terrain={art} variant={0} />
           </>
         )}

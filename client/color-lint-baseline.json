@@ -31,12 +31,8 @@
     "#ffffff18": 1
   },
   "src/components/BriefingElements.tsx": {
-    "#263f30": 1,
-    "#b2ceaa": 1,
     "#b8c4e0": 1,
-    "#c4d1a5": 1,
-    "#f1e8d2": 1,
-    "#f5e5bf": 1
+    "#c4d1a5": 1
   },
   "src/components/CampaignCard.tsx": {
     "#89bba477": 1,
@@ -58,33 +54,6 @@
     "#e8a05c": 1,
     "#ffc079": 1,
     "#ffc07926": 1
-  },
-  "src/components/features/Rune.tsx": {
-    "#392851": 1,
-    "#6c6480": 1,
-    "#a47fd0": 2,
-    "#c8a2ed": 2,
-    "#d9bdf5": 2,
-    "#f1d4ff": 1,
-    "#f8e4ff": 1,
-    "#fff4b0": 2
-  },
-  "src/components/features/Spring.tsx": {
-    "#2f8f9a": 1,
-    "#8f8a9a": 1,
-    "#8ff0a8": 1,
-    "#a6f5e4": 1,
-    "#b9b4c3": 2,
-    "#d6d1de": 1
-  },
-  "src/components/features/Watchtower.tsx": {
-    "#6f4a30": 2,
-    "#8a5d3b": 2,
-    "#8c3f36": 1,
-    "#b8584a": 1,
-    "#c9955f": 1,
-    "#e8d6b8": 1,
-    "#f0d4a0": 1
   },
   "src/components/Game.tsx": {
     "#b79dce17": 1,
@@ -117,15 +86,6 @@
     "#f6d789cc": 1,
     "#ffffff14": 1
   },
-  "src/components/hex-art.ts": {
-    "#4c7186": 1,
-    "#536e51": 1,
-    "#594e53": 1,
-    "#737c69": 1,
-    "#7d8963": 1,
-    "#d5b774": 1,
-    "#e5bc70": 1
-  },
   "src/components/HexTile.tsx": {
     "#213f30": 1,
     "#ecedcc": 1,
@@ -134,32 +94,13 @@
     "#f8d4b0": 1,
     "#fff4cb": 1
   },
-  "src/components/LevelMiniature.tsx": {
-    "#b2b69a": 1,
-    "#d0643c": 1,
-    "#dfeccf": 1,
-    "#f09a78": 1
-  },
   "src/components/MenuBackground.tsx": {
     "#000": 1,
     "#214d4940": 1,
     "#657d4d40": 1
   },
   "src/components/PawnChip.tsx": {
-    "#10281e": 1,
-    "#24342e": 1,
-    "#41584b": 1,
-    "#47614c": 1,
-    "#b2ceaa": 1,
-    "#d5deb0": 1,
-    "#db9b7e": 1,
-    "#dec89a": 1,
-    "#e9e5ce": 1,
-    "#f1e8d2": 1,
-    "#f5e5bf": 1,
-    "#f6e5a6": 1,
-    "#ff8d75": 1,
-    "#ffdf9e": 1
+    "#ff8d75": 1
   },
   "src/components/styles.ts": {
     "#0000008c": 1,
@@ -170,107 +111,13 @@
     "#b7c9a0": 2,
     "#d4bb7b": 2
   },
-  "src/components/terrains/Basalt.tsx": {
-    "#40373e": 1,
-    "#433b42": 1,
-    "#6c5c62": 1,
-    "#75666b": 1,
-    "#9a8388": 1,
-    "#a28b88": 1
-  },
-  "src/components/terrains/Forest.tsx": {
-    "#1b3429": 1,
-    "#254332": 1,
-    "#344f39": 1,
-    "#3d5b40": 1,
-    "#9baf79": 1,
-    "#c2b085": 1
-  },
-  "src/components/terrains/Lake.tsx": {
-    "#bfe0ea": 2
-  },
-  "src/components/terrains/Lava.tsx": {
-    "#d2a376": 1,
-    "#d6ab7d": 1,
-    "#d7a674": 1,
-    "#e0b47f": 1
-  },
-  "src/components/terrains/Mountain.tsx": {
-    "#263c2e": 1,
-    "#576651": 1,
-    "#7d8b70": 1,
-    "#8f9980": 1,
-    "#b2b69a": 1,
-    "#dedec0": 1
-  },
-  "src/components/terrains/Palm.tsx": {
-    "#4f7751": 1,
-    "#86603c": 1,
-    "#886039": 1,
-    "#96a467": 1,
-    "#bc864c": 1
-  },
-  "src/components/terrains/Plain.tsx": {
-    "#4a6446": 1,
-    "#d0d4a4": 1,
-    "#d2c391": 1
-  },
-  "src/components/terrains/Sand.tsx": {
-    "#8b5c30": 1,
-    "#e6c081": 1
-  },
   "src/components/TileLayer.tsx": {
     "#0a211b60": 1,
-    "#193e35": 1,
-    "#407265": 1,
-    "#623a33": 1,
-    "#815c51": 1,
-    "#8e5d4b": 1,
-    "#a35f4d": 1,
-    "#a86650": 1,
-    "#b9825d": 1,
-    "#c59164": 1,
-    "#deb17c": 1,
-    "#f2df9e": 2,
-    "#ffb27f": 1,
-    "#fff6cc": 1
+    "#ffb27f": 1
   },
   "src/components/UnitUnlockToast.tsx": {
     "#0009": 1,
     "#141a17f5": 1
-  },
-  "src/lib/engine/pawns/archer.ts": {
-    "#6a9a5b": 1
-  },
-  "src/lib/engine/pawns/berserker.ts": {
-    "#b54a4a": 1
-  },
-  "src/lib/engine/pawns/bomber.ts": {
-    "#c97b4a": 1
-  },
-  "src/lib/engine/pawns/bulwark.ts": {
-    "#b59a6b": 1
-  },
-  "src/lib/engine/pawns/hoplite.ts": {
-    "#4a8a8a": 1
-  },
-  "src/lib/engine/pawns/king.ts": {
-    "#f0d38e": 1
-  },
-  "src/lib/engine/pawns/lancer.ts": {
-    "#6b8fc9": 1
-  },
-  "src/lib/engine/pawns/magician.ts": {
-    "#9b7bb5": 1
-  },
-  "src/lib/engine/pawns/ninja.ts": {
-    "#5a6578": 1
-  },
-  "src/lib/engine/pawns/swordsman.ts": {
-    "#7a9bb5": 1
-  },
-  "src/lib/engine/pawns/wolf.ts": {
-    "#8a9a8a": 1
   },
   "src/pwa.ts": {
     "#172a21": 1

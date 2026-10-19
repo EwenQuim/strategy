@@ -24,10 +24,6 @@
   --color-enemy: var(--enemy);
   --color-player: var(--player);
   --color-panel: var(--panel);
-  --color-active-gold: var(--active-gold);
-  --color-king: var(--king);
-  --color-feature-shade: var(--feature-shade);
-  --color-plate: var(--plate);
   --color-input: var(--input);
 }
 
@@ -75,10 +71,6 @@
     --enemy: #d69b81;
     --player: #b6d2b5;
     --panel: #20362b;
-    --active-gold: #ffe9a8;
-    --king: #f0d38e;
-    --feature-shade: #1b1418;
-    --plate: #17362b;
     --input: #152b24;
   }
 
