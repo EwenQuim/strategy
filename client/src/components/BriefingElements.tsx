@@ -3,7 +3,7 @@ import { hexPoints, terrainColors } from './hex-art'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
 import type { IntroducedElement } from '../campaign'
-import { ELEMENT_ACCENTS, type BriefingElement } from '../briefings'
+import { ELEMENT_ACCENTS } from '../briefings'
 import { PAWN_CLASSES, TILE_FEATURES, type PawnKind, type TileFeature } from '../lib/engine'
 
 const isPawn = (art: IntroducedElement): art is PawnKind => art in PAWN_CLASSES
@@ -14,10 +14,12 @@ export function ElementArt({
   art,
   index,
   hero = false,
+  small = false,
 }: {
   art: IntroducedElement
   index: number
   hero?: boolean
+  small?: boolean
 }) {
   const accent = ELEMENT_ACCENTS[art] ?? 'var(--gold)'
   const delay = index * 120 + 'ms'
@@ -27,7 +29,9 @@ export function ElementArt({
       className={
         hero
           ? 'relative size-[164px] shrink-0 max-[360px]:size-[136px] [@media(max-height:650px)]:size-[112px]'
-          : 'relative size-[76px] shrink-0 max-[360px]:size-[64px]'
+          : small
+            ? 'relative size-[44px] shrink-0 max-[360px]:size-[40px]'
+            : 'relative size-[76px] shrink-0 max-[360px]:size-[64px]'
       }
       style={{ animationDelay: delay }}
     >
@@ -82,7 +86,7 @@ export function ElementArt({
   )
 }
 
-function StatChip({
+export function StatChip({
   icon,
   value,
   color,
@@ -96,66 +100,5 @@ function StatChip({
       <Icon name={icon} className={'size-[11px] ' + color} />
       {value}
     </span>
-  )
-}
-
-function ElementCard({ element, index }: { element: BriefingElement; index: number }) {
-  const delay = index * 90 + 'ms'
-  const hasArt = element.art !== undefined
-
-  return (
-    <li
-      className="briefing-card motion-reduce:animate-none flex items-start gap-3.5 rounded-xl border border-line bg-[#ffffff06] px-3.5 py-3.5"
-      style={{ animationDelay: delay }}
-    >
-      {hasArt && <ElementArt art={element.art} index={index} />}
-      <div className="min-w-0 flex-1">
-        <strong className="block font-serif text-[19px] leading-snug text-gold">
-          {element.name}
-        </strong>
-
-        {element.stats && (
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
-            <StatChip icon="heart" value={element.stats.hp} color="text-[#d59d81]" />
-            <StatChip icon="sword" value={element.stats.damage} color="text-[#c4d1a5]" />
-            <StatChip icon="target" value={element.stats.range} color="text-[#a4af99]" />
-          </div>
-        )}
-
-        {element.special && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-snug">
-            <span className="font-semibold text-gold">{element.special.name}</span>
-            <span className="inline-flex items-center gap-0.5 rounded bg-[#ffffff0d] px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
-              <Icon name="energy" className="size-2.5" />
-              {element.special.cost}
-            </span>
-            <span className="text-muted">{element.special.description}</span>
-          </div>
-        )}
-
-        {element.points.length > 0 && (
-          <ul className="mb-0 mt-1.5 list-none space-y-1 text-[13px] leading-snug text-muted">
-            {element.points.map((point) => (
-              <li
-                key={point}
-                className="relative pl-3 before:absolute before:top-[7px] before:left-0 before:size-[5px] before:rounded-full before:bg-line"
-              >
-                {point}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </li>
-  )
-}
-
-export function BriefingElements({ elements }: { elements: readonly BriefingElement[] }) {
-  return (
-    <ul className="m-0 flex list-none flex-col gap-3 p-0 py-5">
-      {elements.map((element, index) => (
-        <ElementCard key={element.name} element={element} index={index} />
-      ))}
-    </ul>
   )
 }
