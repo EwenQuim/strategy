@@ -89,7 +89,7 @@ export function SupportFeedback({ effect }: { effect: BattleEffect | null }) {
             width="40"
             height="20"
             rx="10"
-            className="fill-[#162b23] stroke-current stroke-[.8]"
+            className="fill-input stroke-current stroke-[.8]"
           />
           <text x="-13" y="4" className="fill-current text-[12px] font-bold">
             +1

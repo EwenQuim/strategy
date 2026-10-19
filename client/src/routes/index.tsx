@@ -16,7 +16,7 @@ const homeControlClassName =
   ' min-h-[clamp(56px,7.5dvh,68px)] shrink-0 justify-between gap-3 px-5 py-3 text-[16px] [@media(max-height:650px)]:min-h-12 [@media(max-height:650px)]:py-2 [@media(max-height:650px)]:text-sm'
 
 const homeButtonClassName =
-  homeControlClassName + ' border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
+  homeControlClassName + ' border-line bg-surface-faint text-ink hover:bg-surface'
 
 export const Route = createFileRoute('/')({
   component: function Landing() {
@@ -28,7 +28,7 @@ export const Route = createFileRoute('/')({
     const health = useHealth()
     const online = health.isSuccess
     return (
-      <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-[#101f1b] text-ink">
+      <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-menu text-ink">
         <MenuBackground />
         <div
           data-testid="menu-content"
@@ -47,7 +47,7 @@ export const Route = createFileRoute('/')({
               params={started ? undefined : { campaign: TUTORIAL.slug, level: '1' }}
               className={
                 homeControlClassName +
-                ' border-[#e5d19a] bg-[#d8c38a] text-[#24392a] hover:bg-[#ecdaa3]'
+                ' border-[#e5d19a] bg-gold text-[#24392a] hover:bg-[#ecdaa3]'
               }
               preload={false}
             >
@@ -101,7 +101,7 @@ export const Route = createFileRoute('/')({
                 to={to}
                 className={
                   buttonClassName +
-                  ' min-h-14 flex-1 justify-center border-line bg-[#ffffff04] text-ink hover:bg-[#ffffff0c] [@media(max-height:650px)]:min-h-11'
+                  ' min-h-14 flex-1 justify-center border-line bg-surface-faint text-ink hover:bg-surface [@media(max-height:650px)]:min-h-11'
                 }
                 preload={false}
                 aria-label={label}

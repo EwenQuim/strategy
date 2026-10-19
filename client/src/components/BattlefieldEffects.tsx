@@ -61,7 +61,7 @@ export function BattlefieldEffects({
                       />
                       <path
                         d="M1-9C8 0 11 4 11 9a11 11 0 0 1-22 0c0-6 7-10 12-18Z"
-                        fill="#ffe1a3"
+                        fill="var(--impact)"
                       />
                     </g>
                   ) : (
@@ -105,7 +105,7 @@ export function BattlefieldEffects({
               key={key(hit.q, hit.r)}
               transform={'translate(' + hexX(hit.q, hit.r) + ' ' + hexY(hit.r) + ')'}
             >
-              <g className={hit.damage > 0 ? 'text-[#ffe1a3]' : 'text-[#c9eaf4]'}>
+              <g className={hit.damage > 0 ? 'text-impact' : 'text-[#c9eaf4]'}>
                 <circle
                   r="28"
                   className={
@@ -123,7 +123,7 @@ export function BattlefieldEffects({
                   y="8"
                   textAnchor="middle"
                   className={
-                    'combat-impact-label fill-current stroke-[#14271f] stroke-[5] font-black [paint-order:stroke] ' +
+                    'combat-impact-label fill-current stroke-page stroke-[5] font-black [paint-order:stroke] ' +
                     (hit.damage > 0
                       ? 'text-[32px]'
                       : 'combat-impact-label--drift text-[24px] italic')
@@ -160,14 +160,14 @@ export function BattlefieldEffects({
                 x="-4"
                 y="7"
                 textAnchor="middle"
-                className="fill-current stroke-[#14271f] stroke-[5] text-[24px] font-black [paint-order:stroke]"
+                className="fill-current stroke-page stroke-[5] text-[24px] font-black [paint-order:stroke]"
               >
                 {effect.energyDelta > 0 ? '+' + effect.energyDelta : effect.energyDelta}
               </text>
               <g transform="translate(7 -7) scale(.45)">
                 <Icon
                   name="energy"
-                  className="fill-current stroke-[#14271f] stroke-[3] [paint-order:stroke]"
+                  className="fill-current stroke-page stroke-[3] [paint-order:stroke]"
                 />
               </g>
             </g>

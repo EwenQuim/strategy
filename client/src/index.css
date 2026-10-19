@@ -5,9 +5,36 @@
   --color-muted: var(--muted);
   --color-gold: var(--gold);
   --color-line: var(--line);
+  --color-page: var(--page);
+  --color-menu: var(--menu);
+  --color-surface-faint: var(--surface-faint);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-strong: var(--surface-strong);
+  --color-recessed: var(--recessed);
+  --color-recessed-soft: var(--recessed-soft);
+  --color-scrim: var(--scrim);
+  --color-card-start: var(--card-start);
+  --color-card-end: var(--card-end);
+  --color-switch-knob: var(--switch-knob);
+  --color-campaign-complete: var(--campaign-complete);
+  --color-impact: var(--impact);
+  --color-hp: var(--hp);
+  --color-enemy: var(--enemy);
+  --color-player: var(--player);
+  --color-panel: var(--panel);
+  --color-input: var(--input);
 }
 
 @theme {
+  --shadow-control: 0 6px 24px #07180f30;
+  --shadow-control-hover: 0 8px 30px #07180f50;
+  --shadow-menu-card: 0 8px 24px #0002;
+  --shadow-campaign-card: 0 8px 28px #0003;
+  --shadow-press: 0 3px 0 #0003, inset 0 1px 0 #fff5;
+  --drop-shadow-art: 0 8px 24px #0006;
+  --drop-shadow-art-soft: 0 4px 8px #0006;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-serif: Georgia, serif;
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
@@ -16,8 +43,8 @@
 @layer base {
   :root {
     font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
-    color: #eee9d7;
-    background: #14271f;
+    color: var(--ink);
+    background: var(--page);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -25,6 +52,26 @@
     --muted: #a4af99;
     --gold: #dcc48a;
     --line: #c4d1a51c;
+    --page: #14271f;
+    --menu: #101f1b;
+    --surface-faint: #ffffff04;
+    --surface-soft: #ffffff09;
+    --surface: rgb(255 255 255 / 5%);
+    --surface-raised: rgb(255 255 255 / 10%);
+    --surface-strong: rgb(255 255 255 / 15%);
+    --recessed: rgb(0 0 0 / 20%);
+    --recessed-soft: rgb(0 0 0 / 15%);
+    --scrim: #000;
+    --card-start: rgb(255 255 255 / 7%);
+    --card-end: rgb(255 255 255 / 2%);
+    --switch-knob: #172a21;
+    --campaign-complete: #89bba4;
+    --impact: #ffe1a3;
+    --hp: #d59d81;
+    --enemy: #d69b81;
+    --player: #b6d2b5;
+    --panel: #20362b;
+    --input: #152b24;
   }
 
   body {

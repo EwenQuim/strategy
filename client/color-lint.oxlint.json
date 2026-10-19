@@ -1,0 +1,7 @@
+{
+  "jsPlugins": ["./scripts/color-literals-plugin.mjs"],
+  "categories": { "correctness": "off" },
+  "rules": {
+    "color-literals/no-literal": "error"
+  }
+}

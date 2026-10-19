@@ -1,0 +1,139 @@
+{
+  "src/components/AchievementToast.tsx": {
+    "#0009": 1,
+    "#141a17ee": 1
+  },
+  "src/components/battlefield-tile.ts": {
+    "#94716d": 1,
+    "#b79dce": 2,
+    "#b98370": 1,
+    "#c9b77f": 1
+  },
+  "src/components/BattlefieldEffects.tsx": {
+    "#b7e5c8": 1,
+    "#c9eaf4": 1,
+    "#ead695": 1,
+    "#ff805e": 1,
+    "#ffab78": 2,
+    "#ffd4a1": 1,
+    "#ffd98f": 1
+  },
+  "src/components/Briefing.tsx": {
+    "#000": 1,
+    "#0003": 1,
+    "#0006": 1,
+    "#000b": 1,
+    "#172a21": 1,
+    "#b4c9db": 1,
+    "#e6a38d": 1,
+    "#f2dfac": 1,
+    "#fff7": 1,
+    "#ffffff18": 1
+  },
+  "src/components/BriefingElements.tsx": {
+    "#b8c4e0": 1,
+    "#c4d1a5": 1
+  },
+  "src/components/CampaignCard.tsx": {
+    "#89bba477": 1,
+    "#ffffff14": 1,
+    "#ffffff18": 1
+  },
+  "src/components/CombatFeedback.tsx": {
+    "#ff6a5566": 1,
+    "#ffc07966": 1
+  },
+  "src/components/CommandAction.tsx": {
+    "#9f82b933": 1,
+    "#a1b29b": 1,
+    "#bcc8a62e": 1,
+    "#bcc8a670": 1,
+    "#c4a6db": 1,
+    "#d0b6e7": 1,
+    "#e6e7d4": 1,
+    "#e8a05c": 1,
+    "#ffc079": 1,
+    "#ffc07926": 1
+  },
+  "src/components/Game.tsx": {
+    "#b79dce17": 1,
+    "#b79dce40": 1,
+    "#b9837017": 1,
+    "#b9837040": 1,
+    "#c5d09c02": 1,
+    "#c5d09c03": 1,
+    "#c5d09c08": 1,
+    "#c9bce4": 1,
+    "#e0a987": 1
+  },
+  "src/components/GameCommandDeck.tsx": {
+    "#10201840": 1,
+    "#c4d1a530": 1
+  },
+  "src/components/GameCommandSummary.tsx": {
+    "#203d3077": 1,
+    "#4c604038": 1,
+    "#7f957e": 1,
+    "#c4d1a53b": 1
+  },
+  "src/components/GameHeader.tsx": {
+    "#0a1e1a22": 1
+  },
+  "src/components/GameResult.tsx": {
+    "#0008": 1,
+    "#000c": 1,
+    "#d0675add": 1,
+    "#f6d789cc": 1,
+    "#ffffff14": 1
+  },
+  "src/components/HexTile.tsx": {
+    "#213f30": 1,
+    "#ecedcc": 1,
+    "#f0edcc": 2,
+    "#f1db9c": 1,
+    "#f8d4b0": 1,
+    "#fff4cb": 1
+  },
+  "src/components/MenuBackground.tsx": {
+    "#000": 1,
+    "#214d4940": 1,
+    "#657d4d40": 1
+  },
+  "src/components/PawnChip.tsx": {
+    "#ff8d75": 1
+  },
+  "src/components/styles.ts": {
+    "#0000008c": 1,
+    "#d1cf9b40": 1,
+    "#eddbab": 1
+  },
+  "src/components/SupportFeedback.tsx": {
+    "#b7c9a0": 2,
+    "#d4bb7b": 2
+  },
+  "src/components/TileLayer.tsx": {
+    "#0a211b60": 1,
+    "#ffb27f": 1
+  },
+  "src/components/UnitUnlockToast.tsx": {
+    "#0009": 1,
+    "#141a17f5": 1
+  },
+  "src/pwa.ts": {
+    "#172a21": 1
+  },
+  "src/routes/campaign.$campaign.index.tsx": {
+    "#0002": 1
+  },
+  "src/routes/index.tsx": {
+    "#24392a": 1,
+    "#e5d19a": 1,
+    "#ecdaa3": 1
+  },
+  "src/routes/online.$code.tsx": {
+    "#dcc48a20": 1
+  },
+  "src/routes/online.index.tsx": {
+    "#e0a586": 1
+  }
+}

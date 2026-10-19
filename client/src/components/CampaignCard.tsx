@@ -24,7 +24,7 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
     <Link
       to={campaign === TUTORIAL ? '/campaign/$campaign/$level' : '/campaign/$campaign'}
       params={{ campaign: campaign.slug, level: '1' }}
-      className="flex h-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-[radial-gradient(ellipse_at_top,#ffffff18,transparent_70%)] bg-(--biome-background) p-3 min-[900px]:gap-3 min-[900px]:p-5 text-ink shadow-[0_8px_28px_#0003] hover:border-gold/40 hover:brightness-110 data-[done=true]:border-[#89bba477]"
+      className="flex h-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-[radial-gradient(ellipse_at_top,#ffffff18,transparent_70%)] bg-(--biome-background) p-3 min-[900px]:gap-3 min-[900px]:p-5 text-ink shadow-campaign-card hover:border-gold/40 hover:brightness-110 data-[done=true]:border-[#89bba477]"
       style={BIOMES[showcase.biome].theme}
       data-done={done}
       preload={false}

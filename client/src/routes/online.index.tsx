@@ -208,7 +208,7 @@ export const Route = createFileRoute('/online/')({
             disabled={!trimmedName || joinCode.length !== 6 || busy}
             className={
               onlineButtonClassName +
-              ' gap-3 px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
+              ' gap-3 px-[25px] bg-surface-faint text-ink hover:bg-surface'
             }
           >
             {m.joinGame}
@@ -242,7 +242,7 @@ export const Route = createFileRoute('/online/')({
                 }
                 className={
                   onlineButtonClassName +
-                  ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c] disabled:opacity-50'
+                  ' justify-between px-4 py-3 text-left bg-surface-faint hover:bg-surface disabled:opacity-50'
                 }
               >
                 <span className="font-mono tracking-[0.2em]">{open.code}</span>
@@ -286,7 +286,7 @@ export const Route = createFileRoute('/online/')({
                     params={{ code: game.code }}
                     className={
                       onlineButtonClassName +
-                      ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c]'
+                      ' justify-between px-4 py-3 text-left bg-surface-faint hover:bg-surface'
                     }
                     preload={false}
                   >

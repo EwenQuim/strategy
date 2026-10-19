@@ -1,12 +1,12 @@
 import { hexOf, mapFromRows, type FixedBattleSetup } from '../lib/engine'
-import { SIZE, hexPoints, hexX, hexY, terrainColors } from './hex-art'
+import { SIZE, hexPoints, hexX, hexY, terrainPalette } from './hex-art'
 
-const colors = {
-  ...terrainColors,
+const miniaturePalette = {
+  ...terrainPalette,
   mountain: 'var(--mountain-front, #b2b69a)',
   lava: '#d0643c',
 }
-const armyColors = { player: '#dfeccf', enemy: '#f09a78' }
+const armyPalette = { player: '#dfeccf', enemy: '#f09a78' }
 
 export function LevelMiniature({ setup }: { setup: FixedBattleSetup }) {
   const tiles = [...mapFromRows(setup.map).values()]
@@ -22,7 +22,7 @@ export function LevelMiniature({ setup }: { setup: FixedBattleSetup }) {
           key={tile.q + ',' + tile.r}
           transform={`translate(${hexX(tile.q, tile.r)} ${hexY(tile.r)})`}
         >
-          <polygon points={hexPoints} fill={colors[tile.terrain]} />
+          <polygon points={hexPoints} fill={miniaturePalette[tile.terrain]} />
           {tile.feature && <circle r={SIZE * 0.4} fill="var(--gold)" />}
         </g>
       ))}
@@ -35,7 +35,7 @@ export function LevelMiniature({ setup }: { setup: FixedBattleSetup }) {
               cx={hexX(q, r)}
               cy={hexY(r)}
               r={SIZE * 0.45}
-              fill={armyColors[side]}
+              fill={armyPalette[side]}
             />
           )
         }),

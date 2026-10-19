@@ -59,7 +59,7 @@ export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
           <ul className="mt-2 flex list-none flex-col gap-1.5 p-0 text-[13px] text-muted">
             {SHORTCUTS.map(([keys, label]) => (
               <li key={keys} className="flex items-center gap-3">
-                <kbd className="inline-flex min-w-7 justify-center rounded-md border border-line bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-ink">
+                <kbd className="inline-flex min-w-7 justify-center rounded-md border border-line bg-surface px-1.5 py-0.5 font-mono text-[11px] text-ink">
                   {keys}
                 </kbd>
                 {label}
