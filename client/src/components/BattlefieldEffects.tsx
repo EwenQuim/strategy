@@ -12,6 +12,15 @@ export function BattlefieldEffects({
   effect: BattleEffect | null
   effectId: number
 }) {
+  const blastCenters =
+    effect?.kind === 'hellfire'
+      ? (effect.centers ?? [effect.to])
+      : effect?.kind === 'bomb'
+        ? [effect.to]
+        : []
+  const trail = effect?.kind !== 'rally' && effect?.kind !== 'hellfire' && !effect?.support
+  const ring =
+    effect?.kind !== 'bomb' && effect?.kind !== 'hellfire' && !effect?.impacts?.length
   return (
     <>
       {effect && (
@@ -21,9 +30,7 @@ export function BattlefieldEffects({
           data-kind={effect.kind}
           aria-hidden="true"
         >
-          {effect.kind !== 'rally' &&
-            effect.kind !== 'hellfire' &&
-            !effect.support &&
+          {trail &&
             (effect.kind === 'fireball' ? (
               <FireballBeam from={effect.from} to={effect.to} />
             ) : (
@@ -39,37 +46,32 @@ export function BattlefieldEffects({
                 }
               />
             ))}
-          {(effect.kind === 'bomb' || effect.kind === 'hellfire') &&
-            (effect.kind === 'hellfire' ? (effect.centers ?? [effect.to]) : [effect.to]).map(
-              (center) => (
-                <g
-                  key={key(center.q, center.r)}
-                  data-testid={effect.kind === 'hellfire' ? 'hellfire-effect' : 'bomb-effect'}
-                  transform={
-                    'translate(' + hexX(center.q, center.r) + ' ' + hexY(center.r) + ')'
-                  }
-                >
-                  <circle
-                    r="66"
-                    className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box] motion-reduce:animate-none"
+          {blastCenters.map((center) => (
+            <g
+              key={key(center.q, center.r)}
+              data-testid={effect.kind === 'hellfire' ? 'hellfire-effect' : 'bomb-effect'}
+              transform={'translate(' + hexX(center.q, center.r) + ' ' + hexY(center.r) + ')'}
+            >
+              <circle
+                r="66"
+                className="battle-impact origin-center fill-current stroke-current stroke-2 [fill-opacity:0.18] [transform-box:fill-box] motion-reduce:animate-none"
+              />
+              {effect.kind === 'hellfire' ? (
+                <g className="hellfire-flame motion-reduce:animate-none">
+                  <path
+                    d="M0-30C9-16 21-9 21 5a21 21 0 0 1-42 0c0-9 5-16 11-21-1 9 3 12 5 12C-1-9 3-18 0-30Z"
+                    fill="currentColor"
                   />
-                  {effect.kind === 'hellfire' ? (
-                    <g className="hellfire-flame motion-reduce:animate-none">
-                      <path
-                        d="M0-30C9-16 21-9 21 5a21 21 0 0 1-42 0c0-9 5-16 11-21-1 9 3 12 5 12C-1-9 3-18 0-30Z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M1-9C8 0 11 4 11 9a11 11 0 0 1-22 0c0-6 7-10 12-18Z"
-                        fill="#ffe1a3"
-                      />
-                    </g>
-                  ) : (
-                    <BombBlast />
-                  )}
+                  <path
+                    d="M1-9C8 0 11 4 11 9a11 11 0 0 1-22 0c0-6 7-10 12-18Z"
+                    fill="#ffe1a3"
+                  />
                 </g>
-              ),
-            )}
+              ) : (
+                <BombBlast />
+              )}
+            </g>
+          ))}
           {effect.kind === 'fireball' && (
             <g
               transform={
@@ -79,7 +81,7 @@ export function BattlefieldEffects({
               <BombBlast />
             </g>
           )}
-          {effect.kind !== 'bomb' && effect.kind !== 'hellfire' && !effect.impacts?.length && (
+          {ring && (
             <g
               transform={
                 'translate(' + hexX(effect.to.q, effect.to.r) + ' ' + hexY(effect.to.r) + ')'

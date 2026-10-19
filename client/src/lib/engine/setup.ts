@@ -115,13 +115,17 @@ export function validateSetup(setup: BattleSetup, tiles?: Map<string, Tile>): vo
   }
 }
 
-function shuffle<T>(items: T[], random: SeededRandom): T[] {
+function shuffle<T>(items: T[], random: Pick<SeededRandom, 'next'>): T[] {
   const out = [...items]
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(random.next() * (i + 1))
     ;[out[i], out[j]] = [out[j], out[i]]
   }
   return out
+}
+
+export function randomArmy(random: Pick<SeededRandom, 'next'>) {
+  return [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
 }
 
 // Mirrored rosters can pair every unit with its counterpart on the other side.
@@ -230,7 +234,6 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
   const authoredTiles = setup?.map === undefined ? undefined : mapFromRows(setup.map)
   if (setup !== undefined) validateSetup(setup, authoredTiles)
   const random = new SeededRandom(seedState(seed))
-  const symmetric = isSymmetricSeed(seed)
   let biome: Biome
   let pawns: Pawn[]
   let tiles: Map<string, Tile>
@@ -251,9 +254,10 @@ export function prepareBattle(seed: string, setup?: BattleSetup, startingSide?: 
     const biomes = (Object.keys(BIOMES) as Biome[]).filter((name) => name !== 'hell')
     biome = setup?.biome ?? biomes[Math.floor(random.next() * biomes.length)]
     size = rollMapSize(random)
+    const symmetric = isSymmetricSeed(seed)
     const playerArmy = setup
       ? setup.player.map((kind) => PAWN_CLASSES[kind])
-      : [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
+      : randomArmy(random)
     const enemyArmy = setup ? setup.enemy.map((kind) => PAWN_CLASSES[kind]) : playerArmy
     // The shape exists before armies spawn on it, then decoration protects them.
     const shape = generateMapShape(random, size, symmetric)

@@ -14,8 +14,8 @@ import { initialPlayback, playbackReducer } from '../src/lib/playback.ts'
 import { activePawn } from '../src/lib/engine/index.ts'
 
 test('Participant defaults provide human vs normal AI and independently editable options', () => {
-  const first = defaultParticipant(true)
-  const second = defaultParticipant(false)
+  const first = defaultParticipant('human')
+  const second = defaultParticipant('bot')
   assert.equal(participantBot(first), null)
   assert.deepEqual(participantBot(second), DEFAULT_BOT_CONFIG)
   second.options.candidates = 3

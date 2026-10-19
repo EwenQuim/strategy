@@ -231,11 +231,11 @@ test(
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), 'desert')
       assert.equal(
         await page.locator('[data-testid="initiative-unit"][data-side="player"]').count(),
-        5,
+        6,
       )
       assert.equal(
         await page.locator('[data-testid="initiative-unit"][data-side="enemy"]').count(),
-        5,
+        6,
       )
       assert.equal(await page.locator('[data-testid="player-turn"]').count(), 0)
       await page.getByRole('button', { name: 'How to play' }).click()
