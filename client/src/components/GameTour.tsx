@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState, type CSSProperties } from 'react'
 import type { GameState, Side } from '../lib/engine'
-import { iconButtonClassName, primaryButtonClassName } from './styles'
+import { buttonClassName, iconButtonClassName } from './styles'
 import { Icon } from './Icon'
 import * as m from '../i18n/game'
 import * as b from '../i18n/briefing-popup'
@@ -118,7 +118,7 @@ export function GameTour({ state, onDone }: { state: GameState; onDone: () => vo
             style={hole}
           />
           <div
-            className="tour-ring pointer-events-none absolute rounded-xl border-2 border-gold"
+            className="tour-ring pointer-events-none absolute rounded-xl border-2 border-gold motion-reduce:animate-none"
             style={hole}
           />
         </>
@@ -145,7 +145,7 @@ export function GameTour({ state, onDone }: { state: GameState; onDone: () => vo
           {current.title}
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-ink">{current.body}</p>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           {step > 0 && (
             <button
               type="button"
@@ -166,7 +166,12 @@ export function GameTour({ state, onDone }: { state: GameState; onDone: () => vo
           <button
             type="button"
             autoFocus
-            className={primaryButtonClassName + ' min-h-11 rounded-xl px-4'}
+            // The deck button's px-[25px] and gap-[30px] cannot be overridden by
+            // appending classes, and they overflow the narrow card in long locales.
+            className={
+              buttonClassName +
+              ' min-h-11 justify-center gap-2 rounded-xl border-transparent bg-gold px-4 text-[15px] text-[var(--biome-panel,#20362b)] hover:brightness-110'
+            }
             onClick={next}
           >
             {last ? m.go : b.next}

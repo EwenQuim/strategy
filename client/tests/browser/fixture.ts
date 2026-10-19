@@ -187,13 +187,18 @@ export async function fixture(t: TestContext) {
     releaseB,
   }
 }
-export async function dismissQuickPlayTutorial(page: Page) {
-  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-  const tutorial = page.getByRole('dialog', { name: 'Quick play' })
-  if (await tutorial.isVisible()) {
-    await page.getByRole('button', { name: 'Go !', exact: true }).click()
-    await tutorial.waitFor({ state: 'hidden' })
+// The spotlight tour pauses the battle, so the command deck only wakes up once it is gone.
+export async function dismissTour(page: Page) {
+  await page.locator('[data-action="endTurn"]').waitFor()
+  const tour = page.getByRole('dialog', { name: 'Quick tour' })
+  if (await tour.isVisible()) {
+    await tour.getByRole('button', { name: 'Skip', exact: true }).click()
+    await tour.waitFor({ state: 'hidden' })
   }
+}
+export async function dismissQuickPlayTutorial(page: Page) {
+  await dismissTour(page)
+  await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
 }
 export async function playInUi(page: Page, state: GameState, action: Action) {
   const clickTile = (at: Axial) =>
