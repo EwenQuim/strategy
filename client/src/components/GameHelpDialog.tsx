@@ -1,6 +1,6 @@
 import { useState, type RefObject } from 'react'
 import type { Biome } from '../lib/engine'
-import { INTRODUCTIONS } from '../briefings'
+import { INTRODUCTIONS, type BriefingElement } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
 import * as m from '../i18n/help'
@@ -51,87 +51,65 @@ const TABS: readonly { id: Tab; label: string; icon: IconName }[] = [
 const rowClassName =
   'flex items-start gap-3 rounded-xl border border-line bg-[#ffffff06] px-3 py-2.5 max-[360px]:gap-2.5 max-[360px]:px-2.5 max-[360px]:py-2'
 
-function BasicsPanel() {
+// One row layout for every briefing element: art or icon, name, then only the
+// fields the element actually has (stats, special, points).
+function CheatsheetRow({ element, index }: { element: BriefingElement; index: number }) {
+  const detailed = element.stats !== undefined || element.special !== undefined
   return (
-    <ul className="m-0 flex list-none flex-col gap-2.5 p-0 pt-5">
-      {BASICS.map((element) => (
-        <li key={element.name} className={rowClassName}>
-          <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-line bg-black/20 text-gold">
-            <Icon name={element.icon ?? 'hex'} className="size-4" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <strong className="block font-serif text-[17px] leading-snug text-gold">
-              {element.name}
-            </strong>
+    <li className={rowClassName + (element.art && !detailed ? ' items-center' : '')}>
+      {element.art ? (
+        <ElementArt art={element.art} index={index} small />
+      ) : (
+        <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-line bg-black/20 text-gold">
+          <Icon name={element.icon ?? 'hex'} className="size-4" />
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <strong className="font-serif text-[16px] leading-snug text-gold">
+            {element.name}
+          </strong>
+          {element.stats && (
+            <>
+              <StatChip icon="heart" value={element.stats.hp} color="text-[#d59d81]" />
+              <StatChip icon="sword" value={element.stats.damage} color="text-[#c4d1a5]" />
+              <StatChip icon="target" value={element.stats.range} color="text-[#a4af99]" />
+            </>
+          )}
+        </div>
+        {element.special && (
+          <p className="m-0 mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-snug">
+            <span className="font-semibold text-gold">{element.special.name}</span>
+            <span className="inline-flex items-center gap-0.5 rounded bg-[#ffffff0d] px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
+              <Icon name="energy" className="size-2.5" />
+              {element.special.cost}
+            </span>
+            <span className="text-muted">{element.special.description}</span>
+          </p>
+        )}
+        {element.points.length > 0 &&
+          // Illustrated rows keep their caveats on one line; concept cards list them.
+          (element.art ? (
+            <p className="m-0 mt-0.5 text-[12.5px] leading-snug text-muted">
+              {element.points.join(' · ')}
+            </p>
+          ) : (
             <ul className="m-0 mt-1 list-none space-y-1 p-0 text-[13px] leading-snug text-muted">
               {element.points.map((point) => (
                 <li key={point}>{point}</li>
               ))}
             </ul>
-          </div>
-        </li>
-      ))}
-    </ul>
+          ))}
+      </div>
+    </li>
   )
 }
 
-function UnitsPanel() {
-  return (
-    <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5">
-      {UNITS.map((element, index) => (
-        <li key={element.name} className={rowClassName}>
-          {element.art && <ElementArt art={element.art} index={index} small />}
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <strong className="font-serif text-[16px] leading-snug text-gold">
-                {element.name}
-              </strong>
-              {element.stats && (
-                <>
-                  <StatChip icon="heart" value={element.stats.hp} color="text-[#d59d81]" />
-                  <StatChip icon="sword" value={element.stats.damage} color="text-[#c4d1a5]" />
-                  <StatChip icon="target" value={element.stats.range} color="text-[#a4af99]" />
-                </>
-              )}
-            </div>
-            {element.special && (
-              <p className="m-0 mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-snug">
-                <span className="font-semibold text-gold">{element.special.name}</span>
-                <span className="inline-flex items-center gap-0.5 rounded bg-[#ffffff0d] px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
-                  <Icon name="energy" className="size-2.5" />
-                  {element.special.cost}
-                </span>
-                <span className="text-muted">{element.special.description}</span>
-              </p>
-            )}
-            {element.points.length > 0 && (
-              <p className="m-0 mt-0.5 text-[12px] leading-snug text-muted">
-                {element.points.join(' · ')}
-              </p>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-function TerrainPanel({ biome }: { biome: Biome }) {
-  const elements = [...TERRAIN, ...(biome === 'hell' ? INTRODUCTIONS.hell : [])]
+function CheatsheetList({ elements }: { elements: readonly BriefingElement[] }) {
   return (
     <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5">
       {elements.map((element, index) => (
-        <li key={element.name} className={rowClassName + ' items-center'}>
-          {element.art && <ElementArt art={element.art} index={index} small />}
-          <div className="min-w-0 flex-1">
-            <strong className="block font-serif text-[15px] leading-snug text-gold">
-              {element.name}
-            </strong>
-            <p className="m-0 mt-0.5 text-[12.5px] leading-snug text-muted">
-              {element.points.join(' · ')}
-            </p>
-          </div>
-        </li>
+        <CheatsheetRow key={element.name} element={element} index={index} />
       ))}
     </ul>
   )
@@ -164,6 +142,14 @@ interface GameHelpDialogProps {
 
 export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
   const [tab, setTab] = useState<Tab>('basics')
+  const elements =
+    tab === 'basics'
+      ? BASICS
+      : tab === 'units'
+        ? UNITS
+        : tab === 'terrain'
+          ? [...TERRAIN, ...(biome === 'hell' ? INTRODUCTIONS.hell : [])]
+          : undefined
 
   return (
     <dialog
@@ -216,10 +202,7 @@ export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
         className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 max-[360px]:px-4"
         role="tabpanel"
       >
-        {tab === 'basics' && <BasicsPanel />}
-        {tab === 'units' && <UnitsPanel />}
-        {tab === 'terrain' && <TerrainPanel biome={biome} />}
-        {tab === 'keys' && <ShortcutsPanel />}
+        {elements ? <CheatsheetList elements={elements} /> : <ShortcutsPanel />}
       </div>
     </dialog>
   )
