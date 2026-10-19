@@ -4,12 +4,13 @@
 // with mobile emulation and CPU throttling, then reports:
 //   - load: navigation until the first player turn is ready
 //   - idle: rendering work while the screen is static (the regression gate)
-//   - move tap: main-thread long tasks for one player move
-//   - bot turns: wall time and main-thread long tasks per enemy turn
+//   - move tap, aim toggle and bot turns: frames over 22ms (dropped at 60Hz) and
+//     main-thread long tasks while each one animates
 //
 // Usage:
 //   node scripts/bench-web.ts [--json] [--no-build]
 //   THROTTLE=6 SEED=perfprobe1 DIFFICULTY=normal TURNS=5 node scripts/bench-web.ts
+//   ABLATE=animations|halo node scripts/bench-web.ts   (A/B the cost of an effect)
 //
 // The idle paint budget fails the run when anything animates without
 // compositing on a static screen: the active-pawn halo once repainted the whole
@@ -35,6 +36,12 @@ const IDLE_WINDOW_MS = 3000
 // A static screen must not repaint. The budget tolerates a few stray paints but
 // fails on a repaint loop, which shows up as one paint per frame (~180 here).
 const IDLE_PAINT_BUDGET = 6
+const ABLATIONS: Record<string, string> = {
+  animations: '*,*::before,*::after{animation:none!important;transition:none!important}',
+  halo: '[data-art="active-halo"]{display:none!important}',
+}
+const ABLATE = process.env.ABLATE ?? ''
+if (ABLATE && !Object.hasOwn(ABLATIONS, ABLATE)) throw new RangeError('Invalid ablation')
 
 type TraceEvent = { name: string; ph: string; dur?: number }
 
@@ -48,15 +55,24 @@ type FrameStats = {
 
 type IdleStats = FrameStats & { paints: number; rasterTasks: number; layoutTrees: number }
 
-type BotTurn = { wallMs: number; taskTotalMs: number; worstTaskMs: number }
+type Interaction = {
+  frames: number
+  over22: number
+  worstFrameMs: number
+  longTasksMs: number[]
+}
+
+type BotTurn = Interaction & { wallMs: number }
 
 type Report = {
   throttle: number
   seed: string
   difficulty: string
+  ablate: string
   loadMs: number
   idle: IdleStats
-  moveTapTasksMs: number[]
+  moveTap: Interaction
+  aim: Interaction
   botTurns: BotTurn[]
 }
 
@@ -163,36 +179,86 @@ async function measureIdle(page: Page, cdp: CDPSession): Promise<IdleStats> {
   }
 }
 
-type LongTaskWindow = Window & { __longTasks?: number[] }
-
-async function measureMoveTap(page: Page): Promise<number[]> {
-  await page.evaluate(() => {
-    const win = window as LongTaskWindow
-    win.__longTasks = []
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) win.__longTasks?.push(entry.duration)
-    }).observe({ entryTypes: ['longtask'] })
-  })
-  await page.click('[data-testid="hex-tile"][role="button"]')
-  await page.waitForTimeout(2000)
-  return page.evaluate(() => (window as LongTaskWindow).__longTasks ?? [])
+type RecorderWindow = Window & {
+  __recording?: { deltas: number[]; tasks: number[]; stop: () => void }
 }
 
-async function measureBotTurn(page: Page): Promise<BotTurn | null> {
+// Frame deltas and long tasks from now until stopRecording, so an interaction is judged on
+// what the player sees while it animates, not only on its script cost.
+const startRecording = (page: Page) =>
+  page.evaluate(() => {
+    const win = window as RecorderWindow
+    const recording = { deltas: [] as number[], tasks: [] as number[], stop: () => {} }
+    let last = performance.now()
+    let frame = 0
+    const tick = (now: number) => {
+      recording.deltas.push(now - last)
+      last = now
+      frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) recording.tasks.push(entry.duration)
+    })
+    observer.observe({ entryTypes: ['longtask'] })
+    recording.stop = () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
+    win.__recording = recording
+  })
+
+const stopRecording = (page: Page) =>
+  page.evaluate((): Interaction => {
+    const recording = (window as RecorderWindow).__recording!
+    recording.stop()
+    return {
+      frames: recording.deltas.length,
+      over22: recording.deltas.filter((delta) => delta > 22).length,
+      worstFrameMs: Math.max(0, ...recording.deltas),
+      longTasksMs: recording.tasks,
+    }
+  })
+
+async function measureMoveTap(page: Page): Promise<Interaction> {
+  await startRecording(page)
+  await page.click('[data-testid="hex-tile"][role="button"]')
+  await page.waitForTimeout(2000)
+  return stopRecording(page)
+}
+
+// Aiming the ability and canceling it repaints every target tile and the banner twice.
+async function measureAim(page: Page): Promise<Interaction> {
+  await startRecording(page)
+  await page.keyboard.press('a')
+  await page.waitForTimeout(800)
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(800)
+  return stopRecording(page)
+}
+
+const enemyTurn = '[data-testid="enemy-turn"]'
+
+// Ending a turn may hand over to another of our own pawns; only turns the bot actually plays
+// are measured, from the click until our next pawn can command again.
+async function measureBotTurn(page: Page): Promise<BotTurn | 'ours' | null> {
   const endTurn = page.locator('[data-action="endTurn"]')
   if (!(await endTurn.count()) || (await endTurn.isDisabled())) return null
-  await page.evaluate(() => {
-    ;(window as LongTaskWindow).__longTasks = []
-  })
+  await startRecording(page)
   const started = Date.now()
   await endTurn.click()
-  await waitForOurTurn(page)
-  const tasks = await page.evaluate(() => (window as LongTaskWindow).__longTasks ?? [])
-  return {
-    wallMs: Date.now() - started,
-    taskTotalMs: tasks.reduce((sum, task) => sum + task, 0),
-    worstTaskMs: tasks.length ? Math.max(...tasks) : 0,
+  const botPlays = await page
+    .waitForSelector(enemyTurn, { timeout: 3000 })
+    .then(() => true)
+    .catch(() => false)
+  if (!botPlays) {
+    await stopRecording(page)
+    return 'ours'
   }
+  await page.waitForSelector(enemyTurn, { state: 'detached', timeout: 60_000 })
+  await waitForOurTurn(page)
+  const wallMs = Date.now() - started
+  return { wallMs, ...(await stopRecording(page)) }
 }
 
 async function runBenchmarks(): Promise<Report> {
@@ -205,6 +271,14 @@ async function runBenchmarks(): Promise<Report> {
       hasTouch: true,
     })
     const page = await context.newPage()
+    if (ABLATE)
+      await page.addInitScript((css) => {
+        document.addEventListener('DOMContentLoaded', () => {
+          const style = document.createElement('style')
+          style.textContent = css
+          document.head.append(style)
+        })
+      }, ABLATIONS[ABLATE])
     const cdp = await context.newCDPSession(page)
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLE })
 
@@ -222,21 +296,24 @@ async function runBenchmarks(): Promise<Report> {
 
     await page.waitForTimeout(400)
     const idle = await measureIdle(page, cdp)
-    const moveTapTasksMs = await measureMoveTap(page)
+    const aim = await measureAim(page)
+    const moveTap = await measureMoveTap(page)
     const botTurns: BotTurn[] = []
-    for (let turn = 0; turn < TURNS; turn++) {
+    for (let attempt = 0; botTurns.length < TURNS && attempt < TURNS * 4; attempt++) {
       const measured = await measureBotTurn(page)
       if (!measured) break
-      botTurns.push(measured)
+      if (measured !== 'ours') botTurns.push(measured)
       await page.waitForTimeout(200)
     }
     return {
       throttle: THROTTLE,
       seed: SEED,
       difficulty: DIFFICULTY,
+      ablate: ABLATE,
       loadMs,
       idle,
-      moveTapTasksMs,
+      moveTap,
+      aim,
       botTurns,
     }
   } finally {
@@ -246,9 +323,12 @@ async function runBenchmarks(): Promise<Report> {
 
 const round = (value: number) => Math.round(value)
 
+const describe = (stats: Interaction) =>
+  `${stats.frames} frames, >22ms ${stats.over22}, worst ${round(stats.worstFrameMs)}ms, long tasks ${stats.longTasksMs.map(round).join(' + ') || 'none'}`
+
 function printReport(report: Report) {
   console.log(
-    `\nbench-web  seed=${report.seed}  difficulty=${report.difficulty}  throttle=${report.throttle}x`,
+    `\nbench-web  seed=${report.seed}  difficulty=${report.difficulty}  throttle=${report.throttle}x${report.ablate ? '  ablate=' + report.ablate : ''}`,
   )
   console.log(`load until first player turn: ${report.loadMs} ms`)
   console.log(
@@ -257,13 +337,10 @@ function printReport(report: Report) {
   console.log(
     `idle paints ${report.idle.paints}, raster tasks ${report.idle.rasterTasks}, layout trees ${report.idle.layoutTrees} (budget: ${IDLE_PAINT_BUDGET} paints)`,
   )
-  console.log(
-    `move tap long tasks: ${report.moveTapTasksMs.map(round).join(' + ') || 'none'} ms`,
-  )
+  console.log(`aim toggle: ${describe(report.aim)}`)
+  console.log(`move tap: ${describe(report.moveTap)}`)
   for (const turn of report.botTurns)
-    console.log(
-      `bot turn: wall ${turn.wallMs} ms, long tasks ${round(turn.taskTotalMs)} ms, worst ${round(turn.worstTaskMs)} ms`,
-    )
+    console.log(`bot turn: wall ${turn.wallMs} ms, ${describe(turn)}`)
 }
 
 async function main() {
