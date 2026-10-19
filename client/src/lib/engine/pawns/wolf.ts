@@ -41,7 +41,7 @@ export class Wolf extends Pawn {
   get maxHp(): number {
     return 3
   }
-  readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 1 }
+  readonly attack: AttackProfile = { damage: 2, minRange: 1, maxRange: 3 }
   get special(): SpecialAbility {
     return cry
   }
