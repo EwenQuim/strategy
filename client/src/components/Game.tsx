@@ -287,7 +287,11 @@ export function Game({
         onAim={setAim}
       />
 
-      <GameHelpDialog dialogRef={dialog} biome={state.biome} />
+      <GameHelpDialog
+        dialogRef={dialog}
+        biome={state.biome}
+        presentKinds={new Set(state.pawns.map((unit) => unit.kind))}
+      />
     </main>
   )
 }
