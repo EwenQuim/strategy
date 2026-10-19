@@ -6,7 +6,7 @@ BUBBLEWRAP := npx --yes @bubblewrap/cli
 WEB_MANIFEST := https://strategy.glenan.quimerch.com/strategy/manifest.webmanifest
 ANDROID_KEYS_DIR := $(HOME)/Developer/keys/hexmate-android
 
-.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-napoleon bench-hannibal train-value retrain-value bench-web record-campaign android-init android-build android-doctor
+.PHONY: onboarding installdeps dev format lint typecheck test test-integration build check docker run go-format go-lint go-test openapi sdk pvp bench-ai bench-napoleon bench-hannibal train-value retrain-value bench-web bench-gameplay record-campaign android-init android-build android-doctor
 
 onboarding: installdeps
 
@@ -68,6 +68,9 @@ record-campaign:
 
 bench-web:
 	$(NPM) run bench:web
+
+bench-gameplay:
+	$(NPM) run bench:gameplay -- $(ARGS)
 
 build:
 	$(NPM) run build
