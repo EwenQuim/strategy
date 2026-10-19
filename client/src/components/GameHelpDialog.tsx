@@ -141,7 +141,8 @@ interface GameHelpDialogProps {
 }
 
 export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
-  const [tab, setTab] = useState<Tab>('basics')
+  // Units are the reference players come back to; basics are covered by the tutorial.
+  const [tab, setTab] = useState<Tab>('units')
   const elements =
     tab === 'basics'
       ? BASICS
