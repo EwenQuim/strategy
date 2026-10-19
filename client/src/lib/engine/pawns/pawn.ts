@@ -21,7 +21,6 @@ type SpecialContext = {
   tile?: Axial
   destination?: Axial
   round: number
-  log: string[]
 }
 
 export type SpecialResult = Omit<BattleEffect, 'from'>

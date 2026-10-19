@@ -1,5 +1,5 @@
 import { hexDist, key, sameHex } from '../hex.ts'
-import { aimAt, canUseSpecial, label, strikeArea } from '../combat.ts'
+import { aimAt, canUseSpecial, strikeArea } from '../combat.ts'
 import type { Tile } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -31,15 +31,14 @@ const bomb: SpecialAbility = {
       .map(aimAt),
   threat: (pawn, { target, from, movementCost }) =>
     hexDist(from, target) <= 3 ? Number(pawn.energy - movementCost >= pawn.special.cost) : 0,
-  perform: ({ pawn, tiles, pawns, log, tile }) => {
+  perform: ({ pawn, tiles, pawns, tile }) => {
     if (!tile || !bombTiles(pawn, tiles).some((center) => sameHex(center, tile))) return null
     pawn.energy -= pawn.special.cost
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const targets = bomb.areaTargets!(pawns, tile, pawn)
     return {
       kind: 'bomb',
       to: tile,
-      impacts: strikeArea(pawns, pawn, targets, log),
+      impacts: strikeArea(pawns, pawn, targets),
     }
   },
 }

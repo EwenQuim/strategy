@@ -1,12 +1,4 @@
-import {
-  aimAt,
-  allyTargets,
-  attackTargets,
-  label,
-  pawnAt,
-  specialTargets,
-  strike,
-} from '../combat.ts'
+import { aimAt, allyTargets, attackTargets, pawnAt, specialTargets, strike } from '../combat.ts'
 import { hexDist } from '../hex.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
 
@@ -20,17 +12,15 @@ const cry: SpecialAbility = {
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
   targets: attackTargets,
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
-  perform: ({ pawn, pawns, tile, log }) => {
+  perform: ({ pawn, pawns, tile }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
-    const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
+    const impacts = [strike(pawns, target, pawn.attack)]
     const allies = allyTargets(pawn, pawns)
     for (const ally of allies) {
       ally.energy += 1
       ally.bonusEnergy += 1
-      log.push(label(ally) + ' gains 1 energy.')
     }
     return {
       kind: 'attack',

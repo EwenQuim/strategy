@@ -1,4 +1,4 @@
-import { aimAt, canAttack, label, specialTargets, strike } from '../combat.ts'
+import { aimAt, canAttack, specialTargets, strike } from '../combat.ts'
 import { hexDist, sameHex } from '../hex.ts'
 import { defaultAi, type PawnAi } from '../pawn-ai.ts'
 import { Pawn, type AttackProfile, type SpecialAbility } from './pawn.ts'
@@ -20,7 +20,7 @@ const fury: SpecialAbility = {
     const boost = pawn.energy - movementCost - pawn.special.cost
     return pawn.attack.damage + boost
   },
-  perform: ({ pawn, pawns, log, tile }) => {
+  perform: ({ pawn, pawns, tile }) => {
     const target = pawns.find(
       (foe) => sameHex(foe, tile) && specialTargets(pawns, pawn).includes(foe),
     )
@@ -28,19 +28,10 @@ const fury: SpecialAbility = {
     const boost = pawn.energy - pawn.special.cost
     if (boost < 0) return null
     pawn.energy = 0
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     return {
       kind: 'attack',
       to: { q: target.q, r: target.r },
-      impacts: [
-        strike(
-          pawns,
-          pawn,
-          target,
-          { ...pawn.attack, damage: pawn.attack.damage + boost },
-          log,
-        ),
-      ],
+      impacts: [strike(pawns, target, { ...pawn.attack, damage: pawn.attack.damage + boost })],
     }
   },
 }

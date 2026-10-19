@@ -1,6 +1,5 @@
 import { key } from './hex.ts'
 import { inHellfire, markHellfire } from './hellfire.ts'
-import { label } from './combat.ts'
 import type { Pawn, Side } from './pawns/index.ts'
 import type { BattleEffect, BattleFrame, GameState } from './engine.ts'
 
@@ -18,18 +17,7 @@ export function endBattle(
   state: GameState,
   winner: NonNullable<GameState['winner']>,
 ): GameState {
-  const message =
-    winner === 'draw'
-      ? 'Both crowns have fallen. Draw.'
-      : winner === 'player'
-        ? 'The enemy crown has fallen. Victory!'
-        : 'Your crown has fallen.'
-  return {
-    ...state,
-    winner,
-    log: [...state.log, message].slice(-40),
-    logCount: state.logCount + 1,
-  }
+  return { ...state, winner }
 }
 
 export function advanceTurn(
@@ -37,8 +25,7 @@ export function advanceTurn(
   record?: (frame: BattleFrame) => void,
 ): GameState {
   let { pawns, hellfire, randomState } = state
-  const log = [...state.log]
-  let { order, round, logCount, blows } = state
+  let { order, round, blows } = state
   let active = state.active + 1
   while (true) {
     if (active >= order.length) {
@@ -47,19 +34,13 @@ export function advanceTurn(
           .filter((pawn) => inHellfire(hellfire, pawn))
           .map((pawn) => {
             pawn.hp--
-            log.push(label(pawn) + ' takes 1 Hellfire damage.')
-            logCount++
-            if (pawn.hp <= 0) {
-              log.push(label(pawn) + ' has fallen.')
-              logCount++
-            }
             return { q: pawn.q, r: pawn.r, damage: 1 }
           })
         const fallen = pawns
           .filter((pawn) => pawn.hp <= 0)
           .map(({ kind, side }) => ({ kind, side }))
         if (fallen.length) blows = [...blows, { fallen }]
-        const burned = { ...state, pawns, log, logCount, blows }
+        const burned = { ...state, pawns, blows }
         record?.(
           captureFrame(burned, {
             kind: 'hellfire',
@@ -85,8 +66,6 @@ export function advanceTurn(
       }
       ;({ hellfire, randomState } = markHellfire({ ...state, pawns, round, randomState }))
       active = 0
-      log.push('Round ' + round + '. Energy and abilities restored.')
-      logCount++
     }
     const next = pawns.find((p) => p.id === order[active])
     if (next) {
@@ -98,8 +77,6 @@ export function advanceTurn(
         next.hp < next.maxHp
       ) {
         next.hp++
-        log.push(label(next) + ' recovers 1 health at the spring.')
-        logCount++
       }
       break
     }
@@ -113,8 +90,6 @@ export function advanceTurn(
     order,
     active,
     round,
-    log: log.slice(-40),
-    logCount,
     blows,
   }
 }
@@ -137,7 +112,6 @@ export function captureFrame(
       hellfire: state.hellfire.map((center) => ({ ...center })),
       pawns: [...state.pawns, ...fallen].map((pawn) => pawn.clone()),
       order: [...state.order],
-      log: [...state.log],
       winner: null,
     },
     effect,

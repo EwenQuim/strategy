@@ -36,8 +36,6 @@ function duel(): GameState {
     blows: [],
     escapes: [],
     winner: null,
-    log: [],
-    logCount: 0,
   }
 }
 

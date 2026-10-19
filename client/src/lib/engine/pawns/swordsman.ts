@@ -3,7 +3,6 @@ import {
   attackTargets,
   canAttack,
   canUseSpecial,
-  label,
   landingThreatenedTiles,
   pawnAt,
   routePath,
@@ -65,7 +64,7 @@ const charge: SpecialAbility = {
       : 0
   },
   perform: (context) => {
-    const { pawn, tiles, pawns, tile, destination, log } = context
+    const { pawn, tiles, pawns, tile, destination } = context
     const target = tile && pawnAt(pawns, tile)
     if (
       !target ||
@@ -74,7 +73,6 @@ const charge: SpecialAbility = {
       !specialTargets(pawns, pawn, destination).includes(target)
     )
       return null
-    log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
     const route = walkingPaths(tiles, pawns, pawn, 2, key(destination.q, destination.r)).get(
       key(destination.q, destination.r),
     )!
