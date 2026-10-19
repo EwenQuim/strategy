@@ -96,7 +96,7 @@ test('Custom playback applies the selected difficulty, preserves setups on resta
     const bot = createBotGame(getBot(config))
     const opening = initialPlayback('custom-difficulty-10', 'ai', setup)
     let playback = opening
-    for (let turn = 0; turn < 4 && !playback.state.winner; turn++) {
+    for (let turn = 0; turn < 5 && !playback.state.winner; turn++) {
       const expected = await bot.transition(playback.state, { type: 'endTurn' })
       playback = playbackReducer(playback, { type: 'endTurn' }, 'ai')
       while (!playback.state.winner && activePawn(playback.state)?.side === 'enemy') {

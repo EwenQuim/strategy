@@ -15,17 +15,28 @@ const rally: SpecialAbility = {
   name: 'rally',
   cost: 2,
   targeted: true,
-  noTargets: 'noEnemiesWithinReach',
-  prompt: 'chooseEnemy',
+  noTargets: 'noAdjacentEnemiesOrAllies',
+  prompt: 'chooseEnemyOrAlly',
   description: 'rallyDescription',
   reaches: (pawn, tile) => hexDist(pawn, tile) === 1,
-  targets: attackTargets,
+  targets: (pawn, pawns) => [...attackTargets(pawn, pawns), ...allyTargets(pawn, pawns)],
   candidates: (pawn, { pawns }) => specialTargets(pawns, pawn).map(aimAt),
   perform: ({ pawn, pawns, tile, log }) => {
     const target = tile && pawnAt(pawns, tile)
     if (!target || !specialTargets(pawns, pawn).includes(target)) return null
     pawn.energy -= pawn.special.cost
     log.push(label(pawn) + ' uses ' + pawn.special.name + '.')
+    if (target.side === pawn.side) {
+      target.energy += 2
+      target.bonusEnergy += 2
+      log.push(label(target) + ' gains 2 energy.')
+      return {
+        kind: 'rally',
+        to: { q: target.q, r: target.r },
+        impacts: [],
+        support: { kind: 'energy', recipients: [{ q: target.q, r: target.r }] },
+      }
+    }
     const impacts = [strike(pawns, pawn, target, pawn.attack, log)]
     const allies = allyTargets(pawn, pawns, true)
     for (const ally of allies) {
@@ -88,7 +99,7 @@ export class King extends Pawn {
   static override readonly icon = 'm3 6 4 4 5-7 5 7 4-4-2 12H5L3 6ZM6 21h12'
   readonly kind = 'king' as const
   static override readonly aiInstructions =
-    'Exalting Assault (2): strike an adjacent enemy for 2 and heal every adjacent ally for 1, up to its maximum health. Cannot heal yourself. Once per activation.'
+    'Exalting Assault (2): strike an adjacent enemy for 2 and heal every adjacent ally for 1, up to its maximum health, or boost a single adjacent ally with +2 energy this round. Cannot target yourself. Once per activation.'
   get maxHp(): number {
     return 7
   }

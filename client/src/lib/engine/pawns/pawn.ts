@@ -45,6 +45,8 @@ export type SpecialTextKey =
   | 'chooseTile'
   | 'chooseTileOrEnemy'
   | 'chooseEnemy'
+  | 'chooseEnemyOrAlly'
+  | 'noAdjacentEnemiesOrAllies'
   | 'aimedShot'
   | 'aimedShotDescription'
   | 'noEnemiesInRange'

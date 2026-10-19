@@ -163,6 +163,37 @@ for (const side of ['player', 'enemy'] as const) {
       assert.equal(next.pawns[0].protectingId, null)
     },
   )
+
+  test(
+    side +
+      ': Exalting Assault strikes an adjacent enemy or boosts one adjacent ally with +2 energy',
+    () => {
+      const state = battle(new King(1, 0, 0, side))
+      state.pawns.push(new Swordsman(4, 1, 0, side, 2), new Swordsman(5, 0, 1, other))
+      assert.deepEqual(
+        specialTargets(state.pawns, state.pawns[0]).map((pawn) => pawn.id),
+        [5, 4],
+      )
+      const boost = transition(state, { type: 'special', target: { q: 1, r: 0 } })
+      const ally = boost.state.pawns.find((pawn) => pawn.id === 4)!
+      assert.equal(ally.energy, 5)
+      assert.equal(ally.hp, 2)
+      assert.equal(boost.state.pawns[0].energy, 1)
+      assert.deepEqual(boost.frames[0].effect, {
+        kind: 'rally',
+        from: { q: 0, r: 0 },
+        to: { q: 1, r: 0 },
+        impacts: [],
+        support: { kind: 'energy', recipients: [{ q: 1, r: 0 }] },
+        energyDelta: -2,
+        energyAt: { q: 0, r: 0 },
+      })
+      const strike = transition(state, { type: 'special', target: { q: 0, r: 1 } })
+      assert.equal(strike.state.pawns.find((pawn) => pawn.id === 5)!.hp, 3)
+      assert.equal(strike.state.pawns.find((pawn) => pawn.id === 4)!.hp, 3)
+      assert.equal(strike.frames[0].effect?.kind, 'attack')
+    },
+  )
 }
 
 test('Bots use long-range rays and bombs centered on empty tiles', async () => {
