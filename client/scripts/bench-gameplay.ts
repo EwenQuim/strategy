@@ -56,8 +56,8 @@ const POPULATION: { name: string; make: () => Bot }[] = [
 
 const SETUP = {
   biome: 'desert',
-  player: ['king', 'swordsman', 'archer', 'ninja', 'lancer'],
-  enemy: ['king', 'swordsman', 'archer', 'ninja', 'lancer'],
+  player: ['king', 'swordsman', 'archer', 'ninja', 'wolf'],
+  enemy: ['king', 'swordsman', 'archer', 'ninja', 'wolf'],
 } as const satisfies BattleSetup
 
 async function playMatch(
