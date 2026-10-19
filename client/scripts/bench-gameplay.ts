@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import {
   activePawn,
   initialState,
@@ -21,18 +22,27 @@ import {
   roundTelemetry,
   summarize,
   type MatchMetrics,
+  type PopulationReport,
 } from './gameplay-metrics.ts'
 
 // Gameplay benchmark: round-robin bot-vs-bot matches over a population of strategies, with
-// per-round engagement and tension telemetry instead of only win rates. Evaluate a rule
-// change by running the same seeds before and after and diffing the reports (--json).
+// per-round engagement and tension telemetry instead of only win rates.
+//
+// Comparing a rule change: on the baseline engine, save the --json output to a file; on the
+// changed engine, run with --baseline=<file> on the same seeds to print a comparison. Keep the
+// bot population fixed across compared runs, and regenerate the baseline after every merged
+// rule change so every comparison is against the current game.
 //
 // Usage:
 //   node scripts/bench-gameplay.ts [--json] [seed ...]
+//   node scripts/bench-gameplay.ts --baseline=<report.json> [seed ...]
 
 const args = process.argv.slice(2)
 const seeds = args.filter((arg) => !arg.startsWith('--'))
 const json = args.includes('--json')
+const baselinePath = args
+  .find((arg) => arg.startsWith('--baseline='))
+  ?.slice('--baseline='.length)
 const MAX_TURNS = 240
 
 const POPULATION: { name: string; make: () => Bot }[] = [
@@ -151,4 +161,62 @@ if (json) {
   console.log(
     failures.length ? `Gates FAILED:\n  - ${failures.join('\n  - ')}` : 'Gates: all pass',
   )
+  if (baselinePath) {
+    const baseline = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
+      report: PopulationReport
+      matches: MatchMetrics[]
+    }
+    const key = (match: MatchMetrics) => `${match.seed}:${match.playerBot}vs${match.enemyBot}`
+    const baselineKeys = new Set(baseline.matches.map(key))
+    if (
+      baselineKeys.size !== matches.length ||
+      matches.some((match) => !baselineKeys.has(key(match)))
+    )
+      throw new Error(
+        'Baseline covers different matches: regenerate it with the same seeds and population',
+      )
+    const count = (value: number | null) => (value === null ? '-' : `${value}`)
+    const swingText = (value: number | null) => (value === null ? '-' : value.toFixed(3))
+    const percentOf = (value: number | null) =>
+      value === null ? '-' : `${Math.round(value * 100)}%`
+    const rows: [string, string, string][] = [
+      ['draw / unfinished', percentOf(baseline.report.drawRate), percentOf(report.drawRate)],
+      ['median rounds', count(baseline.report.medianRounds), count(report.medianRounds)],
+      [
+        'median first contact',
+        count(baseline.report.medianFirstContact),
+        count(report.medianFirstContact),
+      ],
+      ['worst stall', count(baseline.report.worstStall), count(report.worstStall)],
+      [
+        'median late turtle index',
+        percentOf(baseline.report.medianLateTurtle),
+        percentOf(report.medianLateTurtle),
+      ],
+      [
+        'median retreat ratio',
+        percentOf(baseline.report.medianRetreatRatio),
+        percentOf(report.medianRetreatRatio),
+      ],
+      [
+        'median lead changes',
+        count(baseline.report.medianLeadChanges),
+        count(report.medianLeadChanges),
+      ],
+      [
+        'median decision share',
+        percentOf(baseline.report.medianDecisionShare),
+        percentOf(report.medianDecisionShare),
+      ],
+      ['median swing', swingText(baseline.report.medianSwing), swingText(report.medianSwing)],
+      [
+        'turtle probe wins',
+        `${baseline.report.turtleRecord.wins}/${baseline.report.turtleRecord.matches}`,
+        `${report.turtleRecord.wins}/${report.turtleRecord.matches}`,
+      ],
+    ]
+    console.log('')
+    console.log(`Against ${baselinePath} (baseline -> current):`)
+    for (const [label, was, now] of rows) console.log(`  ${label}: ${was} -> ${now}`)
+  }
 }
