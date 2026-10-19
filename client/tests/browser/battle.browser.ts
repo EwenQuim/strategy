@@ -458,11 +458,12 @@ test('Keyboard shortcuts aim, cancel, open help and end turns', async (t) => {
   assert.equal(await special.getAttribute('aria-pressed'), 'true')
   await page.keyboard.press('Escape')
   assert.equal(await special.getAttribute('aria-pressed'), 'false')
-  // H and ? open the help dialog, which lists the shortcuts; Escape closes it.
+  // H and ? open the help dialog; the shortcuts sit behind its Keys tab; Escape closes it.
   const dialog = page.getByRole('dialog')
   for (const key of ['h', '?']) {
     await page.keyboard.press(key)
     await dialog.waitFor()
+    await dialog.getByRole('tab', { name: 'Keys' }).click()
     await page.getByRole('heading', { name: 'Keyboard shortcuts' }).waitFor()
     await page.keyboard.press('Escape')
     await dialog.waitFor({ state: 'hidden' })

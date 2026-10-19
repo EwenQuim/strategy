@@ -467,6 +467,8 @@ test(
         )
     }
     await page.getByRole('button', { name: 'How to play' }).click()
+    // The feature rules live behind the help dialog's Terrain tab.
+    await page.getByRole('dialog').getByRole('tab', { name: 'Terrain' }).click()
     assert.match(await page.locator('dialog').innerText(), /Stay until next turn: \+1 HP/)
     assert.match(
       await page.locator('dialog').innerText(),
