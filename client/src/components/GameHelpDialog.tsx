@@ -6,7 +6,7 @@ import * as game from '../i18n/game'
 import * as m from '../i18n/help'
 import { ElementArt, StatChip } from './BriefingElements'
 import { Icon, type IconName } from './Icon'
-import { dialogClassName, iconButtonClassName } from './styles'
+import { dialogClassName, dividedListClassName, iconButtonClassName } from './styles'
 
 const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
   ['E', game.endTurn],
@@ -49,7 +49,7 @@ const TABS: readonly { id: Tab; label: string; icon: IconName }[] = [
 ]
 
 const rowClassName =
-  'flex items-start gap-3 rounded-xl border border-line bg-[#ffffff06] px-3 py-2.5 max-[360px]:gap-2.5 max-[360px]:px-2.5 max-[360px]:py-2'
+  'flex items-start gap-3 py-3 last:pb-0 max-[360px]:gap-2.5 max-[360px]:py-2.5 max-[360px]:last:pb-0'
 
 // One row layout for every briefing element: art or icon, name, then only the
 // fields the element actually has (stats, special, points).
@@ -90,7 +90,7 @@ function CheatsheetRow({ element, index }: { element: BriefingElement; index: nu
         {element.points.length > 0 &&
           // Illustrated rows keep their caveats on one line; concept cards list them.
           (element.art ? (
-            <p className="m-0 mt-0.5 text-[12.5px] leading-snug text-muted">
+            <p className="m-0 mt-1 text-[12.5px] leading-snug text-muted">
               {element.points.join(' · ')}
             </p>
           ) : (
@@ -107,7 +107,7 @@ function CheatsheetRow({ element, index }: { element: BriefingElement; index: nu
 
 function CheatsheetList({ elements }: { elements: readonly BriefingElement[] }) {
   return (
-    <ul className="m-0 flex list-none flex-col gap-2 p-0 pt-5">
+    <ul className={dividedListClassName + ' pt-2'}>
       {elements.map((element, index) => (
         <CheatsheetRow key={element.name} element={element} index={index} />
       ))}
@@ -161,7 +161,7 @@ export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
         if (event.target === event.currentTarget) dialogRef.current?.close()
       }}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-6 pt-6 pb-4 [&>button]:shrink-0">
+      <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-line px-5 pt-6 pb-4 max-[360px]:px-4 [&>button]:shrink-0">
         <h2 className="font-serif text-[30px] leading-tight" id="dialog-title">
           {game.howToPlay}
         </h2>
@@ -177,7 +177,7 @@ export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
       <div
         role="tablist"
         aria-label={game.howToPlay}
-        className="flex shrink-0 gap-1 border-b border-line px-4 pt-1.5 pb-1.5"
+        className="flex shrink-0 gap-1 border-b border-line px-5 pt-1.5 pb-1.5 max-[360px]:px-4"
       >
         {TABS.map(({ id, label, icon }) => (
           <button
@@ -200,7 +200,7 @@ export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
         ))}
       </div>
       <div
-        className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 max-[360px]:px-4"
+        className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 max-[360px]:px-4"
         role="tabpanel"
       >
         {elements ? <CheatsheetList elements={elements} /> : <ShortcutsPanel />}
