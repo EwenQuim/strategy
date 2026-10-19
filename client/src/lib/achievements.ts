@@ -1,4 +1,4 @@
-import { inHellfire, key, type GameState, type PawnKind, type Side } from './engine/index.ts'
+import { hazardDamage, key, type GameState, type PawnKind, type Side } from './engine/index.ts'
 
 export const ACHIEVEMENTS = [
   { id: 'cleanHands', logo: '🗡️' },
@@ -94,7 +94,7 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
     boomRegicide:
       !!regicide?.by.special &&
       (regicide.by.kind === 'bomber' || regicide.by.kind === 'magician'),
-    daredevil: inHellfire(state.hellfire, king),
+    daredevil: hazardDamage(state.hazards, king) > 0,
   }
   return ACHIEVEMENTS.map(({ id }) => id).filter((id) => rules[id])
 }

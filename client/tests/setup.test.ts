@@ -265,8 +265,8 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
   assert.equal(
     seedState(
       JSON.stringify(
-        states.map(({ hellfire, lastClashRound, blows, escapes, ...state }) => {
-          assert.deepEqual(hellfire, [])
+        states.map(({ hazards, lastClashRound, blows, escapes, ...state }) => {
+          assert.deepEqual(hazards, [])
           assert.equal(lastClashRound, 0)
           assert.deepEqual(blows, [])
           assert.deepEqual(escapes, [])
@@ -278,7 +278,7 @@ test('Seed-only battles have stable terrain, armies, initiative and random strea
       JSON.stringify(
         states.map(
           ({
-            hellfire: _hellfire,
+            hazards: _hazards,
             lastClashRound: _lastClashRound,
             blows: _blows,
             escapes: _escapes,

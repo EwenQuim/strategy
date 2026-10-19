@@ -65,7 +65,13 @@ test('Search position identities include collected runes and the random stream',
 
 test('Search distinguishes identical armies with different Hellfire warnings or initiative', () => {
   const state = battle()
-  assert.notEqual(positionKey(state), positionKey({ ...state, hellfire: [{ q: 0, r: 0 }] }))
+  assert.notEqual(
+    positionKey(state),
+    positionKey({
+      ...state,
+      hazards: [{ kind: 'hellfire', centers: [{ q: 0, r: 0 }] }],
+    }),
+  )
   assert.notEqual(
     positionKey(state),
     positionKey({ ...state, order: state.order.toReversed() }),

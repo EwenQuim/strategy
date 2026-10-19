@@ -211,7 +211,7 @@ function lakeBattle(side: Side): GameState {
   return {
     ...initialState('lake-battle'),
     biome: 'verdant',
-    hellfire: [],
+    hazards: [],
     tiles: new Map(
       Array.from({ length: 7 }, (_, q) => [
         key(q, 0),

@@ -47,8 +47,8 @@ const soldiers = (army: readonly Pawn[]) => army.filter((pawn) => pawn.kind !== 
 // Damage the king can absorb while keeping a margin is cheap; closer to death it is dear.
 const kingAi: PawnAi = {
   value: (_king, health) => KING_SCORE.king + health * KING_SCORE.health,
-  risk: (king, { incoming, health, hellfireDamage }) => {
-    const threat = incoming + hellfireDamage
+  risk: (king, { incoming, health, hazardDamage }) => {
+    const threat = incoming + hazardDamage
     const absorbed = Math.min(threat, Math.max(0, health - DANGER_MARGIN))
     return (
       absorbed * (king.hp >= HEALTHY_HP ? HEALTHY_DAMAGE : SAFE_DAMAGE) +

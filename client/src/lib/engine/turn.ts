@@ -1,5 +1,5 @@
 import { key } from './hex.ts'
-import { inHellfire, markHellfire } from './hellfire.ts'
+import { applyHazards, cloneHazards, scheduleHazards } from './hazards.ts'
 import type { Pawn, Side } from './pawns/index.ts'
 import type { BattleEffect, BattleFrame, GameState } from './engine.ts'
 
@@ -24,38 +24,25 @@ export function advanceTurn(
   state: GameState,
   record?: (frame: BattleFrame) => void,
 ): GameState {
-  let { pawns, hellfire, randomState } = state
+  let { pawns, hazards, randomState } = state
   let { order, round, blows } = state
   let active = state.active + 1
   while (true) {
     if (active >= order.length) {
-      if (hellfire.length) {
-        const impacts = pawns
-          .filter((pawn) => inHellfire(hellfire, pawn))
-          .map((pawn) => {
-            pawn.hp--
-            return { q: pawn.q, r: pawn.r, damage: 1 }
-          })
+      const effect = applyHazards(hazards, pawns)
+      if (effect) {
         const fallen = pawns
           .filter((pawn) => pawn.hp <= 0)
           .map(({ kind, side }) => ({ kind, side }))
         if (fallen.length) blows = [...blows, { fallen }]
         const burned = { ...state, pawns, blows }
-        record?.(
-          captureFrame(burned, {
-            kind: 'hellfire',
-            from: hellfire[0],
-            to: hellfire[0],
-            centers: hellfire,
-            impacts,
-          }),
-        )
+        record?.(captureFrame(burned, effect))
         pawns = pawns.filter((pawn) => pawn.hp > 0)
         clearFallenProtection(pawns)
         const winner = pawns.some((pawn) => pawn.kind === 'king')
           ? winnerFrom(pawns, 'player')
           : 'draw'
-        if (winner) return endBattle({ ...burned, pawns, hellfire: [] }, winner)
+        if (winner) return endBattle({ ...burned, pawns, hazards: [] }, winner)
       }
       round++
       order = order.filter((id) => pawns.some((p) => p.id === id))
@@ -64,7 +51,7 @@ export function advanceTurn(
         pawn.energy = pawn.maxEnergy
         pawn.specialUsed = false
       }
-      ;({ hellfire, randomState } = markHellfire({ ...state, pawns, round, randomState }))
+      ;({ hazards, randomState } = scheduleHazards({ ...state, pawns, round, randomState }))
       active = 0
     }
     const next = pawns.find((p) => p.id === order[active])
@@ -85,7 +72,7 @@ export function advanceTurn(
   return {
     ...state,
     pawns,
-    hellfire,
+    hazards,
     randomState,
     order,
     active,
@@ -109,7 +96,7 @@ export function captureFrame(
     state: {
       ...state,
       tiles: new Map([...state.tiles].map(([k, tile]) => [k, { ...tile }])),
-      hellfire: state.hellfire.map((center) => ({ ...center })),
+      hazards: cloneHazards(state.hazards),
       pawns: [...state.pawns, ...fallen].map((pawn) => pawn.clone()),
       order: [...state.order],
       winner: null,

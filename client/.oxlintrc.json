@@ -188,7 +188,7 @@
                   "!../ai.ts",
                   "!../combat.ts",
                   "!../hex.ts",
-                  "!../hellfire.ts",
+                  "!../hazards.ts",
                   "!../setup.ts",
                   "!../pawns/index.ts"
                 ]

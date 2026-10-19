@@ -9,7 +9,7 @@ import {
 import { sidePlan } from '../../lib/engine/ai/plan.ts'
 import { chooseOption, hpOf } from '../../lib/engine/ai/choice.ts'
 import { introductionTurns } from '../introductions.ts'
-import { inHellfire } from '../../lib/engine/hellfire.ts'
+import { hazardDamage } from '../../lib/engine/hazards.ts'
 import { positionKey, turnPlans, type TurnPlan } from '../../lib/engine/ai/turns.ts'
 import { turnOpening, type Bot } from '../bot.ts'
 import { readOptions, validOptions } from '../options.ts'
@@ -127,7 +127,7 @@ function viableTurns(state: GameState, pawnId: number, ranked: ScoredTurn[]): Sc
     return (
       actor.hp > 1 ||
       plan.state.round !== state.round ||
-      !inHellfire(plan.state.hellfire, actor)
+      hazardDamage(plan.state.hazards, actor) === 0
     )
   }
   const canSurvive = ranked.some(survives)

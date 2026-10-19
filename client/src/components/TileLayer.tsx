@@ -1,13 +1,15 @@
 import { specialTexts } from '../i18n/specialTexts'
 import type { Targeting, TileChoice } from '../lib/tileChoices'
 import {
+  hazardDamage,
+  hellfireCenters,
   key,
   walkingPaths,
   protectorFor,
-  inHellfire,
   pawnAt,
   sameHex,
   type Axial,
+  type Hazard,
   type Pawn,
   type Tile,
 } from '../lib/engine'
@@ -23,7 +25,7 @@ interface TileLayerProps {
   // Alternating class so consecutive effects restart the keyframes.
   quakeClass: string
   pawns: Pawn[]
-  hellfire: readonly Axial[]
+  hazards: readonly Hazard[]
   labels: PlayerNames
   active?: Pawn
   reach: Map<string, number>
@@ -46,7 +48,7 @@ export function TileLayer({
   quakeKeys,
   quakeClass,
   pawns,
-  hellfire,
+  hazards,
   labels,
   active,
   reach,
@@ -60,6 +62,7 @@ export function TileLayer({
   onInspect,
 }: TileLayerProps) {
   const allTiles = [...tiles.values()]
+  const fireCenters = hellfireCenters(hazards)
   const chargeTargeting = targeting === 'charge'
   const paths =
     active && (reach.size || chargeTargeting)
@@ -176,8 +179,8 @@ export function TileLayer({
             rechoosing={!!rechoose && sameHex(rechoose, tile)}
             inRange={range.has(tileKey)}
             quakeClass={quakeKeys?.has(tileKey) ? quakeClass : ''}
-            warned={inHellfire(hellfire, tile)}
-            impactCenter={hellfire.some((center) => sameHex(center, tile))}
+            warned={hazardDamage(hazards, tile) > 0}
+            impactCenter={fireCenters.some((center) => sameHex(center, tile))}
             labels={labels}
           />
         )

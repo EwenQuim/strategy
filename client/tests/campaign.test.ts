@@ -15,6 +15,7 @@ import { campaignBot } from '../src/bots/campaign.ts'
 import {
   initialState,
   activePawn,
+  hellfireCenters,
   mapFromRows,
   passable,
   key,
@@ -165,7 +166,9 @@ test('Original retains twenty encounters across five biomes and introduces Hellf
     ['verdant', 'mountains', 'desert', 'volcano', 'hell'].flatMap((b) => Array(4).fill(b)),
   )
   assert.deepEqual(
-    levels.slice(16).map((level) => initialState(level.seed, level.setup).hellfire.length),
+    levels
+      .slice(16)
+      .map((level) => hellfireCenters(initialState(level.seed, level.setup).hazards).length),
     [1, 2, 2, 2],
   )
   assert.ok(levels.slice(0, 2).every((level) => mapFromRows(level.setup.map).size <= 36))

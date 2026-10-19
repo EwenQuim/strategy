@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CAMPAIGNS } from '../../src/campaign.ts'
-import { initialState as coreState } from '../../src/lib/engine/index.ts'
+import { hellfireCenters, initialState as coreState } from '../../src/lib/engine/index.ts'
 
 const sparta = CAMPAIGNS.find((pack) => pack.slug === 'hot-gates')!
 const ragnarok = CAMPAIGNS.find((pack) => pack.slug === 'ragnarok')!
@@ -23,7 +23,7 @@ test('The Ragnarok finale burns on hellfire with two centers', () => {
   assert.equal(level.setup.biome, 'hell')
   assert.equal(level.setup.hellfireCount, 2)
   const state = coreState(level.seed, level.setup)
-  assert.equal(state.hellfire.length, 2)
+  assert.equal(hellfireCenters(state.hazards).length, 2)
   assert.ok(state.pawns.some((pawn) => pawn.kind === 'berserker'))
   assert.ok(state.pawns.some((pawn) => pawn.kind === 'wolf'))
 })

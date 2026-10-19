@@ -7,7 +7,8 @@ import {
   Ninja,
   Swordsman,
   activePawn,
-  inHellfire,
+  hazardDamage,
+  hellfireCenters,
   initialState,
   key,
   reducer,
@@ -34,7 +35,7 @@ const encounter = {
   ],
 } as const satisfies FixedBattleSetup
 
-function battle(pawns: Pawn[], hellfire: Axial[]): GameState {
+function battle(pawns: Pawn[], centers: Axial[]): GameState {
   const tiles: GameState['tiles'] = new Map()
   for (let q = -6; q <= 6; q++)
     for (let r = -3; r <= 3; r++) tiles.set(key(q, r), { q, r, terrain: 'basalt' })
@@ -42,7 +43,7 @@ function battle(pawns: Pawn[], hellfire: Axial[]): GameState {
     ...initialState('hellfire-test', encounter),
     tiles,
     pawns,
-    hellfire,
+    hazards: [{ kind: 'hellfire', centers }],
     order: pawns.map((pawn) => pawn.id),
     active: 0,
   }
@@ -68,7 +69,7 @@ test('Seeded warnings mark both armies, or alternate sides with one warning, and
     let state = opening
     for (const side of ['player', 'enemy', 'player'] as const) {
       assert.deepEqual(
-        state.hellfire.map(
+        hellfireCenters(state.hazards).map(
           (center) => state.pawns.find((p) => p.q === center.q && p.r === center.r)?.side,
         ),
         hellfireCount === 1 ? [side] : ['player', 'enemy'],
@@ -97,7 +98,7 @@ test('Warnings stay fixed through movement and resolve once when the last actor 
     const result = transition(next, action)
     assert.equal(result.state.round, 1)
     assert.ok(result.state.pawns.every((p) => p.hp === p.maxHp))
-    assert.deepEqual(result.state.hellfire, state.hellfire)
+    assert.deepEqual(result.state.hazards, state.hazards)
     assert.ok(!result.frames.some((frame) => frame.effect?.kind === 'hellfire'))
     next = result.state
   }
@@ -111,8 +112,8 @@ test('Warnings stay fixed through movement and resolve once when the last actor 
     result.frames.map((frame) => frame.effect?.kind),
     ['move', 'hellfire'],
   )
-  assert.deepEqual(result.frames[1].effect?.centers, state.hellfire)
-  assert.deepEqual(result.state.hellfire, [
+  assert.deepEqual(result.frames[1].effect?.centers, hellfireCenters(state.hazards))
+  assert.deepEqual(hellfireCenters(result.state.hazards), [
     { q: 2, r: 0 },
     { q: 4, r: 0 },
   ])
@@ -153,7 +154,7 @@ test('Overlap damages once through Protect, cleans up deaths, and preserves prio
   assert.equal(fire.state.pawns.find((p) => p.id === 2)?.hp, 0)
   const frames = structuredClone(result.frames)
   result.state.pawns[0].hp--
-  result.state.hellfire[0].q++
+  result.state.hazards[0].centers[0].q++
   assert.deepEqual(structuredClone(result.frames), frames)
   assert.deepEqual(structuredClone(state), original)
 })
@@ -224,9 +225,9 @@ test('Other biomes never acquire warnings or take round-end damage', () => {
   for (const biome of Object.keys(BIOMES) as (keyof typeof BIOMES)[]) {
     if (biome === 'hell') continue
     const state = initialState('no-hellfire', { ...encounter, biome })
-    assert.deepEqual(state.hellfire, [])
+    assert.deepEqual(state.hazards, [])
     const next = finishRound(state)
-    assert.deepEqual(next.hellfire, [])
+    assert.deepEqual(next.hazards, [])
     assert.ok(next.pawns.every((pawn) => pawn.hp === pawn.maxHp))
   }
 })
@@ -276,7 +277,7 @@ test('AI evades with a healthy soldier on easy and saves a doomed king on normal
       )
     const survivor = next.pawns.find((p) => p.id === actor.id)!
     assert.ok(survivor, difficulty)
-    assert.equal(inHellfire(state.hellfire, survivor), false, difficulty)
+    assert.equal(hazardDamage(state.hazards, survivor), 0, difficulty)
     assert.equal(survivor.hp, actor.hp)
     assert.equal(next.winner, king ? 'enemy' : null)
     assert.equal(next.round, king ? 1 : 2)

@@ -4,7 +4,7 @@ import type { Pawn } from './pawns/index.ts'
 type UnitThreat = {
   incoming: number
   health: number
-  hellfireDamage: number
+  hazardDamage: number
   value: number
   caution: number
 }

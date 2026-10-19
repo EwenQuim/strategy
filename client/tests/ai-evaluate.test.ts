@@ -22,7 +22,7 @@ function corridor(): GameState {
   ]
   state.order = [1, 2, 3, 4]
   state.active = 0
-  state.hellfire = []
+  state.hazards = []
   return state
 }
 

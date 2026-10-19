@@ -1,5 +1,5 @@
 import { activePawn, reducer, type GameState } from '../engine.ts'
-import { inHellfire } from '../hellfire.ts'
+import { hazardDamage } from '../hazards.ts'
 import { abilityDamage, routePath, walkingPaths, protectorFor } from '../combat.ts'
 import type { SidePlan } from './plan.ts'
 import { distFrom, hexDist, key, passable, sameHex, type Axial, type Tile } from '../hex.ts'
@@ -129,7 +129,7 @@ export function estimateIncomingDamage(
   )
   for (const foe of state.pawns.filter((p) => p.side !== side)) {
     const actsNextRound = order.indexOf(foe.id) < state.active
-    if (actsNextRound && foe.hp <= 1 && inHellfire(state.hellfire, foe)) continue
+    if (actsNextRound && foe.hp <= 1 && hazardDamage(state.hazards, foe) > 0) continue
     const attacker = foe.clone()
     attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
     if (actsNextRound) attacker.specialUsed = false
@@ -184,7 +184,7 @@ export function estimateIncomingDamage(
   return damageByTarget
 }
 
-const SCORE = { victory: 1_000_000, hellfireDamage: 24 }
+const SCORE = { victory: 1_000_000, hazardDamage: 24 }
 
 export function evaluatePosition(
   state: GameState,
@@ -207,20 +207,19 @@ export function evaluatePosition(
   let survivingActor = actor
   for (const pawn of settled.pawns) {
     const allied = pawn.side === actor.side
-    const hellfireDamage = Number(
-      (actedAt.get(pawn.id) ?? -1) < settled.active && inHellfire(settled.hellfire, pawn),
-    )
-    const health = pawn.hp - hellfireDamage
+    const hazard =
+      (actedAt.get(pawn.id) ?? -1) < settled.active ? hazardDamage(settled.hazards, pawn) : 0
+    const health = pawn.hp - hazard
     if (pawn.id === actor.id && health > 0) survivingActor = pawn
     const value = health <= 0 ? 0 : pawn.ai.value(pawn, health)
     score += allied ? value : -value
     if (!allied) continue
     const incoming = danger.get(pawn.id) ?? 0
-    score -= hellfireDamage * SCORE.hellfireDamage
+    score -= hazard * SCORE.hazardDamage
     score -= pawn.ai.risk(pawn, {
       incoming,
       health,
-      hellfireDamage,
+      hazardDamage: hazard,
       value,
       caution: plan.caution,
     })
