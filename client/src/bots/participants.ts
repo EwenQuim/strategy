@@ -16,8 +16,12 @@ export type Participant = {
   options: Record<string, unknown>
 }
 
-export function defaultParticipant(human: boolean): Participant {
-  return { human, name: DEFAULT_BOT_CONFIG.name, options: { ...DEFAULT_BOT_CONFIG.options } }
+export function defaultParticipant(controller: 'human' | 'bot'): Participant {
+  return {
+    human: controller === 'human',
+    name: DEFAULT_BOT_CONFIG.name,
+    options: { ...DEFAULT_BOT_CONFIG.options },
+  }
 }
 
 export function participantBot(participant: Participant): BotConfig | null {

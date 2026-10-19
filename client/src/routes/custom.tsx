@@ -38,8 +38,8 @@ const randomDefaultRoster = () =>
 export const Route = createFileRoute('/custom')({
   component: function CustomPlay() {
     const navigate = Route.useNavigate()
-    const [first, setFirst] = useState(() => defaultParticipant(true))
-    const [second, setSecond] = useState(() => defaultParticipant(false))
+    const [playerController, setPlayerController] = useState(() => defaultParticipant('human'))
+    const [enemyController, setEnemyController] = useState(() => defaultParticipant('bot'))
     const [biome, setBiome] = useState<Biome>('verdant')
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [developerPreview] = useState(readDeveloperPreview)
@@ -49,7 +49,10 @@ export const Route = createFileRoute('/custom')({
     const labels = m.localSides
     let sideBots
     try {
-      sideBots = { player: participantBot(first), enemy: participantBot(second) }
+      sideBots = {
+        player: participantBot(playerController),
+        enemy: participantBot(enemyController),
+      }
     } catch {
       sideBots = undefined
     }
@@ -64,7 +67,7 @@ export const Route = createFileRoute('/custom')({
             void navigate({
               to: '/game',
               search: {
-                mode: first.human && !second.human ? 'ai' : 'local',
+                mode: playerController.human && !enemyController.human ? 'ai' : 'local',
                 bot: sideBots.enemy ?? undefined,
                 sideBots,
                 setup: { biome, player, enemy: enemyRoster },
@@ -75,15 +78,15 @@ export const Route = createFileRoute('/custom')({
           <div className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain">
             <ParticipantPanel
               side={0}
-              participant={first}
-              onChange={setFirst}
+              participant={playerController}
+              onChange={setPlayerController}
               developerPreview={developerPreview}
               collapsed
             />
             <ParticipantPanel
               side={1}
-              participant={second}
-              onChange={setSecond}
+              participant={enemyController}
+              onChange={setEnemyController}
               developerPreview={developerPreview}
             />
             <section
