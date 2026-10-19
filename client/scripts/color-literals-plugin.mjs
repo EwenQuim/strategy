@@ -1,4 +1,4 @@
-const literalColor =
+export const literalColor =
   /#[\da-f]{8}\b|#[\da-f]{6}\b|#[\da-f]{4}\b|#[\da-f]{3}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/gi
 
 export default {
@@ -8,7 +8,7 @@ export default {
       meta: {
         type: 'suggestion',
         schema: [],
-        messages: { literal: 'Color literal {{color}} should be owned by a theme token.' },
+        messages: { literal: '{{color}}' },
       },
       create(context) {
         function check(node, value) {

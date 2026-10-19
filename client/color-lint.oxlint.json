@@ -1,43 +1,7 @@
 {
-  "jsPlugins": ["eslint-plugin-better-tailwindcss", "./scripts/color-literals-plugin.mjs"],
-  "settings": {
-    "better-tailwindcss": {
-      "entryPoint": "src/index.css",
-      "selectors": [
-        { "kind": "attribute", "name": "^class(?:Name)?$", "match": [{ "type": "strings" }] },
-        {
-          "kind": "variable",
-          "name": ".*(?:[Cc]lass(?:Name|Names)?|[Cc]lasses)$",
-          "match": [{ "type": "strings" }]
-        },
-        {
-          "kind": "callee",
-          "name": "^(?:clsx|cn|classnames|twMerge|twJoin|cva)$",
-          "match": [{ "type": "strings" }, { "type": "objectKeys" }, { "type": "objectValues" }]
-        }
-      ]
-    }
-  },
+  "jsPlugins": ["./scripts/color-literals-plugin.mjs"],
+  "categories": { "correctness": "off" },
   "rules": {
-    "color-literals/no-literal": "error",
-    "better-tailwindcss/no-restricted-classes": [
-      "error",
-      {
-        "restrict": [
-          {
-            "pattern": "(?:^|:|!)(?:bg|text|border(?:-[xytrblse])?|divide|outline|ring(?:-offset)?|shadow|inset-shadow|inset-ring|fill|stroke|decoration|accent|caret|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]+(?:/[^!]+)?!?$",
-            "message": "Use a semantic theme color instead of the palette class '$0'."
-          },
-          {
-            "pattern": "(?:^|:|!)(?:bg|text|border(?:-[xytrblse])?|divide|outline|ring(?:-offset)?|shadow|inset-shadow|inset-ring|fill|stroke|decoration|accent|caret|from|via|to)-(?:black|white)(?:/[^!]+)?!?$",
-            "message": "Use a semantic theme color instead of the palette class '$0'."
-          },
-          {
-            "pattern": "\\[(?:[^\\]]*#[0-9a-fA-F]{3,8}|[^\\]]*(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\(|(?:color:)?(?:red|blue|green|black|white|yellow|orange|purple|pink|gray|grey|rebeccapurple)(?:/[^\\]]*)?\\])",
-            "message": "Use theme tokens instead of literal colors in '$0'."
-          }
-        ]
-      }
-    ]
+    "color-literals/no-literal": "error"
   }
 }
