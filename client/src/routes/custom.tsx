@@ -180,7 +180,7 @@ export const Route = createFileRoute('/custom')({
                           else setEnemy(next)
                         }
                         const stepperButtonClassName =
-                          'flex h-11 w-8 shrink-0 items-center justify-center text-lg leading-none text-muted hover:bg-surface-raised hover:text-ink active:bg-surface-raised disabled:opacity-50'
+                          'flex h-11 w-8 shrink-0 items-center justify-center text-lg leading-none text-muted hover:bg-surface-raised hover:text-ink active:bg-surface-strong disabled:opacity-50'
                         return (
                           <td className="w-[30%] text-center" key={side}>
                             <div className="flex w-full items-center overflow-hidden rounded-xl border border-line bg-input">

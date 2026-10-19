@@ -13,7 +13,7 @@ import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
 
 const headerButtonClassName =
-  'grid size-9 place-items-center rounded-xl border border-line bg-surface text-muted hover:bg-icon-hover hover:text-ink [&>svg]:size-[19px]'
+  'grid size-9 place-items-center rounded-xl border border-line bg-surface text-muted hover:bg-surface-soft hover:text-ink [&>svg]:size-[19px]'
 
 interface GameHeaderProps {
   biome: Biome

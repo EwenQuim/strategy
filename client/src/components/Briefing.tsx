@@ -45,7 +45,7 @@ function BriefingPopup({
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_15%,color-mix(in_srgb,var(--briefing-accent)_28%,transparent),transparent_60%),linear-gradient(160deg,var(--icon-hover),transparent_40%,#0006)]"
+        className="pointer-events-none absolute inset-0 -z-1 overflow-hidden bg-[radial-gradient(ellipse_at_50%_15%,color-mix(in_srgb,var(--briefing-accent)_28%,transparent),transparent_60%),linear-gradient(160deg,var(--surface-soft),transparent_40%,#0006)]"
       >
         <svg className="absolute inset-x-0 top-0 h-[360px] w-full text-gold/10 mask-[linear-gradient(#000,transparent)]">
           <defs>

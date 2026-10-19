@@ -86,7 +86,7 @@ export function GameResult({
         }
         data-testid="result-card"
       >
-        <div className="mx-auto mb-3 grid size-11 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-hp [&>svg]:size-[24px] [@media(max-height:650px)]:hidden">
+        <div className="mx-auto mb-3 grid size-11 place-items-center rounded-full border border-gold/25 text-gold group-data-[outcome=defeat]/result:rotate-[-18deg] group-data-[outcome=defeat]/result:text-enemy [&>svg]:size-[24px] [@media(max-height:650px)]:hidden">
           <Icon name="crown" />
         </div>
         <span className="text-xs font-semibold text-muted tracking-[0.17em] uppercase">

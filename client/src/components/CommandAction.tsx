@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 import { Icon, type IconName } from './Icon'
 
 const actionPanelClassName =
-  'grid min-h-16 select-none [-webkit-touch-callout:none] aria-disabled:cursor-help aria-disabled:not-aria-pressed:opacity-38 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left hover:enabled:not-aria-disabled:border-[#bcc8a670] hover:enabled:not-aria-disabled:bg-control-hover max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
+  'grid min-h-16 select-none [-webkit-touch-callout:none] aria-disabled:cursor-help aria-disabled:not-aria-pressed:opacity-38 grid-cols-[auto_1fr] items-center gap-x-2.5 rounded-[9px] border px-4 py-3 text-left hover:enabled:not-aria-disabled:border-[#bcc8a670] hover:enabled:not-aria-disabled:bg-surface max-[601px]:min-h-[76px] max-[601px]:grid-cols-1 max-[601px]:justify-items-center max-[601px]:gap-y-[3px] max-[601px]:rounded-lg max-[601px]:px-0.5 max-[601px]:pt-[9px] max-[601px]:pb-2 max-[601px]:text-center [@media(max-height:650px)]:min-h-[65px] [@media(max-height:650px)]:py-1.5 [@media(min-width:600px)_and_(max-height:480px)]:min-h-12 [@media(min-width:600px)_and_(max-height:480px)]:px-3 [@media(min-width:600px)_and_(max-height:480px)]:py-1.5'
 
 interface CommandActionContentProps {
   icon: IconName
@@ -32,7 +32,7 @@ export function CommandButton({
   return (
     <button
       {...props}
-      className={`${actionPanelClassName} border-[#bcc8a62e] bg-control ${variantClassName} ${className}`}
+      className={`${actionPanelClassName} border-[#bcc8a62e] bg-surface-faint ${variantClassName} ${className}`}
     >
       <CommandActionContent icon={icon} label={label} note={note} />
     </button>

@@ -50,7 +50,7 @@ export function PawnChip({
           <path
             d="m0-23 20 11v24L0 23-20 12v-24Z"
             fill="url(#enemy-chip)"
-            stroke={active ? 'var(--active-gold)' : 'var(--hp)'}
+            stroke={active ? 'var(--active-gold)' : 'var(--enemy)'}
             strokeWidth={active ? 2.5 : 1.5}
           />
         ) : (

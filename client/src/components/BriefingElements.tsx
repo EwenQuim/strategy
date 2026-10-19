@@ -95,7 +95,7 @@ function StatChip({
   color: string
 }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-line bg-icon-hover px-1.5 py-0.5 text-[12px] font-semibold leading-none text-ink">
+    <span className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-soft px-1.5 py-0.5 text-[12px] font-semibold leading-none text-ink">
       <Icon name={icon} className={'size-[11px] ' + color} />
       {value}
     </span>
@@ -108,7 +108,7 @@ function ElementCard({ element, index }: { element: BriefingElement; index: numb
 
   return (
     <li
-      className="briefing-card motion-reduce:animate-none flex items-start gap-3.5 rounded-xl border border-line bg-control px-3.5 py-3.5"
+      className="briefing-card motion-reduce:animate-none flex items-start gap-3.5 rounded-xl border border-line bg-surface-faint px-3.5 py-3.5"
       style={{ animationDelay: delay }}
     >
       {hasArt && <ElementArt art={element.art} index={index} />}
@@ -128,7 +128,7 @@ function ElementCard({ element, index }: { element: BriefingElement; index: numb
         {element.special && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-snug">
             <span className="font-semibold text-gold">{element.special.name}</span>
-            <span className="inline-flex items-center gap-0.5 rounded bg-control-hover px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
+            <span className="inline-flex items-center gap-0.5 rounded bg-surface px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
               <Icon name="energy" className="size-2.5" />
               {element.special.cost}
             </span>

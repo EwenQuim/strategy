@@ -2,7 +2,7 @@ export const buttonClassName =
   'inline-flex items-center rounded-md border py-3.5 text-[13px] font-semibold shadow-control hover:shadow-control-hover [&>svg]:size-[19px]'
 
 export const iconButtonClassName =
-  'grid h-11 w-10 place-items-center rounded-[10px] border border-transparent bg-transparent text-muted hover:border-line hover:bg-icon-hover hover:text-ink [&>svg]:size-[19px]'
+  'grid h-11 w-10 place-items-center rounded-[10px] border border-transparent bg-transparent text-muted hover:border-line hover:bg-surface-soft hover:text-ink [&>svg]:size-[19px]'
 
 export const primaryButtonClassName =
   buttonClassName +
