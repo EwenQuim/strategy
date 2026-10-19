@@ -1,5 +1,5 @@
 import { useState, type RefObject } from 'react'
-import type { Biome } from '../lib/engine'
+import type { Biome, PawnKind } from '../lib/engine'
 import { INTRODUCTIONS, type BriefingElement } from '../briefings'
 import * as common from '../i18n/common'
 import * as game from '../i18n/game'
@@ -18,23 +18,23 @@ const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
 
 // The king entry holds the three core rules first, then the king unit card.
 const BASICS = INTRODUCTIONS.king.slice(0, 3)
-const UNITS = [
-  INTRODUCTIONS.king[3],
-  ...(
-    [
-      'swordsman',
-      'archer',
-      'magician',
-      'bulwark',
-      'bomber',
-      'ninja',
-      'hoplite',
-      'wolf',
-      'berserker',
-      'lancer',
-    ] as const
-  ).map((kind) => INTRODUCTIONS[kind][0]),
-]
+const UNIT_KINDS = [
+  'king',
+  'swordsman',
+  'archer',
+  'magician',
+  'bulwark',
+  'bomber',
+  'ninja',
+  'hoplite',
+  'wolf',
+  'berserker',
+  'lancer',
+] as const
+
+// The king entry holds the three core rules first, then the king unit card.
+const unitElement = (kind: (typeof UNIT_KINDS)[number]) =>
+  INTRODUCTIONS[kind][kind === 'king' ? 3 : 0]
 const TERRAIN = (
   ['lake', 'mountain', 'sand', 'lava', 'watchtower', 'spring', 'rune'] as const
 ).map((kind) => INTRODUCTIONS[kind][0])
@@ -53,10 +53,24 @@ const rowClassName =
 
 // One row layout for every briefing element: art or icon, name, then only the
 // fields the element actually has (stats, special, points).
-function CheatsheetRow({ element, index }: { element: BriefingElement; index: number }) {
+function CheatsheetRow({
+  element,
+  index,
+  muted = false,
+}: {
+  element: BriefingElement
+  index: number
+  muted?: boolean
+}) {
   const detailed = element.stats !== undefined || element.special !== undefined
   return (
-    <li className={rowClassName + (element.art && !detailed ? ' items-center' : '')}>
+    <li
+      className={
+        rowClassName +
+        (muted ? ' opacity-50' : '') +
+        (element.art && !detailed ? ' items-center' : '')
+      }
+    >
       {element.art ? (
         <ElementArt art={element.art} index={index} small />
       ) : (
@@ -105,11 +119,22 @@ function CheatsheetRow({ element, index }: { element: BriefingElement; index: nu
   )
 }
 
-function CheatsheetList({ elements }: { elements: readonly BriefingElement[] }) {
+function CheatsheetList({
+  elements,
+  mutedNames,
+}: {
+  elements: readonly BriefingElement[]
+  mutedNames?: ReadonlySet<string>
+}) {
   return (
     <ul className={dividedListClassName + ' pt-2'}>
       {elements.map((element, index) => (
-        <CheatsheetRow key={element.name} element={element} index={index} />
+        <CheatsheetRow
+          key={element.name}
+          element={element}
+          index={index}
+          muted={mutedNames?.has(element.name)}
+        />
       ))}
     </ul>
   )
@@ -138,16 +163,21 @@ function ShortcutsPanel() {
 interface GameHelpDialogProps {
   dialogRef: RefObject<HTMLDialogElement | null>
   biome: Biome
+  presentKinds: ReadonlySet<PawnKind>
 }
 
-export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
+export function GameHelpDialog({ dialogRef, biome, presentKinds }: GameHelpDialogProps) {
   // Units are the reference players come back to; basics are covered by the tutorial.
   const [tab, setTab] = useState<Tab>('units')
+  // Units in the battle come first; the rest of the roster stays as a gray reference.
+  const present = UNIT_KINDS.filter((kind) => presentKinds.has(kind))
+  const absent = UNIT_KINDS.filter((kind) => !presentKinds.has(kind))
+  const absentNames = new Set(absent.map((kind) => unitElement(kind).name))
   const elements =
     tab === 'basics'
       ? BASICS
       : tab === 'units'
-        ? UNITS
+        ? [...present, ...absent].map(unitElement)
         : tab === 'terrain'
           ? [...TERRAIN, ...(biome === 'hell' ? INTRODUCTIONS.hell : [])]
           : undefined
@@ -203,7 +233,14 @@ export function GameHelpDialog({ dialogRef, biome }: GameHelpDialogProps) {
         className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 max-[360px]:px-4"
         role="tabpanel"
       >
-        {elements ? <CheatsheetList elements={elements} /> : <ShortcutsPanel />}
+        {elements ? (
+          <CheatsheetList
+            elements={elements}
+            mutedNames={tab === 'units' ? absentNames : undefined}
+          />
+        ) : (
+          <ShortcutsPanel />
+        )}
       </div>
     </dialog>
   )
