@@ -72,6 +72,8 @@ export type SpecialTextKey =
   | 'noOpenLine'
   | 'harpoon'
   | 'harpoonDescription'
+  | 'jab'
+  | 'jabDescription'
 
 export interface SpecialAbility {
   readonly name: SpecialTextKey

@@ -60,6 +60,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   berserker: [unit('berserker')],
   lancer: [unit('lancer')],
   harpooner: [unit('harpooner')],
+  reachfighter: [unit('reachfighter')],
   lake: [
     {
       name: b.lakes,

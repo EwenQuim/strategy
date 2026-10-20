@@ -2,6 +2,13 @@ import { t } from './locale.ts'
 import type { PawnKind } from '../lib/engine/index.ts'
 
 export const unitNames: Record<PawnKind, string> = {
+  reachfighter: t({
+    en: 'Reach fighter',
+    fr: 'Combattant à portée',
+    de: 'Reichweitenkämpfer',
+    es: 'Luchador de alcance',
+    it: 'Combattente a distanza',
+  }),
   harpooner: t({
     en: 'Harpooner',
     fr: 'Harponneur',
