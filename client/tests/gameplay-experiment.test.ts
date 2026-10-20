@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { King, Swordsman, Lancer, Bomber, Bulwark, reducer } from '../src/lib/engine/index.ts'
+import {
+  King,
+  Swordsman,
+  Lancer,
+  Bomber,
+  Bulwark,
+  Magician,
+  initialState,
+  reducer,
+} from '../src/lib/engine/index.ts'
 import { Wolf } from '../src/lib/engine/pawns/wolf.ts'
 import { field } from './field.ts'
 import {
@@ -18,6 +27,38 @@ const passive: Bot = {
   options: {},
   chooseActions: async () => [{ type: 'endTurn' }],
 }
+
+test('Directional attacks count as opening opportunities without an adjacent enemy target tile', async () => {
+  const state = field([
+    new Magician(1, 0, 0, 'player'),
+    new King(2, -3, -2, 'player'),
+    new King(3, 3, 0, 'enemy'),
+  ])
+  const match = await playExperiment(metadata, saveStart(state), passive, passive, 1)
+  assert.equal(match.units[0]!.attackOpportunities, 1)
+  assert.equal(match.units[0]!.declinedAttacks, 1)
+})
+
+test('Restoring an authored start preserves warning count and initiative configuration', () => {
+  const setup = {
+    biome: 'hell',
+    hellfireCount: 1,
+    map: ['......', '......', '......', '......', '......', '......'],
+    player: [
+      { kind: 'king', col: 0, row: 5 },
+      { kind: 'swordsman', col: 1, row: 5 },
+    ],
+    enemy: [
+      { kind: 'king', col: 5, row: 0 },
+      { kind: 'swordsman', col: 4, row: 0 },
+    ],
+    firstEnemyKinds: ['swordsman'],
+  } as const
+  const state = initialState('warnings', setup)
+  const restored = restoreStart(saveStart(state))
+  assert.deepEqual(restored.setup, state.setup)
+  assert.deepEqual(restored.order, state.order)
+})
 const metadata = {
   id: 'test',
   seed: 'test',
