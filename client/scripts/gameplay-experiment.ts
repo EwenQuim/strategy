@@ -262,8 +262,12 @@ export async function playExperiment(
         if (
           effect.kind !== 'hellfire' &&
           effect.impacts?.some((hit) => {
-            const target = frame.state.pawns.find((p) => sameHex(p, hit))
-            return hit.damage > 0 && target?.side !== actor.side
+            const target =
+              frame.state.pawns.find((p) => sameHex(p, hit)) ??
+              frame.state.pawns.find(
+                (p) => p.id === before.pawns.find((old) => sameHex(old, hit))?.id,
+              )
+            return hit.damage > 0 && !!target && target.side !== actor.side
           })
         )
           unit.attacks++
