@@ -5,6 +5,8 @@ import { getBot, type BotConfig } from '../src/bots/catalog.ts'
 import type { Bot } from '../src/bots/bot.ts'
 import { BOT_LEVELS } from '../src/lib/engine/ai.ts'
 import { HANNIBAL_LEVELS } from '../src/bots/strategies/hannibal.ts'
+import { NAPOLEON_LEVELS } from '../src/bots/strategies/napoleon.ts'
+import { CAESAR_LEVELS } from '../src/bots/strategies/caesar.ts'
 import {
   activePawn,
   initialState,
@@ -19,7 +21,6 @@ import {
 } from '../src/lib/engine/index.ts'
 import { hexDist, sameHex } from '../src/lib/engine/hex.ts'
 import { VALUE_MODELS } from '../src/bots/valueModel.ts'
-import { TurtleBot } from './turtle-bot.ts'
 import {
   matchMetrics,
   nearestEnemyDistance,
@@ -29,15 +30,17 @@ import {
 
 export type ExperimentConfig = {
   seeds: string[]
+  confirmationSeeds: string[]
   biomes: Biome[]
   rosters: { name: string; units: PawnKind[] }[]
-  bots: { name: string; config: BotConfig | 'turtle' }[]
+  bots: { name: string; config: BotConfig }[]
   maxRounds: number
   setups?: { name: string; setup: FixedBattleSetup }[]
 }
 
 export const DEFAULT_EXPERIMENT: ExperimentConfig = {
   seeds: Array.from({ length: 8 }, (_, i) => `gameplay-${i}`),
+  confirmationSeeds: Array.from({ length: 16 }, (_, i) => `confirmation-${i}`),
   biomes: ['verdant', 'desert', 'mountains', 'volcano', 'hell'],
   rosters: [
     { name: 'mobile', units: ['king', 'swordsman', 'archer', 'ninja', 'lancer'] },
@@ -49,15 +52,29 @@ export const DEFAULT_EXPERIMENT: ExperimentConfig = {
       name: 'napoleon',
       config: {
         name: 'napoleon',
-        options: { candidates: 3, replies: 1, aggression: 1.2, caution: 0.35 },
+        options: NAPOLEON_LEVELS.hard,
       },
     },
-    { name: 'depthsearch', config: { name: 'depthsearch', options: BOT_LEVELS.normal } },
-    { name: 'hannibal', config: { name: 'hannibal', options: HANNIBAL_LEVELS.easy } },
-    { name: 'random', config: { name: 'random', options: {} } },
-    { name: 'turtle', config: 'turtle' },
+    { name: 'depthsearch', config: { name: 'depthsearch', options: BOT_LEVELS.hard } },
+    { name: 'hannibal', config: { name: 'hannibal', options: HANNIBAL_LEVELS.hard } },
+    { name: 'caesar', config: { name: 'caesar', options: CAESAR_LEVELS.hard } },
   ],
   maxRounds: 30,
+}
+
+export function phaseSeeds(
+  config: ExperimentConfig,
+  phase: 'exploration' | 'confirmation',
+): string[] {
+  if (
+    !config.seeds.length ||
+    !config.confirmationSeeds?.length ||
+    new Set(config.seeds).size !== config.seeds.length ||
+    new Set(config.confirmationSeeds).size !== config.confirmationSeeds.length ||
+    config.seeds.some((seed) => config.confirmationSeeds.includes(seed))
+  )
+    throw new Error('Exploration and confirmation seeds must be nonempty, unique and disjoint')
+  return phase === 'confirmation' ? config.confirmationSeeds : config.seeds
 }
 
 export type StartPosition = {
@@ -170,7 +187,6 @@ export type ExperimentMatch = {
   roster: string
   playerBot: string
   enemyBot: string
-  probe: boolean
   start: StartPosition
   telemetry: RoundTelemetry[]
   units: UnitTelemetry[]
@@ -183,7 +199,7 @@ export type ExperimentMatch = {
 }
 
 export function makeBot(entry: ExperimentConfig['bots'][number]): Bot {
-  return entry.config === 'turtle' ? new TurtleBot() : getBot(entry.config)
+  return getBot(entry.config)
 }
 
 export async function playExperiment(

@@ -5,6 +5,7 @@ const mean = (values: number[]) =>
   values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null
 
 function describe(matches: ExperimentMatch[]) {
+  const { turtleRecord: _legacyProbe, ...population } = summarize(matches.map((m) => m.metrics))
   const units = new Map<string, ExperimentMatch['units']>()
   for (const match of matches)
     for (const unit of match.units) {
@@ -13,7 +14,7 @@ function describe(matches: ExperimentMatch[]) {
       units.set(unit.kind, entries)
     }
   return {
-    ...summarize(matches.map((m) => m.metrics)),
+    ...population,
     noContactRate: mean(matches.map((m) => Number(m.metrics.firstContactRound === null))),
     unfinishedRate: mean(matches.map((m) => Number(m.metrics.winner === null))),
     meanStalledRounds: mean(matches.map((m) => m.stalledRounds)),
@@ -63,15 +64,11 @@ function group(matches: ExperimentMatch[], key: (match: ExperimentMatch) => stri
 
 export function experimentReport(matches: ExperimentMatch[]) {
   return {
-    ordinary: describe(matches.filter((m) => !m.probe)),
-    probes: describe(matches.filter((m) => m.probe)),
+    population: describe(matches),
     byBiome: group(matches, (m) => m.biome),
     byRoster: group(matches, (m) => m.roster),
     byMatchup: group(matches, (m) => `${m.playerBot}/${m.enemyBot}`),
-    byContext: group(
-      matches,
-      (m) => `${m.biome}/${m.roster}/${m.probe ? 'probe' : 'ordinary'}`,
-    ),
+    byContext: group(matches, (m) => `${m.biome}/${m.roster}`),
   }
 }
 
@@ -149,21 +146,11 @@ export function pairedComparison(
   return {
     method:
       'Paired mean deltas; approximate normal 95% intervals clustered by seed. Few seeds are exploratory, not a significance claim. No multiplicity correction.',
-    ordinary: summarizePairs(pairs.filter((p) => !p.now.probe)),
-    probes: summarizePairs(pairs.filter((p) => p.now.probe)),
+    population: summarizePairs(pairs),
     byContext: Object.fromEntries(
-      [
-        ...new Set(
-          current.map((m) => `${m.biome}/${m.roster}/${m.probe ? 'probe' : 'ordinary'}`),
-        ),
-      ].map((label) => [
+      [...new Set(current.map((m) => `${m.biome}/${m.roster}`))].map((label) => [
         label,
-        summarizePairs(
-          pairs.filter(
-            (p) =>
-              `${p.now.biome}/${p.now.roster}/${p.now.probe ? 'probe' : 'ordinary'}` === label,
-          ),
-        ),
+        summarizePairs(pairs.filter((p) => `${p.now.biome}/${p.now.roster}` === label)),
       ]),
     ),
     byMatchup: Object.fromEntries(

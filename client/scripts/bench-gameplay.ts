@@ -7,17 +7,16 @@ import {
   makeBot,
   playExperiment,
   provenance,
+  phaseSeeds,
   type ExperimentConfig,
   type ExperimentMatch,
   type Substitution,
 } from './gameplay-experiment.ts'
 import { experimentReport, pairedComparison } from './gameplay-report.ts'
+import { gameplayHtml } from './gameplay-html.ts'
 
 type Task = {
-  metadata: Pick<
-    ExperimentMatch,
-    'id' | 'seed' | 'biome' | 'roster' | 'playerBot' | 'enemyBot' | 'probe'
-  >
+  metadata: Pick<ExperimentMatch, 'id' | 'seed' | 'biome' | 'roster' | 'playerBot' | 'enemyBot'>
   start: ExperimentMatch['start']
   player: ExperimentConfig['bots'][number]
   enemy: ExperimentConfig['bots'][number]
@@ -25,6 +24,7 @@ type Task = {
 type Work = { tasks: Task[]; maxRounds: number; substitution?: Substitution }
 type Run = {
   version: number
+  phase: 'exploration' | 'confirmation'
   config: ExperimentConfig
   provenance: ReturnType<typeof provenance>
   substitution?: Substitution
@@ -60,10 +60,15 @@ if (!isMainThread) {
   const config: ExperimentConfig = flag('config')
     ? JSON.parse(readFileSync(flag('config')!, 'utf8'))
     : structuredClone(baseline?.config ?? DEFAULT_EXPERIMENT)
+  const phase = flag('phase') ?? baseline?.phase ?? 'exploration'
+  if (phase !== 'exploration' && phase !== 'confirmation')
+    throw new Error('Use --phase=exploration|confirmation')
+  const seedField = phase === 'confirmation' ? 'confirmationSeeds' : 'seeds'
   const positional = args.filter((a) => !a.startsWith('--'))
-  if (positional.length) config.seeds = positional
+  if (positional.length) config[seedField] = positional
   if (flag('seeds'))
-    config.seeds = Array.from({ length: Number(flag('seeds')) }, (_, i) => `gameplay-${i}`)
+    config[seedField] = Array.from({ length: Number(flag('seeds')) }, (_, i) => `${phase}-${i}`)
+  const seeds = phaseSeeds(config, phase)
   if (flag('biomes')) config.biomes = flag('biomes')!.split(',') as ExperimentConfig['biomes']
   if (flag('bots'))
     config.bots = config.bots.filter((b) => flag('bots')!.split(',').includes(b.name))
@@ -108,7 +113,8 @@ if (!isMainThread) {
   const source = provenance()
   if (
     baseline &&
-    (baseline.version !== 2 ||
+    (baseline.version !== 3 ||
+      baseline.phase !== phase ||
       JSON.stringify(config) !== JSON.stringify(baseline.config) ||
       source.botSource !== baseline.provenance.botSource)
   )
@@ -126,7 +132,6 @@ if (!isMainThread) {
           roster: match.roster,
           playerBot: match.playerBot,
           enemyBot: match.enemyBot,
-          probe: match.probe,
         },
         start: match.start,
         player,
@@ -134,10 +139,9 @@ if (!isMainThread) {
       })
     }
   } else
-    for (const position of experimentStarts(config))
+    for (const position of experimentStarts({ ...config, seeds }))
       for (const player of config.bots)
         for (const enemy of config.bots) {
-          if (player.config === 'turtle' && enemy.config === 'turtle') continue
           tasks.push({
             metadata: {
               id: `${position.seed}/${position.biome}/${position.roster}/${player.name}/${enemy.name}`,
@@ -146,7 +150,6 @@ if (!isMainThread) {
               roster: position.roster,
               playerBot: player.name,
               enemyBot: enemy.name,
-              probe: player.config === 'turtle' || enemy.config === 'turtle',
             },
             start: position.start,
             player,
@@ -184,7 +187,8 @@ if (!isMainThread) {
           .flat()
           .sort((a, b) => a.id.localeCompare(b.id))
   const output = {
-    version: 2,
+    version: 3,
+    phase,
     config,
     provenance: source,
     substitution,
@@ -195,16 +199,18 @@ if (!isMainThread) {
     matches,
   }
   if (flag('output')) writeFileSync(flag('output')!, JSON.stringify(output, null, 2) + '\n')
+  const htmlPath =
+    flag('html') ??
+    (flag('output') ? flag('output')!.replace(/\.json$/, '') + '.html' : undefined)
+  if (htmlPath) writeFileSync(htmlPath, gameplayHtml(output))
   if (args.includes('--json')) console.log(JSON.stringify(output, null, 2))
   else
     console.log(
       JSON.stringify(
         {
-          ordinary: output.report.ordinary,
-          probes: output.report.probes,
-          comparison: output.comparison
-            ? { ordinary: output.comparison.ordinary, probes: output.comparison.probes }
-            : undefined,
+          phase,
+          population: output.report.population,
+          comparison: output.comparison ? output.comparison.population : undefined,
         },
         null,
         2,

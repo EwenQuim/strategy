@@ -17,6 +17,8 @@ import {
   restoreStart,
   playExperiment,
   type ExperimentMatch,
+  DEFAULT_EXPERIMENT,
+  phaseSeeds,
 } from '../scripts/gameplay-experiment.ts'
 import { pairedComparison } from '../scripts/gameplay-report.ts'
 import { matchMetrics, roundTelemetry } from '../scripts/gameplay-metrics.ts'
@@ -27,6 +29,18 @@ const passive: Bot = {
   options: {},
   chooseActions: async () => [{ type: 'endTurn' }],
 }
+
+test('Exploration and confirmation use separate seeds and reject reused or duplicate seeds', () => {
+  const config = structuredClone(DEFAULT_EXPERIMENT)
+  assert.deepEqual(phaseSeeds(config, 'exploration'), config.seeds)
+  assert.deepEqual(phaseSeeds(config, 'confirmation'), config.confirmationSeeds)
+  assert.throws(() =>
+    phaseSeeds({ ...config, confirmationSeeds: [config.seeds[0]!] }, 'confirmation'),
+  )
+  assert.throws(() =>
+    phaseSeeds({ ...config, seeds: [config.seeds[0]!, config.seeds[0]!] }, 'exploration'),
+  )
+})
 
 test('Directional attacks count as opening opportunities without an adjacent enemy target tile', async () => {
   const state = field([
@@ -66,7 +80,6 @@ const metadata = {
   roster: 'test',
   playerBot: 'scripted',
   enemyBot: 'passive',
-  probe: false,
 }
 
 test('Substitution preserves the exact board, initiative and random stream without mutating the saved start', () => {
@@ -176,8 +189,8 @@ test('Paired comparison rejects different starts and reports seed-level deltas',
   const control = await playExperiment(metadata, saveStart(state), passive, passive, 1)
   const candidate: ExperimentMatch = { ...control, hostileDamage: 2 }
   const comparison = pairedComparison([control], [candidate])
-  assert.equal(comparison.ordinary.hostileDamage!.delta, 2)
-  assert.equal(comparison.ordinary.hostileDamage!.approximate95, null)
+  assert.equal(comparison.population.hostileDamage!.delta, 2)
+  assert.equal(comparison.population.hostileDamage!.approximate95, null)
   assert.throws(() =>
     pairedComparison(
       [control],
