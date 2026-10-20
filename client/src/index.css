@@ -145,11 +145,8 @@
   .tour-card {
     animation: tour-card-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .tour-card--above {
-    animation-name: tour-card-enter-above;
-  }
   .tour-ring {
-    animation: tour-ring-pulse 1.6s ease-in-out infinite;
+    animation: tour-ring-pulse 1.6s ease-in-out 2;
   }
   .battlefield-shake {
     animation: battlefield-shake 260ms ease-out;
@@ -548,18 +545,6 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-/* The above-the-spotlight card keeps its resting translateY(-100%). */
-@keyframes tour-card-enter-above {
-  from {
-    opacity: 0;
-    transform: translateY(-100%) translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(-100%);
   }
 }
 

@@ -58,7 +58,7 @@ export const enemyKingBody = t({
 })
 export const moveBody = t({
   en: 'Tap Move, then a lit tile. Each step costs energy.',
-  fr: 'Touchez Déplacer, puis une case éclairée. Chaque pas coûte de l’énergie.',
+  fr: 'Chaque pas coûte de l’énergie. Vous avez 3 énergies à chaque début de tour.',
   de: 'Tippe auf Bewegen, dann auf eine leuchtende Kachel. Jeder Schritt kostet Energie.',
   es: 'Toca Mover y luego una casilla iluminada. Cada paso cuesta energía.',
   it: 'Tocca Muovi, poi una casella illuminata. Ogni passo costa energia.',
@@ -72,14 +72,14 @@ export const specialAbility = t({
 })
 export const specialBody = t({
   en: 'Every unit has a signature ability. It costs energy, and unused energy expires.',
-  fr: 'Chaque unité a une capacité signature. Elle coûte de l’énergie, et l’énergie inutilisée est perdue.',
+  fr: 'Chaque unité a une capacité signature. Elle coûte 2 énergies.',
   de: 'Jede Einheit hat eine Fähigkeit. Sie kostet Energie, und ungenutzte Energie verfällt.',
   es: 'Cada unidad tiene una habilidad propia. Cuesta energía, y la energía sin usar se pierde.',
   it: 'Ogni unità ha un’abilità propria. Costa energia, e l’energia inutilizzata si perde.',
 })
 export const endTurnBody = t({
   en: 'Done? End the turn to pass to the next unit.',
-  fr: 'Terminé ? Finissez le tour pour passer à l’unité suivante.',
+  fr: 'Terminé ? Appuyez ici pour passer à l’unité suivante. L’énergie restante est perdue.',
   de: 'Fertig? Beende den Zug, um zur nächsten Einheit überzugehen.',
   es: '¿Listo? Termina el turno para pasar a la siguiente unidad.',
   it: 'Finito? Concludi il turno per passare all’unità successiva.',
