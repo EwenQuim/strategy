@@ -1,7 +1,7 @@
 import type { GameState } from '../lib/engine/engine.ts'
 import { abilityDamage } from '../lib/engine/combat.ts'
 import { hexDist, key } from '../lib/engine/hex.ts'
-import { inHellfire } from '../lib/engine/hellfire.ts'
+import { hazardDamage } from '../lib/engine/hazards.ts'
 import { PAWN_CLASSES, type Side } from '../lib/engine/pawns/index.ts'
 import { estimateIncomingDamage, type ReachCache } from '../lib/engine/ai/evaluate.ts'
 
@@ -93,7 +93,7 @@ export function valueFeatures(
         (p) => p.kind === 'archer' && state.tiles.get(key(p.q, p.r))?.feature === 'watchtower',
       ).length / 3,
       army.filter(
-        (p) => state.order.indexOf(p.id) < state.active && inHellfire(state.hellfire, p),
+        (p) => state.order.indexOf(p.id) < state.active && hazardDamage(state.hazards, p) > 0,
       ).length / 5,
       ...Object.keys(PAWN_CLASSES)
         .filter((kind) => kind !== 'king')

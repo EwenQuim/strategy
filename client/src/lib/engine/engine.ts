@@ -9,7 +9,7 @@ import {
   endBattle,
   winnerFrom,
 } from './turn.ts'
-import { markHellfire } from './hellfire.ts'
+import { scheduleHazards, type Hazard } from './hazards.ts'
 import {
   walkingPaths,
   routePath,
@@ -30,7 +30,7 @@ export type Aim = { action: 'special'; destination?: Axial }
 
 type Unit = { kind: PawnKind; side: Side }
 
-// A hellfire blow has no striker.
+// A hazard blow has no striker.
 type Blow = {
   by?: Unit & { id: number; hp: number; special: boolean; watchtower: boolean }
   fallen: Unit[]
@@ -43,7 +43,7 @@ export type GameState = {
   randomState: number
   tiles: Map<string, Tile>
   readonly mapSize: MapSize
-  hellfire: Axial[]
+  hazards: Hazard[]
   pawns: Pawn[]
   order: number[]
   active: number
@@ -92,7 +92,7 @@ export function initialState(
   }
   const state: GameState = {
     ...battle,
-    hellfire: [],
+    hazards: [],
     active: -1,
     round: 1,
     lastClashRound: 0,
@@ -100,7 +100,7 @@ export function initialState(
     blows: [],
     escapes: [],
   }
-  return advanceTurn({ ...state, ...markHellfire(state) })
+  return advanceTurn({ ...state, ...scheduleHazards(state) })
 }
 
 export function transition(state: GameState, action: Action): Transition {

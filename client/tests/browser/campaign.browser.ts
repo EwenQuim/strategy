@@ -3,7 +3,8 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import {
   initialState,
-  inHellfire,
+  hazardDamage,
+  hellfireCenters,
   activePawn,
   specialTargetingTiles,
   specialTargets,
@@ -157,10 +158,12 @@ test(
           })),
         ),
         [...state.tiles.values()].map((tile) => ({
-          warned: inHellfire(state.hellfire, tile),
-          center: state.hellfire.some((center) => center.q === tile.q && center.r === tile.r),
-          hatch: inHellfire(state.hellfire, tile),
-          described: inHellfire(state.hellfire, tile),
+          warned: hazardDamage(state.hazards, tile) > 0,
+          center: hellfireCenters(state.hazards).some(
+            (center) => center.q === tile.q && center.r === tile.r,
+          ),
+          hatch: hazardDamage(state.hazards, tile) > 0,
+          described: hazardDamage(state.hazards, tile) > 0,
         })),
       )
     }

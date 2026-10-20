@@ -7,7 +7,8 @@ const END_TURN: Action = { type: 'endTurn' }
 
 export function positionKey(state: GameState): string {
   let position = `${state.active}|${state.round}|${state.winner}|${state.randomState}|${state.order.join(',')}`
-  for (const center of state.hellfire) position += `|fire:${center.q}:${center.r}`
+  for (const hazard of state.hazards)
+    for (const center of hazard.centers) position += `|${hazard.kind}:${center.q}:${center.r}`
   for (const pawn of state.pawns)
     position += `|${pawn.id}:${pawn.q}:${pawn.r}:${pawn.hp}:${pawn.energy}:${pawn.protectingId}:${pawn.specialUsed}:${pawn.bonusEnergy}:${pawn.springSince}`
   for (const tile of state.tiles.values())

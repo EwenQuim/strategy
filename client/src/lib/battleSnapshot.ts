@@ -4,7 +4,7 @@ import type { BattleSetup, GameState } from './engine/index.ts'
 import type { GameMode } from './game-mode.ts'
 
 // Bump when the saved state shape changes; older records are then discarded.
-export const BATTLE_SNAPSHOT_VERSION = 3
+export const BATTLE_SNAPSHOT_VERSION = 4
 
 type SavedPawn = {
   kind: PawnKind

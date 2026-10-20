@@ -25,7 +25,7 @@ function battle(pawns: Pawn[], order = pawns.map((p) => p.id)): GameState {
   return {
     ...initialState('ai-test'),
     biome: 'verdant',
-    hellfire: [],
+    hazards: [],
     pawns,
     tiles,
     order,
@@ -181,9 +181,14 @@ for (const level of Object.keys(BOT_LEVELS) as BotDifficulty[]) {
     state.tiles.clear()
     for (let q = -3; q <= 8; q++) state.tiles.set(q + ',0', { q, r: 0, terrain: 'plain' })
     state.biome = 'hell'
-    state.hellfire = [
-      { q: 3, r: 0 },
-      { q: -3, r: 0 },
+    state.hazards = [
+      {
+        kind: 'hellfire',
+        centers: [
+          { q: 3, r: 0 },
+          { q: -3, r: 0 },
+        ],
+      },
     ]
     state.active = 1
     state.round = 10

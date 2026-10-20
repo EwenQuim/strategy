@@ -1,6 +1,6 @@
 import * as m from '../i18n/game'
 import type { TileChoice, Targeting } from '../lib/tileChoices'
-import type { Axial, BattleEffect, Pawn, Tile } from '../lib/engine'
+import type { Axial, BattleEffect, Hazard, Pawn, Tile } from '../lib/engine'
 import { SupportHalos } from './SupportFeedback'
 import { TileLayer } from './TileLayer'
 import { PawnLayer } from './PawnLayer'
@@ -12,7 +12,7 @@ interface BattlefieldProps {
   labels: PlayerNames
   tiles: Map<string, Tile>
   pawns: Pawn[]
-  hellfire: readonly Axial[]
+  hazards: readonly Hazard[]
   active?: Pawn
   reach: Map<string, number>
   targets: Map<string, TileChoice>
@@ -34,7 +34,7 @@ export function Battlefield({
   labels,
   tiles,
   pawns,
-  hellfire,
+  hazards,
   active,
   reach,
   targets,
@@ -82,7 +82,7 @@ export function Battlefield({
         quakeKeys={quakeKeys}
         quakeClass={quakeClass}
         pawns={pawns}
-        hellfire={hellfire}
+        hazards={hazards}
         labels={labels}
         active={active}
         reach={reach}

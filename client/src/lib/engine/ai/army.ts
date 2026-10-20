@@ -1,6 +1,6 @@
 import type { GameState } from '../engine.ts'
 import { hexDist, key } from '../hex.ts'
-import { inHellfire } from '../hellfire.ts'
+import { hazardDamage } from '../hazards.ts'
 import type { Pawn, Side } from '../pawns/index.ts'
 import { distancesToAttack, estimateIncomingDamage, type ReachCache } from './evaluate.ts'
 
@@ -48,7 +48,7 @@ export function evaluateArmy(
     const allies = state.pawns.filter((p) => p.side === pawn.side && p.id !== pawn.id)
     const foes = state.pawns.filter((p) => p.side !== pawn.side)
     const burns =
-      state.order.indexOf(pawn.id) < state.active && inHellfire(state.hellfire, pawn)
+      state.order.indexOf(pawn.id) < state.active && hazardDamage(state.hazards, pawn) > 0
     const health = pawn.hp - Number(burns)
     let value = health > 0 ? pawn.ai.value(pawn, health) : 0
     // Preserve future attacking capacity, not just HP: removing a signature matters.
@@ -67,7 +67,7 @@ export function evaluateArmy(
       value -= pawn.ai.risk(pawn, {
         incoming: danger[pawn.side].get(pawn.id) ?? 0,
         health,
-        hellfireDamage: Number(burns),
+        hazardDamage: Number(burns),
         value: health > 0 ? pawn.ai.value(pawn, health) + 6 : 0,
         caution: allied ? weights.caution : 1,
       })

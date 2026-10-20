@@ -20,7 +20,7 @@ function duel(): GameState {
   return {
     seed: 'achievements',
     biome: 'verdant',
-    hellfire: [],
+    hazards: [],
     randomState: 0,
     tiles,
     mapSize: { width: 7, height: 1 },
@@ -39,8 +39,14 @@ function duel(): GameState {
   }
 }
 
-function field(pawns: Pawn[], biome: Biome = 'verdant', hellfire: Axial[] = []): GameState {
-  return { ...duel(), biome, hellfire, pawns, order: pawns.map((pawn) => pawn.id) }
+function field(pawns: Pawn[], biome: Biome = 'verdant', centers: Axial[] = []): GameState {
+  return {
+    ...duel(),
+    biome,
+    hazards: centers.length ? [{ kind: 'hellfire', centers }] : [],
+    pawns,
+    order: pawns.map((pawn) => pawn.id),
+  }
 }
 
 const play = (state: GameState, ...actions: Action[]): GameState =>

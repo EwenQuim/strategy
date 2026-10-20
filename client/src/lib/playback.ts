@@ -38,7 +38,7 @@ export function playbackReducer(
   // player sees the cost of their own moves and specials instead of only the bots' ones.
   // A kept frame without impacts shows no deaths, so the last one can display the final
   // state itself: the frame's defensive clones would break the tile memo across the board.
-  // Earlier ones keep their captured state so a following frame (round-end hellfire)
+  // Earlier ones keep their captured state so a following frame (round-end hazards)
   // never rewinds to pawns the final state has already buried.
   const kept = result.frames.filter(
     (frame) => isImpactFrame(frame) || !!frame.effect?.energyDelta,

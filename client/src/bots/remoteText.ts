@@ -1,5 +1,6 @@
 import {
   activePawn,
+  hellfireCenters,
   PAWN_CLASSES,
   reducer,
   type Action,
@@ -56,10 +57,12 @@ export function positionText(state: GameState): string {
     '',
     'Terrain (every tile not listed is an open plain):',
     terrain || '- none',
-    ...(state.hellfire.length
+    ...(hellfireCenters(state.hazards).length
       ? [
           '',
-          `Hellfire will strike these tiles soon: ${state.hellfire.map(({ q, r }) => `(${q},${r})`).join(', ')}`,
+          `Hellfire will strike these tiles soon: ${hellfireCenters(state.hazards)
+            .map(({ q, r }) => `(${q},${r})`)
+            .join(', ')}`,
         ]
       : []),
   ].join('\n')

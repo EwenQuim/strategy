@@ -227,7 +227,7 @@ export function Game({
             labels={labels}
             tiles={state.tiles}
             pawns={state.pawns}
-            hellfire={state.hellfire}
+            hazards={state.hazards}
             active={state.winner ? undefined : pawn}
             reach={reach}
             targets={choices}
