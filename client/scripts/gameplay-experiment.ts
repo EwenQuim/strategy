@@ -118,6 +118,24 @@ export function restoreStart(start: StartPosition, substitution?: Substitution):
     player: pawns.filter((p) => p.side === 'player').map((p) => p.kind),
     enemy: pawns.filter((p) => p.side === 'enemy').map((p) => p.kind),
   }
+  if (copy.state.setup?.map !== undefined) {
+    return {
+      ...copy.state,
+      setup: {
+        ...copy.state.setup,
+        player: copy.state.setup.player.map((p, i) => ({
+          ...p,
+          kind: pawns.filter((pawn) => pawn.side === 'player')[i]!.kind,
+        })),
+        enemy: copy.state.setup.enemy.map((p, i) => ({
+          ...p,
+          kind: pawns.filter((pawn) => pawn.side === 'enemy')[i]!.kind,
+        })),
+      },
+      pawns,
+      tiles: new Map(copy.tiles),
+    }
+  }
   return { ...copy.state, setup, pawns, tiles: new Map(copy.tiles) }
 }
 
@@ -237,14 +255,18 @@ export async function playExperiment(
     activations++
     const opportunity =
       actor.special.damage !== 0 &&
-      actor.special
-        .candidates(actor, state)
-        .some(
-          (action) =>
-            action.type === 'special' &&
-            action.target &&
-            state.pawns.some((p) => p.side !== actor.side && sameHex(p, action.target)),
+      actor.special.candidates(actor, state).some((action) => {
+        const step = transition(state, action)
+        return step.frames.some(
+          (frame) =>
+            frame.effect?.kind !== 'hellfire' &&
+            frame.effect?.impacts?.some(
+              (hit) =>
+                hit.damage > 0 &&
+                frame.state.pawns.some((p) => p.side !== actor.side && sameHex(p, hit)),
+            ),
         )
+      })
     if (opportunity) unit.attackOpportunities++
     const attacksBefore = unit.attacks
     const actions = await (actor.side === 'player' ? player : enemy).chooseActions(state)
