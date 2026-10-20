@@ -2,6 +2,22 @@ import { t } from './locale.ts'
 import type { SpecialTextKey } from '../lib/engine/index.ts'
 
 export const specialTexts: Record<SpecialTextKey, string> = {
+  jab: t({ en: 'Jab', fr: 'Estoc', de: 'Stich', es: 'Estocada', it: 'Affondo' }),
+  jabDescription: t({
+    en: 'Strike at range 1–2 without moving the target.',
+    fr: 'Frappez à portée 1–2 sans déplacer la cible.',
+    de: 'Triff auf Reichweite 1–2, ohne das Ziel zu bewegen.',
+    es: 'Golpea a distancia 1–2 sin mover al objetivo.',
+    it: 'Colpisci a distanza 1–2 senza muovere il bersaglio.',
+  }),
+  harpoon: t({ en: 'Harpoon', fr: 'Harpon', de: 'Harpune', es: 'Arpón', it: 'Arpione' }),
+  harpoonDescription: t({
+    en: 'Strike at range 1–2. Pull a surviving distant enemy onto open ground beside you. Protection prevents the pull; landing terrain applies.',
+    fr: 'Frappez à portée 1–2. Attirez un ennemi distant survivant sur une case libre adjacente. La protection empêche la traction ; le terrain d’arrivée s’applique.',
+    de: 'Triff auf Reichweite 1–2. Ziehe einen überlebenden entfernten Gegner auf ein freies Nachbarfeld. Schutz verhindert das Ziehen; das Zielgelände wirkt.',
+    es: 'Golpea a distancia 1–2. Atrae a un enemigo distante superviviente a una casilla libre adyacente. La protección impide atraerlo; se aplica el terreno de llegada.',
+    it: 'Colpisci a distanza 1–2. Attira un nemico distante sopravvissuto su una casella libera adiacente. La protezione impedisce il tiro; si applica il terreno di arrivo.',
+  }),
   rally: t({
     en: 'Exalting Assault',
     fr: 'Assaut exaltant',

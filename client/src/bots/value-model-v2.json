@@ -31,7 +31,9 @@
     "units:hoplite",
     "units:wolf",
     "units:berserker",
-    "units:lancer"
+    "units:lancer",
+    "units:harpooner",
+    "units:reachfighter"
   ],
   "trainingPrefix": "value-training-v2",
   "commit": "4b0d6e4ad6733cf2180821a56dfd760047c1e0ae",
@@ -39,7 +41,7 @@
     1.512503, -0.807267, 3.432156, 2.348435, 0.065779, -0.355966, -1.986863, -2.088311,
     -0.108256, 0.73727, 0.140602, 0, -0.828238, 0.642645, 0.18153, 0.328078, -0.000006,
     1.043411, 2.07195, 1.607306, -0.979286, -0.017108, 0.824814, 2.708745, -1.638226, 0,
-    -1.792123
+    -1.792123, 0, 0
   ],
   "baselineValidationLoss": 0.5538919647475676,
   "validationLoss": 0.37389389119040145,
