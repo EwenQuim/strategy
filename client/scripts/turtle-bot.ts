@@ -26,7 +26,15 @@ export class TurtleBot implements Bot<Record<string, never>> {
       for (const action of options) {
         if (action.type === 'endTurn') continue
         const next = reducer(current, action)
-        if (next.blows.length > current.blows.length) continue
+        if (
+          next.blows.length > current.blows.length ||
+          current.pawns.some(
+            (pawn) =>
+              pawn.side !== actor.side &&
+              (next.pawns.find((p) => p.id === pawn.id)?.hp ?? 0) < pawn.hp,
+          )
+        )
+          continue
         const moved = next.pawns.find((pawn) => pawn.id === id)
         if (!moved || moved.hp <= 0) continue
         const gain = nearestEnemyDistance(next, moved) - before

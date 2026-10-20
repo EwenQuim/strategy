@@ -93,7 +93,7 @@ export function roundTelemetry(
   return {
     round,
     clash: state.lastClashRound === round,
-    kills: state.blows.slice(blowsFrom).length,
+    kills: state.blows.slice(blowsFrom).reduce((sum, blow) => sum + blow.fallen.length, 0),
     minDistance: distances.length ? Math.min(...distances) : Infinity,
     meanDistance: distances.length
       ? distances.reduce((sum, distance) => sum + distance, 0) / distances.length
@@ -155,7 +155,7 @@ export function matchMetrics(
     let settled = 0
     for (let i = 0; i < curve.length; i++)
       if (leadOf(curve[i].value) !== winner) settled = i + 1
-    decisionRound = curve[settled]?.round ?? curve[0]?.round ?? null
+    decisionRound = curve[settled]?.round ?? null
   }
   return {
     seed,
