@@ -6,6 +6,8 @@ Mobile-first 2D turn-based hexagonal strategy game. React + Vite + TanStack Rout
 
 Every feature must make the game fun and strategic, never static or boring. The guiding philosophy is "Easy to learn, hard to master": a small rule surface with deep, emergent play. Antiyoy is a great inspiration for this. Battles should feel tense: reward mobility, risk and bold plays, not turtling or waiting. When a rule could go either way, pick the one that keeps units moving and decisions nervous, e.g. a buff that follows a unit instead of pinning it in place.
 
+Ideally, Hexmate could also be played as a physical tabletop game without an app. Favor rules players can resolve by hand with a hex board, pieces, a few tokens and ordinary dice or cards. Keep bookkeeping small and state visible; avoid rules that depend on hidden computational state, exhaustive calculations or automatic path selection. Digital conveniences need not transfer, and Hellfire is an intentional Hell-only exception.
+
 ## Pull requests
 
 Each PR aims for the smallest diff that still delivers its behavior; before opening one, cut everything the feature does not need. When a feature would add a lot of lines, ask whether it is really needed before building it. When a change starts stacking patches on patches, refactor the existing code instead of adding another layer.
