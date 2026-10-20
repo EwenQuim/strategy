@@ -21,6 +21,7 @@ import { UnitUnlockToast } from './UnitUnlockToast'
 import { GameResult } from './GameResult'
 import { GameCommandDeck } from './GameCommandDeck'
 import { GameHelpDialog } from './GameHelpDialog'
+import { GameTour } from './GameTour'
 import { useCommanding } from './useCommanding'
 import { pounceLanding } from '../lib/tileChoices'
 import { useGameShortcuts } from './useGameShortcuts'
@@ -72,14 +73,20 @@ export function Game({
   onVictory,
   online,
   players,
+  tour = false,
+  onTourDone,
 }: GameOptions & {
   campaign?: Campaign
   campaignLevel?: number
   online?: OnlineSession
   players?: PlayerNames
+  tour?: boolean
+  onTourDone?: () => void
 }) {
   const local = mode === 'local'
   const [levelAlreadyCleared] = useState(() => clearedAtStart(campaign, campaignLevel))
+  const [touring, setTouring] = useState(tour)
+  const halted = paused || touring
   const isOnline = mode === 'online'
   const { bots, spectator, viewerSide } = battleControl(mode, bot, sideBots, online?.side)
   const names = players ?? playerNames
@@ -87,7 +94,7 @@ export function Game({
   const { state, dispatch, effect, effectId, playing } = useGame({
     seed,
     mode,
-    paused,
+    paused: halted,
     setup,
     bot,
     sideBots,
@@ -121,7 +128,7 @@ export function Game({
   const opponentActive = !!pawn && !state.winner && !viewerTurn
   // A frame still shows the pawns that die on it, so a kill is detectable from the state alone.
   const killed = state.pawns.some((unit) => unit.hp <= 0)
-  const commanding = viewerTurn && !state.winner && !paused
+  const commanding = viewerTurn && !state.winner && !halted
   const canCommand = commanding && !playing
   const {
     aim,
@@ -292,6 +299,16 @@ export function Game({
         biome={state.biome}
         presentKinds={new Set(state.pawns.map((unit) => unit.kind))}
       />
+
+      {touring && (
+        <GameTour
+          state={state}
+          onDone={() => {
+            setTouring(false)
+            onTourDone?.()
+          }}
+        />
+      )}
     </main>
   )
 }

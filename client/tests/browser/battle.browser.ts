@@ -187,26 +187,31 @@ test(
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await page.getByRole('link', { name: 'Quick play' }).click()
-    const tutorial = page.getByRole('dialog', { name: 'Quick play', includeHidden: true })
-    await tutorial.waitFor()
-    const text = await tutorial.innerText()
-    assert.match(text, /Kill the enemy king/)
-    await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
-    assert.match(await tutorial.innerText(), /Units act one at a time/)
-    await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
-    assert.match(
-      await tutorial.innerText(),
-      /Move and use your signature ability once per activation/,
-    )
-    await tutorial.getByRole('button', { name: 'Next', exact: true }).click()
-    assert.match(await tutorial.innerText(), /Lose your king, lose the battle/)
+    const tour = page.getByRole('dialog', { name: 'Quick tour' })
+    await tour.waitFor()
+    // The tour pauses the battle: the command deck stays inactive until the last step.
+    assert.equal(await page.locator('[data-action="endTurn"]').isDisabled(), true)
+    await tour.getByRole('heading', { name: 'Turn order', exact: true }).waitFor()
+    assert.match(await tour.innerText(), /Units act one at a time/)
+    for (const [name, body] of [
+      ['Your king', /Protect your king/],
+      ['Enemy king', /Kill the enemy king/],
+      ['Move', /Tap Move/],
+      ['Special ability', /signature ability/],
+    ] as const) {
+      await tour.getByRole('button', { name: 'Next', exact: true }).click()
+      await tour.getByRole('heading', { name, exact: true }).waitFor()
+      assert.match(await tour.innerText(), body)
+    }
+    await tour.getByRole('button', { name: 'Next', exact: true }).click()
+    await tour.getByRole('heading', { name: 'End turn', exact: true }).waitFor()
     await page.getByRole('button', { name: 'Go !', exact: true }).click()
-    await tutorial.waitFor({ state: 'hidden' })
+    await tour.waitFor({ state: 'hidden' })
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     await page.getByRole('link', { name: 'Hexmate home' }).click()
     await page.getByRole('link', { name: 'Quick play' }).click()
     await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
-    assert.equal(await tutorial.count(), 0)
+    assert.equal(await tour.count(), 0)
     assert.deepEqual(errors, [])
   },
 )

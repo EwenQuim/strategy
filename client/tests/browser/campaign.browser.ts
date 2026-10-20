@@ -31,6 +31,7 @@ import {
   playTurn,
   finishCampaignLevel,
   sharedBrowser,
+  dismissTour,
 } from './fixture.ts'
 
 test(
@@ -482,14 +483,14 @@ test(
 )
 
 test(
-  'Briefing reveals fit mobile screens and keep every introduction accessible',
+  'The tutorial tour and briefing reveals fit mobile screens and stay accessible',
   { timeout: 90_000 },
   async (t) => {
     const { page, origin } = await fixture(t)
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await page.evaluate((key) => localStorage.setItem(key, '20'), CAMPAIGN_STORAGE_KEY)
-    const briefing = page.getByRole('dialog', { name: 'Battle briefing', exact: true })
+    const tour = page.getByRole('dialog', { name: 'Quick tour' })
     for (const viewport of [
       { width: 280, height: 480 },
       { width: 320, height: 568 },
@@ -501,37 +502,32 @@ test(
     ]) {
       await page.setViewportSize(viewport)
       await page.goto(origin + base + 'campaign/tutorial/1')
-      await briefing.waitFor()
-      assert.equal(
-        await briefing.getByRole('button', { name: 'Previous', exact: true }).isDisabled(),
-        true,
-      )
-      assert.equal(
-        await briefing
-          .getByRole('heading', { name: CAMPAIGNS[0].levels[0].name, exact: true })
-          .count(),
-        0,
-      )
-      for (const name of ['Goal', 'Turn order', 'Energy', 'King', 'Swordsman']) {
-        await briefing.getByRole('heading', { name, exact: true }).waitFor()
+      await tour.waitFor()
+      // The tour pauses the battle until the player completes it.
+      assert.equal(await page.locator('[data-action="endTurn"]').isDisabled(), true)
+      assert.equal(await tour.getByRole('button', { name: 'Previous', exact: true }).count(), 0)
+      for (const name of [
+        'Turn order',
+        'Your king',
+        'Enemy king',
+        'Move',
+        'Special ability',
+        'End turn',
+      ]) {
+        await tour.getByRole('heading', { name, exact: true }).waitFor()
         assert.equal(
-          await briefing
-            .getByRole('button', { name: 'Discover: ' + name, exact: true })
-            .getAttribute('aria-current'),
-          'step',
-        )
-        assert.equal(
-          await briefing.evaluate((dialog) => {
-            const box = dialog.getBoundingClientRect()
+          await tour.evaluate((dialog) => {
+            const card = dialog.querySelector('.tour-card')!
+            const box = card.getBoundingClientRect()
             return (
               box.x >= 0 &&
               box.y >= 0 &&
               box.right <= innerWidth &&
               box.bottom <= innerHeight &&
-              dialog.scrollWidth <= dialog.clientWidth &&
+              card.scrollWidth <= card.clientWidth &&
               document.documentElement.scrollWidth <= innerWidth &&
               document.documentElement.scrollHeight <= innerHeight &&
-              [...dialog.querySelectorAll('button')].every((button) => {
+              [...card.querySelectorAll('button')].every((button) => {
                 const rect = button.getBoundingClientRect()
                 return (
                   rect.x >= box.x &&
@@ -546,24 +542,18 @@ test(
           name + ' at ' + JSON.stringify(viewport),
         )
         assert.equal(
-          await briefing.evaluate((dialog) => dialog.getAnimations({ subtree: true }).length),
+          await tour.evaluate((dialog) => dialog.getAnimations({ subtree: true }).length),
           0,
         )
-        if (name !== 'Swordsman')
-          await briefing.getByRole('button', { name: 'Next', exact: true }).click()
+        if (name !== 'End turn')
+          await tour.getByRole('button', { name: 'Next', exact: true }).click()
       }
-      assert.equal(
-        await briefing.getByRole('button', { name: 'Next', exact: true }).isDisabled(),
-        true,
-      )
-      await briefing.getByRole('button', { name: 'Previous', exact: true }).click()
-      await briefing.getByRole('heading', { name: 'King', exact: true }).waitFor()
-      await briefing.getByRole('button', { name: 'Discover: Goal', exact: true }).click()
-      await briefing.getByRole('heading', { name: 'Goal', exact: true }).waitFor()
-      await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
-      await briefing.waitFor({ state: 'hidden' })
+      await tour.getByRole('button', { name: 'Go !', exact: true }).click()
+      await tour.waitFor({ state: 'hidden' })
+      await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
     }
     await page.setViewportSize({ width: 320, height: 568 })
+    const briefing = page.getByRole('dialog', { name: 'Battle briefing', exact: true })
     for (const level of CAMPAIGNS[1].levels.filter(
       (candidate) => candidate.id > 1 && candidate.newElements.length > 0,
     )) {
@@ -599,7 +589,7 @@ test(
 )
 
 test(
-  'Briefing reveals support every locale, keyboard dismissal and reduced motion',
+  'The tutorial tour supports every locale, keyboard dismissal and reduced motion',
   { timeout: 60_000 },
   async (t) => {
     const { origin } = await fixture(t)
@@ -614,40 +604,37 @@ test(
       try {
         const page = await context.newPage()
         await page.goto(origin + base + 'campaign/tutorial/1')
-        const briefing = page.getByRole('dialog')
-        await briefing.waitFor()
-        const pages = briefing
-          .getByRole('navigation')
-          .getByRole('button')
-          .filter({ has: page.locator('span') })
-        await pages.first().waitFor()
-        assert.equal(await pages.count(), 5, locale)
-        for (const control of await pages.all()) {
-          await control.click()
-          const region = briefing.getByRole('region')
-          assert.equal(await region.evaluate((section) => section.scrollTop), 0)
+        const tour = page.getByRole('dialog')
+        await tour.waitFor()
+        // The card focuses its Next button, so the Enter key steps the tour in every locale.
+        for (let step = 0; step < 5; step++) {
           assert.equal(
-            await region.evaluate((section) => section.scrollWidth <= section.clientWidth),
+            await tour.evaluate((dialog) => {
+              const card = dialog.querySelector('.tour-card')!
+              return (
+                card.scrollWidth <= card.clientWidth &&
+                document.documentElement.scrollWidth <= innerWidth
+              )
+            }),
             true,
+            locale + ' step ' + step,
           )
-          await region.evaluate((section) => {
-            section.scrollTop = section.scrollHeight
-          })
+          await page.keyboard.press('Enter')
         }
-        await page.keyboard.press('Tab')
+        // The card focuses its own button, so the Escape key can dismiss the tour.
         assert.equal(
-          await briefing.evaluate((dialog) => dialog.contains(document.activeElement)),
+          await tour.evaluate((dialog) => dialog.contains(document.activeElement)),
           true,
+          locale,
         )
         await page.keyboard.press('Escape')
-        await briefing.waitFor({ state: 'hidden' })
+        await tour.waitFor({ state: 'hidden' })
         await page.emulateMedia({ reducedMotion: 'no-preference' })
         await page.goto(origin + base + 'campaign/tutorial/1')
-        await briefing.waitFor()
+        await tour.waitFor()
         assert.ok(
-          (await briefing.evaluate(
-            (dialog) => dialog.getAnimations({ subtree: true }).length,
-          )) > 0,
+          (await tour.evaluate((dialog) => dialog.getAnimations({ subtree: true }).length)) > 0,
+          locale,
         )
       } finally {
         await context.close()
@@ -864,7 +851,11 @@ test(
         saved,
       )
       await page.goto(origin + base + 'campaign/' + slug + '/1')
-      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      // The tutorial pack teaches through the tour; other packs still open their briefing.
+      await dismissTour(page)
+      const briefing = page.getByRole('dialog', { name: 'Battle briefing', exact: true })
+      if (await briefing.isVisible())
+        await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
       await page.locator('[data-action="endTurn"]:not([disabled])').waitFor()
       assert.equal(await page.locator('[data-action]').count(), 3)
       assert.equal(
@@ -923,7 +914,9 @@ test(
         await page.screenshot({ path: join(process.env.PR_MEDIA_DIR, slug + '-unlock.png') })
       }
       await page.reload()
-      await page.getByRole('button', { name: 'Go !', exact: true }).click()
+      await dismissTour(page)
+      if (await briefing.isVisible())
+        await briefing.getByRole('button', { name: 'Go !', exact: true }).click()
       await page.getByTestId('battle-result').waitFor()
       assert.equal(await toast.count(), 0)
       if (slug === 'tutorial')

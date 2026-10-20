@@ -122,6 +122,7 @@ export function GameHeader({
         <ol
           className="m-0 flex min-w-0 flex-1 list-none gap-[5px] overflow-x-auto p-0 [scrollbar-width:thin] max-[601px]:gap-[3px]"
           aria-label={m.turnOrder}
+          data-tour="turn-order"
         >
           {visibleOrder.map(({ unit, index }) => (
             <li
