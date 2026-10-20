@@ -112,7 +112,12 @@ export async function fixture(t: TestContext) {
   context.setDefaultTimeout(timeout)
   context.setDefaultNavigationTimeout(timeout)
   const page = await context.newPage()
+  const controlledReload = page.waitForResponse(
+    (response) => response.request().isNavigationRequest() && response.fromServiceWorker(),
+  )
   await page.goto(origin + base)
+  await controlledReload
+  await page.waitForLoadState('load')
   await page.waitForFunction(
     () => navigator.serviceWorker.controller?.state === 'activated',
     undefined,
