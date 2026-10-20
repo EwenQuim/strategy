@@ -2,6 +2,13 @@ import { t } from './locale.ts'
 import type { PawnKind } from '../lib/engine/index.ts'
 
 export const unitNames: Record<PawnKind, string> = {
+  harpooner: t({
+    en: 'Harpooner',
+    fr: 'Harponneur',
+    de: 'Harpunier',
+    es: 'Arponero',
+    it: 'Arpioniere',
+  }),
   king: t({
     en: 'King',
     fr: 'Roi',

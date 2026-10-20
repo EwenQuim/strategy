@@ -70,6 +70,8 @@ export type SpecialTextKey =
   | 'dashDescription'
   | 'dashTo'
   | 'noOpenLine'
+  | 'harpoon'
+  | 'harpoonDescription'
 
 export interface SpecialAbility {
   readonly name: SpecialTextKey

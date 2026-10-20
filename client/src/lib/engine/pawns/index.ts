@@ -9,6 +9,7 @@ import { Magician } from './magician.ts'
 import { Ninja } from './ninja.ts'
 import { Swordsman } from './swordsman.ts'
 import { Wolf } from './wolf.ts'
+import { Harpooner } from './harpooner.ts'
 
 export * from './pawn.ts'
 export { Archer, Bomber, Bulwark, King, Lancer, Magician, Ninja, Swordsman }
@@ -25,8 +26,11 @@ export const PAWN_CLASSES = {
   wolf: Wolf,
   berserker: Berserker,
   lancer: Lancer,
+  harpooner: Harpooner,
 }
 
 export type PawnKind = keyof typeof PAWN_CLASSES
 
-export const RECRUIT_CLASSES = Object.values(PAWN_CLASSES).filter((Unit) => Unit !== King)
+export const RECRUIT_CLASSES = Object.values(PAWN_CLASSES).filter(
+  (Unit) => Unit !== King && Unit !== Harpooner,
+)
