@@ -269,8 +269,10 @@ export async function playExperiment(
           unit.attacks++
         for (const hit of effect.impacts ?? []) {
           if (hit.damage <= 0) continue
-          const atImpact = before.pawns.find(p => sameHex(p, hit))
-          const target = frame.state.pawns.find((p) => sameHex(p, hit)) ?? frame.state.pawns.find(p => p.id === atImpact?.id)
+          const atImpact = before.pawns.find((p) => sameHex(p, hit))
+          const target =
+            frame.state.pawns.find((p) => sameHex(p, hit)) ??
+            frame.state.pawns.find((p) => p.id === atImpact?.id)
           if (!target) continue
           const actual = Math.max(0, Math.min(hit.damage, target.hp + hit.damage))
           byId.get(target.id)!.damageTaken += actual
