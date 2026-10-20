@@ -23,6 +23,7 @@
     "retrain:value": "node scripts/retrain-value.ts",
     "record:campaign": "node scripts/record-campaign.ts",
     "bench:web": "node scripts/bench-web.ts",
+    "bench:gameplay": "node scripts/bench-gameplay.ts",
     "test:ci": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "prepare": "git config --local core.hooksPath .githooks"
   },
