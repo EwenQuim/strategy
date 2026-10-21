@@ -12,11 +12,16 @@ export type WalkRoute = {
   damage: number
   steps: number
   parent: WalkRoute | null
+  // Ice tiles crossed mid-step before the landing tile: entering ice slides to the strip's end.
+  through?: Tile[]
 }
 
 export function routePath(route: WalkRoute): Tile[] {
   const path: Tile[] = []
-  for (let node = route; node.parent; node = node.parent) path.push(node.tile!)
+  for (let node = route; node.parent; node = node.parent) {
+    if (node.through) path.push(...node.through)
+    path.push(node.tile!)
+  }
   return path.reverse()
 }
 
@@ -36,20 +41,47 @@ export function walkingPaths(
   const paths = new Map([[start, root]])
   const leastDamage = new Map([[start, 0]])
   const grid = neighborKeys(tiles)
+  // Entering an ice tile slides in the entry direction across the whole ice strip,
+  // stopping on the last free ice tile before an obstruction. The slide is one step.
+  const slide = (from: Axial, tile: Tile): { tile: Tile; through?: Tile[]; damage: number } => {
+    let damage = Number(tile.terrain === 'lava')
+    if (tile.terrain !== 'ice') return { tile, damage }
+    const dq = tile.q - from.q
+    const dr = tile.r - from.r
+    let landing = tile
+    const crossed: Tile[] = []
+    for (;;) {
+      const next = tiles.get(key(landing.q + dq, landing.r + dr))
+      if (!next || next.terrain !== 'ice' || occupied.has(key(next.q, next.r))) break
+      crossed.push(landing)
+      landing = next
+    }
+    return { tile: landing, ...(crossed.length ? { through: crossed } : {}), damage }
+  }
   let frontier: WalkRoute[] = [root]
   for (let step = 1; step <= maxSteps && frontier.length; step++) {
     const next: WalkRoute[] = []
     for (const current of frontier) {
+      const from = current.tile ?? { q: pawn.q, r: pawn.r }
       for (const k of grid.get(current.key) ?? []) {
         const tile = tiles.get(k)
         if (!tile || !passable(tile) || occupied.has(k)) continue
-        const damage = current.damage + Number(tile.terrain === 'lava')
-        if (damage >= (leastDamage.get(k) ?? Infinity)) continue
-        leastDamage.set(k, damage)
-        const node: WalkRoute = { key: k, tile, damage, steps: step, parent: current }
-        const previous = paths.get(k)
+        const landing = slide(from, tile)
+        const lk = key(landing.tile.q, landing.tile.r)
+        const damage = current.damage + landing.damage
+        if (damage >= (leastDamage.get(lk) ?? Infinity)) continue
+        leastDamage.set(lk, damage)
+        const node: WalkRoute = {
+          key: lk,
+          tile: landing.tile,
+          damage,
+          steps: step,
+          parent: current,
+          ...(landing.through ? { through: landing.through } : {}),
+        }
+        const previous = paths.get(lk)
         if (!previous || step === previous.steps || previous.damage >= pawn.hp)
-          paths.set(k, node)
+          paths.set(lk, node)
         if (damage < pawn.hp) next.push(node)
       }
     }

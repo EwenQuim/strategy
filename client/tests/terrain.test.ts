@@ -101,7 +101,7 @@ test('Deserts have small lakes and rare decorative palms; volcanoes and Hell hav
       )
       assert.equal(
         all.some((tile) => tile.terrain === 'lake'),
-        biome === 'desert' || biome === 'verdant',
+        biome === 'desert' || biome === 'verdant' || biome === 'banquise',
       )
       for (const tile of all.filter((candidate) => candidate.terrain === 'palm')) {
         assert.equal(biome, 'desert')

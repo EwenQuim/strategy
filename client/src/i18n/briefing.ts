@@ -142,6 +142,34 @@ export const hellfire = t({
   es: 'Fuego infernal',
   it: 'Fuoco infernale',
 })
+export const ice = t({
+  en: 'Ice',
+  fr: 'Glace',
+  de: 'Eis',
+  es: 'Hielo',
+  it: 'Ghiaccio',
+})
+export const iceSlide = t({
+  en: 'Entering ice slides you to the last ice tile in that direction: one step, no stopping mid-ice.',
+  fr: 'Entrer sur la glace vous fait glisser jusqu’à la dernière case de glace dans cette direction : un pas, aucun arrêt en cours de glace.',
+  de: 'Betretest du Eis, rutschst du zur letzten Eisfläche in dieser Richtung: ein Schritt, kein Halt unterwegs.',
+  es: 'Entrar en el hielo te desliza hasta la última casilla de hielo en esa dirección: un paso, sin parar a mitad.',
+  it: 'Entrando nel ghiaccio scivoli fino all’ultima casella di ghiaccio in quella direzione: un passo, senza fermarsi a metà.',
+})
+export const banquise = t({
+  en: 'Pack Ice',
+  fr: 'Banquise',
+  de: 'Packeis',
+  es: 'Banquisa',
+  it: 'Banchisa',
+})
+export const banquiseSlides = t({
+  en: 'Long forced slides: cross the map in one step, but you cannot stop mid-ice.',
+  fr: 'De longues glissades forcées : traversez la carte en un pas, mais impossible de s’arrêter en cours de glace.',
+  de: 'Lange erzwungene Rutschfahrten: überquere die Karte in einem Schritt, aber unterwegs hältst du nicht.',
+  es: 'Deslizamientos largos y forzosos: cruza el mapa en un paso, pero no puedes parar a mitad del hielo.',
+  it: 'Lunghe scivolate obbligate: attraversa la mappa in un passo, ma non puoi fermarti a metà ghiaccio.',
+})
 export const blockWalking = t({
   en: 'Block walking and Charge',
   fr: 'Bloquent la marche et la Charge',
