@@ -35,20 +35,6 @@ export const createGame = t({
   es: 'Crear partida',
   it: 'Crea partita',
 })
-export const publicGame = t({
-  en: 'Public game',
-  fr: 'Partie publique',
-  de: 'Öffentliches Spiel',
-  es: 'Partida pública',
-  it: 'Partita pubblica',
-})
-export const publicGameHint = t({
-  en: 'Private by default. Turn on to list the game in the lobby so anyone can join.',
-  fr: 'Privée par défaut. Activez pour afficher la partie dans le salon et que chacun puisse la rejoindre.',
-  de: 'Standardmäßig privat. Aktivieren, um das Spiel in der Lobby aufzulisten, damit jeder beitreten kann.',
-  es: 'Privada por defecto. Actívala para mostrar la partida en la sala y que cualquiera pueda unirse.',
-  it: 'Privata per impostazione predefinita. Attivala per mostrare la partita nella sala, così chiunque può unirsi.',
-})
 export const availableGames = t({
   en: 'Open games',
   fr: 'Parties ouvertes',

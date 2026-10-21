@@ -5,7 +5,7 @@ export * from './engine.ts'
 export { hazardDamage, hellfireCenters } from './hazards.ts'
 export type { Hazard } from './hazards.ts'
 export type { BattleSetup, FixedBattleSetup } from './setup.ts'
-export { randomArmy, symmetricSeed } from './setup.ts'
+export { randomArmy, seededBiome, symmetricSeed } from './setup.ts'
 export {
   canAttack,
   canUseSpecial,

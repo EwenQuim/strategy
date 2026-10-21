@@ -1,5 +1,7 @@
 import { Button, ButtonLink } from '../components/Button'
-import { menuCardClassName, menuInputClassName, switchClassName } from '../components/styles'
+import { menuCardClassName, menuInputClassName } from '../components/styles'
+import { OnlinePlayPanel } from '../components/OnlinePlayPanel'
+import * as lobby from '../i18n/onlineLobby'
 import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
@@ -18,10 +20,8 @@ import {
 import { Icon } from '../components/Icon'
 import {
   readPlayerNameOrDefault,
-  readPublicHosting,
   readStoredGames,
   savePlayerName,
-  savePublicHosting,
   saveStoredGame,
 } from '../onlineSession.ts'
 import type { StoredGame } from '../lib/online.ts'
@@ -74,7 +74,6 @@ export const Route = createFileRoute('/online/')({
     const [code, setCode] = useState(search.join ?? '')
     const [error, setError] = useState(() => inviteError(search.failed))
     const [games] = useState<StoredGame[]>(readStoredGames)
-    const [publicHosting, setPublicHosting] = useState(readPublicHosting)
     const [showGames, setShowGames] = useState(false)
     const createGame = useCreateOnlineGame()
     const joinGame = useJoinOnlineGame()
@@ -87,6 +86,7 @@ export const Route = createFileRoute('/online/')({
 
     const trimmedName = name.trim()
     const joinCode = code.trim().toUpperCase()
+    const joinCodeValid = /^[A-Z0-9]{6}$/.test(joinCode)
     const openGames = (listQuery.data ?? []).filter(
       (open) => !games.some((mine) => mine.code === open.code),
     )
@@ -106,100 +106,65 @@ export const Route = createFileRoute('/online/')({
 
     return (
       <MenuLayout title={m.title}>
-        <form
-          className={
-            menuCardClassName +
-            ' grid w-full max-w-[600px] gap-3 self-center p-4 min-[900px]:gap-4 min-[900px]:p-6'
-          }
-          onSubmit={(event) => {
-            event.preventDefault()
-            if (!trimmedName || busy) return
+        <OnlinePlayPanel
+          name={name}
+          onNameChange={setName}
+          busy={busy}
+          onCreate={(publicGame, roster) =>
             void start(async () => {
-              const game = await createGame.mutateAsync(trimmedName, publicHosting)
+              const game = await createGame.mutateAsync(trimmedName, publicGame, roster)
               saveStoredGame(game)
               return game.code
             })
-          }}
-        >
-          <label htmlFor="online-name" className="grid gap-1.5 text-sm text-muted">
-            {m.yourName}
-            <input
-              className={menuInputClassName}
-              id="online-name"
-              value={name}
-              maxLength={20}
-              autoComplete="nickname"
-              required
-              onChange={(event) => setName(event.target.value)}
-            />
-          </label>
-          <label
-            htmlFor="online-public"
-            className="flex cursor-pointer items-center gap-3 pt-1"
-          >
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <strong className="text-sm">{m.publicGame}</strong>
-              <small id="online-public-hint" className="text-xs leading-relaxed text-muted">
-                {m.publicGameHint}
-              </small>
-            </span>
-            <input
-              id="online-public"
-              type="checkbox"
-              role="switch"
-              aria-describedby="online-public-hint"
-              className={switchClassName}
-              checked={publicHosting}
-              onChange={(event) => {
-                setPublicHosting(event.target.checked)
-                savePublicHosting(event.target.checked)
-              }}
-            />
-          </label>
-          <Button type="submit" disabled={!trimmedName || busy} variant="primary">
-            {m.createGame}
-            <Icon name="arrow" />
-          </Button>
-        </form>
-        <form
-          className={
-            menuCardClassName +
-            ' grid w-full max-w-[600px] gap-3 self-center p-4 min-[900px]:gap-4 min-[900px]:p-6'
           }
-          onSubmit={(event) => {
-            event.preventDefault()
-            if (!trimmedName || joinCode.length !== 6 || busy) return
-            void start(async () => {
-              const game = await joinGame.mutateAsync(joinCode, trimmedName)
-              saveStoredGame(game)
-              return game.code
-            })
-          }}
+        />
+        <details
+          className={menuCardClassName + ' w-full max-w-[600px] self-center p-4'}
+          open={!!search.join}
         >
-          <label htmlFor="online-code" className="grid gap-1.5 text-sm text-muted">
-            {m.gameCode}
-            <input
-              className={
-                menuInputClassName + ' text-center font-mono tracking-[0.3em] uppercase'
-              }
-              id="online-code"
-              value={code}
-              placeholder="AB3F9K"
-              inputMode="text"
-              autoCapitalize="characters"
-              maxLength={6}
-              onChange={(event) => setCode(event.target.value.toUpperCase())}
-            />
-          </label>
-          <Button
-            type="submit"
-            disabled={!trimmedName || joinCode.length !== 6 || busy}
-            variant="secondary"
+          <summary className="flex min-h-11 cursor-pointer items-center py-2 text-sm font-semibold text-ink">
+            {lobby.joinWithCode}
+          </summary>
+          <form
+            className="mt-3 grid gap-3"
+            onSubmit={(event) => {
+              event.preventDefault()
+              if (!trimmedName || !joinCodeValid || busy) return
+              void start(async () => {
+                const game = await joinGame.mutateAsync(joinCode, trimmedName)
+                saveStoredGame(game)
+                return game.code
+              })
+            }}
           >
-            {m.joinGame}
-            <Icon name="hex" />
-          </Button>
-        </form>
+            <label htmlFor="online-code" className="text-sm text-muted">
+              {m.gameCode}
+            </label>
+            <div className="flex gap-2">
+              <input
+                className={
+                  menuInputClassName +
+                  ' flex-1 text-center font-mono tracking-[0.3em] uppercase'
+                }
+                id="online-code"
+                value={code}
+                placeholder="AB3F9K"
+                inputMode="text"
+                autoCapitalize="characters"
+                maxLength={6}
+                onChange={(event) => setCode(event.target.value.toUpperCase())}
+              />
+              <Button
+                type="submit"
+                disabled={!trimmedName || !joinCodeValid || busy}
+                variant="secondary"
+              >
+                {m.joinGame}
+                <Icon name="hex" />
+              </Button>
+            </div>
+          </form>
+        </details>
         {error && (
           <p role="alert" className="text-sm text-[#e0a586]">
             {error}

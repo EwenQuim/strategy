@@ -1,4 +1,5 @@
 import { readLocal, saveLocal } from './storage.ts'
+import { RECRUIT_CLASSES, type PawnKind } from './lib/engine/index.ts'
 import type { StoredGame } from './lib/online.ts'
 
 const NAME_KEY = 'hexmate.online.name'
@@ -18,7 +19,7 @@ export function savePlayerName(name: string): void {
 }
 
 export function readPublicHosting(): boolean {
-  return readLocal(PUBLIC_KEY, false, (raw) => raw === 'true')
+  return readLocal(PUBLIC_KEY, true, (raw) => raw === 'true')
 }
 
 export function savePublicHosting(publicHosting: boolean): void {
@@ -43,4 +44,22 @@ export function readStoredGames(): StoredGame[] {
 export function saveStoredGame(game: StoredGame): void {
   const games = readStoredGames().filter((stored) => stored.code !== game.code)
   saveLocal(GAMES_KEY, JSON.stringify([game, ...games]))
+}
+
+const ROSTER_KEY = 'hexmate.online.roster'
+const starterRoster: PawnKind[] = ['swordsman', 'archer', 'magician', 'ninja', 'bulwark']
+const recruitKinds = new Set(RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player').kind))
+
+export function readOnlineRoster(): PawnKind[] {
+  return readLocal(ROSTER_KEY, starterRoster, (raw) => {
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return starterRoster
+    return [...new Set(parsed)]
+      .filter((kind): kind is PawnKind => recruitKinds.has(kind as PawnKind))
+      .slice(0, 5)
+  })
+}
+
+export function saveOnlineRoster(roster: PawnKind[]): boolean {
+  return saveLocal(ROSTER_KEY, JSON.stringify(roster))
 }

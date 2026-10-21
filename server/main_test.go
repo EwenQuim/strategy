@@ -136,7 +136,7 @@ func TestNewServiceStoreSelection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.Create(context.Background(), "Ewen", false); err != nil {
+	if _, err := svc.Create(context.Background(), "Ewen", false, nil); err != nil {
 		t.Fatalf("memory store: %v", err)
 	}
 
@@ -145,7 +145,7 @@ func TestNewServiceStoreSelection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	creds, err := svc.Create(context.Background(), "Ewen", false)
+	creds, err := svc.Create(context.Background(), "Ewen", false, nil)
 	if err != nil {
 		t.Fatalf("sqlite store: %v", err)
 	}

@@ -194,6 +194,11 @@ export interface CreateGameRequest {
   name: string;
   /** List the game publicly so anyone can join */
   public: boolean;
+  /**
+     * Custom army of distinct recruit kinds, mirrored for the opponent; omit for a random army
+     * @nullable
+     */
+  roster?: string[] | null;
 }
 
 /**
@@ -240,6 +245,8 @@ export interface PublicGame {
   code: string;
   nameEnemy: string;
   namePlayer: string;
+  /** @nullable */
+  roster?: string[] | null;
   seed: string;
   status: string;
   version: number;

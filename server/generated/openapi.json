@@ -132,6 +132,17 @@
           "public": {
             "description": "List the game publicly so anyone can join",
             "type": "boolean"
+          },
+          "roster": {
+            "description": "Custom army of distinct recruit kinds, mirrored for the opponent; omit for a random army",
+            "items": {
+              "description": "Custom army of distinct recruit kinds, mirrored for the opponent; omit for a random army",
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
@@ -244,6 +255,15 @@
           },
           "namePlayer": {
             "type": "string"
+          },
+          "roster": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "seed": {
             "type": "string"

@@ -46,6 +46,7 @@ type Game struct {
 	NameEnemy   string
 	TokenPlayer string
 	TokenEnemy  string
+	Roster      []string
 	Public      bool
 	Status      Status
 	Winner      *Side

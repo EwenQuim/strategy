@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS games (
 	name_enemy    TEXT CHECK (name_enemy IS NULL OR length(name_enemy) BETWEEN 1 AND 20),
 	token_player TEXT NOT NULL,
 	token_enemy  TEXT,
+	roster       TEXT,
 	public       INTEGER NOT NULL CHECK (public IN (0, 1)),
 	status       TEXT NOT NULL CHECK (status IN ('waiting', 'active', 'finished')),
 	winner       TEXT CHECK (winner IS NULL OR winner IN ('player', 'enemy')),
@@ -69,6 +70,10 @@ func Open(path string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	if err := addRosterColumn(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	if _, err := db.Exec(lobbyIndex); err != nil {
 		_ = db.Close()
 		return nil, fmt.Errorf("create schema: %w", err)
@@ -91,6 +96,21 @@ func addPublicColumn(db *sql.DB) error {
 	return nil
 }
 
+// Databases created before custom rosters lack the column.
+func addRosterColumn(db *sql.DB) error {
+	var present int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('games') WHERE name = 'roster'`).Scan(&present); err != nil {
+		return err
+	}
+	if present > 0 {
+		return nil
+	}
+	if _, err := db.Exec(`ALTER TABLE games ADD COLUMN roster TEXT`); err != nil {
+		return fmt.Errorf("add roster column: %w", err)
+	}
+	return nil
+}
+
 func (s *Store) Close() error {
 	return s.db.Close()
 }
@@ -105,10 +125,15 @@ func (s *Store) Create(ctx context.Context, g game.Game) error {
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
+	var roster any
+	if len(g.Roster) > 0 {
+		payload, _ := json.Marshal(g.Roster)
+		roster = string(payload)
+	}
 	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO games (code, seed, name_player, token_player, public, status, version, created_at, updated_at)
-		 VALUES (?, ?, ?, ?, ?, 'waiting', 0, ?, ?)`,
-		g.Code, g.Seed, g.NamePlayer, g.TokenPlayer, g.Public, unix(g.CreatedAt), unix(g.UpdatedAt))
+		`INSERT INTO games (code, seed, name_player, token_player, roster, public, status, version, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, 'waiting', 0, ?, ?)`,
+		g.Code, g.Seed, g.NamePlayer, g.TokenPlayer, roster, g.Public, unix(g.CreatedAt), unix(g.UpdatedAt))
 	return err
 }
 
@@ -257,12 +282,13 @@ func (s *Store) Append(ctx context.Context, code string, version int, action gam
 func (s *Store) read(ctx context.Context, code string) (game.Game, error) {
 	var g game.Game
 	var public int
+	var roster sql.NullString
 	var nameEnemy, tokenEnemy, winner sql.NullString
 	var createdAt, updatedAt int64
 	err := s.db.QueryRowContext(ctx,
-		`SELECT code, seed, name_player, name_enemy, token_player, token_enemy, public, status, winner, version, created_at, updated_at
+		`SELECT code, seed, name_player, name_enemy, token_player, token_enemy, roster, public, status, winner, version, created_at, updated_at
 		 FROM games WHERE code = ?`, code).
-		Scan(&g.Code, &g.Seed, &g.NamePlayer, &nameEnemy, &g.TokenPlayer, &tokenEnemy, &public, &g.Status, &winner, &g.Version, &createdAt, &updatedAt)
+		Scan(&g.Code, &g.Seed, &g.NamePlayer, &nameEnemy, &g.TokenPlayer, &tokenEnemy, &roster, &public, &g.Status, &winner, &g.Version, &createdAt, &updatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return game.Game{}, game.ErrNotFound
 	}
@@ -271,6 +297,11 @@ func (s *Store) read(ctx context.Context, code string) (game.Game, error) {
 	}
 	g.NameEnemy = nameEnemy.String
 	g.TokenEnemy = tokenEnemy.String
+	if roster.Valid {
+		if err := json.Unmarshal([]byte(roster.String), &g.Roster); err != nil {
+			return game.Game{}, err
+		}
+	}
 	g.Public = public == 1
 	if winner.Valid {
 		side := game.Side(winner.String)

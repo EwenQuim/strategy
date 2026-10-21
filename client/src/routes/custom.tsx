@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Icon, PawnIcon } from '../components/Icon'
 import { ParticipantPanel } from '../components/ParticipantPanel'
 import { RosterStepper } from '../components/RosterStepper'
+import { readOnlineRoster } from '../onlineSession'
 import { defaultParticipant, participantBot } from '../bots/participants'
 import {
   BIOMES,
@@ -21,6 +22,7 @@ import {
   saveSymmetricPreference,
 } from '../preferences'
 import * as common from '../i18n/common'
+import * as lobby from '../i18n/onlineLobby'
 import * as m from '../i18n/menus'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
@@ -203,6 +205,16 @@ export const Route = createFileRoute('/custom')({
                   </tr>
                 </tfoot>
               </table>
+              <Button
+                type="button"
+                variant="ghost"
+                size="compact"
+                className="mt-2"
+                onClick={() => setPlayer(['king', ...readOnlineRoster()])}
+              >
+                <Icon name="shield" />
+                {lobby.useOnlineTeam}
+              </Button>
               <p className="text-xs leading-[1.5] text-muted">
                 {m.rosterLimits(MAP_WIDTH * 3)}
               </p>

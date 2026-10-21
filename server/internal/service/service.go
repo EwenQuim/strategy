@@ -44,7 +44,7 @@ type PlayerCredentials struct {
 	Game  game.Game
 }
 
-func (s *Service) Create(ctx context.Context, name string, public bool) (PlayerCredentials, error) {
+func (s *Service) Create(ctx context.Context, name string, public bool, roster []string) (PlayerCredentials, error) {
 	token, err := randomString(32, tokenAlphabet)
 	if err != nil {
 		return PlayerCredentials{}, err
@@ -63,6 +63,7 @@ func (s *Service) Create(ctx context.Context, name string, public bool) (PlayerC
 			Seed:        symmetricSeedPrefix + seed,
 			NamePlayer:  name,
 			TokenPlayer: hash(token),
+			Roster:      roster,
 			Public:      public,
 			Status:      game.Waiting,
 			CreatedAt:   s.now(),
