@@ -8,14 +8,21 @@ import type { Pawn } from './pawns/index.ts'
 // Round-boundary environment hazards: scheduled when a round starts, resolved
 // when it ends. They have no striker and take no turn, so they stay engine rules.
 // New environment events (collapsing tiles, ...) join this union.
-export type Hazard = { kind: 'hellfire'; centers: Axial[] }
+export type Hazard = { kind: 'hellfire'; centers: Axial[] } | { kind: 'sandstorm' }
+
+// While a sandstorm blows, every pawn starts the round with this much energy.
+export const STORM_ENERGY = 2
 
 const inBlast = (centers: readonly Axial[], at: Axial): boolean =>
   centers.some((center) => hexDist(center, at) <= 1)
 
 // Unavoidable damage the scheduled hazards deal at this position at round end.
 export function hazardDamage(hazards: readonly Hazard[], at: Axial): number {
-  return hazards.some((hazard) => inBlast(hazard.centers, at)) ? 1 : 0
+  return hazards.some((hazard) =>
+    hazard.kind === 'hellfire' ? inBlast(hazard.centers, at) : false,
+  )
+    ? 1
+    : 0
 }
 
 // Hellfire blast centers, for the board's warning markers.
@@ -24,16 +31,20 @@ export function hellfireCenters(hazards: readonly Hazard[]): Axial[] {
 }
 
 export function cloneHazards(hazards: readonly Hazard[]): Hazard[] {
-  return hazards.map((hazard) => ({
-    ...hazard,
-    centers: hazard.centers.map(({ q, r }) => ({ q, r })),
-  }))
+  return hazards.map((hazard) =>
+    hazard.kind === 'hellfire'
+      ? { ...hazard, centers: hazard.centers.map(({ q, r }) => ({ q, r })) }
+      : { ...hazard },
+  )
 }
 
 type Schedule = (state: GameState) => Pick<GameState, 'hazards' | 'randomState'>
 
 // Each biome schedules its own hazards; battles in the others run hazard-free.
-const SCHEDULERS: Partial<Record<Biome, Schedule>> = { hell: scheduleHellfire }
+const SCHEDULERS: Partial<Record<Biome, Schedule>> = {
+  hell: scheduleHellfire,
+  desert: scheduleSandstorm,
+}
 
 export function scheduleHazards(state: GameState): Pick<GameState, 'hazards' | 'randomState'> {
   return SCHEDULERS[state.biome]?.(state) ?? { hazards: [], randomState: state.randomState }
@@ -52,6 +63,15 @@ function scheduleHellfire(state: GameState): Pick<GameState, 'hazards' | 'random
   return {
     hazards: centers.length ? [{ kind: 'hellfire', centers }] : [],
     randomState: random.state,
+  }
+}
+
+// Every third round a sandstorm covers the whole desert: no damage, but every
+// pawn starts the round short of energy. It resolves at round end as a no-op.
+function scheduleSandstorm(state: GameState): Pick<GameState, 'hazards' | 'randomState'> {
+  return {
+    hazards: state.round % 3 ? [] : [{ kind: 'sandstorm' }],
+    randomState: state.randomState,
   }
 }
 

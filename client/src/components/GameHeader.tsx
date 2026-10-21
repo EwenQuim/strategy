@@ -4,6 +4,7 @@ import type { Campaign } from '../campaign'
 import type { Biome, Pawn, Side } from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
+import * as bf from '../i18n/battlefield'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
 import { campaignName } from '../i18n/campaign'
@@ -17,6 +18,7 @@ const headerButtonClassName =
 
 interface GameHeaderProps {
   biome: Biome
+  storm?: boolean
   mode: GameMode
   names: PlayerNames
   online?: OnlineSession
@@ -33,6 +35,7 @@ interface GameHeaderProps {
 
 export function GameHeader({
   biome,
+  storm,
   mode,
   names,
   online,
@@ -85,6 +88,15 @@ export function GameHeader({
                 : biomeNames[biome]}
             </span>
           </span>
+          {storm && (
+            <span
+              className="ml-1 shrink-0 rounded-full border border-[#e0b46e66] bg-[#e0b46e1a] px-2 py-[3px] text-[10px] font-semibold text-[#e8c88a]"
+              data-testid="sandstorm-banner"
+              role="status"
+            >
+              {bf.sandstorm}
+            </span>
+          )}
         </Link>
         <div className="flex shrink-0 items-center gap-1.5">
           {(local || isOnline) && pawn && !winner && (

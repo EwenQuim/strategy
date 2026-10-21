@@ -197,6 +197,7 @@ export function Game({
       )}
       <GameHeader
         biome={state.biome}
+        storm={state.hazards.some((hazard) => hazard.kind === 'sandstorm')}
         mode={mode}
         names={names}
         online={online}

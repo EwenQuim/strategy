@@ -1,5 +1,5 @@
 import { key } from './hex.ts'
-import { applyHazards, cloneHazards, scheduleHazards } from './hazards.ts'
+import { applyHazards, cloneHazards, scheduleHazards, STORM_ENERGY } from './hazards.ts'
 import type { Pawn, Side } from './pawns/index.ts'
 import type { BattleEffect, BattleFrame, GameState } from './engine.ts'
 
@@ -52,6 +52,8 @@ export function advanceTurn(
         pawn.specialUsed = false
       }
       ;({ hazards, randomState } = scheduleHazards({ ...state, pawns, round, randomState }))
+      if (hazards.some((hazard) => hazard.kind === 'sandstorm'))
+        for (const pawn of pawns) pawn.energy = Math.min(pawn.energy, STORM_ENERGY)
       active = 0
     }
     const next = pawns.find((p) => p.id === order[active])
