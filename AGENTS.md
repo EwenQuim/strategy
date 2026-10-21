@@ -12,6 +12,10 @@ Ideally, Hexmate could also be played as a physical tabletop game without an app
 
 Each PR aims for the smallest diff that still delivers its behavior; before opening one, cut everything the feature does not need. When a feature would add a lot of lines, ask whether it is really needed before building it. When a change starts stacking patches on patches, refactor the existing code instead of adding another layer.
 
+## Feature workflow
+
+Apply the `feature` skill (`.vibe/skills/feature/SKILL.md`) to any feature or bug fix beyond a trivial edit, whether or not it is invoked explicitly. It chains the rules in this file: smallest cut, test policy, prototype rules, review, and the PR conventions above.
+
 ## Constraints
 
 - Mobile-first: every change must work on a small portrait screen. The game screen is one fixed viewport (top info banner, board, bottom action banner), no scrolling.
