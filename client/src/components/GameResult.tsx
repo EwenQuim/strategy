@@ -7,10 +7,9 @@ import type { GameMode, PlayerNames } from '../lib/game-mode'
 import type { BotConfig } from '../bots/catalog'
 import type { SideBots } from '../bots/participants'
 import { Icon } from './Icon'
-import { primaryButtonClassName } from './styles'
+import { Button, ButtonLink } from './Button'
 
-const resultButtonClassName =
-  primaryButtonClassName + ' mt-5 min-h-12 [@media(max-height:650px)]:mt-3'
+const resultActionClassName = 'mt-5 [@media(max-height:650px)]:mt-3'
 
 interface GameResultProps {
   winner: Side | 'draw'
@@ -108,28 +107,30 @@ export function GameResult({
           <div className="flex flex-col items-center" data-testid="campaign-result-actions">
             {winner === 'player' ? (
               campaignLevel < campaign.levels.length ? (
-                <Link
+                <ButtonLink
                   to="/campaign/$campaign/$level"
                   params={{ campaign: campaign.slug, level: String(campaignLevel + 1) }}
-                  className={resultButtonClassName}
+                  variant="primary"
+                  className={resultActionClassName}
                   preload={false}
                 >
                   {m.nextLevel}
                   <Icon name="arrow" />
-                </Link>
+                </ButtonLink>
               ) : (
-                <Link
+                <ButtonLink
                   to="/campaign/$campaign"
                   params={{ campaign: campaign.slug }}
-                  className={resultButtonClassName}
+                  variant="primary"
+                  className={resultActionClassName}
                 >
                   {m.backToCampaign}
-                </Link>
+                </ButtonLink>
               )
             ) : (
-              <button className={resultButtonClassName} onClick={onRestart}>
+              <Button variant="primary" className={resultActionClassName} onClick={onRestart}>
                 {m.retryLevel}
-              </button>
+              </Button>
             )}
             {!(winner === 'player' && campaignLevel === campaign.levels.length) && (
               <Link
@@ -143,12 +144,17 @@ export function GameResult({
             {!progressSaved && <p role="status">{m.progressNotSaved}</p>}
           </div>
         ) : isOnline ? (
-          <Link to="/online" className={resultButtonClassName} preload={false}>
+          <ButtonLink
+            to="/online"
+            variant="primary"
+            className={resultActionClassName}
+            preload={false}
+          >
             {m.newOnlineGame}
             <Icon name="arrow" />
-          </Link>
+          </ButtonLink>
         ) : (
-          <Link
+          <ButtonLink
             to="/game"
             search={{
               mode,
@@ -156,12 +162,13 @@ export function GameResult({
               sideBots,
               setup: setup?.map === undefined ? setup : undefined,
             }}
-            className={resultButtonClassName}
+            variant="primary"
+            className={resultActionClassName}
             preload={false}
           >
             {m.newGame}
             <Icon name="arrow" />
-          </Link>
+          </ButtonLink>
         )}
       </div>
     </div>

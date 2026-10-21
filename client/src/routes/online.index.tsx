@@ -1,12 +1,7 @@
-import {
-  buttonClassName,
-  menuCardClassName,
-  menuInputClassName,
-  menuPrimaryButtonClassName,
-  switchClassName,
-} from '../components/styles'
+import { Button, ButtonLink } from '../components/Button'
+import { menuCardClassName, menuInputClassName, switchClassName } from '../components/styles'
 import { MenuLayout } from '../components/MenuLayout'
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useQueries } from '@tanstack/react-query'
 import { useState } from 'react'
 import * as common from '../i18n/common'
@@ -30,9 +25,6 @@ import {
   saveStoredGame,
 } from '../onlineSession.ts'
 import type { StoredGame } from '../lib/online.ts'
-
-const onlineButtonClassName =
-  buttonClassName + ' min-h-13 justify-center gap-3 rounded-xl border-line'
 
 type OnlineSearch = { join?: string; failed?: number }
 
@@ -164,14 +156,10 @@ export const Route = createFileRoute('/online/')({
               }}
             />
           </label>
-          <button
-            type="submit"
-            disabled={!trimmedName || busy}
-            className={menuPrimaryButtonClassName}
-          >
+          <Button type="submit" disabled={!trimmedName || busy} variant="primary">
             {m.createGame}
             <Icon name="arrow" />
-          </button>
+          </Button>
         </form>
         <form
           className={
@@ -203,17 +191,14 @@ export const Route = createFileRoute('/online/')({
               onChange={(event) => setCode(event.target.value.toUpperCase())}
             />
           </label>
-          <button
+          <Button
             type="submit"
             disabled={!trimmedName || joinCode.length !== 6 || busy}
-            className={
-              onlineButtonClassName +
-              ' gap-3 px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
-            }
+            variant="secondary"
           >
             {m.joinGame}
             <Icon name="hex" />
-          </button>
+          </Button>
         </form>
         {error && (
           <p role="alert" className="text-sm text-[#e0a586]">
@@ -229,7 +214,7 @@ export const Route = createFileRoute('/online/')({
               {m.availableGames}
             </h2>
             {openGames.map((open) => (
-              <button
+              <Button
                 key={open.code}
                 type="button"
                 disabled={!trimmedName || busy}
@@ -240,16 +225,13 @@ export const Route = createFileRoute('/online/')({
                     return game.code
                   })
                 }
-                className={
-                  onlineButtonClassName +
-                  ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c] disabled:opacity-50'
-                }
+                className="w-full"
               >
-                <span className="font-mono tracking-[0.2em]">{open.code}</span>
+                <span className="flex-1 text-left font-mono tracking-[0.2em]">{open.code}</span>
                 <span className="min-w-0 text-xs text-muted wrap-anywhere">
                   {m.hostedBy(open.namePlayer)}
                 </span>
-              </button>
+              </Button>
             ))}
           </section>
         )}
@@ -280,17 +262,16 @@ export const Route = createFileRoute('/online/')({
                 const doc = docs[index]?.data
                 const missing = docs[index]?.isError
                 return (
-                  <Link
+                  <ButtonLink
                     key={game.code}
                     to="/online/$code"
                     params={{ code: game.code }}
-                    className={
-                      onlineButtonClassName +
-                      ' justify-between px-4 py-3 text-left bg-[#ffffff04] hover:bg-[#ffffff0c]'
-                    }
+                    className="w-full"
                     preload={false}
                   >
-                    <span className="font-mono tracking-[0.2em]">{game.code}</span>
+                    <span className="flex-1 text-left font-mono tracking-[0.2em]">
+                      {game.code}
+                    </span>
                     <span className="min-w-0 text-xs text-muted wrap-anywhere">
                       {!doc
                         ? missing
@@ -302,7 +283,7 @@ export const Route = createFileRoute('/online/')({
                             ? m.finished
                             : m.versus(doc.namePlayer, doc.nameEnemy)}
                     </span>
-                  </Link>
+                  </ButtonLink>
                 )
               })}
           </section>

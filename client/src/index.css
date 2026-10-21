@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/cinzel-latin-600.woff2') format('woff2');
+}
+
 @theme inline {
   --color-ink: var(--ink);
   --color-muted: var(--muted);
@@ -8,6 +16,7 @@
 }
 
 @theme {
+  --font-brand: 'Cinzel', Georgia, serif;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-serif: Georgia, serif;
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
@@ -17,7 +26,7 @@
   :root {
     font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
     color: #eee9d7;
-    background: #14271f;
+    background: #101f1b;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

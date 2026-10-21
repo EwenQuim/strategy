@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type CSSProperties } from 'react'
-import { iconButtonClassName, primaryButtonClassName } from './styles'
+import { Button } from './Button'
 import { Icon } from './Icon'
 import { ElementArt } from './BriefingElements'
 import type { CampaignLevel } from '../campaign'
@@ -70,9 +70,9 @@ function BriefingPopup({
           {title}
         </h2>
         <form method="dialog">
-          <button type="submit" className={iconButtonClassName} aria-label={common.closeDialog}>
+          <Button type="submit" variant="ghost" size="icon" aria-label={common.closeDialog}>
             <Icon name="close" />
-          </button>
+          </Button>
         </form>
       </header>
       <div
@@ -173,15 +173,16 @@ function BriefingPopup({
       <footer className="shrink-0 border-t border-line bg-black/15 px-5 pt-2 pb-5 max-[360px]:px-4 [@media(max-height:650px)]:pb-3">
         {elements.length > 1 && (
           <nav aria-label={title} className="mb-2 flex items-center justify-between gap-2">
-            <button
+            <Button
               type="button"
-              className={iconButtonClassName}
+              variant="ghost"
+              size="icon"
               disabled={page === 0}
               onClick={() => setPage(page - 1)}
               aria-label={b.previous}
             >
               <Icon name="arrow" className="rotate-180" />
-            </button>
+            </Button>
             <div className="flex min-w-0 items-center justify-center">
               {elements.map((item, index) => (
                 <button
@@ -202,29 +203,24 @@ function BriefingPopup({
                 </button>
               ))}
             </div>
-            <button
+            <Button
               type="button"
-              className={iconButtonClassName}
+              variant="ghost"
+              size="icon"
               disabled={page === elements.length - 1}
               onClick={() => setPage(page + 1)}
               aria-label={b.next}
             >
               <Icon name="arrow" />
-            </button>
+            </Button>
           </nav>
         )}
         <form method="dialog">
-          <button
-            type="submit"
-            className={
-              primaryButtonClassName +
-              ' min-h-12 w-full rounded-xl bg-gradient-to-b from-[#f2dfac] to-gold shadow-[0_4px_0_#0003,inset_0_1px_0_#fff7] active:translate-y-px'
-            }
-          >
+          <Button type="submit" variant="primary" className="w-full">
             <Icon name="sword" />
             {m.go}
             <Icon name="arrow" />
-          </button>
+          </Button>
         </form>
       </footer>
     </dialog>

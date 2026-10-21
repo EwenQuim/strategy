@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import type { GameState, Side } from '../lib/engine'
-import { buttonClassName, iconButtonClassName } from './styles'
+import { Button } from './Button'
 import { Icon } from './Icon'
 import * as m from '../i18n/game'
 import * as b from '../i18n/briefing-popup'
@@ -161,13 +161,15 @@ export function GameTour({ state, onDone }: { state: GameState; onDone: () => vo
               {step + 1}/{steps.length}
             </span>
           </p>
-          <button
+          <Button
             type="button"
-            className="-my-2 -mr-2 min-h-11 shrink-0 rounded-lg px-2 text-xs font-semibold text-muted hover:bg-white/5 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            variant="ghost"
+            size="compact"
+            className="-my-2 -mr-2"
             onClick={onDone}
           >
             {t.skip}
-          </button>
+          </Button>
         </div>
         <div className="mt-2 flex gap-1" aria-hidden="true">
           {steps.map((item, index) => (
@@ -185,29 +187,20 @@ export function GameTour({ state, onDone }: { state: GameState; onDone: () => vo
         <p className="mt-1.5 text-[13px] leading-relaxed text-ink/80">{current.body}</p>
         <div className="mt-3 flex items-center justify-between gap-2">
           {step > 0 && (
-            <button
+            <Button
               type="button"
-              className={
-                iconButtonClassName + ' focus-visible:outline-2 focus-visible:outline-gold'
-              }
+              variant="ghost"
+              size="icon"
               onClick={() => setStep(step - 1)}
               aria-label={b.previous}
             >
               <Icon name="arrow" className="rotate-180" />
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
-            autoFocus
-            className={
-              buttonClassName +
-              ' ml-auto min-h-11 justify-center gap-3 rounded-xl border-transparent bg-gold bg-linear-to-b from-white/20 to-transparent px-4 text-[15px] text-[var(--biome-panel,#20362b)] shadow-[0_2px_0_#0003,inset_0_1px_0_#fff4] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:translate-y-px'
-            }
-            onClick={next}
-          >
+          <Button type="button" autoFocus variant="primary" className="ml-auto" onClick={next}>
             {last ? m.go : b.next}
             <Icon name="arrow" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

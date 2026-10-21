@@ -1,8 +1,5 @@
-import {
-  buttonClassName,
-  menuCardClassName,
-  menuPrimaryButtonClassName,
-} from '../components/styles'
+import { menuCardClassName } from '../components/styles'
+import { Button } from '../components/Button'
 import { MenuLayout } from '../components/MenuLayout'
 import { Icon } from '../components/Icon'
 import { createFileRoute, redirect } from '@tanstack/react-router'
@@ -75,9 +72,10 @@ export const Route = createFileRoute('/online/$code')({
                   {code}
                 </div>
                 {typeof navigator.share === 'function' && (
-                  <button
+                  <Button
                     type="button"
-                    className={menuPrimaryButtonClassName + ' w-full'}
+                    variant="primary"
+                    className="w-full"
                     onClick={() => {
                       navigator
                         .share({
@@ -90,20 +88,16 @@ export const Route = createFileRoute('/online/$code')({
                   >
                     {m.shareInvite}
                     <Icon name="arrow" />
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
                   type="button"
-                  className={
-                    typeof navigator.share === 'function'
-                      ? buttonClassName +
-                        ' min-h-13 w-full justify-center gap-3 rounded-xl border-line px-[25px] bg-[#ffffff04] text-ink hover:bg-[#ffffff0c]'
-                      : menuPrimaryButtonClassName + ' w-full'
-                  }
+                  variant={typeof navigator.share === 'function' ? 'secondary' : 'primary'}
+                  className="w-full"
                   onClick={() => void navigator.clipboard?.writeText(code)}
                 >
                   {m.copyCode}
-                </button>
+                </Button>
               </>
             )}
           </div>
