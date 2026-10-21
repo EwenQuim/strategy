@@ -142,6 +142,27 @@ export const hellfire = t({
   es: 'Fuego infernal',
   it: 'Fuoco infernale',
 })
+export const shoal = t({
+  en: 'Shoals',
+  fr: 'Hauts-fonds',
+  de: 'Sandbänke',
+  es: 'Bajíos',
+  it: 'Secche',
+})
+export const tideStrikes = t({
+  en: 'Shoals are always walkable, but when an even round ends the rising tide strikes everyone standing on them.',
+  fr: 'Les hauts-fonds sont toujours franchissables, mais à la fin de chaque round pair, la marée montante frappe tous ceux qui s’y trouvent.',
+  de: 'Sandbänke sind immer begehbar, aber am Ende jedes geraden Rundenschlags die steigende Gezeit alle, die darauf stehen.',
+  es: 'Los bajíos siempre son transitables, pero al terminar cada ronda par, la marea creciente golpea a quien esté sobre ellos.',
+  it: 'Le secche sono sempre attraversabili, ma alla fine di ogni round pari la marea crescente colpisce chi vi si trova.',
+})
+export const archipel = t({
+  en: 'Tidal Archipelago',
+  fr: 'Archipel des marées',
+  de: 'Gezeiten-Archipel',
+  es: 'Archipiélago de mareas',
+  it: 'Arcipelago delle maree',
+})
 export const blockWalking = t({
   en: 'Block walking and Charge',
   fr: 'Bloquent la marche et la Charge',

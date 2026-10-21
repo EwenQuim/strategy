@@ -108,6 +108,20 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
       points: [b.runeEnergy, b.runeSingleUse],
     },
   ],
+  shoal: [
+    {
+      name: b.shoal,
+      art: 'shoal',
+      points: [b.tideStrikes],
+    },
+  ],
+  archipel: [
+    {
+      name: b.archipel,
+      art: 'shoal',
+      points: [b.tideStrikes],
+    },
+  ],
   hell: [
     {
       name: b.hellfire,
