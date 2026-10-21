@@ -6,7 +6,8 @@ import * as game from '../i18n/game'
 import * as m from '../i18n/help'
 import { ElementArt, StatChip } from './BriefingElements'
 import { Icon, type IconName } from './Icon'
-import { dialogClassName, dividedListClassName, iconButtonClassName } from './styles'
+import { dialogClassName, dividedListClassName } from './styles'
+import { Button } from './Button'
 
 const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
   ['E', game.endTurn],
@@ -195,13 +196,14 @@ export function GameHelpDialog({ dialogRef, biome, presentKinds }: GameHelpDialo
         <h2 className="font-serif text-[30px] leading-tight" id="dialog-title">
           {game.howToPlay}
         </h2>
-        <button
-          className={iconButtonClassName}
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => dialogRef.current?.close()}
           aria-label={common.closeDialog}
         >
           <Icon name="close" />
-        </button>
+        </Button>
       </div>
       {/* Shortcuts need a keyboard, so touch-only players never see that tab. */}
       <div

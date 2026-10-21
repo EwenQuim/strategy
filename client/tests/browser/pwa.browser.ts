@@ -336,7 +336,7 @@ test(
     }
     await page.setViewportSize({ width: 844, height: 390 })
     assert.ok(
-      (await page.getByRole('heading', { name: 'Hexmate.', exact: true }).boundingBox())!.y >=
+      (await page.getByRole('heading', { name: 'Bellirion', exact: true }).boundingBox())!.y >=
         0,
     )
     const settingsInLandscape = await page

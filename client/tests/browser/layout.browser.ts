@@ -92,7 +92,7 @@ test(
     }
     await page.setViewportSize({ width: 320, height: 568 })
     await page.goto(origin + base)
-    await page.getByRole('heading', { name: 'Hexmate.', exact: true }).waitFor()
+    await page.getByRole('heading', { name: 'Bellirion', exact: true }).waitFor()
     const online = page.getByRole('link', { name: 'Online', exact: true })
     assert.equal(await online.getAttribute('aria-disabled'), 'true')
     assert.equal(await online.getAttribute('tabindex'), '-1')
@@ -104,7 +104,7 @@ test(
     await page.keyboard.press('Escape')
     await tour.waitFor({ state: 'hidden' })
     await page.getByRole('link', { name: 'Campaign levels', exact: true }).click()
-    await page.getByRole('heading', { name: 'Hexmate.', exact: true }).waitFor()
+    await page.getByRole('heading', { name: 'Bellirion', exact: true }).waitFor()
     await page.getByRole('link', { name: 'Achievements', exact: true }).click()
     await page.getByRole('heading', { name: 'Achievements', exact: true }).waitFor()
     await page.getByRole('link', { name: 'Back to home' }).click()

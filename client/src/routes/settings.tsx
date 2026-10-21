@@ -1,12 +1,8 @@
+import { Button } from '../components/Button'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { MenuLayout } from '../components/MenuLayout'
-import {
-  dialogClassName,
-  iconButtonClassName,
-  menuCardClassName,
-  switchClassName,
-} from '../components/styles'
+import { dialogClassName, menuCardClassName, switchClassName } from '../components/styles'
 import { Icon } from '../components/Icon'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
@@ -131,21 +127,22 @@ export const Route = createFileRoute('/settings')({
             <h2 className="font-serif text-[30px] leading-tight" id="delete-data-title">
               {s.deleteDataWarningTitle}
             </h2>
-            <button
-              className={iconButtonClassName}
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => deleteDialogRef.current?.close()}
               aria-label={common.closeDialog}
             >
               <Icon name="close" />
-            </button>
+            </Button>
           </div>
           <p className="min-h-0 flex-1 overflow-y-auto px-6 pt-5 text-[14px] leading-normal text-muted">
             {s.deleteDataWarning}
           </p>
           <div className="flex shrink-0 flex-col gap-2.5 px-6 pt-2 pb-6">
-            <button
+            <Button
               type="button"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-red-400/60 bg-red-600/30 px-[25px] text-[15px] font-semibold text-red-100 active:translate-y-px hover:bg-red-600/40"
+              variant="danger"
               onClick={() => {
                 clearLocalData()
                 setDeveloperPreview(false)
@@ -154,14 +151,14 @@ export const Route = createFileRoute('/settings')({
               }}
             >
               {s.deleteDataConfirm}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-white/5 px-[25px] text-[15px] font-semibold text-ink hover:bg-white/10"
+              variant="secondary"
               onClick={() => deleteDialogRef.current?.close()}
             >
               {cancel}
-            </button>
+            </Button>
           </div>
         </dialog>
         <div className="mt-auto py-3 text-center text-xs leading-relaxed text-muted">

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { MenuBackground } from './MenuBackground'
-import { Link } from '@tanstack/react-router'
+import { ButtonLink } from './Button'
 import { Icon } from './Icon'
 import * as common from '../i18n/common'
 import * as n from '../i18n/navigation'
@@ -28,7 +28,7 @@ export function MenuLayout({
           ' mx-auto flex w-full shrink-0 items-center gap-3 px-[max(12px,env(safe-area-inset-left))] pt-[max(12px,env(safe-area-inset-top))] pb-3 pr-[max(12px,env(safe-area-inset-right))] min-[900px]:px-[max(24px,env(safe-area-inset-left))] min-[900px]:pr-[max(24px,env(safe-area-inset-right))] [@media(min-width:900px)_and_(min-height:651px)]:pt-[max(32px,env(safe-area-inset-top))] [@media(min-width:900px)_and_(min-height:651px)]:pb-6'
         }
       >
-        <Link
+        <ButtonLink
           to={backTo}
           preload={false}
           aria-label={
@@ -38,10 +38,11 @@ export function MenuLayout({
                 ? common.backToLobby
                 : common.backToHome
           }
-          className="grid size-11 shrink-0 place-items-center rounded-2xl border border-line bg-white/5 text-gold hover:bg-white/10"
+          variant="ghost"
+          size="icon"
         >
           <Icon name="arrow" className="size-5 rotate-180" />
-        </Link>
+        </ButtonLink>
         <div className="min-w-0">
           <h1 className="text-2xl leading-tight font-bold tracking-tight min-[900px]:text-[32px] [@media(max-height:650px)]:text-xl">
             {title}

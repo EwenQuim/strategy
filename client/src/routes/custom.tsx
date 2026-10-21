@@ -1,8 +1,5 @@
-import {
-  menuCardClassName,
-  menuInputClassName,
-  menuPrimaryButtonClassName,
-} from '../components/styles'
+import { menuCardClassName, menuInputClassName } from '../components/styles'
+import { Button } from '../components/Button'
 import { MenuLayout } from '../components/MenuLayout'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -211,14 +208,10 @@ export const Route = createFileRoute('/custom')({
               </p>
             </section>
           </div>
-          <button
-            type="submit"
-            disabled={!sideBots}
-            className={menuPrimaryButtonClassName + ' mt-auto shrink-0 disabled:opacity-50'}
-          >
+          <Button type="submit" disabled={!sideBots} variant="primary" className="mt-auto">
             {m.startBattle}
             <Icon name="arrow" />
-          </button>
+          </Button>
         </form>
       </MenuLayout>
     )
