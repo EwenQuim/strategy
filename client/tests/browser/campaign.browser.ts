@@ -835,7 +835,16 @@ test(
     page.on('pageerror', (error) => errors.push(error.message))
     for (const slug of ['tutorial', 'original']) {
       const pack = CAMPAIGNS.find((candidate) => candidate.slug === slug)!
-      const level = pack.levels[0]
+      const level =
+        slug === 'tutorial'
+          ? pack.levels[0]
+          : pack.levels.find((candidate) => candidate.unlocks.includes('bomber'))!
+      if (slug === 'original') {
+        await page.evaluate(({ key, cleared }) => localStorage.setItem(key, String(cleared)), {
+          key: CAMPAIGN_STORAGE_KEY,
+          cleared: level.id - 1,
+        })
+      }
       const actions = victoryActions(level)
       let state = initialState(level.seed, level.setup, 'player')
       for (const action of actions.slice(0, -1)) state = transition(state, action).state
@@ -850,7 +859,7 @@ test(
         (snapshot) => localStorage.setItem('hexmate.battle', JSON.stringify(snapshot)),
         saved,
       )
-      await page.goto(origin + base + 'campaign/' + slug + '/1')
+      await page.goto(origin + base + 'campaign/' + slug + '/' + level.id)
       // The tutorial pack teaches through the tour; other packs still open their briefing.
       await dismissTour(page)
       const briefing = page.getByRole('dialog', { name: 'Battle briefing', exact: true })
@@ -865,11 +874,11 @@ test(
       await playInUi(page, state, actions.at(-1)!)
       await page.getByTestId('battle-result').waitFor()
       const toast = page.getByTestId('unit-unlock-toast')
-      await toast.waitFor()
-      assert.match(
-        await toast.innerText(),
-        new RegExp(unitNames[level.unlocks[0]] + ' unlocked!'),
-      )
+      if (slug === 'original') {
+        await toast.waitFor()
+        assert.match(await toast.innerText(), new RegExp(unitNames.bomber + ' unlocked!'))
+        assert.match(await toast.innerText(), /Available in all modes/)
+      } else assert.equal(await toast.count(), 0)
       if (slug === 'tutorial') {
         assert.equal(
           await page.evaluate(() => localStorage.getItem('hexmate.achievements')),
@@ -884,11 +893,13 @@ test(
           () => JSON.parse(localStorage.getItem('hexmate.achievements') ?? '[]').length > 0,
         )
       }
-      for (const viewport of [
-        { width: 280, height: 480 },
-        { width: 390, height: 844 },
-        { width: 844, height: 390 },
-      ]) {
+      for (const viewport of slug === 'tutorial'
+        ? []
+        : [
+            { width: 280, height: 480 },
+            { width: 390, height: 844 },
+            { width: 844, height: 390 },
+          ]) {
         await page.setViewportSize(viewport)
         assert.ok(
           await toast.evaluate((element) => {
@@ -903,7 +914,7 @@ test(
           }),
         )
       }
-      if (process.env.PR_MEDIA_DIR) {
+      if (process.env.PR_MEDIA_DIR && slug === 'original') {
         await page.setViewportSize({ width: 390, height: 844 })
         await page.evaluate(
           () =>

@@ -16,6 +16,7 @@ import * as common from '../i18n/common'
 import * as online from '../i18n/online'
 import * as m from '../i18n/onlineLobby'
 import { randomUnlockedRoster, useUnlockedUnits } from '../unitProgress'
+import * as campaign from '../i18n/campaign'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
@@ -116,6 +117,11 @@ export function OnlinePlayPanel({
             <Icon name="arrow" className="size-4 group-open:rotate-90" />
           </summary>
           <p className="mb-3 text-xs leading-relaxed text-muted">{m.selectionHint}</p>
+          {recruits.some((pawn) => !unlocked.includes(pawn.kind)) && (
+            <p className="mb-3 text-xs leading-relaxed text-muted">
+              {campaign.unlockRecruitsHint}
+            </p>
+          )}
           <fieldset className="grid grid-cols-2 gap-2">
             <legend className="sr-only">{m.editTeam}</legend>
             {recruits.map((pawn) => {

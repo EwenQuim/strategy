@@ -15,12 +15,19 @@ export const unitUnlocked = t({
   es: (unit: string) => `¡${unit} desbloqueado!`,
   it: (unit: string) => `${unit} sbloccato!`,
 })
-export const playNextLevel = t({
-  en: 'Command this unit in the next battle.',
-  fr: 'Commandez cette unité au prochain combat.',
-  de: 'Befehle dieser Einheit in der nächsten Schlacht.',
-  es: 'Controla esta unidad en la próxima batalla.',
-  it: 'Comanda questa unità nella prossima battaglia.',
+export const availableInAllModes = t({
+  en: 'Available in all modes.',
+  fr: 'Disponible dans tous les modes.',
+  de: 'In allen Spielmodi verfügbar.',
+  es: 'Disponible en todos los modos.',
+  it: 'Disponibile in tutte le modalità.',
+})
+export const unlockRecruitsHint = t({
+  en: 'Win against locked units in campaign to unlock them.',
+  fr: 'Battez les unités verrouillées en campagne pour les débloquer.',
+  de: 'Besiege gesperrte Einheiten in der Kampagne, um sie freizuschalten.',
+  es: 'Vence a las unidades bloqueadas en la campaña para desbloquearlas.',
+  it: 'Sconfiggi le unità bloccate nella campagna per sbloccarle.',
 })
 
 export const campaignNames: Record<
