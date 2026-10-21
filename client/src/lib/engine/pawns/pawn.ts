@@ -46,6 +46,8 @@ export type SpecialTextKey =
   | 'chooseEnemy'
   | 'aimedShot'
   | 'aimedShotDescription'
+  | 'sniperShot'
+  | 'sniperShotDescription'
   | 'noEnemiesInRange'
   | 'fireball'
   | 'fireballDescription'
