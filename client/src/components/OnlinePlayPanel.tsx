@@ -3,8 +3,13 @@ import { Button } from './Button'
 import { Icon, PawnIcon } from './Icon'
 import { menuCardClassName, menuInputClassName, smallSwitchClassName } from './styles'
 import { RECRUIT_CLASSES, type PawnKind } from '../lib/engine'
-import { readPublicHosting, savePlayerName, savePublicHosting } from '../onlineSession'
-import { readLocal, saveLocal } from '../storage'
+import {
+  readOnlineRoster,
+  readPublicHosting,
+  saveOnlineRoster,
+  savePlayerName,
+  savePublicHosting,
+} from '../onlineSession'
 import { unitNames } from '../i18n/units'
 import { specialTexts } from '../i18n/specialTexts'
 import * as common from '../i18n/common'
@@ -12,18 +17,6 @@ import * as online from '../i18n/online'
 import * as m from '../i18n/onlineLobby'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
-const rosterKey = 'hexmate.online.roster'
-const starter: PawnKind[] = ['swordsman', 'archer', 'magician', 'ninja', 'bulwark']
-
-function readRoster(): PawnKind[] {
-  return readLocal(rosterKey, starter, (raw) => {
-    const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return starter
-    return [...new Set(parsed)]
-      .filter((kind): kind is PawnKind => recruits.some((pawn) => pawn.kind === kind))
-      .slice(0, 5)
-  })
-}
 
 export function OnlinePlayPanel({
   name,
@@ -37,7 +30,7 @@ export function OnlinePlayPanel({
   onCreate: (publicGame: boolean, roster?: PawnKind[]) => void
 }) {
   const [publicHosting, setPublicHosting] = useState(readPublicHosting)
-  const [roster, setRoster] = useState(readRoster)
+  const [roster, setRoster] = useState(readOnlineRoster)
   const [storageFailed, setStorageFailed] = useState(false)
   const teamEditor = useRef<HTMLDetailsElement>(null)
   const toggleTeamEditor = () => {
@@ -137,7 +130,7 @@ export function OnlinePlayPanel({
                         ? roster.filter((kind) => kind !== pawn.kind)
                         : [...roster, pawn.kind]
                       setRoster(next)
-                      setStorageFailed(!saveLocal(rosterKey, JSON.stringify(next)))
+                      setStorageFailed(!saveOnlineRoster(next))
                       if (next.length === 5 && teamEditor.current) {
                         teamEditor.current.open = false
                       }

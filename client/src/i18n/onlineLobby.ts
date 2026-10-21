@@ -35,6 +35,13 @@ export const selectionHint = t({
   es: 'Quita una unidad seleccionada para elegir otra.',
   it: 'Rimuovi una delle unità selezionate per sceglierne un’altra.',
 })
+export const useOnlineTeam = t({
+  en: 'Use my online team',
+  fr: 'Utiliser mon équipe en ligne',
+  de: 'Mein Online-Team verwenden',
+  es: 'Usar mi equipo en línea',
+  it: 'Usa la mia squadra online',
+})
 export const privateGame = t({
   en: 'Private game',
   fr: 'Partie privée',
