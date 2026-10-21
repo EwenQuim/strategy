@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import type { OnlineSession } from '../api/useGame'
 import type { Campaign } from '../campaign'
+import { campaignReturnTo } from '../campaignHistory'
 import type { Biome, Pawn, Side } from '../lib/engine'
 import * as common from '../i18n/common'
 import * as m from '../i18n/game'
@@ -66,7 +67,7 @@ export function GameHeader({
     >
       <div className="m-auto flex min-h-[50px] max-w-[1040px] items-center justify-between min-[900px]:min-h-[53px] [@media(max-height:650px)]:min-h-[43px] [@media(min-width:600px)_and_(max-height:480px)]:min-h-[42px]">
         <Link
-          to={campaign ? '/campaign/$campaign' : isOnline ? '/online' : '/'}
+          to={campaign ? campaignReturnTo(campaign) : isOnline ? '/online' : '/'}
           params={campaign ? { campaign: campaign.slug } : undefined}
           className="flex min-h-11 min-w-0 items-center gap-2.5 text-base leading-none font-bold tracking-tight"
           aria-label={campaign ? common.campaignLevels : isOnline ? m.onlineLobby : m.home}
