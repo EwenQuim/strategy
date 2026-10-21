@@ -8,14 +8,7 @@ import { ParticipantPanel } from '../components/ParticipantPanel'
 import { RosterStepper } from '../components/RosterStepper'
 import { readOnlineRoster } from '../onlineSession'
 import { defaultParticipant, participantBot } from '../bots/participants'
-import {
-  BIOMES,
-  MAP_WIDTH,
-  RECRUIT_CLASSES,
-  randomArmy,
-  type Biome,
-  type Pawn,
-} from '../lib/engine'
+import { BIOMES, MAP_WIDTH, RECRUIT_CLASSES, type Biome, type Pawn } from '../lib/engine'
 import {
   readDeveloperPreview,
   readSymmetricPreference,
@@ -26,13 +19,16 @@ import * as lobby from '../i18n/onlineLobby'
 import * as m from '../i18n/menus'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
+import { randomUnlockedRoster, useUnlockedUnits } from '../unitProgress'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
 // The default roster rolls fresh on every visit, like quick play, so players
 // start from a new random army instead of editing their way to one.
-const randomDefaultRoster = () =>
-  randomArmy({ next: Math.random }).map((Unit) => new Unit(0, 0, 0, 'player').kind)
+const randomDefaultRoster = (): Pawn['kind'][] => [
+  'king',
+  ...randomUnlockedRoster({ next: Math.random }),
+]
 
 export const Route = createFileRoute('/custom')({
   component: function CustomPlay() {
@@ -43,6 +39,7 @@ export const Route = createFileRoute('/custom')({
     const [symmetric, setSymmetric] = useState(readSymmetricPreference)
     const [developerPreview] = useState(readDeveloperPreview)
     const [player, setPlayer] = useState<Pawn['kind'][]>(randomDefaultRoster)
+    const unlocked = useUnlockedUnits()
     const [enemy, setEnemy] = useState<Pawn['kind'][] | null>(null)
     const enemyRoster = enemy ?? player
     const labels = m.localSides
@@ -160,10 +157,17 @@ export const Route = createFileRoute('/custom')({
                     <td className="w-[30%] text-center">1</td>
                   </tr>
                   {recruits.map(({ kind }) => (
-                    <tr key={kind}>
+                    <tr
+                      key={kind}
+                      className={unlocked.includes(kind) ? undefined : 'opacity-50'}
+                    >
                       <th className="text-left font-medium" scope="row">
                         <span className="flex items-center gap-2 capitalize">
-                          <PawnIcon kind={kind} />
+                          {unlocked.includes(kind) ? (
+                            <PawnIcon kind={kind} />
+                          ) : (
+                            <Icon name="lock" />
+                          )}
                           {unitNames[kind]}
                         </span>
                       </th>
@@ -176,10 +180,12 @@ export const Route = createFileRoute('/custom')({
                         return (
                           <td className="w-[30%] text-center" key={side}>
                             <RosterStepper
-                              count={count}
+                              count={unlocked.includes(kind) ? count : 0}
                               max={max}
                               label={labels[side] + ' ' + unitNames[kind]}
-                              disabled={side === 1 && enemy === null}
+                              disabled={
+                                !unlocked.includes(kind) || (side === 1 && enemy === null)
+                              }
                               onChange={(value) => {
                                 const next = [
                                   ...roster.filter((unit) => unit !== kind),

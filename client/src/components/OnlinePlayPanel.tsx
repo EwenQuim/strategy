@@ -15,6 +15,7 @@ import { specialTexts } from '../i18n/specialTexts'
 import * as common from '../i18n/common'
 import * as online from '../i18n/online'
 import * as m from '../i18n/onlineLobby'
+import { randomUnlockedRoster, useUnlockedUnits } from '../unitProgress'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
@@ -31,6 +32,7 @@ export function OnlinePlayPanel({
 }) {
   const [publicHosting, setPublicHosting] = useState(readPublicHosting)
   const [roster, setRoster] = useState(readOnlineRoster)
+  const unlocked = useUnlockedUnits()
   const [storageFailed, setStorageFailed] = useState(false)
   const teamEditor = useRef<HTMLDetailsElement>(null)
   const toggleTeamEditor = () => {
@@ -118,13 +120,17 @@ export function OnlinePlayPanel({
             <legend className="sr-only">{m.editTeam}</legend>
             {recruits.map((pawn) => {
               const selected = roster.includes(pawn.kind)
+              const locked = !unlocked.includes(pawn.kind)
               return (
-                <label key={pawn.kind} className="relative cursor-pointer">
+                <label
+                  key={pawn.kind}
+                  className={'relative ' + (locked ? 'cursor-not-allowed' : 'cursor-pointer')}
+                >
                   <input
                     type="checkbox"
                     className="peer sr-only"
                     checked={selected}
-                    disabled={!selected && roster.length === 5}
+                    disabled={locked || (!selected && roster.length === 5)}
                     onChange={() => {
                       const next = selected
                         ? roster.filter((kind) => kind !== pawn.kind)
@@ -138,15 +144,17 @@ export function OnlinePlayPanel({
                   />
                   <span className="flex h-full items-center gap-2 rounded-xl border border-line p-3 peer-checked:border-gold peer-checked:bg-gold/10 peer-focus-visible:outline-2 peer-focus-visible:outline-gold peer-disabled:opacity-45">
                     <span className="shrink-0 text-gold">
-                      <PawnIcon kind={pawn.kind} />
+                      {locked ? <Icon name="lock" /> : <PawnIcon kind={pawn.kind} />}
                     </span>
                     <span className="min-w-0">
                       <span className="block text-xs font-semibold">
                         {unitNames[pawn.kind]}
                       </span>
-                      <span className="block text-[10px] leading-snug text-muted">
-                        {specialTexts[pawn.special.name]}
-                      </span>
+                      {!locked && (
+                        <span className="block text-[10px] leading-snug text-muted">
+                          {specialTexts[pawn.special.name]}
+                        </span>
+                      )}
                     </span>
                   </span>
                 </label>
@@ -173,7 +181,7 @@ export function OnlinePlayPanel({
           className="justify-center"
           disabled={!name.trim() || busy}
           title={m.quickDescription}
-          onClick={() => onCreate(publicHosting)}
+          onClick={() => onCreate(publicHosting, randomUnlockedRoster({ next: Math.random }))}
         >
           <Icon name="energy" />
           {common.quickPlay}

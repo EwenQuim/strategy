@@ -8,7 +8,9 @@ import {
 import { readBattleFromLocalStorage, saveBattleToLocalStorage } from '../battleStorage.ts'
 import { hapticForFrame } from '../haptics.ts'
 import { useOnlineSync } from './onlineSync.ts'
-import { activePawn } from '../lib/engine/index.ts'
+import { activePawn, seededBiome } from '../lib/engine/index.ts'
+import { SeededRandom, seedState } from '../lib/engine/random.ts'
+import { randomUnlockedRoster } from '../unitProgress.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { GameMode } from '../lib/game-mode.ts'
 import type { BattleSetup, Transition } from '../lib/engine/index.ts'
@@ -58,7 +60,17 @@ export function useGame({
       const saved = online
         ? null
         : readBattleFromLocalStorage(mode, initialSeed, bot, setup, sideBots)
-      return saved ? { state: saved, frames: [] } : initialPlayback(initialSeed, mode, setup)
+      if (saved) return { state: saved, frames: [] }
+      if (online || setup) return initialPlayback(initialSeed, mode, setup)
+      const army = [
+        'king' as const,
+        ...randomUnlockedRoster(new SeededRandom(seedState(initialSeed))),
+      ]
+      return initialPlayback(initialSeed, mode, {
+        biome: seededBiome(initialSeed),
+        player: army,
+        enemy: [...army],
+      })
     },
   )
   const dispatchOnline = useOnlineSync(online, playback, mode, dispatch)

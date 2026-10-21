@@ -8,6 +8,7 @@ import { ElementArt, StatChip } from './BriefingElements'
 import { Icon, type IconName } from './Icon'
 import { dialogClassName, dividedListClassName } from './styles'
 import { Button } from './Button'
+import { useUnlockedUnits } from '../unitProgress'
 
 const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
   ['E', game.endTurn],
@@ -58,11 +59,23 @@ function CheatsheetRow({
   element,
   index,
   muted = false,
+  locked = false,
 }: {
   element: BriefingElement
   index: number
   muted?: boolean
+  locked?: boolean
 }) {
+  if (locked) {
+    return (
+      <li className={rowClassName + ' items-center text-muted opacity-50'}>
+        <span className="grid size-11 shrink-0 place-items-center max-[360px]:size-10">
+          <Icon name="lock" className="size-4" />
+        </span>
+        <strong className="font-serif text-[16px] leading-snug">{element.name}</strong>
+      </li>
+    )
+  }
   const detailed = element.stats !== undefined || element.special !== undefined
   return (
     <li
@@ -123,9 +136,11 @@ function CheatsheetRow({
 function CheatsheetList({
   elements,
   mutedNames,
+  lockedNames,
 }: {
   elements: readonly BriefingElement[]
   mutedNames?: ReadonlySet<string>
+  lockedNames?: ReadonlySet<string>
 }) {
   return (
     <ul className={dividedListClassName + ' pt-2'}>
@@ -135,6 +150,7 @@ function CheatsheetList({
           element={element}
           index={index}
           muted={mutedNames?.has(element.name)}
+          locked={lockedNames?.has(element.name)}
         />
       ))}
     </ul>
@@ -170,6 +186,10 @@ interface GameHelpDialogProps {
 export function GameHelpDialog({ dialogRef, biome, presentKinds }: GameHelpDialogProps) {
   // Units are the reference players come back to; basics are covered by the tutorial.
   const [tab, setTab] = useState<Tab>('units')
+  const unlocked = useUnlockedUnits()
+  const lockedNames = new Set(
+    UNIT_KINDS.filter((kind) => !unlocked.includes(kind)).map((kind) => unitElement(kind).name),
+  )
   // Units in the battle come first; the rest of the roster stays as a gray reference.
   const present = UNIT_KINDS.filter((kind) => presentKinds.has(kind))
   const absent = UNIT_KINDS.filter((kind) => !presentKinds.has(kind))
@@ -239,6 +259,7 @@ export function GameHelpDialog({ dialogRef, biome, presentKinds }: GameHelpDialo
           <CheatsheetList
             elements={elements}
             mutedNames={tab === 'units' ? absentNames : undefined}
+            lockedNames={tab === 'units' ? lockedNames : undefined}
           />
         ) : (
           <ShortcutsPanel />
