@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -23,7 +24,7 @@ func TestGameLifecycle(t *testing.T) {
 			ctx := context.Background()
 			svc := service.New(store)
 
-			creds, err := svc.Create(ctx, "Ewen", false)
+			creds, err := svc.Create(ctx, "Ewen", false, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -124,7 +125,7 @@ func TestCredentialsAreHashedAndWellFormed(t *testing.T) {
 	ctx := context.Background()
 	svc := service.New(store)
 
-	creds, err := svc.Create(ctx, "Ewen", false)
+	creds, err := svc.Create(ctx, "Ewen", false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,11 +174,11 @@ func TestPublicWaitingListing(t *testing.T) {
 			ctx := context.Background()
 			svc := service.New(store)
 
-			private, err := svc.Create(ctx, "Ewen", false)
+			private, err := svc.Create(ctx, "Ewen", false, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
-			public, err := svc.Create(ctx, "Bob", true)
+			public, err := svc.Create(ctx, "Bob", true, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -248,6 +249,36 @@ func TestPublicWaitingLimit(t *testing.T) {
 				if want := fmt.Sprintf("PUB%03d", created-1-i); g.Code != want {
 					t.Fatalf("public waiting[%d] = %s, want %s (newest first)", i, g.Code, want)
 				}
+			}
+		})
+	}
+}
+
+func TestCustomRosterRoundTrip(t *testing.T) {
+	roster := []string{"archer", "ninja", "magician", "wolf", "lancer"}
+	for name, newStore := range stores() {
+		t.Run(name, func(t *testing.T) {
+			store, cleanup := newStore(t)
+			defer cleanup()
+			svc := service.New(store)
+			ctx := context.Background()
+			creds, err := svc.Create(ctx, "Ewen", true, roster)
+			if err != nil {
+				t.Fatal(err)
+			}
+			joined, err := svc.Join(ctx, creds.Game.Code, "Bob")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(joined.Game.Roster, roster) {
+				t.Fatalf("joiner roster = %v, want %v", joined.Game.Roster, roster)
+			}
+			g, err := svc.Game(ctx, creds.Game.Code)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(g.Roster, roster) {
+				t.Fatalf("stored roster = %v, want %v", g.Roster, roster)
 			}
 		})
 	}

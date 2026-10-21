@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/go-fuego/fuego"
@@ -22,6 +23,7 @@ type gameResponse struct {
 	Seed       string           `json:"seed"`
 	NamePlayer string           `json:"namePlayer"`
 	NameEnemy  string           `json:"nameEnemy"`
+	Roster     []string         `json:"roster"`
 	Winner     *string          `json:"winner"`
 	Actions    []map[string]any `json:"actions"`
 }
@@ -153,6 +155,44 @@ func TestOnlineGameFlow(t *testing.T) {
 	}
 	if status, _ := play(creator.Token, 2, map[string]any{"type": "move", "q": 1}, nil); status != http.StatusBadRequest {
 		t.Fatalf("half a move rejected: status=%d", status)
+	}
+}
+
+func TestCreateGameWithRoster(t *testing.T) {
+	ts := newTestServer(t)
+	roster := []string{"archer", "ninja", "magician", "wolf", "lancer"}
+	status, creator := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]any{"name": "Ewen", "public": true, "roster": roster})
+	if status != http.StatusCreated || !reflect.DeepEqual(creator.Game.Roster, roster) {
+		t.Fatalf("create with roster: status=%d body=%+v", status, creator)
+	}
+	code := creator.Game.Code
+	status, g := do[gameResponse](t, ts, http.MethodGet, "/api/games/"+code, nil)
+	if status != http.StatusOK || !reflect.DeepEqual(g.Roster, roster) {
+		t.Fatalf("waiting game roster: status=%d body=%+v", status, g)
+	}
+	status, joiner := do[credentialsResponse](t, ts, http.MethodPost, fmt.Sprintf("/api/games/%s/join", code), map[string]string{"name": "Bob"})
+	if status != http.StatusOK || !reflect.DeepEqual(joiner.Game.Roster, roster) {
+		t.Fatalf("joiner must see the mirrored roster: status=%d body=%+v", status, joiner)
+	}
+	status, g = do[gameResponse](t, ts, http.MethodGet, "/api/games/"+code, nil)
+	if status != http.StatusOK || !reflect.DeepEqual(g.Roster, roster) {
+		t.Fatalf("active game roster: status=%d body=%+v", status, g)
+	}
+
+	status, random := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", map[string]any{"name": "Ewen"})
+	if status != http.StatusCreated || random.Game.Roster != nil {
+		t.Fatalf("create without roster keeps a random army: status=%d body=%+v", status, random)
+	}
+
+	for name, invalid := range map[string][]string{
+		"king":         {"king", "archer", "ninja", "wolf", "lancer"},
+		"duplicate":    {"archer", "archer", "ninja", "wolf", "lancer"},
+		"unknown kind": {"archer", "ninja", "wolf", "lancer", "dragon"},
+	} {
+		body := map[string]any{"name": "Ewen", "roster": invalid}
+		if status, res := do[credentialsResponse](t, ts, http.MethodPost, "/api/games", body); status != http.StatusBadRequest {
+			t.Fatalf("roster %s: status=%d body=%+v", name, status, res)
+		}
 	}
 }
 

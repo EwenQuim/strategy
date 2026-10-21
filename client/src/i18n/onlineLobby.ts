@@ -1,19 +1,5 @@
 import { t } from './locale'
 
-export const chooseMode = t({
-  en: 'How do you want to play?',
-  fr: 'Comment voulez-vous jouer ?',
-  de: 'Wie möchtest du spielen?',
-  es: '¿Cómo quieres jugar?',
-  it: 'Come vuoi giocare?',
-})
-export const quickHint = t({
-  en: 'Everything random',
-  fr: 'Tout est aléatoire',
-  de: 'Alles zufällig',
-  es: 'Todo aleatorio',
-  it: 'Tutto casuale',
-})
 export const quickDescription = t({
   en: 'A new army, a new battlefield. No team to prepare: adapt and play.',
   fr: 'Une nouvelle armée, un nouveau terrain. Rien à préparer : adaptez-vous et jouez.',
@@ -28,19 +14,12 @@ export const myTeam = t({
   es: 'Mi equipo',
   it: 'La mia squadra',
 })
-export const teamHint = t({
-  en: 'Choose your units',
-  fr: 'Choisissez vos unités',
-  de: 'Wähle deine Einheiten',
-  es: 'Elige tus unidades',
-  it: 'Scegli le tue unità',
-})
 export const teamRules = t({
-  en: 'Choose 5 different units. Your king is included separately, as in quick play.',
-  fr: 'Choisissez 5 unités différentes. Votre roi est ajouté, comme en partie rapide.',
-  de: 'Wähle 5 verschiedene Einheiten. Dein König kommt wie im Schnellspiel dazu.',
-  es: 'Elige 5 unidades distintas. Tu rey se añade como en la partida rápida.',
-  it: 'Scegli 5 unità diverse. Il re viene aggiunto, come nella partita rapida.',
+  en: 'Choose 5 different units.',
+  fr: 'Choisissez 5 unités différentes.',
+  de: 'Wähle 5 verschiedene Einheiten.',
+  es: 'Elige 5 unidades distintas.',
+  it: 'Scegli 5 unità diverse.',
 })
 export const editTeam = t({
   en: 'Edit my team',
@@ -56,33 +35,12 @@ export const selectionHint = t({
   es: 'Quita una unidad seleccionada para elegir otra.',
   it: 'Rimuovi una delle unità selezionate per sceglierne un’altra.',
 })
-export const selectionCount = t({
-  en: (count: number) => 'Selected: ' + count + '/5',
-  fr: (count: number) => 'Sélection : ' + count + '/5',
-  de: (count: number) => 'Ausgewählt: ' + count + '/5',
-  es: (count: number) => 'Selección: ' + count + '/5',
-  it: (count: number) => 'Selezionate: ' + count + '/5',
-})
-export const prototype = t({
-  en: 'Prototype',
-  fr: 'Prototype',
-  de: 'Prototyp',
-  es: 'Prototipo',
-  it: 'Prototipo',
-})
-export const prototypeHint = t({
-  en: 'Team selection is not connected to online matches yet. Try your team against a bot; quick play stays online.',
-  fr: 'Le choix d’équipe n’est pas encore connecté aux parties en ligne. Testez votre équipe contre un bot ; la partie rapide reste en ligne.',
-  de: 'Die Teamauswahl ist noch nicht mit Online-Spielen verbunden. Teste dein Team gegen einen Bot; das Schnellspiel bleibt online.',
-  es: 'La selección de equipo aún no está conectada a las partidas en línea. Pruébala contra un bot; la partida rápida sigue en línea.',
-  it: 'La scelta della squadra non è ancora collegata alle partite online. Provala contro un bot; la partita rapida resta online.',
-})
-export const tryTeam = t({
-  en: 'Try against a bot',
-  fr: 'Tester contre un bot',
-  de: 'Gegen einen Bot testen',
-  es: 'Probar contra un bot',
-  it: 'Prova contro un bot',
+export const privateGame = t({
+  en: 'Private game',
+  fr: 'Partie privée',
+  de: 'Privates Spiel',
+  es: 'Partida privada',
+  it: 'Partita privata',
 })
 export const joinWithCode = t({
   en: 'Have an invite code?',

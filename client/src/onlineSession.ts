@@ -18,7 +18,7 @@ export function savePlayerName(name: string): void {
 }
 
 export function readPublicHosting(): boolean {
-  return readLocal(PUBLIC_KEY, false, (raw) => raw === 'true')
+  return readLocal(PUBLIC_KEY, true, (raw) => raw === 'true')
 }
 
 export function savePublicHosting(publicHosting: boolean): void {

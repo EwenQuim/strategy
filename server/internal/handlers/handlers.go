@@ -15,12 +15,16 @@ import (
 )
 
 type createGameRequest struct {
-	Name   string `json:"name" description:"Player name, 1 to 20 characters"`
-	Public bool   `json:"public" description:"List the game publicly so anyone can join"`
+	Name   string   `json:"name" description:"Player name, 1 to 20 characters"`
+	Public bool     `json:"public" description:"List the game publicly so anyone can join"`
+	Roster []string `json:"roster,omitempty" description:"Custom army of distinct recruit kinds, mirrored for the opponent; omit for a random army"`
 }
 
 func (r *createGameRequest) InTransform(_ context.Context) error {
-	return normalizeName(&r.Name)
+	if err := normalizeName(&r.Name); err != nil {
+		return err
+	}
+	return game.ValidateRoster(r.Roster)
 }
 
 type joinGameRequest struct {
@@ -69,6 +73,7 @@ type publicGame struct {
 	Seed       string        `json:"seed"`
 	NamePlayer string        `json:"namePlayer"`
 	NameEnemy  string        `json:"nameEnemy"`
+	Roster     []string      `json:"roster,omitempty"`
 	Winner     *game.Side    `json:"winner"`
 	Actions    []game.Action `json:"actions"`
 }
@@ -159,7 +164,7 @@ func (h *Handlers) createGame(c fuego.ContextWithBody[createGameRequest]) (playe
 	if err != nil {
 		return playerCredentials{}, err
 	}
-	creds, err := h.svc.Create(c.Context(), req.Name, req.Public)
+	creds, err := h.svc.Create(c.Context(), req.Name, req.Public, req.Roster)
 	if err != nil {
 		return playerCredentials{}, httpError(err)
 	}
@@ -211,6 +216,7 @@ func publicView(g game.Game) publicGame {
 		Seed:       g.Seed,
 		NamePlayer: g.NamePlayer,
 		NameEnemy:  g.NameEnemy,
+		Roster:     g.Roster,
 		Winner:     g.Winner,
 		Actions:    g.Actions,
 	}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { battleMessage } from '../src/lib/game-mode.ts'
-import type { OnlineAction, StoredGame } from '../src/lib/online.ts'
+import { rosterSetup, type OnlineAction, type StoredGame } from '../src/lib/online.ts'
 import { initialPlayback, playbackReducer, replay } from '../src/lib/playback.ts'
 import {
   readPublicHosting,
@@ -9,7 +9,13 @@ import {
   savePublicHosting,
   saveStoredGame,
 } from '../src/onlineSession.ts'
-import { activePawn, key, mirrorAxial, symmetricSeed } from '../src/lib/engine/index.ts'
+import {
+  activePawn,
+  key,
+  mirrorAxial,
+  seededBiome,
+  symmetricSeed,
+} from '../src/lib/engine/index.ts'
 
 test('Online mode applies actions like local mode, without a bot', () => {
   const seed = 'online-seed-1'
@@ -120,10 +126,31 @@ test('Stored online games round-trip and ignore corrupted entries', () => {
   assert.deepEqual(readStoredGames(), [])
 })
 
-test('Public game setting defaults to private and round-trips', () => {
-  assert.equal(readPublicHosting(), false)
-  savePublicHosting(true)
+test('Public game setting defaults to public and round-trips', () => {
+  storage.delete('hexmate.online.public')
   assert.equal(readPublicHosting(), true)
   savePublicHosting(false)
   assert.equal(readPublicHosting(), false)
+  savePublicHosting(true)
+  assert.equal(readPublicHosting(), true)
+})
+
+test('A custom online roster builds a mirrored battle setup from the shared seed', () => {
+  const seed = symmetricSeed('roster-seed')
+  const roster = ['archer', 'ninja', 'magician', 'wolf', 'lancer']
+  const setup = rosterSetup(seed, roster)
+  if (!setup) throw new Error('missing setup')
+  assert.equal(setup.map, undefined)
+  assert.equal(setup.biome, seededBiome(seed))
+  assert.deepEqual(setup.player, ['king', ...roster])
+  assert.deepEqual(setup.enemy, setup.player)
+  const state = initialPlayback(seed, 'online', setup).state
+  for (const side of ['player', 'enemy'] as const) {
+    const kinds = state.pawns
+      .filter((pawn) => pawn.side === side)
+      .map((pawn) => pawn.kind)
+      .sort()
+    assert.deepEqual(kinds, [...setup.player].sort())
+  }
+  assert.equal(rosterSetup(seed, undefined), undefined)
 })

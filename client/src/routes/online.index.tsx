@@ -86,6 +86,7 @@ export const Route = createFileRoute('/online/')({
 
     const trimmedName = name.trim()
     const joinCode = code.trim().toUpperCase()
+    const joinCodeValid = /^[A-Z0-9]{6}$/.test(joinCode)
     const openGames = (listQuery.data ?? []).filter(
       (open) => !games.some((mine) => mine.code === open.code),
     )
@@ -109,9 +110,9 @@ export const Route = createFileRoute('/online/')({
           name={name}
           onNameChange={setName}
           busy={busy}
-          onCreate={(publicGame) =>
+          onCreate={(publicGame, roster) =>
             void start(async () => {
-              const game = await createGame.mutateAsync(trimmedName, publicGame)
+              const game = await createGame.mutateAsync(trimmedName, publicGame, roster)
               saveStoredGame(game)
               return game.code
             })
@@ -121,14 +122,14 @@ export const Route = createFileRoute('/online/')({
           className={menuCardClassName + ' w-full max-w-[600px] self-center p-4'}
           open={!!search.join}
         >
-          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-ink">
+          <summary className="flex min-h-11 cursor-pointer items-center py-2 text-sm font-semibold text-ink">
             {lobby.joinWithCode}
           </summary>
           <form
             className="mt-3 grid gap-3"
             onSubmit={(event) => {
               event.preventDefault()
-              if (!trimmedName || !/^[A-Z0-9]{6}$/.test(joinCode) || busy) return
+              if (!trimmedName || !joinCodeValid || busy) return
               void start(async () => {
                 const game = await joinGame.mutateAsync(joinCode, trimmedName)
                 saveStoredGame(game)
@@ -136,11 +137,14 @@ export const Route = createFileRoute('/online/')({
               })
             }}
           >
-            <label htmlFor="online-code" className="grid gap-1.5 text-sm text-muted">
+            <label htmlFor="online-code" className="text-sm text-muted">
               {m.gameCode}
+            </label>
+            <div className="flex gap-2">
               <input
                 className={
-                  menuInputClassName + ' text-center font-mono tracking-[0.3em] uppercase'
+                  menuInputClassName +
+                  ' flex-1 text-center font-mono tracking-[0.3em] uppercase'
                 }
                 id="online-code"
                 value={code}
@@ -150,15 +154,15 @@ export const Route = createFileRoute('/online/')({
                 maxLength={6}
                 onChange={(event) => setCode(event.target.value.toUpperCase())}
               />
-            </label>
-            <Button
-              type="submit"
-              disabled={!trimmedName || !/^[A-Z0-9]{6}$/.test(joinCode) || busy}
-              variant="secondary"
-            >
-              {m.joinGame}
-              <Icon name="hex" />
-            </Button>
+              <Button
+                type="submit"
+                disabled={!trimmedName || !joinCodeValid || busy}
+                variant="secondary"
+              >
+                {m.joinGame}
+                <Icon name="hex" />
+              </Button>
+            </div>
           </form>
         </details>
         {error && (
@@ -173,9 +177,6 @@ export const Route = createFileRoute('/online/')({
           >
             <h2 className="text-sm font-semibold tracking-[0.17em] text-muted uppercase">
               {m.availableGames}
-              <span className="ml-2 text-xs font-normal tracking-normal normal-case">
-                {common.quickPlay}
-              </span>
             </h2>
             {openGames.map((open) => (
               <Button

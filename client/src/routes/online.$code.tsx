@@ -8,6 +8,7 @@ import { Game } from '../components/Game'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
 import { readStoredGames } from '../onlineSession.ts'
+import { rosterSetup } from '../lib/online.ts'
 
 const statusClassName =
   menuCardClassName +
@@ -109,6 +110,7 @@ export const Route = createFileRoute('/online/$code')({
       <Game
         seed={doc.seed}
         mode="online"
+        setup={rosterSetup(doc.seed, doc.roster)}
         online={{ code, token: stored.token, side: stored.side }}
         players={{ player: doc.namePlayer, enemy: doc.nameEnemy }}
       />

@@ -13,6 +13,9 @@ export const menuInputClassName =
 export const switchClassName =
   'relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-1 after:left-1 after:size-[18px] after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-5 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none'
 
+export const smallSwitchClassName =
+  'relative h-5 w-9 shrink-0 cursor-pointer appearance-none rounded-full border border-line bg-white/10 transition-colors after:absolute after:top-[2px] after:left-[2px] after:size-3.5 after:rounded-full after:bg-muted after:transition-transform checked:bg-gold checked:after:translate-x-4 checked:after:bg-[#172a21] motion-reduce:transition-none motion-reduce:after:transition-none'
+
 export const dialogClassName =
   panelClassName +
   ' fixed inset-0 m-auto open:flex max-h-[min(720px,calc(100dvh-40px))] w-[min(520px,calc(100vw-28px))] flex-col p-0 backdrop:bg-black/50 backdrop:backdrop-blur-[7px]'

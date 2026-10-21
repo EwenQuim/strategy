@@ -20,6 +20,13 @@ const SYMMETRIC_SEED_PREFIX = 'sym-'
 export const symmetricSeed = (seed: string) => SYMMETRIC_SEED_PREFIX + seed
 const isSymmetricSeed = (seed: string) => seed.startsWith(SYMMETRIC_SEED_PREFIX)
 
+// The biome prepareBattle rolls for a seed without an authored setup, so online
+// battles share terrain derived from the game seed alone.
+export function seededBiome(seed: string): Biome {
+  const biomes = (Object.keys(BIOMES) as Biome[]).filter((name) => name !== 'hell')
+  return biomes[Math.floor(new SeededRandom(seedState(seed)).next() * biomes.length)]
+}
+
 type PawnPlacement = {
   readonly kind: Pawn['kind']
   readonly col: number

@@ -35,13 +35,6 @@ export const createGame = t({
   es: 'Crear partida',
   it: 'Crea partita',
 })
-export const publicGame = t({
-  en: 'Public game',
-  fr: 'Partie publique',
-  de: 'Öffentliches Spiel',
-  es: 'Partida pública',
-  it: 'Partita pubblica',
-})
 export const availableGames = t({
   en: 'Open games',
   fr: 'Parties ouvertes',

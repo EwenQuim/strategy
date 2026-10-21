@@ -156,7 +156,7 @@ func TestGameEventsHeartbeatDoesNotReadStorage(t *testing.T) {
 func TestGameEventsSubscribeBeforeSnapshot(t *testing.T) {
 	store := &observedStore{Store: memory.New()}
 	svc := service.New(store)
-	creator, err := svc.Create(t.Context(), "Ewen", false)
+	creator, err := svc.Create(t.Context(), "Ewen", false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

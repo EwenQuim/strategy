@@ -24,6 +24,7 @@ const toOnlineGame = (game: PublicGame): OnlineGame => ({
   seed: game.seed,
   namePlayer: game.namePlayer,
   nameEnemy: game.nameEnemy,
+  roster: game.roster ?? undefined,
   winner: (game.winner as Side | null) ?? null,
   actions: (game.actions ?? []) as OnlineAction[],
 })
@@ -61,8 +62,14 @@ export const useCreateOnlineGame = () => {
   const mutation = useCreateGame()
   return {
     ...mutation,
-    mutateAsync: async (name: string, publicGame: boolean): Promise<StoredGame> => {
-      const creds = await mutation.mutateAsync({ data: { name, public: publicGame } })
+    mutateAsync: async (
+      name: string,
+      publicGame: boolean,
+      roster?: string[],
+    ): Promise<StoredGame> => {
+      const creds = await mutation.mutateAsync({
+        data: { name, public: publicGame, ...(roster?.length ? { roster } : {}) },
+      })
       return { code: creds.game.code, token: creds.token, side: 'player' }
     },
   }
