@@ -83,6 +83,14 @@ export function withBriefings<Level extends { setup: FixedBattleSetup }>(
   )
 }
 
+export const STARTER_RECRUITS: readonly PawnKind[] = [
+  'swordsman',
+  'archer',
+  'magician',
+  'ninja',
+  'bulwark',
+]
+
 const CLASSIC_UNITS: readonly PawnKind[] = [
   'king',
   'swordsman',

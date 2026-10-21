@@ -131,7 +131,7 @@ function shuffle<T>(items: T[], random: Pick<SeededRandom, 'next'>): T[] {
   return out
 }
 
-export function randomArmy(random: Pick<SeededRandom, 'next'>) {
+function randomArmy(random: Pick<SeededRandom, 'next'>) {
   return [King, ...shuffle([...RECRUIT_CLASSES], random).slice(0, 5)]
 }
 

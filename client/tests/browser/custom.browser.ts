@@ -133,7 +133,8 @@ test(
     assert.equal(await enemyArcher.isDisabled(), true)
     // The default roster is random, so start from a bare king to make the counts below deterministic.
     for (const input of await page.getByRole('spinbutton', { name: /^Player 1 / }).all()) {
-      await input.fill('0')
+      if (await input.isDisabled()) assert.equal(await input.inputValue(), '0')
+      else await input.fill('0')
     }
     await playerArcher.fill('3')
     assert.equal(await enemyArcher.inputValue(), '3')

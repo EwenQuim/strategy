@@ -5,7 +5,7 @@ import {
   completeCampaignLevel,
   parseCampaignProgress,
   type Campaign,
-} from './campaign'
+} from './campaign.ts'
 
 const NONE: readonly number[] = []
 const sessionCleared = new Map<string, readonly number[]>()

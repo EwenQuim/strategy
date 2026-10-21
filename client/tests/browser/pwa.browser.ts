@@ -374,7 +374,12 @@ test(
       )
       assert.equal(
         await page.locator('[data-testid="hex-tile"]').count(),
-        initialState(seed).tiles.size,
+        initialState(
+          seed,
+          await page.evaluate(
+            () => JSON.parse(localStorage.getItem('hexmate.battle')!).state.setup,
+          ),
+        ).tiles.size,
       )
       assert.equal(await page.locator('[data-biome]').getAttribute('data-biome'), biome)
       backgrounds.add(
