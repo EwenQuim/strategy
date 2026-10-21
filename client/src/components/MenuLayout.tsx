@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { MenuBackground } from './MenuBackground'
 import { ButtonLink } from './Button'
 import { Icon } from './Icon'
+import { campaignMenuTo } from '../campaignHistory'
 import * as common from '../i18n/common'
 import * as n from '../i18n/navigation'
 
@@ -19,6 +20,7 @@ export function MenuLayout({
   children: ReactNode
 }) {
   const widthClassName = wide ? 'max-w-[1100px]' : 'max-w-[640px]'
+  const destination = backTo === '/campaign' ? campaignMenuTo() : backTo
   return (
     <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-[#101f1b] text-ink">
       <MenuBackground />
@@ -29,12 +31,12 @@ export function MenuLayout({
         }
       >
         <ButtonLink
-          to={backTo}
+          to={destination}
           preload={false}
           aria-label={
-            backTo === '/campaign'
+            destination === '/campaign'
               ? n.backToCampaigns
-              : backTo === '/online'
+              : destination === '/online'
                 ? common.backToLobby
                 : common.backToHome
           }

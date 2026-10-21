@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { Campaign } from '../campaign'
+import { campaignReturnTo } from '../campaignHistory'
 import type { BattleSetup, Side } from '../lib/engine'
 import * as m from '../i18n/game'
 import { levelName } from '../i18n/campaign'
@@ -110,6 +111,7 @@ export function GameResult({
                 <ButtonLink
                   to="/campaign/$campaign/$level"
                   params={{ campaign: campaign.slug, level: String(campaignLevel + 1) }}
+                  replace
                   variant="primary"
                   className={resultActionClassName}
                   preload={false}
@@ -119,7 +121,7 @@ export function GameResult({
                 </ButtonLink>
               ) : (
                 <ButtonLink
-                  to="/campaign/$campaign"
+                  to={campaignReturnTo(campaign)}
                   params={{ campaign: campaign.slug }}
                   variant="primary"
                   className={resultActionClassName}
@@ -134,7 +136,7 @@ export function GameResult({
             )}
             {!(winner === 'player' && campaignLevel === campaign.levels.length) && (
               <Link
-                to="/campaign/$campaign"
+                to={campaignReturnTo(campaign)}
                 params={{ campaign: campaign.slug }}
                 className="p-3 text-[13px] underline"
               >
