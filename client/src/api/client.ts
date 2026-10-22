@@ -1,10 +1,8 @@
 import { readServerUrl } from '../preferences.ts'
 
-// Applies the developer server URL preference so SDK calls and the SSE stream
-// target the same server.
 export function apiUrl(path: string): string {
   const base = readServerUrl()
-  return base && path.startsWith('/') ? base + path : path
+  return base ? base + path : path
 }
 
 export class ApiError<TErr = unknown> extends Error {
