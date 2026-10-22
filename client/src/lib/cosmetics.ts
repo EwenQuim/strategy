@@ -1,16 +1,12 @@
 import type { AchievementId } from './achievements.ts'
 import type { Side } from './engine/index.ts'
 
-// Team colors are pure cosmetics: they re-skin the viewer's army through CSS
-// variables, the same mechanism biome themes use, and never touch engine state.
-// Future cosmetic elements (shapes, banners) can follow the same pattern: a
-// catalog entry, an optional achievement unlock, and a stored preference.
+// Pure cosmetics: re-skin through CSS variables like biome themes; never touch
+// engine state.
 export interface TeamColor {
   readonly id: string
-  // Undefined means always available; every other color stays locked until its
-  // achievement is earned.
+  // Undefined means always available.
   readonly unlock?: AchievementId
-  // The pawn body gradient, then the health bar, chip outline and header accent.
   readonly body: readonly [string, string]
   readonly hp: string
   readonly stroke: string
@@ -78,15 +74,12 @@ export function teamColorUnlocked(color: TeamColor, earned: readonly Achievement
   return color.unlock === undefined || earned.includes(color.unlock)
 }
 
-// CSS variables re-skinning one side's pawns; the game screen merges them into
-// its inline style next to the biome theme.
 export function teamColorTheme(color: TeamColor, side: Side): Record<`--${string}`, string> {
-  const prefix = side === 'player' ? 'player' : 'enemy'
   return {
-    [`--pawn-${prefix}-start`]: color.body[0],
-    [`--pawn-${prefix}-end`]: color.body[1],
-    [`--pawn-${prefix}-hp`]: color.hp,
-    [`--${prefix}`]: color.accent,
+    [`--pawn-${side}-start`]: color.body[0],
+    [`--pawn-${side}-end`]: color.body[1],
+    [`--pawn-${side}-hp`]: color.hp,
+    [`--${side}`]: color.accent,
     // Player chips outline with --pawn-stroke, enemy chips with their accent.
     ...(side === 'player' ? { '--pawn-stroke': color.stroke } : {}),
   }
