@@ -125,7 +125,7 @@ export function BattlefieldEffects({
                   y="8"
                   textAnchor="middle"
                   className={
-                    'combat-impact-label fill-current stroke-page stroke-[5] font-black [paint-order:stroke] ' +
+                    'combat-impact-label fill-current stroke-[#14271f] stroke-[5] font-black [paint-order:stroke] ' +
                     (hit.damage > 0
                       ? 'text-[32px]'
                       : 'combat-impact-label--drift text-[24px] italic')
@@ -162,14 +162,14 @@ export function BattlefieldEffects({
                 x="-4"
                 y="7"
                 textAnchor="middle"
-                className="fill-current stroke-page stroke-[5] text-[24px] font-black [paint-order:stroke]"
+                className="fill-current stroke-[#14271f] stroke-[5] text-[24px] font-black [paint-order:stroke]"
               >
                 {effect.energyDelta > 0 ? '+' + effect.energyDelta : effect.energyDelta}
               </text>
               <g transform="translate(7 -7) scale(.45)">
                 <Icon
                   name="energy"
-                  className="fill-current stroke-page stroke-[3] [paint-order:stroke]"
+                  className="fill-current stroke-[#14271f] stroke-[3] [paint-order:stroke]"
                 />
               </g>
             </g>
