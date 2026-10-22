@@ -31,17 +31,13 @@
   --color-hp: var(--hp);
   --color-enemy: var(--enemy);
   --color-player: var(--player);
-  --color-panel: var(--panel);
   --color-input: var(--input);
 }
 
 @theme {
   --font-brand: 'Cinzel', Georgia, serif;
-  --shadow-control: 0 6px 24px #07180f30;
-  --shadow-control-hover: 0 8px 30px #07180f50;
   --shadow-menu-card: 0 8px 24px #0002;
   --shadow-campaign-card: 0 8px 28px #0003;
-  --shadow-press: 0 3px 0 #0003, inset 0 1px 0 #fff5;
   --drop-shadow-art: 0 8px 24px #0006;
   --drop-shadow-art-soft: 0 4px 8px #0006;
   --font-display: Georgia, 'Times New Roman', serif;
