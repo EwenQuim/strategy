@@ -12,6 +12,8 @@ import {
   type Pawn,
   type Tile,
 } from '../src/lib/engine/index.ts'
+import { Hoplite } from '../src/lib/engine/pawns/hoplite.ts'
+import { Lancer } from '../src/lib/engine/pawns/lancer.ts'
 import { earnedAchievements } from '../src/lib/achievements.ts'
 
 function duel(): GameState {
@@ -62,7 +64,8 @@ test('A first-round ninja regicide earns its achievements for the winner only', 
   assert.deepEqual(won.blows, [
     {
       by: { id: 1, kind: 'ninja', side: 'player', hp: 1, special: true, watchtower: false },
-      fallen: [{ kind: 'king', side: 'enemy' }],
+      from: { q: 0, r: 0 },
+      fallen: [{ kind: 'king', side: 'enemy', q: 1, r: 0 }],
     },
   ])
   assert.deepEqual(earnedAchievements(won, 'player'), [
@@ -89,11 +92,13 @@ test('A lava suicide followed by a royal kill earns Extra Crispy', () => {
   assert.deepEqual(won.blows, [
     {
       by: { id: 1, kind: 'ninja', side: 'player', hp: 0, special: false, watchtower: false },
-      fallen: [{ kind: 'ninja', side: 'player' }],
+      from: { q: 0, r: 0 },
+      fallen: [{ kind: 'ninja', side: 'player', q: 1, r: 0 }],
     },
     {
       by: { id: 2, kind: 'king', side: 'player', hp: 7, special: true, watchtower: false },
-      fallen: [{ kind: 'king', side: 'enemy' }],
+      from: { q: 3, r: 0 },
+      fallen: [{ kind: 'king', side: 'enemy', q: 2, r: 0 }],
     },
   ])
   assert.deepEqual(earnedAchievements(won, 'player'), [
@@ -183,5 +188,41 @@ test('Winning with your King inside the Hellfire blast earns Daredevil', () => {
     'partyOfOne',
     'speedrun',
     'daredevil',
+  ])
+})
+
+test('Thrusting the enemy King into lava earns Magma Opus', () => {
+  const state = field([
+    new Hoplite(1, 0, 0, 'player'),
+    new King(2, -3, 0, 'player'),
+    new King(3, 2, 0, 'enemy', 2),
+  ])
+  state.tiles.set('3,0', { q: 3, r: 0, terrain: 'lava' })
+  const won = play(state, { type: 'special', target: { q: 2, r: 0 } })
+  assert.equal(won.winner, 'player')
+  assert.deepEqual(won.blows, [
+    {
+      by: { id: 1, kind: 'hoplite', side: 'player', hp: 5, special: true, watchtower: false },
+      from: { q: 0, r: 0 },
+      fallen: [{ kind: 'king', side: 'enemy', q: 3, r: 0 }],
+    },
+  ])
+  assert.deepEqual(earnedAchievements(won, 'player'), ['cleanHands', 'speedrun', 'lavaPush'])
+})
+
+test('A five-tile Rush kill earns Across the Map', () => {
+  const state = field([
+    new Lancer(1, 0, 0, 'player'),
+    new King(2, -3, 0, 'player'),
+    new King(3, 5, 0, 'enemy', 2),
+  ])
+  state.tiles.set('4,0', { q: 4, r: 0, terrain: 'plain' })
+  state.tiles.set('5,0', { q: 5, r: 0, terrain: 'plain' })
+  const won = play(state, { type: 'special', target: { q: 5, r: 0 } })
+  assert.equal(won.winner, 'player')
+  assert.deepEqual(earnedAchievements(won, 'player'), [
+    'cleanHands',
+    'speedrun',
+    'acrossTheMap',
   ])
 })

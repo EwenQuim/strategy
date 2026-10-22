@@ -30,10 +30,12 @@ export type Aim = { action: 'special'; destination?: Axial }
 
 type Unit = { kind: PawnKind; side: Side }
 
-// A hazard blow has no striker.
+// A hazard blow has no striker. Origins and death tiles are absent from blows
+// restored from older snapshots.
 type Blow = {
   by?: Unit & { id: number; hp: number; special: boolean; watchtower: boolean }
-  fallen: Unit[]
+  from?: Axial
+  fallen: (Unit & { q?: number; r?: number })[]
 }
 
 export type GameState = {
@@ -242,6 +244,7 @@ function reduce(
   if (action.type === 'restart') return initialState(state.seed, state.setup)
   const pawn = activePawn(state)
   if (!pawn || state.winner) return state
+  const origin = { q: pawn.q, r: pawn.r }
 
   const result = executeAction(state, action)
   if (!result) return state
@@ -260,7 +263,8 @@ function reduce(
       special: action.type === 'special',
       watchtower: state.tiles.get(key(pawn.q, pawn.r))?.feature === 'watchtower',
     },
-    fallen: fallen.map(({ kind, side }) => ({ kind, side })),
+    from: origin,
+    fallen: fallen.map(({ kind, side, q, r }) => ({ kind, side, q, r })),
   }
   const next: GameState = {
     ...state,

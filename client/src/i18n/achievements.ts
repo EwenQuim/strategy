@@ -86,13 +86,21 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Bull Rush',
       description: "Kill an enemy with a Swordsman's Charge.",
     },
-    spearToday: {
-      title: 'Spear Today, Gone Tomorrow',
-      description: "Kill an enemy with a Hoplite's Thrust.",
+    lavaPush: {
+      title: 'Magma Opus',
+      description: "Push an enemy into lava with a Hoplite's Thrust.",
     },
-    lanceALot: {
-      title: 'Lance-a-Lot',
-      description: "Kill an enemy with a Lancer's Rush.",
+    acrossTheMap: {
+      title: 'Across the Map',
+      description: "Kill an enemy 5 tiles away with a Lancer's Rush.",
+    },
+    blinkStrike: {
+      title: 'Out of Nowhere',
+      description: "Kill an enemy 4 tiles away with a Ninja's Ambush.",
+    },
+    twoBirds: {
+      title: 'Two Birds, One Blast',
+      description: 'Kill 2 enemies with a single Fireball or Bomb.',
     },
     notToday: {
       title: 'Not Today',
@@ -176,13 +184,21 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Charge du taureau',
       description: "Éliminez un ennemi avec la Charge de l'Épéiste.",
     },
-    spearToday: {
-      title: 'Estoc de grâce',
-      description: "Éliminez un ennemi avec l'Estoc de l'Hoplite.",
+    lavaPush: {
+      title: 'Magma Opus',
+      description: "Poussez un ennemi dans la lave avec l'Estoc de l'Hoplite.",
     },
-    lanceALot: {
-      title: 'Lance-a-Lot',
-      description: 'Éliminez un ennemi avec la Ruée du Lancier.',
+    acrossTheMap: {
+      title: "D'un bout à l'autre",
+      description: 'Éliminez un ennemi à 5 tuiles avec la Ruée du Lancier.',
+    },
+    blinkStrike: {
+      title: 'Sorti de nulle part',
+      description: "Éliminez un ennemi à 4 tuiles avec l'Embuscade du Ninja.",
+    },
+    twoBirds: {
+      title: "D'une pierre deux coups",
+      description: 'Éliminez 2 ennemis avec une seule Boule de feu ou Bombe.',
     },
     notToday: {
       title: "Pas aujourd'hui",
@@ -271,13 +287,21 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Ansturm',
       description: 'Töte einen Feind mit dem Sturmangriff des Schwertkämpfers.',
     },
-    spearToday: {
-      title: 'Stoßgebet',
-      description: 'Töte einen Feind mit dem Stoß des Hopliten.',
+    lavaPush: {
+      title: 'Magma Opus',
+      description: 'Stoße einen Feind mit dem Stoß des Hopliten in Lava.',
     },
-    lanceALot: {
-      title: 'Angriff aus dem Galopp',
-      description: 'Töte einen Feind mit dem Sprint des Lanzenträgers.',
+    acrossTheMap: {
+      title: 'Über die ganze Karte',
+      description: 'Töte einen Feind 5 Felder entfernt mit dem Sprint des Lanzenträgers.',
+    },
+    blinkStrike: {
+      title: 'Aus dem Nichts',
+      description: 'Töte einen Feind 4 Felder entfernt mit dem Hinterhalt des Ninjas.',
+    },
+    twoBirds: {
+      title: 'Zwei Fliegen mit einer Klappe',
+      description: 'Töte 2 Feinde mit einem einzigen Feuerball oder einer Bombe.',
     },
     notToday: {
       title: 'Heute nicht',
@@ -363,13 +387,21 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Carga de toro',
       description: 'Elimina a un enemigo con la Carga del Espadachín.',
     },
-    spearToday: {
-      title: 'Estocada de gracia',
-      description: 'Elimina a un enemigo con la Estocada del Hoplita.',
+    lavaPush: {
+      title: 'Magma Opus',
+      description: 'Empuja a un enemigo a la lava con la Estocada del Hoplita.',
     },
-    lanceALot: {
-      title: 'A toda lanza',
-      description: 'Elimina a un enemigo con la Embestida del Lancero.',
+    acrossTheMap: {
+      title: 'De punta a punta',
+      description: 'Elimina a un enemigo a 5 casillas con la Embestida del Lancero.',
+    },
+    blinkStrike: {
+      title: 'De la nada',
+      description: 'Elimina a un enemigo a 4 casillas con la Emboscada del Ninja.',
+    },
+    twoBirds: {
+      title: 'Dos pájaros de un tiro',
+      description: 'Elimina a 2 enemigos con una sola Bola de fuego o Bomba.',
     },
     notToday: {
       title: 'Hoy no',
@@ -455,13 +487,21 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Carica del toro',
       description: 'Elimina un nemico con la Carica dello Spadaccino.',
     },
-    spearToday: {
-      title: 'Affondo di grazia',
-      description: "Elimina un nemico con l'Affondo dell'Oplita.",
+    lavaPush: {
+      title: 'Magma Opus',
+      description: "Spingi un nemico nella lava con l'Affondo dell'Oplita.",
     },
-    lanceALot: {
-      title: 'Lancia in resta',
-      description: 'Elimina un nemico con lo Scatto del Lanciere.',
+    acrossTheMap: {
+      title: "Da un capo all'altro",
+      description: 'Elimina un nemico a 5 esagoni con lo Scatto del Lanciere.',
+    },
+    blinkStrike: {
+      title: 'Dal nulla',
+      description: "Elimina un nemico a 4 esagoni con l'Imboscata del Ninja.",
+    },
+    twoBirds: {
+      title: 'Due piccioni, una fava',
+      description: 'Elimina 2 nemici con una sola Palla di fuoco o Bomba.',
     },
     notToday: {
       title: 'Oggi no',
