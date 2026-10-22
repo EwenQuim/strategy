@@ -22,7 +22,7 @@ export function MenuLayout({
   const widthClassName = wide ? 'max-w-[1100px]' : 'max-w-[640px]'
   const destination = backTo === '/campaign' ? campaignMenuTo() : backTo
   return (
-    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-[#101f1b] text-ink">
+    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-menu text-ink">
       <MenuBackground />
       <header
         className={

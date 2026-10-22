@@ -1,4 +1,5 @@
 import { specialTexts } from '../i18n/specialTexts'
+import { pawnPalette, tilePalette } from './art-palette'
 import type { Targeting, TileChoice } from '../lib/tileChoices'
 import {
   hazardDamage,
@@ -105,33 +106,33 @@ export function TileLayer({
           />
         </pattern>
         <linearGradient id="lava-melt" x1="0" y1="0" x2=".8" y2="1">
-          <stop stopColor="#815c51" />
-          <stop offset=".45" stopColor="#b9825d" />
-          <stop offset="1" stopColor="#8e5d4b" />
+          <stop stopColor={tilePalette.lavaStart} />
+          <stop offset=".45" stopColor={tilePalette.lavaMiddle} />
+          <stop offset="1" stopColor={tilePalette.lavaEnd} />
         </linearGradient>
         <radialGradient id="lava-glow" cx=".4" cy=".45" r=".6">
-          <stop stopColor="#deb17c" stopOpacity=".5" />
-          <stop offset=".5" stopColor="#c59164" stopOpacity=".22" />
-          <stop offset="1" stopColor="#a86650" stopOpacity="0" />
+          <stop stopColor={tilePalette.glowStart} stopOpacity=".5" />
+          <stop offset=".5" stopColor={tilePalette.glowMiddle} stopOpacity=".22" />
+          <stop offset="1" stopColor={tilePalette.glowEnd} stopOpacity="0" />
         </radialGradient>
         <clipPath id="lava-hex">
           <polygon points={hexPoints} />
         </clipPath>
         <radialGradient id="active-halo">
-          <stop stopColor="#ffe9a8" stopOpacity=".7" />
-          <stop offset=".4" stopColor="#f2df9e" stopOpacity=".35" />
-          <stop offset="1" stopColor="#f2df9e" stopOpacity="0" />
+          <stop stopColor={pawnPalette.active} stopOpacity=".7" />
+          <stop offset=".4" stopColor={pawnPalette.halo} stopOpacity=".35" />
+          <stop offset="1" stopColor={pawnPalette.halo} stopOpacity="0" />
         </radialGradient>
         <linearGradient id="player-chip" x2="0" y2="1">
-          <stop stopColor="#407265" />
-          <stop offset="1" stopColor="#193e35" />
+          <stop stopColor={pawnPalette.playerStart} />
+          <stop offset="1" stopColor={pawnPalette.playerEnd} />
         </linearGradient>
         <linearGradient id="enemy-chip" x2="0" y2="1">
-          <stop stopColor="#a35f4d" />
-          <stop offset="1" stopColor="#623a33" />
+          <stop stopColor={pawnPalette.enemyStart} />
+          <stop offset="1" stopColor={pawnPalette.enemyEnd} />
         </linearGradient>
         <linearGradient id="tile-light" x2="0.7" y2="1">
-          <stop stopColor="#fff6cc" stopOpacity=".13" />
+          <stop stopColor={tilePalette.light} stopOpacity=".13" />
           <stop offset="1" stopColor="var(--tile-shade)" stopOpacity=".12" />
         </linearGradient>
       </defs>

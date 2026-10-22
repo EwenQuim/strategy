@@ -89,7 +89,7 @@ function CheatsheetRow({
       {element.art ? (
         <ElementArt art={element.art} index={index} small />
       ) : (
-        <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-line bg-black/20 text-gold">
+        <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-line bg-recessed text-gold">
           <Icon name={element.icon ?? 'hex'} className="size-4" />
         </span>
       )}
@@ -100,16 +100,16 @@ function CheatsheetRow({
           </strong>
           {element.stats && (
             <>
-              <StatChip icon="heart" value={element.stats.hp} color="text-[#d59d81]" />
+              <StatChip icon="heart" value={element.stats.hp} color="text-hp" />
               <StatChip icon="sword" value={element.stats.damage} color="text-[#c4d1a5]" />
-              <StatChip icon="target" value={element.stats.range} color="text-[#a4af99]" />
+              <StatChip icon="target" value={element.stats.range} color="text-muted" />
             </>
           )}
         </div>
         {element.special && (
           <p className="m-0 mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-snug">
             <span className="font-semibold text-gold">{element.special.name}</span>
-            <span className="inline-flex items-center gap-0.5 rounded bg-[#ffffff0d] px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
+            <span className="inline-flex items-center gap-0.5 rounded bg-surface px-1 py-px text-[11px] font-semibold text-[#b8c4e0]">
               <Icon name="energy" className="size-2.5" />
               {element.special.cost}
             </span>
@@ -167,7 +167,7 @@ function ShortcutsPanel() {
       <ul className="mt-2.5 flex list-none flex-col gap-1.5 p-0 text-[13px] text-muted">
         {SHORTCUTS.map(([keys, label]) => (
           <li key={keys} className="flex items-center gap-3">
-            <kbd className="inline-flex min-w-7 justify-center rounded-md border border-line bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-ink">
+            <kbd className="inline-flex min-w-7 justify-center rounded-md border border-line bg-surface px-1.5 py-0.5 font-mono text-[11px] text-ink">
               {keys}
             </kbd>
             {label}
@@ -242,8 +242,8 @@ export function GameHelpDialog({ dialogRef, biome, presentKinds }: GameHelpDialo
             className={
               'flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-[12px] font-semibold leading-none transition-colors [&>svg]:size-3.5 ' +
               (tab === id
-                ? 'bg-[#ffffff0d] text-gold'
-                : 'text-muted hover:bg-[#ffffff06] hover:text-ink') +
+                ? 'bg-surface text-gold'
+                : 'text-muted hover:bg-surface-faint hover:text-ink') +
               (id === 'keys' ? ' hidden [@media(pointer:fine)]:flex' : '')
             }
           >
