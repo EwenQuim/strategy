@@ -21,6 +21,10 @@ export const ACHIEVEMENTS = [
   { id: 'oops', logo: '🙈' },
   { id: 'boomRegicide', logo: '💣' },
   { id: 'daredevil', logo: '😈' },
+  { id: 'bullRush', logo: '⚔️' },
+  { id: 'spearToday', logo: '🔱' },
+  { id: 'lanceALot', logo: '🏇' },
+  { id: 'notToday', logo: '🧱' },
 ] as const
 
 export type AchievementId = (typeof ACHIEVEMENTS)[number]['id']
@@ -92,6 +96,16 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
       !!regicide?.by.special &&
       (regicide.by.kind === 'bomber' || regicide.by.kind === 'magician'),
     daredevil: hazardDamage(state.hazards, king) > 0,
+    bullRush: myBlows.some(
+      ({ by, kills }) => by.kind === 'swordsman' && by.special && kills.length > 0,
+    ),
+    spearToday: myBlows.some(
+      ({ by, kills }) => by.kind === 'hoplite' && by.special && kills.length > 0,
+    ),
+    lanceALot: myBlows.some(
+      ({ by, kills }) => by.kind === 'lancer' && by.special && kills.length > 0,
+    ),
+    notToday: mine.some((pawn) => pawn.kind === 'bulwark' && pawn.protectingId !== null),
   }
   return ACHIEVEMENTS.map(({ id }) => id).filter((id) => rules[id])
 }

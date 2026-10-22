@@ -82,6 +82,22 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Daredevil',
       description: 'Win while your King stands inside a Hellfire blast area.',
     },
+    bullRush: {
+      title: 'Bull Rush',
+      description: "Kill an enemy with a Swordsman's Charge.",
+    },
+    spearToday: {
+      title: 'Spear Today, Gone Tomorrow',
+      description: "Kill an enemy with a Hoplite's Thrust.",
+    },
+    lanceALot: {
+      title: 'Lance-a-Lot',
+      description: "Kill an enemy with a Lancer's Rush.",
+    },
+    notToday: {
+      title: 'Not Today',
+      description: 'Win while your Bulwark is still Protecting an ally.',
+    },
   },
   fr: {
     cleanHands: {
@@ -155,6 +171,22 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Casse-cou',
       description:
         "Gagner pendant que votre roi est dans une zone de flammes du feu de l'enfer.",
+    },
+    bullRush: {
+      title: 'Charge du taureau',
+      description: "Éliminez un ennemi avec la Charge de l'Épéiste.",
+    },
+    spearToday: {
+      title: 'Estoc de grâce',
+      description: "Éliminez un ennemi avec l'Estoc de l'Hoplite.",
+    },
+    lanceALot: {
+      title: 'Lance-a-Lot',
+      description: 'Éliminez un ennemi avec la Ruée du Lancier.',
+    },
+    notToday: {
+      title: "Pas aujourd'hui",
+      description: 'Gagnez pendant que votre Rempart Protège encore un allié.',
     },
   },
   de: {
@@ -235,6 +267,22 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Tollkühn',
       description: 'Gewinne, während dein König im Höllenfeuer-Einwirkbereich steht.',
     },
+    bullRush: {
+      title: 'Ansturm',
+      description: 'Töte einen Feind mit dem Sturmangriff des Schwertkämpfers.',
+    },
+    spearToday: {
+      title: 'Stoßgebet',
+      description: 'Töte einen Feind mit dem Stoß des Hopliten.',
+    },
+    lanceALot: {
+      title: 'Angriff aus dem Galopp',
+      description: 'Töte einen Feind mit dem Sprint des Lanzenträgers.',
+    },
+    notToday: {
+      title: 'Heute nicht',
+      description: 'Gewinne, während dein Bollwerk noch einen Verbündeten schützt.',
+    },
   },
   es: {
     cleanHands: {
@@ -311,6 +359,22 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Temerario',
       description: 'Gana mientras tu rey está en la zona de llamarada del fuego infernal.',
     },
+    bullRush: {
+      title: 'Carga de toro',
+      description: 'Elimina a un enemigo con la Carga del Espadachín.',
+    },
+    spearToday: {
+      title: 'Estocada de gracia',
+      description: 'Elimina a un enemigo con la Estocada del Hoplita.',
+    },
+    lanceALot: {
+      title: 'A toda lanza',
+      description: 'Elimina a un enemigo con la Embestida del Lancero.',
+    },
+    notToday: {
+      title: 'Hoy no',
+      description: 'Gana mientras tu Baluarte sigue Protegiendo a un aliado.',
+    },
   },
   it: {
     cleanHands: {
@@ -386,6 +450,22 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     daredevil: {
       title: 'Temerario',
       description: 'Vinci mentre il tuo re è nella zona di vampata del fuoco infernale.',
+    },
+    bullRush: {
+      title: 'Carica del toro',
+      description: 'Elimina un nemico con la Carica dello Spadaccino.',
+    },
+    spearToday: {
+      title: 'Affondo di grazia',
+      description: "Elimina un nemico con l'Affondo dell'Oplita.",
+    },
+    lanceALot: {
+      title: 'Lancia in resta',
+      description: 'Elimina un nemico con lo Scatto del Lanciere.',
+    },
+    notToday: {
+      title: 'Oggi no',
+      description: 'Vinci mentre il tuo Bastione sta ancora Proteggendo un alleato.',
     },
   },
 })
