@@ -1,7 +1,7 @@
 export function Spring() {
   return (
     <>
-      <ellipse cy="15" rx="20" ry="5" fill="#1b1418" opacity=".45" />
+      <ellipse cy="15" rx="20" ry="5" fill="var(--feature-shade)" opacity=".45" />
       <path d="M-19 4v7q19 10 38 0V4Z" fill="#8f8a9a" />
       <ellipse cy="4" rx="19" ry="7" fill="#b9b4c3" />
       <ellipse cy="4" rx="15" ry="5" fill="#2f8f9a" />

@@ -13,10 +13,33 @@
   --color-muted: var(--muted);
   --color-gold: var(--gold);
   --color-line: var(--line);
+  --color-page: var(--page);
+  --color-menu: var(--menu);
+  --color-surface-faint: var(--surface-faint);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-strong: var(--surface-strong);
+  --color-recessed: var(--recessed);
+  --color-recessed-soft: var(--recessed-soft);
+  --color-scrim: var(--scrim);
+  --color-card-start: var(--card-start);
+  --color-card-end: var(--card-end);
+  --color-switch-knob: var(--switch-knob);
+  --color-campaign-complete: var(--campaign-complete);
+  --color-impact: var(--impact);
+  --color-hp: var(--hp);
+  --color-enemy: var(--enemy);
+  --color-player: var(--player);
+  --color-input: var(--input);
 }
 
 @theme {
   --font-brand: 'Cinzel', Georgia, serif;
+  --shadow-menu-card: 0 8px 24px #0002;
+  --shadow-campaign-card: 0 8px 28px #0003;
+  --drop-shadow-art: 0 8px 24px #0006;
+  --drop-shadow-art-soft: 0 4px 8px #0006;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-serif: Georgia, serif;
   --font-label: 'Avenir Next', 'Segoe UI', sans-serif;
@@ -25,8 +48,8 @@
 @layer base {
   :root {
     font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
-    color: #eee9d7;
-    background: #101f1b;
+    color: var(--ink);
+    background: var(--page);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -34,6 +57,56 @@
     --muted: #a4af99;
     --gold: #dcc48a;
     --line: #c4d1a51c;
+    --page: #101f1b;
+    --menu: #101f1b;
+    --surface-faint: #ffffff04;
+    --surface-soft: #ffffff09;
+    --surface: rgb(255 255 255 / 5%);
+    --surface-raised: rgb(255 255 255 / 10%);
+    --surface-strong: rgb(255 255 255 / 15%);
+    --recessed: rgb(0 0 0 / 20%);
+    --recessed-soft: rgb(0 0 0 / 15%);
+    --scrim: #000;
+    --card-start: rgb(255 255 255 / 7%);
+    --card-end: rgb(255 255 255 / 2%);
+    --switch-knob: #172a21;
+    --campaign-complete: #89bba4;
+    --impact: #ffe1a3;
+    --hp: #d59d81;
+    --enemy: #d69b81;
+    --player: #b6d2b5;
+    --panel: #20362b;
+    --input: #152b24;
+    --feature-shade: #1b1418;
+    --tile-base: #263f30;
+    --tile-light: #fff6cc;
+    --tile-lava-start: #815c51;
+    --tile-lava-middle: #b9825d;
+    --tile-lava-end: #8e5d4b;
+    --tile-glow-start: #deb17c;
+    --tile-glow-middle: #c59164;
+    --tile-glow-end: #a86650;
+    --pawn-active: #ffe9a8;
+    --pawn-halo: #f2df9e;
+    --pawn-king: #f0d38e;
+    --pawn-icon: #f1e8d2;
+    --pawn-label: #e9e5ce;
+    --pawn-stroke: #b2ceaa;
+    --pawn-ring: #f5e5bf;
+    --pawn-plate: #17362b;
+    --pawn-shadow: #10281e;
+    --pawn-badge: #24342e;
+    --pawn-badge-stroke: #dec89a;
+    --pawn-protection: #f6e5a6;
+    --pawn-player-hp: #d5deb0;
+    --pawn-enemy-hp: #db9b7e;
+    --pawn-empty-hp: #47614c;
+    --pawn-energy: #ffdf9e;
+    --pawn-empty-energy: #41584b;
+    --pawn-player-start: #407265;
+    --pawn-player-end: #193e35;
+    --pawn-enemy-start: #a35f4d;
+    --pawn-enemy-end: #623a33;
   }
 
   body {

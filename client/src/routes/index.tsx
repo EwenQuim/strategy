@@ -22,7 +22,7 @@ export const Route = createFileRoute('/')({
     const health = useHealth()
     const online = health.isSuccess
     return (
-      <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-[#101f1b] text-ink">
+      <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-menu text-ink">
         <MenuBackground />
         <div
           data-testid="menu-content"

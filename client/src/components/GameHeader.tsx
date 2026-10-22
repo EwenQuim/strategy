@@ -14,7 +14,7 @@ import { possessiveArmyLabels } from '../army-labels'
 import { Icon, PawnIcon } from './Icon'
 
 const headerButtonClassName =
-  'grid size-9 place-items-center rounded-xl border border-line bg-white/5 text-muted hover:bg-[#ffffff09] hover:text-ink [&>svg]:size-[19px]'
+  'grid size-9 place-items-center rounded-xl border border-line bg-surface text-muted hover:bg-surface-soft hover:text-ink [&>svg]:size-[19px]'
 
 interface GameHeaderProps {
   biome: Biome
@@ -72,7 +72,7 @@ export function GameHeader({
           className="flex min-h-11 min-w-0 items-center gap-2.5 text-base leading-none font-bold tracking-tight"
           aria-label={campaign ? common.campaignLevels : isOnline ? m.onlineLobby : m.home}
         >
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-white/5 text-gold">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-surface text-gold">
             <Icon name="arrow" className="size-[18px] rotate-180" />
           </span>
           <span className="flex min-w-0 items-baseline gap-2">
@@ -90,7 +90,7 @@ export function GameHeader({
         <div className="flex shrink-0 items-center gap-1.5">
           {(local || isOnline) && pawn && !winner && (
             <span
-              className="mr-2.5 self-center text-[10px] text-[#d69b81] data-[side=player]:text-[#b6d2b5]"
+              className="mr-2.5 self-center text-[10px] text-enemy data-[side=player]:text-player"
               data-testid="player-turn"
               data-side={pawn.side}
               role="status"
@@ -102,7 +102,7 @@ export function GameHeader({
           )}
           {mode === 'ai' && !winner && pawn?.side === 'enemy' && (
             <span
-              className="mr-2.5 self-center text-[10px] text-[#d69b81]"
+              className="mr-2.5 self-center text-[10px] text-enemy"
               data-testid="enemy-turn"
               role="status"
             >
@@ -128,7 +128,7 @@ export function GameHeader({
           {visibleOrder.map(({ unit, index }) => (
             <li
               key={unit.id}
-              className="relative flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[11px] text-[#b6d2b5] data-[side=enemy]:text-[#d69b81] data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-[#b6d2b566] data-[side=player]:aria-[current=step]:bg-[#b6d2b514] data-[side=enemy]:aria-[current=step]:border-[#d69b8166] data-[side=enemy]:aria-[current=step]:bg-[#d69b8114] [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
+              className="relative flex min-w-6 flex-1 items-center justify-center gap-1 rounded-[5px] border border-transparent px-[6px] py-1 text-[11px] text-player data-[side=enemy]:text-enemy data-[acted=true]:opacity-35 data-[side=player]:aria-[current=step]:border-player/40 data-[side=player]:aria-[current=step]:bg-player/8 data-[side=enemy]:aria-[current=step]:border-enemy/40 data-[side=enemy]:aria-[current=step]:bg-enemy/8 [&>svg]:size-4 min-[900px]:px-[9px] max-[601px]:flex-col max-[601px]:gap-0 max-[601px]:px-0.5 max-[601px]:py-[4px] max-[601px]:[&>svg]:size-3.5"
               data-testid="initiative-unit"
               data-side={unit.side}
               data-acted={index < active}

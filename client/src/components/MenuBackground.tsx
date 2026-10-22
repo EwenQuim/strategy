@@ -5,7 +5,7 @@ export function MenuBackground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 -z-1 overflow-hidden bg-[radial-gradient(ellipse_at_15%_0%,#657d4d40,transparent_50%),radial-gradient(ellipse_at_100%_70%,#214d4940,transparent_60%),linear-gradient(160deg,#ffffff03,transparent)]"
+      className="pointer-events-none absolute inset-0 -z-1 overflow-hidden bg-[radial-gradient(ellipse_at_15%_0%,#657d4d40,transparent_50%),radial-gradient(ellipse_at_100%_70%,#214d4940,transparent_60%),linear-gradient(160deg,var(--surface-faint),transparent)]"
     >
       <svg className="absolute inset-0 size-full text-gold/5 mask-[linear-gradient(#000,transparent_85%)]">
         <defs>

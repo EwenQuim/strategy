@@ -10,11 +10,11 @@ export function BombBlast() {
       />
       <circle
         r="22"
-        className="bomb-blast--shockwave [animation-delay:100ms] fill-none stroke-[#ffe1a3] stroke-2 [transform-box:fill-box] origin-center motion-reduce:animate-none"
+        className="bomb-blast--shockwave [animation-delay:100ms] fill-none stroke-impact stroke-2 [transform-box:fill-box] origin-center motion-reduce:animate-none"
       />
       <circle
         r="11"
-        className="bomb-blast--flash fill-[#ffe1a3] [transform-box:fill-box] origin-center motion-reduce:animate-none"
+        className="bomb-blast--flash fill-impact [transform-box:fill-box] origin-center motion-reduce:animate-none"
       />
     </g>
   )
@@ -39,7 +39,7 @@ export function FireballBeam({ from, to }: { from: Axial; to: Axial }) {
     <g>
       {line('stroke-current stroke-[13] opacity-25')}
       {line('stroke-current stroke-[6] opacity-50')}
-      {line('stroke-[#ffe1a3] stroke-[2.5]')}
+      {line('stroke-impact stroke-[2.5]')}
     </g>
   )
 }

@@ -7,7 +7,7 @@ const variants = {
   accent: 'border-[#bed5ac] bg-[#a9c594] text-[#24392a]',
   danger: 'border-[#e8af9c] bg-[#d8917d] text-[#381c18]',
   ghost:
-    'border-transparent bg-transparent text-muted not-disabled:not-aria-disabled:hover:bg-white/5 not-disabled:not-aria-disabled:hover:text-ink',
+    'border-transparent bg-transparent text-muted not-disabled:not-aria-disabled:hover:bg-surface not-disabled:not-aria-disabled:hover:text-ink',
 }
 
 const sizes = {

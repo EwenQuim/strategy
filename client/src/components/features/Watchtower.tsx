@@ -1,7 +1,7 @@
 export function Watchtower() {
   return (
     <>
-      <ellipse cy="18" rx="17" ry="4.5" fill="#1b1418" opacity=".45" />
+      <ellipse cy="18" rx="17" ry="4.5" fill="var(--feature-shade)" opacity=".45" />
       <path d="M-10 18-6-6M10 18 6-6" stroke="#8a5d3b" strokeWidth="3" strokeLinecap="round" />
       <path d="M-8 10 7 0M8 10-7 0" stroke="#6f4a30" strokeWidth="1.8" />
       <path d="M-12-6h24v-7h-24Z" fill="#c9955f" />
