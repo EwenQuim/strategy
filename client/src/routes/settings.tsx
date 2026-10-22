@@ -8,12 +8,14 @@ import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
 import * as s from '../i18n/settings'
 import { cancel } from '../i18n/game'
-import { ApiKeyField } from '../components/ApiKeyField'
+import { TextField } from '../components/TextField'
 import {
   readDeveloperPreview,
   saveDeveloperPreview,
   readHapticsEnabled,
   saveHapticsEnabled,
+  readServerUrl,
+  saveServerUrl,
 } from '../preferences'
 import { clearLocalData } from '../localData'
 import {
@@ -29,6 +31,7 @@ export const Route = createFileRoute('/settings')({
     const [hapticsEnabled, setHapticsEnabled] = useState(readHapticsEnabled)
     const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
+    const [serverUrl, setServerUrl] = useState(readServerUrl)
     const deleteDialogRef = useRef<HTMLDialogElement>(null)
     return (
       <MenuLayout title={s.settings}>
@@ -84,22 +87,33 @@ export const Route = createFileRoute('/settings')({
         </label>
         {developerPreview && (
           <>
-            <ApiKeyField
+            <TextField
               label={s.mistralApiKey}
               hint={s.mistralApiKeyHint}
+              type="password"
               value={mistralKey}
               onChange={(key) => {
                 setMistralKey(key)
                 saveMistralApiKey(key)
               }}
             />
-            <ApiKeyField
+            <TextField
               label={s.jevApiKey}
               hint={s.jevApiKeyHint}
+              type="password"
               value={jevKey}
               onChange={(key) => {
                 setJevKey(key)
                 saveJevApiKey(key)
+              }}
+            />
+            <TextField
+              label={s.serverUrl}
+              hint={s.serverUrlHint}
+              value={serverUrl}
+              onChange={(url) => {
+                setServerUrl(url)
+                saveServerUrl(url)
               }}
             />
           </>
@@ -147,6 +161,7 @@ export const Route = createFileRoute('/settings')({
                 clearLocalData()
                 setDeveloperPreview(false)
                 setHapticsEnabled(true)
+                setServerUrl('')
                 deleteDialogRef.current?.close()
               }}
             >

@@ -40,6 +40,7 @@ func main() {
 	s := fuego.NewServer(
 		fuego.WithAddr(addr),
 		fuego.WithoutStartupMessages(),
+		fuego.WithGlobalMiddlewares(cors),
 		fuego.WithEngineOptions(
 			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
 				DisableDefaultServer: true,
@@ -58,6 +59,22 @@ func main() {
 
 	log.Printf("listening on %s (dist=%s, db=%s)", addr, dist, cmp.Or(dbPath, "memory"))
 	log.Fatal(s.Run())
+}
+
+// cors lets the client's developer server URL setting call this API from
+// another origin. Tokens travel in request bodies, never cookies, so no
+// credentials are allowed.
+func cors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if r.Method == http.MethodOptions {
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func newService(dbPath string) (*service.Service, error) {

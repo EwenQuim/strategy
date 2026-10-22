@@ -63,6 +63,20 @@ export const jevApiKeyHint = t({
   es: 'Alimenta la estrategia experimental IA de Jev en batallas personalizadas. Se guarda solo en este navegador.',
   it: 'Alimenta la strategia sperimentale IA Jev nelle battaglie personalizzate. Salvata solo in questo browser.',
 })
+export const serverUrl = t({
+  en: 'Server URL',
+  fr: 'URL du serveur',
+  de: 'Server-URL',
+  es: 'URL del servidor',
+  it: 'URL del server',
+})
+export const serverUrlHint = t({
+  en: 'Sends online battles to another Hexmate server, e.g. http://localhost:8080. Empty uses this site.',
+  fr: 'Envoie les batailles en ligne vers un autre serveur Hexmate, p. ex. http://localhost:8080. Vide pour utiliser ce site.',
+  de: 'Leitet Online-Kämpfe an einen anderen Hexmate-Server, z. B. http://localhost:8080. Leer bedeutet diese Website.',
+  es: 'Envía las batallas en línea a otro servidor de Hexmate, p. ej. http://localhost:8080. Vacío usa este sitio.',
+  it: 'Invia le battaglie online a un altro server Hexmate, ad es. http://localhost:8080. Vuoto usa questo sito.',
+})
 export const deleteData = t({
   en: 'Delete all data',
   fr: 'Supprimer toutes les données',
