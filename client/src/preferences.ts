@@ -29,3 +29,25 @@ export function readDeveloperPreview(): boolean {
 export function saveDeveloperPreview(enabled: boolean): void {
   saveLocal(DEVELOPER_PREVIEW_KEY, String(enabled))
 }
+
+const SERVER_URL_KEY = 'hexmate.serverUrl'
+
+export function readServerUrl(): string {
+  return readLocal(SERVER_URL_KEY, '', normalizeServerUrl)
+}
+
+export function saveServerUrl(url: string): void {
+  saveLocal(SERVER_URL_KEY, normalizeServerUrl(url))
+}
+
+// The empty string means the app's own origin.
+function normalizeServerUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, '')
+  if (!trimmed) return ''
+  try {
+    const protocol = new URL(trimmed).protocol
+    return protocol === 'http:' || protocol === 'https:' ? trimmed : ''
+  } catch {
+    return ''
+  }
+}

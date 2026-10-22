@@ -14,6 +14,8 @@ import {
   saveDeveloperPreview,
   readHapticsEnabled,
   saveHapticsEnabled,
+  readServerUrl,
+  saveServerUrl,
 } from '../preferences'
 import { clearLocalData } from '../localData'
 import {
@@ -29,6 +31,7 @@ export const Route = createFileRoute('/settings')({
     const [hapticsEnabled, setHapticsEnabled] = useState(readHapticsEnabled)
     const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
+    const [serverUrl, setServerUrl] = useState(readServerUrl)
     const deleteDialogRef = useRef<HTMLDialogElement>(null)
     return (
       <MenuLayout title={s.settings}>
@@ -102,6 +105,16 @@ export const Route = createFileRoute('/settings')({
                 saveJevApiKey(key)
               }}
             />
+            <ApiKeyField
+              label={s.serverUrl}
+              hint={s.serverUrlHint}
+              type="text"
+              value={serverUrl}
+              onChange={(url) => {
+                setServerUrl(url)
+                saveServerUrl(url)
+              }}
+            />
           </>
         )}
         <button
@@ -147,6 +160,7 @@ export const Route = createFileRoute('/settings')({
                 clearLocalData()
                 setDeveloperPreview(false)
                 setHapticsEnabled(true)
+                setServerUrl('')
                 deleteDialogRef.current?.close()
               }}
             >

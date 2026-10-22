@@ -5,11 +5,13 @@ export function ApiKeyField({
   hint,
   value,
   onChange,
+  type = 'password',
 }: {
   label: string
   hint: string
   value: string
   onChange: (value: string) => void
+  type?: 'text' | 'password'
 }) {
   return (
     <label className={menuCardClassName + ' flex flex-col gap-3 p-4 min-[900px]:p-6'}>
@@ -19,7 +21,7 @@ export function ApiKeyField({
       </span>
       <input
         className={menuInputClassName}
-        type="password"
+        type={type}
         autoComplete="off"
         spellCheck={false}
         value={value}

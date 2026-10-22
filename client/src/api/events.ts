@@ -1,3 +1,5 @@
+import { apiUrl } from './client.ts'
+
 export function watchOnlineGame(code: string, onGame: (data: string) => void) {
   let source: EventSource | undefined
   let watchdog: ReturnType<typeof setTimeout>
@@ -19,7 +21,7 @@ export function watchOnlineGame(code: string, onGame: (data: string) => void) {
   function connect() {
     source?.close()
     version = -1
-    source = new EventSource('/api/games/' + encodeURIComponent(code) + '/events')
+    source = new EventSource(apiUrl('/api/games/' + encodeURIComponent(code) + '/events'))
     watch()
     source.onopen = watch
     source.addEventListener('heartbeat', onHeartbeat)
