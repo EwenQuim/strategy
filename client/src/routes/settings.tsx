@@ -123,7 +123,10 @@ export const Route = createFileRoute('/settings')({
                   aria-pressed={selected}
                   aria-label={
                     color.unlock && !unlocked
-                      ? c.lockedColor(achievementTexts[color.unlock].title)
+                      ? c.lockedColor(
+                          c.colorNames[color.id],
+                          achievementTexts[color.unlock].title,
+                        )
                       : c.colorNames[color.id]
                   }
                   onClick={() => {
@@ -214,6 +217,7 @@ export const Route = createFileRoute('/settings')({
                 setDeveloperPreview(false)
                 setHapticsEnabled(true)
                 setServerUrl('')
+                setTeamColor(readTeamColor())
                 deleteDialogRef.current?.close()
               }}
             >

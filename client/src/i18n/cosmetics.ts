@@ -61,9 +61,14 @@ export const colorNames = t<Record<TeamColorId, string>>({
 })
 
 export const lockedColor = t({
-  en: (achievement: string) => `Locked — unlock the achievement "${achievement}"`,
-  fr: (achievement: string) => `Verrouillée — débloquez le succès « ${achievement} »`,
-  de: (achievement: string) => `Gesperrt — schalte den Erfolg „${achievement}“ frei`,
-  es: (achievement: string) => `Bloqueado — desbloquea el logro «${achievement}»`,
-  it: (achievement: string) => `Bloccato — sblocca l'obiettivo «${achievement}»`,
+  en: (color: string, achievement: string) =>
+    `${color} — locked. Unlock the achievement "${achievement}"`,
+  fr: (color: string, achievement: string) =>
+    `${color} — verrouillée. Débloquez le succès « ${achievement} »`,
+  de: (color: string, achievement: string) =>
+    `${color} — gesperrt. Schalte den Erfolg „${achievement}“ frei`,
+  es: (color: string, achievement: string) =>
+    `${color} — bloqueado. Desbloquea el logro «${achievement}»`,
+  it: (color: string, achievement: string) =>
+    `${color} — bloccato. Sblocca l'obiettivo «${achievement}»`,
 })

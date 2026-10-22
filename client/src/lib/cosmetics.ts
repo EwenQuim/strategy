@@ -66,7 +66,7 @@ export const TEAM_COLORS: readonly TeamColor[] = [
 
 export type TeamColorId = (typeof TEAM_COLORS)[number]['id']
 
-export function teamColor(id: string | undefined): TeamColor {
+export function teamColor(id: string): TeamColor {
   return TEAM_COLORS.find((color) => color.id === id) ?? TEAM_COLORS[0]
 }
 

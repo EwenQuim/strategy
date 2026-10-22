@@ -83,6 +83,7 @@ export function Game({
   onTourDone?: () => void
 }) {
   const local = mode === 'local'
+  const [teamColor] = useState(readTeamColor)
   const [touring, setTouring] = useState(tour)
   const halted = paused || touring
   const isOnline = mode === 'online'
@@ -191,7 +192,7 @@ export function Game({
       data-biome={state.biome}
       style={{
         ...BIOMES[state.biome].theme,
-        ...teamColorTheme(readTeamColor(), viewerSide),
+        ...teamColorTheme(teamColor, viewerSide),
       }}
     >
       {(killed || !!effect?.impacts?.length) && (
