@@ -53,10 +53,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Tower Camper',
       description: 'Kill an enemy with Eagle eye from a watchtower.',
     },
-    untouchable: {
-      title: "Can't Touch This",
-      description: 'Win after your King dodges 3 attacks.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Win within the first 3 rounds.' },
     dogs: {
       title: 'Who Let the Dogs Out',
@@ -129,10 +125,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     towerCamper: {
       title: 'Campeur de tour',
       description: 'Tuer un ennemi avec Œil de lynx depuis une tour.',
-    },
-    untouchable: {
-      title: 'Intouchable',
-      description: 'Gagner après que votre roi a esquivé 3 attaques.',
     },
     speedrun: { title: 'Speedrun Any%', description: 'Gagner dans les 3 premières manches.' },
     dogs: {
@@ -214,10 +206,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Turmcamper',
       description: 'Töte einen Feind mit Adlerauge von einem Wachturm.',
     },
-    untouchable: {
-      title: 'Unberührbar',
-      description: 'Gewinne, nachdem dein König 3 Angriffen ausgewichen ist.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Gewinne innerhalb der ersten 3 Runden.' },
     dogs: {
       title: 'Lasst die Hunde los',
@@ -294,10 +282,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Campero de torre',
       description: 'Mata a un enemigo con Ojo de águila desde una torre.',
     },
-    untouchable: {
-      title: 'Intocable',
-      description: 'Gana después de que tu rey esquive 3 ataques.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Gana en las 3 primeras rondas.' },
     dogs: {
       title: '¿Quién soltó a los perros?',
@@ -373,10 +357,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     towerCamper: {
       title: 'Camperone in torre',
       description: 'Uccidi un nemico con Occhio di lince da una torre.',
-    },
-    untouchable: {
-      title: 'Intoccabile',
-      description: 'Vinci dopo che il tuo re ha schivato 3 attacchi.',
     },
     speedrun: { title: 'Speedrun Any%', description: 'Vinci entro i primi 3 round.' },
     dogs: {

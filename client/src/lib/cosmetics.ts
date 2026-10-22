@@ -32,7 +32,7 @@ export const TEAM_COLORS: readonly TeamColor[] = [
   },
   {
     id: 'azure',
-    unlock: 'untouchable',
+    unlock: 'nobodyLeftBehind',
     body: ['#46688f', '#1f2f47'],
     hp: '#c0d0e4',
     stroke: '#a4bcd6',

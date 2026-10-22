@@ -13,7 +13,6 @@ export const ACHIEVEMENTS = [
   { id: 'chainReaction', logo: '🔥' },
   { id: 'floorIsLava', logo: '🌋' },
   { id: 'towerCamper', logo: '🎯' },
-  { id: 'untouchable', logo: '🎲' },
   { id: 'speedrun', logo: '⚡' },
   { id: 'dogs', logo: '🐺' },
   { id: 'crispy', logo: '🍗' },
@@ -68,8 +67,6 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
       ({ by, kills }) =>
         by.kind === 'archer' && by.special && by.watchtower && kills.length > 0,
     ),
-    untouchable:
-      state.escapes.filter((unit) => unit.side === me && unit.kind === 'king').length >= 3,
     speedrun: state.round <= 3,
     dogs:
       myRoster.has('wolf') && [...myRoster].every((kind) => kind === 'king' || kind === 'wolf'),
