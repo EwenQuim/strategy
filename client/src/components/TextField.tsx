@@ -1,11 +1,11 @@
 import { menuCardClassName, menuInputClassName } from './styles'
 
-export function ApiKeyField({
+export function TextField({
   label,
   hint,
   value,
   onChange,
-  type = 'password',
+  type = 'text',
 }: {
   label: string
   hint: string
