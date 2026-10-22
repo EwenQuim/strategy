@@ -93,11 +93,11 @@ export const Route = createFileRoute('/settings')({
                   type="button"
                   className={
                     'grid size-11 place-items-center rounded-full border-2 ' +
-                    (selected ? 'border-gold' : 'border-line') +
-                    (unlocked ? ' cursor-pointer' : ' cursor-help opacity-40 grayscale')
+                    (unlocked ? ' cursor-pointer' : ' cursor-help opacity-40')
                   }
                   style={{
                     background: 'linear-gradient(' + color.body[0] + ', ' + color.body[1] + ')',
+                    borderColor: selected ? 'var(--gold)' : color.stroke,
                   }}
                   aria-pressed={selected}
                   aria-label={label}
