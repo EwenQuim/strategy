@@ -6,12 +6,9 @@ import type { PlayerNames } from '../lib/game-mode'
 import { DEFAULT_BOT_CONFIG } from '../bots/catalog'
 import { battleControl } from '../bots/participants'
 import { possessiveArmyLabels, playerNames } from '../army-labels'
-import { campaignUnlocks, type Campaign } from '../campaign'
-import {
-  subscribeCampaignProgress,
-  campaignProgressSaved,
-  clearedAtStart,
-} from '../campaignProgress'
+import type { Campaign } from '../campaign'
+import { useFreshUnitUnlocks } from '../unitProgress'
+import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
 import { Battlefield } from './Battlefield'
 import { CombatFeedback } from './CombatFeedback'
@@ -84,7 +81,6 @@ export function Game({
   onTourDone?: () => void
 }) {
   const local = mode === 'local'
-  const [levelAlreadyCleared] = useState(() => clearedAtStart(campaign, campaignLevel))
   const [touring, setTouring] = useState(tour)
   const halted = paused || touring
   const isOnline = mode === 'online'
@@ -101,6 +97,7 @@ export function Game({
     onVictory,
     online,
   })
+  const freshUnlocks = useFreshUnitUnlocks(campaign, campaignLevel, state.winner)
   const progressSaved = useSyncExternalStore(subscribeCampaignProgress, () =>
     campaignProgressSaved(campaign?.slug ?? ''),
   )
@@ -268,9 +265,7 @@ export function Game({
         {state.winner && freshAchievements.length > 0 && (
           <AchievementToast achievements={freshAchievements} />
         )}
-        <UnitUnlockToast
-          units={campaignUnlocks(campaign, campaignLevel, levelAlreadyCleared, state.winner)}
-        />
+        <UnitUnlockToast units={freshUnlocks} />
       </section>
 
       <GameCommandDeck

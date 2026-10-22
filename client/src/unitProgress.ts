@@ -1,7 +1,11 @@
-import { useSyncExternalStore } from 'react'
-import { CAMPAIGNS, STARTER_RECRUITS } from './campaign.ts'
-import { readClearedLevels, subscribeCampaignProgress } from './campaignProgress.ts'
-import type { PawnKind } from './lib/engine/index.ts'
+import { useState, useSyncExternalStore } from 'react'
+import { CAMPAIGNS, STARTER_RECRUITS, campaignUnlocks, type Campaign } from './campaign.ts'
+import {
+  clearedAtStart,
+  readClearedLevels,
+  subscribeCampaignProgress,
+} from './campaignProgress.ts'
+import type { GameState, PawnKind } from './lib/engine/index.ts'
 
 let unlockedUnits: readonly PawnKind[] = ['king', ...STARTER_RECRUITS]
 
@@ -20,6 +24,18 @@ export function readUnlockedUnits(): readonly PawnKind[] {
 
 export function useUnlockedUnits(): readonly PawnKind[] {
   return useSyncExternalStore(subscribeCampaignProgress, readUnlockedUnits)
+}
+
+export function useFreshUnitUnlocks(
+  campaign: Campaign | undefined,
+  level: number | undefined,
+  winner: GameState['winner'],
+): readonly PawnKind[] {
+  const [unlockedAtStart] = useState(readUnlockedUnits)
+  const [alreadyWon] = useState(() => winner === 'player' || clearedAtStart(campaign, level))
+  return campaignUnlocks(campaign, level, alreadyWon, winner).filter(
+    (kind) => !unlockedAtStart.includes(kind),
+  )
 }
 
 export function randomUnlockedRoster(random: { next: () => number }): PawnKind[] {

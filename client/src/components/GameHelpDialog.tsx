@@ -9,6 +9,7 @@ import { Icon, type IconName } from './Icon'
 import { dialogClassName, dividedListClassName } from './styles'
 import { Button } from './Button'
 import { useUnlockedUnits } from '../unitProgress'
+import * as campaign from '../i18n/campaign'
 
 const SHORTCUTS: readonly (readonly [keys: string, label: string])[] = [
   ['E', game.endTurn],
@@ -255,6 +256,11 @@ export function GameHelpDialog({ dialogRef, biome, presentKinds }: GameHelpDialo
         className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 max-[360px]:px-4"
         role="tabpanel"
       >
+        {tab === 'units' && lockedNames.size > 0 && (
+          <p className="mt-3 text-xs leading-relaxed text-muted">
+            {campaign.unlockRecruitsHint}
+          </p>
+        )}
         {elements ? (
           <CheatsheetList
             elements={elements}

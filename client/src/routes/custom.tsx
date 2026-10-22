@@ -20,6 +20,7 @@ import * as m from '../i18n/menus'
 import { unitNames } from '../i18n/units'
 import { biomeNames } from '../i18n/biomes'
 import { randomUnlockedRoster, useUnlockedUnits } from '../unitProgress'
+import * as campaign from '../i18n/campaign'
 
 const recruits = RECRUIT_CLASSES.map((Unit) => new Unit(0, 0, 0, 'player'))
 
@@ -224,6 +225,11 @@ export const Route = createFileRoute('/custom')({
               <p className="text-xs leading-[1.5] text-muted">
                 {m.rosterLimits(MAP_WIDTH * 3)}
               </p>
+              {recruits.some((pawn) => !unlocked.includes(pawn.kind)) && (
+                <p className="text-xs leading-[1.5] text-muted">
+                  {campaign.unlockRecruitsHint}
+                </p>
+              )}
             </section>
           </div>
           <Button type="submit" disabled={!sideBots} variant="primary" className="mt-auto">

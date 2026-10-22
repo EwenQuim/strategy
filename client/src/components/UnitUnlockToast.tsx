@@ -25,7 +25,7 @@ export function UnitUnlockToast({ units }: { units: readonly PawnKind[] }) {
             <strong className="block font-serif text-lg leading-tight">
               {m.unitUnlocked(unitNames[kind])}
             </strong>
-            <span className="text-xs text-muted">{m.playNextLevel}</span>
+            <span className="text-xs text-muted">{m.availableInAllModes}</span>
           </div>
         </li>
       ))}
