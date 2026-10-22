@@ -77,6 +77,36 @@
     --player: #b6d2b5;
     --panel: #20362b;
     --input: #152b24;
+    --feature-shade: #1b1418;
+    --tile-base: #263f30;
+    --tile-light: #fff6cc;
+    --tile-lava-start: #815c51;
+    --tile-lava-middle: #b9825d;
+    --tile-lava-end: #8e5d4b;
+    --tile-glow-start: #deb17c;
+    --tile-glow-middle: #c59164;
+    --tile-glow-end: #a86650;
+    --pawn-active: #ffe9a8;
+    --pawn-halo: #f2df9e;
+    --pawn-king: #f0d38e;
+    --pawn-icon: #f1e8d2;
+    --pawn-label: #e9e5ce;
+    --pawn-stroke: #b2ceaa;
+    --pawn-ring: #f5e5bf;
+    --pawn-plate: #17362b;
+    --pawn-shadow: #10281e;
+    --pawn-badge: #24342e;
+    --pawn-badge-stroke: #dec89a;
+    --pawn-protection: #f6e5a6;
+    --pawn-player-hp: #d5deb0;
+    --pawn-enemy-hp: #db9b7e;
+    --pawn-empty-hp: #47614c;
+    --pawn-energy: #ffdf9e;
+    --pawn-empty-energy: #41584b;
+    --pawn-player-start: #407265;
+    --pawn-player-end: #193e35;
+    --pawn-enemy-start: #a35f4d;
+    --pawn-enemy-end: #623a33;
   }
 
   body {

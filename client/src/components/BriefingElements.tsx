@@ -1,5 +1,4 @@
 import { Icon, PawnIcon, type IconName } from './Icon'
-import { pawnPalette, tilePalette } from './art-palette'
 import { hexPoints, terrainPalette } from './hex-art'
 import { TerrainArt } from './terrains/TerrainArt'
 import { FeatureArt } from './features/FeatureArt'
@@ -51,7 +50,7 @@ export function ElementArt({
       >
         {isPawn(art) ? (
           <>
-            <polygon points={hexPoints} fill={tilePalette.base} />
+            <polygon points={hexPoints} fill="var(--tile-base)" />
             <polygon
               points={hexPoints}
               fill="none"
@@ -63,13 +62,13 @@ export function ElementArt({
             <circle
               r="22"
               fill="url(#player-chip)"
-              stroke={pawnPalette.playerStroke}
+              stroke="var(--pawn-stroke)"
               strokeWidth="1.5"
             />
-            <circle r="17.5" fill="none" stroke={pawnPalette.ring} strokeOpacity=".12" />
+            <circle r="17.5" fill="none" stroke="var(--pawn-ring)" strokeOpacity=".12" />
             <g
               transform="translate(-12 -12)"
-              color={art === 'king' ? pawnPalette.king : pawnPalette.icon}
+              color={art === 'king' ? 'var(--pawn-king)' : 'var(--pawn-icon)'}
             >
               <PawnIcon kind={art} />
             </g>

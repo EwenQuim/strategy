@@ -1,5 +1,4 @@
 import { hexX, hexY } from './hex-art'
-import { pawnPalette } from './art-palette'
 import * as m from '../i18n/combat'
 import type { Pawn, Tile } from '../lib/engine'
 import { FeatureArt } from './features/FeatureArt'
@@ -39,7 +38,7 @@ export function PawnChip({
             : undefined
         }
       >
-        <ellipse cy="17" rx="23" ry="9" fill={pawnPalette.shadow} opacity=".5" />
+        <ellipse cy="17" rx="23" ry="9" fill="var(--pawn-shadow)" opacity=".5" />
         {active && (
           <g data-art="active-halo" className="active-halo-pop motion-reduce:animate-none">
             {/* The board keeps SIZE * 1.35 (45.9) of viewBox around tile centers; scaled
@@ -51,33 +50,33 @@ export function PawnChip({
           <path
             d="m0-23 20 11v24L0 23-20 12v-24Z"
             fill="url(#enemy-chip)"
-            stroke={active ? pawnPalette.active : 'var(--enemy)'}
+            stroke={active ? 'var(--pawn-active)' : 'var(--enemy)'}
             strokeWidth={active ? 2.5 : 1.5}
           />
         ) : (
           <circle
             r="22"
             fill="url(#player-chip)"
-            stroke={active ? pawnPalette.active : pawnPalette.playerStroke}
+            stroke={active ? 'var(--pawn-active)' : 'var(--pawn-stroke)'}
             strokeWidth={active ? 2.5 : 1.5}
           />
         )}
-        <circle r="17.5" fill="none" stroke={pawnPalette.ring} strokeOpacity=".15" />
+        <circle r="17.5" fill="none" stroke="var(--pawn-ring)" strokeOpacity=".15" />
         <g
           transform="translate(-12 -15)"
-          color={pawn.kind === 'king' ? pawnPalette.king : pawnPalette.icon}
+          color={pawn.kind === 'king' ? 'var(--pawn-king)' : 'var(--pawn-icon)'}
         >
           <PawnIcon kind={pawn.kind} />
         </g>
-        <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill={pawnPalette.label}>
+        <text y="13" textAnchor="middle" fontSize="8" fontWeight="600" fill="var(--pawn-label)">
           {pawn.id.toString().padStart(2, '0')}
         </text>
         {feature && (
           <g data-art="feature-badge" transform="translate(-20 -19) scale(.43)">
             <circle
               r="28"
-              fill={pawnPalette.badge}
-              stroke={pawnPalette.badgeStroke}
+              fill="var(--pawn-badge)"
+              stroke="var(--pawn-badge-stroke)"
               strokeWidth="2"
             />
             <FeatureArt feature={feature} />
@@ -87,13 +86,13 @@ export function PawnChip({
           <g
             data-art="protection-badge"
             transform="translate(10 -26) scale(.65)"
-            color={pawnPalette.protection}
+            color="var(--pawn-protection)"
           >
-            <circle cx="12" cy="12" r="14" fill={pawnPalette.plate} />
+            <circle cx="12" cy="12" r="14" fill="var(--pawn-plate)" />
             <Icon name="shield" />
           </g>
         )}
-        <rect x="-15" y="24" width="30" height="5" rx="2.5" fill={pawnPalette.plate} />
+        <rect x="-15" y="24" width="30" height="5" rx="2.5" fill="var(--pawn-plate)" />
         {Array.from({ length: pawn.maxHp }, (_, i) => (
           <rect
             key={i}
@@ -107,9 +106,9 @@ export function PawnChip({
             fill={
               i < pawn.hp
                 ? enemy
-                  ? pawnPalette.enemyHp
-                  : pawnPalette.playerHp
-                : pawnPalette.emptyHp
+                  ? 'var(--pawn-enemy-hp)'
+                  : 'var(--pawn-player-hp)'
+                : 'var(--pawn-empty-hp)'
             }
           />
         ))}
@@ -121,7 +120,7 @@ export function PawnChip({
               width={pawn.maxEnergy * 7 + 6}
               height="7"
               rx="3.5"
-              fill={pawnPalette.plate}
+              fill="var(--pawn-plate)"
             />
             {Array.from({ length: pawn.maxEnergy }, (_, i) => (
               <path
@@ -131,12 +130,12 @@ export function PawnChip({
                 d="M0-2.6 2.6 0 0 2.6-2.6 0Z"
                 transform={'translate(' + (-((pawn.maxEnergy - 1) * 3.5) + i * 7) + ' 33.5)'}
                 className="transition-[fill] duration-300 motion-reduce:transition-none"
-                fill={i < pawn.energy ? pawnPalette.energy : pawnPalette.emptyEnergy}
+                fill={i < pawn.energy ? 'var(--pawn-energy)' : 'var(--pawn-empty-energy)'}
               />
             ))}
           </g>
         )}
-        {active && <path d="m0-35 4-5h-8Z" fill={pawnPalette.active} />}
+        {active && <path d="m0-35 4-5h-8Z" fill="var(--pawn-active)" />}
       </g>
       {pawn.hp <= 0 && (
         <text
