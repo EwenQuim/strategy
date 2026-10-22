@@ -39,35 +39,11 @@ export const Route = createFileRoute('/settings')({
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
     const [serverUrl, setServerUrl] = useState(readServerUrl)
     const [teamColor, setTeamColor] = useState(readTeamColor)
+    const [lockedHint, setLockedHint] = useState<string | null>(null)
     const earned = readUnlockedAchievements()
     const deleteDialogRef = useRef<HTMLDialogElement>(null)
     return (
       <MenuLayout title={s.settings}>
-        <label
-          className={
-            menuCardClassName +
-            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
-          }
-        >
-          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <strong className="text-base">{s.developerPreview}</strong>
-            <small id="developer-preview-hint" className="text-sm leading-relaxed text-muted">
-              {s.developerPreviewHint}
-            </small>
-          </span>
-          <input
-            type="checkbox"
-            role="switch"
-            aria-label={s.developerPreview}
-            aria-describedby="developer-preview-hint"
-            className={switchClassName + ' mt-1'}
-            checked={developerPreview}
-            onChange={(event) => {
-              setDeveloperPreview(event.target.checked)
-              saveDeveloperPreview(event.target.checked)
-            }}
-          />
-        </label>
         <label
           className={
             menuCardClassName +
@@ -107,6 +83,10 @@ export const Route = createFileRoute('/settings')({
             {TEAM_COLORS.map((color) => {
               const unlocked = teamColorUnlocked(color, earned)
               const selected = color.id === teamColor.id
+              const label =
+                color.unlock && !unlocked
+                  ? c.lockedColor(c.colorNames[color.id], achievementTexts[color.unlock].title)
+                  : c.colorNames[color.id]
               return (
                 <button
                   key={color.id}
@@ -114,22 +94,20 @@ export const Route = createFileRoute('/settings')({
                   className={
                     'grid size-11 place-items-center rounded-full border-2 ' +
                     (selected ? 'border-gold' : 'border-line') +
-                    (unlocked ? ' cursor-pointer' : ' cursor-not-allowed opacity-40 grayscale')
+                    (unlocked ? ' cursor-pointer' : ' cursor-help opacity-40 grayscale')
                   }
                   style={{
                     background: 'linear-gradient(' + color.body[0] + ', ' + color.body[1] + ')',
                   }}
-                  disabled={!unlocked}
                   aria-pressed={selected}
-                  aria-label={
-                    color.unlock && !unlocked
-                      ? c.lockedColor(
-                          c.colorNames[color.id],
-                          achievementTexts[color.unlock].title,
-                        )
-                      : c.colorNames[color.id]
-                  }
+                  aria-label={label}
+                  title={label}
                   onClick={() => {
+                    if (color.unlock && !unlocked) {
+                      setLockedHint(label)
+                      return
+                    }
+                    setLockedHint(null)
                     setTeamColor(color)
                     saveTeamColor(color.id)
                   }}
@@ -139,7 +117,38 @@ export const Route = createFileRoute('/settings')({
               )
             })}
           </div>
+          {lockedHint && (
+            <p role="status" className="text-sm leading-relaxed text-muted">
+              {lockedHint}
+            </p>
+          )}
         </section>
+        <hr className="border-line" />
+        <label
+          className={
+            menuCardClassName +
+            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
+          }
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <strong className="text-base">{s.developerPreview}</strong>
+            <small id="developer-preview-hint" className="text-sm leading-relaxed text-muted">
+              {s.developerPreviewHint}
+            </small>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            aria-label={s.developerPreview}
+            aria-describedby="developer-preview-hint"
+            className={switchClassName + ' mt-1'}
+            checked={developerPreview}
+            onChange={(event) => {
+              setDeveloperPreview(event.target.checked)
+              saveDeveloperPreview(event.target.checked)
+            }}
+          />
+        </label>
         {developerPreview && (
           <>
             <TextField
