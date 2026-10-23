@@ -93,6 +93,20 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     es: 'Ningún enemigo en el alcance',
     it: 'Nessun nemico nel raggio',
   }),
+  snipe: t({
+    en: 'Snipe',
+    fr: 'Tir de précision',
+    de: 'Präzisionsschuss',
+    es: 'Tiro de precisión',
+    it: 'Tiro di precisione',
+  }),
+  snipeDescription: t({
+    en: 'Shoots at distance 3–5, or up to 6 from a watchtower.',
+    fr: 'Tire à 3–5 cases, ou jusqu’à 6 depuis une tour.',
+    de: 'Schießt auf Entfernung 3–5, vom Wachturm bis 6.',
+    es: 'Dispara a distancia 3–5, o hasta 6 desde una torre.',
+    it: 'Colpisce a distanza 3–5, o fino a 6 da una torre.',
+  }),
   fireball: t({
     en: 'Fireball',
     fr: 'Boule de feu',

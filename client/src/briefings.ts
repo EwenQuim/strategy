@@ -59,6 +59,7 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
   wolf: [unit('wolf')],
   berserker: [unit('berserker')],
   lancer: [unit('lancer')],
+  marksman: [unit('marksman', b.marksmanRooted, b.marksmanSiege)],
   lake: [
     {
       name: b.lakes,

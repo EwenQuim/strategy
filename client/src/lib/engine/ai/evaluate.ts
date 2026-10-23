@@ -131,7 +131,11 @@ export function estimateIncomingDamage(
     const actsNextRound = order.indexOf(foe.id) < state.active
     if (actsNextRound && foe.hp <= 1 && hazardDamage(state.hazards, foe) > 0) continue
     const attacker = foe.clone()
-    attacker.energy = actsNextRound ? START_ENERGY : attacker.energy
+    // A unit that already acted refreshes next round, capped by its own energy pool:
+    // a marksman never gets the standard three.
+    attacker.energy = actsNextRound
+      ? Math.min(START_ENERGY, attacker.maxEnergy)
+      : attacker.energy
     if (actsNextRound) attacker.specialUsed = false
     if (
       attacker.energy <= 0 ||
