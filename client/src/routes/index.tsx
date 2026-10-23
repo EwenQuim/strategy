@@ -1,11 +1,11 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ButtonLink } from '../components/Button'
 import { MenuBackground } from '../components/MenuBackground'
 import { HomeBoard } from '../components/HomeBoard'
 import { Icon } from '../components/Icon'
 import { CAMPAIGNS, TUTORIAL, totalVictories } from '../campaign'
-import { useHealth } from '../api/online.ts'
+import { pingPresence, useHealth } from '../api/online.ts'
 import { readCampaignProgress, subscribeCampaignProgress } from '../campaignProgress'
 import * as common from '../i18n/common'
 import * as m from '../i18n/menus'
@@ -14,6 +14,9 @@ import { settings } from '../i18n/settings'
 
 export const Route = createFileRoute('/')({
   component: function Landing() {
+    useEffect(() => {
+      void pingPresence()
+    }, [])
     const allCompleted = useSyncExternalStore(subscribeCampaignProgress, () =>
       totalVictories(readCampaignProgress),
     )

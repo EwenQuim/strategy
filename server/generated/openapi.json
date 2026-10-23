@@ -905,6 +905,14 @@
         "operationId": "presence",
         "parameters": [
           {
+            "description": "Player id to record as online today",
+            "in": "query",
+            "name": "player",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "header",
             "name": "Accept",
             "schema": {
@@ -959,7 +967,7 @@
             "description": "Internal Server Error _(panics)_"
           }
         },
-        "summary": "Count players online today",
+        "summary": "Count players online today, recording the player query id as seen today",
         "tags": [
           "api",
           "presence"

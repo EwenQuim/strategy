@@ -283,6 +283,13 @@ export interface PublicWaitingGame {
  */
 export interface UnknownInterface {}
 
+export type PresenceParams = {
+/**
+ * Player id to record as online today
+ */
+player?: string;
+};
+
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
@@ -925,12 +932,19 @@ export function useHealth<TData = Awaited<ReturnType<typeof health>>, TError = E
 
 
 
-export const getPresenceUrl = () => {
+export const getPresenceUrl = (params?: PresenceParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/presence`
+  return stringifiedParams.length > 0 ? `/api/presence?${stringifiedParams}` : `/api/presence`
 }
 
 /**
@@ -943,11 +957,11 @@ export const getPresenceUrl = () => {
  * - `github.com/go-fuego/fuego.defaultLogger.middleware`
  *
  * ---
- * @summary Count players online today
+ * @summary Count players online today, recording the player query id as seen today
  */
-export const presence = async ( options?: Parameters<typeof client>[1]): Promise<PresenceResponse> => {
+export const presence = async (params?: PresenceParams, options?: Parameters<typeof client>[1]): Promise<PresenceResponse> => {
 
-  return client<PresenceResponse>(getPresenceUrl(),
+  return client<PresenceResponse>(getPresenceUrl(params),
   {
     ...options,
     method: 'GET'
@@ -960,23 +974,23 @@ export const presence = async ( options?: Parameters<typeof client>[1]): Promise
 
 
 
-export const getPresenceQueryKey = () => {
+export const getPresenceQueryKey = (params?: PresenceParams,) => {
     return [
-    `/api/presence`
+    `/api/presence`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getPresenceQueryOptions = <TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
+export const getPresenceQueryOptions = <TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(params?: PresenceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getPresenceQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getPresenceQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof presence>>> = ({ signal }) => presence({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof presence>>> = ({ signal }) => presence(params, { signal, ...requestOptions });
 
 
 
@@ -990,7 +1004,7 @@ export type PresenceQueryError = ErrorType<HTTPError>
 
 
 export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>> & Pick<
+ params: undefined |  PresenceParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof presence>>,
           TError,
@@ -1000,7 +1014,7 @@ export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>> & Pick<
+ params?: PresenceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof presence>>,
           TError,
@@ -1010,19 +1024,19 @@ export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
+ params?: PresenceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Count players online today
+ * @summary Count players online today, recording the player query id as seen today
  */
 
 export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
+ params?: PresenceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getPresenceQueryOptions(options)
+  const queryOptions = getPresenceQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

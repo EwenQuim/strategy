@@ -4,6 +4,7 @@ import {
   getGame,
   getGetGameQueryKey,
   joinGame,
+  presence,
   useCreateGame,
   useGetGame,
   useJoinGame,
@@ -61,7 +62,15 @@ export async function fetchOnlineGame(code: string): Promise<OnlineGame> {
 export const useListOnlineGames = () => useListGames({ query: { refetchInterval: 5000 } })
 
 export const usePlayersToday = (poll: boolean) =>
-  usePresence({ query: { staleTime: 15_000, refetchInterval: poll ? 15_000 : false } })
+  usePresence(
+    { player: readPlayerId() },
+    { query: { staleTime: 15_000, refetchInterval: poll ? 15_000 : false } },
+  )
+
+// Offline and local play have no server; presence is best-effort.
+export async function pingPresence(): Promise<void> {
+  await presence({ player: readPlayerId() }).catch(() => undefined)
+}
 
 export const useCreateOnlineGame = () => {
   const mutation = useCreateGame()
