@@ -127,6 +127,19 @@ export const lobbyNote = t({
   it: 'Le battaglie online sono a turni, senza timer. Le mosse si sincronizzano da sole, quindi puoi chiudere la scheda e riprendere più tardi.',
 })
 
+export const playersOnlineToday = t({
+  en: (count: number) =>
+    `${count} ${plural(count, { one: 'player', other: 'players' })} online today`,
+  fr: (count: number) =>
+    `${count} ${plural(count, { one: 'joueur', other: 'joueurs' })} en ligne aujourd'hui`,
+  de: (count: number) =>
+    `${count} ${plural(count, { one: 'Spieler', other: 'Spieler' })} heute online`,
+  es: (count: number) =>
+    `${count} ${plural(count, { one: 'jugador', other: 'jugadores' })} en línea hoy`,
+  it: (count: number) =>
+    `${count} ${plural(count, { one: 'giocatore', other: 'giocatori' })} online oggi`,
+})
+
 export const gameGone = t({
   en: 'This game does not exist anymore.',
   fr: "Cette partie n'existe plus.",

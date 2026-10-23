@@ -23,6 +23,7 @@ func (h *Handlers) gameEvents(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(status), status)
 		return
 	}
+	h.svc.Seen(r.URL.Query().Get("player"))
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache, no-transform")

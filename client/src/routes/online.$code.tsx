@@ -3,7 +3,7 @@ import { Button } from '../components/Button'
 import { MenuLayout } from '../components/MenuLayout'
 import { Icon } from '../components/Icon'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { ApiError, health, useOnlineGame } from '../api/online.ts'
+import { ApiError, health, useOnlineGame, usePlayersToday } from '../api/online.ts'
 import { Game } from '../components/Game'
 import * as common from '../i18n/common'
 import * as m from '../i18n/online'
@@ -30,6 +30,9 @@ export const Route = createFileRoute('/online/$code')({
     const { code } = Route.useParams()
     const stored = readStoredGames().find((game) => game.code === code)
     const game = useOnlineGame(code, !!stored)
+    const doc = game.data
+    const waiting = !doc || doc.status === 'waiting'
+    const presence = usePlayersToday(waiting)
 
     // beforeLoad redirects non-players to the lobby invite flow
     if (!stored) return null
@@ -48,8 +51,7 @@ export const Route = createFileRoute('/online/$code')({
       )
     }
 
-    const doc = game.data
-    if (!doc || doc.status === 'waiting') {
+    if (waiting) {
       return (
         <MenuLayout title={m.onlineGame} backTo="/online">
           <div className={statusClassName}>
@@ -99,6 +101,11 @@ export const Route = createFileRoute('/online/$code')({
                 >
                   {m.copyCode}
                 </Button>
+                {presence.data?.playersToday ? (
+                  <p className="text-sm text-muted">
+                    {m.playersOnlineToday(presence.data.playersToday)}
+                  </p>
+                ) : null}
               </>
             )}
           </div>

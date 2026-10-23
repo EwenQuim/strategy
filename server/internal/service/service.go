@@ -32,10 +32,16 @@ type Service struct {
 	now         func() time.Time
 	mu          sync.Mutex
 	subscribers map[string]map[chan struct{}]struct{}
+	seenToday   map[string]time.Time
 }
 
 func New(store Store) *Service {
-	return &Service{store: store, now: time.Now, subscribers: make(map[string]map[chan struct{}]struct{})}
+	return &Service{
+		store:       store,
+		now:         time.Now,
+		subscribers: make(map[string]map[chan struct{}]struct{}),
+		seenToday:   make(map[string]time.Time),
+	}
 }
 
 type PlayerCredentials struct {
@@ -125,6 +131,32 @@ func (s *Service) Play(ctx context.Context, code, token string, version int, act
 		s.notify(code)
 	}
 	return g, err
+}
+
+func (s *Service) Seen(id string) {
+	if id == "" {
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.pruneToday()
+	s.seenToday[id] = s.now()
+}
+
+func (s *Service) PlayersToday() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.pruneToday()
+	return len(s.seenToday)
+}
+
+func (s *Service) pruneToday() {
+	today := s.now()
+	for id, day := range s.seenToday {
+		if day.Year() != today.Year() || day.YearDay() != today.YearDay() {
+			delete(s.seenToday, id)
+		}
+	}
 }
 
 func (s *Service) Subscribe(code string) (<-chan struct{}, func()) {

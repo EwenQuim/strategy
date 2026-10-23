@@ -93,6 +93,10 @@ type publicWaitingGame struct {
 	NamePlayer string `json:"namePlayer"`
 }
 
+type presenceResponse struct {
+	PlayersToday int `json:"playersToday"`
+}
+
 // Handlers binds the game service to HTTP. Register wires its methods as
 // fuego controllers.
 type Handlers struct {
@@ -113,6 +117,11 @@ func Register(s *fuego.Server, svc *service.Service) {
 		option.OperationID("listGames"),
 		option.Summary("List public games waiting for an opponent"),
 		option.Tags("games"))
+
+	fuego.Get(api, "/presence", h.presence,
+		option.OperationID("presence"),
+		option.Summary("Count players online today"),
+		option.Tags("presence"))
 
 	fuego.Post(api, "/games", h.createGame,
 		option.OperationID("createGame"),
@@ -157,6 +166,10 @@ func (h *Handlers) listGames(c fuego.ContextNoBody) ([]publicWaitingGame, error)
 		waiting = append(waiting, publicWaitingGame{Code: g.Code, NamePlayer: g.NamePlayer})
 	}
 	return waiting, nil
+}
+
+func (h *Handlers) presence(fuego.ContextNoBody) (presenceResponse, error) {
+	return presenceResponse{PlayersToday: h.svc.PlayersToday()}, nil
 }
 
 func (h *Handlers) createGame(c fuego.ContextWithBody[createGameRequest]) (playerCredentials, error) {

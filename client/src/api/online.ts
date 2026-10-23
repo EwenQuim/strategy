@@ -8,8 +8,10 @@ import {
   useGetGame,
   useJoinGame,
   useListGames,
+  usePresence,
 } from '../../generated/sdk.gen.ts'
 import { watchOnlineGame } from './events.ts'
+import { readPlayerId } from '../onlineSession.ts'
 import type { PublicGame } from '../../generated/sdk.gen.ts'
 import type { Side } from '../lib/engine/pawns/pawn.ts'
 import type { OnlineAction, OnlineGame, StoredGame } from '../lib/online.ts'
@@ -43,7 +45,7 @@ export function useOnlineGame(code: string, stream = false) {
 
   useEffect(() => {
     if (!live) return
-    return watchOnlineGame(code, (data) => {
+    return watchOnlineGame(code, readPlayerId(), (data) => {
       client.setQueryData(getGetGameQueryKey(code), JSON.parse(data) as PublicGame)
     })
   }, [client, code, live])
@@ -57,6 +59,9 @@ export async function fetchOnlineGame(code: string): Promise<OnlineGame> {
 }
 
 export const useListOnlineGames = () => useListGames({ query: { refetchInterval: 5000 } })
+
+export const usePlayersToday = (poll: boolean) =>
+  usePresence({ query: { staleTime: 15_000, refetchInterval: poll ? 15_000 : false } })
 
 export const useCreateOnlineGame = () => {
   const mutation = useCreateGame()

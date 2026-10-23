@@ -264,6 +264,13 @@ export interface PlayerCredentials {
 }
 
 /**
+ * presenceResponse schema
+ */
+export interface PresenceResponse {
+  playersToday: number;
+}
+
+/**
  * publicWaitingGame schema
  */
 export interface PublicWaitingGame {
@@ -906,6 +913,116 @@ export function useHealth<TData = Awaited<ReturnType<typeof health>>, TError = E
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPresenceUrl = () => {
+
+
+
+
+  return `/api/presence`
+}
+
+/**
+ * #### Controller:
+ *
+ * `hexmate/server/internal/handlers.(*Handlers).presence`
+ *
+ * #### Middlewares:
+ *
+ * - `github.com/go-fuego/fuego.defaultLogger.middleware`
+ *
+ * ---
+ * @summary Count players online today
+ */
+export const presence = async ( options?: Parameters<typeof client>[1]): Promise<PresenceResponse> => {
+
+  return client<PresenceResponse>(getPresenceUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPresenceQueryKey = () => {
+    return [
+    `/api/presence`
+    ] as const;
+    }
+
+
+export const getPresenceQueryOptions = <TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPresenceQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof presence>>> = ({ signal }) => presence({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PresenceQueryResult = NonNullable<Awaited<ReturnType<typeof presence>>>
+export type PresenceQueryError = ErrorType<HTTPError>
+
+
+export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof presence>>,
+          TError,
+          Awaited<ReturnType<typeof presence>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof presence>>,
+          TError,
+          Awaited<ReturnType<typeof presence>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Count players online today
+ */
+
+export function usePresence<TData = Awaited<ReturnType<typeof presence>>, TError = ErrorType<HTTPError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof presence>>, TError, TData>>, request?: SecondParameter<typeof client>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPresenceQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
