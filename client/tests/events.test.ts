@@ -42,9 +42,9 @@ test('SSE heartbeats, stalled streams, terminal errors, resume, and cleanup', (t
   }
 
   const snapshots: string[] = []
-  stop = watchOnlineGame('AB3F9K', (game) => snapshots.push(game))
+  stop = watchOnlineGame('AB3F9K', 'player-1', (game) => snapshots.push(game))
   assert.equal(sources.length, 1)
-  assert.equal(sources[0].url, '/api/games/AB3F9K/events')
+  assert.equal(sources[0].url, '/api/games/AB3F9K/events?player=player-1')
   sources[0].onopen?.()
   const game = { code: 'AB3F9K', version: 0, actions: [] }
   sources[0].onmessage?.(new MessageEvent('message', { data: JSON.stringify(game) }))

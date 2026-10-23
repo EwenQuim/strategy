@@ -236,6 +236,18 @@
         ],
         "type": "object"
       },
+      "presenceResponse": {
+        "description": "presenceResponse schema",
+        "properties": {
+          "playersToday": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "playersToday"
+        ],
+        "type": "object"
+      },
       "publicGame": {
         "properties": {
           "actions": {
@@ -886,6 +898,81 @@
           "health"
         ]
       }
+    },
+    "/api/presence": {
+      "get": {
+        "description": "#### Controller: \n\n`hexmate/server/internal/handlers.(*Handlers).presence`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
+        "operationId": "presence",
+        "parameters": [
+          {
+            "description": "Player id to record as online today",
+            "in": "query",
+            "name": "player",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/presenceResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/presenceResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Bad Request _(validation or deserialization error)_"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Internal Server Error _(panics)_"
+          }
+        },
+        "summary": "Count players online today, recording the player query id as seen today",
+        "tags": [
+          "api",
+          "presence"
+        ]
+      }
     }
   },
   "tags": [
@@ -897,6 +984,9 @@
     },
     {
       "name": "health"
+    },
+    {
+      "name": "presence"
     }
   ]
 }

@@ -7,6 +7,17 @@ import { readUnlockedUnits } from './unitProgress.ts'
 const NAME_KEY = 'hexmate.online.name'
 const GAMES_KEY = 'hexmate.online.games'
 const PUBLIC_KEY = 'hexmate.online.public'
+const PLAYER_ID_KEY = 'hexmate.online.player'
+
+export function readPlayerId(): string {
+  return readLocal(PLAYER_ID_KEY, '', (raw) => raw) || savePlayerId()
+}
+
+function savePlayerId(): string {
+  const id = crypto.randomUUID()
+  saveLocal(PLAYER_ID_KEY, id)
+  return id
+}
 
 export function readPlayerNameOrDefault(): string {
   const name = readLocal(NAME_KEY, '', (raw) => raw)
