@@ -36,6 +36,16 @@ test('A winning signature is selected even with one simulation', async () => {
   assert.equal(actions.reduce(reducer, state).winner, 'player')
 })
 
+test('The patient crown still takes a winning regicide with its own hand', async () => {
+  const state = field([
+    new King(1, 0, 0, 'player'),
+    new King(2, 1, 0, 'enemy', 2),
+    new Swordsman(3, 4, 4, 'enemy'),
+  ])
+  const actions = await new CaesarBot({ simulations: 1 }).chooseActions(state)
+  assert.equal(actions.reduce(reducer, state).winner, 'player')
+})
+
 test('Caesar advances on the enemy king instead of shuffling in its own zone', async () => {
   const state = field([
     new Swordsman(1, 0, 0, 'enemy'),
