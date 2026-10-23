@@ -15,4 +15,5 @@ export const terrainPalette = {
   palm: '#d5b774',
   basalt: 'var(--basalt-tile, #594e53)',
   lava: 'url(#lava-melt)',
+  shoal: '#8fc6c9',
 }

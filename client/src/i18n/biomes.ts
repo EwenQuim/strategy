@@ -10,6 +10,7 @@ export const terrainNames: Record<Terrain, string> = {
   palm: t({ en: 'Palm', fr: 'Palmier', de: 'Palme', es: 'Palmera', it: 'Palma' }),
   basalt: t({ en: 'Basalt', fr: 'Basalte', de: 'Basalt', es: 'Basalto', it: 'Basalto' }),
   lava: t({ en: 'Lava', fr: 'Lave', de: 'Lava', es: 'Lava', it: 'Lava' }),
+  shoal: t({ en: 'Shoal', fr: 'Haut-fond', de: 'Sandbank', es: 'Bajo', it: 'Secca' }),
 }
 
 export const biomeNames: Record<Biome, string> = {
@@ -42,6 +43,13 @@ export const biomeNames: Record<Biome, string> = {
     it: 'Cratere di braci',
   }),
   hell: t({ en: 'Hell', fr: 'Enfer', de: 'Hölle', es: 'Infierno', it: 'Inferno' }),
+  archipel: t({
+    en: 'Tidal Archipelago',
+    fr: 'Archipel des marées',
+    de: 'Gezeiten-Archipel',
+    es: 'Archipiélago de mareas',
+    it: 'Arcipelago delle maree',
+  }),
 }
 
 export const featureTexts: Record<TileFeature, { name: string; description: string }> = {

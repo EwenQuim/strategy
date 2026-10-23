@@ -78,6 +78,11 @@ export function ElementArt({
             <polygon points={hexPoints} fill={terrainPalette.plain} />
             <FeatureArt feature={art} />
           </>
+        ) : art === 'archipel' ? (
+          <>
+            <polygon points={hexPoints} fill={terrainColors.shoal} />
+            <TerrainArt terrain="shoal" variant={0} />
+          </>
         ) : art === 'hell' ? (
           <>
             <polygon points={hexPoints} fill={terrainPalette.basalt} />

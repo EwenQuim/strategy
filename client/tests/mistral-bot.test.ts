@@ -58,8 +58,12 @@ test('Without an API key the registered Mistral bot falls back to the local sear
   const state = enemyTurn('mistral-sync')
   const actions = await getBot(BOTS.mistral.defaultConfig).chooseActions(state)
   assert.ok(actions.length > 0)
-  for (const action of actions)
-    assert.notEqual(reducer(state, action), state, `illegal ${JSON.stringify(action)}`)
+  let turn = state
+  for (const action of actions) {
+    const next = reducer(turn, action)
+    assert.notEqual(next, turn, `illegal ${JSON.stringify(action)}`)
+    turn = next
+  }
 })
 
 test('Without an API key the adapter proposes nothing', async () => {

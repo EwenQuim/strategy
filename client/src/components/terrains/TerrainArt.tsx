@@ -8,6 +8,7 @@ import { Mountain } from './Mountain'
 import { Palm } from './Palm'
 import { Plain } from './Plain'
 import { Sand } from './Sand'
+import { Shoal } from './Shoal'
 
 const terrainArt: Record<Terrain, (props: { variant: number }) => ReactElement> = {
   lava: Lava,
@@ -18,6 +19,7 @@ const terrainArt: Record<Terrain, (props: { variant: number }) => ReactElement> 
   mountain: Mountain,
   forest: Forest,
   plain: Plain,
+  shoal: Shoal,
 }
 
 export function TerrainArt({ terrain, variant }: { terrain: Terrain; variant: number }) {

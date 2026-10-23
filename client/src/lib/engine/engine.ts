@@ -56,7 +56,7 @@ export type GameState = {
 }
 
 export type BattleEffect = {
-  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'protect' | 'hellfire'
+  kind: 'move' | 'attack' | 'rally' | 'fireball' | 'bomb' | 'protect' | 'hellfire' | 'tide'
   from: Axial
   to: Axial
   centers?: Axial[]
