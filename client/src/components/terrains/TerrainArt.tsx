@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import type { Terrain } from '../../lib/engine'
 import { Basalt } from './Basalt'
 import { Forest } from './Forest'
+import { Ice } from './Ice'
 import { Lake } from './Lake'
 import { Lava } from './Lava'
 import { Mountain } from './Mountain'
@@ -18,6 +19,7 @@ const terrainArt: Record<Terrain, (props: { variant: number }) => ReactElement> 
   mountain: Mountain,
   forest: Forest,
   plain: Plain,
+  ice: Ice,
 }
 
 export function TerrainArt({ terrain, variant }: { terrain: Terrain; variant: number }) {

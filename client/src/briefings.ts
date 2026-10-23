@@ -108,6 +108,20 @@ export const INTRODUCTIONS: Record<IntroducedElement, readonly BriefingElement[]
       points: [b.runeEnergy, b.runeSingleUse],
     },
   ],
+  ice: [
+    {
+      name: b.ice,
+      art: 'ice',
+      points: [b.iceSlide],
+    },
+  ],
+  banquise: [
+    {
+      name: b.banquise,
+      art: 'ice',
+      points: [b.banquiseSlides],
+    },
+  ],
   hell: [
     {
       name: b.hellfire,

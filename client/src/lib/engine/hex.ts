@@ -4,7 +4,7 @@ import type { MapFeature, Shape } from './biomes/biome.ts'
 
 export type Axial = { q: number; r: number }
 export type Terrain =
-  'plain' | 'forest' | 'mountain' | 'lake' | 'sand' | 'palm' | 'basalt' | 'lava'
+  'plain' | 'forest' | 'mountain' | 'lake' | 'sand' | 'palm' | 'basalt' | 'lava' | 'ice'
 export type TileFeature = 'watchtower' | 'spring' | 'rune'
 export type Tile = { q: number; r: number; terrain: Terrain; feature?: TileFeature }
 
@@ -209,6 +209,7 @@ const terrainSymbols: Record<string, Terrain> = {
   p: 'palm',
   b: 'basalt',
   l: 'lava',
+  i: 'ice',
 }
 
 const featureSymbols: Record<string, TileFeature> = { W: 'watchtower', H: 'spring', R: 'rune' }

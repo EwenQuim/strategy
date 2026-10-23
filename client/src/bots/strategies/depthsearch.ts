@@ -131,7 +131,7 @@ function viableTurns(state: GameState, pawnId: number, ranked: ScoredTurn[]): Sc
     )
   }
   const canSurvive = ranked.some(survives)
-  return ranked.filter((turn) => {
+  const viable = ranked.filter((turn) => {
     if (turn.value < ranked[0]!.value - VIABLE_SCORE_MARGIN) return false
     if (survives(turn)) return true
     return (
@@ -140,6 +140,9 @@ function viableTurns(state: GameState, pawnId: number, ranked: ScoredTurn[]): Sc
         state.pawns.some((p) => p.side !== pawn.side && hpOf(turn.state, p.id) < p.hp))
     )
   })
+  // Every surviving plan can sit below the score margin of a doomed best plan:
+  // fall back to the survivors instead of returning no turn at all.
+  return viable.length ? viable : ranked.filter(survives)
 }
 
 function score(plan: TurnPlan, search: Search): ScoredTurn {
