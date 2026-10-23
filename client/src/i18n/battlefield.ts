@@ -99,3 +99,11 @@ export const noMode = t({
   es: 'Sin modo',
   it: 'Nessuna modalità',
 })
+
+export const sandstorm = t({
+  en: 'Sandstorm: 2 energy max',
+  fr: 'Tempête de sable : 2 d’énergie max',
+  de: 'Sandsturm: max. 2 Energie',
+  es: 'Tormenta de arena: 2 de energía máx.',
+  it: 'Tempesta di sabbia: 2 energia max',
+})

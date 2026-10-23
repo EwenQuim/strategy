@@ -154,7 +154,7 @@ test('Overlap damages once through Protect, cleans up deaths, and preserves prio
   assert.equal(fire.state.pawns.find((p) => p.id === 2)?.hp, 0)
   const frames = structuredClone(result.frames)
   result.state.pawns[0].hp--
-  result.state.hazards[0].centers[0].q++
+  if (result.state.hazards[0].kind === 'hellfire') result.state.hazards[0].centers[0].q++
   assert.deepEqual(structuredClone(result.frames), frames)
   assert.deepEqual(structuredClone(state), original)
 })
