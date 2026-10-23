@@ -7,6 +7,7 @@ import { King } from './king.ts'
 import { Lancer } from './lancer.ts'
 import { Magician } from './magician.ts'
 import { Ninja } from './ninja.ts'
+import { Sniper } from './sniper.ts'
 import { Swordsman } from './swordsman.ts'
 import { Wolf } from './wolf.ts'
 
@@ -25,6 +26,7 @@ export const PAWN_CLASSES = {
   wolf: Wolf,
   berserker: Berserker,
   lancer: Lancer,
+  sniper: Sniper,
 }
 
 export type PawnKind = keyof typeof PAWN_CLASSES

@@ -86,6 +86,20 @@ export const specialTexts: Record<SpecialTextKey, string> = {
     es: 'Dispara a distancia 2–3, o hasta 4 desde una torre.',
     it: 'Colpisce a distanza 2–3, o fino a 4 da una torre.',
   }),
+  sniperShot: t({
+    en: 'Sniper shot',
+    fr: 'Tir de précision',
+    de: 'Präzisionsschuss',
+    es: 'Tiro de precisión',
+    it: 'Tiro di precisione',
+  }),
+  sniperShotDescription: t({
+    en: 'Deals 3 damage at distance 2–4, up to 5 from a watchtower. Costs all energy: no moving the same round.',
+    fr: 'Inflige 3 dégâts à 2–4 cases, jusqu’à 5 depuis une tour. Coûte toute l’énergie : aucun déplacement le même tour.',
+    de: 'Verursacht 3 Schaden auf Entfernung 2–4, vom Wachturm bis 5. Kostet die gesamte Energie: keine Bewegung in derselben Runde.',
+    es: 'Inflige 3 de daño a distancia 2–4, hasta 5 desde una torre. Cuesta toda la energía: sin moverse en la misma ronda.',
+    it: 'Infligge 3 danni a distanza 2–4, fino a 5 da una torre. Costa tutta l’energia: nessun movimento nello stesso round.',
+  }),
   noEnemiesInRange: t({
     en: 'No enemies in range',
     fr: 'Aucun ennemi à portée',
