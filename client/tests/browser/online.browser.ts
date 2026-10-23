@@ -67,6 +67,9 @@ test(
         broadcast()
         response.setHeader('Content-Type', 'application/json')
         response.end(JSON.stringify({ version: game.version }))
+      } else if (path === '/api/presence') {
+        response.setHeader('Content-Type', 'application/json')
+        response.end(JSON.stringify({ playersToday: 1 }))
       } else if (path === '/api/games/' + game.code) {
         gets++
         response.writeHead(rejectMoves ? 503 : 200, { 'Content-Type': 'application/json' })
@@ -113,7 +116,7 @@ test(
       },
       { code: game.code, token: 'secret', side },
     )
-    const connected = page.waitForResponse((response) => response.url().endsWith('/events'))
+    const connected = page.waitForResponse((response) => response.url().includes('/events'))
     await page.goto('http://127.0.0.1:' + address.port + '/strategy/online/' + game.code)
     await page.getByRole('heading', { name: 'Waiting for an opponent' }).waitFor()
     await connected
@@ -169,7 +172,7 @@ test(
       page.getByRole('button', { name: /End turn/ }).click(),
     ])
     rejectMoves = false
-    const reconnected = page.waitForResponse((response) => response.url().endsWith('/events'))
+    const reconnected = page.waitForResponse((response) => response.url().includes('/events'))
     for (const stream of streams) stream.end()
     await reconnected
     await waitForState()
