@@ -5,6 +5,9 @@ import { BombBlast, FireballBeam } from './BombBlast'
 import { Icon } from './Icon'
 import { SupportFeedback } from './SupportFeedback'
 
+// Round-boundary hazards render as ambient board events, not unit actions.
+const isAmbient = (kind: BattleEffect['kind']) => kind === 'hellfire' || kind === 'flood'
+
 export function BattlefieldEffects({
   effect,
   effectId,
@@ -18,9 +21,9 @@ export function BattlefieldEffects({
       : effect?.kind === 'bomb'
         ? [effect.to]
         : []
-  const trail = effect?.kind !== 'rally' && effect?.kind !== 'hellfire' && !effect?.support
-  const ring =
-    effect?.kind !== 'bomb' && effect?.kind !== 'hellfire' && !effect?.impacts?.length
+  const ambient = effect !== null && isAmbient(effect.kind)
+  const trail = effect?.kind !== 'rally' && !ambient && !effect?.support
+  const ring = effect?.kind !== 'bomb' && !ambient && !effect?.impacts?.length
   return (
     <>
       {effect && (
