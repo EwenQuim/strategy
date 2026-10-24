@@ -1,4 +1,15 @@
 import { readLocal, saveLocal } from './storage.ts'
+import { teamColor, TEAM_COLORS, type TeamColor } from './lib/cosmetics.ts'
+
+const TEAM_COLOR_KEY = 'hexmate.teamColor'
+
+export function readTeamColor(): TeamColor {
+  return teamColor(readLocal(TEAM_COLOR_KEY, TEAM_COLORS[0].id, (raw) => raw))
+}
+
+export function saveTeamColor(id: string): boolean {
+  return saveLocal(TEAM_COLOR_KEY, id)
+}
 
 const SYMMETRIC_KEY = 'hexmate.custom.symmetric'
 

@@ -10,6 +10,8 @@ import type { Campaign } from '../campaign'
 import { useFreshUnitUnlocks } from '../unitProgress'
 import { subscribeCampaignProgress, campaignProgressSaved } from '../campaignProgress'
 import { useFreshAchievements } from '../achievementProgress'
+import { teamColorTheme } from '../lib/cosmetics'
+import { readTeamColor } from '../preferences'
 import { Battlefield } from './Battlefield'
 import { CombatFeedback } from './CombatFeedback'
 import { GameHeader } from './GameHeader'
@@ -81,6 +83,7 @@ export function Game({
   onTourDone?: () => void
 }) {
   const local = mode === 'local'
+  const [teamColor] = useState(readTeamColor)
   const [touring, setTouring] = useState(tour)
   const halted = paused || touring
   const isOnline = mode === 'online'
@@ -187,7 +190,10 @@ export function Game({
     <main
       className="grid h-dvh grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-(--biome-background) text-ink"
       data-biome={state.biome}
-      style={BIOMES[state.biome].theme}
+      style={{
+        ...BIOMES[state.biome].theme,
+        ...teamColorTheme(teamColor, viewerSide),
+      }}
     >
       {(killed || !!effect?.impacts?.length) && (
         <CombatFeedback key={effectId} killed={killed} effect={effect} />

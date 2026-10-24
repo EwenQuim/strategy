@@ -16,7 +16,13 @@ import {
   saveHapticsEnabled,
   readServerUrl,
   saveServerUrl,
+  readTeamColor,
+  saveTeamColor,
 } from '../preferences'
+import { TEAM_COLORS, teamColorUnlocked } from '../lib/cosmetics'
+import { readUnlockedAchievements } from '../achievementProgress'
+import { achievements as achievementTexts } from '../i18n/achievements'
+import * as c from '../i18n/cosmetics'
 import { clearLocalData } from '../localData'
 import {
   readMistralApiKey,
@@ -32,34 +38,12 @@ export const Route = createFileRoute('/settings')({
     const [mistralKey, setMistralKey] = useState(() => readMistralApiKey() ?? '')
     const [jevKey, setJevKey] = useState(() => readJevApiKey() ?? '')
     const [serverUrl, setServerUrl] = useState(readServerUrl)
+    const [teamColor, setTeamColor] = useState(readTeamColor)
+    const [lockedHint, setLockedHint] = useState<string | null>(null)
+    const earned = readUnlockedAchievements()
     const deleteDialogRef = useRef<HTMLDialogElement>(null)
     return (
       <MenuLayout title={s.settings}>
-        <label
-          className={
-            menuCardClassName +
-            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
-          }
-        >
-          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <strong className="text-base">{s.developerPreview}</strong>
-            <small id="developer-preview-hint" className="text-sm leading-relaxed text-muted">
-              {s.developerPreviewHint}
-            </small>
-          </span>
-          <input
-            type="checkbox"
-            role="switch"
-            aria-label={s.developerPreview}
-            aria-describedby="developer-preview-hint"
-            className={switchClassName + ' mt-1'}
-            checked={developerPreview}
-            onChange={(event) => {
-              setDeveloperPreview(event.target.checked)
-              saveDeveloperPreview(event.target.checked)
-            }}
-          />
-        </label>
         <label
           className={
             menuCardClassName +
@@ -82,6 +66,86 @@ export const Route = createFileRoute('/settings')({
             onChange={(event) => {
               setHapticsEnabled(event.target.checked)
               saveHapticsEnabled(event.target.checked)
+            }}
+          />
+        </label>
+        <section
+          className={menuCardClassName + ' flex flex-col gap-3 p-4 min-[900px]:p-6'}
+          aria-labelledby="army-color-title"
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <strong className="text-base" id="army-color-title">
+              {c.armyColor}
+            </strong>
+            <small className="text-sm leading-relaxed text-muted">{c.armyColorHint}</small>
+          </span>
+          <div className="flex flex-wrap gap-2.5" role="group" aria-label={c.armyColor}>
+            {TEAM_COLORS.map((color) => {
+              const unlocked = teamColorUnlocked(color, earned)
+              const selected = color.id === teamColor.id
+              const label =
+                color.unlock && !unlocked
+                  ? c.lockedColor(c.colorNames[color.id], achievementTexts[color.unlock].title)
+                  : c.colorNames[color.id]
+              return (
+                <button
+                  key={color.id}
+                  type="button"
+                  className={
+                    'grid size-11 place-items-center rounded-full border-2 ' +
+                    (unlocked ? ' cursor-pointer' : ' cursor-help opacity-40')
+                  }
+                  style={{
+                    background: 'linear-gradient(' + color.body[0] + ', ' + color.body[1] + ')',
+                    borderColor: selected ? 'var(--gold)' : color.stroke,
+                  }}
+                  aria-pressed={selected}
+                  aria-label={label}
+                  title={label}
+                  onClick={() => {
+                    if (color.unlock && !unlocked) {
+                      setLockedHint(label)
+                      return
+                    }
+                    setLockedHint(null)
+                    setTeamColor(color)
+                    saveTeamColor(color.id)
+                  }}
+                >
+                  {!unlocked && <Icon name="lock" className="size-5 text-ink" />}
+                </button>
+              )
+            })}
+          </div>
+          {lockedHint && (
+            <p role="status" className="text-sm leading-relaxed text-muted">
+              {lockedHint}
+            </p>
+          )}
+        </section>
+        <hr className="border-line" />
+        <label
+          className={
+            menuCardClassName +
+            ' flex cursor-pointer items-start gap-3 p-4 min-[900px]:gap-5 min-[900px]:p-6'
+          }
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <strong className="text-base">{s.developerPreview}</strong>
+            <small id="developer-preview-hint" className="text-sm leading-relaxed text-muted">
+              {s.developerPreviewHint}
+            </small>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            aria-label={s.developerPreview}
+            aria-describedby="developer-preview-hint"
+            className={switchClassName + ' mt-1'}
+            checked={developerPreview}
+            onChange={(event) => {
+              setDeveloperPreview(event.target.checked)
+              saveDeveloperPreview(event.target.checked)
             }}
           />
         </label>
@@ -162,6 +226,7 @@ export const Route = createFileRoute('/settings')({
                 setDeveloperPreview(false)
                 setHapticsEnabled(true)
                 setServerUrl('')
+                setTeamColor(readTeamColor())
                 deleteDialogRef.current?.close()
               }}
             >

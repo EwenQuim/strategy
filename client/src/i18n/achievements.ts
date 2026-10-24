@@ -53,10 +53,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Tower Camper',
       description: 'Kill an enemy with Eagle eye from a watchtower.',
     },
-    untouchable: {
-      title: "Can't Touch This",
-      description: 'Win after your King dodges 3 attacks.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Win within the first 3 rounds.' },
     dogs: {
       title: 'Who Let the Dogs Out',
@@ -85,6 +81,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     daredevil: {
       title: 'Daredevil',
       description: 'Win while your King stands inside a Hellfire blast area.',
+    },
+    bullRush: {
+      title: 'Bull Rush',
+      description: "Kill an enemy with a Swordsman's Charge.",
+    },
+    lavaPush: {
+      title: 'Magma Opus',
+      description: "Push an enemy into lava with a Hoplite's Thrust.",
+    },
+    acrossTheMap: {
+      title: 'Across the Map',
+      description: "Kill an enemy 5 tiles away with a Lancer's Rush.",
+    },
+    blinkStrike: {
+      title: 'Out of Nowhere',
+      description: "Kill an enemy 4 tiles away with a Ninja's Ambush.",
+    },
+    twoBirds: {
+      title: 'Two Birds, One Blast',
+      description: 'Kill 2 enemies with a single Fireball or Bomb.',
+    },
+    notToday: {
+      title: 'Not Today',
+      description: 'Win while your Bulwark is still Protecting an ally.',
     },
   },
   fr: {
@@ -130,10 +150,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Campeur de tour',
       description: 'Tuer un ennemi avec Œil de lynx depuis une tour.',
     },
-    untouchable: {
-      title: 'Intouchable',
-      description: 'Gagner après que votre roi a esquivé 3 attaques.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Gagner dans les 3 premières manches.' },
     dogs: {
       title: 'Qui a lâché les chiens ?',
@@ -163,6 +179,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Casse-cou',
       description:
         "Gagner pendant que votre roi est dans une zone de flammes du feu de l'enfer.",
+    },
+    bullRush: {
+      title: 'Charge du taureau',
+      description: "Éliminez un ennemi avec la Charge de l'Épéiste.",
+    },
+    lavaPush: {
+      title: 'Magma Opus',
+      description: "Poussez un ennemi dans la lave avec l'Estoc de l'Hoplite.",
+    },
+    acrossTheMap: {
+      title: "D'un bout à l'autre",
+      description: 'Éliminez un ennemi à 5 tuiles avec la Ruée du Lancier.',
+    },
+    blinkStrike: {
+      title: 'Sorti de nulle part',
+      description: "Éliminez un ennemi à 4 tuiles avec l'Embuscade du Ninja.",
+    },
+    twoBirds: {
+      title: "D'une pierre deux coups",
+      description: 'Éliminez 2 ennemis avec une seule Boule de feu ou Bombe.',
+    },
+    notToday: {
+      title: "Pas aujourd'hui",
+      description: 'Gagnez pendant que votre Rempart Protège encore un allié.',
     },
   },
   de: {
@@ -214,10 +254,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Turmcamper',
       description: 'Töte einen Feind mit Adlerauge von einem Wachturm.',
     },
-    untouchable: {
-      title: 'Unberührbar',
-      description: 'Gewinne, nachdem dein König 3 Angriffen ausgewichen ist.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Gewinne innerhalb der ersten 3 Runden.' },
     dogs: {
       title: 'Lasst die Hunde los',
@@ -246,6 +282,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     daredevil: {
       title: 'Tollkühn',
       description: 'Gewinne, während dein König im Höllenfeuer-Einwirkbereich steht.',
+    },
+    bullRush: {
+      title: 'Ansturm',
+      description: 'Töte einen Feind mit dem Sturmangriff des Schwertkämpfers.',
+    },
+    lavaPush: {
+      title: 'Magma Opus',
+      description: 'Stoße einen Feind mit dem Stoß des Hopliten in Lava.',
+    },
+    acrossTheMap: {
+      title: 'Über die ganze Karte',
+      description: 'Töte einen Feind 5 Felder entfernt mit dem Sprint des Lanzenträgers.',
+    },
+    blinkStrike: {
+      title: 'Aus dem Nichts',
+      description: 'Töte einen Feind 4 Felder entfernt mit dem Hinterhalt des Ninjas.',
+    },
+    twoBirds: {
+      title: 'Zwei Fliegen mit einer Klappe',
+      description: 'Töte 2 Feinde mit einem einzigen Feuerball oder einer Bombe.',
+    },
+    notToday: {
+      title: 'Heute nicht',
+      description: 'Gewinne, während dein Bollwerk noch einen Verbündeten schützt.',
     },
   },
   es: {
@@ -294,10 +354,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Campero de torre',
       description: 'Mata a un enemigo con Ojo de águila desde una torre.',
     },
-    untouchable: {
-      title: 'Intocable',
-      description: 'Gana después de que tu rey esquive 3 ataques.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Gana en las 3 primeras rondas.' },
     dogs: {
       title: '¿Quién soltó a los perros?',
@@ -326,6 +382,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     daredevil: {
       title: 'Temerario',
       description: 'Gana mientras tu rey está en la zona de llamarada del fuego infernal.',
+    },
+    bullRush: {
+      title: 'Carga de toro',
+      description: 'Elimina a un enemigo con la Carga del Espadachín.',
+    },
+    lavaPush: {
+      title: 'Magma Opus',
+      description: 'Empuja a un enemigo a la lava con la Estocada del Hoplita.',
+    },
+    acrossTheMap: {
+      title: 'De punta a punta',
+      description: 'Elimina a un enemigo a 5 casillas con la Embestida del Lancero.',
+    },
+    blinkStrike: {
+      title: 'De la nada',
+      description: 'Elimina a un enemigo a 4 casillas con la Emboscada del Ninja.',
+    },
+    twoBirds: {
+      title: 'Dos pájaros de un tiro',
+      description: 'Elimina a 2 enemigos con una sola Bola de fuego o Bomba.',
+    },
+    notToday: {
+      title: 'Hoy no',
+      description: 'Gana mientras tu Baluarte sigue Protegiendo a un aliado.',
     },
   },
   it: {
@@ -374,10 +454,6 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
       title: 'Camperone in torre',
       description: 'Uccidi un nemico con Occhio di lince da una torre.',
     },
-    untouchable: {
-      title: 'Intoccabile',
-      description: 'Vinci dopo che il tuo re ha schivato 3 attacchi.',
-    },
     speedrun: { title: 'Speedrun Any%', description: 'Vinci entro i primi 3 round.' },
     dogs: {
       title: 'Chi ha liberato i cani?',
@@ -406,6 +482,30 @@ export const achievements = t<Record<AchievementId, AchievementText>>({
     daredevil: {
       title: 'Temerario',
       description: 'Vinci mentre il tuo re è nella zona di vampata del fuoco infernale.',
+    },
+    bullRush: {
+      title: 'Carica del toro',
+      description: 'Elimina un nemico con la Carica dello Spadaccino.',
+    },
+    lavaPush: {
+      title: 'Magma Opus',
+      description: "Spingi un nemico nella lava con l'Affondo dell'Oplita.",
+    },
+    acrossTheMap: {
+      title: "Da un capo all'altro",
+      description: 'Elimina un nemico a 5 esagoni con lo Scatto del Lanciere.',
+    },
+    blinkStrike: {
+      title: 'Dal nulla',
+      description: "Elimina un nemico a 4 esagoni con l'Imboscata del Ninja.",
+    },
+    twoBirds: {
+      title: 'Due piccioni, una fava',
+      description: 'Elimina 2 nemici con una sola Palla di fuoco o Bomba.',
+    },
+    notToday: {
+      title: 'Oggi no',
+      description: 'Vinci mentre il tuo Bastione sta ancora Proteggendo un alleato.',
     },
   },
 })

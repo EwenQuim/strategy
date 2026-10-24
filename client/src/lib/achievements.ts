@@ -1,4 +1,13 @@
-import { hazardDamage, key, type GameState, type PawnKind, type Side } from './engine/index.ts'
+import {
+  hazardDamage,
+  hexDist,
+  key,
+  type Axial,
+  type GameState,
+  type PawnKind,
+  type Side,
+  type Tile,
+} from './engine/index.ts'
 
 export const ACHIEVEMENTS = [
   { id: 'cleanHands', logo: '🗡️' },
@@ -13,7 +22,6 @@ export const ACHIEVEMENTS = [
   { id: 'chainReaction', logo: '🔥' },
   { id: 'floorIsLava', logo: '🌋' },
   { id: 'towerCamper', logo: '🎯' },
-  { id: 'untouchable', logo: '🎲' },
   { id: 'speedrun', logo: '⚡' },
   { id: 'dogs', logo: '🐺' },
   { id: 'crispy', logo: '🍗' },
@@ -22,9 +30,26 @@ export const ACHIEVEMENTS = [
   { id: 'oops', logo: '🙈' },
   { id: 'boomRegicide', logo: '💣' },
   { id: 'daredevil', logo: '😈' },
+  { id: 'bullRush', logo: '⚔️' },
+  { id: 'lavaPush', logo: '🥌' },
+  { id: 'acrossTheMap', logo: '🐎' },
+  { id: 'notToday', logo: '🧱' },
+  { id: 'blinkStrike', logo: '👻' },
+  { id: 'twoBirds', logo: '🐦' },
 ] as const
 
 export type AchievementId = (typeof ACHIEVEMENTS)[number]['id']
+
+// Blows restored from older snapshots carry no positions.
+function strikeDistance(from: Axial | undefined, victim: { q?: number; r?: number }): number {
+  const { q, r } = victim
+  return from && q !== undefined && r !== undefined ? hexDist(from, { q, r }) : 0
+}
+
+function deathTile(state: GameState, victim: { q?: number; r?: number }): Tile | undefined {
+  const { q, r } = victim
+  return q !== undefined && r !== undefined ? state.tiles.get(key(q, r)) : undefined
+}
 
 export function earnedAchievements(state: GameState, me: Side): AchievementId[] {
   if (state.winner !== me) return []
@@ -36,8 +61,8 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
     ...mine.map((pawn) => pawn.kind),
     ...fallen.filter((unit) => unit.side === me).map((unit) => unit.kind),
   ])
-  const myBlows = state.blows.flatMap(({ by, fallen: victims }) =>
-    by?.side === me ? [{ by, kills: victims.filter((unit) => unit.side !== me) }] : [],
+  const myBlows = state.blows.flatMap(({ by, from, fallen: victims }) =>
+    by?.side === me ? [{ by, from, kills: victims.filter((unit) => unit.side !== me) }] : [],
   )
   const regicide = myBlows.find(({ kills }) => kills.some((unit) => unit.kind === 'king'))
   const killsBy = new Map<number, number>()
@@ -68,8 +93,6 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
       ({ by, kills }) =>
         by.kind === 'archer' && by.special && by.watchtower && kills.length > 0,
     ),
-    untouchable:
-      state.escapes.filter((unit) => unit.side === me && unit.kind === 'king').length >= 3,
     speedrun: state.round <= 3,
     dogs:
       myRoster.has('wolf') && [...myRoster].every((kind) => kind === 'king' || kind === 'wolf'),
@@ -95,6 +118,35 @@ export function earnedAchievements(state: GameState, me: Side): AchievementId[] 
       !!regicide?.by.special &&
       (regicide.by.kind === 'bomber' || regicide.by.kind === 'magician'),
     daredevil: hazardDamage(state.hazards, king) > 0,
+    bullRush: myBlows.some(
+      ({ by, kills }) => by.kind === 'swordsman' && by.special && kills.length > 0,
+    ),
+    lavaPush: myBlows.some(
+      ({ by, from, kills }) =>
+        by.kind === 'hoplite' &&
+        by.special &&
+        kills.some(
+          (victim) =>
+            strikeDistance(from, victim) >= 2 && deathTile(state, victim)?.terrain === 'lava',
+        ),
+    ),
+    acrossTheMap: myBlows.some(
+      ({ by, from, kills }) =>
+        by.kind === 'lancer' &&
+        by.special &&
+        kills.some((victim) => strikeDistance(from, victim) >= 5),
+    ),
+    notToday: mine.some((pawn) => pawn.kind === 'bulwark' && pawn.protectingId !== null),
+    blinkStrike: myBlows.some(
+      ({ by, from, kills }) =>
+        by.kind === 'ninja' &&
+        by.special &&
+        kills.some((victim) => strikeDistance(from, victim) >= 4),
+    ),
+    twoBirds: myBlows.some(
+      ({ by, kills }) =>
+        (by.kind === 'magician' || by.kind === 'bomber') && by.special && kills.length >= 2,
+    ),
   }
   return ACHIEVEMENTS.map(({ id }) => id).filter((id) => rules[id])
 }
